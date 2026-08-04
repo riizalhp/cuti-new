@@ -1,0 +1,85 @@
+---
+// Hero section with glassmorphism design
+---
+
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden gradient-mesh">
+  <div class="section-container py-20 lg:py-32">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <!-- Left Content -->
+      <div class="text-center lg:text-left space-y-8 animate-blur-in">
+        <h1 class="text-5xl lg:text-7xl font-bold leading-tight">
+          AI Career Operating System untuk
+          <span class="text-gradient">Pencari Kerja Indonesia</span>
+        </h1>
+
+        <p class="text-xl lg:text-2xl text-text-secondary max-w-2xl">
+          Dari CV hingga offering dalam satu platform. Powered by AI.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+          <a href="/register" class="btn-gradient inline-block">
+            Mulai Gratis
+          </a>
+          <a href="#demo" class="btn-ghost inline-block">
+            Lihat Demo
+          </a>
+        </div>
+
+        <!-- Social Proof -->
+        <div class="flex items-center gap-4 justify-center lg:justify-start text-text-secondary">
+          <div class="flex -space-x-2">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent-indigo to-accent-violet border-2 border-white"></div>
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent-violet to-accent-indigo border-2 border-white"></div>
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent-indigo to-accent-violet border-2 border-white"></div>
+          </div>
+          <p class="text-sm font-medium">
+            Join 1,000+ pencari kerja yang sudah berhasil
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Visual -->
+      <div class="relative lg:block animate-float">
+        <div class="glass-card p-8 max-w-md mx-auto">
+          <div class="space-y-4">
+            <!-- Mock Dashboard Preview -->
+            <div class="h-12 bg-gradient-to-r from-accent-indigo to-accent-violet rounded-xl opacity-80"></div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="h-24 glass-heavy rounded-xl"></div>
+              <div class="h-24 glass-heavy rounded-xl"></div>
+            </div>
+            <div class="h-32 glass-heavy rounded-xl"></div>
+            <div class="grid grid-cols-3 gap-3">
+              <div class="h-16 glass-heavy rounded-lg"></div>
+              <div class="h-16 glass-heavy rounded-lg"></div>
+              <div class="h-16 glass-heavy rounded-lg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll Indicator -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+    <svg class="w-6 h-6 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+    </svg>
+  </div>
+</section>
+
+<style>
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+</style>
