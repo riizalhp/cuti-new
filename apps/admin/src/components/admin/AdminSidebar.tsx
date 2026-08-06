@@ -14,6 +14,8 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+import Image from "next/image"
+
 interface NavItem {
   title: string
   href: string
@@ -41,15 +43,27 @@ export function AdminSidebar() {
       <div className="flex flex-col h-full p-4">
         {/* Logo */}
         <div className="flex items-center justify-between mb-8">
-          {!collapsed && (
-            <motion.h1
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-2xl font-bold text-white"
-            >
-              CUTI Admin
-            </motion.h1>
-          )}
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center p-1 shrink-0">
+              <Image
+                src="/logo.webp"
+                alt="AmbilCUTI Logo"
+                width={32}
+                height={32}
+                unoptimized
+                className="w-full h-full object-contain"
+              />
+            </div>
+            {!collapsed && (
+              <motion.h1
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-xl font-bold text-white tracking-tight"
+              >
+                CUTI Admin
+              </motion.h1>
+            )}
+          </div>
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="p-2 rounded-lg hover:bg-white/10 text-white transition-colors"

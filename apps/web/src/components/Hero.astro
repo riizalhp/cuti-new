@@ -1,85 +1,36 @@
----
-// Hero section with glassmorphism design
----
-
-<section class="relative min-h-screen flex items-center justify-center overflow-hidden gradient-mesh">
-  <div class="section-container py-20 lg:py-32">
-    <div class="grid lg:grid-cols-2 gap-12 items-center">
-      <!-- Left Content -->
-      <div class="text-center lg:text-left space-y-8 animate-blur-in">
-        <h1 class="text-5xl lg:text-7xl font-bold leading-tight">
-          AI Career Operating System untuk
-          <span class="text-gradient">Pencari Kerja Indonesia</span>
-        </h1>
-
-        <p class="text-xl lg:text-2xl text-text-secondary max-w-2xl">
-          Dari CV hingga offering dalam satu platform. Powered by AI.
-        </p>
-
-        <!-- CTA Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-          <a href="/register" class="btn-gradient inline-block">
-            Mulai Gratis
-          </a>
-          <a href="#demo" class="btn-ghost inline-block">
-            Lihat Demo
-          </a>
-        </div>
-
-        <!-- Social Proof -->
-        <div class="flex items-center gap-4 justify-center lg:justify-start text-text-secondary">
-          <div class="flex -space-x-2">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent-indigo to-accent-violet border-2 border-white"></div>
-            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent-violet to-accent-indigo border-2 border-white"></div>
-            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent-indigo to-accent-violet border-2 border-white"></div>
-          </div>
-          <p class="text-sm font-medium">
-            Join 1,000+ pencari kerja yang sudah berhasil
-          </p>
-        </div>
-      </div>
-
-      <!-- Right Visual -->
-      <div class="relative lg:block animate-float">
-        <div class="glass-card p-8 max-w-md mx-auto">
-          <div class="space-y-4">
-            <!-- Mock Dashboard Preview -->
-            <div class="h-12 bg-gradient-to-r from-accent-indigo to-accent-violet rounded-xl opacity-80"></div>
-            <div class="grid grid-cols-2 gap-4">
-              <div class="h-24 glass-heavy rounded-xl"></div>
-              <div class="h-24 glass-heavy rounded-xl"></div>
-            </div>
-            <div class="h-32 glass-heavy rounded-xl"></div>
-            <div class="grid grid-cols-3 gap-3">
-              <div class="h-16 glass-heavy rounded-lg"></div>
-              <div class="h-16 glass-heavy rounded-lg"></div>
-              <div class="h-16 glass-heavy rounded-lg"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+<section class="hero" id="top">
+  <div class="hero-copy">
+    <div class="eyebrow reveal" data-reveal>
+      <span class="status-dot"></span>
+      Career OS untuk generasi pertama kerja
+    </div>
+    <h1 class="reveal" data-reveal>
+      Semua urusan <em>kariermu,</em><br />di satu tempat.
+    </h1>
+    <p class="hero-lede reveal" data-reveal>
+      Bikin CV ATS, temukan loker, pantau lamaran, dan selesaikan misi berhadiah—tanpa pindah-pindah aplikasi.
+    </p>
+    <div class="hero-actions reveal" data-reveal>
+      <a class="button" href="#akses">Mulai perjalananmu <span>↗</span></a>
+      <a class="text-link" href="#fitur">Lihat semua fitur <span>↓</span></a>
+    </div>
+    <div class="social-proof reveal" data-reveal>
+      <div class="avatar-stack" aria-hidden="true"><span>RA</span><span>DI</span><span>NA</span></div>
+      <p><strong>Dibuat untuk kamu.</strong><br />SMA/SMK, mahasiswa, dan fresh graduate.</p>
     </div>
   </div>
 
-  <!-- Scroll Indicator -->
-  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-    <svg class="w-6 h-6 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-    </svg>
+  <div class="hero-visual reveal" data-reveal>
+    <img src="/images/cuti-hero.png" alt="Tiga talenta muda Indonesia bersiap memulai karier" width="1600" height="1000" />
+    <div class="hero-sticker sticker-one">CV ATS<br /><strong>92%</strong></div>
+    <div class="hero-sticker sticker-two"><span>●</span> 4 lamaran<br />aktif dipantau</div>
+    <div class="hero-caption">Dari bingung<br />jadi <em>berani.</em></div>
   </div>
 </section>
 
-<style>
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
-  }
-
-  .animate-float {
-    animation: float 4s ease-in-out infinite;
-  }
-</style>
+<div class="ticker" aria-label="Fitur unggulan CUTI">
+  <div class="ticker-track">
+    <span>CV ATS BUILDER</span><b>✦</b><span>JOB TRACKER</span><b>✦</b><span>LOKER TERKURASI</span><b>✦</b><span>MISI BERHADIAH</span><b>✦</b><span>LIFETIME ACCESS</span><b>✦</b>
+    <span>CV ATS BUILDER</span><b>✦</b><span>JOB TRACKER</span><b>✦</b><span>LOKER TERKURASI</span><b>✦</b><span>MISI BERHADIAH</span><b>✦</b><span>LIFETIME ACCESS</span><b>✦</b>
+  </div>
+</div>

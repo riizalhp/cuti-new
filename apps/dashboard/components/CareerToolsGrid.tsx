@@ -222,7 +222,7 @@ export const CareerToolsGrid: React.FC = () => {
                   value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
                   placeholder="Contoh: Lowongan Admin Penjualan di PT Maju Bersama, kualifikasi: Menguasai Excel, komunikasi baik, lokasi Jakarta Pusat..."
-                  className="w-full bg-white/40 dark:bg-slate-800/50 border border-white/30 dark:border-white/10 rounded-xl p-3.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-violet-500 backdrop-blur-md"
+                  className="w-full bg-white/40 dark:bg-slate-800/50 border border-white/30 dark:border-white/10 rounded-xl p-3.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-violet-500 backdrop-blur-md resize-none"
                 ></textarea>
               </div>
 

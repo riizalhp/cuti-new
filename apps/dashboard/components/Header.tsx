@@ -88,7 +88,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-3 z-30 w-[calc(100%-1.5rem)] md:w-[calc(100%-3rem)] mx-auto glass-panel rounded-full px-4 lg:px-6 py-2.5 transition-all my-2 shadow-2xl border border-white/30 dark:border-white/10">
+    <header className="sticky top-0 z-30 w-full glass-panel border-b border-white/30 dark:border-white/10 px-4 lg:px-6 py-3 transition-all shadow-2xl">
       <div className="flex items-center justify-between gap-4">
         {/* Left Greeting & Status */}
         <div className="flex items-center gap-3">
@@ -174,7 +174,11 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => setShowNotifications(!showNotifications)}
               aria-label="Notifications"
-              className="relative p-2 rounded-full text-slate-700 dark:text-slate-300 bg-white/30 dark:bg-slate-900/50 hover:bg-white/50 dark:hover:bg-slate-800/80 border border-white/40 dark:border-white/10 transition cursor-pointer"
+              className={`relative p-2 rounded-full transition cursor-pointer border ${
+                showNotifications
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-navy-700 dark:border-white shadow-md ring-2 ring-navy-500/30'
+                  : 'bg-white/30 dark:bg-slate-900/50 hover:bg-white/50 dark:hover:bg-slate-800/80 border-white/40 dark:border-white/10 text-slate-700 dark:text-slate-300'
+              }`}
             >
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
@@ -249,7 +253,11 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               title="Lihat & Pengaturan Profil Saya"
-              className="flex items-center gap-2.5 pl-1.5 py-1 pr-2 rounded-full hover:bg-white/40 dark:hover:bg-slate-800/60 border border-transparent hover:border-white/30 transition group cursor-pointer text-left"
+              className={`flex items-center gap-2.5 pl-1.5 py-1 pr-2.5 rounded-full transition group cursor-pointer text-left border ${
+                showProfileMenu
+                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-navy-700 dark:border-white shadow-lg ring-2 ring-orange-500/50'
+                  : 'bg-white/30 dark:bg-slate-900/50 hover:bg-white/50 dark:hover:bg-slate-800/80 border-white/40 dark:border-white/10'
+              }`}
             >
               <div className="relative">
                 <Image
@@ -258,14 +266,20 @@ export const Header: React.FC<HeaderProps> = ({
                   width={36}
                   height={36}
                   referrerPolicy="no-referrer"
-                  className="w-8 h-8 rounded-full object-cover border-2 border-violet-500 shadow-sm group-hover:scale-105 transition"
+                  className={`w-8 h-8 rounded-full object-cover transition ${
+                    showProfileMenu
+                      ? 'border-2 border-orange-500 ring-2 ring-orange-500/60 scale-105 shadow-md'
+                      : 'border-2 border-violet-500 group-hover:scale-105'
+                  }`}
                 />
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
               </div>
               <div className="hidden xl:block text-left">
-                <p className="text-xs font-black text-slate-900 dark:text-white leading-tight group-hover:text-violet-600 dark:group-hover:text-violet-400 transition flex items-center gap-1">
+                <p className={`text-xs font-black leading-tight flex items-center gap-1 transition ${
+                  showProfileMenu ? 'text-white dark:text-slate-900 font-extrabold' : 'text-slate-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400'
+                }`}>
                   <span>{currentUser.name}</span>
-                  <ChevronDown className="w-3 h-3 text-slate-400" />
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showProfileMenu ? 'rotate-180 text-orange-400 dark:text-orange-600 font-bold' : 'text-slate-400'}`} />
                 </p>
               </div>
             </button>

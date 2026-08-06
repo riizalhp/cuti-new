@@ -4,11 +4,13 @@ import React, { useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { useModals } from '@/context/ModalContext';
+import { useRouter } from 'next/navigation';
 
 export default function UserLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const { openUpgrade } = useModals();
+  const router = useRouter();
 
   const toggleSidebarCollapse = () => {
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
@@ -28,6 +30,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     <div className="h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex transition-colors font-sans">
       <Sidebar
         onOpenUpgradeModal={openUpgrade}
+        onSwitchToAdminPortal={() => router.push('/admin')}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={toggleSidebarCollapse}
         isMobileOpen={isMobileSidebarOpen}
@@ -47,9 +50,6 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
           {children}
         </main>
 
-        <footer className="py-3 text-center text-xs text-slate-400 dark:text-slate-600 border-t border-slate-200/50 dark:border-slate-800/50">
-          &copy; {new Date().getFullYear()} CUTI &mdash; Career Portal AI. All rights reserved.
-        </footer>
       </div>
     </div>
   );

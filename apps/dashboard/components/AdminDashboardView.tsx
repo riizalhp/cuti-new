@@ -1676,7 +1676,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
       {activeAdminTab === 'system' && (
         <div className="space-y-6">
           {/* Provider Selection Header Banner */}
-          <div className="p-5 rounded-xl bg-gradient-to-r from-violet-900/90 via-slate-900 to-slate-900 border border-violet-800/50 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="p-5 rounded-xl bg-[#0D3BD9] border border-blue-500/50 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-violet-600/30 border border-violet-500/40 text-violet-400 flex items-center justify-center shrink-0">
                 <Bot className="w-5 h-5" />
@@ -2472,7 +2472,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                   value={editingCvOrder.notes}
                   onChange={(e) => setEditingCvOrder({ ...editingCvOrder, notes: e.target.value })}
                   placeholder="Catatan pengerjaan atau detail revisi dari klien..."
-                  className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none"
+                  className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none resize-none"
                 ></textarea>
               </div>
 

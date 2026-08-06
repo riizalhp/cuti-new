@@ -76,7 +76,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
   const progressPercent = Math.round((completedCount / steps.length) * 100);
 
   return (
-    <div className="bg-gradient-to-r from-violet-900 via-indigo-850 to-slate-900 rounded-xl p-5 md:p-6 text-white shadow-lg border border-violet-700/30">
+    <div className="bg-[#0D3BD9] rounded-xl p-5 md:p-6 text-white shadow-lg border border-blue-500/30">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
         {/* Left Info & Steps */}
         <div className="lg:col-span-8 space-y-4">
@@ -98,11 +98,11 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
           </div>
 
           {/* Progress Bar */}
-          <div className="w-full bg-violet-950/80 rounded-full h-2 overflow-hidden border border-violet-800/40">
+          <div className="w-full bg-slate-900/80 rounded-full h-2.5 overflow-hidden border border-white/10 p-0.5">
             <div
-              className="bg-gradient-to-r from-emerald-400 via-amber-300 to-violet-400 h-2 rounded-full transition-all duration-500"
+              className="bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400 h-full rounded-full transition-all duration-500 shadow-sm shadow-orange-500/40"
               style={{ width: `${progressPercent}%` }}
-            ></div>
+            />
           </div>
 
           {/* Steps List */}

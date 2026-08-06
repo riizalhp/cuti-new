@@ -274,7 +274,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau teks pengantar.`;
   return (
     <div className="space-y-8 pb-12 font-sans">
       {/* Top Banner Header */}
-      <div className="p-6 md:p-8 rounded-2xl bg-gradient-to-r from-slate-900 via-violet-950 to-slate-900 border border-slate-800 shadow-xl relative overflow-hidden">
+      <div className="p-6 md:p-8 rounded-2xl bg-[#0D3BD9] text-white border border-blue-500/50 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
@@ -308,7 +308,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau teks pengantar.`;
               <button
                 type="button"
                 onClick={onOpenUpgradeModal}
-                className="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-500 hover:to-violet-400 text-white text-xs font-extrabold transition shadow-lg shadow-violet-600/20 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-[#0D3BD9] hover:bg-[#0B33BD] text-white text-xs font-extrabold transition shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Zap className="w-4 h-4 text-amber-300" />
                 <span>Unlimited Pass</span>
@@ -378,7 +378,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau teks pengantar.`;
                   placeholder="Contoh: Software Engineer at Company X | Tech Lover"
                   value={currentHeadline}
                   onChange={(e) => setCurrentHeadline(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                  className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-violet-500 transition resize-none"
                 />
               </div>
 
@@ -391,7 +391,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau teks pengantar.`;
                   placeholder="Salin dan tempel ringkasan tentang diri kamu dari LinkedIn..."
                   value={currentAbout}
                   onChange={(e) => setCurrentAbout(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                  className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-violet-500 transition resize-none"
                 />
               </div>
 
@@ -404,7 +404,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau teks pengantar.`;
                   placeholder="Tempel riwayat kerja atau sertifikasi tambahan untuk analisis yang lebih akurat..."
                   value={rawProfileText}
                   onChange={(e) => setRawProfileText(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                  className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-violet-500 transition resize-none"
                 />
               </div>
 

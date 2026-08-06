@@ -361,7 +361,7 @@ export const MisiCuanView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Gamification Header Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-violet-950 to-slate-900 rounded-xl p-6 text-white border border-violet-800/40 shadow-md">
+      <div className="bg-[#0D3BD9] rounded-xl p-6 text-white border border-blue-500/50 shadow-md">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs">

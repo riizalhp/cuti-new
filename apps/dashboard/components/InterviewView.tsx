@@ -208,7 +208,7 @@ export const InterviewView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-violet-900 via-slate-900 to-violet-950 rounded-xl p-6 text-white border border-violet-800/40 shadow-md">
+      <div className="bg-[#0D3BD9] rounded-xl p-6 text-white border border-blue-500/50 shadow-md">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs mb-1">
@@ -394,7 +394,7 @@ export const InterviewView: React.FC = () => {
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
                   placeholder="Ketikkan jawaban Anda menggunakan metode STAR (Situation, Task, Action, Result)..."
-                  className="w-full p-3.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 leading-relaxed"
+                  className="w-full p-3.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 leading-relaxed resize-none"
                 />
               </div>
 

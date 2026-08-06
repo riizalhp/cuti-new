@@ -233,25 +233,31 @@ export const AutoApplyView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 p-1">
-      {/* Top Welcome Title */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-            <Send className="w-6 h-6 text-violet-500 animate-pulse" />
-            <span>AI Auto Apply Jobs</span>
+    <div className="space-y-6 md:space-y-8 w-full">
+      {/* Top Banner / Header */}
+      <div className="relative overflow-hidden rounded-xl md:rounded-2xl bg-[#0D3BD9] text-white p-5 sm:p-6 md:p-8 shadow-xl">
+        <div className="relative z-10 space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-400 text-slate-950 flex items-center gap-1 shadow-sm">
+              <Send className="w-3.5 h-3.5" /> AI Auto Apply Engine
+            </span>
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-white backdrop-blur-xs border border-white/10 flex items-center gap-1.5">
+              <div className={`w-2 h-2 rounded-full ${isAutoApplyActive ? 'bg-emerald-400 animate-ping' : 'bg-slate-400'}`} />
+              {isAutoApplyActive ? 'Aktif Mengirim' : 'Siaga'}
+            </span>
+          </div>
+
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-snug">
+            AI Auto Apply Jobs
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs md:text-sm text-violet-100/90 max-w-3xl leading-relaxed">
             Teknologi automasi pencari & pelamar kerja AI. Melamar lowongan terkurasi yang sesuai dengan skor kepantasan CV-mu secara otomatis 24/7.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2 px-4 shadow-xs">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-          <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
-            Engine Status: {isAutoApplyActive ? 'Mengirim Lamaran...' : 'Siaga'}
-          </span>
-        </div>
+        {/* Decorative Background Elements */}
+        <div className="absolute -right-10 -bottom-10 w-64 h-64 rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
+        <div className="absolute right-20 top-0 w-32 h-32 rounded-full bg-amber-400/10 blur-2xl pointer-events-none" />
       </div>
 
       {/* Main Grid Options */}
@@ -432,7 +438,7 @@ export const AutoApplyView: React.FC = () => {
                   className={`px-6 py-3.5 rounded-xl font-black text-xs transition duration-200 shadow-md flex items-center justify-center gap-2 shrink-0 ${
                     isAutoApplyActive
                       ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/20'
-                      : 'bg-gradient-to-r from-violet-600 to-amber-500 hover:opacity-90 text-white shadow-violet-600/20'
+                      : 'bg-[#0D3BD9] hover:bg-[#0B33BD] text-white shadow-blue-600/20'
                   }`}
                 >
                   {isAutoApplyActive ? (

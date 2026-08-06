@@ -3,18 +3,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6366F1] focus-visible:ring-offset-2",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0D3BD9] focus-visible:ring-offset-2",
   {
     variants: {
       variant: {
         primary:
-          "bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] text-white shadow-[0_4px_6px_rgba(99,102,241,0.2),0_1px_3px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_12px_rgba(99,102,241,0.3),0_2px_4px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 active:scale-[0.98]",
+          "bg-[#0D3BD9] text-white shadow-md hover:bg-[#0B33BD] hover:-translate-y-0.5 active:scale-[0.98]",
         secondary:
           "bg-white/10 backdrop-blur-[12px] border border-white/[0.18] text-[#1F2937] hover:bg-white/15 hover:scale-[1.02]",
         ghost:
-          "bg-transparent text-[#6366F1] hover:bg-[#6366F1]/10 hover:rounded-lg",
+          "bg-transparent text-[#0D3BD9] hover:bg-[#0D3BD9]/10 hover:rounded-lg",
         danger:
-          "bg-gradient-to-br from-[#EF4444] to-[#DC2626] text-white shadow-[0_4px_6px_rgba(239,68,68,0.2),0_1px_3px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_12px_rgba(239,68,68,0.3),0_2px_4px_rgba(0,0,0,0.15)] hover:-translate-y-0.5",
+          "bg-[#EF4444] text-white shadow-md hover:bg-[#DC2626] hover:-translate-y-0.5",
         outline:
           "border border-slate-200 bg-white hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100",
       },

@@ -2,33 +2,34 @@
 
 import React, { useState } from 'react';
 import {
-  FileCheck,
-  Upload,
   FileText,
   Building,
   Briefcase,
   Sparkles,
   CheckCircle2,
-  XCircle,
   AlertTriangle,
-  ArrowRight,
   RefreshCw,
   Plus,
-  Info,
   Zap,
   Check,
-  Search,
   ChevronRight,
-  Download,
-  Share2,
-  Copy,
   Target,
   Award,
-  BookOpen,
-  Cpu,
-  Layers,
   BarChart2,
-  FileDown,
+  ArrowRight,
+  X,
+  SlidersHorizontal,
+  Layers,
+  ArrowUpDown,
+  PlusCircle,
+  HelpCircle,
+  CheckSquare,
+  Square,
+  FileCheck2,
+  Star,
+  Trophy,
+  Filter,
+  Eye,
   ExternalLink,
 } from 'lucide-react';
 
@@ -42,11 +43,34 @@ interface SavedCV {
   experienceYears: string;
 }
 
+interface JobMatchTarget {
+  id: string;
+  position: string;
+  company: string;
+  matchScore: number;
+  atsScore: number;
+  stars: number;
+  statusBadge: string;
+  statusColor: 'emerald' | 'blue' | 'amber' | 'rose';
+  description: string;
+  breakdown: {
+    hardSkills: number;
+    softSkills: number;
+    experience: number;
+    education: number;
+  };
+  matchedKeywords: string[];
+  missingKeywords: string[];
+  strengths: string[];
+  improvements: string[];
+  analyzedAt: string;
+}
+
 const mockSavedCVs: SavedCV[] = [
   {
     id: 'cv-1',
     title: 'CV Fullstack Engineer (Utama)',
-    updatedAt: '22 Juli 2026',
+    updatedAt: '5 menit lalu',
     atsScore: 88,
     role: 'Fullstack Developer',
     experienceYears: '3+ Tahun',
@@ -54,16 +78,16 @@ const mockSavedCVs: SavedCV[] = [
   },
   {
     id: 'cv-2',
-    title: 'CV Data Analyst ATS',
+    title: 'CV Frontend ATS Specialist',
     updatedAt: '18 Juli 2026',
-    atsScore: 82,
-    role: 'Data Analyst',
-    experienceYears: '2 Tahun',
-    skills: ['Python', 'SQL', 'Tableau', 'Excel Advanced', 'Statistics', 'Power BI', 'Data Visualization'],
+    atsScore: 85,
+    role: 'Frontend Engineer',
+    experienceYears: '2.5 Tahun',
+    skills: ['React.js', 'Vue.js', 'JavaScript ES6+', 'HTML5/CSS3', 'Tailwind CSS', 'Redux', 'Jest'],
   },
   {
     id: 'cv-3',
-    title: 'CV Product Manager',
+    title: 'CV Product Manager & Strategy',
     updatedAt: '10 Juni 2026',
     atsScore: 79,
     role: 'Product Manager',
@@ -72,132 +96,194 @@ const mockSavedCVs: SavedCV[] = [
   },
 ];
 
-const sampleJobPresets = [
+const initialJobTargets: JobMatchTarget[] = [
   {
-    title: 'Senior Frontend Engineer',
-    company: 'PT GoTo Gojek Tokopedia',
-    description: `Kami mencari Senior Frontend Engineer yang berpengalaman dalam membangun aplikasi web skala besar.
-Kualifikasi Utama:
-- Minimal 3 tahun pengalaman dengan React.js, Next.js, dan TypeScript.
-- Memahami konsep State Management (Zustand/Redux), Responsive Design dengan Tailwind CSS.
-- Pengalaman melakukan otomatisasi pengujian dengan Jest atau React Testing Library.
-- Terbiasa berkolaborasi dengan metodologi Agile/Scrum, Git, CI/CD pipeline, dan GraphQL API.
-- Memiliki pemahaman performa web (Web Vitals, SSR/SSG, Caching).`,
-  },
-  {
-    title: 'Data Analyst',
-    company: 'Bank Mandiri (Persero) Tbk',
-    description: `Mengolah data bisnis dan menyajikan insight analitis untuk mendukung pengambilan keputusan strategis.
-Kualifikasi:
-- Pendidikan S1 Teknik/Statistika/Matematika/Komputer.
-- Menguasai SQL query tingkat lanjut dan pemrosesan data dengan Python (Pandas, NumPy).
-- Berpengalaman membuat dashboard interaktif di Tableau / Power BI.
-- Memiliki kemampuan komunikasi data (data storytelling) dan analisis bisnis yang kuat.
-- Terbiasa bekerja dengan database terdistribusi seperti PostgreSQL dan BigQuery.`,
-  },
-  {
-    title: 'Associate Product Manager',
-    company: 'Bukalapak',
-    description: `Bertanggung jawab dalam merancang skema produk e-commerce dari ideasi hingga peluncuran.
-Kualifikasi:
-- Pengalaman 1-3 tahun di bidang Product Management atau Product Analysis.
-- Terbiasa membuat PRD (Product Requirement Document) dan wireframe tingkat dasar.
-- Memahami indikator kinerja produk (OKRs, KPIs, Retention, Conversion Rate).
-- Kuat dalam User Research, A/B Testing, dan tools manajemen proyek seperti JIRA / Confluence.
-- Kemampuan pemecahan masalah (problem solving) dan komunikasi lintas divisi yang sangat baik.`,
-  },
-];
-
-export const CvMatchAnalysisView: React.FC = () => {
-  // Mode selection
-  const [cvSourceMode, setCvSourceMode] = useState<'saved' | 'upload' | 'text'>('saved');
-  const [selectedCvId, setSelectedCvId] = useState<string>('cv-1');
-
-  // File Upload State
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-
-  // Raw Text State
-  const [rawCvText, setRawCvText] = useState('');
-
-  // Job Description Input State
-  const [jobTitle, setJobTitle] = useState('Senior Frontend Engineer');
-  const [companyName, setCompanyName] = useState('PT GoTo Gojek Tokopedia');
-  const [jobDescription, setJobDescription] = useState(sampleJobPresets[0].description);
-
-  // Analysis Processing State
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisStep, setAnalysisStep] = useState(0);
-  const [hasAnalyzed, setHasAnalyzed] = useState(true); // Default to showing sample result for immediate visual delight
-
-  // Dynamic Keyword Add State
-  const [addedSkills, setAddedSkills] = useState<string[]>([]);
-
-  // Sample Analysis Result Data
-  const analysisResult = {
-    matchScore: 86 + (addedSkills.length * 3), // Increases score dynamically when skills added
-    statusBadge: 'Sangat Cocok untuk Dilamar',
+    id: 'job-goto',
+    position: 'Frontend Engineer',
+    company: 'GoTo',
+    matchScore: 86,
+    atsScore: 91,
+    stars: 5,
+    statusBadge: 'Sangat Layak',
     statusColor: 'emerald',
+    analyzedAt: 'Baru saja',
+    description: 'Minimal 3 tahun pengalaman dengan React.js, Next.js, dan TypeScript. Memahami Zustand/Redux & Tailwind CSS.',
     breakdown: {
       hardSkills: 88,
       softSkills: 85,
       experience: 82,
       education: 95,
     },
-    matchedKeywords: [
-      'React.js',
-      'Next.js',
-      'TypeScript',
-      'Tailwind CSS',
-      'Git',
-      'REST API',
-      'Node.js',
-      'Agile / Scrum',
-      ...addedSkills,
-    ],
-    missingKeywords: [
-      'GraphQL',
-      'Jest / Unit Testing',
-      'CI/CD Pipeline',
-      'Web Vitals / Caching',
-    ].filter((k) => !addedSkills.includes(k)),
+    matchedKeywords: ['React.js', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Git', 'REST API', 'Node.js', 'Agile / Scrum', 'Zustand', 'Web Performance', 'HTML5'],
+    missingKeywords: ['GraphQL', 'Jest / Testing', 'CI/CD', 'Web Vitals'],
     strengths: [
-      'Pengalaman dengan React.js & TypeScript sesuai dengan kualifikasi utama lowongan.',
-      'Memiliki portofolio pembuatan aplikasi Next.js dengan arsitektur modern.',
-      'Riwayat kerja selama 3+ tahun selaras dengan standar seniority pekerjaan.',
+      'Pengalaman React & TypeScript selaras sempurna dengan kualifikasi utama GoTo.',
+      'Portofolio Next.js modern memberikan nilai tambah tinggi.',
+      'Riwayat kerja 3+ tahun sesuai dengan standar seniority.',
     ],
     improvements: [
-      'Belum mencantumkan pengujian otomatis (Jest/Testing Library) pada CV.',
-      'Sebutkan pengalaman terkait GraphQL API dan optimasi Web Vitals untuk menaikkan skor match hingga 95%+.',
-      'Tambahkan pencapaian kuantitatif (misal: "Meningkatkan kecepatan load sebesar 35%").',
+      'Cantumkan otomatisasi pengujian (Jest / React Testing Library).',
+      'Tambahkan optimasi Web Vitals & Caching untuk dorong match ke 92%+',
     ],
-  };
+  },
+  {
+    id: 'job-shopee',
+    position: 'Frontend Developer',
+    company: 'Shopee',
+    matchScore: 82,
+    atsScore: 87,
+    stars: 4,
+    statusBadge: 'Layak',
+    statusColor: 'blue',
+    analyzedAt: '10 menit lalu',
+    description: 'Mengembangkan antarmuka e-commerce berkinerja tinggi menggunakan React.js, State Management, & REST API.',
+    breakdown: {
+      hardSkills: 79,
+      softSkills: 90,
+      experience: 85,
+      education: 90,
+    },
+    matchedKeywords: ['React.js', 'TypeScript', 'Tailwind CSS', 'Node.js', 'REST API', 'Git'],
+    missingKeywords: ['Vue.js', 'WebSockets', 'Micro-frontends', 'Performance Monitoring'],
+    strengths: [
+      'Soft skills dan komunikasi tim ditekankan dengan sangat baik.',
+      'Pengalaman integrasi REST API sangat cocok untuk ekosistem Shopee.',
+    ],
+    improvements: [
+      'Sebutkan pengalaman kerja pada aplikasi web berskala tinggi (high concurrency).',
+    ],
+  },
+  {
+    id: 'job-tokopedia',
+    position: 'Senior Frontend',
+    company: 'Tokopedia',
+    matchScore: 78,
+    atsScore: 83,
+    stars: 4,
+    statusBadge: 'Perlu Optimasi',
+    statusColor: 'amber',
+    analyzedAt: '1 jam lalu',
+    description: 'Membangun fitur transaksi e-commerce, mengoptimalkan kecepatan load, dan berkolaborasi dengan Product Manager.',
+    breakdown: {
+      hardSkills: 75,
+      softSkills: 80,
+      experience: 80,
+      education: 88,
+    },
+    matchedKeywords: ['React.js', 'Next.js', 'TypeScript', 'Git', 'PostgreSQL'],
+    missingKeywords: ['GraphQL', 'Docker', 'System Architecture', 'Design System'],
+    strengths: [
+      'Tech stack utama (React & Next.js) selaras dengan standar Tokopedia.',
+    ],
+    improvements: [
+      'Tambahkan pencapaian kuantitatif pada pengalaman kerja terdahulu.',
+      'Sebutkan kontribusi pada pemeliharaan Design System internal.',
+    ],
+  },
+  {
+    id: 'job-mandiri',
+    position: 'Tech Lead / Analyst',
+    company: 'Bank Mandiri',
+    matchScore: 74,
+    atsScore: 79,
+    stars: 3,
+    statusBadge: 'Kurang Cocok',
+    statusColor: 'rose',
+    analyzedAt: '2 jam lalu',
+    description: 'Memimpin tim pengembang antarmuka aplikasi digital banking, standar keamanan data tinggi, dan arsitektur enterprise.',
+    breakdown: {
+      hardSkills: 70,
+      softSkills: 82,
+      experience: 75,
+      education: 92,
+    },
+    matchedKeywords: ['TypeScript', 'Node.js', 'PostgreSQL', 'REST API', 'Git'],
+    missingKeywords: ['Enterprise Security', 'OWASP Top 10', 'Microservices', 'Clean Code Architecture'],
+    strengths: [
+      'Latar belakang pendidikan dan arsitektur backend menjadi poin plus.',
+    ],
+    improvements: [
+      'Tambahkan sertifikasi atau pengalaman terkait standar keamanan perbankan digital.',
+    ],
+  },
+];
 
+const samplePresets = [
+  {
+    position: 'Fullstack Engineer',
+    company: 'Bukalapak',
+    description: 'Mencari Fullstack Engineer berpengalaman dengan React.js, Node.js, PostgreSQL, dan arsitektur Microservices.',
+  },
+  {
+    position: 'Frontend Developer',
+    company: 'Traveloka',
+    description: 'Membangun antarmuka pemesanan tiket cepat. Syarat: React.js, Next.js, Redux, Performance Optimization.',
+  },
+  {
+    position: 'Software Engineer',
+    company: 'Blibli',
+    description: 'Mengembangkan sistem e-commerce berskala tinggi. Membutuhkan TypeScript, REST API, Git, dan CI/CD.',
+  },
+];
+
+export const CvMatchAnalysisView: React.FC = () => {
+  // Step 1 State: Active CV
+  const [selectedCvId, setSelectedCvId] = useState<string>('cv-1');
+  const [isChangeCvModalOpen, setIsChangeCvModalOpen] = useState<boolean>(false);
+
+  // Target Jobs State (History / Ranking)
+  const [jobTargets, setJobTargets] = useState<JobMatchTarget[]>(initialJobTargets);
+  const [selectedJobId, setSelectedJobId] = useState<string>('job-goto');
+
+  // Multi-Compare State (Checkbox selection for side-by-side)
+  const [compareJobIds, setCompareJobIds] = useState<string[]>(['job-goto', 'job-shopee']);
+  const [viewMode, setViewMode] = useState<'detail' | 'compare'>('detail');
+
+  // Active Tab for Detail Panel (Overview, Keywords, Gap Skill, Insights)
+  const [activeTab, setActiveTab] = useState<'overview' | 'keywords' | 'gap' | 'insights'>('overview');
+
+  // Modals State
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [isKeywordsModalOpen, setIsKeywordsModalOpen] = useState<boolean>(false);
+
+  // Form State inside Modal
+  const [newPosition, setNewPosition] = useState('');
+  const [newCompany, setNewCompany] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisStep, setAnalysisStep] = useState(0);
+
+  // Dynamic Skill Addition Simulation per job
+  const [addedSkillsMap, setAddedSkillsMap] = useState<Record<string, string[]>>({});
+
+  const activeCv = mockSavedCVs.find((c) => c.id === selectedCvId) || mockSavedCVs[0];
+  const selectedJob = jobTargets.find((j) => j.id === selectedJobId) || jobTargets[0];
+
+  // Calculated Stats Summary Bar
+  const totalAnalyzed = jobTargets.length;
+  const avgMatchScore = Math.round(
+    jobTargets.reduce((acc, curr) => acc + curr.matchScore, 0) / (totalAnalyzed || 1)
+  );
+  const bestTarget = [...jobTargets].sort((a, b) => b.matchScore - a.matchScore)[0];
+
+  // Steps indicator text
   const analysisStepsList = [
-    'Mengekstrak konten & struktur CV...',
-    'Menganalisis kata kunci utama pada Job Description...',
+    'Mengekstrak kualifikasi dari CV Aktif...',
+    'Memetakan kata kunci utama dari Job Target...',
     'Mencocokkan Hard Skills & Soft Skills...',
-    'Menghitung keselarasan tingkat pengalaman & kualifikasi...',
-    'Menyusun skor match ATS & rekomendasi optimasi...',
+    'Menghitung rasio keselarasan ATS...',
+    'Menyusun peringkat & rekomendasi optimasi...',
   ];
 
-  const handleStartAnalysis = () => {
-    if (cvSourceMode === 'upload' && !uploadedFile) {
-      alert('Silakan pilih atau upload file CV Anda terlebih dahulu.');
-      return;
-    }
-    if (cvSourceMode === 'text' && !rawCvText.trim()) {
-      alert('Silakan tempelkan (paste) teks CV Anda.');
-      return;
-    }
-    if (!jobDescription.trim()) {
-      alert('Silakan masukkan teks Job Description.');
+  // Handle Add New Job Target (Modal submit)
+  const handleRunAnalysis = () => {
+    if (!newPosition.trim() || !newCompany.trim() || !newDescription.trim()) {
+      alert('Silakan isi Nama Posisi, Perusahaan, dan Teks Job Description terlebih dahulu.');
       return;
     }
 
     setIsAnalyzing(true);
     setAnalysisStep(0);
-    setHasAnalyzed(false);
 
     let step = 0;
     const interval = setInterval(() => {
@@ -207,630 +293,843 @@ export const CvMatchAnalysisView: React.FC = () => {
       } else {
         clearInterval(interval);
         setIsAnalyzing(false);
-        setHasAnalyzed(true);
+
+        // Generate simulated target result
+        const randomScore = Math.floor(Math.random() * 15) + 75; // 75-90%
+        const newTarget: JobMatchTarget = {
+          id: `job-${Date.now()}`,
+          position: newPosition,
+          company: newCompany,
+          matchScore: randomScore,
+          atsScore: randomScore + 5,
+          stars: randomScore >= 85 ? 5 : randomScore >= 80 ? 4 : 3,
+          statusBadge: randomScore >= 85 ? 'Sangat Layak' : randomScore >= 80 ? 'Layak' : 'Perlu Optimasi',
+          statusColor: randomScore >= 85 ? 'emerald' : randomScore >= 80 ? 'blue' : 'amber',
+          analyzedAt: 'Baru saja',
+          description: newDescription,
+          breakdown: {
+            hardSkills: Math.min(95, randomScore + 2),
+            softSkills: Math.min(95, randomScore - 1),
+            experience: Math.min(95, randomScore - 4),
+            education: 90,
+          },
+          matchedKeywords: ['TypeScript', 'React.js', 'Git', 'REST API', 'Tailwind CSS', 'Node.js'],
+          missingKeywords: ['GraphQL', 'Unit Testing', 'CI/CD Pipeline', 'System Design'],
+          strengths: [
+            `Kemampuan teknis selaras dengan kualifikasi ${newPosition} di ${newCompany}.`,
+            'Struktur pengalamatan proyek jelas dan mudah dipahami.',
+          ],
+          improvements: [
+            'Cantumkan kata kunci khusus pengujian dan CI/CD untuk hasil maksimal.',
+          ],
+        };
+
+        setJobTargets((prev) => {
+          const updated = [newTarget, ...prev];
+          return updated.sort((a, b) => b.matchScore - a.matchScore);
+        });
+
+        setSelectedJobId(newTarget.id);
+        setIsAddModalOpen(false);
+        setNewPosition('');
+        setNewCompany('');
+        setNewDescription('');
       }
-    }, 600);
+    }, 450);
   };
 
-  const handleFileDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setUploadedFile(e.dataTransfer.files[0]);
-    }
+  // Toggle Compare Checkbox
+  const toggleCompare = (jobId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setCompareJobIds((prev) => {
+      if (prev.includes(jobId)) {
+        if (prev.length <= 1) return prev; // Keep at least 1
+        return prev.filter((id) => id !== jobId);
+      } else {
+        if (prev.length >= 2) {
+          return [prev[1], jobId]; // Keep maximum 2 for side-by-side
+        }
+        return [...prev, jobId];
+      }
+    });
   };
 
-  const handleApplyPreset = (preset: typeof sampleJobPresets[0]) => {
-    setJobTitle(preset.title);
-    setCompanyName(preset.company);
-    setJobDescription(preset.description);
+  const handleSimulateAddKeyword = (jobId: string, keyword: string) => {
+    setAddedSkillsMap((prev) => {
+      const existing = prev[jobId] || [];
+      if (existing.includes(keyword)) return prev;
+      return { ...prev, [jobId]: [...existing, keyword] };
+    });
   };
 
-  const handleAddMissingKeyword = (keyword: string) => {
-    if (!addedSkills.includes(keyword)) {
-      setAddedSkills((prev) => [...prev, keyword]);
-    }
+  const handleApplyPreset = (preset: typeof samplePresets[0]) => {
+    setNewPosition(preset.position);
+    setNewCompany(preset.company);
+    setNewDescription(preset.description);
   };
+
+  // Sorted job targets descending by match score
+  const sortedJobs = [...jobTargets].sort((a, b) => b.matchScore - a.matchScore);
+
+  // Compare jobs data
+  const compareJobsData = sortedJobs.filter((j) => compareJobIds.includes(j.id)).slice(0, 2);
 
   return (
-    <div className="space-y-6 md:space-y-8 w-full">
-      {/* Top Banner / Header */}
-      <div className="relative overflow-hidden rounded-xl md:rounded-2xl bg-linear-to-r from-violet-900 via-violet-800 to-slate-900 text-white p-5 sm:p-6 md:p-8 shadow-xl">
-        <div className="relative z-10 space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-400 text-slate-950 flex items-center gap-1 shadow-sm">
-              <Sparkles className="w-3.5 h-3.5" /> ATS Match Analyzer AI
+    <div className="space-y-5 w-full max-w-7xl mx-auto pb-12">
+      {/* 2. COMPACT HERO SECTION (100–120px SaaS Dashboard Style) */}
+      <div className="relative overflow-hidden rounded-2xl bg-[#0D3BD9] text-white p-4 sm:p-5 md:p-6 shadow-md border border-blue-500/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="relative z-10 space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#F97316] text-white flex items-center gap-1">
+              <Trophy className="w-3 h-3 text-amber-200" /> Leaderboard Hub
             </span>
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-white backdrop-blur-xs border border-white/10">
-              Akurasi 98%
+            <span className="text-[11px] text-blue-100 font-medium">
+              Multi-Job Comparison &amp; ATS Score Ranking
             </span>
           </div>
 
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-snug">
-            Analisis Match CV &amp; Job Description
+          <h1 className="text-lg sm:text-xl font-black tracking-tight">
+            Perbandingan Lowongan Kerja
           </h1>
-          <p className="text-xs md:text-sm text-violet-100/90 max-w-3xl leading-relaxed">
-            Uji sejauh mana CV kamu sesuai dengan syarat pekerjaan impian secara instan. Dapatkan analisa kata kunci ATS yang hilang, skor kecocokan, dan panduan optimasi presisi tinggi.
+          <p className="text-xs text-blue-100/90 max-w-2xl leading-relaxed">
+            Bandingkan kecocokan CV kamu dengan beberapa lowongan kerja sekaligus untuk menentukan prioritas terbaik.
           </p>
         </div>
 
-        {/* Decorative Background Elements */}
-        <div className="absolute -right-10 -bottom-10 w-64 h-64 rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
-        <div className="absolute right-20 top-0 w-32 h-32 rounded-full bg-amber-400/10 blur-2xl pointer-events-none" />
+        {/* Action Button "+ Tambah Lowongan" directly in Hero */}
+        <div className="relative z-10 shrink-0">
+          <button
+            type="button"
+            onClick={() => setIsAddModalOpen(true)}
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#F97316] hover:bg-orange-600 text-white font-extrabold text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span>Tambah Lowongan</span>
+          </button>
+        </div>
+
+        {/* Subtle Decorative Background */}
+        <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-blue-400/20 to-transparent pointer-events-none" />
       </div>
 
-      {/* Main Grid: Input Form vs Results */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-        {/* Left Column: CV & JD Input Form (5 Cols) */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* STEP 1: Pilih Sumber CV */}
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-xs">
-            <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="w-7 h-7 rounded-lg bg-violet-100 dark:bg-violet-950 text-violet-600 dark:text-violet-400 flex items-center justify-center font-bold text-xs shrink-0">
-                1
+      {/* 3. ACTIVE CV SUMMARY BAR & 11. PROGRESS METRICS */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+        {/* Active CV Bar (7 Cols) */}
+        <div className="lg:col-span-7 bg-white rounded-xl border border-slate-200 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[#1F3578]/10 text-[#1F3578] flex items-center justify-center shrink-0">
+              <FileCheck2 className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  CV Aktif:
+                </span>
+                <span className="text-xs font-black text-slate-900">
+                  {activeCv.title}
+                </span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                  <Star className="w-3 h-3 text-emerald-600 fill-emerald-600" />
+                  <span>{activeCv.atsScore}% ATS</span>
+                </span>
               </div>
-              <h2 className="font-bold text-sm text-slate-900 dark:text-white">
-                Pilih atau Upload CV Kamu
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {activeCv.role} • Terakhir dianalisis {activeCv.updatedAt}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsChangeCvModalOpen(true)}
+            className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#1F3578] text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span>Ganti CV</span>
+          </button>
+        </div>
+
+        {/* 11. Dashboard Live Progress Summary (5 Cols) */}
+        <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200 p-3.5 shadow-2xs flex items-center justify-between gap-2 text-center text-xs">
+          <div className="flex-1 border-r border-slate-100 pr-2">
+            <span className="text-[10px] font-bold text-slate-400 block uppercase">Lowongan</span>
+            <span className="font-extrabold text-slate-900 text-sm">{totalAnalyzed} Target</span>
+          </div>
+
+          <div className="flex-1 border-r border-slate-100 pr-2">
+            <span className="text-[10px] font-bold text-slate-400 block uppercase">Rata-rata Match</span>
+            <span className="font-extrabold text-emerald-600 text-sm">{avgMatchScore}%</span>
+          </div>
+
+          <div className="flex-1">
+            <span className="text-[10px] font-bold text-slate-400 block uppercase">Target Terbaik</span>
+            <span className="font-extrabold text-[#F97316] text-xs truncate flex items-center justify-center gap-1" title={bestTarget?.company}>
+              <Trophy className="w-3.5 h-3.5 text-[#F97316] shrink-0" />
+              <span>{bestTarget?.company || '-'} ({bestTarget?.matchScore}%)</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 8. MAIN DESKTOP 2-COLUMN STICKY LAYOUT */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* LEFT COLUMN: 4. RANKING LEADERBOARD CARDS (5 COLS) */}
+        <div className="lg:col-span-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Trophy className="w-4 h-4 text-[#F97316]" />
+              <h2 className="font-extrabold text-sm text-slate-900">
+                Peringkat Kecocokan Lowongan
               </h2>
             </div>
 
-            {/* Source Toggle Tabs */}
-            <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/60 rounded-lg text-xs font-semibold">
+            {/* Mode Switch Button */}
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-[11px] font-bold">
               <button
                 type="button"
-                onClick={() => setCvSourceMode('saved')}
-                className={`py-2 px-2 rounded-lg transition text-center cursor-pointer ${
-                  cvSourceMode === 'saved'
-                    ? 'bg-white dark:bg-slate-900 text-violet-600 dark:text-violet-400 font-bold shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                onClick={() => setViewMode('detail')}
+                className={`px-2.5 py-1 rounded transition cursor-pointer ${
+                  viewMode === 'detail' ? 'bg-white text-[#1F3578] shadow-2xs' : 'text-slate-500'
                 }`}
               >
-                CV Tersimpan
+                Detail
               </button>
-
               <button
                 type="button"
-                onClick={() => setCvSourceMode('upload')}
-                className={`py-2 px-2 rounded-lg transition text-center cursor-pointer ${
-                  cvSourceMode === 'upload'
-                    ? 'bg-white dark:bg-slate-900 text-violet-600 dark:text-violet-400 font-bold shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                onClick={() => setViewMode('compare')}
+                className={`px-2.5 py-1 rounded transition cursor-pointer flex items-center gap-1 ${
+                  viewMode === 'compare' ? 'bg-white text-[#F97316] shadow-2xs' : 'text-slate-500'
                 }`}
               >
-                Upload File Baru
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setCvSourceMode('text')}
-                className={`py-2 px-2 rounded-lg transition text-center cursor-pointer ${
-                  cvSourceMode === 'text'
-                    ? 'bg-white dark:bg-slate-900 text-violet-600 dark:text-violet-400 font-bold shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                }`}
-              >
-                Paste Teks CV
+                <ArrowUpDown className="w-3 h-3" />
+                <span>Komparasi (2)</span>
               </button>
             </div>
-
-            {/* Mode 1: Saved CV Selection */}
-            {cvSourceMode === 'saved' && (
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
-                  Pilih dari Profil CV yang Ada:
-                </label>
-                <div className="space-y-2">
-                  {mockSavedCVs.map((cv) => (
-                    <div
-                      key={cv.id}
-                      onClick={() => setSelectedCvId(cv.id)}
-                      className={`p-3.5 rounded-lg border transition cursor-pointer flex items-start justify-between gap-3 ${
-                        selectedCvId === cv.id
-                          ? 'border-violet-600 bg-violet-50/60 dark:bg-violet-950/40 ring-2 ring-violet-500/20'
-                          : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40'
-                      }`}
-                    >
-                      <div className="flex items-start gap-2.5">
-                        <FileText className={`w-5 h-5 mt-0.5 shrink-0 ${selectedCvId === cv.id ? 'text-violet-600 dark:text-violet-400' : 'text-slate-400'}`} />
-                        <div>
-                          <h4 className="text-xs font-bold text-slate-900 dark:text-white">
-                            {cv.title}
-                          </h4>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                            {cv.role} • Diperbarui {cv.updatedAt}
-                          </p>
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {cv.skills.slice(0, 4).map((s, idx) => (
-                              <span
-                                key={idx}
-                                className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
-                              >
-                                {s}
-                              </span>
-                            ))}
-                            {cv.skills.length > 4 && (
-                              <span className="text-[9px] text-slate-400 font-semibold self-center">
-                                +{cv.skills.length - 4} skill
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <span className="px-2 py-0.5 rounded text-[10px] font-black bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shrink-0">
-                        Skor {cv.atsScore}%
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Mode 2: File Upload */}
-            {cvSourceMode === 'upload' && (
-              <div className="space-y-3">
-                <div
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setIsDragging(true);
-                  }}
-                  onDragLeave={() => setIsDragging(false)}
-                  onDrop={handleFileDrop}
-                  className={`p-6 rounded-xl border-2 border-dashed text-center transition cursor-pointer flex flex-col items-center justify-center space-y-2 ${
-                    isDragging
-                      ? 'border-violet-600 bg-violet-50 dark:bg-violet-950/50'
-                      : 'border-slate-200 dark:border-slate-800 hover:border-violet-400 bg-slate-50/50 dark:bg-slate-800/30'
-                  }`}
-                >
-                  <div className="w-10 h-10 rounded-full bg-violet-100 dark:bg-violet-950 text-violet-600 dark:text-violet-400 flex items-center justify-center">
-                    <Upload className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                      Tarik &amp; Lepaskan File CV di sini
-                    </p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
-                      Format terdukung: PDF, DOCX, DOC (Maks. 10MB)
-                    </p>
-                  </div>
-
-                  <label className="mt-2 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold cursor-pointer transition shadow-xs">
-                    Pilih File Komputer
-                    <input
-                      type="file"
-                      accept=".pdf,.docx,.doc,.txt"
-                      className="hidden"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          setUploadedFile(e.target.files[0]);
-                        }
-                      }}
-                    />
-                  </label>
-                </div>
-
-                {uploadedFile && (
-                  <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-3 text-xs">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                      <div>
-                        <p className="font-bold text-emerald-900 dark:text-emerald-200">
-                          {uploadedFile.name}
-                        </p>
-                        <p className="text-[10px] text-emerald-700 dark:text-emerald-400">
-                          {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB • Siap dianalisis
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setUploadedFile(null)}
-                      className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                    >
-                      Batal
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Mode 3: Raw Text */}
-            {cvSourceMode === 'text' && (
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
-                  Tempelkan Teks Isi CV Anda:
-                </label>
-                <textarea
-                  rows={6}
-                  value={rawCvText}
-                  onChange={(e) => setRawCvText(e.target.value)}
-                  placeholder="Contoh: Nama: Rizky Febrian, Role: Fullstack Engineer, Pengalaman: 3 tahun membuat aplikasi React & Node.js..."
-                  className="w-full p-3 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
-                />
-                <p className="text-[10px] text-slate-400 text-right">
-                  {rawCvText.trim().split(/\s+/).filter(Boolean).length} Kata
-                </p>
-              </div>
-            )}
           </div>
 
-          {/* STEP 2: Input Job Description */}
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-xs">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-violet-100 dark:bg-violet-950 text-violet-600 dark:text-violet-400 flex items-center justify-center font-bold text-xs shrink-0">
-                  2
+          {/* 4. LEADERBOARD CARDS LIST */}
+          <div className="space-y-2.5">
+            {sortedJobs.map((job, idx) => {
+              const isSelected = selectedJobId === job.id && viewMode === 'detail';
+              const isCheckedForCompare = compareJobIds.includes(job.id);
+              const rankBadge = `#${idx + 1}`;
+
+              const statusBadgeColor =
+                job.statusColor === 'emerald'
+                  ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                  : job.statusColor === 'blue'
+                  ? 'bg-blue-100 text-blue-800 border-blue-200'
+                  : job.statusColor === 'amber'
+                  ? 'bg-amber-100 text-amber-800 border-amber-200'
+                  : 'bg-rose-100 text-rose-800 border-rose-200';
+
+              return (
+                <div
+                  key={job.id}
+                  onClick={() => {
+                    setSelectedJobId(job.id);
+                    setViewMode('detail');
+                  }}
+                  className={`p-3.5 rounded-xl border transition cursor-pointer space-y-2.5 relative ${
+                    isSelected
+                      ? 'border-[#3B5CC4] bg-blue-50/60 ring-2 ring-[#3B5CC4]/20 shadow-xs'
+                      : 'border-slate-200 hover:bg-slate-50/80 bg-white'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-2.5">
+                      {/* Checkbox for side-by-side compare */}
+                      <button
+                        type="button"
+                        onClick={(e) => toggleCompare(job.id, e)}
+                        title="Centang untuk membandingkan bar chart"
+                        className="text-slate-400 hover:text-[#3B5CC4] mt-0.5 transition"
+                      >
+                        {isCheckedForCompare ? (
+                          <CheckSquare className="w-4 h-4 text-[#3B5CC4]" />
+                        ) : (
+                          <Square className="w-4 h-4" />
+                        )}
+                      </button>
+
+                      {/* Rank Badge */}
+                      <span className="text-xs font-black w-6 text-slate-500 text-center shrink-0">
+                        {rankBadge}
+                      </span>
+
+                      {/* Info */}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-extrabold text-slate-900">
+                            {job.company}
+                          </h3>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600">
+                            {job.position}
+                          </span>
+                        </div>
+
+                        {/* Stars rating */}
+                        <div className="flex items-center gap-1 mt-1">
+                          {Array.from({ length: 5 }).map((_, sIdx) => (
+                            <Star
+                              key={sIdx}
+                              className={`w-3 h-3 ${
+                                sIdx < job.stars
+                                  ? 'text-amber-400 fill-amber-400'
+                                  : 'text-slate-200 fill-slate-100'
+                              }`}
+                            />
+                          ))}
+                          <span className={`ml-2 px-1.5 py-0.5 rounded text-[9px] font-extrabold border ${statusBadgeColor}`}>
+                            {job.statusBadge}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right match score badge */}
+                    <div className="text-right shrink-0">
+                      <span className="text-[10px] text-slate-400 block font-semibold">ATS Match</span>
+                      <span className={`text-base font-black ${job.matchScore >= 80 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        {job.matchScore}%
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <h2 className="font-bold text-sm text-slate-900 dark:text-white">
-                  Target Job Description Lowongan
-                </h2>
+              );
+            })}
+          </div>
+
+          {/* Quick Add Button underneath Leaderboard */}
+          <button
+            type="button"
+            onClick={() => setIsAddModalOpen(true)}
+            className="w-full py-3 rounded-xl border-2 border-dashed border-slate-300 hover:border-[#3B5CC4] hover:bg-blue-50/50 text-[#1F3578] font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Plus className="w-4 h-4 text-[#F97316]" />
+            <span>Tambah Target Lowongan Baru</span>
+          </button>
+        </div>
+
+        {/* RIGHT COLUMN: 5 & 8. TABBED STICKY DETAIL ATS PANEL (7 COLS) */}
+        <div className="lg:col-span-7 sticky top-6 space-y-4">
+          {viewMode === 'compare' && compareJobsData.length >= 2 ? (
+            /* 12. VISUAL BAR GRAPH COMPARISON MODE (GoTo vs Shopee) */
+            <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-5 shadow-2xs">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <span className="text-[10px] font-extrabold text-[#F97316] uppercase tracking-wider block">
+                    Visual Bar Comparison Matrix
+                  </span>
+                  <h3 className="text-sm font-extrabold text-slate-900 mt-0.5">
+                    {compareJobsData[0].company} vs {compareJobsData[1].company}
+                  </h3>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setViewMode('detail')}
+                  className="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition cursor-pointer"
+                >
+                  Kembali ke Detail
+                </button>
+              </div>
+
+              {/* BAR GRAPH COMPARISON LIST */}
+              <div className="space-y-4 text-xs">
+                {/* Match Score Bar */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between font-bold text-slate-800">
+                    <span>Total Match Score</span>
+                    <span>
+                      {compareJobsData[0].company}: <strong className="text-emerald-600">{compareJobsData[0].matchScore}%</strong> vs {compareJobsData[1].company}: <strong className="text-emerald-600">{compareJobsData[1].matchScore}%</strong>
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden flex">
+                      <div className="h-full bg-[#1F3578] transition-all" style={{ width: `${compareJobsData[0].matchScore}%` }} title={`${compareJobsData[0].company}: ${compareJobsData[0].matchScore}%`} />
+                    </div>
+                    <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden flex">
+                      <div className="h-full bg-[#F97316] transition-all" style={{ width: `${compareJobsData[1].matchScore}%` }} title={`${compareJobsData[1].company}: ${compareJobsData[1].matchScore}%`} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Hard Skill Bar */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between font-bold text-slate-800">
+                    <span>Hard Skill Match</span>
+                    <span>{compareJobsData[0].breakdown.hardSkills}% vs {compareJobsData[1].breakdown.hardSkills}%</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div className="h-full bg-[#3B5CC4]" style={{ width: `${compareJobsData[0].breakdown.hardSkills}%` }} />
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div className="h-full bg-[#F97316]" style={{ width: `${compareJobsData[1].breakdown.hardSkills}%` }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Soft Skill Bar */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between font-bold text-slate-800">
+                    <span>Soft Skill Match</span>
+                    <span>{compareJobsData[0].breakdown.softSkills}% vs {compareJobsData[1].breakdown.softSkills}%</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div className="h-full bg-[#3B5CC4]" style={{ width: `${compareJobsData[0].breakdown.softSkills}%` }} />
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div className="h-full bg-[#F97316]" style={{ width: `${compareJobsData[1].breakdown.softSkills}%` }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Experience Bar */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between font-bold text-slate-800">
+                    <span>Kesesuaian Pengalaman</span>
+                    <span>{compareJobsData[0].breakdown.experience}% vs {compareJobsData[1].breakdown.experience}%</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div className="h-full bg-[#3B5CC4]" style={{ width: `${compareJobsData[0].breakdown.experience}%` }} />
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div className="h-full bg-[#F97316]" style={{ width: `${compareJobsData[1].breakdown.experience}%` }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Summary Winner Card */}
+                <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 space-y-1">
+                  <span className="font-extrabold text-emerald-700 uppercase tracking-wider block text-[10px]">
+                    Kesimpulan Pilihan Terbaik
+                  </span>
+                  <p className="font-bold flex items-center gap-1.5 flex-wrap">
+                    <Trophy className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Prioritaskan melamar ke <span className="underline">{compareJobsData[0].matchScore >= compareJobsData[1].matchScore ? compareJobsData[0].company : compareJobsData[1].company}</span> terlebih dahulu karena memiliki skor kecocokan kata kunci ATS paling tinggi ({Math.max(compareJobsData[0].matchScore, compareJobsData[1].matchScore)}%).</span>
+                  </p>
+                </div>
               </div>
             </div>
+          ) : (
+            /* 5. TABBED DETAIL ATS PANEL FOR SELECTED JOB */
+            <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-5 shadow-2xs">
+              {/* Target Job Header info */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Detail Evaluasi Lowongan Terpilih
+                  </span>
+                  <h3 className="text-base font-extrabold text-slate-900 mt-0.5">
+                    {selectedJob.company} — <span className="text-[#3B5CC4]">{selectedJob.position}</span>
+                  </h3>
+                </div>
 
-            {/* Preset Samples Loader */}
-            <div className="space-y-1.5">
-              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block">
-                Gunakan Contoh Preset Cepat:
+                <span className="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  {selectedJob.matchScore}% ATS
+                </span>
+              </div>
+
+              {/* 5. FOUR CLEAN TABS */}
+              <div className="grid grid-cols-4 gap-1 p-1 bg-slate-100 rounded-lg text-xs font-extrabold">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('overview')}
+                  className={`py-2 text-center rounded-md transition cursor-pointer ${
+                    activeTab === 'overview' ? 'bg-white text-[#1F3578] shadow-2xs' : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  Overview
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('keywords')}
+                  className={`py-2 text-center rounded-md transition cursor-pointer ${
+                    activeTab === 'keywords' ? 'bg-white text-[#1F3578] shadow-2xs' : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  Keywords
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('gap')}
+                  className={`py-2 text-center rounded-md transition cursor-pointer ${
+                    activeTab === 'gap' ? 'bg-white text-[#1F3578] shadow-2xs' : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  Gap Skill
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('insights')}
+                  className={`py-2 text-center rounded-md transition cursor-pointer ${
+                    activeTab === 'insights' ? 'bg-white text-[#1F3578] shadow-2xs' : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  Insight
+                </button>
+              </div>
+
+              {/* TAB 1: OVERVIEW */}
+              {activeTab === 'overview' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                    <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 block">Hard Skill</span>
+                      <span className="font-extrabold text-[#1F3578] text-sm">{selectedJob.breakdown.hardSkills}%</span>
+                      <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#3B5CC4]" style={{ width: `${selectedJob.breakdown.hardSkills}%` }} />
+                      </div>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 block">Soft Skill</span>
+                      <span className="font-extrabold text-[#1F3578] text-sm">{selectedJob.breakdown.softSkills}%</span>
+                      <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#3B5CC4]" style={{ width: `${selectedJob.breakdown.softSkills}%` }} />
+                      </div>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 block">Pengalaman</span>
+                      <span className="font-extrabold text-[#1F3578] text-sm">{selectedJob.breakdown.experience}%</span>
+                      <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#3B5CC4]" style={{ width: `${selectedJob.breakdown.experience}%` }} />
+                      </div>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 block">Pendidikan</span>
+                      <span className="font-extrabold text-[#1F3578] text-sm">{selectedJob.breakdown.education}%</span>
+                      <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#3B5CC4]" style={{ width: `${selectedJob.breakdown.education}%` }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <strong className="font-bold text-slate-900">Deskripsi Ringkas Target:</strong> {selectedJob.description}
+                  </p>
+                </div>
+              )}
+
+              {/* 9. TAB 2: KEYWORDS & LIHAT SEMUA TRIGGER */}
+              {activeTab === 'keywords' && (
+                <div className="space-y-3 text-xs">
+                  <div className="space-y-2">
+                    <span className="font-bold text-emerald-600 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Kata Kunci Cocok ({selectedJob.matchedKeywords.length + (addedSkillsMap[selectedJob.id]?.length || 0)})
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedJob.matchedKeywords
+                        .concat(addedSkillsMap[selectedJob.id] || [])
+                        .slice(0, 5)
+                        .map((kw, idx) => (
+                          <span key={idx} className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                            <Check className="w-3 h-3 text-emerald-600 shrink-0" />
+                            <span>{kw}</span>
+                          </span>
+                        ))}
+
+                      {selectedJob.matchedKeywords.length > 5 && (
+                        <button
+                          type="button"
+                          onClick={() => setIsKeywordsModalOpen(true)}
+                          className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
+                        >
+                          +{selectedJob.matchedKeywords.length - 5} skill lagi (Lihat Semua)
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: GAP SKILL */}
+              {activeTab === 'gap' && (
+                <div className="space-y-3 text-xs">
+                  <span className="font-bold text-amber-600 flex items-center gap-1">
+                    <AlertTriangle className="w-3.5 h-3.5" /> Skill Belum Ditemukan di CV (Klik + untuk Simulasikan)
+                  </span>
+
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedJob.missingKeywords
+                      .filter((k) => !(addedSkillsMap[selectedJob.id] || []).includes(k))
+                      .map((kw, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleSimulateAddKeyword(selectedJob.id, kw)}
+                          className="px-2.5 py-1 rounded-lg font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <Plus className="w-3 h-3 text-amber-600" />
+                          <span>{kw}</span>
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 4: INSIGHTS */}
+              {activeTab === 'insights' && (
+                <div className="space-y-3 text-xs">
+                  <div className="space-y-1.5">
+                    <span className="font-bold text-slate-900 block uppercase text-[10px] tracking-wider">Keunggulan Utama:</span>
+                    <ul className="space-y-1 text-slate-600">
+                      {selectedJob.strengths.map((s, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                          <span>{s}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                    <span className="font-bold text-slate-900 block uppercase text-[10px] tracking-wider">Panduan Optimasi:</span>
+                    <ul className="space-y-1 text-slate-600">
+                      {selectedJob.improvements.map((imp, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <ChevronRight className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                          <span>{imp}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* 10. CLEAR CTA HIERARCHY BAR */}
+              <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2">
+                {/* Tertiary CTA */}
+                <button
+                  type="button"
+                  onClick={() => alert(`Posisi ${selectedJob.company} berhasil ditambahkan ke Tracker!`)}
+                  className="w-full sm:w-auto px-3 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold transition text-center cursor-pointer"
+                >
+                  + Tracker Lamaran
+                </button>
+
+                {/* Primary CTA (ORANGE-500) */}
+                <button
+                  type="button"
+                  onClick={() => alert(`CV berhasil dioptimalkan khusus untuk lowongan ${selectedJob.company}!`)}
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#F97316] hover:bg-orange-600 text-white font-extrabold text-xs shadow-md transition text-center cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Sparkles className="w-4 h-4 text-white" />
+                  <span>Optimasi CV (Rekomendasi Utama)</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 6. MODAL: TAMBAH LOWONGAN TARGET */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
+                <PlusCircle className="w-5 h-5 text-[#F97316]" />
+                <span>Tambah Target Lowongan Kerja</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Presets loader inside modal */}
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                Pilih Preset Cepat:
               </span>
-              <div className="flex flex-wrap gap-1.5">
-                {sampleJobPresets.map((preset, idx) => (
+              <div className="flex flex-wrap gap-1">
+                {samplePresets.map((preset, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => handleApplyPreset(preset)}
-                    className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer"
+                    className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
                   >
-                    + {preset.title} ({preset.company.split(' ')[1] || preset.company})
+                    + {preset.company} ({preset.position})
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Inputs */}
-            <div className="space-y-3">
+            {/* Form Inputs */}
+            <div className="space-y-3 text-xs">
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                  Nama Posisi Pekerjaan <span className="text-rose-500">*</span>
-                </label>
+                <label className="font-bold text-slate-700 block mb-1">Nama Posisi *</label>
                 <input
                   type="text"
                   required
-                  value={jobTitle}
-                  onChange={(e) => setJobTitle(e.target.value)}
+                  value={newPosition}
+                  onChange={(e) => setNewPosition(e.target.value)}
                   placeholder="Contoh: Frontend Engineer"
-                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-[#3B5CC4] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                  Nama Perusahaan / Perusahaan Impian
-                </label>
+                <label className="font-bold text-slate-700 block mb-1">Nama Perusahaan *</label>
                 <input
                   type="text"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="Contoh: Tokopedia"
-                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                  required
+                  value={newCompany}
+                  onChange={(e) => setNewCompany(e.target.value)}
+                  placeholder="Contoh: GoTo / Shopee / Tokopedia"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-[#3B5CC4] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                  Teks Lengkap Job Description / Requirement <span className="text-rose-500">*</span>
-                </label>
+                <label className="font-bold text-slate-700 block mb-1">Teks Job Description *</label>
                 <textarea
-                  rows={8}
+                  rows={5}
                   required
-                  value={jobDescription}
-                  onChange={(e) => setJobDescription(e.target.value)}
-                  placeholder="Tempelkan persyaratan pekerjaan dari LinkedIn, JobStreet, atau portal karir di sini..."
-                  className="w-full p-3 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none leading-relaxed"
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                  placeholder="Tempelkan persyaratan pekerjaan dari portal karir di sini..."
+                  className="w-full p-3 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-[#3B5CC4] focus:outline-none resize-none"
                 />
               </div>
             </div>
 
-            {/* Submit Button */}
-            <button
-              type="button"
-              onClick={handleStartAnalysis}
-              disabled={isAnalyzing}
-              className="w-full py-3 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-            >
-              {isAnalyzing ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Menganalisis Kualifikasi AI...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4 text-amber-300" />
-                  <span>Mulai Analisis Kecocokan AI</span>
-                </>
-              )}
-            </button>
+            {/* Modal submit button */}
+            <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(false)}
+                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50 transition cursor-pointer"
+              >
+                Batal
+              </button>
+
+              <button
+                type="button"
+                onClick={handleRunAnalysis}
+                disabled={isAnalyzing}
+                className="px-5 py-2.5 rounded-lg bg-[#F97316] hover:bg-orange-600 text-white font-extrabold text-xs shadow-md transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {isAnalyzing ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Menganalisis...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-white" />
+                    <span>Analisis &amp; Tambah</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
+      )}
 
-        {/* Right Column: Results & Analytics (7 Cols) */}
-        <div className="lg:col-span-7 space-y-6">
-          {/* Loading Animation Box */}
-          {isAnalyzing && (
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-8 text-center space-y-6 shadow-sm">
-              <div className="relative w-16 h-16 mx-auto">
-                <div className="absolute inset-0 rounded-full border-4 border-violet-200 dark:border-violet-900 animate-ping" />
-                <div className="relative w-16 h-16 rounded-full bg-violet-600 text-white flex items-center justify-center shadow-lg">
-                  <Cpu className="w-8 h-8 animate-pulse text-amber-300" />
-                </div>
-              </div>
+      {/* 9. MODAL: LIHAT SEMUA KEYWORDS */}
+      {isKeywordsModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
+                <Target className="w-4 h-4 text-[#3B5CC4]" />
+                <span>Semua Kata Kunci ATS ({selectedJob.company})</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsKeywordsModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer p-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-              <div className="space-y-1.5">
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
-                  Sistem AI Sedang Memproses Analisis Match
-                </h3>
-                <p className="text-xs text-violet-600 dark:text-violet-400 font-bold animate-pulse">
-                  {analysisStepsList[analysisStep]}
-                </p>
-              </div>
-
-              {/* Step Indicators */}
-              <div className="space-y-2 max-w-sm mx-auto text-left">
-                {analysisStepsList.map((stepText, idx) => (
-                  <div key={idx} className="flex items-center gap-2 text-xs">
-                    {idx < analysisStep ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    ) : idx === analysisStep ? (
-                      <RefreshCw className="w-4 h-4 text-violet-600 animate-spin shrink-0" />
-                    ) : (
-                      <div className="w-4 h-4 rounded-full border-2 border-slate-300 dark:border-slate-700 shrink-0" />
-                    )}
-                    <span
-                      className={
-                        idx === analysisStep
-                          ? 'font-bold text-violet-600 dark:text-violet-400'
-                          : idx < analysisStep
-                          ? 'text-slate-600 dark:text-slate-300 line-through opacity-70'
-                          : 'text-slate-400'
-                      }
-                    >
-                      {stepText}
+            <div className="space-y-2 max-h-64 overflow-y-auto pr-1 text-xs">
+              <span className="font-bold text-emerald-600 block">Kata Kunci Ditemukan di CV:</span>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedJob.matchedKeywords
+                  .concat(addedSkillsMap[selectedJob.id] || [])
+                  .map((kw, idx) => (
+                    <span key={idx} className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                      <Check className="w-3 h-3 text-emerald-600 shrink-0" />
+                      <span>{kw}</span>
                     </span>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
-          )}
 
-          {/* Results Output */}
-          {!isAnalyzing && hasAnalyzed && (
-            <div className="space-y-6">
-              {/* Overall Match Score Card */}
-              <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
+            <div className="pt-2 text-right">
+              <button
+                type="button"
+                onClick={() => setIsKeywordsModalOpen(false)}
+                className="px-4 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: GANTI CV */}
+      {isChangeCvModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-[#3B5CC4]" />
+                <span>Pilih Profil CV Aktif</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsChangeCvModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+              {mockSavedCVs.map((cv) => (
+                <div
+                  key={cv.id}
+                  onClick={() => {
+                    setSelectedCvId(cv.id);
+                    setIsChangeCvModalOpen(false);
+                  }}
+                  className={`p-3.5 rounded-xl border transition cursor-pointer flex items-start justify-between gap-3 ${
+                    selectedCvId === cv.id
+                      ? 'border-[#3B5CC4] bg-blue-50/60 ring-2 ring-[#3B5CC4]/20'
+                      : 'border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
                   <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                      Hasil Analisis Match Lowongan
+                    <h4 className="text-xs font-bold text-slate-900">{cv.title}</h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">{cv.role} • Diperbarui {cv.updatedAt}</p>
+                  </div>
+                  {selectedCvId === cv.id && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">
+                      Aktif
                     </span>
-                    <h3 className="text-base font-extrabold text-slate-900 dark:text-white mt-0.5">
-                      {jobTitle}
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-0.5">
-                      <Building className="w-3.5 h-3.5" />
-                      <span>{companyName}</span>
-                    </p>
-                  </div>
-
-                  {/* Score Gauge Widget */}
-                  <div className="flex items-center gap-3.5 bg-slate-50/80 dark:bg-slate-800/60 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shrink-0">
-                    <div className="relative w-16 h-16 flex items-center justify-center font-black text-lg text-emerald-600 dark:text-emerald-400 shrink-0">
-                      <svg className="w-full h-full transform -rotate-90">
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="26"
-                          stroke="currentColor"
-                          strokeWidth="5"
-                          className="text-slate-200 dark:text-slate-700/80"
-                          fill="transparent"
-                        />
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="26"
-                          stroke="currentColor"
-                          strokeWidth="5"
-                          className="text-emerald-500"
-                          strokeDasharray="163.3"
-                          strokeDashoffset={163.3 - (163.3 * Math.min(100, analysisResult.matchScore)) / 100}
-                          strokeLinecap="round"
-                          fill="transparent"
-                        />
-                      </svg>
-                      <span className="absolute font-extrabold text-sm tracking-tighter text-slate-900 dark:text-white">
-                        {analysisResult.matchScore}%
-                      </span>
-                    </div>
-
-                    <div className="space-y-1">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80">
-                        <Sparkles className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                        <span>{analysisResult.statusBadge}</span>
-                      </span>
-                      <p className="text-[11px] font-medium text-slate-600 dark:text-slate-400 max-w-[170px] leading-snug">
-                        Peluang lolos screening ATS sangat tinggi!
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 4 Core Metrics Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 block">Hard Skills</span>
-                    <span className="text-base font-extrabold text-violet-600 dark:text-violet-400">
-                      {analysisResult.breakdown.hardSkills}%
-                    </span>
-                    <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                      <div className="h-full bg-violet-600" style={{ width: `${analysisResult.breakdown.hardSkills}%` }} />
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 block">Soft Skills</span>
-                    <span className="text-base font-extrabold text-violet-600 dark:text-violet-400">
-                      {analysisResult.breakdown.softSkills}%
-                    </span>
-                    <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                      <div className="h-full bg-violet-600" style={{ width: `${analysisResult.breakdown.softSkills}%` }} />
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 block">Pengalaman</span>
-                    <span className="text-base font-extrabold text-violet-600 dark:text-violet-400">
-                      {analysisResult.breakdown.experience}%
-                    </span>
-                    <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                      <div className="h-full bg-violet-600" style={{ width: `${analysisResult.breakdown.experience}%` }} />
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 block">Pendidikan</span>
-                    <span className="text-base font-extrabold text-violet-600 dark:text-violet-400">
-                      {analysisResult.breakdown.education}%
-                    </span>
-                    <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                      <div className="h-full bg-violet-600" style={{ width: `${analysisResult.breakdown.education}%` }} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Matched vs Missing Keywords ATS Breakdown */}
-              <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-5">
-                <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                  <Target className="w-4 h-4 text-violet-600" />
-                  <span>Analisis Kata Kunci ATS (Hard &amp; Soft Skills)</span>
-                </h3>
-
-                {/* Found Keywords */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Kata Kunci Ditemukan di CV ({analysisResult.matchedKeywords.length})</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {analysisResult.matchedKeywords.map((kw, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1"
-                      >
-                        <Check className="w-3 h-3 text-emerald-500" />
-                        {kw}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Missing Keywords */}
-                <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400">
-                      <AlertTriangle className="w-4 h-4" />
-                      <span>Kata Kunci Belum Ada di CV ({analysisResult.missingKeywords.length})</span>
-                    </div>
-                    <span className="text-[10px] text-slate-400">Klik + untuk simulasikan penambahan ke CV</span>
-                  </div>
-
-                  {analysisResult.missingKeywords.length === 0 ? (
-                    <p className="text-xs text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800">
-                      Selamat! Semua kata kunci penting dari Job Description telah ditemukan di CV Anda!
-                    </p>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {analysisResult.missingKeywords.map((kw, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => handleAddMissingKeyword(kw)}
-                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                          title="Klik untuk mensimulasikan penambahan kata kunci ke CV"
-                        >
-                          <Plus className="w-3.5 h-3.5 text-amber-600" />
-                          <span>{kw}</span>
-                        </button>
-                      ))}
-                    </div>
                   )}
                 </div>
-              </div>
-
-              {/* Strengths & AI Action Recommendations */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Keunggulan */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 space-y-3 shadow-xs">
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
-                    <Award className="w-4 h-4 text-emerald-500" />
-                    <span>Keunggulan CV Kamu</span>
-                  </h4>
-                  <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                    {analysisResult.strengths.map((s, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                        <span>{s}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Area Perbaikan */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 space-y-3 shadow-xs">
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
-                    <Zap className="w-4 h-4 text-amber-500" />
-                    <span>Panduan Optimasi AI</span>
-                  </h4>
-                  <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                    {analysisResult.improvements.map((imp, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <ChevronRight className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                        <span>{imp}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Action Bar */}
-              <div className="p-4 rounded-xl bg-violet-900 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-amber-400 text-slate-950 flex items-center justify-center font-bold shrink-0">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-xs sm:text-sm">
-                      Ingin Langsung Mengoptimalkan CV Ini?
-                    </h4>
-                    <p className="text-[11px] text-violet-200">
-                      AI CUTI siap menyisipkan kata kunci di atas secara alami ke dalam CV kamu.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <button
-                    type="button"
-                    onClick={() => alert('CV Anda berhasil diperbarui dengan penyesuaian kata kunci ATS!')}
-                    className="flex-1 sm:flex-initial px-4 py-2.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold transition shadow-xs cursor-pointer text-center"
-                  >
-                    Auto-Optimasi CV AI
-                  </button>
-                </div>
-              </div>
+              ))}
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

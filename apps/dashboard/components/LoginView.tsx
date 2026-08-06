@@ -290,7 +290,7 @@ export const LoginView: React.FC<LoginViewProps> = () => {
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-300 block">
-                Email *
+                Alamat Email *
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 absolute left-3.5 top-3 text-slate-500" />
@@ -311,12 +311,13 @@ export const LoginView: React.FC<LoginViewProps> = () => {
                   Kata Sandi *
                 </label>
                 {mode === 'login' && (
-                  <Link
-                    href="/forgot-password"
-                    className="text-[11px] font-semibold text-violet-400 hover:text-violet-300 hover:underline"
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotModal(true)}
+                    className="text-[11px] font-bold text-violet-400 hover:underline cursor-pointer"
                   >
-                    Lupa kata sandi?
-                  </Link>
+                    Lupa Kata Sandi?
+                  </button>
                 )}
               </div>
               <div className="relative">
@@ -332,7 +333,7 @@ export const LoginView: React.FC<LoginViewProps> = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-slate-500 hover:text-slate-300"
+                  className="absolute right-3.5 top-3 text-slate-400 hover:text-white transition cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -340,13 +341,13 @@ export const LoginView: React.FC<LoginViewProps> = () => {
             </div>
 
             {mode === 'login' && (
-              <div className="flex items-center justify-between pt-1">
-                <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-400">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 text-violet-600 rounded border-slate-700 bg-slate-800 focus:ring-violet-500"
+                    className="w-4 h-4 text-violet-600 rounded border-slate-700 bg-slate-800 focus:ring-violet-500 cursor-pointer"
                   />
                   <span>Ingat Saya di perangkat ini</span>
                 </label>
@@ -356,7 +357,7 @@ export const LoginView: React.FC<LoginViewProps> = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-xs transition shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2 mt-2"
+              className="w-full py-3 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-xs transition shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2 mt-2 cursor-pointer disabled:opacity-50"
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

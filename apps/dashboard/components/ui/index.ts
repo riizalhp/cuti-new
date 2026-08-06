@@ -9,3 +9,6 @@ export type { GlassCardProps } from "./glass-card";
 
 export { Input } from "./input";
 export type { InputProps } from "./input";
+
+export { Skeleton } from "./skeleton";
+

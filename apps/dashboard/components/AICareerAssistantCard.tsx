@@ -71,10 +71,10 @@ export const AICareerAssistantCard: React.FC = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-violet-900 via-slate-900 to-violet-950 rounded-xl p-5 md:p-6 text-white border border-violet-700/50 shadow-lg">
+    <div className="bg-[#0D3BD9] rounded-xl p-5 md:p-6 text-white border border-blue-500/50 shadow-lg">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-tr from-violet-500 to-amber-400 flex items-center justify-center text-slate-950 font-bold shadow-md">
+          <div className="w-10 h-10 rounded-lg bg-[#0B33BD] flex items-center justify-center text-white font-bold shadow-md">
             <Bot className="w-6 h-6" />
           </div>
           <div>
@@ -86,7 +86,7 @@ export const AICareerAssistantCard: React.FC = () => {
                 Active AI
               </span>
             </div>
-            <p className="text-xs text-violet-200">
+            <p className="text-xs text-blue-100">
               Rekomendasi otomatis berbasis analisis profil &amp; tren rekrutmen 2026
             </p>
           </div>
@@ -101,12 +101,12 @@ export const AICareerAssistantCard: React.FC = () => {
             <button
               key={idx}
               onClick={() => handleConsult(`Tolong berikan detail panduan untuk: ${s.title}`)}
-              className="p-3.5 rounded-lg bg-violet-950/60 border border-violet-700/40 text-left hover:border-violet-400/60 transition group flex flex-col justify-between"
+              className="p-3.5 rounded-lg bg-[#071E6C] border border-blue-400/30 text-left hover:border-blue-300 transition group flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <Icon className="w-4 h-4 text-amber-300" />
-                  <span className="text-[10px] font-bold text-violet-300 group-hover:text-amber-300 transition flex items-center gap-1">
+                  <span className="text-[10px] font-bold text-blue-200 group-hover:text-white transition flex items-center gap-1">
                     {s.action}
                     <ChevronRight className="w-3 h-3" />
                   </span>

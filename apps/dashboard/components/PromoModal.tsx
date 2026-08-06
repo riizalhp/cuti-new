@@ -82,7 +82,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
     <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg relative overflow-hidden flex flex-col">
         {/* Top Decorative Header Banner */}
-        <div className="relative bg-gradient-to-r from-violet-600 via-violet-700 to-amber-600 p-6 text-white overflow-hidden">
+        <div className="relative bg-[#0D3BD9] p-6 text-white overflow-hidden">
           {/* Background Lighting/Glow Circles */}
           <div className="absolute top-0 right-0 -mr-10 -mt-10 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-32 h-32 bg-violet-400/20 rounded-full blur-2xl pointer-events-none" />
@@ -218,7 +218,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
           <div className="space-y-2.5 pt-2">
             <Button
               onClick={handleClaim}
-              className="w-full py-3 h-auto rounded-lg bg-gradient-to-r from-violet-600 via-violet-600 to-amber-600 hover:from-violet-700 hover:to-amber-700 text-white font-extrabold text-sm shadow-lg shadow-violet-500/25 transition cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3 h-auto rounded-lg bg-[#0D3BD9] hover:bg-[#0B33BD] text-white font-extrabold text-sm shadow-lg shadow-blue-500/25 transition cursor-pointer flex items-center justify-center gap-2"
             >
               <Sparkles className="w-4 h-4 text-amber-300" />
               <span>Klaim Diskon 70% Sekarang</span>

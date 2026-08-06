@@ -41,7 +41,7 @@ export default function SettingsPage() {
                   <textarea
                     rows={3}
                     defaultValue="Professional CV generation platform"
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
                   />
                 </div>
               </div>

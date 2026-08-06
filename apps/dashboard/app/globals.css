@@ -1,7 +1,24 @@
-@import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,300,400&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap');
+
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 @plugin "@tailwindcss/typography";
+
+@theme {
+  --font-sans: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --color-navy-50: #EEF2FF;
+  --color-navy-100: #E0E7FF;
+  --color-navy-200: #C7D2FE;
+  --color-navy-300: #93C5FD;
+  --color-navy-400: #60A5FA;
+  --color-navy-500: #0D3BD9;
+  --color-navy-600: #0B33BD;
+  --color-navy-700: #0D3BD9;
+  --color-navy-800: #0A2C9F;
+  --color-navy-900: #071E6C;
+  --color-navy-950: #041142;
+}
+
 
 /* CUTI Design System Variables */
 :root {
@@ -16,11 +33,11 @@
   --glass-border: rgba(255, 255, 255, 0.18);
   --glass-border-emphasized: rgba(255, 255, 255, 0.2);
 
-  /* Accent Colors */
-  --accent-indigo: #8B5CF6;
-  --accent-violet: #A78BFA;
-  --accent-hover: #7C3AED;
-  --accent-active: #6D28D9;
+  /* Accent Colors - Electric Cobalt Blue */
+  --accent-indigo: #0D3BD9;
+  --accent-violet: #0D3BD9;
+  --accent-hover: #0B33BD;
+  --accent-active: #092794;
 
   /* Text Colors */
   --text-primary: #1F2937;
@@ -82,9 +99,6 @@
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-tertiary: var(--text-tertiary);
-
-  /* Font family - Satoshi + Inter fallback */
-  --font-sans: 'Satoshi', 'Inter Variable', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Global Styles */
@@ -159,34 +173,32 @@ body {
 /* Neo Skeuomorphism (Soft Skeuomorphic Pill Buttons) */
 .btn-neo-skeuo {
   border-radius: 9999px;
-  background: linear-gradient(180deg, #3f3f46 0%, #27272a 45%, #121316 100%);
+  background: #0D3BD9;
   color: #ffffff;
   box-shadow:
-    0 3px 8px rgba(0, 0, 0, 0.35),
-    0 10px 25px rgba(0, 0, 0, 0.18),
-    inset 0 1px rgba(255, 255, 255, 0.3),
-    inset 0 -2px rgba(0, 0, 0, 0.4);
+    0 3px 8px rgba(13, 59, 217, 0.35),
+    0 10px 25px rgba(13, 59, 217, 0.18),
+    inset 0 1px rgba(255, 255, 255, 0.3);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-neo-skeuo:hover {
   transform: translateY(-2px);
+  background: #0B33BD;
   box-shadow:
-    0 6px 16px rgba(0, 0, 0, 0.45),
-    0 15px 30px rgba(0, 0, 0, 0.25),
-    inset 0 1px rgba(255, 255, 255, 0.45),
-    inset 0 -2px rgba(0, 0, 0, 0.5);
+    0 6px 16px rgba(13, 59, 217, 0.45),
+    0 15px 30px rgba(13, 59, 217, 0.25),
+    inset 0 1px rgba(255, 255, 255, 0.45);
 }
 
 .btn-neo-skeuo-light {
   border-radius: 9999px;
-  background: linear-gradient(180deg, #ffffff 0%, #f4f4f5 50%, #e4e4e7 100%);
-  color: #0f1013;
+  background: #ffffff;
+  color: #0D3BD9;
   box-shadow:
     0 3px 8px rgba(0, 0, 0, 0.12),
     0 10px 25px rgba(0, 0, 0, 0.08),
-    inset 0 1px rgba(255, 255, 255, 0.95),
-    inset 0 -2px rgba(0, 0, 0, 0.12);
+    inset 0 1px rgba(255, 255, 255, 0.95);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -200,21 +212,21 @@ body {
 
 .btn-neo-skeuo-accent {
   border-radius: 9999px;
-  background: linear-gradient(180deg, #6366f1 0%, #4f46e5 50%, #3730a3 100%);
+  background: #0D3BD9;
   color: #ffffff;
   box-shadow:
-    0 3px 8px rgba(79, 70, 229, 0.4),
-    0 10px 25px rgba(79, 70, 229, 0.25),
-    inset 0 1px rgba(255, 255, 255, 0.4),
-    inset 0 -2px rgba(0, 0, 0, 0.3);
+    0 3px 8px rgba(13, 59, 217, 0.4),
+    0 10px 25px rgba(13, 59, 217, 0.25),
+    inset 0 1px rgba(255, 255, 255, 0.4);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-neo-skeuo-accent:hover {
   transform: translateY(-2px);
+  background: #0B33BD;
   box-shadow:
-    0 6px 18px rgba(79, 70, 229, 0.5),
-    0 15px 30px rgba(79, 70, 229, 0.35),
+    0 6px 18px rgba(13, 59, 217, 0.5),
+    0 15px 30px rgba(13, 59, 217, 0.35),
     inset 0 1px rgba(255, 255, 255, 0.5);
 }
 
@@ -295,3 +307,180 @@ body {
   outline-offset: 2px;
   border-radius: inherit;
 }
+
+/* Custom Styled Textarea - Non-resizable & Modern Custom UI */
+textarea {
+  resize: none !important;
+  font-family: var(--font-sans, inherit);
+  line-height: 1.6;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* Custom Sleek Scrollbar for Textareas */
+textarea::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.35);
+  border-radius: 9999px;
+}
+
+textarea::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.6);
+}
+
+textarea::placeholder {
+  color: #9CA3AF;
+  opacity: 0.85;
+}
+
+/* Dedicated Utility Class for Custom Textarea styling */
+.custom-textarea {
+  resize: none !important;
+  font-family: inherit;
+  line-height: 1.6;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(226, 232, 240, 1);
+  background-color: rgba(248, 250, 252, 0.8);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+}
+
+.custom-textarea:focus {
+  border-color: var(--color-navy-500, #3B5CC4);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59, 92, 196, 0.15), 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.dark .custom-textarea {
+  border-color: rgba(51, 65, 85, 1);
+  background-color: rgba(15, 23, 42, 0.6);
+  color: #f8fafc;
+}
+
+.dark .custom-textarea:focus {
+  border-color: #60a5fa;
+  background-color: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+/* Custom Styled Select / Dropdown - Non-native System UI */
+select {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  font-family: inherit;
+  cursor: pointer !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.5rem center !important;
+  background-size: 0.85em 0.85em !important;
+  padding-right: 1.75rem !important;
+  padding-left: 0.5rem !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* Prevent double icon overlay when manual SVG icon is placed next to select */
+select + svg.pointer-events-none,
+select ~ svg.pointer-events-none {
+  display: none !important;
+}
+
+.dark select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394A3B8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E") !important;
+}
+
+/* Custom Dropdown Option Styling */
+select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  padding: 0.5rem 0.75rem !important;
+  font-weight: 500;
+}
+
+.dark select option {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+/* Dedicated Utility Class for Custom Select / Dropdown */
+.custom-select, .custom-dropdown {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  font-family: inherit;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(226, 232, 240, 1);
+  background-color: rgba(248, 250, 252, 0.8);
+  padding: 0.625rem 2.5rem 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: #0f172a;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+}
+
+.custom-select:focus, .custom-dropdown:focus {
+  border-color: var(--color-navy-500, #3B5CC4);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59, 92, 196, 0.15), 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.dark .custom-select, .dark .custom-dropdown {
+  border-color: rgba(51, 65, 85, 1);
+  background-color: rgba(15, 23, 42, 0.6);
+  color: #f8fafc;
+}
+
+.dark .custom-select:focus, .dark .custom-dropdown:focus {
+  border-color: #60a5fa;
+  background-color: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+/* Print Media Styles for A4 CV Paper Sheets */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  header, footer, nav, aside, button, .no-print, [role="navigation"] {
+    display: none !important;
+  }
+
+  .a4-paper-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    width: 210mm !important;
+    height: 297mm !important;
+  }
+}
+
+
+

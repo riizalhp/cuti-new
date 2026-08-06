@@ -144,7 +144,7 @@ export const CareerReadinessView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-violet-900 via-slate-900 to-violet-950 rounded-xl p-6 text-white border border-violet-800/40 shadow-md">
+      <div className="bg-[#0D3BD9] rounded-xl p-6 text-white border border-blue-500/50 shadow-md">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs">
@@ -408,7 +408,7 @@ export const CareerReadinessView: React.FC = () => {
       {/* SUBTAB 4: SERTIFIKAT READINESS */}
       {activeSubTab === 'sertifikat' && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-6 shadow-xs text-center">
-          <div className="max-w-2xl mx-auto p-8 rounded-xl bg-gradient-to-b from-slate-900 via-violet-950 to-slate-900 text-white border-2 border-amber-400 shadow-xl space-y-4">
+          <div className="max-w-2xl mx-auto p-8 rounded-xl bg-[#0D3BD9] text-white border-2 border-amber-400 shadow-xl space-y-4">
             <div className="flex items-center justify-center gap-2 text-amber-400">
               <ShieldCheck className="w-8 h-8" />
             </div>

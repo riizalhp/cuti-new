@@ -51,7 +51,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
         </button>
 
         <div className="text-center mb-6">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 text-slate-950 font-black flex items-center justify-center mx-auto mb-3 shadow-lg shadow-amber-500/20">
+          <div className="w-12 h-12 rounded-full bg-[#0D3BD9] text-white font-black flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-500/20">
             <Crown className="w-6 h-6" />
           </div>
           <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">

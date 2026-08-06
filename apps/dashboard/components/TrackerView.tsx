@@ -8,7 +8,6 @@ import {
   Building2,
   Calendar,
   Trash2,
-  DollarSign,
   MapPin,
   Kanban,
   List,
@@ -16,7 +15,6 @@ import {
   ArrowRight,
   X,
   FileText,
-  GripVertical,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
@@ -132,9 +130,61 @@ export const TrackerView: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
 
-  // Drag and Drop state
-  const [draggedAppId, setDraggedAppId] = useState<string | null>(null);
+  // Pointer Drag and Drop State
+  const [activeDragItem, setActiveDragItem] = useState<ApplicationItem | null>(null);
+  const [dragPos, setDragPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [dragWidth, setDragWidth] = useState<number>(280);
   const [dragOverColumn, setDragOverColumn] = useState<ApplicationItem['status'] | null>(null);
+
+  const handlePointerDownCard = (e: React.PointerEvent<HTMLDivElement>, app: ApplicationItem) => {
+    // Skip if clicking delete button
+    if ((e.target as HTMLElement).closest('button')) return;
+    if (e.button !== 0) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+
+    setActiveDragItem(app);
+    setDragPos({ x: e.clientX, y: e.clientY });
+    setDragOffset({ x: offsetX, y: offsetY });
+    setDragWidth(rect.width);
+    setDragOverColumn(app.status);
+
+    const handlePointerMove = (moveEvent: PointerEvent) => {
+      setDragPos({ x: moveEvent.clientX, y: moveEvent.clientY });
+
+      const elemBelow = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+      const colElem = elemBelow?.closest('[data-column-status]');
+      if (colElem) {
+        const targetStatus = colElem.getAttribute('data-column-status') as ApplicationItem['status'];
+        setDragOverColumn(targetStatus);
+      } else {
+        setDragOverColumn(null);
+      }
+    };
+
+    const handlePointerUp = (upEvent: PointerEvent) => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
+
+      const elemBelow = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
+      const colElem = elemBelow?.closest('[data-column-status]');
+      if (colElem) {
+        const targetStatus = colElem.getAttribute('data-column-status') as ApplicationItem['status'];
+        handleUpdateStatus(app.id, targetStatus);
+      }
+
+      setActiveDragItem(null);
+      setDragOverColumn(null);
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
+  };
 
   // New Application Form State
   const [newCompany, setNewCompany] = useState('');
@@ -273,25 +323,25 @@ export const TrackerView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header & Stats Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-violet-950 to-slate-900 rounded-xl p-6 text-white border border-violet-800/40 shadow-md">
+      {/* Header Banner */}
+      <div className="bg-[#0D3BD9] rounded-xl p-6 text-white border border-blue-500/50 shadow-md">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs mb-1">
+            <div className="flex items-center gap-2 text-blue-200 font-semibold text-xs mb-1">
               <Briefcase className="w-4 h-4" />
-              <span>Job Application Tracker</span>
+              <span>Manajemen Lamaran Pekerjaan</span>
             </div>
             <h2 className="text-xl md:text-2xl font-bold tracking-tight">
-              Tracker & Pipeline Lamaran Kerja
+              Tracker Lamaran Kerja
             </h2>
             <p className="text-xs text-slate-300 mt-1 max-w-xl">
-              Pantau seluruh riwayat lamaran, tahapan seleksi interview, hingga offering dalam format Kanban Board atau Tabel List.
+              Pantau status semua lamaran kerja kamu dari interview hingga offering letter dalam satu dashboard terpusat.
             </p>
           </div>
 
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white font-bold text-xs shadow-md transition-all shrink-0"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#0D3BD9] hover:bg-[#0B33BD] text-white font-bold text-xs shadow-md transition-all shrink-0 border border-white/20"
           >
             <Plus className="w-4 h-4" />
             <span>Tambah Lamaran Baru</span>
@@ -385,8 +435,8 @@ export const TrackerView: React.FC = () => {
           {/* Quick Helper Banner */}
           <div className="hidden sm:flex items-center justify-between px-4 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 text-xs text-slate-600 dark:text-slate-300">
             <div className="flex items-center gap-2">
-              <GripVertical className="w-4 h-4 text-violet-500" />
-              <span><strong>Drag & Drop:</strong> Tarik kartu lamaran dan lepas ke kolom status tujuan untuk memperbarui progress.</span>
+              <Kanban className="w-4 h-4 text-violet-500" />
+              <span><strong>Drag & Drop:</strong> Tarik kartu lamaran dari mana saja dan lepas ke kolom status tujuan untuk memperbarui progress.</span>
             </div>
             <span className="text-[11px] text-slate-400 font-medium">Auto-Sync Status</span>
           </div>
@@ -399,28 +449,7 @@ export const TrackerView: React.FC = () => {
               return (
                 <div
                   key={col.status}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'move';
-                    if (dragOverColumn !== col.status) {
-                      setDragOverColumn(col.status);
-                    }
-                  }}
-                  onDragLeave={(e) => {
-                    // Check if leaving the column container
-                    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                      setDragOverColumn(null);
-                    }
-                  }}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setDragOverColumn(null);
-                    const appId = e.dataTransfer.getData('text/plain') || draggedAppId;
-                    if (appId) {
-                      handleUpdateStatus(appId, col.status);
-                    }
-                    setDraggedAppId(null);
-                  }}
+                  data-column-status={col.status}
                   className={`snap-center shrink-0 w-[85vw] sm:w-[320px] lg:w-auto rounded-xl border transition-all duration-200 p-3 space-y-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xs ${
                     isOver
                       ? 'border-violet-500 ring-2 ring-violet-500/40 bg-violet-50/50 dark:bg-violet-950/30 scale-[1.01]'
@@ -449,92 +478,60 @@ export const TrackerView: React.FC = () => {
                       </div>
                     ) : (
                       columnApps.map((app) => {
-                        const isDragging = draggedAppId === app.id;
+                        const isDragging = activeDragItem?.id === app.id;
+
+                        if (isDragging) {
+                          return (
+                            <div
+                              key={app.id}
+                              className="h-[95px] rounded-xl border-2 border-dashed border-violet-400/60 bg-violet-50/40 dark:bg-violet-950/20 transition-all flex items-center justify-center text-violet-500 dark:text-violet-400 text-xs font-semibold select-none"
+                            >
+                              Pindahkan ke kolom baru...
+                            </div>
+                          );
+                        }
 
                         return (
                           <div
                             key={app.id}
-                            draggable
-                            onDragStart={(e) => {
-                              e.dataTransfer.setData('text/plain', app.id);
-                              e.dataTransfer.effectAllowed = 'move';
-                              setDraggedAppId(app.id);
-                            }}
-                            onDragEnd={() => {
-                              setDraggedAppId(null);
-                              setDragOverColumn(null);
-                            }}
-                            className={`group bg-white dark:bg-slate-900 rounded-lg p-3.5 border border-slate-200 dark:border-slate-800 shadow-2xs hover:border-violet-400 dark:hover:border-violet-500 transition-all space-y-2.5 cursor-grab active:cursor-grabbing relative select-none ${
-                              isDragging ? 'opacity-40 scale-95 border-dashed border-violet-500' : ''
-                            }`}
+                            onPointerDown={(e) => handlePointerDownCard(e, app)}
+                            className="group bg-white dark:bg-slate-900 rounded-xl p-3.5 border border-slate-200 dark:border-slate-800 shadow-2xs hover:shadow-md hover:border-violet-400 dark:hover:border-violet-500 transition-all space-y-2.5 cursor-grab active:cursor-grabbing relative select-none touch-none"
                           >
-                            <div className="flex items-start justify-between gap-1.5">
-                              <div className="flex items-start gap-1.5 flex-1 min-w-0">
-                                <GripVertical className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-violet-500 transition shrink-0 mt-0.5" />
-                                <div className="min-w-0 flex-1">
-                                  <h4 className="font-bold text-xs text-slate-900 dark:text-white leading-snug truncate">
-                                    {app.position}
-                                  </h4>
-                                  <p className="text-[11px] font-bold text-violet-600 dark:text-violet-400 mt-0.5 truncate">
-                                    {app.company}
-                                  </p>
-                                </div>
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <h4 className="font-bold text-xs text-slate-900 dark:text-white leading-snug truncate">
+                                  {app.position}
+                                </h4>
+                                <p className="text-[11px] font-bold text-violet-600 dark:text-violet-400 mt-0.5 truncate">
+                                  {app.company}
+                                </p>
                               </div>
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleDeleteApp(app.id);
                                 }}
-                                className="text-slate-400 hover:text-rose-600 transition p-1 shrink-0"
+                                className="text-slate-400 hover:text-rose-600 transition p-1 shrink-0 cursor-pointer"
                                 title="Hapus"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
 
-                            <div className="space-y-1 text-[11px] text-slate-500 dark:text-slate-400 pl-5">
+                            <div className="space-y-1 text-[11px] text-slate-500 dark:text-slate-400">
                               <div className="flex items-center gap-1.5">
-                                <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                                <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                                 <span className="truncate">{app.location}</span>
                               </div>
                               <div className="flex items-center gap-1.5">
-                                <Calendar className="w-3 h-3 text-slate-400 shrink-0" />
+                                <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                                 <span>{app.appliedDate}</span>
                               </div>
                               {app.salary !== '-' && (
                                 <div className="flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
-                                  <DollarSign className="w-3 h-3 shrink-0" />
                                   <span className="truncate">{app.salary}</span>
                                 </div>
                               )}
-                            </div>
-
-                            {app.notes && (
-                              <p className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-[10px] text-slate-600 dark:text-slate-300 line-clamp-2 border border-slate-100 dark:border-slate-800 ml-5">
-                                {app.notes}
-                              </p>
-                            )}
-
-                            {/* Quick Change Status Dropdown */}
-                            <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-1 pl-5">
-                              <span className="text-[10px] text-slate-400 font-medium">Ubah Status:</span>
-                              <div className="relative">
-                                <select
-                                  value={app.status}
-                                  onChange={(e) =>
-                                    handleUpdateStatus(app.id, e.target.value as ApplicationItem['status'])
-                                  }
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="text-[10px] font-bold py-1 pl-2 pr-6 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none appearance-none cursor-pointer"
-                                >
-                                  <option value="Terkirim">Terkirim</option>
-                                  <option value="Screening">Screening</option>
-                                  <option value="Interview">Interview</option>
-                                  <option value="Offering">Offering</option>
-                                  <option value="Ditolak">Ditolak</option>
-                                </select>
-                                <ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                              </div>
                             </div>
                           </div>
                         );
@@ -545,6 +542,51 @@ export const TrackerView: React.FC = () => {
               );
             })}
           </div>
+
+          {/* Floating Card Overlay Saat Ditarik (100% Solid Card Tanpa Bayangan Transparan) */}
+          {activeDragItem && (
+            <div
+              style={{
+                position: 'fixed',
+                left: dragPos.x - dragOffset.x,
+                top: dragPos.y - dragOffset.y,
+                width: dragWidth,
+                pointerEvents: 'none',
+                zIndex: 9999,
+              }}
+              className="bg-white dark:bg-slate-900 rounded-xl p-3.5 border-2 border-violet-500 shadow-2xl scale-[1.03] rotate-1 space-y-2.5 opacity-100 ring-4 ring-violet-500/20 select-none"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <h4 className="font-bold text-xs text-slate-900 dark:text-white leading-snug truncate">
+                    {activeDragItem.position}
+                  </h4>
+                  <p className="text-[11px] font-bold text-violet-600 dark:text-violet-400 mt-0.5 truncate">
+                    {activeDragItem.company}
+                  </p>
+                </div>
+                <div className="text-slate-400 p-1 shrink-0">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </div>
+              </div>
+
+              <div className="space-y-1 text-[11px] text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span className="truncate">{activeDragItem.location}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span>{activeDragItem.appliedDate}</span>
+                </div>
+                {activeDragItem.salary !== '-' && (
+                  <div className="flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
+                    <span className="truncate">{activeDragItem.salary}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

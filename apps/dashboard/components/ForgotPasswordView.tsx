@@ -181,18 +181,19 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
     <div className="min-h-screen w-full bg-slate-950 text-slate-100 flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden font-sans">
       {/* Background Ornaments */}
       <div className="absolute top-0 left-1/3 w-96 h-96 bg-violet-600/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/3 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 left-10 w-64 h-64 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute top-0 left-1/3 w-96 h-96 bg-[#0D3BD9]/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-1/3 w-96 h-96 bg-[#0D3BD9]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-10 w-64 h-64 bg-[#0D3BD9]/10 rounded-full blur-2xl pointer-events-none" />
 
       {/* Top Header Navigation */}
       <div className="absolute top-6 left-6 right-6 flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 to-amber-400 flex items-center justify-center font-black text-white text-lg shadow-lg">
-            K
+          <div className="w-10 h-10 rounded-xl bg-[#0D3BD9] flex items-center justify-center font-black text-white text-lg shadow-lg">
+            C
           </div>
           <div>
             <span className="font-extrabold text-base tracking-tight text-white block">
-              CUTI <span className="text-amber-400">AI</span>
+              CUTI <span className="text-[#0D3BD9]">AI</span>
             </span>
             <span className="text-[10px] text-slate-400 font-medium block">
               Pusat Keamanan & Reset Akun

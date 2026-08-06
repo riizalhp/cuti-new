@@ -129,7 +129,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       )}
 
       {/* Main Profile Header Card */}
-      <div className="bg-gradient-to-r from-slate-900 via-violet-950 to-slate-900 rounded-2xl p-6 md:p-8 text-white border border-violet-800/40 shadow-xl relative overflow-hidden">
+      <div className="bg-[#0D3BD9] rounded-2xl p-6 md:p-8 text-white border border-blue-500/50 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -335,12 +335,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
 
             <div className="space-y-1.5 md:col-span-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Ringkasan Diri (Bio Ringkas)</label>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Ringkasan Diri</label>
               <textarea
                 rows={4}
                 value={profileData.bio}
                 onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none resize-none"
               />
             </div>
           </div>
@@ -537,7 +537,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </h3>
             <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
               <div>
-                <h4 className="font-bold text-xs text-slate-900 dark:text-white">Autentikasi Dua Faktor (2FA)</h4>
+                <h4 className="font-bold text-xs text-slate-900 dark:text-white">Autentikasi Dua Faktor</h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">Lindungi akun dengan verifikasi kode OTP saat login dari perangkat baru.</p>
               </div>
               <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
@@ -669,7 +669,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   {themeMode === 'light' && <CheckCircle2 className="w-5 h-5 text-violet-600" />}
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs text-slate-900 dark:text-white">Mode Terang (Light)</h4>
+                  <h4 className="font-bold text-xs text-slate-900 dark:text-white">Mode Terang</h4>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Tampilan bersih dengan latar belakang terang.</p>
                 </div>
               </button>
@@ -690,7 +690,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   {themeMode === 'dark' && <CheckCircle2 className="w-5 h-5 text-violet-600" />}
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs text-slate-900 dark:text-white">Mode Gelap (Dark)</h4>
+                  <h4 className="font-bold text-xs text-slate-900 dark:text-white">Mode Gelap</h4>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Kontras nyaman untuk penggunaan malam hari.</p>
                 </div>
               </button>
@@ -711,7 +711,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   {themeMode === 'system' && <CheckCircle2 className="w-5 h-5 text-violet-600" />}
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs text-slate-900 dark:text-white">Otomatis (Sistem)</h4>
+                  <h4 className="font-bold text-xs text-slate-900 dark:text-white">Otomatis</h4>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Mengikuti preferensi tema perangkat kamu.</p>
                 </div>
               </button>
@@ -809,7 +809,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 dark:text-slate-300 block">Zona Waktu (Timezone)</label>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block">Zona Waktu</label>
                 <div className="relative">
                   <select
                     value={timezone}
@@ -858,7 +858,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
               <div className="space-y-1 text-center sm:text-left">
-                <h4 className="font-bold text-xs text-slate-900 dark:text-white">Arsip Portofolio Karier (Backup)</h4>
+                <h4 className="font-bold text-xs text-slate-900 dark:text-white">Arsip Portofolio Karier</h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">Termasuk 3 versi CV ATS, 2 Surat Lamaran, dan 14 log lamaran kerja.</p>
               </div>
               <button

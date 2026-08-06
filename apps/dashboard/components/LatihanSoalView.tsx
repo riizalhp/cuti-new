@@ -1052,7 +1052,7 @@ export const LatihanSoalView: React.FC = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
       {/* Top Banner Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-900 via-slate-900 to-violet-950 p-6 md:p-8 text-white shadow-xl border border-violet-800/50">
+      <div className="relative overflow-hidden rounded-2xl bg-[#0D3BD9] p-6 md:p-8 text-white shadow-xl border border-blue-500/50">
         <div className="absolute top-0 right-0 -mr-10 -mt-10 w-48 h-48 bg-amber-400/20 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 space-y-3 max-w-2xl">
@@ -1307,7 +1307,7 @@ export const LatihanSoalView: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full overflow-hidden flex flex-col">
             {/* Payment Header */}
-            <div className="p-5 bg-gradient-to-r from-violet-900 via-slate-900 to-violet-950 text-white flex items-center justify-between border-b border-violet-800/50">
+            <div className="p-5 bg-[#0D3BD9] text-white flex items-center justify-between border-b border-blue-500/50">
               <div className="space-y-0.5">
                 <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />

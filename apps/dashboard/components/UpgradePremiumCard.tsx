@@ -26,7 +26,7 @@ export const UpgradePremiumCard: React.FC<UpgradePremiumCardProps> = ({
   ];
 
   return (
-    <div className="bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 rounded-xl p-5 text-white shadow-md border border-amber-400/40 flex flex-col justify-between transition-transform hover:scale-[1.01]">
+    <div className="bg-[#0D3BD9] rounded-xl p-5 text-white shadow-md border border-blue-400/40 flex flex-col justify-between transition-transform hover:scale-[1.01]">
       <div>
         <div className="flex items-center justify-between mb-3">
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-black/20 text-amber-100 backdrop-blur-sm border border-amber-300/30 flex items-center gap-1">

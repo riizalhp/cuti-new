@@ -353,7 +353,7 @@ export const DesignSystemView: React.FC = () => {
           </div>
 
           {/* Interactive Right Drawer Preview Trigger Card */}
-          <div className="bg-gradient-to-r from-violet-900 via-slate-900 to-violet-950 rounded-2xl p-6 text-white border border-violet-800/50 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="bg-[#0D3BD9] rounded-2xl p-6 text-white border border-blue-500/50 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="w-5 h-5 text-violet-400" />

@@ -1,164 +1,43 @@
----
-const pricingPlans = [
-  {
-    name: 'Free',
-    price: 'Rp 0',
-    period: '',
-    badge: null,
-    features: [
-      { text: '2 CV maksimal', included: true },
-      { text: '10 lamaran tracking', included: true },
-      { text: 'Template dasar', included: true },
-      { text: 'AI Screener', included: false },
-      { text: 'Interview prep', included: false },
-      { text: 'LinkedIn optimizer', included: false },
-    ],
-    cta: 'Mulai Gratis',
-    ctaLink: '/register',
-    highlighted: false,
-  },
-  {
-    name: 'Monthly Premium',
-    price: 'Rp 49.000',
-    period: '/bulan',
-    badge: null,
-    features: [
-      { text: 'Unlimited CV', included: true },
-      { text: 'Unlimited tracking', included: true },
-      { text: 'Semua template premium', included: true },
-      { text: 'AI Screener unlimited', included: true },
-      { text: 'Interview prep unlimited', included: true },
-      { text: 'LinkedIn optimizer', included: true },
-      { text: 'Priority support', included: true },
-    ],
-    cta: 'Pilih Monthly',
-    ctaLink: '/checkout?plan=monthly',
-    highlighted: false,
-  },
-  {
-    name: 'Annual Premium',
-    price: 'Rp 399.000',
-    period: '/tahun',
-    subprice: 'Rp 33.250/bulan',
-    badge: 'Paling Hemat',
-    savings: 'Save 33%',
-    features: [
-      { text: 'Unlimited CV', included: true },
-      { text: 'Unlimited tracking', included: true },
-      { text: 'Semua template premium', included: true },
-      { text: 'AI Screener unlimited', included: true },
-      { text: 'Interview prep unlimited', included: true },
-      { text: 'LinkedIn optimizer', included: true },
-      { text: 'Priority support', included: true },
-    ],
-    cta: 'Pilih Annual',
-    ctaLink: '/checkout?plan=annual',
-    highlighted: true,
-  },
-];
----
-
-<section id="pricing" class="section-container py-20 lg:py-32">
-  <div class="text-center mb-16 space-y-4">
-    <h2 class="text-4xl lg:text-5xl font-bold">
-      Pilih <span class="text-gradient">Paket Anda</span>
-    </h2>
-    <p class="text-xl text-text-secondary max-w-3xl mx-auto">
-      Mulai gratis, upgrade kapan saja. No credit card required.
-    </p>
+<section class="section journey" id="cara-kerja">
+  <div class="section-heading split reveal" data-reveal>
+    <span class="kicker">YOUR CAREER, YOUR MOVE.</span>
+    <h2>Dari nol sampai <em>siap kerja.</em></h2>
   </div>
-
-  <!-- Pricing Cards -->
-  <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-    {pricingPlans.map((plan, index) => (
-      <div
-        class={`relative glass-card p-8 space-y-6 animate-on-scroll ${
-          plan.highlighted ? 'ring-2 ring-accent-indigo scale-105' : ''
-        }`}
-        style={`animation-delay: ${index * 100}ms;`}
-      >
-        {/* Badge */}
-        {plan.badge && (
-          <div class="absolute -top-4 left-1/2 -translate-x-1/2">
-            <div class="px-4 py-1 rounded-full text-sm font-semibold text-white bg-gradient-to-r from-amber-400 to-amber-500">
-              {plan.badge}
-            </div>
-          </div>
-        )}
-
-        {/* Header */}
-        <div class="space-y-2">
-          <h3 class="text-xl font-semibold">{plan.name}</h3>
-          <div class="flex items-baseline gap-1">
-            <span class="text-4xl font-bold">{plan.price}</span>
-            {plan.period && (
-              <span class="text-text-secondary">{plan.period}</span>
-            )}
-          </div>
-          {plan.subprice && (
-            <p class="text-sm text-text-secondary">{plan.subprice}</p>
-          )}
-          {plan.savings && (
-            <div class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-status-success/20 text-status-success">
-              {plan.savings}
-            </div>
-          )}
-        </div>
-
-        {/* Features */}
-        <ul class="space-y-3">
-          {plan.features.map((feature) => (
-            <li class="flex items-start gap-3">
-              {feature.included ? (
-                <svg class="w-5 h-5 text-status-success flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-              ) : (
-                <svg class="w-5 h-5 text-text-tertiary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-              )}
-              <span class={feature.included ? 'text-text-primary' : 'text-text-tertiary'}>
-                {feature.text}
-              </span>
-            </li>
-          ))}
-        </ul>
-
-        {/* CTA */}
-        <a
-          href={plan.ctaLink}
-          class={`block text-center w-full ${
-            plan.highlighted ? 'btn-gradient' : 'btn-ghost'
-          }`}
-        >
-          {plan.cta}
-        </a>
-      </div>
-    ))}
-  </div>
-
-  <!-- Additional Info -->
-  <p class="text-center text-sm text-text-secondary mt-12">
-    Semua paket termasuk dukungan email. Cancel anytime, no questions asked.
-  </p>
+  <ol class="steps">
+    <li class="reveal" data-reveal><span>01</span><div><b>Kenali tujuanmu</b><p>Isi profil dan pilih bidang yang kamu incar.</p></div></li>
+    <li class="reveal" data-reveal><span>02</span><div><b>Siapkan amunisimu</b><p>Bangun CV ATS dan tingkatkan kualitasnya.</p></div></li>
+    <li class="reveal" data-reveal><span>03</span><div><b>Temukan peluang</b><p>Jelajahi loker dan program pilihan.</p></div></li>
+    <li class="reveal" data-reveal><span>04</span><div><b>Pantau progres</b><p>Kelola semua lamaran tanpa batas.</p></div></li>
+  </ol>
 </section>
 
-<script>
-  const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -100px 0px'
-  };
+<section class="access-section" id="akses">
+  <div class="access-copy reveal" data-reveal>
+    <span class="kicker light">SEKALI BAYAR. SELAMANYA PUNYA.</span>
+    <h2>Bukan langganan.<br /><em>Investasi karier.</em></h2>
+    <p>Satu pembayaran untuk seluruh perjalanan kariermu. Tanpa tagihan bulanan, tanpa fitur yang tiba-tiba terkunci.</p>
+    <ul>
+      <li>CV Builder & template ATS</li>
+      <li>Tracker lamaran unlimited</li>
+      <li>Marketplace loker & kemitraan</li>
+      <li>Misi dan reward karier</li>
+    </ul>
+  </div>
+  <div class="price-card reveal" data-reveal>
+    <div class="price-badge">LIFETIME MEMBER</div>
+    <p>Akses penuh, selamanya</p>
+    <div class="price"><sup>Rp</sup><strong>149</strong><span>ribu<br />sekali bayar</span></div>
+    <a href="#" class="button button-dark">Ambil akses lifetime <span>↗</span></a>
+    <small>Pembayaran aman melalui Midtrans</small>
+  </div>
+</section>
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-      }
-    });
-  }, observerOptions);
-
-  document.querySelectorAll('.animate-on-scroll').forEach(el => {
-    observer.observe(el);
-  });
-</script>
+<section class="section faq" id="faq">
+  <div class="faq-title reveal" data-reveal><span class="kicker">MASIH PENASARAN?</span><h2>Pertanyaan yang<br /><em>sering mampir.</em></h2></div>
+  <div class="faq-list reveal" data-reveal>
+    <details><summary>Apakah CUTI cuma untuk fresh graduate?<span>+</span></summary><p>Tidak. CUTI dirancang untuk siswa SMA/SMK, mahasiswa, dan fresh graduate usia 16–24 tahun yang sedang menyiapkan karier pertamanya.</p></details>
+    <details><summary>Apakah tracker lamaran benar-benar unlimited?<span>+</span></summary><p>Ya. Kamu bebas mencatat dan memantau sebanyak apa pun lamaran tanpa batas.</p></details>
+    <details><summary>Bagaimana cara mengunduh CV?<span>+</span></summary><p>CV dirender langsung di browser dan bisa disimpan menjadi PDF melalui fitur print, sehingga tetap cepat dan privat.</p></details>
+    <details><summary>Bagaimana reward misi dibayarkan?<span>+</span></summary><p>Saldo akan ditinjau oleh admin dan ditransfer secara manual setelah disetujui.</p></details>
+  </div>
+</section>

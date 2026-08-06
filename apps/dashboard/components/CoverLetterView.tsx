@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 import {
   Mail,
   Sparkles,
@@ -133,7 +134,7 @@ budi.santoso@email.com | +62 812-3456-7890`;
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-violet-900 via-slate-900 to-violet-950 rounded-xl p-6 text-white border border-violet-800/40 shadow-md">
+      <div className="bg-[#0D3BD9] rounded-xl p-6 text-white border border-blue-500/50 shadow-md">
         <div className="flex items-center gap-2 text-violet-400 font-semibold text-xs mb-1">
           <Mail className="w-4 h-4" />
           <span>AI Cover Letter Generator</span>
@@ -202,18 +203,15 @@ budi.santoso@email.com | +62 812-3456-7890`;
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                 Gaya Bahasa / Tone
               </label>
-              <div className="relative">
-                <select
-                  value={tone}
-                  onChange={(e) => setTone(e.target.value as any)}
-                  className="w-full px-3 py-2 pr-9 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none appearance-none cursor-pointer"
-                >
-                  <option value="Formal (Bahasa Indonesia)">Formal (Bahasa Indonesia)</option>
-                  <option value="Professional (English)">Professional (English)</option>
-                  <option value="Persuasif & Antusias">Persuasif & Antusias</option>
-                </select>
-                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
+              <CustomSelect
+                value={tone}
+                onChange={(val) => setTone(val as any)}
+                options={[
+                  'Formal (Bahasa Indonesia)',
+                  'Professional (English)',
+                  'Persuasif & Antusias',
+                ]}
+              />
             </div>
 
             <div>
@@ -225,14 +223,14 @@ budi.santoso@email.com | +62 812-3456-7890`;
                 placeholder="Sebutkan prestasi utama kamu (e.g., Memimpin migrasi React, meningkatkan performa web 40%)..."
                 value={experienceHighlights}
                 onChange={(e) => setExperienceHighlights(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white resize-none"
               />
             </div>
 
             <button
               type="submit"
               disabled={isGenerating}
-              className="w-full py-2.5 rounded-lg bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-lg bg-[#0D3BD9] hover:bg-[#0B33BD] text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2"
             >
               {isGenerating ? (
                 <>

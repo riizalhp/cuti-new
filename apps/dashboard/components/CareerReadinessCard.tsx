@@ -57,7 +57,7 @@ export const CareerReadinessCard: React.FC<CareerReadinessCardProps> = ({
         {/* Progress gauge bar */}
         <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden mb-4">
           <div
-            className="bg-gradient-to-r from-violet-500 to-emerald-500 h-2.5 rounded-full"
+            className="bg-[#0D3BD9] h-2.5 rounded-full"
             style={{ width: `${score}%` }}
           ></div>
         </div>

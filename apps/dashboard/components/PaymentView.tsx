@@ -143,7 +143,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Top Banner Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-violet-950 to-slate-900 rounded-2xl p-6 md:p-8 text-white border border-violet-800/40 shadow-xl relative overflow-hidden">
+      <div className="bg-[#0D3BD9] rounded-2xl p-6 md:p-8 text-white border border-blue-500/50 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2">
