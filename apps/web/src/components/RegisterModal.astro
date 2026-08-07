@@ -1,0 +1,304 @@
+---
+---
+
+<div id="register-modal" class="login-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="register-modal-title">
+  <div class="login-modal-backdrop" data-close-register></div>
+  <div class="login-modal-card register-modal-card">
+    <button type="button" class="login-modal-close" aria-label="Tutup modal" data-close-register>
+      &times;
+    </button>
+    
+    <div class="login-modal-header">
+      <div class="brand-mark-wrapper">
+        <span class="brand-mark">C</span>
+      </div>
+      <h2 id="register-modal-title" class="login-modal-title">Daftar Akun <em>CUTI</em></h2>
+      <p class="login-modal-subtitle">Bergabung sekarang dengan Google untuk membuka akses seluruh fitur kariermu.</p>
+    </div>
+
+    <div class="register-benefits">
+      <div class="benefit-item"><b>✓</b> <span>CV ATS Builder Instan</span></div>
+      <div class="benefit-item"><b>✓</b> <span>Job Tracker Unlimited</span></div>
+      <div class="benefit-item"><b>✓</b> <span>Misi Berhadiah Saldo</span></div>
+    </div>
+
+    <div class="login-action-container">
+      <a href="https://app.cuti.online/api/auth/google" class="button google-auth-btn">
+        <div class="btn-left">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.37 7.37 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.97 0 12s.45 3.85 1.24 5.42l4.04-3.15z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.37 0 3.26 2.63 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+          </svg>
+          <span>Daftar dengan Google</span>
+        </div>
+        <span class="btn-arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="login-modal-footer">
+      <p>Sudah punya akun? <button type="button" class="text-button" data-open-login data-close-register>Masuk di sini ↗</button></p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .login-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .login-modal-overlay.is-active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .login-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--ink) 65%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .register-modal-card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 440px;
+    padding: 40px 32px 32px;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    box-shadow: 10px 10px 0 var(--ink);
+    transform: rotate(1deg) scale(0.96);
+    transition: transform 0.3s cubic-bezier(0.2, 0.75, 0.25, 1);
+  }
+
+  .login-modal-overlay.is-active .register-modal-card {
+    transform: rotate(1deg) scale(1);
+  }
+
+  .login-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+  }
+
+  .login-modal-close:hover {
+    background: var(--cobalt);
+    color: var(--paper);
+    transform: rotate(90deg);
+  }
+
+  .login-modal-header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .brand-mark-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .login-modal-title {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: clamp(2rem, 3.5vw, 2.6rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+  }
+
+  .login-modal-title em {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--cobalt);
+  }
+
+  .login-modal-subtitle {
+    margin: 10px 0 0;
+    font-size: 14px;
+    color: color-mix(in srgb, var(--ink) 70%, transparent);
+    line-height: 1.45;
+  }
+
+  .register-benefits {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: var(--periwinkle);
+    border: 1px solid var(--ink);
+    border-radius: 12px;
+  }
+
+  .benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .benefit-item b {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--lime);
+    color: var(--ink);
+    font-size: 11px;
+  }
+
+  .login-action-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .google-auth-btn {
+    min-height: 54px;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 22px;
+    border: 1px solid var(--cobalt);
+    border-radius: 999px;
+    color: var(--paper);
+    background: var(--cobalt);
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 15px;
+    transition: transform 0.25s, color 0.25s, background 0.25s;
+  }
+
+  .google-auth-btn:hover {
+    transform: translateY(-3px);
+    color: var(--cobalt);
+    background: var(--paper);
+  }
+
+  .btn-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn-left svg {
+    background: #ffffff;
+    border-radius: 50%;
+    padding: 3px;
+    box-sizing: content-box;
+  }
+
+  .btn-arrow {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .login-modal-footer {
+    margin-top: 24px;
+    text-align: center;
+    padding-top: 18px;
+    border-top: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  }
+
+  .login-modal-footer p {
+    margin: 0;
+    font-size: 13px;
+    color: color-mix(in srgb, var(--ink) 75%, transparent);
+  }
+
+  .text-button {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    font-weight: 600;
+    color: var(--cobalt);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .text-button:hover {
+    color: var(--ink);
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    function initRegisterModal() {
+      const modal = document.getElementById('register-modal');
+      if (!modal) return;
+
+      function openModal() {
+        modal.classList.add('is-active');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        const googleBtn = modal.querySelector('.google-auth-btn');
+        if (googleBtn) googleBtn.focus();
+      }
+
+      function closeModal() {
+        modal.classList.remove('is-active');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      document.querySelectorAll('[data-open-register]').forEach((btn) => {
+        btn.onclick = (e) => {
+          e.preventDefault();
+          closeModal();
+          openModal();
+        };
+      });
+
+      document.querySelectorAll('[data-close-register]').forEach((btn) => {
+        btn.onclick = () => closeModal();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('is-active')) {
+          closeModal();
+        }
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initRegisterModal);
+    } else {
+      initRegisterModal();
+    }
+  })();
+</script>

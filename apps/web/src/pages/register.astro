@@ -1,0 +1,262 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import LoginModal from '../components/LoginModal.astro';
+import RegisterModal from '../components/RegisterModal.astro';
+---
+
+<BaseLayout 
+  title="Daftar Akun — CUTI Career OS" 
+  description="Daftar akun CUTI dengan Google untuk membuat CV ATS, memantau lamaran, dan meraih reward karier."
+  canonicalUrl="https://cuti.online/register"
+>
+  <header class="site-header">
+    <a href="/" class="brand" aria-label="Kembali ke beranda CUTI">
+      <span class="brand-mark">C</span>
+      <span>CUTI</span>
+    </a>
+    <a href="/" class="text-link">← Kembali ke Beranda</a>
+  </header>
+
+  <main class="register-page-container">
+    <div class="register-card-wrapper reveal" data-reveal>
+      <div class="register-card">
+        <div class="brand-mark-wrapper">
+          <span class="brand-mark">C</span>
+        </div>
+        
+        <div class="card-header">
+          <span class="kicker">CAREER OS INDONESIA</span>
+          <h1>Daftar Akun <em>CUTI</em></h1>
+          <p>Satu akun Google untuk seluruh perjalanan kariermu: buat CV ATS, pantau lamaran, dan klaim reward misi.</p>
+        </div>
+
+        <div class="feature-bullets">
+          <div class="bullet-item">
+            <span class="bullet-icon">✓</span>
+            <div>
+              <strong>CV Builder ATS Instan</strong>
+              <p>Unduh PDF privat langsung dari browser.</p>
+            </div>
+          </div>
+          <div class="bullet-item">
+            <span class="bullet-icon">✓</span>
+            <div>
+              <strong>Job Tracker Unlimited</strong>
+              <p>Kelola seluruh lamaran di papan Kanban.</p>
+            </div>
+          </div>
+          <div class="bullet-item">
+            <span class="bullet-icon">✓</span>
+            <div>
+              <strong>Misi Berhadiah Saldo</strong>
+              <p>Bangun kebiasaan positif dan kumpulkan reward.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-box">
+          <a href="https://app.cuti.online/api/auth/google" class="button google-auth-btn">
+            <div class="btn-left">
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.37 7.37 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.97 0 12s.45 3.85 1.24 5.42l4.04-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.37 0 3.26 2.63 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+              <span>Daftar dengan Google</span>
+            </div>
+            <span class="btn-arrow">↗</span>
+          </a>
+          <small class="guarantee-note">Gratis pendaftaran · 1-Klik pendaftaran aman</small>
+        </div>
+
+        <div class="card-footer">
+          <p>Sudah punya akun? <button type="button" class="text-button" data-open-login>Masuk di sini ↗</button></p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <LoginModal />
+  <RegisterModal />
+</BaseLayout>
+
+<style>
+  .register-page-container {
+    min-height: calc(100vh - 78px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    background: var(--paper);
+  }
+
+  .register-card-wrapper {
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .register-card {
+    position: relative;
+    padding: 48px 40px 40px;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    box-shadow: 12px 12px 0 var(--ink);
+    transform: rotate(1deg);
+  }
+
+  .brand-mark-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .card-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .card-header h1 {
+    margin: 8px 0 12px;
+    font-size: clamp(2.4rem, 5vw, 3.4rem);
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+  }
+
+  .card-header h1 em {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--cobalt);
+  }
+
+  .card-header p {
+    margin: 0;
+    font-size: 15px;
+    color: color-mix(in srgb, var(--ink) 75%, transparent);
+    line-height: 1.45;
+  }
+
+  .feature-bullets {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 32px;
+    padding: 20px;
+    background: var(--periwinkle);
+    border: 1px solid var(--ink);
+  }
+
+  .bullet-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .bullet-icon {
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+    border-radius: 50%;
+    background: var(--lime);
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .bullet-item strong {
+    display: block;
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  .bullet-item p {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: color-mix(in srgb, var(--ink) 70%, transparent);
+  }
+
+  .action-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .google-auth-btn {
+    min-height: 54px;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 22px;
+    border: 1px solid var(--cobalt);
+    border-radius: 999px;
+    color: var(--paper);
+    background: var(--cobalt);
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    transition: transform 0.25s, color 0.25s, background 0.25s;
+  }
+
+  .google-auth-btn:hover {
+    transform: translateY(-3px);
+    color: var(--cobalt);
+    background: var(--paper);
+  }
+
+  .btn-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn-left svg {
+    background: #ffffff;
+    border-radius: 50%;
+    padding: 3px;
+    box-sizing: content-box;
+  }
+
+  .btn-arrow {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .guarantee-note {
+    font-size: 12px;
+    color: color-mix(in srgb, var(--ink) 60%, transparent);
+  }
+
+  .card-footer {
+    margin-top: 32px;
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid color-mix(in srgb, var(--ink) 20%, transparent);
+  }
+
+  .card-footer p {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .text-button {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    font-weight: 600;
+    color: var(--cobalt);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .text-button:hover {
+    color: var(--ink);
+  }
+</style>

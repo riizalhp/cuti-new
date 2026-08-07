@@ -3,16 +3,69 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
 import FeatureGrid from '../components/FeatureGrid.astro';
+import Testimonials from '../components/Testimonials.astro';
 import Pricing from '../components/Pricing.astro';
 import Footer from '../components/Footer.astro';
+import LoginModal from '../components/LoginModal.astro';
+import RegisterModal from '../components/RegisterModal.astro';
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Apakah CUTI cuma untuk fresh graduate?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Tidak. CUTI dirancang untuk siswa SMA/SMK, mahasiswa, dan fresh graduate usia 16–24 tahun yang sedang menyiapkan karier pertamanya.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Apakah tracker lamaran benar-benar unlimited?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Ya. Kamu bebas mencatat dan memantau sebanyak apa pun lamaran tanpa batas.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Bagaimana cara mengunduh CV?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'CV dirender langsung di browser dan bisa disimpan menjadi PDF melalui fitur print, sehingga tetap cepat dan privat.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Bagaimana reward misi dibayarkan?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Saldo akan ditinjau oleh admin dan ditransfer secara manual setelah disetujui.',
+      },
+    },
+  ],
+};
 ---
 
-<BaseLayout title="CUTI — Semua Urusan Kariermu, di Satu Tempat" description="Career Operating System untuk siswa SMA/SMK, mahasiswa, dan fresh graduate Indonesia. Buat CV ATS, cari loker, pantau lamaran, dan raih reward.">
+<BaseLayout 
+  title="CUTI — Platform Karier & CV ATS Talenta Muda Indonesia" 
+  description="Career Operating System untuk siswa SMA/SMK, mahasiswa, dan fresh graduate. Buat CV ATS-friendly, pantau lamaran kerja, temukan loker, dan raih reward."
+  canonicalUrl="https://cuti.online/"
+  faqSchema={faqSchema}
+>
   <Header />
   <main>
     <Hero />
     <FeatureGrid />
+    <Testimonials />
     <Pricing />
   </main>
   <Footer />
+  <LoginModal />
+  <RegisterModal />
 </BaseLayout>
+
+
+

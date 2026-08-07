@@ -14,7 +14,7 @@ This document provides detailed specifications for all pages in the CUTI platfor
 
 ## 1. Landing Page (Astro)
 
-**URL:** `https://cuti.id`  
+**URL:** `https://cuti.online`  
 **Goal:** Convert visitors to registered users  
 **Key Metric:** Sign-up conversion rate
 

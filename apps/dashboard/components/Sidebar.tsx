@@ -85,7 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       category: 'Lowongan',
       icon: Briefcase,
       items: [
-        { id: 'cari-lowongan', label: 'Cari Lowongan', href: 'https://loker.ambilcuti.id', icon: Compass },
+        { id: 'cari-lowongan', label: 'Cari Lowongan', href: 'https://loker.cuti.online', icon: Compass },
         { id: 'match-cv', label: 'Match CV & Job', href: '/match-cv', icon: Sparkles },
         { id: 'auto-apply', label: 'Auto Apply', href: '/auto-apply', icon: Send, badge: 'Beta' },
       ],

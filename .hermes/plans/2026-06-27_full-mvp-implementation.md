@@ -70,7 +70,7 @@ MIDTRANS_IS_PRODUCTION=false
 
 # Resend
 RESEND_API_KEY="your-resend-key"
-RESEND_FROM_EMAIL="noreply@ambilcuti.id"
+RESEND_FROM_EMAIL="noreply@cuti.online"
 
 # Auth
 AUTH_SECRET="generate-a-secret-here"
@@ -550,7 +550,7 @@ npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
 
 ### Task 7.3: Landing Page
 
-**Objective:** Build landing page for ambilcuti.id.
+**Objective:** Build landing page for cuti.online.
 
 **Files:**
 - Create: `apps/web/src/app/page.tsx`

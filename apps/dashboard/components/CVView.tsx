@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CvPromoModal } from '@/components/CvPromoModal';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { CustomDatePicker } from '@/components/ui/CustomDatePicker';
+import { AutoResizeTextarea } from '@/components/ui/AutoResizeTextarea';
 import { INDONESIAN_CITIES } from '@/lib/indonesianCities';
 import {
   FileText,
@@ -166,10 +167,11 @@ const CVSectionCard = ({
   onToggle,
   onMoveUp,
   onMoveDown,
-  onDragStart,
-  onDragOver,
-  onDrop,
-  isDragged,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
+  isPointerDragging,
+  dragOffsetY = 0,
   children,
 }: {
   sectionKey: string;
@@ -181,28 +183,33 @@ const CVSectionCard = ({
   onToggle: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
-  onDragStart: (e: React.DragEvent) => void;
-  onDragOver: (e: React.DragEvent) => void;
-  onDrop: (e: React.DragEvent) => void;
-  isDragged: boolean;
+  onPointerDown: (e: React.PointerEvent) => void;
+  onPointerMove: (e: React.PointerEvent) => void;
+  onPointerUp: (e: React.PointerEvent) => void;
+  isPointerDragging?: boolean;
+  dragOffsetY?: number;
   children: React.ReactNode;
 }) => {
   return (
     <div
-      draggable
-      onDragStart={onDragStart}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-      className={`border rounded-xl bg-white dark:bg-slate-900 shadow-2xs transition-all ${
-        isDragged
-          ? 'opacity-30 border-2 border-dashed border-orange-500 scale-[0.99] bg-orange-50/20'
-          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+      style={{
+        transform: isPointerDragging ? `translateY(${dragOffsetY}px) scale(1.02)` : undefined,
+        zIndex: isPointerDragging ? 50 : 1,
+        transition: isPointerDragging ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
+      }}
+      className={`border rounded-xl bg-white dark:bg-slate-900 transition-all duration-200 relative touch-none overflow-hidden ${
+        isPointerDragging
+          ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 bg-white dark:bg-slate-900 cursor-grabbing'
+          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs'
       }`}
     >
       <div className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition border-b border-slate-100 dark:border-slate-800 rounded-t-xl">
         <div className="flex items-center gap-2 min-w-0">
           <div
-            className="cursor-grab active:cursor-grabbing p-1 text-slate-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded transition shrink-0"
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            className="cursor-grab active:cursor-grabbing p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition shrink-0 bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 touch-none select-none"
             title="Tarik untuk mengatur posisi section di CV"
           >
             <GripVertical className="w-4 h-4" />
@@ -219,32 +226,8 @@ const CVSectionCard = ({
         <div className="flex items-center gap-1 shrink-0">
           <button
             type="button"
-            disabled={index === 0}
-            onClick={(e) => {
-              e.stopPropagation();
-              onMoveUp();
-            }}
-            className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-20 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
-            title="Pindahkan ke atas"
-          >
-            <ChevronUp className="w-3.5 h-3.5" />
-          </button>
-          <button
-            type="button"
-            disabled={index === totalSections - 1}
-            onClick={(e) => {
-              e.stopPropagation();
-              onMoveDown();
-            }}
-            className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-20 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
-            title="Pindahkan ke bawah"
-          >
-            <ChevronDown className="w-3.5 h-3.5" />
-          </button>
-          <button
-            type="button"
             onClick={onToggle}
-            className="p-1 text-teal-600 dark:text-teal-400 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer ml-1"
+            className="p-1 text-teal-600 dark:text-teal-400 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
           >
             {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
@@ -1510,32 +1493,17 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const [eduDegree, setEduDegree] = useState('');
   const [eduYear, setEduYear] = useState('');
 
-  // Drag & Drop Section Reordering State & Handlers
-  const [draggedSectionIndex, setDraggedSectionIndex] = useState<number | null>(null);
+  // Pointer-based Section Drag & Drop State & Handlers
+  const [pointerDragIdx, setPointerDragIdx] = useState<number | null>(null);
+  const [pointerOffsetY, setPointerOffsetY] = useState<number>(0);
+  const pointerStartYRef = useRef<number>(0);
+  const pointerDragIdxRef = useRef<number | null>(null);
+  const sectionOrderArrayRef = useRef<string[]>([]);
+  const dragClientYRef = useRef<number | null>(null);
 
   const activeSectionOrder = formData.sectionOrder && formData.sectionOrder.length > 0
     ? formData.sectionOrder
     : DEFAULT_SECTION_ORDER;
-
-  const handleSectionDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedSectionIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleSectionDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleSectionDrop = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    if (draggedSectionIndex === null || draggedSectionIndex === index) return;
-    const newOrder = [...activeSectionOrder];
-    const [dragged] = newOrder.splice(draggedSectionIndex, 1);
-    newOrder.splice(index, 0, dragged);
-    setFormData((prev) => ({ ...prev, sectionOrder: newOrder }));
-    setDraggedSectionIndex(null);
-  };
 
   const moveSectionUpDown = (index: number, dir: 'up' | 'down') => {
     const targetIdx = dir === 'up' ? index - 1 : index + 1;
@@ -1545,6 +1513,403 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     newOrder.splice(targetIdx, 0, item);
     setFormData((prev) => ({ ...prev, sectionOrder: newOrder }));
   };
+
+  const handlePointerDown = (e: React.PointerEvent, index: number) => {
+    if (e.button !== 0) return;
+    const handleEl = e.currentTarget as HTMLElement;
+    try { handleEl.setPointerCapture(e.pointerId); } catch {}
+
+    const currentList = [...activeSectionOrder];
+    sectionOrderArrayRef.current = currentList;
+
+    pointerDragIdxRef.current = index;
+    dragClientYRef.current = e.clientY;
+    setPointerDragIdx(index);
+    pointerStartYRef.current = e.clientY;
+    setPointerOffsetY(0);
+  };
+
+  // Movement is handled by global window 'pointermove' listener
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handlePointerMove = (_e: React.PointerEvent, _index: number) => {
+    /* noop — window listener handles movement */
+  };
+
+  const handlePointerUp = () => {
+    pointerDragIdxRef.current = null;
+    sectionOrderArrayRef.current = [];
+    dragClientYRef.current = null;
+    setPointerDragIdx(null);
+    setPointerOffsetY(0);
+  };
+
+  // Global window listener for Section Drag & Drop
+  useEffect(() => {
+    if (pointerDragIdx === null) return;
+
+    const onSectionWindowUp = () => {
+      pointerDragIdxRef.current = null;
+      sectionOrderArrayRef.current = [];
+      dragClientYRef.current = null;
+      setPointerDragIdx(null);
+      setPointerOffsetY(0);
+    };
+
+    const onSectionWindowMove = (e: PointerEvent) => {
+      // Safety check: cancel if primary mouse click button is released
+      if (e.buttons === 0) {
+        onSectionWindowUp();
+        return;
+      }
+
+      dragClientYRef.current = e.clientY;
+
+      const currentIdx = pointerDragIdxRef.current;
+      if (currentIdx === null) return;
+
+      const deltaY = e.clientY - pointerStartYRef.current;
+      const threshold = 55;
+      const list = sectionOrderArrayRef.current;
+
+      if (deltaY > threshold) {
+        if (currentIdx < list.length - 1) {
+          const nextIdx = currentIdx + 1;
+          const newArr = [...list];
+          const [item] = newArr.splice(currentIdx, 1);
+          newArr.splice(nextIdx, 0, item);
+
+          // Synchronous ref updates for zero latency
+          sectionOrderArrayRef.current = newArr;
+          pointerStartYRef.current = e.clientY;
+          pointerDragIdxRef.current = nextIdx;
+
+          setPointerDragIdx(nextIdx);
+          setPointerOffsetY(0);
+          setFormData((prev) => ({ ...prev, sectionOrder: newArr }));
+        }
+      } else if (deltaY < -threshold) {
+        if (currentIdx > 0) {
+          const nextIdx = currentIdx - 1;
+          const newArr = [...list];
+          const [item] = newArr.splice(currentIdx, 1);
+          newArr.splice(nextIdx, 0, item);
+
+          // Synchronous ref updates for zero latency
+          sectionOrderArrayRef.current = newArr;
+          pointerStartYRef.current = e.clientY;
+          pointerDragIdxRef.current = nextIdx;
+
+          setPointerDragIdx(nextIdx);
+          setPointerOffsetY(0);
+          setFormData((prev) => ({ ...prev, sectionOrder: newArr }));
+        }
+      } else {
+        setPointerOffsetY(deltaY);
+      }
+    };
+
+    window.addEventListener('pointerup', onSectionWindowUp);
+    window.addEventListener('pointermove', onSectionWindowMove);
+    window.addEventListener('pointercancel', onSectionWindowUp);
+    window.addEventListener('blur', onSectionWindowUp);
+    return () => {
+      window.removeEventListener('pointerup', onSectionWindowUp);
+      window.removeEventListener('pointermove', onSectionWindowMove);
+      window.removeEventListener('pointercancel', onSectionWindowUp);
+      window.removeEventListener('blur', onSectionWindowUp);
+    };
+  // Re-register whenever drag starts
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pointerDragIdx === null]);
+
+  // Generic Sub-Item Pointer Dragging Helper for all 9 sections
+  const [subItemDragKey, setSubItemDragKey] = useState<string | null>(null);
+  const [subItemDragIdx, setSubItemDragIdx] = useState<number | null>(null);
+  const [subItemOffsetY, setSubItemOffsetY] = useState<number>(0);
+  const subItemStartYRef = useRef<number>(0);
+  // Refs mirror state so window listeners always see current values synchronously
+  const subItemDragKeyRef = useRef<string | null>(null);
+  const subItemDragIdxRef = useRef<number | null>(null);
+  // Synchronous array ref maintained during dragging to prevent async React state lag
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const subItemArrayRef = useRef<any[]>([]);
+
+  // Helper to retrieve the actual layout scroll container (#main-content-scroll) or window
+  const getScrollContainer = (): Element | Window => {
+    if (typeof document === 'undefined') return window;
+    const mainEl = document.getElementById('main-content-scroll') || document.querySelector('main');
+    if (mainEl && mainEl.scrollHeight > mainEl.clientHeight) {
+      return mainEl;
+    }
+    return window;
+  };
+
+  // Auto-scroll viewport/container continuously during section or sub-item dragging near screen edges
+  useEffect(() => {
+    if (pointerDragIdx === null && subItemDragIdx === null) {
+      dragClientYRef.current = null;
+      return;
+    }
+
+    let animationFrameId: number;
+
+    const performAutoScroll = () => {
+      const clientY = dragClientYRef.current;
+      if (clientY !== null) {
+        const edgeThreshold = 140;
+        const windowHeight = window.innerHeight;
+        const container = getScrollContainer();
+
+        let scrollAmount = 0;
+
+        if (clientY > windowHeight - edgeThreshold) {
+          const intensity = Math.min(1, (clientY - (windowHeight - edgeThreshold)) / edgeThreshold);
+          scrollAmount = Math.max(12, Math.round(intensity * 32));
+        } else if (clientY < edgeThreshold) {
+          const intensity = Math.min(1, (edgeThreshold - clientY) / edgeThreshold);
+          scrollAmount = -Math.max(12, Math.round(intensity * 32));
+        }
+
+        if (scrollAmount !== 0) {
+          const oldScrollTop = container instanceof Window ? container.scrollY : (container as Element).scrollTop;
+
+          if ('scrollBy' in container && typeof container.scrollBy === 'function') {
+            container.scrollBy({ top: scrollAmount, behavior: 'instant' as ScrollBehavior });
+          } else {
+            window.scrollBy({ top: scrollAmount, behavior: 'instant' as ScrollBehavior });
+          }
+
+          const newScrollTop = container instanceof Window ? container.scrollY : (container as Element).scrollTop;
+          const actualScrollAmount = newScrollTop - oldScrollTop;
+
+          if (actualScrollAmount !== 0) {
+            // Adjust pointer start positions by actual scroll delta so dragged card stays locked to cursor
+            pointerStartYRef.current -= actualScrollAmount;
+            subItemStartYRef.current -= actualScrollAmount;
+          }
+
+          // Re-evaluate section drag position with updated pointerStartYRef
+          if (pointerDragIdxRef.current !== null) {
+            const currentIdx = pointerDragIdxRef.current;
+            const deltaY = clientY - pointerStartYRef.current;
+            const threshold = 55;
+            const list = sectionOrderArrayRef.current;
+
+            if (deltaY > threshold) {
+              if (currentIdx < list.length - 1) {
+                const nextIdx = currentIdx + 1;
+                const newArr = [...list];
+                const [item] = newArr.splice(currentIdx, 1);
+                newArr.splice(nextIdx, 0, item);
+
+                sectionOrderArrayRef.current = newArr;
+                pointerStartYRef.current = clientY;
+                pointerDragIdxRef.current = nextIdx;
+
+                setPointerDragIdx(nextIdx);
+                setPointerOffsetY(0);
+                setFormData((prev) => ({ ...prev, sectionOrder: newArr }));
+              }
+            } else if (deltaY < -threshold) {
+              if (currentIdx > 0) {
+                const nextIdx = currentIdx - 1;
+                const newArr = [...list];
+                const [item] = newArr.splice(currentIdx, 1);
+                newArr.splice(nextIdx, 0, item);
+
+                sectionOrderArrayRef.current = newArr;
+                pointerStartYRef.current = clientY;
+                pointerDragIdxRef.current = nextIdx;
+
+                setPointerDragIdx(nextIdx);
+                setPointerOffsetY(0);
+                setFormData((prev) => ({ ...prev, sectionOrder: newArr }));
+              }
+            } else {
+              setPointerOffsetY(deltaY);
+            }
+          }
+
+          // Re-evaluate sub-item drag position with updated subItemStartYRef
+          if (subItemDragKeyRef.current !== null && subItemDragIdxRef.current !== null) {
+            const key = subItemDragKeyRef.current;
+            const currentIdx = subItemDragIdxRef.current;
+            const deltaY = clientY - subItemStartYRef.current;
+            const threshold = 55;
+            const list = subItemArrayRef.current;
+
+            if (deltaY > threshold) {
+              if (currentIdx < list.length - 1) {
+                const nextIdx = currentIdx + 1;
+                const newArr = [...list];
+                const [item] = newArr.splice(currentIdx, 1);
+                newArr.splice(nextIdx, 0, item);
+
+                subItemArrayRef.current = newArr;
+                subItemStartYRef.current = clientY;
+                subItemDragIdxRef.current = nextIdx;
+
+                setSubItemDragIdx(nextIdx);
+                setSubItemOffsetY(0);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                setFormData((prev: any) => ({ ...prev, [key]: newArr }));
+              }
+            } else if (deltaY < -threshold) {
+              if (currentIdx > 0) {
+                const nextIdx = currentIdx - 1;
+                const newArr = [...list];
+                const [item] = newArr.splice(currentIdx, 1);
+                newArr.splice(nextIdx, 0, item);
+
+                subItemArrayRef.current = newArr;
+                subItemStartYRef.current = clientY;
+                subItemDragIdxRef.current = nextIdx;
+
+                setSubItemDragIdx(nextIdx);
+                setSubItemOffsetY(0);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                setFormData((prev: any) => ({ ...prev, [key]: newArr }));
+              }
+            } else {
+              setSubItemOffsetY(deltaY);
+            }
+          }
+        }
+      }
+      animationFrameId = requestAnimationFrame(performAutoScroll);
+    };
+
+    animationFrameId = requestAnimationFrame(performAutoScroll);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [pointerDragIdx !== null, subItemDragIdx !== null]);
+
+  const handleSubItemPointerDown = (e: React.PointerEvent, secKey: string, index: number) => {
+    if (e.button !== 0) return;
+    const handleEl = e.currentTarget as HTMLElement;
+    try { handleEl.setPointerCapture(e.pointerId); } catch {}
+
+    // Synchronously copy section array into ref for zero-latency manipulation
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const currentList = [...(((formData as any)[secKey] as any[]) || [])];
+    subItemArrayRef.current = currentList;
+
+    subItemDragKeyRef.current = secKey;
+    subItemDragIdxRef.current = index;
+    dragClientYRef.current = e.clientY;
+    setSubItemDragKey(secKey);
+    setSubItemDragIdx(index);
+    subItemStartYRef.current = e.clientY;
+    setSubItemOffsetY(0);
+  };
+
+  // Movement is now handled by the global window 'pointermove' listener (see useEffect below).
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleSubItemPointerMove = (_e: React.PointerEvent, _secKey: string, _index: number) => {
+    /* noop — window listener handles movement */
+  };
+
+  // Reset cleanup: fires when user releases pointer ANYWHERE
+  const handleSubItemPointerUp = () => {
+    subItemDragKeyRef.current = null;
+    subItemDragIdxRef.current = null;
+    subItemArrayRef.current = [];
+    dragClientYRef.current = null;
+    setSubItemDragKey(null);
+    setSubItemDragIdx(null);
+    setSubItemOffsetY(0);
+  };
+
+  // Global safety net: window-level listeners guarantee drag always ends even if
+  // the grip handle element loses pointer capture after a React re-render/reorder.
+  useEffect(() => {
+    if (subItemDragIdx === null) return;
+
+    const onWindowUp = () => {
+      subItemDragKeyRef.current = null;
+      subItemDragIdxRef.current = null;
+      subItemArrayRef.current = [];
+      dragClientYRef.current = null;
+      setSubItemDragKey(null);
+      setSubItemDragIdx(null);
+      setSubItemOffsetY(0);
+    };
+
+    const onWindowMove = (e: PointerEvent) => {
+      // 1. Safety check: If mouse primary button (left click) is not pressed, cancel drag immediately!
+      if (e.buttons === 0) {
+        onWindowUp();
+        return;
+      }
+
+      dragClientYRef.current = e.clientY;
+
+      const key = subItemDragKeyRef.current;
+      const currentIdx = subItemDragIdxRef.current;
+      if (key === null || currentIdx === null) return;
+
+      const deltaY = e.clientY - subItemStartYRef.current;
+      const threshold = 55;
+      const list = subItemArrayRef.current;
+
+      if (deltaY > threshold) {
+        if (currentIdx < list.length - 1) {
+          const nextIdx = currentIdx + 1;
+          const newArr = [...list];
+          const [item] = newArr.splice(currentIdx, 1);
+          newArr.splice(nextIdx, 0, item);
+
+          // SYNCHRONOUS REF UPDATES (immediate, zero latency):
+          subItemArrayRef.current = newArr;
+          subItemStartYRef.current = e.clientY;
+          subItemDragIdxRef.current = nextIdx;
+
+          // SYNCHRONOUS STATE UPDATES for visual rendering:
+          setSubItemDragIdx(nextIdx);
+          setSubItemOffsetY(0);
+
+          // ASYNCHRONOUS DATA UPDATE:
+          setFormData((prev) => ({ ...prev, [key]: newArr }));
+        }
+      } else if (deltaY < -threshold) {
+        if (currentIdx > 0) {
+          const nextIdx = currentIdx - 1;
+          const newArr = [...list];
+          const [item] = newArr.splice(currentIdx, 1);
+          newArr.splice(nextIdx, 0, item);
+
+          // SYNCHRONOUS REF UPDATES (immediate, zero latency):
+          subItemArrayRef.current = newArr;
+          subItemStartYRef.current = e.clientY;
+          subItemDragIdxRef.current = nextIdx;
+
+          // SYNCHRONOUS STATE UPDATES for visual rendering:
+          setSubItemDragIdx(nextIdx);
+          setSubItemOffsetY(0);
+
+          // ASYNCHRONOUS DATA UPDATE:
+          setFormData((prev) => ({ ...prev, [key]: newArr }));
+        }
+      } else {
+        setSubItemOffsetY(deltaY);
+      }
+    };
+
+    window.addEventListener('pointerup', onWindowUp);
+    window.addEventListener('pointermove', onWindowMove);
+    window.addEventListener('pointercancel', onWindowUp);
+    window.addEventListener('blur', onWindowUp);
+    return () => {
+      window.removeEventListener('pointerup', onWindowUp);
+      window.removeEventListener('pointermove', onWindowMove);
+      window.removeEventListener('pointercancel', onWindowUp);
+      window.removeEventListener('blur', onWindowUp);
+    };
+  // Re-register whenever drag starts (idx changes from null → number)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subItemDragIdx === null]);
 
   // Auto-save CV data to local storage ONLY when data changes AND after 1.5s idle inactivity (selesai mengisi)
   useEffect(() => {
@@ -2986,7 +3351,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       {(viewMode === 'create' || viewMode === 'preview') && (
         <div className="flex flex-col space-y-4 max-w-7xl mx-auto w-full">
           {/* TOP BAR ABOVE PREVIEW & EDITOR */}
-          <div className="w-full bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 shadow-2xs">
+          <div className="w-full bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 shadow-2xs no-print">
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-1 rounded-md bg-orange-50 text-orange-600 font-bold text-xs border border-orange-200">
                 Pratinjau Kertas A4 (Real-time)
@@ -3057,7 +3422,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             </div>
 
             {/* RIGHT COLUMN: INLINE FORM CONTROLS DIRECTLY NEXT TO CV (Clean, Frameless Container) */}
-            <div className="lg:col-span-5 xl:col-span-5 w-full flex flex-col space-y-3">
+            <div className="lg:col-span-5 xl:col-span-5 w-full flex flex-col space-y-3 no-print">
               {/* Header Panel (Frameless, Direct Page Title & Auto-Save Badge) */}
               <div className="px-1 py-1 flex items-center justify-between gap-3">
                 <div className="space-y-1 min-w-0">
@@ -3244,12 +3609,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       title = 'Ringkasan Profesional';
                       accordionKey = 'sec2';
                       content = (
-                        <textarea
-                          rows={4}
+                        <AutoResizeTextarea
                           placeholder="e.g., Senior frontend engineer dengan 8+ tahun pengalaman..."
                           value={formData.summary}
                           onChange={(e) => setFormData((prev) => ({ ...prev, summary: e.target.value }))}
-                          className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition leading-relaxed shadow-2xs resize-none"
                         />
                       );
                     } else if (secKey === 'experience') {
@@ -3263,15 +3626,38 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             const endMonth = exp.endDate?.split(' ')[0] || '';
                             const endYear = exp.endDate?.split(' ')[1] || exp.endDate || '';
 
+                            const isDraggingThis = subItemDragKey === 'experience' && subItemDragIdx === expIdx;
+
                             return (
                               <div
                                 key={exp.id || expIdx}
-                                className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 shadow-2xs"
+                                style={{
+                                  transform: isDraggingThis ? `translateY(${subItemOffsetY}px) scale(1.02)` : undefined,
+                                  zIndex: isDraggingThis ? 50 : 1,
+                                  transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
+                                }}
+                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative overflow-hidden ${
+                                  isDraggingThis
+                                    ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
+                                    : 'border-slate-200 dark:border-slate-800 shadow-2xs'
+                                }`}
                               >
                                 <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                                  <span className="font-bold text-xs text-slate-800 dark:text-white">
-                                    Pengalaman Kerja #{expIdx + 1}
-                                  </span>
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      onPointerDown={(e) => handleSubItemPointerDown(e, 'experience', expIdx)}
+                                      onPointerMove={(e) => handleSubItemPointerMove(e, 'experience', expIdx)}
+                                      onPointerUp={handleSubItemPointerUp}
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      title="Tarik untuk mengatur posisi"
+                                    >
+                                      <GripVertical className="w-3.5 h-3.5" />
+                                    </div>
+                                    <span className="font-bold text-xs text-slate-800 dark:text-white">
+                                      Pengalaman Kerja #{expIdx + 1}
+                                    </span>
+
+                                  </div>
                                   <button
                                     type="button"
                                     onClick={() =>
@@ -3481,8 +3867,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Deskripsi Tugas &amp; Pencapaian</label>
-                                  <textarea
-                                    rows={3}
+                                  <AutoResizeTextarea
                                     placeholder="e.g., Memimpin tim frontend 5 orang, mengoptimalkan waktu muat aplikasi hingga 40%..."
                                     value={exp.description}
                                     onChange={(e) => {
@@ -3493,7 +3878,6 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, experience: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition leading-relaxed shadow-2xs resize-none"
                                   />
                                 </div>
                               </div>
@@ -3534,28 +3918,52 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       accordionKey = 'sec4';
                       content = (
                         <div className="space-y-4">
-                          {(formData.internships || []).map((item, itemIdx) => (
-                            <div
-                              key={item.id || itemIdx}
-                              className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 shadow-2xs"
-                            >
-                              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                                <span className="font-bold text-xs text-slate-800 dark:text-white">
-                                  Magang #{itemIdx + 1}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setFormData((prev) => ({
-                                      ...prev,
-                                      internships: (prev.internships || []).filter((_, i) => i !== itemIdx),
-                                    }))
-                                  }
-                                  className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
+                          {(formData.internships || []).map((item, itemIdx) => {
+                            const isDraggingThis = subItemDragKey === 'internships' && subItemDragIdx === itemIdx;
+
+                            return (
+                              <div
+                                key={item.id || itemIdx}
+                                style={{
+                                  transform: isDraggingThis ? `translateY(${subItemOffsetY}px) scale(1.02)` : undefined,
+                                  zIndex: isDraggingThis ? 50 : 1,
+                                  transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
+                                }}
+                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative overflow-hidden ${
+                                  isDraggingThis
+                                    ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
+                                    : 'border-slate-200 dark:border-slate-800 shadow-2xs'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      onPointerDown={(e) => handleSubItemPointerDown(e, 'internships', itemIdx)}
+                                      onPointerMove={(e) => handleSubItemPointerMove(e, 'internships', itemIdx)}
+                                      onPointerUp={handleSubItemPointerUp}
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      title="Tarik untuk mengatur posisi"
+                                    >
+                                      <GripVertical className="w-3.5 h-3.5" />
+                                    </div>
+                                    <span className="font-bold text-xs text-slate-800 dark:text-white">
+                                      Magang #{itemIdx + 1}
+                                    </span>
+
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        internships: (prev.internships || []).filter((_, i) => i !== itemIdx),
+                                      }))
+                                    }
+                                    className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
 
                               <div className="grid grid-cols-2 gap-3">
                                 <div>
@@ -3633,8 +4041,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                               <div>
                                 <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Deskripsi Tugas Magang</label>
-                                <textarea
-                                  rows={3}
+                                <AutoResizeTextarea
                                   placeholder="e.g., Membantu tim merancang wireframe dan mendesain 10+ komponen UI..."
                                   value={item.description}
                                   onChange={(e) => {
@@ -3645,11 +4052,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       return { ...prev, internships: arr };
                                     });
                                   }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs resize-none"
                                 />
                               </div>
                             </div>
-                          ))}
+                          );
+                          })}
 
                           <button
                             type="button"
@@ -3682,28 +4089,52 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       accordionKey = 'sec5';
                       content = (
                         <div className="space-y-4">
-                          {(formData.projects || []).map((proj, projIdx) => (
-                            <div
-                              key={proj.id || projIdx}
-                              className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 shadow-2xs"
-                            >
-                              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                                <span className="font-bold text-xs text-slate-800 dark:text-white">
-                                  Proyek #{projIdx + 1}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setFormData((prev) => ({
-                                      ...prev,
-                                      projects: (prev.projects || []).filter((_, i) => i !== projIdx),
-                                    }))
-                                  }
-                                  className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
+                          {(formData.projects || []).map((proj, projIdx) => {
+                            const isDraggingThis = subItemDragKey === 'projects' && subItemDragIdx === projIdx;
+
+                            return (
+                              <div
+                                key={proj.id || projIdx}
+                                style={{
+                                  transform: isDraggingThis ? `translateY(${subItemOffsetY}px) scale(1.02)` : undefined,
+                                  zIndex: isDraggingThis ? 50 : 1,
+                                  transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
+                                }}
+                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative overflow-hidden ${
+                                  isDraggingThis
+                                    ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
+                                    : 'border-slate-200 dark:border-slate-800 shadow-2xs'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      onPointerDown={(e) => handleSubItemPointerDown(e, 'projects', projIdx)}
+                                      onPointerMove={(e) => handleSubItemPointerMove(e, 'projects', projIdx)}
+                                      onPointerUp={handleSubItemPointerUp}
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      title="Tarik untuk mengatur posisi"
+                                    >
+                                      <GripVertical className="w-3.5 h-3.5" />
+                                    </div>
+                                    <span className="font-bold text-xs text-slate-800 dark:text-white">
+                                      Proyek #{projIdx + 1}
+                                    </span>
+
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        projects: (prev.projects || []).filter((_, i) => i !== projIdx),
+                                      }))
+                                    }
+                                    className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
 
                               <div className="grid grid-cols-2 gap-3">
                                 <div>
@@ -3762,8 +4193,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                               <div>
                                 <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Deskripsi Proyek</label>
-                                <textarea
-                                  rows={3}
+                                <AutoResizeTextarea
                                   placeholder="e.g., Membangun aplikasi toko online dengan fitur payment gateway..."
                                   value={proj.description}
                                   onChange={(e) => {
@@ -3774,11 +4204,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       return { ...prev, projects: arr };
                                     });
                                   }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs resize-none"
                                 />
                               </div>
                             </div>
-                          ))}
+                          );
+                          })}
 
                           <button
                             type="button"
@@ -3809,28 +4239,52 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       accordionKey = 'sec6';
                       content = (
                         <div className="space-y-4">
-                          {(formData.organizations || []).map((org, orgIdx) => (
-                            <div
-                              key={org.id || orgIdx}
-                              className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 shadow-2xs"
-                            >
-                              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                                <span className="font-bold text-xs text-slate-800 dark:text-white">
-                                  Organisasi #{orgIdx + 1}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setFormData((prev) => ({
-                                      ...prev,
-                                      organizations: (prev.organizations || []).filter((_, i) => i !== orgIdx),
-                                    }))
-                                  }
-                                  className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
+                          {(formData.organizations || []).map((org, orgIdx) => {
+                            const isDraggingThis = subItemDragKey === 'organizations' && subItemDragIdx === orgIdx;
+
+                            return (
+                              <div
+                                key={org.id || orgIdx}
+                                style={{
+                                  transform: isDraggingThis ? `translateY(${subItemOffsetY}px) scale(1.02)` : undefined,
+                                  zIndex: isDraggingThis ? 50 : 1,
+                                  transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
+                                }}
+                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative overflow-hidden ${
+                                  isDraggingThis
+                                    ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
+                                    : 'border-slate-200 dark:border-slate-800 shadow-2xs'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      onPointerDown={(e) => handleSubItemPointerDown(e, 'organizations', orgIdx)}
+                                      onPointerMove={(e) => handleSubItemPointerMove(e, 'organizations', orgIdx)}
+                                      onPointerUp={handleSubItemPointerUp}
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      title="Tarik untuk mengatur posisi"
+                                    >
+                                      <GripVertical className="w-3.5 h-3.5" />
+                                    </div>
+                                    <span className="font-bold text-xs text-slate-800 dark:text-white">
+                                      Organisasi #{orgIdx + 1}
+                                    </span>
+
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        organizations: (prev.organizations || []).filter((_, i) => i !== orgIdx),
+                                      }))
+                                    }
+                                    className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
 
                               <div className="grid grid-cols-2 gap-3">
                                 <div>
@@ -3908,8 +4362,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                               <div>
                                 <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Deskripsi Kegiatan</label>
-                                <textarea
-                                  rows={3}
+                                <AutoResizeTextarea
                                   placeholder="e.g., Mengkoordinasikan seminar teknologi nasional dengan 500+ peserta..."
                                   value={org.description}
                                   onChange={(e) => {
@@ -3920,11 +4373,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       return { ...prev, organizations: arr };
                                     });
                                   }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs resize-none"
                                 />
                               </div>
                             </div>
-                          ))}
+                          );
+                          })}
 
                           <button
                             type="button"
@@ -3956,28 +4409,52 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       accordionKey = 'sec7';
                       content = (
                         <div className="space-y-4">
-                          {formData.education.map((edu, eduIdx) => (
-                            <div
-                              key={edu.id || eduIdx}
-                              className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 shadow-2xs"
-                            >
-                              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                                <span className="font-bold text-xs text-slate-800 dark:text-white">
-                                  Pendidikan #{eduIdx + 1}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setFormData((prev) => ({
-                                      ...prev,
-                                      education: prev.education.filter((_, i) => i !== eduIdx),
-                                    }))
-                                  }
-                                  className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
+                          {formData.education.map((edu, eduIdx) => {
+                            const isDraggingThis = subItemDragKey === 'education' && subItemDragIdx === eduIdx;
+
+                            return (
+                              <div
+                                key={edu.id || eduIdx}
+                                style={{
+                                  transform: isDraggingThis ? `translateY(${subItemOffsetY}px) scale(1.02)` : undefined,
+                                  zIndex: isDraggingThis ? 50 : 1,
+                                  transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
+                                }}
+                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative overflow-hidden ${
+                                  isDraggingThis
+                                    ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
+                                    : 'border-slate-200 dark:border-slate-800 shadow-2xs'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      onPointerDown={(e) => handleSubItemPointerDown(e, 'education', eduIdx)}
+                                      onPointerMove={(e) => handleSubItemPointerMove(e, 'education', eduIdx)}
+                                      onPointerUp={handleSubItemPointerUp}
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      title="Tarik untuk mengatur posisi"
+                                    >
+                                      <GripVertical className="w-3.5 h-3.5" />
+                                    </div>
+                                    <span className="font-bold text-xs text-slate-800 dark:text-white">
+                                      Pendidikan #{eduIdx + 1}
+                                    </span>
+
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        education: prev.education.filter((_, i) => i !== eduIdx),
+                                      }))
+                                    }
+                                    className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
 
                               <div className="grid grid-cols-2 gap-3">
                                 <div>
@@ -4053,7 +4530,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 </div>
                               </div>
                             </div>
-                          ))}
+                          );
+                          })}
 
                           <button
                             type="button"
@@ -4549,61 +5027,89 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             Note: Disarankan menulis &quot;Referensi tersedia atas permintaan&quot; pada CV Anda dan memberikan informasi ini secara terpisah saat diminta.
                           </div>
 
-                          {(formData.references || []).map((ref, refIdx) => (
-                            <div key={ref.id || refIdx} className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3 shadow-2xs relative">
-                              <div className="flex items-center justify-between">
-                                <span className="font-bold text-xs text-slate-700 dark:text-slate-300">Referensi #{refIdx + 1}</span>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setFormData((prev) => ({
-                                      ...prev,
-                                      references: (prev.references || []).filter((_, i) => i !== refIdx),
-                                    }))
-                                  }
-                                  className="text-rose-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1 cursor-pointer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" /> Hapus
-                                </button>
-                              </div>
-                              <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-1">
-                                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
-                                  <input
-                                    type="text"
-                                    placeholder="e.g., John Smith"
-                                    value={ref.fullName}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setFormData((prev) => {
-                                        const arr = [...(prev.references || [])];
-                                        arr[refIdx] = { ...arr[refIdx], fullName: val };
-                                        return { ...prev, references: arr };
-                                      });
-                                    }}
-                                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                                  />
+                          {(formData.references || []).map((ref, refIdx) => {
+                            const isDraggingThis = subItemDragKey === 'references' && subItemDragIdx === refIdx;
+
+                            return (
+                              <div
+                                key={ref.id || refIdx}
+                                style={{
+                                  transform: isDraggingThis ? `translateY(${subItemOffsetY}px) scale(1.02)` : undefined,
+                                  zIndex: isDraggingThis ? 50 : 1,
+                                  transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
+                                }}
+                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3 transition-all duration-200 relative overflow-hidden ${
+                                  isDraggingThis
+                                    ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
+                                    : 'border-slate-200 dark:border-slate-800 shadow-2xs'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      onPointerDown={(e) => handleSubItemPointerDown(e, 'references', refIdx)}
+                                      onPointerMove={(e) => handleSubItemPointerMove(e, 'references', refIdx)}
+                                      onPointerUp={handleSubItemPointerUp}
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      title="Tarik untuk mengatur posisi"
+                                    >
+                                      <GripVertical className="w-3.5 h-3.5" />
+                                    </div>
+                                    <span className="font-bold text-xs text-slate-700 dark:text-slate-300">Referensi #{refIdx + 1}</span>
+
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        references: (prev.references || []).filter((_, i) => i !== refIdx),
+                                      }))
+                                    }
+                                    className="text-rose-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" /> Hapus
+                                  </button>
                                 </div>
-                                <div className="space-y-1">
-                                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Jabatan</label>
-                                  <input
-                                    type="text"
-                                    placeholder="e.g., Engineering Director"
-                                    value={ref.title || ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setFormData((prev) => {
-                                        const arr = [...(prev.references || [])];
-                                        arr[refIdx] = { ...arr[refIdx], title: val };
-                                        return { ...prev, references: arr };
-                                      });
-                                    }}
-                                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                                  />
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
+                                    <input
+                                      type="text"
+                                      placeholder="e.g., John Smith"
+                                      value={ref.fullName}
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        setFormData((prev) => {
+                                          const arr = [...(prev.references || [])];
+                                          arr[refIdx] = { ...arr[refIdx], fullName: val };
+                                          return { ...prev, references: arr };
+                                        });
+                                      }}
+                                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Jabatan</label>
+                                    <input
+                                      type="text"
+                                      placeholder="e.g., Engineering Director"
+                                      value={ref.title || ''}
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        setFormData((prev) => {
+                                          const arr = [...(prev.references || [])];
+                                          arr[refIdx] = { ...arr[refIdx], title: val };
+                                          return { ...prev, references: arr };
+                                        });
+                                      }}
+                                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                                    />
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
 
                           <button
                             type="button"
@@ -4639,2017 +5145,16 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         onToggle={() => toggleAccordion(accordionKey)}
                         onMoveUp={() => moveSectionUpDown(idx, 'up')}
                         onMoveDown={() => moveSectionUpDown(idx, 'down')}
-                        onDragStart={(e) => handleSectionDragStart(e, idx)}
-                        onDragOver={(e) => handleSectionDragOver(e, idx)}
-                        onDrop={(e) => handleSectionDrop(e, idx)}
-                        isDragged={draggedSectionIndex === idx}
+                        onPointerDown={(e) => handlePointerDown(e, idx)}
+                        onPointerMove={(e) => handlePointerMove(e, idx)}
+                        onPointerUp={handlePointerUp}
+                        isPointerDragging={pointerDragIdx === idx}
+                        dragOffsetY={pointerDragIdx === idx ? pointerOffsetY : 0}
                       >
                         {content}
                       </CVSectionCard>
                     );
                   })}
-
-                  {/* Section 3: Pengalaman Kerja */}
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => toggleAccordion('sec3')}
-                      className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition cursor-pointer border-b border-slate-100 dark:border-slate-800"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-slate-800 dark:text-white">Pengalaman Kerja</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        {openAccordion['sec3'] ? (
-                          <ChevronUp className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        )}
-                      </div>
-                    </button>
-                    {openAccordion['sec3'] && (
-                      <div className="p-4 space-y-4 bg-white dark:bg-slate-900">
-                        {formData.experience.map((exp, idx) => {
-                          const startMonth = exp.startDate?.split(' ')[0] || '';
-                          const startYear = exp.startDate?.split(' ')[1] || exp.startDate || '';
-                          const endMonth = exp.endDate?.split(' ')[0] || '';
-                          const endYear = exp.endDate?.split(' ')[1] || exp.endDate || '';
-
-                          return (
-                            <div
-                              key={exp.id || idx}
-                              className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 shadow-2xs"
-                            >
-                              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                                <div className="flex items-center gap-2">
-                                  <GripVertical className="w-4 h-4 text-slate-400 shrink-0 cursor-grab" />
-                                  <span className="font-bold text-xs text-slate-800 dark:text-white">
-                                    Pengalaman Kerja #{idx + 1}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      setFormData((prev) => ({
-                                        ...prev,
-                                        experience: prev.experience.filter((_, i) => i !== idx),
-                                      }))
-                                    }
-                                    className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                  <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Perusahaan *</label>
-                                  <input
-                                    type="text"
-                                    placeholder="e.g., Acme Corp"
-                                    value={exp.company}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setFormData((prev) => {
-                                        const arr = [...prev.experience];
-                                        arr[idx] = { ...arr[idx], company: val };
-                                        return { ...prev, experience: arr };
-                                      });
-                                    }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Jabatan *</label>
-                                  <input
-                                    type="text"
-                                    placeholder="e.g., Senior Frontend Engineer"
-                                    value={exp.role}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setFormData((prev) => {
-                                        const arr = [...prev.experience];
-                                        arr[idx] = { ...arr[idx], role: val };
-                                        return { ...prev, experience: arr };
-                                      });
-                                    }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Lokasi</label>
-                                  <input
-                                    type="text"
-                                    placeholder="e.g., San Francisco, CA"
-                                    value={exp.location || ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setFormData((prev) => {
-                                        const arr = [...prev.experience];
-                                        arr[idx] = { ...arr[idx], location: val };
-                                        return { ...prev, experience: arr };
-                                      });
-                                    }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Website Perusahaan</label>
-                                  <input
-                                    type="text"
-                                    placeholder="e.g., acme.example.com"
-                                    value={exp.website || ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setFormData((prev) => {
-                                        const arr = [...prev.experience];
-                                        arr[idx] = { ...arr[idx], website: val };
-                                        return { ...prev, experience: arr };
-                                      });
-                                    }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Start Date</label>
-                                  <CustomDatePicker
-                                    value={exp.startDate || ''}
-                                    placeholder="Pilih Bulan &amp; Tahun Masuk..."
-                                    onChange={(val) => {
-                                      setFormData((prev) => {
-                                        const arr = [...prev.experience];
-                                        arr[idx] = { ...arr[idx], startDate: val, period: `${val} - ${arr[idx].endDate || ''}` };
-                                        return { ...prev, experience: arr };
-                                      });
-                                    }}
-                                  />
-                                </div>
-
-                                <div>
-                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">End Date</label>
-                                  <CustomDatePicker
-                                    disabled={exp.isCurrent}
-                                    value={exp.isCurrent ? 'Sekarang' : (exp.endDate || '')}
-                                    placeholder="Pilih Bulan &amp; Tahun Keluar..."
-                                    allowPresent
-                                    onChange={(val) => {
-                                      setFormData((prev) => {
-                                        const arr = [...prev.experience];
-                                        const isCurr = val === 'Sekarang';
-                                        arr[idx] = {
-                                          ...arr[idx],
-                                          endDate: val,
-                                          isCurrent: isCurr,
-                                          period: `${arr[idx].startDate || ''} - ${val}`,
-                                        };
-                                        return { ...prev, experience: arr };
-                                      });
-                                    }}
-                                  />
-                                </div>
-                              </div>
-
-                              <label className="flex items-center gap-2 font-medium text-xs text-slate-700 dark:text-slate-300 cursor-pointer pt-1">
-                                <input
-                                  type="checkbox"
-                                  checked={exp.isCurrent || false}
-                                  onChange={(e) => {
-                                    const checked = e.target.checked;
-                                    setFormData((prev) => {
-                                      const arr = [...prev.experience];
-                                      arr[idx] = {
-                                        ...arr[idx],
-                                        isCurrent: checked,
-                                        endDate: checked ? 'Sekarang' : '',
-                                        period: `${arr[idx].startDate || ''} - ${checked ? 'Sekarang' : ''}`,
-                                      };
-                                      return { ...prev, experience: arr };
-                                    });
-                                  }}
-                                  className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 border-slate-300"
-                                />
-                                <span>Masih Bekerja</span>
-                              </label>
-
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Deskripsi Pekerjaan</label>
-                                <textarea
-                                  rows={2}
-                                  placeholder="Deskripsi tugas dan tanggung jawab..."
-                                  value={exp.description}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...prev.experience];
-                                      arr[idx] = { ...arr[idx], description: val };
-                                      return { ...prev, experience: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs resize-none"
-                                />
-                              </div>
-
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Pencapaian Utama</label>
-                                <textarea
-                                  rows={1}
-                                  placeholder="Hasil atau pencapaian terukur yang diraih..."
-                                  value={exp.achievements || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...prev.experience];
-                                      arr[idx] = { ...arr[idx], achievements: val };
-                                      return { ...prev, experience: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs resize-none"
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              experience: [
-                                ...prev.experience,
-                                {
-                                  id: `exp-${Date.now()}`,
-                                  role: '',
-                                  company: '',
-                                  period: '',
-                                  description: '',
-                                },
-                              ],
-                            }))
-                          }
-                          className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Tambah Pengalaman Kerja</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Section 4: Pengalaman Magang */}
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => toggleAccordion('sec4')}
-                      className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition cursor-pointer border-b border-slate-100 dark:border-slate-800"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-slate-800 dark:text-white">Pengalaman Magang</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        {openAccordion['sec4'] ? (
-                          <ChevronUp className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        )}
-                      </div>
-                    </button>
-                    {openAccordion['sec4'] && (
-                      <div className="p-4 space-y-4 bg-white dark:bg-slate-900">
-                        {(formData.internships || []).map((int, idx) => (
-                          <div
-                            key={int.id || idx}
-                            className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 shadow-2xs"
-                          >
-                            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold text-xs text-slate-800 dark:text-white">
-                                  Pengalaman Magang #{idx + 1}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setFormData((prev) => ({
-                                      ...prev,
-                                      internships: (prev.internships || []).filter((_, i) => i !== idx),
-                                    }))
-                                  }
-                                  className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                                <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Perusahaan *</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., Tech Internship Inc"
-                                  value={int.company}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.internships || [])];
-                                      arr[idx] = { ...arr[idx], company: val };
-                                      return { ...prev, internships: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Posisi Magang *</label>
-                                <input
-                                  placeholder="e.g., Frontend Developer Intern"
-                                  value={int.role}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.internships || [])];
-                                      arr[idx] = { ...arr[idx], role: val };
-                                      return { ...prev, internships: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Mulai</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., Jun 2021"
-                                  value={int.startDate || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.internships || [])];
-                                      arr[idx] = { ...arr[idx], startDate: val };
-                                      return { ...prev, internships: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Selesai</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., Sep 2021"
-                                  value={int.endDate || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.internships || [])];
-                                      arr[idx] = { ...arr[idx], endDate: val };
-                                      return { ...prev, internships: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                            </div>
-
-                            <div>
-                              <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Deskripsi Magang</label>
-                              <textarea
-                                rows={2}
-                                placeholder="Deskripsi aktivitas magang..."
-                                value={int.description}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const arr = [...(prev.internships || [])];
-                                    arr[idx] = { ...arr[idx], description: val };
-                                    return { ...prev, internships: arr };
-                                  });
-                                }}
-                                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs resize-none"
-                              />
-                            </div>
-                          </div>
-                        ))}
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              internships: [
-                                ...(prev.internships || []),
-                                {
-                                  id: `int-${Date.now()}`,
-                                  role: '',
-                                  company: '',
-                                  description: '',
-                                },
-                              ],
-                            }))
-                          }
-                          className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Tambah Pengalaman Magang</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Section 5: Proyek */}
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => toggleAccordion('sec5')}
-                      className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition cursor-pointer border-b border-slate-100 dark:border-slate-800"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-slate-800 dark:text-white">Proyek</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        {openAccordion['sec5'] ? (
-                          <ChevronUp className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        )}
-                      </div>
-                    </button>
-                    {openAccordion['sec5'] && (
-                      <div className="p-4 space-y-4 bg-white dark:bg-slate-900">
-                        {(formData.projects || []).map((proj, idx) => (
-                          <div
-                            key={proj.id || idx}
-                            className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 shadow-2xs"
-                          >
-                            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                              <div className="flex items-center gap-2">
-                                <GripVertical className="w-4 h-4 text-slate-400 shrink-0 cursor-grab" />
-                                <span className="font-bold text-xs text-slate-800 dark:text-white">
-                                  Proyek #{idx + 1}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setFormData((prev) => ({
-                                      ...prev,
-                                      projects: (prev.projects || []).filter((_, i) => i !== idx),
-                                    }))
-                                  }
-                                  className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                                <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Nama Proyek *</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., E-Commerce Platform"
-                                  value={proj.name}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.projects || [])];
-                                      arr[idx] = { ...arr[idx], name: val };
-                                      return { ...prev, projects: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Peran dalam Proyek *</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., Lead Developer"
-                                  value={proj.role}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.projects || [])];
-                                      arr[idx] = { ...arr[idx], role: val };
-                                      return { ...prev, projects: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Link Proyek / GitHub</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., github.com/johndoe/project"
-                                  value={proj.link || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.projects || [])];
-                                      arr[idx] = { ...arr[idx], link: val };
-                                      return { ...prev, projects: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Pengerjaan</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., 2023"
-                                  value={proj.date || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.projects || [])];
-                                      arr[idx] = { ...arr[idx], date: val };
-                                      return { ...prev, projects: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                            </div>
-
-                            <div>
-                              <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Deskripsi Proyek</label>
-                              <textarea
-                                rows={2}
-                                placeholder="Deskripsi fitur dan kontribusi proyek..."
-                                value={proj.description}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const arr = [...(prev.projects || [])];
-                                    arr[idx] = { ...arr[idx], description: val };
-                                    return { ...prev, projects: arr };
-                                  });
-                                }}
-                                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs resize-none"
-                              />
-                            </div>
-                          </div>
-                        ))}
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              projects: [
-                                ...(prev.projects || []),
-                                {
-                                  id: `proj-${Date.now()}`,
-                                  name: '',
-                                  role: '',
-                                  description: '',
-                                },
-                              ],
-                            }))
-                          }
-                          className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Tambah Proyek</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Section 6: Pengalaman Organisasi */}
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => toggleAccordion('sec6')}
-                      className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition cursor-pointer border-b border-slate-100 dark:border-slate-800"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-slate-800 dark:text-white">Pengalaman Organisasi</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        {openAccordion['sec6'] ? (
-                          <ChevronUp className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        )}
-                      </div>
-                    </button>
-                    {openAccordion['sec6'] && (
-                      <div className="p-4 space-y-4 bg-white dark:bg-slate-900">
-                        {(formData.organizations || []).map((org, idx) => (
-                          <div
-                            key={org.id || idx}
-                            className="border border-slate-200 dark:border-slate-800 rounded-xl p-3 bg-white dark:bg-slate-900 space-y-3.5 shadow-2xs"
-                          >
-                            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                              <div className="flex items-center gap-2">
-                                <GripVertical className="w-4 h-4 text-slate-400 shrink-0 cursor-grab" />
-                                <span className="font-bold text-xs text-slate-800 dark:text-white">
-                                  Organisasi #{idx + 1}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setFormData((prev) => ({
-                                      ...prev,
-                                      organizations: (prev.organizations || []).filter((_, i) => i !== idx),
-                                    }))
-                                  }
-                                  className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                                <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Nama Organisasi *</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., Himpunan Mahasiswa"
-                                  value={org.name}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.organizations || [])];
-                                      arr[idx] = { ...arr[idx], name: val };
-                                      return { ...prev, organizations: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Jabatan *</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., Ketua Divisi IT"
-                                  value={org.role}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.organizations || [])];
-                                      arr[idx] = { ...arr[idx], role: val };
-                                      return { ...prev, organizations: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Mulai</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., 2021"
-                                  value={org.startDate || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.organizations || [])];
-                                      arr[idx] = { ...arr[idx], startDate: val };
-                                      return { ...prev, organizations: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Selesai</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., 2022"
-                                  value={org.endDate || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.organizations || [])];
-                                      arr[idx] = { ...arr[idx], endDate: val };
-                                      return { ...prev, organizations: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                            </div>
-
-                            <div>
-                              <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Deskripsi Organisasi</label>
-                              <textarea
-                                rows={2}
-                                placeholder="Deskripsi peranan dan kegiatan..."
-                                value={org.description}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const arr = [...(prev.organizations || [])];
-                                    arr[idx] = { ...arr[idx], description: val };
-                                    return { ...prev, organizations: arr };
-                                  });
-                                }}
-                                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs resize-none"
-                              />
-                            </div>
-                          </div>
-                        ))}
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              organizations: [
-                                ...(prev.organizations || []),
-                                {
-                                  id: `org-${Date.now()}`,
-                                  role: '',
-                                  name: '',
-                                  description: '',
-                                },
-                              ],
-                            }))
-                          }
-                          className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Tambah Organisasi</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Section 7: Pendidikan (Education) */}
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => toggleAccordion('sec7')}
-                      className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition cursor-pointer border-b border-slate-100 dark:border-slate-800"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-slate-800 dark:text-white">Pendidikan</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        {openAccordion['sec7'] ? (
-                          <ChevronUp className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        )}
-                      </div>
-                    </button>
-                    {openAccordion['sec7'] && (
-                      <div className="p-4 space-y-4 bg-white dark:bg-slate-900">
-                        {formData.education.map((edu, idx) => {
-                          const startMonth = edu.startDate?.split(' ')[0] || '';
-                          const startYear = edu.startDate?.split(' ')[1] || edu.startDate || '';
-                          const endMonth = edu.endDate?.split(' ')[0] || '';
-                          const endYear = edu.endDate?.split(' ')[1] || edu.endDate || '';
-
-                          return (
-                            <div
-                              key={edu.id || idx}
-                              className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 shadow-2xs"
-                            >
-                              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                                <div className="flex items-center gap-2">
-                                  <GripVertical className="w-4 h-4 text-slate-400 shrink-0 cursor-grab" />
-                                  <span className="font-bold text-xs text-slate-800 dark:text-white">
-                                    Education #{idx + 1}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      setFormData((prev) => ({
-                                        ...prev,
-                                        education: prev.education.filter((_, i) => i !== idx),
-                                      }))
-                                    }
-                                    className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                  <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Institution</label>
-                                  <input
-                                    type="text"
-                                    placeholder="e.g., University of California, Berkeley"
-                                    value={edu.institution}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setFormData((prev) => {
-                                        const arr = [...prev.education];
-                                        arr[idx] = { ...arr[idx], institution: val };
-                                        return { ...prev, education: arr };
-                                      });
-                                    }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Degree</label>
-                                  <input
-                                    type="text"
-                                    placeholder="e.g., Bachelor of Science"
-                                    value={edu.degree}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setFormData((prev) => {
-                                        const arr = [...prev.education];
-                                        arr[idx] = { ...arr[idx], degree: val };
-                                        return { ...prev, education: arr };
-                                      });
-                                    }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Field of Study</label>
-                                  <input
-                                    type="text"
-                                    placeholder="e.g., Computer Science"
-                                    value={edu.location || ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setFormData((prev) => {
-                                      const arr = [...prev.education];
-                                        arr[idx] = { ...arr[idx], location: val };
-                                        return { ...prev, education: arr };
-                                      });
-                                    }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                  />
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                  <div>
-                                    <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Start Date</label>
-                                    <CustomDatePicker
-                                      value={edu.startDate || ''}
-                                      placeholder="Pilih Bulan & Tahun Masuk..."
-                                      onChange={(val) => {
-                                        setFormData((prev) => {
-                                          const arr = [...prev.education];
-                                          arr[idx] = { ...arr[idx], startDate: val, year: `${val} - ${arr[idx].endDate || ''}` };
-                                          return { ...prev, education: arr };
-                                        });
-                                      }}
-                                    />
-                                  </div>
-
-                                  <div>
-                                    <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">End Date</label>
-                                    <CustomDatePicker
-                                      value={edu.endDate || ''}
-                                      placeholder="Pilih Bulan & Tahun Lulus..."
-                                      allowPresent
-                                      onChange={(val) => {
-                                        setFormData((prev) => {
-                                          const arr = [...prev.education];
-                                          arr[idx] = { ...arr[idx], endDate: val, year: `${arr[idx].startDate || ''} - ${val}` };
-                                          return { ...prev, education: arr };
-                                        });
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
-                                <div className="pt-4">
-                                  <label className="flex items-center gap-2 font-medium text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
-                                    <input
-                                      type="checkbox"
-                                      className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 border-slate-300"
-                                    />
-                                    <span>Currently studying</span>
-                                  </label>
-                                </div>
-                              </div>
-
-                              <div className="max-w-xs">
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">GPA</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., 3.9 / 4.0"
-                                  value={edu.gpa || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...prev.education];
-                                      arr[idx] = { ...arr[idx], gpa: val };
-                                      return { ...prev, education: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              education: [
-                                ...prev.education,
-                                {
-                                  id: `edu-${Date.now()}`,
-                                  institution: '',
-                                  degree: '',
-                                  year: '',
-                                },
-                              ],
-                            }))
-                          }
-                          className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Tambah Pendidikan</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Section 8: Sertifikat */}
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => toggleAccordion('sec8')}
-                      className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition cursor-pointer border-b border-slate-100 dark:border-slate-800"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-slate-800 dark:text-white">Sertifikat</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        {openAccordion['sec8'] ? (
-                          <ChevronUp className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        )}
-                      </div>
-                    </button>
-                    {openAccordion['sec8'] && (
-                      <div className="p-4 space-y-4 bg-white dark:bg-slate-900">
-                        {(formData.certifications || []).map((cert, idx) => (
-                          <div
-                            key={cert.id || idx}
-                            className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 shadow-2xs"
-                          >
-                            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                              <div className="flex items-center gap-2">
-                                <GripVertical className="w-4 h-4 text-slate-400 shrink-0 cursor-grab" />
-                                <span className="font-bold text-xs text-slate-800 dark:text-white">
-                                  Sertifikat #{idx + 1}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setFormData((prev) => ({
-                                      ...prev,
-                                      certifications: (prev.certifications || []).filter((_, i) => i !== idx),
-                                    }))
-                                  }
-                                  className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                                <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Nama Sertifikat *</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., AWS Certified Developer"
-                                  value={cert.name}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.certifications || [])];
-                                      arr[idx] = { ...arr[idx], name: val };
-                                      return { ...prev, certifications: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Penerbit *</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., Amazon Web Services"
-                                  value={cert.issuer}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.certifications || [])];
-                                      arr[idx] = { ...arr[idx], issuer: val };
-                                      return { ...prev, certifications: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-3">
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Terbit</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., 2023"
-                                  value={cert.issueDate || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.certifications || [])];
-                                      arr[idx] = { ...arr[idx], issueDate: val };
-                                      return { ...prev, certifications: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Kedaluwarsa</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., 2026"
-                                  value={cert.expiryDate || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.certifications || [])];
-                                      arr[idx] = { ...arr[idx], expiryDate: val };
-                                      return { ...prev, certifications: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Link Verifikasi</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., aws.amazon.com/verify"
-                                  value={cert.link || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.certifications || [])];
-                                      arr[idx] = { ...arr[idx], link: val };
-                                      return { ...prev, certifications: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              certifications: [
-                                ...(prev.certifications || []),
-                                {
-                                  id: `cert-${Date.now()}`,
-                                  name: '',
-                                  issuer: '',
-                                },
-                              ],
-                            }))
-                          }
-                          className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Tambah Sertifikat</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Section 9: Keahlian */}
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => toggleAccordion('sec9')}
-                      className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition cursor-pointer border-b border-slate-100 dark:border-slate-800"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-slate-800 dark:text-white">Keahlian</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        {openAccordion['sec9'] ? (
-                          <ChevronUp className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        )}
-                      </div>
-                    </button>
-                    {openAccordion['sec9'] && (
-                      <div className="p-4 space-y-4 bg-white dark:bg-slate-900">
-                        {(formData.skillsList || []).map((sk, idx) => (
-                          <div
-                            key={sk.id || idx}
-                            className="border border-slate-200 dark:border-slate-800 rounded-xl p-3 bg-white dark:bg-slate-900 flex items-center gap-2.5 shadow-2xs"
-                          >
-                            <GripVertical className="w-4 h-4 text-slate-400 shrink-0 cursor-grab" />
-                            <input
-                              type="text"
-                              placeholder="e.g., React.js / TypeScript"
-                              value={sk.name}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setFormData((prev) => {
-                                  const arr = [...(prev.skillsList || [])];
-                                  arr[idx] = { ...arr[idx], name: val };
-                                  const legacySkills = arr.map((s) => `${s.name} (${s.level})`).filter(Boolean);
-                                  return { ...prev, skillsList: arr, skills: legacySkills };
-                                });
-                              }}
-                              className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                            />
-                             <CustomSelect
-                               value={sk.level}
-                               options={['Expert', 'Advanced', 'Intermediate', 'Beginner']}
-                               onChange={(val) => {
-                                 setFormData((prev) => {
-                                   const arr = [...(prev.skillsList || [])];
-                                   arr[idx] = { ...arr[idx], level: val as any };
-                                   const legacySkills = arr.map((s) => `${s.name} (${s.level})`).filter(Boolean);
-                                   return { ...prev, skillsList: arr, skills: legacySkills };
-                                 });
-                               }}
-                               className="w-32"
-                             />
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setFormData((prev) => {
-                                  const arr = (prev.skillsList || []).filter((_, i) => i !== idx);
-                                  const legacySkills = arr.map((s) => `${s.name} (${s.level})`).filter(Boolean);
-                                  return { ...prev, skillsList: arr, skills: legacySkills };
-                                })
-                              }
-                              className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer shrink-0"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ))}
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              skillsList: [
-                                ...(prev.skillsList || []),
-                                {
-                                  id: `sk-${Date.now()}`,
-                                  name: '',
-                                  level: 'Advanced',
-                                },
-                              ],
-                            }))
-                          }
-                          className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Tambah Skill</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Section 10: Bahasa */}
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => toggleAccordion('sec10')}
-                      className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition cursor-pointer border-b border-slate-100 dark:border-slate-800"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-slate-800 dark:text-white">Bahasa</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        {openAccordion['sec10'] ? (
-                          <ChevronUp className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        )}
-                      </div>
-                    </button>
-                    {openAccordion['sec10'] && (
-                      <div className="p-4 space-y-4 bg-white dark:bg-slate-900">
-                        {(formData.languages || []).map((lang, idx) => (
-                          <div
-                            key={lang.id || idx}
-                            className="border border-slate-200 dark:border-slate-800 rounded-xl p-3 bg-white dark:bg-slate-900 flex items-center gap-2.5 shadow-2xs"
-                          >
-                            <GripVertical className="w-4 h-4 text-slate-400 shrink-0 cursor-grab" />
-                            <input
-                              type="text"
-                              placeholder="e.g., Bahasa Indonesia / English"
-                              value={lang.language}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setFormData((prev) => {
-                                  const arr = [...(prev.languages || [])];
-                                  arr[idx] = { ...arr[idx], language: val };
-                                  return { ...prev, languages: arr };
-                                });
-                              }}
-                              className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                            />
-                            <CustomSelect
-                               value={lang.level}
-                               options={['Native', 'Professional', 'Conversational', 'Basic']}
-                               onChange={(val) => {
-                                 setFormData((prev) => {
-                                   const arr = [...(prev.languages || [])];
-                                   arr[idx] = { ...arr[idx], level: val as any };
-                                   return { ...prev, languages: arr };
-                                 });
-                               }}
-                               className="w-36"
-                             />
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setFormData((prev) => ({
-                                  ...prev,
-                                  languages: (prev.languages || []).filter((_, i) => i !== idx),
-                                }))
-                              }
-                              className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer shrink-0"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ))}
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              languages: [
-                                ...(prev.languages || []),
-                                {
-                                  id: `lang-${Date.now()}`,
-                                  language: '',
-                                  level: 'Professional',
-                                },
-                              ],
-                            }))
-                          }
-                          className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Tambah Bahasa</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Section 11: Pelatihan & Kursus (Course) */}
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => toggleAccordion('sec11')}
-                      className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition cursor-pointer border-b border-slate-100 dark:border-slate-800 rounded-t-xl"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-slate-800 dark:text-white">Pelatihan &amp; Kursus</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        {openAccordion['sec11'] ? (
-                          <ChevronUp className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        )}
-                      </div>
-                    </button>
-                    {openAccordion['sec11'] && (
-                      <div className="p-4 space-y-4 bg-white dark:bg-slate-900">
-                        {(formData.courses || []).map((crs, idx) => (
-                          <div
-                            key={crs.id || idx}
-                            className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3 shadow-2xs relative"
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-xs text-slate-700 dark:text-slate-300">Course #{idx + 1}</span>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    courses: (prev.courses || []).filter((_, i) => i !== idx),
-                                  }))
-                                }
-                                className="text-rose-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1 cursor-pointer"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" /> Hapus
-                              </button>
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Course Name</label>
-                              <input
-                                type="text"
-                                placeholder="e.g., Machine Learning"
-                                value={crs.courseName}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const arr = [...(prev.courses || [])];
-                                    arr[idx] = { ...arr[idx], courseName: val };
-                                    return { ...prev, courses: arr };
-                                  });
-                                }}
-                                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Institution / Platform</label>
-                              <input
-                                type="text"
-                                placeholder="e.g., Coursera"
-                                value={crs.institution}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const arr = [...(prev.courses || [])];
-                                    arr[idx] = { ...arr[idx], institution: val };
-                                    return { ...prev, courses: arr };
-                                  });
-                                }}
-                                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Completion Date</label>
-                              <div className="grid grid-cols-2 gap-2">
-                                <CustomSelect
-                                  value={crs.month || ''}
-                                  options={['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']}
-                                  onChange={(val) => {
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.courses || [])];
-                                      arr[idx] = { ...arr[idx], month: val };
-                                      return { ...prev, courses: arr };
-                                    });
-                                  }}
-                                  placeholder="Month"
-                                />
-                                <input
-                                  type="text"
-                                  placeholder="Year"
-                                  value={crs.year || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.courses || [])];
-                                      arr[idx] = { ...arr[idx], year: val };
-                                      return { ...prev, courses: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                                />
-                              </div>
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Describe what you learned</label>
-                              <textarea
-                                rows={3}
-                                placeholder="Describe what you learned..."
-                                value={crs.description || ''}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const arr = [...(prev.courses || [])];
-                                    arr[idx] = { ...arr[idx], description: val };
-                                    return { ...prev, courses: arr };
-                                  });
-                                }}
-                                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 resize-none"
-                              />
-                            </div>
-                          </div>
-                        ))}
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              courses: [
-                                ...(prev.courses || []),
-                                {
-                                  id: `crs-${Date.now()}`,
-                                  courseName: '',
-                                  institution: '',
-                                  month: '',
-                                  year: '',
-                                  description: '',
-                                },
-                              ],
-                            }))
-                          }
-                          className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Tambah Course</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Section 12: Beasiswa (Scholarship) */}
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => toggleAccordion('sec12')}
-                      className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition cursor-pointer border-b border-slate-100 dark:border-slate-800 rounded-t-xl"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-slate-800 dark:text-white">Beasiswa</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        {openAccordion['sec12'] ? (
-                          <ChevronUp className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        )}
-                      </div>
-                    </button>
-                    {openAccordion['sec12'] && (
-                      <div className="p-4 space-y-4 bg-white dark:bg-slate-900">
-                        {(formData.scholarships || []).map((sch, idx) => (
-                          <div
-                            key={sch.id || idx}
-                            className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3 shadow-2xs relative"
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-xs text-slate-700 dark:text-slate-300">Scholarship #{idx + 1}</span>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    scholarships: (prev.scholarships || []).filter((_, i) => i !== idx),
-                                  }))
-                                }
-                                className="text-rose-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1 cursor-pointer"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" /> Hapus
-                              </button>
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Scholarship Name</label>
-                              <input
-                                type="text"
-                                placeholder="e.g., Merit Scholarship for Academic Excellence"
-                                value={sch.name}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const arr = [...(prev.scholarships || [])];
-                                    arr[idx] = { ...arr[idx], name: val };
-                                    return { ...prev, scholarships: arr };
-                                  });
-                                }}
-                                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Provider / Institution</label>
-                              <input
-                                type="text"
-                                placeholder="e.g., University of California"
-                                value={sch.provider}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const arr = [...(prev.scholarships || [])];
-                                    arr[idx] = { ...arr[idx], provider: val };
-                                    return { ...prev, scholarships: arr };
-                                  });
-                                }}
-                                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Date Awarded</label>
-                              <div className="grid grid-cols-2 gap-2">
-                                <CustomSelect
-                                  value={sch.month || ''}
-                                  options={['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']}
-                                  onChange={(val) => {
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.scholarships || [])];
-                                      arr[idx] = { ...arr[idx], month: val };
-                                      return { ...prev, scholarships: arr };
-                                    });
-                                  }}
-                                  placeholder="Month"
-                                />
-                                <input
-                                  type="text"
-                                  placeholder="Year"
-                                  value={sch.year || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.scholarships || [])];
-                                      arr[idx] = { ...arr[idx], year: val };
-                                      return { ...prev, scholarships: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                                />
-                              </div>
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Deskripsi</label>
-                              <textarea
-                                rows={3}
-                                placeholder="Description (Optional)..."
-                                value={sch.description || ''}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const arr = [...(prev.scholarships || [])];
-                                    arr[idx] = { ...arr[idx], description: val };
-                                    return { ...prev, scholarships: arr };
-                                  });
-                                }}
-                                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 resize-none"
-                              />
-                            </div>
-                          </div>
-                        ))}
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              scholarships: [
-                                ...(prev.scholarships || []),
-                                {
-                                  id: `sch-${Date.now()}`,
-                                  name: '',
-                                  provider: '',
-                                  month: '',
-                                  year: '',
-                                  description: '',
-                                },
-                              ],
-                            }))
-                          }
-                          className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Tambah Scholarship</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Section 13: Pengalaman Relawan (Volunteer) */}
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => toggleAccordion('sec13')}
-                      className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition cursor-pointer border-b border-slate-100 dark:border-slate-800 rounded-t-xl"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-slate-800 dark:text-white">Pengalaman Relawan</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        {openAccordion['sec13'] ? (
-                          <ChevronUp className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        )}
-                      </div>
-                    </button>
-                    {openAccordion['sec13'] && (
-                      <div className="p-4 space-y-4 bg-white dark:bg-slate-900">
-                        {(formData.volunteers || []).map((vol, idx) => (
-                          <div
-                            key={vol.id || idx}
-                            className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3 shadow-2xs relative"
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-xs text-slate-700 dark:text-slate-300">Volunteer #{idx + 1}</span>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    volunteers: (prev.volunteers || []).filter((_, i) => i !== idx),
-                                  }))
-                                }
-                                className="text-rose-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1 cursor-pointer"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" /> Hapus
-                              </button>
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Organization</label>
-                              <input
-                                type="text"
-                                placeholder="e.g., Red Cross"
-                                value={vol.organization}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const arr = [...(prev.volunteers || [])];
-                                    arr[idx] = { ...arr[idx], organization: val };
-                                    return { ...prev, volunteers: arr };
-                                  });
-                                }}
-                                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Role</label>
-                              <input
-                                type="text"
-                                placeholder="e.g., First Aid Volunteer"
-                                value={vol.role}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const arr = [...(prev.volunteers || [])];
-                                    arr[idx] = { ...arr[idx], role: val };
-                                    return { ...prev, volunteers: arr };
-                                  });
-                                }}
-                                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Location</label>
-                              <input
-                                type="text"
-                                placeholder="e.g., San Francisco, CA"
-                                value={vol.location || ''}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const arr = [...(prev.volunteers || [])];
-                                    arr[idx] = { ...arr[idx], location: val };
-                                    return { ...prev, volunteers: arr };
-                                  });
-                                }}
-                                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                              />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1">
-                                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Start Date</label>
-                                <div className="grid grid-cols-2 gap-1.5">
-                                  <CustomSelect
-                                    value={vol.startMonth || ''}
-                                    options={['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']}
-                                    onChange={(val) => {
-                                      setFormData((prev) => {
-                                        const arr = [...(prev.volunteers || [])];
-                                        arr[idx] = { ...arr[idx], startMonth: val };
-                                        return { ...prev, volunteers: arr };
-                                      });
-                                    }}
-                                    placeholder="Month"
-                                  />
-                                  <input
-                                    type="text"
-                                    placeholder="Year"
-                                    value={vol.startYear || ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setFormData((prev) => {
-                                        const arr = [...(prev.volunteers || [])];
-                                        arr[idx] = { ...arr[idx], startYear: val };
-                                        return { ...prev, volunteers: arr };
-                                      });
-                                    }}
-                                    className="w-full px-2.5 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                                  />
-                                </div>
-                              </div>
-                              <div className="space-y-1">
-                                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">End Date</label>
-                                <div className="grid grid-cols-2 gap-1.5">
-                                  <CustomSelect
-                                    value={vol.endMonth || ''}
-                                    options={['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']}
-                                    onChange={(val) => {
-                                      setFormData((prev) => {
-                                        const arr = [...(prev.volunteers || [])];
-                                        arr[idx] = { ...arr[idx], endMonth: val };
-                                        return { ...prev, volunteers: arr };
-                                      });
-                                    }}
-                                    placeholder="Month"
-                                    disabled={vol.isCurrent}
-                                  />
-                                  <input
-                                    type="text"
-                                    placeholder="Year"
-                                    value={vol.endYear || ''}
-                                    disabled={vol.isCurrent}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setFormData((prev) => {
-                                        const arr = [...(prev.volunteers || [])];
-                                        arr[idx] = { ...arr[idx], endYear: val };
-                                        return { ...prev, volunteers: arr };
-                                      });
-                                    }}
-                                    className="w-full px-2.5 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 disabled:opacity-50"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                            <label className="flex items-center gap-2 pt-1 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
-                              <input
-                                type="checkbox"
-                                checked={vol.isCurrent || false}
-                                onChange={(e) => {
-                                  const checked = e.target.checked;
-                                  setFormData((prev) => {
-                                    const arr = [...(prev.volunteers || [])];
-                                    arr[idx] = { ...arr[idx], isCurrent: checked };
-                                    return { ...prev, volunteers: arr };
-                                  });
-                                }}
-                                className="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
-                              />
-                              <span>I currently volunteer here</span>
-                            </label>
-                            <div className="space-y-1 pt-1">
-                              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Describe your role and contributions</label>
-                              <textarea
-                                rows={3}
-                                placeholder="Describe your role and contributions..."
-                                value={vol.description || ''}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const arr = [...(prev.volunteers || [])];
-                                    arr[idx] = { ...arr[idx], description: val };
-                                    return { ...prev, volunteers: arr };
-                                  });
-                                }}
-                                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 resize-none"
-                              />
-                            </div>
-                          </div>
-                        ))}
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              volunteers: [
-                                ...(prev.volunteers || []),
-                                {
-                                  id: `vol-${Date.now()}`,
-                                  organization: '',
-                                  role: '',
-                                  location: '',
-                                  startMonth: '',
-                                  startYear: '',
-                                  endMonth: '',
-                                  endYear: '',
-                                  isCurrent: false,
-                                  description: '',
-                                },
-                              ],
-                            }))
-                          }
-                          className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Tambah Volunteer</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Section 14: Referensi (Reference) */}
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => toggleAccordion('sec14')}
-                      className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition cursor-pointer border-b border-slate-100 dark:border-slate-800 rounded-t-xl"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-slate-800 dark:text-white">Referensi</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        {openAccordion['sec14'] ? (
-                          <ChevronUp className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                        )}
-                      </div>
-                    </button>
-                    {openAccordion['sec14'] && (
-                      <div className="p-4 space-y-4 bg-white dark:bg-slate-900">
-                        <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-xl text-amber-800 dark:text-amber-300 text-xs italic leading-relaxed">
-                          Note: It&apos;s often best practice to write &quot;References available upon request&quot; on your CV and provide this information separately when asked.
-                        </div>
-
-                        {(formData.references || []).map((ref, idx) => (
-                          <div
-                            key={ref.id || idx}
-                            className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3 shadow-2xs relative"
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-xs text-slate-700 dark:text-slate-300">Reference #{idx + 1}</span>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    references: (prev.references || []).filter((_, i) => i !== idx),
-                                  }))
-                                }
-                                className="text-rose-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1 cursor-pointer"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" /> Hapus
-                              </button>
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Full Name</label>
-                              <input
-                                type="text"
-                                placeholder="e.g., John Smith"
-                                value={ref.fullName}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const arr = [...(prev.references || [])];
-                                    arr[idx] = { ...arr[idx], fullName: val };
-                                    return { ...prev, references: arr };
-                                  });
-                                }}
-                                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                              />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1">
-                                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Title</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., Project Manager"
-                                  value={ref.title || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.references || [])];
-                                      arr[idx] = { ...arr[idx], title: val };
-                                      return { ...prev, references: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Company</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., Innovate Co."
-                                  value={ref.company || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.references || [])];
-                                      arr[idx] = { ...arr[idx], company: val };
-                                      return { ...prev, references: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                                />
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1">
-                                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Email</label>
-                                <input
-                                  type="email"
-                                  placeholder="e.g., john.smith@email.com"
-                                  value={ref.email || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.references || [])];
-                                      arr[idx] = { ...arr[idx], email: val };
-                                      return { ...prev, references: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Phone</label>
-                                <input
-                                  type="tel"
-                                  placeholder="e.g., +62 812 3456 7890"
-                                  value={ref.phone || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.references || [])];
-                                      arr[idx] = { ...arr[idx], phone: val };
-                                      return { ...prev, references: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              references: [
-                                ...(prev.references || []),
-                                {
-                                  id: `ref-${Date.now()}`,
-                                  fullName: '',
-                                  title: '',
-                                  company: '',
-                                  email: '',
-                                  phone: '',
-                                },
-                              ],
-                            }))
-                          }
-                          className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Tambah Reference</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
                 </form>
               </div>
             </div>
@@ -7212,52 +5717,61 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   );
 };
 
-// A4 Paperlike Canvas Component: Maintains exact A4 proportions per sheet, handles multi-page (Page 2+) flow with top/bottom/left/right padding
+// A4 Paperlike Canvas Component: Maintains exact A4 proportions per sheet, handles multi-page (Page 2+) flow with responsive auto-scaling & zoom controls
 const A4PaperlikeCanvas: React.FC<{
   templateId: string;
   customData?: Partial<CVData>;
   showPageNumbers?: boolean;
 }> = ({ templateId, customData, showPageNumbers = true }) => {
   const hiddenMeasureRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [contentHeightPx, setContentHeightPx] = useState<number>(0);
+  const [zoomScale, setZoomScale] = useState<number | null>(null);
+  const [autoScale, setAutoScale] = useState<number>(1);
 
   useEffect(() => {
-    const measure = () => {
+    const updateDimensions = () => {
       if (hiddenMeasureRef.current) {
         setContentHeightPx(hiddenMeasureRef.current.scrollHeight);
       }
+      if (containerRef.current) {
+        const availW = containerRef.current.clientWidth - 24;
+        const a4W = 794; // approx px width of 210mm
+        if (availW > 0 && availW < a4W) {
+          setAutoScale(Number((availW / a4W).toFixed(2)));
+        } else {
+          setAutoScale(1);
+        }
+      }
     };
 
-    measure();
+    updateDimensions();
 
-    const observer = new ResizeObserver(() => {
-      measure();
-    });
+    const ro = new ResizeObserver(updateDimensions);
+    if (hiddenMeasureRef.current) ro.observe(hiddenMeasureRef.current);
+    if (containerRef.current) ro.observe(containerRef.current);
 
-    if (hiddenMeasureRef.current) {
-      observer.observe(hiddenMeasureRef.current);
-    }
+    window.addEventListener('resize', updateDimensions);
 
     return () => {
-      observer.disconnect();
+      ro.disconnect();
+      window.removeEventListener('resize', updateDimensions);
     };
   }, [templateId, customData]);
 
+  const effectiveScale = zoomScale !== null ? zoomScale : autoScale;
+
   // Standard A4 dimensions: 210mm x 297mm
-  // Printable content height per page: 273mm (assuming 12mm top and 12mm bottom padding per page)
   const A4_HEIGHT_MM = 297;
   const PADDING_TOP_MM = 12;
   const PADDING_BOTTOM_MM = 12;
   const PRINTABLE_HEIGHT_MM = A4_HEIGHT_MM - (PADDING_TOP_MM + PADDING_BOTTOM_MM); // 273mm
 
-  // Convert px to mm (1px ≈ 0.26458333mm at 96 DPI)
   const measuredHeightMM = contentHeightPx ? contentHeightPx * 0.26458333 : 250;
-
-  // Calculate total required pages (minimum 1 page)
   const totalPages = Math.max(1, Math.ceil(measuredHeightMM / PRINTABLE_HEIGHT_MM));
 
   return (
-    <div className="w-full flex flex-col items-center gap-6 py-2">
+    <div ref={containerRef} className="w-full flex flex-col items-center gap-4 py-2">
       {/* Hidden DOM measurement container */}
       <div className="fixed top-[-9999px] left-[-9999px] opacity-0 pointer-events-none" aria-hidden="true">
         <div ref={hiddenMeasureRef} style={{ width: '210mm', background: '#ffffff' }}>
@@ -7265,81 +5779,78 @@ const A4PaperlikeCanvas: React.FC<{
         </div>
       </div>
 
-      {/* Render Paginated A4 Paper Sheets */}
-      {Array.from({ length: totalPages }, (_, index) => {
-        const pageNum = index + 1;
-        const translateYMM = index * PRINTABLE_HEIGHT_MM;
+      {/* Render Paginated A4 Paper Sheets with Responsive Scale Wrapper */}
+      <div
+        className="flex flex-col items-center gap-6 transition-transform duration-200 origin-top"
+        style={{
+          transform: effectiveScale < 1 ? `scale(${effectiveScale})` : undefined,
+          marginBottom: effectiveScale < 1 ? `-${(1 - effectiveScale) * 297 * 3.78 * totalPages}px` : undefined,
+        }}
+      >
+        {Array.from({ length: totalPages }, (_, index) => {
+          const pageNum = index + 1;
+          const translateYMM = index * PRINTABLE_HEIGHT_MM;
 
-        return (
-          <div key={pageNum} className="flex flex-col items-center w-full max-w-[210mm]">
-            {/* Page Indicator Badge */}
-            {showPageNumbers && (
-              <div className="w-full flex items-center justify-between px-2 mb-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 shadow-2xs text-[11px] font-bold">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-                  Halaman {pageNum} dari {totalPages}
-                </span>
-                <span className="text-[11px] text-slate-400 font-mono">Standard A4 Paper • 210 × 297 mm</span>
-              </div>
-            )}
-
-            {/* A4 Paperlike Sheet Card */}
-            <div
-              className="a4-paper-sheet relative bg-white text-slate-900 shadow-2xl shadow-slate-900/15 border border-slate-300/80 dark:border-slate-700/80 rounded-[2px] overflow-hidden transition-all duration-300 hover:shadow-slate-900/25"
-              style={{
-                width: '210mm',
-                height: '297mm',
-                boxSizing: 'border-box',
-              }}
-            >
-              {/* Paper Texture Micro-Grain Overlay */}
+          return (
+            <div key={pageNum} className="flex flex-col items-center w-full max-w-[210mm]">
+              {/* A4 Paperlike Sheet Card */}
               <div
-                className="absolute inset-0 pointer-events-none opacity-[0.025] mix-blend-multiply"
+                className="a4-paper-sheet relative bg-white text-slate-900 shadow-2xl shadow-slate-900/15 border border-slate-300/80 dark:border-slate-700/80 rounded-[2px] overflow-hidden transition-all duration-300 hover:shadow-slate-900/25 shrink-0"
                 style={{
-                  backgroundImage: `radial-gradient(#000 1px, transparent 1px)`,
-                  backgroundSize: '16px 16px',
+                  width: '210mm',
+                  height: '297mm',
+                  boxSizing: 'border-box',
                 }}
-              />
-
-              {/* Printable Page Inner Layout */}
-              <div className="w-full h-full flex flex-col justify-between box-border">
-                {/* Top Padding Spacer for Page 2+ */}
-                {index > 0 ? (
-                  <div style={{ height: `${PADDING_TOP_MM}mm`, flexShrink: 0 }} />
-                ) : null}
-
-                {/* Printable Content Slice Viewport */}
+              >
+                {/* Paper Texture Micro-Grain Overlay */}
                 <div
-                  className="w-full overflow-hidden flex-1 relative"
+                  className="absolute inset-0 pointer-events-none opacity-[0.025] mix-blend-multiply no-print"
                   style={{
-                    height: `${PRINTABLE_HEIGHT_MM}mm`,
-                    maxHeight: `${PRINTABLE_HEIGHT_MM}mm`,
+                    backgroundImage: `radial-gradient(#000 1px, transparent 1px)`,
+                    backgroundSize: '16px 16px',
                   }}
-                >
+                />
+
+                {/* Printable Page Inner Layout */}
+                <div className="w-full h-full flex flex-col justify-between box-border">
+                  {/* Top Padding Spacer for Page 2+ */}
+                  {index > 0 ? (
+                    <div style={{ height: `${PADDING_TOP_MM}mm`, flexShrink: 0 }} />
+                  ) : null}
+
+                  {/* Printable Content Slice Viewport */}
                   <div
-                    className="w-full transition-transform duration-200"
+                    className="w-full overflow-hidden flex-1 relative"
                     style={{
-                      transform: `translateY(-${translateYMM}mm)`,
+                      height: `${PRINTABLE_HEIGHT_MM}mm`,
+                      maxHeight: `${PRINTABLE_HEIGHT_MM}mm`,
                     }}
                   >
-                    <CVTemplatePreview templateId={templateId} customData={customData} />
+                    <div
+                      className="w-full transition-transform duration-200"
+                      style={{
+                        transform: `translateY(-${translateYMM}mm)`,
+                      }}
+                    >
+                      <CVTemplatePreview templateId={templateId} customData={customData} />
+                    </div>
                   </div>
+
+                  {/* Bottom Padding Spacer for Page 2+ */}
+                  {index > 0 ? (
+                    <div style={{ height: `${PADDING_BOTTOM_MM}mm`, flexShrink: 0 }} />
+                  ) : null}
                 </div>
 
-                {/* Bottom Padding Spacer for Page 2+ */}
-                {index > 0 ? (
-                  <div style={{ height: `${PADDING_BOTTOM_MM}mm`, flexShrink: 0 }} />
-                ) : null}
+                {/* Page Break Separation Indicator Line */}
+                {totalPages > 1 && pageNum < totalPages && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400/30 via-orange-500/50 to-orange-400/30 border-t border-orange-300/40 no-print" />
+                )}
               </div>
-
-              {/* Page Break Separation Indicator Line */}
-              {totalPages > 1 && pageNum < totalPages && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400/30 via-orange-500/50 to-orange-400/30 border-t border-orange-300/40" />
-              )}
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 };

@@ -12,3 +12,5 @@ export type { InputProps } from "./input";
 
 export { Skeleton } from "./skeleton";
 
+export { AutoResizeTextarea } from "./AutoResizeTextarea";
+export type { AutoResizeTextareaProps } from "./AutoResizeTextarea";

@@ -1,6 +1,6 @@
 # CUTI — API Contract
 
-Base URL: `https://api.cuti.id/v1`
+Base URL: `https://api.cuti.online/v1`
 
 ## Response Format
 

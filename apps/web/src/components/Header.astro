@@ -1,7 +1,7 @@
 <header class="site-header">
   <a href="#top" class="brand" aria-label="CUTI, kembali ke atas">
     <span class="brand-mark">C</span>
-    <span>CUTI</span>
+    <span class="brand-text">CUTI</span>
   </a>
   <button class="menu-toggle" type="button" aria-label="Buka menu" aria-expanded="false" data-menu-button>
     <span></span><span></span>
@@ -9,8 +9,19 @@
   <nav class="site-nav" aria-label="Navigasi utama" data-menu>
     <a href="#fitur">Fitur</a>
     <a href="#cara-kerja">Cara kerja</a>
+    <a href="#testimoni">Testimoni</a>
     <a href="#akses">Lifetime</a>
     <a href="#faq">FAQ</a>
   </nav>
-  <a href="#akses" class="button button-small header-cta">Mulai sekarang <span>↗</span></a>
+  <button type="button" class="button button-small header-cta" data-open-login>Login <span>↗</span></button>
 </header>
+
+<style>
+  .brand,
+  .brand-mark,
+  .brand-text {
+    font-family: 'Bodoni Moda', serif !important;
+  }
+</style>
+
+

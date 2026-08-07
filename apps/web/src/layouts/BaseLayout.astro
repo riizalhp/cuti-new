@@ -4,9 +4,47 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description: string;
+  ogImage?: string;
+  ogType?: string;
+  canonicalUrl?: string;
+  faqSchema?: Record<string, any>;
 }
 
-const { title, description } = Astro.props;
+const {
+  title,
+  description,
+  ogImage = 'https://cuti.online/images/cuti-hero.png',
+  ogType = 'website',
+  canonicalUrl = 'https://cuti.online/',
+  faqSchema,
+} = Astro.props;
+
+const siteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'CUTI',
+  alternateName: 'AmbilCUTI',
+  url: 'https://cuti.online/',
+  description: 'Career Operating System untuk siswa SMA/SMK, mahasiswa, dan fresh graduate Indonesia.',
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'All',
+  offers: {
+    '@type': 'Offer',
+    price: '149000',
+    priceCurrency: 'IDR',
+    priceValidUntil: '2030-12-31',
+    availability: 'https://schema.org/InStock',
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'AmbilCUTI',
+    url: 'https://cuti.online/',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://cuti.online/images/cuti-hero.png',
+    },
+  },
+};
 ---
 
 <!doctype html>
@@ -14,12 +52,36 @@ const { title, description } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href={canonicalUrl} />
     <meta name="theme-color" content="#1738D1" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:site_name" content="CUTI" />
+    <meta property="og:locale" content="id_ID" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalUrl} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- Preconnect & Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <title>{title}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- JSON-LD Structured Data -->
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(siteSchema)} />
+    {faqSchema && <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
   </head>
   <body>
     <slot />

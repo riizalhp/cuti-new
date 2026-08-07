@@ -19,7 +19,10 @@ import {
   ArrowUp,
   ArrowDown,
   ChevronDown,
+  Globe,
+  ExternalLink,
 } from 'lucide-react';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 
 export interface ApplicationItem {
   id: string;
@@ -30,6 +33,8 @@ export interface ApplicationItem {
   status: 'Terkirim' | 'Screening' | 'Interview' | 'Offering' | 'Ditolak';
   salary: string;
   notes: string;
+  portal: string;
+  portalUrl?: string;
 }
 
 const initialApplications: ApplicationItem[] = [
@@ -42,6 +47,8 @@ const initialApplications: ApplicationItem[] = [
     status: 'Interview',
     salary: 'Rp 18.000.000 - Rp 25.000.000',
     notes: 'Interview User dijadwalkan tanggal 25 Juli 2026 jam 10:00 WIB',
+    portal: 'LinkedIn',
+    portalUrl: 'https://linkedin.com/jobs',
   },
   {
     id: 'app-2',
@@ -52,6 +59,8 @@ const initialApplications: ApplicationItem[] = [
     status: 'Offering',
     salary: 'Rp 22.000.000',
     notes: 'Offering letter sudah diterima, batas konfirmasi hingga 28 Juli 2026',
+    portal: 'Glints',
+    portalUrl: 'https://glints.com/id',
   },
   {
     id: 'app-3',
@@ -62,6 +71,8 @@ const initialApplications: ApplicationItem[] = [
     status: 'Screening',
     salary: 'Rp 15.000.000 - Rp 20.000.000',
     notes: 'Menunggu hasil kuis koding online ATS',
+    portal: 'JobStreet',
+    portalUrl: 'https://jobstreet.co.id',
   },
   {
     id: 'app-4',
@@ -72,6 +83,8 @@ const initialApplications: ApplicationItem[] = [
     status: 'Terkirim',
     salary: 'Rp 14.000.000',
     notes: 'Lamaran via portal resmi BCA Careers',
+    portal: 'Website Perusahaan',
+    portalUrl: 'https://karir.bca.co.id',
   },
   {
     id: 'app-5',
@@ -82,6 +95,8 @@ const initialApplications: ApplicationItem[] = [
     status: 'Ditolak',
     salary: 'Rp 16.000.000',
     notes: 'Posisi telah terisi oleh kandidat internal',
+    portal: 'KitaLulus',
+    portalUrl: 'https://kitalulus.com',
   },
 ];
 
@@ -122,6 +137,126 @@ const KANBAN_COLUMNS: Array<{
     badgeBg: 'bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800',
   },
 ];
+
+export interface CardColorPalette {
+  bg: string;
+  border: string;
+  hoverBorder: string;
+  accentBar: string;
+  companyText: string;
+  tagBg: string;
+  tagText: string;
+  iconColor: string;
+  dotBg: string;
+}
+
+const CARD_PALETTES: CardColorPalette[] = [
+  // 1. Vibrant Rose / Coral
+  {
+    bg: 'bg-rose-50/90 dark:bg-rose-950/40',
+    border: 'border-rose-200/90 dark:border-rose-800/60',
+    hoverBorder: 'hover:border-rose-400 dark:hover:border-rose-500',
+    accentBar: 'bg-gradient-to-r from-rose-400 to-pink-500',
+    companyText: 'text-rose-700 dark:text-rose-300 font-bold',
+    tagBg: 'bg-rose-100/90 dark:bg-rose-900/60',
+    tagText: 'text-rose-800 dark:text-rose-200',
+    iconColor: 'text-rose-500',
+    dotBg: 'bg-rose-500',
+  },
+  // 2. Bright Amber / Peach
+  {
+    bg: 'bg-amber-50/90 dark:bg-amber-950/40',
+    border: 'border-amber-200/90 dark:border-amber-800/60',
+    hoverBorder: 'hover:border-amber-400 dark:hover:border-amber-500',
+    accentBar: 'bg-gradient-to-r from-amber-400 to-orange-500',
+    companyText: 'text-amber-700 dark:text-amber-300 font-bold',
+    tagBg: 'bg-amber-100/90 dark:bg-amber-900/60',
+    tagText: 'text-amber-800 dark:text-amber-200',
+    iconColor: 'text-amber-500',
+    dotBg: 'bg-amber-500',
+  },
+  // 3. Fresh Emerald / Mint
+  {
+    bg: 'bg-emerald-50/90 dark:bg-emerald-950/40',
+    border: 'border-emerald-200/90 dark:border-emerald-800/60',
+    hoverBorder: 'hover:border-emerald-400 dark:hover:border-emerald-500',
+    accentBar: 'bg-gradient-to-r from-emerald-400 to-teal-500',
+    companyText: 'text-emerald-700 dark:text-emerald-300 font-bold',
+    tagBg: 'bg-emerald-100/90 dark:bg-emerald-900/60',
+    tagText: 'text-emerald-800 dark:text-emerald-200',
+    iconColor: 'text-emerald-500',
+    dotBg: 'bg-emerald-500',
+  },
+  // 4. Vibrant Sky / Cyan
+  {
+    bg: 'bg-sky-50/90 dark:bg-sky-950/40',
+    border: 'border-sky-200/90 dark:border-sky-800/60',
+    hoverBorder: 'hover:border-sky-400 dark:hover:border-sky-500',
+    accentBar: 'bg-gradient-to-r from-sky-400 to-blue-500',
+    companyText: 'text-sky-700 dark:text-sky-300 font-bold',
+    tagBg: 'bg-sky-100/90 dark:bg-sky-900/60',
+    tagText: 'text-sky-800 dark:text-sky-200',
+    iconColor: 'text-sky-500',
+    dotBg: 'bg-sky-500',
+  },
+  // 5. Electric Violet / Purple
+  {
+    bg: 'bg-violet-50/90 dark:bg-violet-950/40',
+    border: 'border-violet-200/90 dark:border-violet-800/60',
+    hoverBorder: 'hover:border-violet-400 dark:hover:border-violet-500',
+    accentBar: 'bg-gradient-to-r from-violet-400 to-purple-500',
+    companyText: 'text-violet-700 dark:text-violet-300 font-bold',
+    tagBg: 'bg-violet-100/90 dark:bg-violet-900/60',
+    tagText: 'text-violet-800 dark:text-violet-200',
+    iconColor: 'text-violet-500',
+    dotBg: 'bg-violet-500',
+  },
+  // 6. Royal Indigo / Blue
+  {
+    bg: 'bg-indigo-50/90 dark:bg-indigo-950/40',
+    border: 'border-indigo-200/90 dark:border-indigo-800/60',
+    hoverBorder: 'hover:border-indigo-400 dark:hover:border-indigo-500',
+    accentBar: 'bg-gradient-to-r from-indigo-400 to-blue-600',
+    companyText: 'text-indigo-700 dark:text-indigo-300 font-bold',
+    tagBg: 'bg-indigo-100/90 dark:bg-indigo-900/60',
+    tagText: 'text-indigo-800 dark:text-indigo-200',
+    iconColor: 'text-indigo-500',
+    dotBg: 'bg-indigo-500',
+  },
+  // 7. Bright Teal / Turquoise
+  {
+    bg: 'bg-teal-50/90 dark:bg-teal-950/40',
+    border: 'border-teal-200/90 dark:border-teal-800/60',
+    hoverBorder: 'hover:border-teal-400 dark:hover:border-teal-500',
+    accentBar: 'bg-gradient-to-r from-teal-400 to-cyan-500',
+    companyText: 'text-teal-700 dark:text-teal-300 font-bold',
+    tagBg: 'bg-teal-100/90 dark:bg-teal-900/60',
+    tagText: 'text-teal-800 dark:text-teal-200',
+    iconColor: 'text-teal-500',
+    dotBg: 'bg-teal-500',
+  },
+  // 8. Hot Fuchsia / Pink
+  {
+    bg: 'bg-fuchsia-50/90 dark:bg-fuchsia-950/40',
+    border: 'border-fuchsia-200/90 dark:border-fuchsia-800/60',
+    hoverBorder: 'hover:border-fuchsia-400 dark:hover:border-fuchsia-500',
+    accentBar: 'bg-gradient-to-r from-fuchsia-400 to-pink-600',
+    companyText: 'text-fuchsia-700 dark:text-fuchsia-300 font-bold',
+    tagBg: 'bg-fuchsia-100/90 dark:bg-fuchsia-900/60',
+    tagText: 'text-fuchsia-800 dark:text-fuchsia-200',
+    iconColor: 'text-fuchsia-500',
+    dotBg: 'bg-fuchsia-500',
+  },
+];
+
+const getCardPalette = (id: string): CardColorPalette => {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % CARD_PALETTES.length;
+  return CARD_PALETTES[index];
+};
 
 export const TrackerView: React.FC = () => {
   const [apps, setApps] = useState<ApplicationItem[]>(initialApplications);
@@ -194,10 +329,15 @@ export const TrackerView: React.FC = () => {
   const [newStatus, setNewStatus] = useState<ApplicationItem['status']>('Terkirim');
   const [newSalary, setNewSalary] = useState('');
   const [newNotes, setNewNotes] = useState('');
+  const [newPortal, setNewPortal] = useState('LinkedIn');
+  const [customPortal, setCustomPortal] = useState('');
+  const [newPortalUrl, setNewPortalUrl] = useState('');
 
   const handleAddApplication = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCompany || !newPosition) return;
+
+    const finalPortal = newPortal === 'Lainnya' ? (customPortal.trim() || 'Custom Portal') : newPortal;
 
     const newApp: ApplicationItem = {
       id: `app-${apps.length + 1}`,
@@ -208,6 +348,8 @@ export const TrackerView: React.FC = () => {
       status: newStatus,
       salary: newSalary || '-',
       notes: newNotes,
+      portal: finalPortal,
+      portalUrl: newPortalUrl.trim(),
     };
 
     setApps([newApp, ...apps]);
@@ -223,6 +365,9 @@ export const TrackerView: React.FC = () => {
     setNewStatus('Terkirim');
     setNewSalary('');
     setNewNotes('');
+    setNewPortal('LinkedIn');
+    setCustomPortal('');
+    setNewPortalUrl('');
   };
 
   const handleDeleteApp = (id: string) => {
@@ -239,12 +384,13 @@ export const TrackerView: React.FC = () => {
     const matchesFilter = filterStatus === 'Semua' || a.status === filterStatus;
     const matchesSearch =
       a.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      a.position.toLowerCase().includes(searchTerm.toLowerCase());
+      a.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (a.portal || '').toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
   // Table Sorting State
-  type SortField = 'company' | 'position' | 'location' | 'appliedDate' | 'salary' | 'status';
+  type SortField = 'company' | 'position' | 'location' | 'appliedDate' | 'salary' | 'status' | 'portal';
   type SortDirection = 'asc' | 'desc';
 
   const [sortField, setSortField] = useState<SortField | null>('appliedDate');
@@ -280,6 +426,9 @@ export const TrackerView: React.FC = () => {
     } else if (sortField === 'salary') {
       valA = a.salary.toLowerCase();
       valB = b.salary.toLowerCase();
+    } else if (sortField === 'portal') {
+      valA = (a.portal || '').toLowerCase();
+      valB = (b.portal || '').toLowerCase();
     } else if (sortField === 'status') {
       const statusOrder: Record<string, number> = {
         'Terkirim': 1,
@@ -432,15 +581,6 @@ export const TrackerView: React.FC = () => {
       {/* VIEW 1: KANBAN BOARD */}
       {viewMode === 'kanban' && (
         <div className="space-y-3">
-          {/* Quick Helper Banner */}
-          <div className="hidden sm:flex items-center justify-between px-4 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 text-xs text-slate-600 dark:text-slate-300">
-            <div className="flex items-center gap-2">
-              <Kanban className="w-4 h-4 text-violet-500" />
-              <span><strong>Drag & Drop:</strong> Tarik kartu lamaran dari mana saja dan lepas ke kolom status tujuan untuk memperbarui progress.</span>
-            </div>
-            <span className="text-[11px] text-slate-400 font-medium">Auto-Sync Status</span>
-          </div>
-
           <div className="flex lg:grid lg:grid-cols-5 gap-4 overflow-x-auto snap-x snap-mandatory pb-4 pt-1 items-start min-h-[450px]">
             {KANBAN_COLUMNS.map((col) => {
               const columnApps = filteredApps.filter((a) => a.status === col.status);
@@ -491,18 +631,32 @@ export const TrackerView: React.FC = () => {
                           );
                         }
 
+                        const palette = getCardPalette(app.id);
+
                         return (
                           <div
                             key={app.id}
                             onPointerDown={(e) => handlePointerDownCard(e, app)}
-                            className="group bg-white dark:bg-slate-900 rounded-xl p-3.5 border border-slate-200 dark:border-slate-800 shadow-2xs hover:shadow-md hover:border-violet-400 dark:hover:border-violet-500 transition-all space-y-2.5 cursor-grab active:cursor-grabbing relative select-none touch-none"
+                            className={`group ${palette.bg} rounded-xl p-3.5 border ${palette.border} ${palette.hoverBorder} shadow-2xs hover:shadow-md transition-all space-y-2.5 cursor-grab active:cursor-grabbing relative select-none touch-none overflow-hidden`}
                           >
-                            <div className="flex items-start justify-between gap-2">
+                            {/* Top Accent Strip */}
+                            <div className={`absolute top-0 left-0 right-0 h-1 ${palette.accentBar}`} />
+
+                            <div className="flex items-start justify-between gap-2 pt-0.5">
                               <div className="min-w-0 flex-1">
-                                <h4 className="font-bold text-xs text-slate-900 dark:text-white leading-snug truncate">
-                                  {app.position}
-                                </h4>
-                                <p className="text-[11px] font-bold text-violet-600 dark:text-violet-400 mt-0.5 truncate">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span className={`w-2 h-2 rounded-full ${palette.dotBg} shrink-0`} />
+                                  <h4
+                                    className="font-bold text-xs text-slate-900 dark:text-white leading-snug truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0"
+                                    title={app.position}
+                                  >
+                                    {app.position}
+                                  </h4>
+                                </div>
+                                <p
+                                  className={`text-[11px] ${palette.companyText} mt-1 truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0`}
+                                  title={app.company}
+                                >
                                   {app.company}
                                 </p>
                               </div>
@@ -518,18 +672,45 @@ export const TrackerView: React.FC = () => {
                               </button>
                             </div>
 
-                            <div className="space-y-1 text-[11px] text-slate-500 dark:text-slate-400">
-                              <div className="flex items-center gap-1.5">
-                                <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                <span className="truncate">{app.location}</span>
+                            <div className="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <MapPin className={`w-3.5 h-3.5 ${palette.iconColor} shrink-0`} />
+                                <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0" title={app.location}>
+                                  {app.location}
+                                </span>
                               </div>
-                              <div className="flex items-center gap-1.5">
-                                <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                <span>{app.appliedDate}</span>
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <Calendar className={`w-3.5 h-3.5 ${palette.iconColor} shrink-0`} />
+                                <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0" title={app.appliedDate}>
+                                  {app.appliedDate}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <Globe className={`w-3.5 h-3.5 ${palette.iconColor} shrink-0`} />
+                                {app.portalUrl ? (
+                                  <a
+                                    href={app.portalUrl.startsWith('http') ? app.portalUrl : `https://${app.portalUrl}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                    className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0 font-bold hover:underline flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 cursor-pointer"
+                                    title={`Buka portal ${app.portal} (${app.portalUrl})`}
+                                  >
+                                    <span>{app.portal || 'Direct'}</span>
+                                    <ExternalLink className="w-3 h-3 shrink-0 opacity-80" />
+                                  </a>
+                                ) : (
+                                  <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0 font-medium" title={app.portal || 'Direct'}>
+                                    {app.portal || 'Direct'}
+                                  </span>
+                                )}
                               </div>
                               {app.salary !== '-' && (
-                                <div className="flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
-                                  <span className="truncate">{app.salary}</span>
+                                <div className={`flex items-center gap-1.5 font-bold px-2 py-0.5 rounded-md ${palette.tagBg} ${palette.tagText} max-w-full min-w-0 mt-1`}>
+                                  <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0" title={app.salary}>
+                                    {app.salary}
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -544,77 +725,89 @@ export const TrackerView: React.FC = () => {
           </div>
 
           {/* Floating Card Overlay Saat Ditarik (100% Solid Card Tanpa Bayangan Transparan) */}
-          {activeDragItem && (
-            <div
-              style={{
-                position: 'fixed',
-                left: dragPos.x - dragOffset.x,
-                top: dragPos.y - dragOffset.y,
-                width: dragWidth,
-                pointerEvents: 'none',
-                zIndex: 9999,
-              }}
-              className="bg-white dark:bg-slate-900 rounded-xl p-3.5 border-2 border-violet-500 shadow-2xl scale-[1.03] rotate-1 space-y-2.5 opacity-100 ring-4 ring-violet-500/20 select-none"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0 flex-1">
-                  <h4 className="font-bold text-xs text-slate-900 dark:text-white leading-snug truncate">
-                    {activeDragItem.position}
-                  </h4>
-                  <p className="text-[11px] font-bold text-violet-600 dark:text-violet-400 mt-0.5 truncate">
-                    {activeDragItem.company}
-                  </p>
-                </div>
-                <div className="text-slate-400 p-1 shrink-0">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </div>
-              </div>
+          {activeDragItem && (() => {
+            const dragPalette = getCardPalette(activeDragItem.id);
+            return (
+              <div
+                style={{
+                  position: 'fixed',
+                  left: dragPos.x - dragOffset.x,
+                  top: dragPos.y - dragOffset.y,
+                  width: dragWidth,
+                  pointerEvents: 'none',
+                  zIndex: 9999,
+                }}
+                className={`${dragPalette.bg} rounded-xl p-3.5 border-2 border-violet-500 shadow-2xl scale-[1.03] rotate-1 space-y-2.5 opacity-100 ring-4 ring-violet-500/20 select-none overflow-hidden`}
+              >
+                {/* Top Accent Strip */}
+                <div className={`absolute top-0 left-0 right-0 h-1 ${dragPalette.accentBar}`} />
 
-              <div className="space-y-1 text-[11px] text-slate-500 dark:text-slate-400">
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span className="truncate">{activeDragItem.location}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span>{activeDragItem.appliedDate}</span>
-                </div>
-                {activeDragItem.salary !== '-' && (
-                  <div className="flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
-                    <span className="truncate">{activeDragItem.salary}</span>
+                <div className="flex items-start justify-between gap-2 pt-0.5">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className={`w-2 h-2 rounded-full ${dragPalette.dotBg} shrink-0`} />
+                      <h4
+                        className="font-bold text-xs text-slate-900 dark:text-white leading-snug truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0"
+                        title={activeDragItem.position}
+                      >
+                        {activeDragItem.position}
+                      </h4>
+                    </div>
+                    <p
+                      className={`text-[11px] ${dragPalette.companyText} mt-1 truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0`}
+                      title={activeDragItem.company}
+                    >
+                      {activeDragItem.company}
+                    </p>
                   </div>
-                )}
+                  <div className="text-slate-400 p-1 shrink-0">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <MapPin className={`w-3.5 h-3.5 ${dragPalette.iconColor} shrink-0`} />
+                    <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0" title={activeDragItem.location}>
+                      {activeDragItem.location}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Calendar className={`w-3.5 h-3.5 ${dragPalette.iconColor} shrink-0`} />
+                    <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0" title={activeDragItem.appliedDate}>
+                      {activeDragItem.appliedDate}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Globe className={`w-3.5 h-3.5 ${dragPalette.iconColor} shrink-0`} />
+                    {activeDragItem.portalUrl ? (
+                      <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0 font-bold flex items-center gap-1 text-violet-600 dark:text-violet-400">
+                        <span>{activeDragItem.portal || 'Direct'}</span>
+                        <ExternalLink className="w-3 h-3 shrink-0 opacity-80" />
+                      </span>
+                    ) : (
+                      <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0 font-medium" title={activeDragItem.portal || 'Direct'}>
+                        {activeDragItem.portal || 'Direct'}
+                      </span>
+                    )}
+                  </div>
+                  {activeDragItem.salary !== '-' && (
+                    <div className={`flex items-center gap-1.5 font-bold px-2 py-0.5 rounded-md ${dragPalette.tagBg} ${dragPalette.tagText} max-w-full min-w-0 mt-1`}>
+                      <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0" title={activeDragItem.salary}>
+                        {activeDragItem.salary}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       )}
 
       {/* VIEW 2: LIST TABEL */}
       {viewMode === 'table' && (
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs">
-          {/* Active Sort Bar Helper */}
-          <div className="p-3 bg-slate-50 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-600 dark:text-slate-300">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-700 dark:text-slate-200">Urutan Tabel:</span>
-              <span className="px-2 py-0.5 rounded-md bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 font-semibold border border-violet-200 dark:border-violet-800 text-[11px]">
-                {sortField === 'position' || sortField === 'company'
-                  ? 'Posisi & Perusahaan'
-                  : sortField === 'location'
-                  ? 'Lokasi'
-                  : sortField === 'appliedDate'
-                  ? 'Tanggal Melamar'
-                  : sortField === 'salary'
-                  ? 'Ekspektasi Gaji'
-                  : sortField === 'status'
-                  ? 'Status Seleksi'
-                  : 'Default'}
-                {' '}({sortDirection === 'asc' ? 'A-Z / Lama ke Baru' : 'Z-A / Baru ke Lama'})
-              </span>
-            </div>
-            <span className="text-[11px] text-slate-400">Klik judul kolom di tabel untuk mengubah urutan</span>
-          </div>
-
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
@@ -678,6 +871,25 @@ export const TrackerView: React.FC = () => {
                   </th>
                   <th className="p-4">
                     <button
+                      onClick={() => handleSort('portal')}
+                      className={`flex items-center gap-1.5 hover:text-violet-600 dark:hover:text-violet-400 transition cursor-pointer select-none ${
+                        sortField === 'portal' ? 'text-violet-600 dark:text-violet-400 font-black' : ''
+                      }`}
+                    >
+                      <span>Portal Melamar</span>
+                      {sortField === 'portal' ? (
+                        sortDirection === 'asc' ? (
+                          <ArrowUp className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
+                        ) : (
+                          <ArrowDown className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 opacity-50 shrink-0" />
+                      )}
+                    </button>
+                  </th>
+                  <th className="p-4">
+                    <button
                       onClick={() => handleSort('salary')}
                       className={`flex items-center gap-1.5 hover:text-violet-600 dark:hover:text-violet-400 transition cursor-pointer select-none ${
                         sortField === 'salary' ? 'text-violet-600 dark:text-violet-400 font-black' : ''
@@ -721,7 +933,7 @@ export const TrackerView: React.FC = () => {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
                 {sortedAndFilteredApps.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-slate-400">
+                    <td colSpan={8} className="p-8 text-center text-slate-400">
                       Tidak ada lamaran ditemukan.
                     </td>
                   </tr>
@@ -752,27 +964,38 @@ export const TrackerView: React.FC = () => {
                           <span>{app.appliedDate}</span>
                         </div>
                       </td>
+                      <td className="p-4 whitespace-nowrap text-slate-600 dark:text-slate-300">
+                        <div className="flex items-center gap-1.5 font-medium">
+                          <Globe className="w-3.5 h-3.5 text-violet-500 shrink-0" />
+                          {app.portalUrl ? (
+                            <a
+                              href={app.portalUrl.startsWith('http') ? app.portalUrl : `https://${app.portalUrl}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:underline flex items-center gap-1 text-violet-600 dark:text-violet-400 font-bold"
+                              title={`Buka link ${app.portal}`}
+                            >
+                              <span>{app.portal || '-'}</span>
+                              <ExternalLink className="w-3 h-3 shrink-0 opacity-80" />
+                            </a>
+                          ) : (
+                            <span>{app.portal || '-'}</span>
+                          )}
+                        </div>
+                      </td>
                       <td className="p-4 whitespace-nowrap font-medium text-emerald-600 dark:text-emerald-400">
                         {app.salary}
                       </td>
                       <td className="p-4 whitespace-nowrap">
-                        <div className="relative inline-block">
-                          <select
+                        <div className="w-32">
+                          <CustomSelect
                             value={app.status}
-                            onChange={(e) =>
-                              handleUpdateStatus(app.id, e.target.value as ApplicationItem['status'])
+                            onChange={(val) =>
+                              handleUpdateStatus(app.id, val as ApplicationItem['status'])
                             }
-                            className={`pl-2.5 pr-7 py-1 rounded-lg text-xs font-bold border transition ${getStatusBadgeClass(
-                              app.status
-                            )} cursor-pointer focus:outline-none appearance-none`}
-                          >
-                            <option value="Terkirim">Terkirim</option>
-                            <option value="Screening">Screening</option>
-                            <option value="Interview">Interview</option>
-                            <option value="Offering">Offering</option>
-                            <option value="Ditolak">Ditolak</option>
-                          </select>
-                          <ChevronDown className="w-3.5 h-3.5 opacity-70 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            options={['Terkirim', 'Screening', 'Interview', 'Offering', 'Ditolak']}
+                            size="sm"
+                          />
                         </div>
                       </td>
                       <td className="p-4 max-w-xs text-slate-500 dark:text-slate-400 text-xs truncate">
@@ -892,25 +1115,69 @@ export const TrackerView: React.FC = () => {
                   </div>
                 </div>
 
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                      Lamar Melalui Portal
+                    </label>
+                    <CustomSelect
+                      value={newPortal}
+                      onChange={(val) => setNewPortal(val)}
+                      options={[
+                        'LinkedIn',
+                        'JobStreet',
+                        'KitaLulus',
+                        'Glints',
+                        'Kalibrr',
+                        'Website Perusahaan',
+                        'Email Recruiter',
+                        { value: 'Lainnya', label: 'Lainnya (Isi Sendiri / Custom)' },
+                      ]}
+                      placeholder="Pilih Portal Melamar"
+                    />
+                  </div>
+
+                  {newPortal === 'Lainnya' && (
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                        Nama Portal Custom <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Contoh: Indeed / Deel / Karir.com / Telegram"
+                        value={customPortal}
+                        onChange={(e) => setCustomPortal(e.target.value)}
+                        className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                      Link / URL Lowongan Portal <span className="text-slate-400 font-normal">(Hyperlink Opsional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: https://linkedin.com/jobs/view/123456"
+                      value={newPortalUrl}
+                      onChange={(e) => setNewPortalUrl(e.target.value)}
+                      className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                    />
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                       Status Tahapan
                     </label>
-                    <div className="relative">
-                      <select
-                        value={newStatus}
-                        onChange={(e) => setNewStatus(e.target.value as ApplicationItem['status'])}
-                        className="w-full px-3.5 py-2.5 pr-9 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/80 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none appearance-none cursor-pointer transition font-medium"
-                      >
-                        <option value="Terkirim">Terkirim</option>
-                        <option value="Screening">Screening</option>
-                        <option value="Interview">Interview</option>
-                        <option value="Offering">Offering</option>
-                        <option value="Ditolak">Ditolak</option>
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
+                    <CustomSelect
+                      value={newStatus}
+                      onChange={(val) => setNewStatus(val as ApplicationItem['status'])}
+                      options={['Terkirim', 'Screening', 'Interview', 'Offering', 'Ditolak']}
+                      placeholder="Pilih Status"
+                    />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">

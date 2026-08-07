@@ -284,7 +284,7 @@ Gunakan Bahasa Indonesia kasual, ringkas, dan membangun kepercayaan.
 | **Danger Rose/Red** | `#E11D48` / `#EF4444` (`rose-600`/`rose-500`) | `rose-400` / `bg-rose-950` | Status Ditolak, konfirmasi hapus, error state |
 | **Info / Stage Blue** | `#2563EB` / `#3B82F6` (`blue-600`/`blue-500`) | `blue-400` / `bg-blue-950` | Status Lamaran Terkirim, pengumuman, info tracker |
 | **Background Canvas** | `#F8FAFC` (`slate-50`) / `#FFFFFF` | `#020617` (`slate-950`) / `#0F172A` | Canvas utama dan card background |
-| **Border & Divider** | `#E2E8F0` (`slate-200`) | `#1E293B` (`slate-800`) | Garis pemisah card and modul bento |
+| **Border & Divider** | `#E2E8F0` (`slate-200`) | `#1E293B` (`slate-800`) | Garis pemisah card dan modul bento |
 | **Text Hierarchy** | Primary: `#0F172A` (`slate-900`) / Muted: `#64748B` (`slate-500`) | Primary: `#F8FAFC` (`slate-50`) / Muted: `#94A3B8` (`slate-400`) | Teks judul, body, dan caption metadata |
 
 ### 3. Skala Tipografi Dashboard User

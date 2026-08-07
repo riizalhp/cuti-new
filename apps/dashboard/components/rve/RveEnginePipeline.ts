@@ -59,6 +59,23 @@ export interface AtsCorrelationItem {
   recommendation: string;
 }
 
+export interface AiModelEvaluation {
+  modelName: string;
+  badgeColor: string;
+  score: number;
+  pros: string[];
+  cons: string[];
+}
+
+export interface RecruiterPersona {
+  id: string;
+  name: string;
+  badge: string;
+  description: string;
+  focusArea: string;
+  strictness: string;
+}
+
 export interface RveReportResult {
   parsedData: CvParsedData;
   boundingBoxes: BoundingBox[];
@@ -67,6 +84,8 @@ export interface RveReportResult {
   fPatternScore: number;
   atsScore: number;
   recruiterVerdict: string;
+  verdictStatus: 'interview' | 'maybe' | 'reject';
+  confidenceScore: number;
   hrdNotes: string;
   atsCorrelations: AtsCorrelationItem[];
   beforeAfterFixes: Array<{
@@ -77,6 +96,28 @@ export interface RveReportResult {
     impactBonus: number;
   }>;
   predictedInterviewQuestions: string[];
+  // AI Screener Selling Point
+  aiEvaluations: AiModelEvaluation[];
+  consensusScore: number;
+  topAiSummary: {
+    overview: string;
+    dropReasons: string[];
+    estimatedProbability: number;
+  };
+  beforeAfterComparison: {
+    beforeScore: number;
+    afterScore: number;
+    diff: number;
+  };
+  gamification: {
+    progress: number;
+    checklist: Array<{
+      id: string;
+      label: string;
+      bonus: number;
+      isDone: boolean;
+    }>;
+  };
 }
 
 /**
@@ -492,10 +533,18 @@ export function runFullRvePipeline(
   const fixationPoints = predictEyeTrackingAndHeatmap(parsedData, boundingBoxes);
   const atsCorrelations = analyzeAtsCorrelation(parsedData, fixationPoints, targetRole);
 
-  const bonusFromFixes = appliedFixIds.length * 4;
-  const overallAttentionScore = Math.min(98, 88 + bonusFromFixes);
-  const fPatternScore = Math.min(99, 92 + bonusFromFixes);
-  const atsScore = Math.min(98, 84 + bonusFromFixes);
+  const bonusFromFixes = appliedFixIds.length * 5;
+  const initialBaseScore = 78;
+  const overallAttentionScore = Math.min(98, initialBaseScore + 10 + bonusFromFixes);
+  const fPatternScore = Math.min(99, 88 + bonusFromFixes);
+  const atsScore = Math.min(98, 72 + bonusFromFixes + (appliedFixIds.length > 0 ? 14 : 0));
+
+  const gpt5Score = Math.min(98, 86 + bonusFromFixes + (appliedFixIds.length > 0 ? 5 : 0));
+  const geminiScore = Math.min(98, 89 + bonusFromFixes + (appliedFixIds.length > 0 ? 4 : 0));
+  const claudeScore = Math.min(98, 84 + bonusFromFixes + (appliedFixIds.length > 0 ? 4 : 0));
+  const consensusScore = Math.round((gpt5Score + geminiScore + claudeScore) / 3);
+
+  const verdictStatus = consensusScore >= 85 ? 'interview' : consensusScore >= 70 ? 'maybe' : 'reject';
 
   return {
     parsedData,
@@ -505,11 +554,15 @@ export function runFullRvePipeline(
     fPatternScore,
     atsScore,
     recruiterVerdict:
-      overallAttentionScore >= 85
-        ? 'Lolos Pre-Screening RVE Engine! Struktur visual CV sangat memikat perhatian recruiter dalam 6 detik pertama dan memenuhi kualifikasi ATS.'
-        : 'CV Cukup Baik. Diperlukan penajaman pada penulisan metrik % pencapaian agar impresi awal lebih kuat.',
+      verdictStatus === 'interview'
+        ? 'Lolos Pre-Screening RVE Pipeline! Struktur visual dan narasi CV sangat memikat perhatian recruiter dalam 6 detik pertama dan memenuhi kualifikasi ATS & AI Recruiter.'
+        : verdictStatus === 'maybe'
+        ? 'CV Berpeluang Dipertimbangkan (Maybe). Diperlukan penajaman pada penulisan metrik % pencapaian agar impresi awal lebih kuat.'
+        : 'CV Berisiko Tereliminasi. Mohon optimalkan seksi ringkasan dan tambahkan metrik angka.',
+    verdictStatus,
+    confidenceScore: 87,
     hrdNotes:
-      'Recruiter Vision Engine mencatat tata letak judul dan seksi pengalaman sangat bersih. Mata recruiter tertuju pertama kali pada nama dan metrik efisiensi 35%. Keterbacaan pola F sangat tinggi.',
+      'Recruiter Vision Pipeline mencatat tata letak judul dan seksi pengalaman sangat bersih. Mata recruiter tertuju pertama kali pada nama dan metrik efisiensi 35%. Keterbacaan pola F sangat tinggi.',
     atsCorrelations,
     beforeAfterFixes: [
       {
@@ -517,14 +570,21 @@ export function runFullRvePipeline(
         section: 'Pengalaman Kerja (Software Engineer)',
         before: 'Mengembangkan dan memelihara aplikasi web perusahaan menggunakan React.js.',
         after: 'Mengembangkan 12+ modul web berbasis React.js & TypeScript, berhasil mempercepat waktu render sebesar 35%.',
-        impactBonus: 4,
+        impactBonus: 5,
       },
       {
         id: 'fix-2',
-        section: 'Ringkasan Profil (Summary)',
+        section: 'Ringkasan Profil (Executive Summary)',
         before: 'Saya adalah developer yang bersemangat dan pekerja keras dalam tim.',
         after: 'Software Engineer dengan 3+ tahun pengalaman membangun aplikasi web skala tinggi menggunakan Next.js dan Node.js.',
-        impactBonus: 4,
+        impactBonus: 5,
+      },
+      {
+        id: 'fix-3',
+        section: 'Seksi Skills & Tech Stack',
+        before: 'React, HTML, CSS, JavaScript, Web Development',
+        after: 'React.js, Next.js, TypeScript, Node.js, PostgreSQL, Tailwind CSS, REST API, Jest',
+        impactBonus: 5,
       },
     ],
     predictedInterviewQuestions: [
@@ -532,5 +592,67 @@ export function runFullRvePipeline(
       'Bagaimana metodologi Anda dalam memastikan kualitas kode saat berkolaborasi dengan tim cross-functional?',
       'Apa arsitektur database favorit Anda untuk menangani puluhan ribu pengguna harian?',
     ],
+    // AI Screener Selling Point Breakdown
+    aiEvaluations: [
+      {
+        modelName: 'GPT-5',
+        badgeColor: 'bg-emerald-500',
+        score: gpt5Score,
+        pros: ['Achievement terukur dengan metrik %', 'Tech stack relevan dengan target posisi'],
+        cons: ['Executive Summary terlalu panjang', 'Kurang detail pada sertifikasi pendukung'],
+      },
+      {
+        modelName: 'Gemini',
+        badgeColor: 'bg-blue-500',
+        score: geminiScore,
+        pros: ['Struktur layout A4 & F-Pattern sangat bersih (92%)', 'Urutan kronologis posisi kerja jelas'],
+        cons: ['Format tanggal belum sepenuhnya seragam di seksi edukasi'],
+      },
+      {
+        modelName: 'Claude',
+        badgeColor: 'bg-amber-500',
+        score: claudeScore,
+        pros: ['Narasi karir profesional & berorientasi solusi', 'Penggunaan kata kerja aksi aktif'],
+        cons: ['Angka kuantitatif di posisi kedua masih bisa ditingkatkan'],
+      },
+    ],
+    consensusScore,
+    topAiSummary: {
+      overview: 'CV Anda memiliki fondasi yang cukup kuat untuk meloloskan tahap awal.',
+      dropReasons: [
+        'Tidak ada angka pencapaian terukur di seksi pengalaman kerja kedua.',
+        'Ringkasan profil masih bersifat deskriptif umum, belum mencantumkan hasil spesifik.',
+        'Kata kerja kurang aktif di beberapa bullet point pengalaman.',
+      ],
+      estimatedProbability: consensusScore,
+    },
+    beforeAfterComparison: {
+      beforeScore: 72,
+      afterScore: consensusScore,
+      diff: consensusScore - 72,
+    },
+    gamification: {
+      progress: Math.min(100, consensusScore),
+      checklist: [
+        {
+          id: 'check-1',
+          label: 'Metrik Angka & Pencapaian (%)',
+          bonus: 8,
+          isDone: appliedFixIds.includes('fix-1'),
+        },
+        {
+          id: 'check-2',
+          label: 'Executive Summary Berorientasi Hasil',
+          bonus: 6,
+          isDone: appliedFixIds.includes('fix-2'),
+        },
+        {
+          id: 'check-3',
+          label: 'Kata Kunci Spesifik Role & Stack',
+          bonus: 6,
+          isDone: appliedFixIds.includes('fix-3'),
+        },
+      ],
+    },
   };
 }
