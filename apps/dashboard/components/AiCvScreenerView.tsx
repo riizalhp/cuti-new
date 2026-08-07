@@ -455,7 +455,7 @@ export const AiCvScreenerView: React.FC = () => {
       if (lower.includes('ditolak') || lower.includes('kelemahan') || lower.includes('kurang')) {
         responseText = `Berdasarkan evaluasi konsensus ${currentPersona.name}, CV Anda berisiko tereliminasi karena seksi pengalaman kerja kedua belum memiliki metrik angka (%). Tambahkan metrik seperti "berhasil menghemat waktu 30%" agar skor naik ke 91%+!`;
       } else if (lower.includes('summary') || lower.includes('ringkasan')) {
-        responseText = `Jika Anda mengubah ringkasan profil menjadi berorientasi hasil (seperti "Software Engineer 3+ tahun pengalaman dengan React & Node.js"), skor konsensus AI Recruiter akan langsung melesat menjadi 93%! Klik tombol "✨ Optimalkan CV Saya" untuk menerapkannya secara otomatis.`;
+        responseText = `Jika Anda mengubah ringkasan profil menjadi berorientasi hasil (seperti "Software Engineer 3+ tahun pengalaman dengan React & Node.js"), skor konsensus AI Recruiter akan langsung melesat menjadi 93%! Klik tombol "Optimalkan CV Saya" untuk menerapkannya secara otomatis.`;
       } else if (lower.includes('100%') || lower.includes('sempurna')) {
         responseText = `Untuk mencapai 100% Sempurna, terapkan 3 rekomendasi utama: 1) Sertakan metrik %, 2) Perjelas tech stack utama di bagian atas, dan 3) Gunakan kata kerja aksi di setiap bullet point.`;
       } else {
@@ -786,7 +786,7 @@ export const AiCvScreenerView: React.FC = () => {
                           <span>{hist.timestamp}</span>
 
                           <span className="font-black text-xs text-orange-500 flex items-center gap-1">
-                            {hist.verdictStatus === 'interview' ? '🟢' : hist.verdictStatus === 'maybe' ? '🟡' : '🔴'}{' '}
+                            <span className={`w-2 h-2 rounded-full ${hist.verdictStatus === 'interview' ? 'bg-emerald-500' : hist.verdictStatus === 'maybe' ? 'bg-amber-500' : 'bg-rose-500'}`} />
                             {hist.consensusScore}% Consensus
                             <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition" />
                           </span>
@@ -980,19 +980,19 @@ export const AiCvScreenerView: React.FC = () => {
                     {rveReport.verdictStatus === 'interview' && (
                       <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm">
                         <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-xs" />
-                        <span>🟢 Interview Recommended</span>
+                        <span>Interview Recommended</span>
                       </div>
                     )}
                     {rveReport.verdictStatus === 'maybe' && (
                       <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-extrabold text-sm">
                         <span className="w-3.5 h-3.5 rounded-full bg-amber-500 shadow-xs" />
-                        <span>🟡 Dipertimbangkan (Maybe)</span>
+                        <span>Dipertimbangkan (Maybe)</span>
                       </div>
                     )}
                     {rveReport.verdictStatus === 'reject' && (
                       <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-extrabold text-sm">
                         <span className="w-3.5 h-3.5 rounded-full bg-rose-500 shadow-xs" />
-                        <span>🔴 Perlu Perbaikan (Reject)</span>
+                        <span>Perlu Perbaikan (Reject)</span>
                       </div>
                     )}
                     <span className="text-[10px] font-bold text-slate-400 block border-l border-slate-200 dark:border-slate-700 pl-3">
@@ -1109,7 +1109,7 @@ export const AiCvScreenerView: React.FC = () => {
                     ) : (
                       <>
                         <Sparkles className="w-4 h-4 fill-white" />
-                        <span>✨ Optimalkan CV Saya (Satu Klik Perbaiki Semua)</span>
+                        <span>Optimalkan CV Saya (Satu Klik Perbaiki Semua)</span>
                       </>
                     )}
                   </button>
@@ -1117,7 +1117,7 @@ export const AiCvScreenerView: React.FC = () => {
               </div>
 
               {/* Timeline Stepper Navigation Bar */}
-              <div className="sticky top-4 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-md">
+              <div className="sticky top-0 z-30 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-lg">
                 <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar text-[11px] font-bold">
                   <a
                     href="#step-1-vision"
@@ -1469,16 +1469,18 @@ export const AiCvScreenerView: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleSendChatMessage('Mengapa CV saya belum 100%?')}
-                        className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950 hover:text-orange-600 dark:hover:text-orange-400 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition cursor-pointer font-medium"
+                        className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950 hover:text-orange-600 dark:hover:text-orange-400 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition cursor-pointer font-medium flex items-center gap-1"
                       >
-                        💡 Mengapa CV belum 100%?
+                        <Lightbulb className="w-3 h-3 text-amber-500" />
+                        <span>Mengapa CV belum 100%?</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => handleSendChatMessage('Bagaimana kalau saya ganti summary?')}
-                        className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950 hover:text-orange-600 dark:hover:text-orange-400 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition cursor-pointer font-medium"
+                        className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950 hover:text-orange-600 dark:hover:text-orange-400 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition cursor-pointer font-medium flex items-center gap-1"
                       >
-                        ✏️ Ganti summary?
+                        <FileText className="w-3 h-3 text-blue-500" />
+                        <span>Ganti summary?</span>
                       </button>
                     </div>
 
@@ -1547,7 +1549,14 @@ export const AiCvScreenerView: React.FC = () => {
                                   : 'bg-orange-500 hover:bg-orange-600 text-white shadow-xs'
                               }`}
                             >
-                              {isApplied ? '✓ Telah Diterapkan (+5% Skor)' : '+ Terapkan Perbaikan ini'}
+                              {isApplied ? (
+                                <span className="flex items-center gap-1">
+                                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                  Telah Diterapkan (+5% Skor)
+                                </span>
+                              ) : (
+                                '+ Terapkan Perbaikan ini'
+                              )}
                             </button>
                           </div>
 

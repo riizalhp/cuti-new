@@ -66,67 +66,47 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const categories: SidebarCategory[] = [
     {
-      category: 'Dashboard',
+      category: 'Beranda',
       icon: Home,
       items: [
         { id: 'beranda', label: 'Beranda', href: '/beranda', icon: Home },
       ],
     },
     {
-      category: 'Profil Karier',
+      category: 'Profil & Dokumen',
       icon: User,
       items: [
         { id: 'cv', label: 'CV Saya', href: '/cv', icon: FileText },
         { id: 'cv-screener', label: 'CV Screener', href: '/cv-screener', icon: Eye },
         { id: 'linkedin', label: 'Analisis LinkedIn', href: '/linkedin', icon: Linkedin },
-      ],
-    },
-    {
-      category: 'Lowongan',
-      icon: Briefcase,
-      items: [
-        { id: 'cari-lowongan', label: 'Cari Lowongan', href: 'https://loker.cuti.online', icon: Compass },
-        { id: 'match-cv', label: 'Match CV & Job', href: '/match-cv', icon: Sparkles },
-        { id: 'auto-apply', label: 'Auto Apply', href: '/auto-apply', icon: Send, badge: 'Beta' },
-      ],
-    },
-    {
-      category: 'Lamaran',
-      icon: FileText,
-      items: [
-        { id: 'surat-lamaran', label: 'Surat Lamaran', href: '/surat-lamaran', icon: Mail },
-        { id: 'tracker', label: 'Tracker Lamaran', href: '/tracker', icon: Briefcase, badge: '4' },
-      ],
-    },
-    {
-      category: 'Persiapan Kerja',
-      icon: Target,
-      items: [
-        { id: 'interview', label: 'Panduan Interview', href: '/interview', icon: Mic },
-        { id: 'latihan-soal', label: 'Latihan Interview', href: '/latihan-soal', icon: Flame },
         { id: 'readiness', label: 'Career Readiness', href: '/readiness', icon: TrendingUp, isReadiness: true },
       ],
     },
     {
-      category: 'Rewards',
+      category: 'Lamaran',
+      icon: Briefcase,
+      items: [
+        { id: 'tracker', label: 'Tracker Lamaran', href: '/tracker', icon: Briefcase, badge: '4' },
+        { id: 'cari-lowongan', label: 'Cari Lowongan', href: 'https://loker.cuti.online', icon: Compass },
+        { id: 'match-cv', label: 'Match CV & Job', href: '/match-cv', icon: Sparkles },
+        { id: 'auto-apply', label: 'Auto Apply', href: '/auto-apply', icon: Send, badge: 'Beta' },
+        { id: 'surat-lamaran', label: 'Surat Lamaran', href: '/surat-lamaran', icon: Mail },
+      ],
+    },
+    {
+      category: 'Pengembangan',
+      icon: Target,
+      items: [
+        { id: 'interview', label: 'Panduan Interview', href: '/interview', icon: Mic },
+        { id: 'latihan-soal', label: 'Latihan Interview', href: '/latihan-soal', icon: Flame },
+      ],
+    },
+    {
+      category: 'Lainnya',
       icon: Gift,
       items: [
         { id: 'misi-cuan', label: 'Misi & Cuan', href: '/misi-cuan', icon: Target, badge: 'Baru' },
         { id: 'referral', label: 'Referral', href: '/referral', icon: Users },
-      ],
-    },
-    {
-      category: 'Belajar',
-      icon: BookOpen,
-      items: [
-        { id: 'panduan', label: 'Panduan', href: '/design-system', icon: BookOpen },
-        { id: 'aturan', label: 'Aturan', href: '/design-system', icon: Scale },
-      ],
-    },
-    {
-      category: 'Pengaturan',
-      icon: Settings,
-      items: [
         { id: 'pengaturan', label: 'Pengaturan', href: '/pengaturan', icon: Settings },
       ],
     },

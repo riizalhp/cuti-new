@@ -111,7 +111,17 @@ export const RecentActivityTimeline: React.FC = () => {
             );
           })}
         </div>
+      </div>
+
+      {/* Footer Link */}
+      <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800">
+        <button
+          onClick={() => window.location.href = '/tracker'}
+          className="w-full text-center py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer border-0"
+        >
+          Lihat Selengkapnya di Tracker →
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
 };

@@ -203,34 +203,30 @@ const CVSectionCard = ({
           : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs'
       }`}
     >
-      <div className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition border-b border-slate-100 dark:border-slate-800 rounded-t-xl">
-        <div className="flex items-center gap-2 min-w-0">
+      <div
+        onClick={onToggle}
+        className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition border-b border-slate-100 dark:border-slate-800 rounded-t-xl cursor-pointer select-none group"
+      >
+        <div className="flex items-center gap-2.5 min-w-0">
           <div
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
+            onClick={(e) => e.stopPropagation()}
             className="cursor-grab active:cursor-grabbing p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition shrink-0 bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 touch-none select-none"
             title="Tarik untuk mengatur posisi section di CV"
           >
             <GripVertical className="w-4 h-4" />
           </div>
-          <button
-            type="button"
-            onClick={onToggle}
-            className="font-bold text-sm text-slate-800 dark:text-white truncate hover:text-orange-500 transition cursor-pointer text-left"
-          >
+          <span className="font-bold text-sm text-slate-800 dark:text-white truncate group-hover:text-orange-500 transition">
             {title}
-          </button>
+          </span>
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
-          <button
-            type="button"
-            onClick={onToggle}
-            className="p-1 text-teal-600 dark:text-teal-400 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
-          >
-            {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
+          <div className="p-1 text-slate-500 dark:text-slate-400 group-hover:text-orange-500 rounded transition">
+            {isOpen ? <ChevronUp className="w-4 h-4 text-orange-500" /> : <ChevronDown className="w-4 h-4" />}
+          </div>
         </div>
       </div>
 
@@ -265,6 +261,7 @@ export interface InternshipItem {
   website?: string;
   startDate?: string;
   endDate?: string;
+  period?: string;
   description: string;
 }
 
@@ -273,6 +270,7 @@ export interface ProjectItem {
   name: string;
   role: string;
   link?: string;
+  tech?: string;
   date?: string;
   description: string;
 }
@@ -283,6 +281,7 @@ export interface OrganizationItem {
   name: string;
   startDate?: string;
   endDate?: string;
+  period?: string;
   description: string;
 }
 
@@ -357,6 +356,7 @@ export interface ReferenceItem {
   company?: string;
   email?: string;
   phone?: string;
+  note?: string;
 }
 
 export interface CVData {
@@ -373,13 +373,15 @@ export interface CVData {
   headline: string;
   photoUrl?: string;
 
-  // 2. Informasi Kontak
+  // 2. Informasi Kontak & Social Media
   email: string;
   phone: string;
   website?: string;
   linkedin?: string;
   github?: string;
   instagram?: string;
+  socialPlatform?: string;
+  socialHandle?: string;
 
   // 3. Lokasi
   city?: string;
@@ -876,104 +878,188 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     } else {
       const fallbackCv: CVData = {
         id: cvId,
-        title: `CV Senior Frontend Engineer - John Doe`,
+        title: `CV Senior Software Engineer - John Doe`,
         updatedAt: 'Hari ini',
         atsScore: 95,
+        firstName: 'John',
+        lastName: 'Doe',
         fullName: 'John Doe',
-        headline: 'Senior Frontend Engineer',
+        headline: 'Senior Software Engineer / Project Manager',
+        photoUrl: 'https://example.com/foto-profil.jpg',
         email: 'john.doe@example.com',
-        phone: '+1 555 010 1234',
-        location: 'San Francisco, California, United States',
-        summary: 'Senior frontend engineer.',
-        skills: ['TypeScript'],
+        phone: '+62 812-3456-7890',
+        website: 'johndoe.dev',
+        linkedin: 'linkedin.com/in/johndoe',
+        github: 'github.com/johndoe',
+        city: 'Jakarta',
+        province: 'DKI Jakarta',
+        country: 'Indonesia',
+        location: 'Jakarta, Indonesia',
+        summary:
+          'Senior Software Engineer berpengalaman dalam membangun aplikasi web berkinerja tinggi, scalable, dan ATS friendly.',
+        skills: ['TypeScript', 'React', 'Next.js', 'Node.js', 'Tailwind CSS', 'PostgreSQL', 'Git', 'REST API'],
+        skillsList: [
+          { id: 'sk-1', name: 'TypeScript', level: 'Expert' },
+          { id: 'sk-2', name: 'React', level: 'Expert' },
+          { id: 'sk-3', name: 'Next.js', level: 'Expert' },
+          { id: 'sk-4', name: 'Node.js', level: 'Advanced' },
+          { id: 'sk-5', name: 'Tailwind CSS', level: 'Advanced' },
+          { id: 'sk-6', name: 'PostgreSQL', level: 'Advanced' },
+          { id: 'sk-7', name: 'Git', level: 'Advanced' },
+          { id: 'sk-8', name: 'REST API', level: 'Advanced' },
+        ],
         experience: [
           {
             id: 'exp-1',
-            company: 'Acme Corp',
-            role: 'Senior Frontend Engineer',
-            period: '2021 - Sekarang',
-            description: 'Leading frontend architecture for multi-tenant SaaS.',
-          },
-          {
-            id: 'exp-2',
-            company: 'Globex',
-            role: 'Frontend Engineer',
-            period: 'Remote • globex.example.com',
+            company: 'PT Inovasi Teknologi',
+            role: 'Senior Software Engineer',
+            location: 'Jakarta, Indonesia',
+            website: 'acmecorp.com',
+            startDate: 'Jan 2021',
+            endDate: 'Sekarang',
+            isCurrent: true,
+            period: 'Jan 2021 - Sekarang',
             description:
-              '• Delivered the customer-facing analytics dashboard used by 12k weekly active users.\n• Introduced a shared component library and Storybook, cutting feature delivery time by ~30%.\n• Integrated analytics and A/B testing (Mixpanel, GrowthBook) to drive data-informed UI decisions.\n• Moved all marketing sites to Good Core Web Vitals through image, font, and caching optimizations.',
+              'Memimpin pengembangan fitur frontend & backend, mengoptimalkan kecepatan load hingga 45%, dan mengimplementasikan CI/CD.',
           },
+        ],
+        internships: [
           {
-            id: 'exp-3',
-            company: 'Initech',
-            role: 'Junior Frontend Developer',
-            period: 'Austin, TX • initech.example.com',
+            id: 'int-1',
+            company: 'Tech Startup Indonesia',
+            role: 'UI/UX & Frontend Intern',
+            location: 'Jakarta, Indonesia',
+            startDate: 'Jan 2023',
+            endDate: 'Jun 2023',
+            period: 'Jan 2023 - Jun 2023',
             description:
-              '• Built responsive, cross-browser interfaces from Figma designs for enterprise clients.\n• Automated form-heavy QA workflows, reducing manual testing time by 20%.\n• Shipped a reusable form-validation library still used across three internal apps.',
+              'Membantu tim merancang wireframe dan mendesain 10+ komponen UI serta mengimplementasikannya dengan TailwindCSS.',
           },
+        ],
+        projects: [
           {
-            id: 'exp-4',
-            company: 'Hooli (Magang)',
-            role: 'Frontend Engineering Intern',
-            period: 'Palo Alto, CA • hooli.example.com',
+            id: 'proj-1',
+            name: 'E-Commerce Platform',
+            role: 'Lead Developer',
+            link: 'https://project.com',
+            tech: 'React, Node.js, TailwindCSS • https://project.com',
+            date: '2023 - 2024',
             description:
-              '• Shipped a customer-facing settings page in React, used by the full beta cohort by the end of the summer.\n• Wrote the team\'s first component unit tests, lifting coverage on the shared UI package to 70%.',
+              'Membangun aplikasi toko online dengan fitur payment gateway dan real-time analytics.',
           },
+        ],
+        organizations: [
           {
-            id: 'exp-5',
-            company: 'react-a11y-kit (Proyek)',
-            role: 'Creator & Maintainer',
-            period: 'github.com/johndoe/react-a11y-kit',
+            id: 'org-1',
+            name: 'Himpunan Mahasiswa Informatika',
+            role: 'Ketua Divisi Acara',
+            startDate: '2022',
+            endDate: '2023',
+            period: '2022 - 2023',
             description:
-              'Open-source accessibility toolkit for React with 2k+ stars and 40+ contributors. Ships audited, WCAG-compliant primitives adopted across several production design systems.',
-          },
-          {
-            id: 'exp-6',
-            company: 'React SF Meetup & Web Dev Club (Organisasi)',
-            role: 'Organizer & President',
-            period: 'Community & University',
-            description:
-              '• Curate monthly talks for a 1,800-member community and coordinate speakers, venues, and sponsors.\n• Launched a lightning-talk track that has given 30+ first-time speakers a stage.\n• Grew the campus Web Dev Club from 30 to 120 members and ran weekly hands-on workshops.',
+              'Mengkoordinasikan seminar teknologi nasional dengan 500+ peserta dan mengelola pendaftaran peserta.',
           },
         ],
         education: [
           {
             id: 'edu-1',
-            institution: 'Recurse Center',
-            degree: 'Software Residency (New York, NY)',
-            year: 'Residency',
+            institution: 'Universitas Indonesia',
+            degree: 'S1 Teknik Informatika / Ilmu Komputer (IPK 3.75)',
+            location: 'Depok, Jawa Barat',
+            gpa: '3.75 / 4.00',
+            startDate: '2017',
+            endDate: '2021',
+            year: '2017 - 2021',
           },
+        ],
+        certifications: [
           {
-            id: 'edu-2',
-            institution: 'State University',
-            degree: 'B.Sc. Computer Science (Boston, MA - Honors GPA 3.8)',
-            year: '2012 - 2016',
+            id: 'cert-1',
+            name: 'AWS Certified Solutions Architect',
+            issuer: 'Amazon Web Services',
+            issueDate: 'Nov 2023',
+            link: 'aws.amazon.com/verification',
           },
+        ],
+        languages: [
+          { id: 'lang-1', language: 'Bahasa Indonesia', level: 'Professional' },
+          { id: 'lang-2', language: 'Bahasa Inggris', level: 'Professional' },
+        ],
+        courses: [
           {
-            id: 'edu-3',
-            institution: 'Sertifikat Profesional',
-            degree: 'AWS Solutions Architect | Meta Front-End Developer | CPACC Web Accessibility',
-            year: '2021 - 2024',
+            id: 'crs-1',
+            courseName: 'Digital Marketing Mastery',
+            institution: 'RevoU / Google Academy',
+            month: 'Desember',
+            year: '2023',
+            description: 'Strategi pemasaran digital dan analisis data.',
           },
+        ],
+        scholarships: [
           {
-            id: 'edu-4',
-            institution: 'Bahasa',
-            degree: 'English (Native) • Spanish (Professional) • French (Conversational)',
-            year: 'Bahasa',
+            id: 'sch-1',
+            name: 'Beasiswa Djarum Beasiswa Plus',
+            provider: 'Djarum Foundation',
+            month: 'September',
+            year: '2020',
+            description: 'Program pelatihan kepemimpinan dan beasiswa prestasi.',
+          },
+        ],
+        volunteers: [
+          {
+            id: 'vol-1',
+            organization: 'Palang Merah Indonesia',
+            role: 'Tim Tanggap Bencana',
+            location: 'Jakarta',
+            startMonth: 'Januari',
+            startYear: '2022',
+            isCurrent: true,
+            description: 'Mengkoordinasikan logistik darurat dan posko bantuan bencana.',
+          },
+        ],
+        references: [
+          {
+            id: 'ref-1',
+            fullName: 'John Smith',
+            title: 'Engineering Director',
+            company: 'PT Inovasi Teknologi',
+            email: 'john.smith@example.com',
+            phone: '+62 812-3456-7890',
+            note: 'Referensi tersedia atas permintaan',
           },
         ],
       };
       setSelectedCV(fallbackCv);
       setTitleInput(fallbackCv.title);
       setFormData({
+        firstName: fallbackCv.firstName,
+        lastName: fallbackCv.lastName,
         fullName: fallbackCv.fullName,
         headline: fallbackCv.headline,
+        photoUrl: fallbackCv.photoUrl,
         email: fallbackCv.email,
         phone: fallbackCv.phone,
+        website: fallbackCv.website,
+        linkedin: fallbackCv.linkedin,
+        github: fallbackCv.github,
+        city: fallbackCv.city,
+        province: fallbackCv.province,
+        country: fallbackCv.country,
         location: fallbackCv.location,
         summary: fallbackCv.summary,
-        skills: [...fallbackCv.skills],
-        experience: [...fallbackCv.experience],
-        education: [...fallbackCv.education],
+        skills: fallbackCv.skills ? [...fallbackCv.skills] : [],
+        skillsList: fallbackCv.skillsList ? [...fallbackCv.skillsList] : [],
+        experience: fallbackCv.experience ? [...fallbackCv.experience] : [],
+        education: fallbackCv.education ? [...fallbackCv.education] : [],
+        internships: fallbackCv.internships ? [...fallbackCv.internships] : [],
+        projects: fallbackCv.projects ? [...fallbackCv.projects] : [],
+        organizations: fallbackCv.organizations ? [...fallbackCv.organizations] : [],
+        certifications: fallbackCv.certifications ? [...fallbackCv.certifications] : [],
+        languages: fallbackCv.languages ? [...fallbackCv.languages] : [],
+        courses: fallbackCv.courses ? [...fallbackCv.courses] : [],
+        scholarships: fallbackCv.scholarships ? [...fallbackCv.scholarships] : [],
+        volunteers: fallbackCv.volunteers ? [...fallbackCv.volunteers] : [],
+        references: fallbackCv.references ? [...fallbackCv.references] : [],
       });
     }
     setViewMode('preview');
@@ -988,6 +1074,21 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const [newCvJobTitle, setNewCvJobTitle] = useState<string>('');
   const [newCvStartMode, setNewCvStartMode] = useState<'example' | 'empty' | 'import'>('example');
   const [newCvFile, setNewCvFile] = useState<File | null>(null);
+  const [templateFormSubmitted, setTemplateFormSubmitted] = useState<boolean>(false);
+
+  // Document Layout & Formatting Settings State
+  const [showLayoutSelector, setShowLayoutSelector] = useState<boolean>(false);
+  const [showDocSettings, setShowDocSettings] = useState<boolean>(false);
+  const [docFontFamily, setDocFontFamily] = useState<'sans' | 'serif' | 'mono' | 'standard'>('sans');
+  const [docFontSize, setDocFontSize] = useState<'sm' | 'base' | 'md' | 'lg'>('base');
+  const [docSpacing, setDocSpacing] = useState<'compact' | 'normal' | 'spacious'>('normal');
+  const [docShowIcons, setDocShowIcons] = useState<boolean>(true);
+
+  // Template Form Validation
+  const isNewCvTitleValid = newCvTitle.trim().length > 0;
+  const isNewCvJobTitleValid = newCvJobTitle.trim().length > 0;
+  const isNewCvFileValid = newCvStartMode !== 'import' || newCvFile !== null;
+  const isTemplateFormValid = isNewCvTitleValid && isNewCvJobTitleValid && isNewCvFileValid;
 
   // AI CV Creation Wizard State
   const [aiWizardStep, setAiWizardStep] = useState<number>(1); // 1: Package, 2: Payment, 3: Data Option/Form, 4: Progress
@@ -1293,191 +1394,169 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   };
 
   // Form State for Manual CV & Wizard
+  // Form State for Manual CV & Wizard
   const [formData, setFormData] = useState<Omit<CVData, 'id' | 'updatedAt' | 'atsScore' | 'title'>>({
     sectionOrder: DEFAULT_SECTION_ORDER,
     firstName: 'John',
     lastName: 'Doe',
     fullName: 'John Doe',
-    headline: 'Senior Frontend Engineer',
-    photoUrl: '',
+    headline: 'Senior Software Engineer / Project Manager',
+    photoUrl: 'https://example.com/foto-profil.jpg',
     email: 'john.doe@example.com',
-    phone: '+1 555 010 1234',
+    phone: '+62 812-3456-7890',
     website: 'johndoe.dev',
     linkedin: 'linkedin.com/in/johndoe',
-    github: 'johndoe',
+    github: 'github.com/johndoe',
     instagram: '',
-    city: 'San Francisco',
-    province: 'California',
-    country: 'United States',
-    location: 'San Francisco, California, United States',
+    city: 'Jakarta',
+    province: 'DKI Jakarta',
+    country: 'Indonesia',
+    location: 'Jakarta, Indonesia',
     summary:
-      'Senior frontend engineer with 8+ years building accessible, high-performance web applications for fintech and SaaS. Deep experience with React, Next.js, and design systems, with a focus on developer experience and shipping measurable outcomes. Comfortable leading projects end to end and mentoring teams.',
+      'Senior Software Engineer berpengalaman dalam membangun aplikasi web berkinerja tinggi, scalable, dan ATS friendly.',
     experience: [
       {
         id: 'exp-1',
-        company: 'Acme Corp',
-        role: 'Senior Frontend Engineer',
-        location: 'San Francisco, CA',
-        website: 'acme.example.com',
-        startDate: '2020',
+        company: 'PT Inovasi Teknologi',
+        role: 'Senior Software Engineer',
+        location: 'Jakarta, Indonesia',
+        website: 'acmecorp.com',
+        startDate: 'Jan 2021',
         endDate: 'Sekarang',
         isCurrent: true,
-        period: 'San Francisco, CA • acme.example.com',
+        period: 'Jan 2021 - Sekarang',
         description:
-          '• Led migration of a 200k-line codebase to a typed component library, cutting UI defects by 40%.\n• Architected the design-system accessibility program, reaching WCAG 2.1 AA across every shipped component.\n• Cut initial bundle size 55% with code-splitting and dependency audits, improving LCP from 3.1s to 1.4s.\n• Built a real-time analytics dashboard over WebSockets, adopted by 12k weekly active users.\n• Maintain react-a11y-kit, an open-source accessibility toolkit with 2k+ stars.\n• Mentored four engineers and set the team\'s code-review, testing, and release standards.',
-        achievements: 'Cutting UI defects by 40%, LCP improved from 3.1s to 1.4s.',
-      },
-      {
-        id: 'exp-2',
-        company: 'Globex',
-        role: 'Frontend Engineer',
-        location: 'Remote',
-        website: 'globex.example.com',
-        startDate: '2018',
-        endDate: '2020',
-        period: 'Remote • globex.example.com',
-        description:
-          '• Delivered the customer-facing analytics dashboard used by 12k weekly active users.\n• Introduced a shared component library and Storybook, cutting feature delivery time by ~30%.\n• Integrated analytics and A/B testing (Mixpanel, GrowthBook) to drive data-informed UI decisions.\n• Moved all marketing sites to Good Core Web Vitals through image, font, and caching optimizations.',
-      },
-      {
-        id: 'exp-3',
-        company: 'Initech',
-        role: 'Junior Frontend Developer',
-        location: 'Austin, TX',
-        website: 'initech.example.com',
-        startDate: '2016',
-        endDate: '2018',
-        period: 'Austin, TX • initech.example.com',
-        description:
-          '• Built responsive, cross-browser interfaces from Figma designs for enterprise clients.\n• Automated form-heavy QA workflows, reducing manual testing time by 20%.\n• Shipped a reusable form-validation library still used across three internal apps.',
+          'Memimpin pengembangan fitur frontend & backend, mengoptimalkan kecepatan load hingga 45%, dan mengimplementasikan CI/CD.',
+        achievements: 'Mengoptimalkan kecepatan load hingga 45% dan otomasi CI/CD.',
       },
     ],
     internships: [
       {
         id: 'int-1',
-        company: 'Hooli',
-        role: 'Frontend Engineering Intern',
-        location: 'Palo Alto, CA',
-        website: 'hooli.example.com',
-        startDate: '2015',
-        endDate: '2016',
+        company: 'Tech Startup Indonesia',
+        role: 'UI/UX & Frontend Intern',
+        location: 'Jakarta, Indonesia',
+        website: 'techstartup.id',
+        startDate: 'Jan 2023',
+        endDate: 'Jun 2023',
+        period: 'Jan 2023 - Jun 2023',
         description:
-          '• Shipped a customer-facing settings page in React, used by the full beta cohort by the end of the summer.\n• Wrote the team\'s first component unit tests, lifting coverage on the shared UI package to 70%.',
+          'Membantu tim merancang wireframe dan mendesain 10+ komponen UI serta mengimplementasikannya dengan TailwindCSS.',
       },
     ],
     projects: [
       {
         id: 'proj-1',
-        name: 'react-a11y-kit',
-        role: 'Creator & Maintainer',
-        link: 'github.com/johndoe/react-a11y-kit',
-        date: '2021 - Sekarang',
+        name: 'E-Commerce Platform',
+        role: 'Lead Developer',
+        link: 'https://project.com',
+        tech: 'React, Node.js, TailwindCSS • https://project.com',
+        date: '2023 - 2024',
         description:
-          'Open-source accessibility toolkit for React with 2k+ stars and 40+ contributors. Ships audited, WCAG-compliant primitives adopted across several production design systems.',
+          'Membangun aplikasi toko online dengan fitur payment gateway dan real-time analytics.',
       },
     ],
     organizations: [
       {
         id: 'org-1',
-        name: 'React SF Meetup',
-        role: 'Organizer',
-        startDate: '2021',
-        endDate: 'Sekarang',
+        name: 'Himpunan Mahasiswa Informatika',
+        role: 'Ketua Divisi Acara',
+        startDate: '2022',
+        endDate: '2023',
+        period: '2022 - 2023',
         description:
-          'Curate monthly talks for a 1,800-member community and coordinate speakers, venues, and sponsors.',
-      },
-      {
-        id: 'org-2',
-        name: 'Web Development Club, State University',
-        role: 'President',
-        startDate: '2014',
-        endDate: '2016',
-        description:
-          'Grew the club from 30 to 120 members and ran weekly hands-on workshops.',
+          'Mengkoordinasikan seminar teknologi nasional dengan 500+ peserta dan mengelola pendaftaran peserta.',
       },
     ],
     education: [
       {
         id: 'edu-1',
-        institution: 'Recurse Center',
-        degree: 'Software Residency',
-        location: 'New York, NY',
-        year: '2020',
-      },
-      {
-        id: 'edu-2',
-        institution: 'State University',
-        degree: 'B.Sc. Computer Science',
-        location: 'Boston, MA',
-        gpa: '3.8 / 4.0',
-        startDate: '2012',
-        endDate: '2016',
-        year: '2012 - 2016',
+        institution: 'Universitas Indonesia',
+        degree: 'S1 Teknik Informatika / Ilmu Komputer (IPK 3.75)',
+        location: 'Depok, Jawa Barat',
+        gpa: '3.75 / 4.00',
+        startDate: '2017',
+        endDate: '2021',
+        year: '2017 - 2021',
       },
     ],
     certifications: [
       {
         id: 'cert-1',
-        name: 'AWS Certified Solutions Architect – Associate',
+        name: 'AWS Certified Solutions Architect',
         issuer: 'Amazon Web Services',
-        issueDate: '2023',
+        issueDate: 'Nov 2023',
         link: 'aws.amazon.com/verification',
-      },
-      {
-        id: 'cert-2',
-        name: 'Meta Front-End Developer',
-        issuer: 'Coursera / Meta',
-        issueDate: '2022',
-        link: 'coursera.org/verify/meta-frontend',
-      },
-      {
-        id: 'cert-3',
-        name: 'Certified Professional in Web Accessibility (CPACC)',
-        issuer: 'IAAP',
-        issueDate: '2021',
-        link: 'accessibilityassociation.org',
       },
     ],
     skillsList: [
       { id: 'sk-1', name: 'TypeScript', level: 'Expert' },
-      { id: 'sk-2', name: 'JavaScript (ES2023)', level: 'Expert' },
-      { id: 'sk-3', name: 'React & Next.js', level: 'Expert' },
+      { id: 'sk-2', name: 'React', level: 'Expert' },
+      { id: 'sk-3', name: 'Next.js', level: 'Expert' },
       { id: 'sk-4', name: 'Node.js', level: 'Advanced' },
-      { id: 'sk-5', name: 'GraphQL & REST APIs', level: 'Advanced' },
-      { id: 'sk-6', name: 'Tailwind CSS', level: 'Advanced' },
-      { id: 'sk-7', name: 'Testing (Playwright, Vitest)', level: 'Advanced' },
-      { id: 'sk-8', name: 'State (Zustand, React Query)', level: 'Advanced' },
-      { id: 'sk-9', name: 'Web Accessibility (WCAG)', level: 'Advanced' },
-      { id: 'sk-10', name: 'CI/CD & Docker', level: 'Intermediate' },
+      { id: 'sk-5', name: 'Tailwind CSS', level: 'Advanced' },
+      { id: 'sk-6', name: 'PostgreSQL', level: 'Advanced' },
+      { id: 'sk-7', name: 'Git', level: 'Advanced' },
+      { id: 'sk-8', name: 'REST API', level: 'Advanced' },
     ],
     skills: [
-      'TypeScript (Expert)',
-      'JavaScript (ES2023) (Expert)',
-      'React & Next.js (Expert)',
-      'Node.js (Advanced)',
-      'GraphQL & REST APIs (Advanced)',
-      'Tailwind CSS (Advanced)',
-      'Testing (Playwright, Vitest) (Advanced)',
-      'State (Zustand, React Query) (Advanced)',
-      'Web Accessibility (WCAG) (Advanced)',
-      'CI/CD & Docker (Intermediate)',
+      'TypeScript',
+      'React',
+      'Next.js',
+      'Node.js',
+      'Tailwind CSS',
+      'PostgreSQL',
+      'Git',
+      'REST API',
     ],
     languages: [
-      { id: 'lang-1', language: 'English', level: 'Native' },
-      { id: 'lang-2', language: 'Spanish', level: 'Professional' },
-      { id: 'lang-3', language: 'French', level: 'Conversational' },
+      { id: 'lang-1', language: 'Bahasa Indonesia', level: 'Professional' },
+      { id: 'lang-2', language: 'Bahasa Inggris', level: 'Professional' },
     ],
     courses: [
-      { id: 'crs-1', courseName: 'Machine Learning Specialization', institution: 'Coursera / Stanford University', month: 'Agustus', year: '2024', description: 'Deep neural networks, supervised & unsupervised learning algorithms.' },
+      {
+        id: 'crs-1',
+        courseName: 'Digital Marketing Mastery',
+        institution: 'RevoU / Google Academy',
+        month: 'Desember',
+        year: '2023',
+        description: 'Strategi pemasaran digital dan analisis data.',
+      },
     ],
     scholarships: [
-      { id: 'sch-1', name: 'Merit Scholarship for Academic Excellence', provider: 'University of California', month: 'September', year: '2023', description: 'Awarded for maintaining top 5% GPA across all engineering departments.' },
+      {
+        id: 'sch-1',
+        name: 'Beasiswa Djarum Beasiswa Plus',
+        provider: 'Djarum Foundation',
+        month: 'September',
+        year: '2020',
+        description: 'Program pelatihan kepemimpinan dan beasiswa prestasi.',
+      },
     ],
     volunteers: [
-      { id: 'vol-1', organization: 'Red Cross International', role: 'First Aid & Emergency Response Volunteer', location: 'San Francisco, CA', startMonth: 'Januari', startYear: '2023', endMonth: '', endYear: '', isCurrent: true, description: 'Coordinated disaster response drills and community first-aid workshops.' },
+      {
+        id: 'vol-1',
+        organization: 'Palang Merah Indonesia',
+        role: 'Tim Tanggap Bencana',
+        location: 'Jakarta',
+        startMonth: 'Januari',
+        startYear: '2022',
+        endMonth: '',
+        endYear: '',
+        isCurrent: true,
+        description: 'Mengkoordinasikan logistik darurat dan posko bantuan bencana.',
+      },
     ],
     references: [
-      { id: 'ref-1', fullName: 'Sarah Smith', title: 'Engineering Director', company: 'Acme Corp', email: 'sarah.smith@example.com', phone: '+1 555 019 2831' },
+      {
+        id: 'ref-1',
+        fullName: 'John Smith',
+        title: 'Engineering Director',
+        company: 'PT Inovasi Teknologi',
+        email: 'john.smith@example.com',
+        phone: '+62 812-3456-7890',
+        note: 'Referensi tersedia atas permintaan',
+      },
     ],
   });
 
@@ -1500,6 +1579,49 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const pointerDragIdxRef = useRef<number | null>(null);
   const sectionOrderArrayRef = useRef<string[]>([]);
   const dragClientYRef = useRef<number | null>(null);
+
+  // Profile Photo Upload Ref & Handler (Canvas WebP Compression)
+  const photoFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 400; // max dimension 400px for crisp avatar
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          }
+        } else {
+          if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          // Compress to WebP format at 82% quality
+          const webpDataUrl = canvas.toDataURL('image/webp', 0.82);
+          setFormData((prev) => ({ ...prev, photoUrl: webpDataUrl }));
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
 
   const activeSectionOrder = formData.sectionOrder && formData.sectionOrder.length > 0
     ? formData.sectionOrder
@@ -2298,7 +2420,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           </div>
 
           {/* Grid Daftar CV */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Card Order Active (Sedang Ditinjau) */}
             {activeOrder && (
               <div className="bg-gradient-to-br from-amber-50/40 via-white to-orange-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-amber-950/30 border-2 border-amber-400/80 dark:border-amber-500/60 rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden">
@@ -3350,75 +3472,265 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       {/* VIEW MODE 4: MANUAL CREATION & EDIT VIEW */}
       {(viewMode === 'create' || viewMode === 'preview') && (
         <div className="flex flex-col space-y-4 max-w-7xl mx-auto w-full">
-          {/* TOP BAR ABOVE PREVIEW & EDITOR */}
-          <div className="w-full bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 shadow-2xs no-print">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 rounded-md bg-orange-50 text-orange-600 font-bold text-xs border border-orange-200">
-                Pratinjau Kertas A4 (Real-time)
-              </span>
-              <span className="text-[11px] text-slate-500 hidden sm:inline">
-                210 x 297 mm
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 shadow-2xs">
-                <span className="text-[11px] font-extrabold uppercase text-slate-400 dark:text-slate-500 hidden sm:inline">
-                  Template:
-                </span>
-                <select
-                  value={selectedTemplateId}
-                  onChange={(e) => {
-                    const newTpl = e.target.value;
-                    setSelectedTemplateId(newTpl);
-                    if (selectedCV) {
-                      const updatedCV = { ...selectedCV, templateId: newTpl };
-                      setSelectedCV(updatedCV);
-                      setCvList((prevList) => {
-                        const nextList = prevList.map((item) => (item.id === selectedCV.id ? updatedCV : item));
-                        if (typeof window !== 'undefined') {
-                          localStorage.setItem('cuti_cv_list', JSON.stringify(nextList));
-                        }
-                        return nextList;
-                      });
-                    }
-                  }}
-                  className="bg-transparent text-slate-800 dark:text-slate-200 font-bold text-xs cursor-pointer focus:outline-none"
-                >
-                  {cvTemplates
-                    .filter((t) => !t.hidden)
-                    .map((tpl) => (
-                      <option key={tpl.id} value={tpl.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
-                        {tpl.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-
+          {/* CONTROL TOOLBAR FOR LAYOUT & DOCUMENT SETTINGS */}
+          <div className="w-full bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-2xs no-print">
+            {/* Left: Back to List & Active Layout Indicator */}
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 transition cursor-pointer"
+                className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 transition cursor-pointer"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
+                <ArrowLeft className="w-4 h-4" />
                 <span>Kembali</span>
               </button>
+
+              <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block" />
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline">Tata Letak:</span>
+                <span className="px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 text-xs font-bold border border-orange-200 dark:border-orange-800/60 flex items-center gap-1.5">
+                  <LayoutGrid className="w-3.5 h-3.5 text-orange-500" />
+                  <span>{cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS Standard'}</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Right: Controls & Download Actions */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Toggle Visual Template Selector */}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLayoutSelector(!showLayoutSelector);
+                  if (showDocSettings) setShowDocSettings(false);
+                }}
+                className={`px-3.5 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer border ${
+                  showLayoutSelector
+                    ? 'bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-700 shadow-2xs'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                }`}
+              >
+                <LayoutGrid className="w-4 h-4 text-orange-500" />
+                <span>Pilih Template & Tata Letak</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showLayoutSelector ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Toggle Document Settings */}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDocSettings(!showDocSettings);
+                  if (showLayoutSelector) setShowLayoutSelector(false);
+                }}
+                className={`px-3.5 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer border ${
+                  showDocSettings
+                    ? 'bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-700 shadow-2xs'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                }`}
+              >
+                <SlidersHorizontal className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+                <span>Pengaturan Dokumen</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showDocSettings ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Primary Download Button */}
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5" />
+                <Download className="w-4 h-4" />
                 <span>Unduh PDF A4</span>
               </button>
             </div>
           </div>
 
+          {/* VISUAL TEMPLATE SELECTOR GALLERY WITH MINI PREVIEWS */}
+          {showLayoutSelector && (
+            <div className="w-full bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4 animate-in fade-in duration-200 no-print shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    <LayoutGrid className="w-4 h-4 text-orange-500" />
+                    <span>Pilih Template & Tata Letak CV ATS</span>
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Klik preview kecil untuk memilih tata letak yang diinginkan. Semua template 100% aman untuk parser sistem ATS.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowLayoutSelector(false)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                {cvTemplates
+                  .filter((tpl) => !tpl.hidden)
+                  .map((tpl) => {
+                    const isSelected = selectedTemplateId === tpl.id;
+                    return (
+                      <div
+                        key={tpl.id}
+                        onClick={() => {
+                          setSelectedTemplateId(tpl.id);
+                          if (selectedCV) {
+                            const updatedCV = { ...selectedCV, templateId: tpl.id };
+                            setSelectedCV(updatedCV);
+                            setCvList((prevList) => {
+                              const nextList = prevList.map((item) => (item.id === selectedCV.id ? updatedCV : item));
+                              if (typeof window !== 'undefined') {
+                                localStorage.setItem('cuti_cv_list', JSON.stringify(nextList));
+                              }
+                              return nextList;
+                            });
+                          }
+                        }}
+                        className={`group relative p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+                          isSelected
+                            ? 'bg-orange-50/80 dark:bg-orange-950/40 border-orange-500 ring-2 ring-orange-500/30 shadow-md'
+                            : 'bg-slate-50/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:border-orange-300 dark:hover:border-orange-700'
+                        }`}
+                      >
+                        {/* MINI VISUAL PREVIEW THUMBNAIL */}
+                        <div className="w-full aspect-[210/297] rounded-lg bg-white border border-slate-200 dark:border-slate-700 p-1.5 overflow-hidden shadow-2xs relative flex flex-col justify-between mb-2 group-hover:shadow-md transition">
+                          <TemplateThumbnailVisual templateId={tpl.id} />
+                          {isSelected && (
+                            <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-xs">
+                              <Check className="w-3 h-3 stroke-[3]" />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Template Info */}
+                        <div className="space-y-1">
+                          <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase bg-slate-200/80 text-slate-700 dark:bg-slate-800 dark:text-slate-300 block truncate">
+                            {tpl.badge}
+                          </span>
+                          <h5 className="font-extrabold text-xs text-slate-900 dark:text-white truncate">
+                            {tpl.name}
+                          </h5>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
+
+          {/* DOCUMENT SETTINGS PANEL */}
+          {showDocSettings && (
+            <div className="w-full bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-5 animate-in fade-in duration-200 no-print shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    <SlidersHorizontal className="w-4 h-4 text-orange-500" />
+                    <span>Pengaturan Dokumen & Tipografi</span>
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Sesuaikan font, ukuran teks, spasi, dan tampilan ikon kontak sesuai kebutuhan.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowDocSettings(false)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                {/* Font Family Selection */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                    Jenis Font
+                  </label>
+                  <select
+                    value={docFontFamily}
+                    onChange={(e) => setDocFontFamily(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                  >
+                    <option value="sans">Geist / Inter (Sans-serif Modern)</option>
+                    <option value="serif">EB Garamond / Lora (Serif Klasik)</option>
+                    <option value="mono">JetBrains Mono (Monospace Tech)</option>
+                    <option value="standard">Carlito / Arimo (ATS Standard)</option>
+                  </select>
+                </div>
+
+                {/* Font Size Selection */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                    Ukuran Font
+                  </label>
+                  <select
+                    value={docFontSize}
+                    onChange={(e) => setDocFontSize(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                  >
+                    <option value="sm">Kecil (9.5 pt - Hemat Ruang)</option>
+                    <option value="base">Normal (10.5 pt - Ideal)</option>
+                    <option value="md">Sedang (11.5 pt - Standar)</option>
+                    <option value="lg">Besar (12.5 pt - Mudah Dibaca)</option>
+                  </select>
+                </div>
+
+                {/* Line & Section Spacing */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                    Spasi Paragraf & Margin
+                  </label>
+                  <select
+                    value={docSpacing}
+                    onChange={(e) => setDocSpacing(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                  >
+                    <option value="compact">Padat (Spasi Rapat)</option>
+                    <option value="normal">Normal (Spasi Seimbang)</option>
+                    <option value="spacious">Lega (Spasi Longgar)</option>
+                  </select>
+                </div>
+
+                {/* Contact Icons Toggle */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                    Ikon Kontak Header
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setDocShowIcons(!docShowIcons)}
+                    className={`w-full px-3 py-2 rounded-xl border text-xs font-bold flex items-center justify-between transition cursor-pointer ${
+                      docShowIcons
+                        ? 'bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800'
+                        : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                    }`}
+                  >
+                    <span>{docShowIcons ? 'Ikon Kontak Aktif' : 'Teks Kontak Saja'}</span>
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${docShowIcons ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-600'}`}>
+                      {docShowIcons && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* MAIN CONTENT: SPLIT SCREEN ON DESKTOP (LEFT: A4 CANVAS, RIGHT: INLINE FORM EDITOR) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* LEFT COLUMN: CENTERED A4 CANVAS PREVIEW */}
             <div className="lg:col-span-7 xl:col-span-7 w-full overflow-x-auto no-scrollbar pb-4 flex justify-center bg-slate-200/60 dark:bg-slate-950/80 p-4 md:p-6 rounded-xl border border-slate-300/60 dark:border-slate-800 lg:sticky lg:top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
-              <A4PaperlikeCanvas templateId={selectedTemplateId} customData={formData} />
+              <A4PaperlikeCanvas
+                templateId={selectedTemplateId}
+                customData={formData}
+                docFontFamily={docFontFamily}
+                docFontSize={docFontSize}
+                docSpacing={docSpacing}
+                docShowIcons={docShowIcons}
+              />
             </div>
 
             {/* RIGHT COLUMN: INLINE FORM CONTROLS DIRECTLY NEXT TO CV (Clean, Frameless Container) */}
@@ -3572,27 +3884,114 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">GitHub</label>
-                            <input
-                              type="text"
-                              placeholder="e.g., github.com/johndoe"
-                              value={formData.github || ''}
-                              onChange={(e) => setFormData((prev) => ({ ...prev, github: e.target.value }))}
-                              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                            />
+                        {/* Media Sosial Optional Dropdown & Input */}
+                        <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+                          <label className="font-semibold text-slate-700 dark:text-slate-300 block text-xs">
+                            Media Sosial Tambahan (Opsional)
+                          </label>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                              <select
+                                value={formData.socialPlatform || 'github'}
+                                onChange={(e) =>
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    socialPlatform: e.target.value,
+                                  }))
+                                }
+                                className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 transition shadow-2xs"
+                              >
+                                <option value="github">GitHub</option>
+                                <option value="linkedin">LinkedIn</option>
+                                <option value="dribbble">Dribbble</option>
+                                <option value="pinterest">Pinterest</option>
+                                <option value="instagram">Instagram</option>
+                                <option value="tiktok">TikTok</option>
+                                <option value="website">Portofolio / Website</option>
+                                <option value="other">Lainnya</option>
+                              </select>
+                            </div>
+                            <div>
+                              <input
+                                type="text"
+                                placeholder={
+                                  formData.socialPlatform === 'dribbble'
+                                    ? 'e.g., dribbble.com/johndoe'
+                                    : formData.socialPlatform === 'pinterest'
+                                    ? 'e.g., pinterest.com/johndoe'
+                                    : formData.socialPlatform === 'instagram'
+                                    ? 'e.g., instagram.com/johndoe'
+                                    : formData.socialPlatform === 'tiktok'
+                                    ? 'e.g., tiktok.com/@johndoe'
+                                    : 'e.g., github.com/johndoe'
+                                }
+                                value={formData.github || formData.socialHandle || ''}
+                                onChange={(e) =>
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    github: e.target.value,
+                                    socialHandle: e.target.value,
+                                  }))
+                                }
+                                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                              />
+                            </div>
                           </div>
-                          <div>
-                            <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Foto Profil</label>
-                            <input
-                              type="text"
-                              placeholder="e.g., https://example.com/foto-profil.jpg"
-                              value={formData.photoUrl || ''}
-                              onChange={(e) => setFormData((prev) => ({ ...prev, photoUrl: e.target.value }))}
-                              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                            />
-                          </div>
+                        </div>
+
+                        {/* Foto Profil Upload Canvas WebP & Preview (Opsional) */}
+                        <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                          <label className="font-semibold text-slate-700 dark:text-slate-300 block text-xs">
+                            Foto Profil (Opsional)
+                          </label>
+                          <input
+                            type="file"
+                            ref={photoFileInputRef}
+                            accept="image/*"
+                            onChange={handlePhotoUpload}
+                            className="hidden"
+                          />
+                          {formData.photoUrl ? (
+                            <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+                              <img
+                                src={formData.photoUrl}
+                                alt="Profil"
+                                className="w-14 h-14 rounded-full object-cover border-2 border-orange-500 shadow-2xs shrink-0 bg-white"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-bold text-slate-800 dark:text-white truncate">Foto Profil Terpasang</p>
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400">Format WebP Terkompresi</p>
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => photoFileInputRef.current?.click()}
+                                  className="px-2.5 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white text-xs font-semibold transition cursor-pointer"
+                                >
+                                  Ganti
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setFormData((prev) => ({ ...prev, photoUrl: '' }))}
+                                  className="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-400 text-xs font-semibold transition cursor-pointer"
+                                >
+                                  Hapus
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-3">
+                              <button
+                                type="button"
+                                onClick={() => photoFileInputRef.current?.click()}
+                                className="px-4 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-950/40 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-slate-700 transition cursor-pointer flex items-center gap-2"
+                              >
+                                <Upload className="w-4 h-4 text-orange-500" />
+                                <span>Unggah Foto Profil (Auto Compress WebP)</span>
+                              </button>
+                              <span className="text-[11px] text-slate-400">PNG, JPG, WebP</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -5391,6 +5790,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         setNewCvJobTitle('');
                         setNewCvStartMode('example');
                         setNewCvFile(null);
+                        setTemplateFormSubmitted(false);
                         setTemplateModalStep(2);
                       }}
                       className="px-6 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
@@ -5443,11 +5843,22 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             value={newCvTitle}
                             onChange={(e) => setNewCvTitle(e.target.value)}
                             placeholder="Contoh: CV Loker Software Engineer 2026"
-                            className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition font-medium"
+                            className={`w-full px-4 py-2.5 rounded-xl border text-xs font-medium focus:ring-2 transition ${
+                              templateFormSubmitted && !isNewCvTitleValid
+                                ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100 focus:ring-rose-500 focus:border-rose-500'
+                                : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-blue-500 focus:border-blue-500'
+                            }`}
                           />
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                            Nama untuk memudahkan kamu membedakan file CV di dashboard.
-                          </p>
+                          {templateFormSubmitted && !isNewCvTitleValid ? (
+                            <p className="text-[11px] font-bold text-rose-500 mt-1 flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                              <span>Judul CV wajib diisi untuk melanjutkan.</span>
+                            </p>
+                          ) : (
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                              Nama untuk memudahkan kamu membedakan file CV di dashboard.
+                            </p>
+                          )}
                         </div>
 
                         {/* Input Lowongan / Target Posisi */}
@@ -5460,11 +5871,22 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             value={newCvJobTitle}
                             onChange={(e) => setNewCvJobTitle(e.target.value)}
                             placeholder="Contoh: Senior Frontend Developer / Staff Administrasi"
-                            className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition font-medium"
+                            className={`w-full px-4 py-2.5 rounded-xl border text-xs font-medium focus:ring-2 transition ${
+                              templateFormSubmitted && !isNewCvJobTitleValid
+                                ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100 focus:ring-rose-500 focus:border-rose-500'
+                                : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-blue-500 focus:border-blue-500'
+                            }`}
                           />
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                            Posisi pekerjaan spesifik yang menjadi target lamaran kamu.
-                          </p>
+                          {templateFormSubmitted && !isNewCvJobTitleValid ? (
+                            <p className="text-[11px] font-bold text-rose-500 mt-1 flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                              <span>Lowongan / Target Posisi wajib diisi untuk melanjutkan.</span>
+                            </p>
+                          ) : (
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                              Posisi pekerjaan spesifik yang menjadi target lamaran kamu.
+                            </p>
+                          )}
                         </div>
                       </div>
 
@@ -5580,6 +6002,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                     Format didukung: PDF, DOCX, DOC, TXT (Maks. 5MB)
                                   </p>
                                 )}
+                                {templateFormSubmitted && !isNewCvFileValid && (
+                                  <p className="text-[11px] font-bold text-rose-500 mt-1 flex items-center justify-center gap-1">
+                                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                    <span>Wajib memilih file CV untuk diimpor.</span>
+                                  </p>
+                                )}
                               </div>
                             )}
                           </div>
@@ -5592,15 +6020,30 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 {/* Modal Footer Step 2 */}
                 <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
                   <button
+                    type="button"
                     onClick={() => setTemplateModalStep(1)}
                     className="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer flex items-center gap-1"
                   >
                     <ArrowLeft className="w-4 h-4" />
                     <span>Kembali ke Templat</span>
                   </button>
-                  <button
-                    onClick={() => {
-                      const newId = `cv-${Date.now()}`;
+
+                  <div className="flex items-center gap-3">
+                    {templateFormSubmitted && !isTemplateFormValid && (
+                      <span className="text-xs font-extrabold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 bg-rose-50 dark:bg-rose-950/60 px-3 py-1.5 rounded-lg border border-rose-200 dark:border-rose-800">
+                        <AlertCircle className="w-4 h-4 shrink-0 animate-bounce text-rose-500" />
+                        <span>Harap isi semua kolom wajib (*)</span>
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTemplateFormSubmitted(true);
+                        if (!isTemplateFormValid) {
+                          return;
+                        }
+
+                        const newId = `cv-${Date.now()}`;
                       const templateName = cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS';
 
                       let initialData: Partial<CVData> = {};
@@ -5698,8 +6141,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
-              </>
-            )}
+              </div>
+            </>
+          )}
           </div>
         </div>
       )}
@@ -5717,12 +6161,159 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   );
 };
 
+// Mini Visual Thumbnail Preview Component for Template Selection Cards
+const TemplateThumbnailVisual: React.FC<{ templateId: string }> = ({ templateId }) => {
+  if (templateId === 'ketat-serif') {
+    return (
+      <div className="w-full h-full flex flex-col p-1.5 space-y-1 bg-white text-slate-800 select-none">
+        <div className="text-center space-y-0.5 pb-1 border-b-2 border-slate-800">
+          <div className="h-2 w-16 bg-slate-900 mx-auto rounded-xs" />
+          <div className="h-1 w-20 bg-slate-400 mx-auto rounded-xs" />
+        </div>
+        <div className="space-y-1 pt-0.5">
+          <div className="flex items-center justify-between border-b border-slate-400 pb-0.5">
+            <div className="h-1.5 w-12 bg-slate-900 rounded-xs" />
+            <div className="h-1 w-6 bg-slate-400 rounded-xs" />
+          </div>
+          <div className="h-1 w-full bg-slate-300 rounded-xs" />
+          <div className="h-1 w-4/5 bg-slate-300 rounded-xs" />
+        </div>
+        <div className="space-y-1 pt-0.5">
+          <div className="flex items-center justify-between border-b border-slate-400 pb-0.5">
+            <div className="h-1.5 w-14 bg-slate-900 rounded-xs" />
+          </div>
+          <div className="h-1 w-full bg-slate-300 rounded-xs" />
+          <div className="h-1 w-3/4 bg-slate-300 rounded-xs" />
+        </div>
+      </div>
+    );
+  }
+
+  if (templateId === 'luasa-minimal') {
+    return (
+      <div className="w-full h-full flex flex-col p-1.5 space-y-1.5 bg-slate-50/60 text-slate-800 select-none">
+        <div className="space-y-0.5 pb-1">
+          <div className="h-2.5 w-14 bg-slate-800 rounded-xs" />
+          <div className="h-1 w-24 bg-slate-400 rounded-xs" />
+        </div>
+        <div className="space-y-1">
+          <div className="h-1.5 w-10 bg-slate-700 rounded-xs tracking-widest" />
+          <div className="h-1 w-full bg-slate-300 rounded-xs" />
+          <div className="h-1 w-5/6 bg-slate-300 rounded-xs" />
+        </div>
+        <div className="space-y-1">
+          <div className="h-1.5 w-12 bg-slate-700 rounded-xs" />
+          <div className="h-1 w-full bg-slate-300 rounded-xs" />
+        </div>
+      </div>
+    );
+  }
+
+  if (templateId === 'tebal-bold') {
+    return (
+      <div className="w-full h-full flex flex-col bg-white text-slate-900 select-none overflow-hidden">
+        <div className="bg-slate-900 p-1.5 text-white space-y-0.5">
+          <div className="h-2.5 w-16 bg-white rounded-xs" />
+          <div className="h-1 w-12 bg-slate-300 rounded-xs" />
+        </div>
+        <div className="p-1 space-y-1.5">
+          <div className="space-y-1">
+            <div className="h-1.5 w-14 bg-slate-900 rounded-xs font-black" />
+            <div className="h-1 w-full bg-slate-300 rounded-xs" />
+            <div className="h-1 w-4/5 bg-slate-300 rounded-xs" />
+          </div>
+          <div className="space-y-1">
+            <div className="h-1.5 w-12 bg-slate-900 rounded-xs" />
+            <div className="h-1 w-full bg-slate-300 rounded-xs" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (templateId === 'creative-tech') {
+    return (
+      <div className="w-full h-full flex flex-col p-1.5 space-y-1 bg-white text-slate-800 select-none">
+        <div className="border-l-2 border-emerald-500 pl-1 space-y-0.5">
+          <div className="h-2 w-14 bg-slate-900 rounded-xs" />
+          <div className="h-1 w-18 bg-emerald-600 rounded-xs" />
+        </div>
+        <div className="space-y-1 pt-1">
+          <div className="h-1.5 w-12 bg-slate-800 rounded-xs" />
+          <div className="flex gap-1">
+            <div className="h-2 w-5 bg-emerald-100 rounded-xs" />
+            <div className="h-2 w-5 bg-emerald-100 rounded-xs" />
+            <div className="h-2 w-5 bg-emerald-100 rounded-xs" />
+          </div>
+        </div>
+        <div className="space-y-0.5 pt-0.5">
+          <div className="h-1.5 w-10 bg-slate-800 rounded-xs" />
+          <div className="h-1 w-full bg-slate-300 rounded-xs" />
+        </div>
+      </div>
+    );
+  }
+
+  if (templateId === 'harvard-modern') {
+    return (
+      <div className="w-full h-full flex flex-col p-1.5 space-y-1 bg-white text-slate-800 select-none">
+        <div className="text-center space-y-0.5 pb-1 border-b border-slate-300">
+          <div className="h-2 w-16 bg-slate-900 mx-auto rounded-xs" />
+          <div className="h-1 w-20 bg-slate-400 mx-auto rounded-xs" />
+        </div>
+        <div className="grid grid-cols-12 gap-1 pt-0.5">
+          <div className="col-span-4 space-y-1">
+            <div className="h-1 w-full bg-slate-400 rounded-xs" />
+            <div className="h-1 w-3/4 bg-slate-300 rounded-xs" />
+          </div>
+          <div className="col-span-8 space-y-1">
+            <div className="h-1.5 w-10 bg-slate-900 rounded-xs" />
+            <div className="h-1 w-full bg-slate-300 rounded-xs" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default: ATS Modern / Rezi / Executive
+  return (
+    <div className="w-full h-full flex flex-col p-1.5 space-y-1 bg-white text-slate-800 select-none">
+      <div className="text-center space-y-0.5 pb-1 border-b border-slate-200">
+        <div className="h-2 w-16 bg-slate-900 mx-auto rounded-xs" />
+        <div className="h-1 w-24 bg-slate-400 mx-auto rounded-xs" />
+      </div>
+      <div className="space-y-1 pt-0.5">
+        <div className="h-1.5 w-12 bg-blue-600 rounded-xs" />
+        <div className="h-1 w-full bg-slate-300 rounded-xs" />
+        <div className="h-1 w-5/6 bg-slate-300 rounded-xs" />
+      </div>
+      <div className="space-y-1 pt-0.5">
+        <div className="h-1.5 w-14 bg-blue-600 rounded-xs" />
+        <div className="h-1 w-full bg-slate-300 rounded-xs" />
+        <div className="h-1 w-2/3 bg-slate-300 rounded-xs" />
+      </div>
+    </div>
+  );
+};
+
 // A4 Paperlike Canvas Component: Maintains exact A4 proportions per sheet, handles multi-page (Page 2+) flow with responsive auto-scaling & zoom controls
 const A4PaperlikeCanvas: React.FC<{
   templateId: string;
   customData?: Partial<CVData>;
   showPageNumbers?: boolean;
-}> = ({ templateId, customData, showPageNumbers = true }) => {
+  docFontFamily?: string;
+  docFontSize?: string;
+  docSpacing?: string;
+  docShowIcons?: boolean;
+}> = ({
+  templateId,
+  customData,
+  showPageNumbers = true,
+  docFontFamily = 'sans',
+  docFontSize = 'base',
+  docSpacing = 'normal',
+  docShowIcons = true,
+}) => {
   const hiddenMeasureRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [contentHeightPx, setContentHeightPx] = useState<number>(0);
@@ -5757,7 +6348,7 @@ const A4PaperlikeCanvas: React.FC<{
       ro.disconnect();
       window.removeEventListener('resize', updateDimensions);
     };
-  }, [templateId, customData]);
+  }, [templateId, customData, docFontFamily, docFontSize, docSpacing, docShowIcons]);
 
   const effectiveScale = zoomScale !== null ? zoomScale : autoScale;
 
@@ -5775,7 +6366,14 @@ const A4PaperlikeCanvas: React.FC<{
       {/* Hidden DOM measurement container */}
       <div className="fixed top-[-9999px] left-[-9999px] opacity-0 pointer-events-none" aria-hidden="true">
         <div ref={hiddenMeasureRef} style={{ width: '210mm', background: '#ffffff' }}>
-          <CVTemplatePreview templateId={templateId} customData={customData} />
+          <CVTemplatePreview
+            templateId={templateId}
+            customData={customData}
+            docFontFamily={docFontFamily}
+            docFontSize={docFontSize}
+            docSpacing={docSpacing}
+            docShowIcons={docShowIcons}
+          />
         </div>
       </div>
 
@@ -5832,7 +6430,14 @@ const A4PaperlikeCanvas: React.FC<{
                         transform: `translateY(-${translateYMM}mm)`,
                       }}
                     >
-                      <CVTemplatePreview templateId={templateId} customData={customData} />
+                      <CVTemplatePreview
+                        templateId={templateId}
+                        customData={customData}
+                        docFontFamily={docFontFamily}
+                        docFontSize={docFontSize}
+                        docSpacing={docSpacing}
+                        docShowIcons={docShowIcons}
+                      />
                     </div>
                   </div>
 
@@ -5856,55 +6461,128 @@ const A4PaperlikeCanvas: React.FC<{
 };
 
 // CV Template Preview Component with Full Data Support
-const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVData> }> = ({ templateId, customData }) => {
+const CVTemplatePreview: React.FC<{
+  templateId: string;
+  customData?: Partial<CVData>;
+  docFontFamily?: string;
+  docFontSize?: string;
+  docSpacing?: string;
+  docShowIcons?: boolean;
+}> = ({
+  templateId,
+  customData,
+  docFontFamily = 'sans',
+  docFontSize = 'base',
+  docSpacing = 'normal',
+  docShowIcons = true,
+}) => {
+  const getEmailMailto = (emailStr?: string) => {
+    if (!emailStr) return '#';
+    const clean = emailStr.replace(/^mailto:/i, '').trim();
+    return `mailto:${clean}`;
+  };
+
+  const getCleanUrl = (url?: string, defaultPrefix = 'https://') => {
+    if (!url) return '#';
+    const trimmed = url.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('mailto:')) return trimmed;
+    return `${defaultPrefix}${trimmed}`;
+  };
+
   // Data (merges customData with fallback dummy data)
   const dummyData = {
     fullName: customData?.fullName || 'John Doe',
-    jobTitle: customData?.headline || 'Senior Frontend Engineer',
+    jobTitle: customData?.headline || 'Senior Software Engineer / Project Manager',
     email: customData?.email || 'john.doe@example.com',
-    phone: customData?.phone || '+1 555 010 1234',
-    location: customData?.location || 'San Francisco, California, United States',
-    linkedin: 'johndoe.dev • github.com/johndoe',
+    phone: customData?.phone || '+62 812-3456-7890',
+    location: customData?.location || 'Jakarta, Indonesia',
+    website: customData?.website || 'johndoe.dev',
+    linkedin: customData?.linkedin || 'linkedin.com/in/johndoe',
+    github: customData?.github || customData?.socialHandle || 'github.com/johndoe',
+    socialPlatform: customData?.socialPlatform || 'github',
+    photoUrl: customData?.photoUrl !== undefined ? customData.photoUrl : '',
     summary:
       customData?.summary ||
-      'Senior frontend engineer with 8+ years building accessible, high-performance web applications for fintech and SaaS. Deep experience with React, Next.js, and design systems, with a focus on developer experience and shipping measurable outcomes. Comfortable leading projects end to end and mentoring teams.',
+      'Senior Software Engineer berpengalaman dalam membangun aplikasi web berkinerja tinggi, scalable, dan ATS friendly.',
     skills:
       customData?.skills && customData.skills.length > 0
         ? customData.skills
         : [
-            'TypeScript (Expert)',
-            'JavaScript (ES2023) (Expert)',
-            'React & Next.js (Expert)',
-            'Node.js (Advanced)',
-            'GraphQL & REST APIs (Advanced)',
-            'Tailwind CSS (Advanced)',
-            'Testing (Playwright, Vitest) (Advanced)',
-            'State (Zustand, React Query) (Advanced)',
-            'Web Accessibility (WCAG) (Advanced)',
-            'CI/CD & Docker (Intermediate)',
+            'TypeScript',
+            'React',
+            'Next.js',
+            'Node.js',
+            'Tailwind CSS',
+            'PostgreSQL',
+            'Git',
+            'REST API',
           ],
     experience:
       customData?.experience && customData.experience.length > 0
         ? customData.experience.map((exp) => ({
             company: exp.company,
             role: exp.role,
-            period: exp.period,
+            period: exp.period || `${exp.startDate || ''} - ${exp.endDate || ''}`,
             description: exp.description,
           }))
         : [
             {
-              company: 'PT Tech Inovasi Indonesia',
-              role: 'Senior Full Stack Developer',
-              period: 'Jan 2023 - Sekarang',
+              company: 'PT Inovasi Teknologi',
+              role: 'Senior Software Engineer',
+              period: 'Jan 2021 - Sekarang',
               description:
-                '• Memimpin migrasi aplikasi monolith ke microservices architecture, meningkatkan scalability 3x lipat\n• Mengembangkan dashboard analytics real-time dengan React & Node.js yang digunakan oleh 50,000+ pengguna\n• Mentoring 4 junior developers dan melakukan code review untuk memastikan best practices\n• Implementasi CI/CD pipeline menggunakan GitHub Actions, mengurangi deployment time 70%',
+                'Memimpin pengembangan fitur frontend & backend, mengoptimalkan kecepatan load hingga 45%, dan mengimplementasikan CI/CD.',
             },
+          ],
+    internships:
+      customData?.internships && customData.internships.length > 0
+        ? customData.internships.map((item) => ({
+            company: item.company,
+            role: item.role,
+            period: item.period || `${item.startDate || ''} - ${item.endDate || ''}`,
+            description: item.description,
+          }))
+        : [
             {
-              company: 'Startup Digital Solutions',
-              role: 'Frontend Developer',
-              period: 'Mar 2021 - Des 2022',
+              company: 'Tech Startup Indonesia',
+              role: 'UI/UX & Frontend Intern',
+              period: 'Jan 2023 - Jun 2023',
               description:
-                '• Membangun aplikasi e-commerce dengan Next.js & TypeScript, mencapai 95+ Lighthouse score\n• Kolaborasi dengan tim backend untuk integrasi RESTful API dan GraphQL\n• Optimasi Web Vitals dan SEO, meningkatkan organic traffic 40%\n• Implementasi state management dengan Zustand dan caching strategy',
+                'Membantu tim merancang wireframe dan mendesain 10+ komponen UI serta mengimplementasikannya dengan TailwindCSS.',
+            },
+          ],
+    projects:
+      customData?.projects && customData.projects.length > 0
+        ? customData.projects.map((proj) => ({
+            name: proj.name,
+            role: proj.role,
+            tech: proj.tech || proj.link || '',
+            description: proj.description,
+          }))
+        : [
+            {
+              name: 'E-Commerce Platform',
+              role: 'Lead Developer',
+              tech: 'React, Node.js, TailwindCSS • https://project.com',
+              description:
+                'Membangun aplikasi toko online dengan fitur payment gateway dan real-time analytics.',
+            },
+          ],
+    organizations:
+      customData?.organizations && customData.organizations.length > 0
+        ? customData.organizations.map((org) => ({
+            name: org.name,
+            role: org.role,
+            period: org.period || `${org.startDate || ''} - ${org.endDate || ''}`,
+            description: org.description,
+          }))
+        : [
+            {
+              name: 'Himpunan Mahasiswa Informatika',
+              role: 'Ketua Divisi Acara',
+              period: '2022 - 2023',
+              description:
+                'Mengkoordinasikan seminar teknologi nasional dengan 500+ peserta dan mengelola pendaftaran peserta.',
             },
           ],
     education:
@@ -5912,29 +6590,86 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
         ? customData.education.map((edu) => ({
             institution: edu.institution,
             degree: edu.degree,
-            year: edu.year,
-            gpa: 'GPA: 3.82/4.00',
+            year: edu.year || `${edu.startDate || ''} - ${edu.endDate || ''}`,
+            gpa: edu.gpa || '3.75 / 4.00',
           }))
         : [
             {
               institution: 'Universitas Indonesia',
-              degree: 'S1 Ilmu Komputer',
+              degree: 'S1 Teknik Informatika / Ilmu Komputer (IPK 3.75)',
               year: '2017 - 2021',
-              gpa: 'GPA: 3.82/4.00',
+              gpa: '3.75 / 4.00',
             },
           ],
-    projects: [
-      {
-        name: 'SaaS Dashboard Platform',
-        tech: 'React, Next.js, TypeScript, Tailwind CSS, Supabase',
-        description:
-          'Platform dashboard analytics B2B dengan real-time data visualization dan role-based access control. Digunakan oleh 100+ perusahaan.',
-      },
-    ],
-    courses: customData?.courses || [],
-    scholarships: customData?.scholarships || [],
-    volunteers: customData?.volunteers || [],
-    references: customData?.references || [],
+    certifications:
+      customData?.certifications && customData.certifications.length > 0
+        ? customData.certifications.map((cert) => ({
+            name: cert.name,
+            issuer: cert.issuer,
+            issueDate: cert.issueDate,
+          }))
+        : [
+            {
+              name: 'AWS Certified Solutions Architect',
+              issuer: 'Amazon Web Services',
+              issueDate: 'Nov 2023',
+            },
+          ],
+    languages:
+      customData?.languages && customData.languages.length > 0
+        ? customData.languages
+        : [
+            { id: 'lang-1', language: 'Bahasa Indonesia', level: 'Professional' },
+            { id: 'lang-2', language: 'Bahasa Inggris', level: 'Professional' },
+          ],
+    courses:
+      customData?.courses && customData.courses.length > 0
+        ? customData.courses
+        : [
+            {
+              id: 'crs-1',
+              courseName: 'Digital Marketing Mastery',
+              institution: 'RevoU / Google Academy',
+              year: '2023',
+              description: 'Strategi pemasaran digital dan analisis data.',
+            },
+          ],
+    scholarships:
+      customData?.scholarships && customData.scholarships.length > 0
+        ? customData.scholarships
+        : [
+            {
+              id: 'sch-1',
+              name: 'Beasiswa Djarum Beasiswa Plus',
+              provider: 'Djarum Foundation',
+              year: '2020',
+              description: 'Program pelatihan kepemimpinan dan beasiswa prestasi.',
+            },
+          ],
+    volunteers:
+      customData?.volunteers && customData.volunteers.length > 0
+        ? customData.volunteers
+        : [
+            {
+              id: 'vol-1',
+              organization: 'Palang Merah Indonesia',
+              role: 'Tim Tanggap Bencana',
+              startYear: '2022',
+              description: 'Mengkoordinasikan logistik darurat dan posko bantuan bencana.',
+            },
+          ],
+    references:
+      customData?.references && customData.references.length > 0
+        ? customData.references
+        : [
+            {
+              id: 'ref-1',
+              fullName: 'John Smith',
+              title: 'Engineering Director',
+              company: 'PT Inovasi Teknologi',
+              note: 'Referensi tersedia atas permintaan',
+            },
+          ],
   };
 
   // Template Renderers
@@ -6170,22 +6905,63 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
     };
 
     return (
-      <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+      <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
         {/* Header */}
-        <div className="border-b-4 border-slate-900 pb-4 mb-6">
-          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
-            {dummyData.fullName}
-          </h1>
-          <p className="text-base font-semibold text-slate-700 mb-3">{dummyData.jobTitle}</p>
-          <div className="text-xs text-slate-600 flex flex-wrap gap-x-4 gap-y-1">
-            <span>{dummyData.email}</span>
-            <span>•</span>
-            <span>{dummyData.phone}</span>
-            <span>•</span>
-            <span>{dummyData.location}</span>
-            <span>•</span>
-            <span className="text-blue-600">{dummyData.linkedin}</span>
+        <div className="border-b-4 border-slate-900 pb-4 mb-6 flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
+              {dummyData.fullName}
+            </h1>
+            <p className="text-base font-semibold text-slate-700 mb-3">{dummyData.jobTitle}</p>
+            <div className="text-xs text-slate-600 flex flex-wrap gap-x-3 gap-y-1 items-center">
+              <a href={getEmailMailto(dummyData.email)} className="hover:underline font-medium text-slate-800">
+                {dummyData.email}
+              </a>
+              {dummyData.phone && (
+                <>
+                  <span>•</span>
+                  <span>{dummyData.phone}</span>
+                </>
+              )}
+              {dummyData.location && (
+                <>
+                  <span>•</span>
+                  <span>{dummyData.location}</span>
+                </>
+              )}
+              {dummyData.linkedin && (
+                <>
+                  <span>•</span>
+                  <a href={getCleanUrl(dummyData.linkedin)} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                    {dummyData.linkedin}
+                  </a>
+                </>
+              )}
+              {dummyData.github && (
+                <>
+                  <span>•</span>
+                  <a href={getCleanUrl(dummyData.github)} target="_blank" rel="noreferrer" className="text-slate-800 hover:underline font-medium">
+                    {dummyData.github}
+                  </a>
+                </>
+              )}
+              {dummyData.website && (
+                <>
+                  <span>•</span>
+                  <a href={getCleanUrl(dummyData.website)} target="_blank" rel="noreferrer" className="text-teal-600 hover:underline">
+                    {dummyData.website}
+                  </a>
+                </>
+              )}
+            </div>
           </div>
+          {dummyData.photoUrl ? (
+            <img
+              src={dummyData.photoUrl}
+              alt={dummyData.fullName}
+              className="w-20 h-20 rounded-lg object-cover border border-slate-300 shrink-0 shadow-2xs"
+            />
+          ) : null}
         </div>
 
         {/* Dynamic Reordered Sections */}
@@ -6195,19 +6971,52 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
   };
 
   const renderMinimalistExecutive = () => (
-    <div className="p-12" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
       {/* Header - Centered */}
-      <div className="text-center border-b-2 border-slate-300 pb-4 mb-6">
+      <div className="flex flex-col items-center text-center border-b-2 border-slate-300 pb-4 mb-6">
+        {dummyData.photoUrl ? (
+          <img
+            src={dummyData.photoUrl}
+            alt={dummyData.fullName}
+            className="w-20 h-20 rounded-full object-cover border-2 border-slate-300 mb-3 shadow-2xs"
+          />
+        ) : null}
         <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
           {dummyData.fullName}
         </h1>
         <p className="text-base font-semibold text-slate-600 mb-3">{dummyData.jobTitle}</p>
-        <div className="text-xs text-slate-600 flex flex-wrap justify-center gap-x-4 gap-y-1">
-          <span>{dummyData.email}</span>
-          <span>•</span>
-          <span>{dummyData.phone}</span>
-          <span>•</span>
-          <span>{dummyData.location}</span>
+        <div className="text-xs text-slate-600 flex flex-wrap justify-center gap-x-3 gap-y-1 items-center">
+          <a href={getEmailMailto(dummyData.email)} className="hover:underline font-medium text-slate-800">
+            {dummyData.email}
+          </a>
+          {dummyData.phone && (
+            <>
+              <span>•</span>
+              <span>{dummyData.phone}</span>
+            </>
+          )}
+          {dummyData.location && (
+            <>
+              <span>•</span>
+              <span>{dummyData.location}</span>
+            </>
+          )}
+          {dummyData.linkedin && (
+            <>
+              <span>•</span>
+              <a href={getCleanUrl(dummyData.linkedin)} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                {dummyData.linkedin}
+              </a>
+            </>
+          )}
+          {dummyData.github && (
+            <>
+              <span>•</span>
+              <a href={getCleanUrl(dummyData.github)} target="_blank" rel="noreferrer" className="text-slate-800 hover:underline font-medium">
+                {dummyData.github}
+              </a>
+            </>
+          )}
         </div>
       </div>
 
@@ -6265,7 +7074,7 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
   );
 
   const renderCreativeTech = () => (
-    <div className="p-12" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
       {/* Header with accent */}
       <div className="border-l-8 border-emerald-500 pl-4 mb-6">
         <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-1">
@@ -6353,7 +7162,7 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
   );
 
   const renderFreshGraduate = () => (
-    <div className="p-12" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
       {/* Header */}
       <div className="text-center mb-6">
         <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
@@ -6443,7 +7252,7 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
   );
 
   const renderHarvardModern = () => (
-    <div className="p-12" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
       {/* Header */}
       <div className="border-b-4 border-slate-900 pb-3 mb-6">
         <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900">
@@ -6489,7 +7298,7 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
   );
 
   const renderBlueAccent = () => (
-    <div className="p-12" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
       <div className="border-b-3 border-blue-600 pb-4 mb-6">
         <h1 className="text-3xl font-black uppercase text-blue-900">{dummyData.fullName}</h1>
         <p className="text-base font-semibold text-blue-600 mt-1">{dummyData.jobTitle}</p>
@@ -6529,7 +7338,7 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
   );
 
   const renderElegantPhoto = () => (
-    <div className="p-12" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
       <div className="flex items-start gap-6 border-b-2 border-purple-600 pb-4 mb-6">
         <div className="flex-1">
           <h1 className="text-3xl font-black uppercase text-slate-900">{dummyData.fullName}</h1>
@@ -6578,7 +7387,7 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
   );
 
   const renderReziClassic = () => (
-    <div className="p-12" style={{ fontFamily: "'Georgia', serif" }}>
+    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
       <div className="text-center border-b border-slate-400 pb-4 mb-6">
         <h1 className="text-3xl font-bold text-slate-900">{dummyData.fullName}</h1>
         <p className="text-base text-slate-700 mt-2">{dummyData.jobTitle}</p>
@@ -6618,7 +7427,7 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
   );
 
   const renderModernOrange = () => (
-    <div className="p-12" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
       {/* Header with Orange Accent */}
       <div className="border-l-8 border-orange-500 pl-6 mb-6">
         <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-1">
@@ -6698,7 +7507,7 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
   );
 
   const renderExecutiveNavy = () => (
-    <div className="p-12" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
       {/* Navy Header Block */}
       <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-6 mb-6 -mx-12 -mt-12 shadow-lg">
         <h1 className="text-3xl font-black uppercase tracking-wide mb-2">
@@ -6771,7 +7580,7 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
   );
 
   const renderTechSidebar = () => (
-    <div className="flex" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+    <div className="flex" style={{ fontFamily: selectedFontFamily }}>
       {/* Left Sidebar - Tech Stack */}
       <div className="w-64 bg-cyan-900 text-white p-6">
         <div className="mb-6">
@@ -6865,7 +7674,7 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
   );
 
   const renderCharcoalWhite = () => (
-    <div className="p-12 bg-white" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+    <div className="p-12 bg-white" style={{ fontFamily: selectedFontFamily }}>
       {/* Minimal Header */}
       <div className="text-center border-b border-slate-300 pb-6 mb-6">
         <h1 className="text-4xl font-black tracking-tighter text-slate-900 mb-3">
@@ -6934,7 +7743,7 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
   );
 
   const renderGreenEco = () => (
-    <div className="p-12" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
       {/* Header with Green Accent */}
       <div className="mb-6 pb-4 border-b-4 border-green-600">
         <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
@@ -7029,7 +7838,7 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
   );
 
   const renderResearchAcademic = () => (
-    <div className="p-12" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
       {/* Academic Header */}
       <div className="text-center mb-6 pb-4 border-b-2 border-indigo-700">
         <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-2">
@@ -7117,7 +7926,7 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
 
   // --- ATM Templates Inspired by rimzzlabs/lanjut ---
   const renderKetikMonospace = () => (
-    <div className="p-10 text-slate-800 bg-white font-mono" style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>
+    <div className="p-10 text-slate-800 bg-white font-mono" style={{ fontFamily: selectedFontFamily }}>
       {/* Typewriter Header */}
       <div className="border-b-2 border-slate-800 pb-4 mb-6">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">
@@ -7188,7 +7997,7 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
   );
 
   const renderKetatSerif = () => (
-    <div className="p-10 text-slate-900 bg-white font-serif" style={{ fontFamily: 'Georgia, Cambria, "Times New Roman", Times, serif' }}>
+    <div className="p-10 text-slate-900 bg-white font-serif" style={{ fontFamily: selectedFontFamily }}>
       {/* Header */}
       <div className="mb-5">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">
@@ -7392,44 +8201,83 @@ const CVTemplatePreview: React.FC<{ templateId: string; customData?: Partial<CVD
     </div>
   );
 
+  // Map Document Settings to Dynamic CSS & Style Properties
+  const fontStyleMap: Record<string, string> = {
+    sans: "'Inter', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    serif: "'EB Garamond', 'Lora', 'Georgia', Cambria, 'Times New Roman', serif",
+    mono: "'JetBrains Mono', 'Courier Prime', 'Fira Code', 'Consolas', monospace",
+    standard: "'Carlito', 'Arimo', 'Calibri', 'Arial', sans-serif",
+  };
+
+  const fontSizeMap: Record<string, string> = {
+    sm: '0.9em',
+    base: '1em',
+    md: '1.08em',
+    lg: '1.18em',
+  };
+
+  const spacingClassMap: Record<string, string> = {
+    compact: '[&_.mb-6]:mb-3 [&_.mb-4]:mb-2 [&_.mb-3]:mb-1.5 [&_.space-y-4]:space-y-2 [&_.space-y-3]:space-y-1.5 [&_.py-6]:py-3 [&_.p-6]:p-4 [&_.p-12]:p-6',
+    spacious: '[&_.mb-6]:mb-8 [&_.mb-4]:mb-6 [&_.mb-3]:mb-4 [&_.space-y-4]:space-y-6 [&_.space-y-3]:space-y-4 [&_.py-6]:py-8 [&_.p-6]:p-8 [&_.p-12]:p-14',
+    normal: '',
+  };
+
+  const selectedFontFamily = fontStyleMap[docFontFamily] || fontStyleMap.sans;
+  const selectedFontSize = fontSizeMap[docFontSize] || fontSizeMap.base;
+  const selectedSpacingClass = spacingClassMap[docSpacing] || '';
+
   // Template Router
-  switch (templateId) {
-    case 'ketik-monospace':
-      return renderKetikMonospace();
-    case 'ketat-serif':
-      return renderKetatSerif();
-    case 'luasa-minimal':
-      return renderLuasaMinimal();
-    case 'tebal-bold':
-      return renderTebalBold();
-    case 'minimalist-executive':
-      return renderMinimalistExecutive();
-    case 'creative-tech':
-      return renderCreativeTech();
-    case 'fresh-graduate':
-      return renderFreshGraduate();
-    case 'harvard-modern':
-      return renderHarvardModern();
-    case 'blue-accent':
-      return renderBlueAccent();
-    case 'elegant-photo':
-      return renderElegantPhoto();
-    case 'rezi-classic':
-      return renderReziClassic();
-    case 'modern-orange':
-      return renderModernOrange();
-    case 'executive-navy':
-      return renderExecutiveNavy();
-    case 'tech-sidebar':
-      return renderTechSidebar();
-    case 'charcoal-white':
-      return renderCharcoalWhite();
-    case 'green-eco':
-      return renderGreenEco();
-    case 'research-academic':
-      return renderResearchAcademic();
-    case 'ats-modern':
-    default:
-      return renderATSModern();
-  }
+  const getTemplateContent = () => {
+    switch (templateId) {
+      case 'ketik-monospace':
+        return renderKetikMonospace();
+      case 'ketat-serif':
+        return renderKetatSerif();
+      case 'luasa-minimal':
+        return renderLuasaMinimal();
+      case 'tebal-bold':
+        return renderTebalBold();
+      case 'minimalist-executive':
+        return renderMinimalistExecutive();
+      case 'creative-tech':
+        return renderCreativeTech();
+      case 'fresh-graduate':
+        return renderFreshGraduate();
+      case 'harvard-modern':
+        return renderHarvardModern();
+      case 'blue-accent':
+        return renderBlueAccent();
+      case 'elegant-photo':
+        return renderElegantPhoto();
+      case 'rezi-classic':
+        return renderReziClassic();
+      case 'modern-orange':
+        return renderModernOrange();
+      case 'executive-navy':
+        return renderExecutiveNavy();
+      case 'tech-sidebar':
+        return renderTechSidebar();
+      case 'charcoal-white':
+        return renderCharcoalWhite();
+      case 'green-eco':
+        return renderGreenEco();
+      case 'research-academic':
+        return renderResearchAcademic();
+      case 'ats-modern':
+      default:
+        return renderATSModern();
+    }
+  };
+
+  return (
+    <div
+      className={`w-full min-h-[297mm] bg-white text-slate-900 transition-all duration-200 ${selectedSpacingClass} ${!docShowIcons ? '[&_svg]:hidden [&_.contact-icon]:hidden' : ''}`}
+      style={{
+        fontFamily: selectedFontFamily,
+        fontSize: selectedFontSize,
+      }}
+    >
+      {getTemplateContent()}
+    </div>
+  );
 };

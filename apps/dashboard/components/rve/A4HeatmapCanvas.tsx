@@ -7,7 +7,7 @@ import {
   FixationPoint,
   AtsCorrelationItem,
 } from './RveEnginePipeline';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Mail, Phone, MapPin } from 'lucide-react';
 
 interface A4HeatmapCanvasProps {
   parsedData: CvParsedData;
@@ -245,9 +245,9 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
             )}
           </div>
           <p className="text-[11px] text-slate-500 flex flex-wrap gap-3 pt-1">
-            <span>📧 {parsedData.email}</span>
-            <span>📞 {parsedData.phone}</span>
-            <span>📍 {parsedData.location}</span>
+            <span className="flex items-center gap-1"><Mail className="w-3 h-3 text-slate-400" /> {parsedData.email}</span>
+            <span className="flex items-center gap-1"><Phone className="w-3 h-3 text-slate-400" /> {parsedData.phone}</span>
+            <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-slate-400" /> {parsedData.location}</span>
           </p>
         </div>
 
