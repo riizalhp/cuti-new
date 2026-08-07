@@ -27,6 +27,7 @@ import {
   Scale,
   Gift,
   User,
+  Globe,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -87,6 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Briefcase,
       items: [
         { id: 'tracker', label: 'Tracker Lamaran', href: '/tracker', icon: Briefcase, badge: '4' },
+        { id: 'scrape-jobs', label: 'Scraper Lowongan', href: '/scrape-jobs', icon: Globe, badge: 'Baru' },
         { id: 'cari-lowongan', label: 'Cari Lowongan', href: 'https://loker.cuti.online', icon: Compass },
         { id: 'match-cv', label: 'Match CV & Job', href: '/match-cv', icon: Sparkles },
         { id: 'auto-apply', label: 'Auto Apply', href: '/auto-apply', icon: Send, badge: 'Beta' },

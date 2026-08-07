@@ -71,8 +71,22 @@ export interface RecruiterPersona {
   id: string;
   name: string;
   badge: string;
+  category: 'company' | 'region' | 'special';
+  categoryLabel: string;
   description: string;
   focusArea: string;
+  evalFocus: string;
+  companies: string[];
+  matchScore: number;
+  isRecommended?: boolean;
+  ratings: {
+    portfolio: number;
+    impact: number;
+    techStack: number;
+    education: number;
+  };
+  highlights: string[];
+  reducedEmphasis: string[];
   strictness: string;
 }
 
@@ -555,7 +569,7 @@ export function runFullRvePipeline(
     atsScore,
     recruiterVerdict:
       verdictStatus === 'interview'
-        ? 'Lolos Pre-Screening RVE Pipeline! Struktur visual dan narasi CV sangat memikat perhatian recruiter dalam 6 detik pertama dan memenuhi kualifikasi ATS & AI Recruiter.'
+        ? 'Lolos Pre-Screening RVE Pipeline! Struktur visual dan narasi CV sangat memikat perhatian recruiter dalam 6 detik pertama dan memenuhi kualifikasi ATS & Tim Recruiter.'
         : verdictStatus === 'maybe'
         ? 'CV Berpeluang Dipertimbangkan (Maybe). Diperlukan penajaman pada penulisan metrik % pencapaian agar impresi awal lebih kuat.'
         : 'CV Berisiko Tereliminasi. Mohon optimalkan seksi ringkasan dan tambahkan metrik angka.',

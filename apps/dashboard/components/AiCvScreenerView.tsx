@@ -45,6 +45,11 @@ import {
   Trash2,
   Bookmark,
   Plus,
+  Star,
+  Search,
+  ChevronDown,
+  ChevronUp,
+  GraduationCap,
 } from 'lucide-react';
 import {
   runFullRvePipeline,
@@ -129,95 +134,194 @@ const mockSavedCVs = [
   },
 ];
 
-// 11 Recruiter Personas
+// 11 Recruiter Personas dengan kategori, star ratings, contoh perusahaan, & match score
 const recruiterPersonas: RecruiterPersona[] = [
   {
     id: 'startup',
     name: 'Startup',
     badge: 'Fast-Paced & Impact',
+    category: 'company',
+    categoryLabel: 'Jenis Perusahaan',
     description: 'Fokus tinggi pada kecepatan eksekusi, portofolio proyek nyata, stack modern, dan dampak bisnis langsung.',
-    focusArea: 'Kecepatan & Portofolio',
-    strictness: 'Kecepatan & Impact %',
+    focusArea: 'Portofolio & Impact',
+    evalFocus: 'Lebih mementingkan bukti eksekusi & portofolio nyata dibanding gelar formal.',
+    companies: ['Gojek', 'Tokopedia', 'Ruangguru', 'Xendit'],
+    matchScore: 96,
+    isRecommended: true,
+    ratings: { portfolio: 5, impact: 5, techStack: 4, education: 2 },
+    highlights: ['Portfolio project nyata', 'Tech stack modern', 'Dampak bisnis & metrik %', 'Kecepatan eksekusi'],
+    reducedEmphasis: ['IPK akademik', 'Sertifikat formal non-praktis'],
+    strictness: 'Fokus Bukti & Impact',
   },
   {
     id: 'unicorn',
     name: 'Unicorn',
     badge: 'High Scale & System',
+    category: 'company',
+    categoryLabel: 'Jenis Perusahaan',
     description: 'Menilai kemampuan skala sistem besar, arsitektur, kepemimpinan tim, dan efisiensi performa.',
     focusArea: 'Arsitektur & Skala',
-    strictness: 'Fokus Scale System',
+    evalFocus: 'Penekanan pada skalabilitas sistem, arsitektur handal, dan kepemimpinan tim besar.',
+    companies: ['Grab', 'Traveloka', 'Shopee', 'Bukalapak'],
+    matchScore: 90,
+    isRecommended: true,
+    ratings: { portfolio: 5, impact: 5, techStack: 5, education: 3 },
+    highlights: ['Arsitektur sistem skala besar', 'Optimasi performa & query', 'Leadership & kolaborasi tim'],
+    reducedEmphasis: ['Pengalaman perusahaan skala kecil tanpa metrik'],
+    strictness: 'Skalabilitas Sistem',
   },
   {
     id: 'corporate',
     name: 'Corporate',
     badge: 'Formal & Structure',
+    category: 'company',
+    categoryLabel: 'Jenis Perusahaan',
     description: 'Memperhatikan struktur formal, rekam jejak karir yang stabil, gelar pendidikan, dan kualifikasi baku.',
-    focusArea: 'Kualifikasi Formal',
-    strictness: 'Ketat pada Standard CV',
-  },
-  {
-    id: 'bumn',
-    name: 'BUMN',
-    badge: 'Kualifikasi Standar',
-    description: 'Prioritas pada kesesuaian dokumen resmi, IPK minimum, kelengkapan administrasi, dan keaslian berkas.',
-    focusArea: 'Administrasi & IPK',
-    strictness: 'Ketat pada Regulasi',
-  },
-  {
-    id: 'jepang',
-    name: 'Jepang',
-    badge: 'Kedisiplinan & Detail',
-    description: 'Sangat teliti terhadap kerapihan format, konsistensi riwayat kerja, kedisiplinan, dan motivasi jangka panjang.',
-    focusArea: 'Konsistensi & Loyalitas',
-    strictness: 'Format Seragam Nikkei',
-  },
-  {
-    id: 'cina',
-    name: 'Cina',
-    badge: 'Target KPI & Speed',
-    description: 'Sangat terfokus pada indikator kinerja kuantitatif KPI, daya tahan kerja tinggi, kecepatan eksekusi, dan hasil bisnis.',
-    focusArea: 'KPI & Ketahanan Kerja',
-    strictness: 'Ketat pada Target KPI',
-  },
-  {
-    id: 'australia',
-    name: 'Australia',
-    badge: 'Work-Life & Autonomy',
-    description: 'Menilai keterampilan praktis langsung, budaya kolaboratif terbuka, independensi, dan komunikasi profesional.',
-    focusArea: 'Skill Praktis & Kolaborasi',
-    strictness: 'Fokus Practical & Clear Communication',
-  },
-  {
-    id: 'remote-us',
-    name: 'Remote US',
-    badge: 'Autonomy & Metric %',
-    description: 'Menyukai CV ringkas berorientasi metrik %, komunikasi bahasa Inggris profesional, dan kemandirian tinggi.',
-    focusArea: 'Metrik Angka & Bahasa',
-    strictness: 'Strict pada Result Metrics',
-  },
-  {
-    id: 'fresh-grad',
-    name: 'Fresh Graduate',
-    badge: 'Potensi & Organisasi',
-    description: 'Menilai keaktifan organisasi kampus, IPK, kecepatan belajar, proyek akademik, dan sikap haus ilmu.',
-    focusArea: 'Potensi & Organisasi',
-    strictness: 'Fokus Potensi & Proyek',
+    focusArea: 'Kualifikasi & Stabilitas',
+    evalFocus: 'Ketat pada kelengkapan administrasi, reputasi kampus, dan stabilitas riwayat karir.',
+    companies: ['Astra', 'Telkom Indonesia', 'BCA', 'Unilever'],
+    matchScore: 65,
+    isRecommended: false,
+    ratings: { portfolio: 3, impact: 4, techStack: 3, education: 5 },
+    highlights: ['Gelar & reputasi institusi', 'Stabilitas riwayat pekerjaan', 'Kesesuaian standar administrasi'],
+    reducedEmphasis: ['Proyek sampingan (side project) tidak resmi'],
+    strictness: 'Standar Kualifikasi Formal',
   },
   {
     id: 'product-co',
     name: 'Product Company',
     badge: 'Product Ownership',
+    category: 'company',
+    categoryLabel: 'Jenis Perusahaan',
     description: 'Menyoroti pemahaman pengalaman pengguna, kolaborasi tim, dan bagaimana kode/fitur meningkatkan user metric.',
-    focusArea: 'Product Mindset',
-    strictness: 'Fokus User Impact',
+    focusArea: 'Product Mindset & UX',
+    evalFocus: 'Pemahaman pengguna (user experience) dan kolaborasi produk melintas divisi.',
+    companies: ['Tiket.com', 'Traveloka', 'Blibli', 'DANA'],
+    matchScore: 86,
+    isRecommended: false,
+    ratings: { portfolio: 4, impact: 5, techStack: 4, education: 3 },
+    highlights: ['Dampak fitur terhadap pengguna (User Impact)', 'A/B Testing & data-driven design', 'Cross-functional collaboration'],
+    reducedEmphasis: ['Tugas rutin maintenance tanpa ownership fitur'],
+    strictness: 'Product Impact & UX',
   },
   {
     id: 'consulting',
     name: 'Consulting',
     badge: 'Problem Solving',
+    category: 'company',
+    categoryLabel: 'Jenis Perusahaan',
     description: 'Mencari kemampuan analisis masalah terstruktur, komunikasi tingkat direksi, dan eksekusi solusi bisnis.',
-    focusArea: 'Problem Solving & Case',
-    strictness: 'Struktur Analitis Ketat',
+    focusArea: 'Problem Solving & Analisis',
+    evalFocus: 'Kerangka pemikiran analitis terstruktur (case solving) dan komunikasi manajerial.',
+    companies: ['McKinsey & Co', 'BCG', 'Bain', 'PwC / Deloitte'],
+    matchScore: 75,
+    isRecommended: false,
+    ratings: { portfolio: 3, impact: 5, techStack: 3, education: 5 },
+    highlights: ['Struktur pemecahan masalah terurut', 'Prestasi kompetisi bisnis / case study', 'Kepemimpinan organisasi & komunikasi'],
+    reducedEmphasis: ['Detail koding tanpa dampak strategi bisnis'],
+    strictness: 'Kerangka Analitis Ketat',
+  },
+  {
+    id: 'remote-us',
+    name: 'Remote US',
+    badge: 'Autonomy & Metric %',
+    category: 'region',
+    categoryLabel: 'Wilayah / Global',
+    description: 'Menyukai CV ringkas berorientasi metrik %, komunikasi bahasa Inggris profesional, dan kemandirian tinggi.',
+    focusArea: 'Metrik Angka & Bahasa',
+    evalFocus: 'CV 1-2 halaman ringkas padat dengan metrik keberhasilan % dan link GitHub/Portofolio.',
+    companies: ['GitLab', 'Automattic', 'Deel', 'Toptal'],
+    matchScore: 88,
+    isRecommended: true,
+    ratings: { portfolio: 5, impact: 5, techStack: 5, education: 2 },
+    highlights: ['Metrik kuantitatif % di setiap bullet point', 'Link live project & GitHub', 'Bahasa Inggris fluent / professional'],
+    reducedEmphasis: ['Format CV >2 halaman', 'Alamat rumah lengkap & foto pribadi'],
+    strictness: 'Metrik Angka & Otonomi',
+  },
+  {
+    id: 'australia',
+    name: 'Australia',
+    badge: 'Work-Life & Autonomy',
+    category: 'region',
+    categoryLabel: 'Wilayah / Global',
+    description: 'Menilai keterampilan praktis langsung, budaya kolaboratif terbuka, independensi, dan komunikasi profesional.',
+    focusArea: 'Skill Praktis & Kolaborasi',
+    evalFocus: 'Kerapian komunikasi bahasa Inggris dan bukti keterampilan praktis langsung.',
+    companies: ['Atlassian', 'Canva', 'Employment Hero', 'SafetyCulture'],
+    matchScore: 82,
+    isRecommended: false,
+    ratings: { portfolio: 4, impact: 4, techStack: 4, education: 3 },
+    highlights: ['Komunikasi bahasa Inggris profesional', 'Kemandirian kerja & proaktif', 'Pengalaman kolaborasi tim agile'],
+    reducedEmphasis: ['Gelar akademik tanpa bukti komunikasi praktis'],
+    strictness: 'Skill Praktis & Bahasa',
+  },
+  {
+    id: 'jepang',
+    name: 'Jepang',
+    badge: 'Kedisiplinan & Detail',
+    category: 'region',
+    categoryLabel: 'Wilayah / Global',
+    description: 'Sangat teliti terhadap kerapihan format, konsistensi riwayat kerja, kedisiplinan, dan motivasi jangka panjang.',
+    focusArea: 'Konsistensi & Loyalitas',
+    evalFocus: 'Kerapihan format seragam standar Nikkei dan motivasi komitmen jangka panjang.',
+    companies: ['Toyota', 'Honda', 'Sony', 'Panasonic'],
+    matchScore: 72,
+    isRecommended: false,
+    ratings: { portfolio: 3, impact: 4, techStack: 3, education: 4 },
+    highlights: ['Kerapian format & tata bahasa', 'Loyalitas & durasi kerja', 'Kemampuan bahasa & etos kedisiplinan'],
+    reducedEmphasis: ['Riwayat kerja sering berpindah dalam waktu singkat'],
+    strictness: 'Kerapian Format & Loyalitas',
+  },
+  {
+    id: 'cina',
+    name: 'Cina',
+    badge: 'Target KPI & Speed',
+    category: 'region',
+    categoryLabel: 'Wilayah / Global',
+    description: 'Sangat terfokus pada indikator kinerja kuantitatif KPI, daya tahan kerja tinggi, kecepatan eksekusi, dan hasil bisnis.',
+    focusArea: 'Target KPI & Eksekusi',
+    evalFocus: 'Target pencapaian angka KPI yang agresif dan kecepatan penyelesaian masalah.',
+    companies: ['TikTok / ByteDance', 'Huawei', 'Shopee / Sea', 'Oppo'],
+    matchScore: 85,
+    isRecommended: false,
+    ratings: { portfolio: 4, impact: 5, techStack: 4, education: 3 },
+    highlights: ['Pencapaian angka metrik KPI', 'Ketahanan kerja & kecepatan', 'Hasil omzet / efisiensi konkret'],
+    reducedEmphasis: ['Deskripsi tugas rutin tanpa pencapaian angka'],
+    strictness: 'Target KPI & Kecepatan',
+  },
+  {
+    id: 'fresh-grad',
+    name: 'Fresh Graduate',
+    badge: 'Potensi & Organisasi',
+    category: 'special',
+    categoryLabel: 'Khusus',
+    description: 'Menilai keaktifan organisasi kampus, IPK, kecepatan belajar, proyek akademik, dan sikap haus ilmu.',
+    focusArea: 'Potensi & Organisasi',
+    evalFocus: 'Fokus pada keaktifan organisasi kampus, proyek tugas akhir, dan potensi belajar.',
+    companies: ['MT Program', 'Internship', 'Graduate Trainee'],
+    matchScore: 78,
+    isRecommended: false,
+    ratings: { portfolio: 3, impact: 3, techStack: 3, education: 5 },
+    highlights: ['Kepemimpinan organisasi kampus', 'IPK & judul skripsi/tugas akhir', 'Sertifikat kompetensi & pelatihan'],
+    reducedEmphasis: ['Ekspektasi pengalaman kerja senior'],
+    strictness: 'Potensi & Organisasi Kampus',
+  },
+  {
+    id: 'bumn',
+    name: 'BUMN',
+    badge: 'Kualifikasi Standar',
+    category: 'special',
+    categoryLabel: 'Khusus',
+    description: 'Prioritas pada kesesuaian dokumen resmi, IPK minimum, kelengkapan administrasi, dan keaslian berkas.',
+    focusArea: 'Administrasi & IPK',
+    evalFocus: 'Fokus pada kepatuhan regulasi resmi, IPK minimum, dan berkas administrasi.',
+    companies: ['Pertamina', 'Telkom', 'Bank Mandiri', 'PLN'],
+    matchScore: 58,
+    isRecommended: false,
+    ratings: { portfolio: 2, impact: 3, techStack: 3, education: 5 },
+    highlights: ['Transkrip nilai & IPK minimum', 'Sertifikat resmi negara/BNSP', 'Kelengkapan dokumen administrasi'],
+    reducedEmphasis: ['Pengalaman magang informal tanpa surat resmi'],
+    strictness: 'Regulasi & Administrasi',
   },
 ];
 
@@ -237,7 +341,7 @@ interface SavedReportHistoryItem {
   verdictStatus: 'interview' | 'maybe' | 'reject';
   timestamp: string;
   appliedFixes: string[];
-  cvSourceMode: 'saved' | 'upload' | 'text';
+  cvSourceMode: 'saved' | 'upload';
   selectedCvId: string;
   selectedPersonaId: string;
 }
@@ -277,7 +381,7 @@ export const AiCvScreenerView: React.FC = () => {
   ]);
 
   // Source Mode Selection
-  const [cvSourceMode, setCvSourceMode] = useState<'saved' | 'upload' | 'text'>('saved');
+  const [cvSourceMode, setCvSourceMode] = useState<'saved' | 'upload'>('saved');
   const [selectedCvId, setSelectedCvId] = useState<string>('cv-1');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [rawCvText, setRawCvText] = useState('');
@@ -300,16 +404,53 @@ export const AiCvScreenerView: React.FC = () => {
   const [showHeatmapOverlay, setShowHeatmapOverlay] = useState<boolean>(true);
   const [heatmapViewMode, setHeatmapViewMode] = useState<'heatmap' | 'f-pattern' | 'bbox' | 'ats-matrix'>('heatmap');
 
-  // Interactive AI Recruiter Chat State
+  // Interactive Recruiter Chat State
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       id: 'msg-1',
       sender: 'ai',
-      text: 'Halo! Saya AI Recruiter. Saya telah menganalisis CV Anda secara menyeluruh. Ada yang ingin Anda tanyakan tentang hasil screening atau cara meloloskan CV ini?',
+      text: 'Halo! Saya Tim Recruiter CUTI. Saya telah menganalisis CV Anda secara menyeluruh. Ada yang ingin Anda tanyakan tentang hasil screening atau cara meloloskan CV ini?',
       time: 'Baru saja',
     },
   ]);
   const [inputChatText, setInputChatText] = useState('');
+
+  // Recruiter Persona Search & Filter States
+  const [personaSearchQuery, setPersonaSearchQuery] = useState('');
+  const [personaCategoryFilter, setPersonaCategoryFilter] = useState<'all' | 'company' | 'region' | 'special'>('all');
+  const [expandedPersonaId, setExpandedPersonaId] = useState<string | null>('startup');
+  const [showAllPersonas, setShowAllPersonas] = useState(false);
+
+  const filteredPersonas = useMemo(() => {
+    return recruiterPersonas.filter((p) => {
+      if (personaCategoryFilter !== 'all' && p.category !== personaCategoryFilter) {
+        return false;
+      }
+      if (personaSearchQuery.trim()) {
+        const q = personaSearchQuery.toLowerCase();
+        const matchName = p.name.toLowerCase().includes(q);
+        const matchCategory = p.categoryLabel.toLowerCase().includes(q);
+        const matchDesc = p.description.toLowerCase().includes(q);
+        const matchFocus = p.focusArea.toLowerCase().includes(q);
+        const matchCompany = p.companies.some((c) => c.toLowerCase().includes(q));
+        return matchName || matchCategory || matchDesc || matchFocus || matchCompany;
+      }
+      return true;
+    });
+  }, [personaSearchQuery, personaCategoryFilter]);
+
+  const renderStarRating = (count: number) => {
+    return (
+      <div className="flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-3 h-3 ${star <= count ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-700'}`}
+          />
+        ))}
+      </div>
+    );
+  };
 
   const selectedSavedCv = mockSavedCVs.find((c) => c.id === selectedCvId) || mockSavedCVs[0];
   const currentPersona = recruiterPersonas.find((p) => p.id === selectedPersonaId) || recruiterPersonas[0];
@@ -329,7 +470,7 @@ export const AiCvScreenerView: React.FC = () => {
   const pipelineStepsList = [
     'STEP 1: Recruiter Vision — Memprediksi Pola Mata HRD 6 Detik...',
     'STEP 2: ATS Compatibility — Menguji Kata Kunci & Format Mesin ATS...',
-    'STEP 3: AI Recruiter Screener — Menguji Evaluasi Multi-AI (GPT-5, Gemini, Claude)...',
+    'STEP 3: Multi-Screener Intelligence — Menguji Evaluasi Konsensus Recruiter (Engine v2)...',
     'STEP 4: Hiring Probability — Menghitung Skor Konsensus Peluang Panggilan Wawancara...',
     'STEP 5: Improvement Engine — Menyusun Langkah Optimasi CV Instant...',
   ];
@@ -345,10 +486,6 @@ export const AiCvScreenerView: React.FC = () => {
   const handleStartRvePipeline = () => {
     if (cvSourceMode === 'upload' && !uploadedFile) {
       alert('Silakan pilih atau upload file CV Anda terlebih dahulu.');
-      return;
-    }
-    if (cvSourceMode === 'text' && !rawCvText.trim()) {
-      alert('Silakan tempelkan (paste) teks CV Anda.');
       return;
     }
 
@@ -373,9 +510,7 @@ export const AiCvScreenerView: React.FC = () => {
           candidateName:
             cvSourceMode === 'saved'
               ? selectedSavedCv.candidateName
-              : cvSourceMode === 'upload'
-              ? uploadedFile?.name || 'CV Upload'
-              : 'CV Paste',
+              : uploadedFile?.name || 'CV Upload',
           targetRole,
           personaName: currentPersona.name,
           consensusScore: rveReport.consensusScore,
@@ -455,7 +590,7 @@ export const AiCvScreenerView: React.FC = () => {
       if (lower.includes('ditolak') || lower.includes('kelemahan') || lower.includes('kurang')) {
         responseText = `Berdasarkan evaluasi konsensus ${currentPersona.name}, CV Anda berisiko tereliminasi karena seksi pengalaman kerja kedua belum memiliki metrik angka (%). Tambahkan metrik seperti "berhasil menghemat waktu 30%" agar skor naik ke 91%+!`;
       } else if (lower.includes('summary') || lower.includes('ringkasan')) {
-        responseText = `Jika Anda mengubah ringkasan profil menjadi berorientasi hasil (seperti "Software Engineer 3+ tahun pengalaman dengan React & Node.js"), skor konsensus AI Recruiter akan langsung melesat menjadi 93%! Klik tombol "Optimalkan CV Saya" untuk menerapkannya secara otomatis.`;
+        responseText = `Jika Anda mengubah ringkasan profil menjadi berorientasi hasil (seperti "Software Engineer 3+ tahun pengalaman dengan React & Node.js"), skor konsensus Recruiter akan langsung melesat menjadi 93%! Klik tombol "Optimalkan CV Saya" untuk menerapkannya secara otomatis.`;
       } else if (lower.includes('100%') || lower.includes('sempurna')) {
         responseText = `Untuk mencapai 100% Sempurna, terapkan 3 rekomendasi utama: 1) Sertakan metrik %, 2) Perjelas tech stack utama di bagian atas, dan 3) Gunakan kata kerja aksi di setiap bullet point.`;
       } else {
@@ -474,184 +609,79 @@ export const AiCvScreenerView: React.FC = () => {
 
   return (
     <div className="space-y-6 md:space-y-8 w-full pb-16 font-sans transition-all duration-300">
-      {/* Navigation Header Bar (Phase Switcher: Input & History vs Full Report View) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-orange-500 text-white shadow-xs">
-            <Sparkles className="w-5 h-5 fill-white" />
-          </div>
-          <div>
-            <h1 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <span>CUTI CV Intelligence Platform</span>
-              <span className="text-[10px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-950 px-2 py-0.5 rounded border border-orange-200 dark:border-orange-900">
-                v2.0 Linear Pipeline
-              </span>
-            </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Evaluasi mendalam daya pikat CV terhadap HRD, ATS, dan AI Recruiter.
-            </p>
-          </div>
-        </div>
-
-        {/* Phase Toggle Tabs */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-bold shrink-0">
-          <button
-            type="button"
-            onClick={() => setActivePhase('setup')}
-            className={`px-3.5 py-2 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
-              activePhase === 'setup'
-                ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 font-extrabold shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            <span>Formulir &amp; Riwayat ({reportHistory.length})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActivePhase('report')}
-            className={`px-3.5 py-2 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
-              activePhase === 'report'
-                ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 font-extrabold shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <BarChart3 className="w-3.5 h-3.5" />
-            <span>Laporan Intelligence Full-Width</span>
-          </button>
-        </div>
-      </div>
-
-      {/* PHASE 1: SETUP & HISTORY LIST VIEW */}
+      {/* PHASE 1: SETUP & HISTORY 3-COLUMN LAYOUT VIEW */}
       {activePhase === 'setup' && (
         <div className="space-y-6 w-full animate-in fade-in duration-300">
           {/* Header Banner */}
-          <div className="p-6 rounded-2xl bg-[#0D3BD9] border border-blue-500/50 text-white shadow-xl relative overflow-hidden">
-            <div className="relative z-10 space-y-2 max-w-2xl">
-              <span className="inline-block px-3 py-1 rounded-full text-xs font-black bg-amber-400 text-slate-950">
+          <div className="p-5 sm:p-6 rounded-2xl bg-[#0D3BD9] border border-blue-500/50 text-white shadow-xl relative overflow-hidden">
+            <div className="relative z-10 space-y-2 max-w-3xl">
+              <span className="inline-block px-3 py-1 rounded-full text-xs font-black bg-amber-400 text-slate-950 shadow-xs">
                 Langkah 1: Konfigurasi CV &amp; Target Perusahaan
               </span>
-              <h2 className="text-2xl font-black">Pilih CV &amp; Kriteria Recruiter Target Anda</h2>
+              <h2 className="text-xl sm:text-2xl font-black text-white">Pilih CV &amp; Kriteria Recruiter Target Anda</h2>
               <p className="text-xs text-slate-200">
-                Pilih salah satu dari 11 persona recruiter di bawah ini. Hasil evaluasi akan disimpan secara otomatis di riwayat laporan Anda.
+                Sesuaikan posisi impian, berkas CV, dan pilih salah satu persona recruiter di bawah ini untuk mensimulasikan evaluasi HRD, ATS, dan Tim Recruiter.
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Left Form: CV & Persona Selection */}
-            <div className="lg:col-span-7 space-y-6">
-              <div className="p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-                {/* Recruiter Persona Selection (11 Tipe) */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-extrabold text-slate-900 dark:text-white block">
-                      Siapa Recruiter Anda? (11 Tipe Target Persona)
+          {/* Configuration Card: Position, Seniority & CV File Source */}
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+              {/* Position Title & Level */}
+              <div className="md:col-span-7 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-extrabold text-slate-900 dark:text-white block mb-1">
+                      Nama Posisi Pekerjaan Target *
                     </label>
-                    <span className="text-[10px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-950 px-2 py-0.5 rounded border border-orange-200">
-                      11 Tipe Persona
-                    </span>
+                    <input
+                      type="text"
+                      value={targetRole}
+                      onChange={(e) => setTargetRole(e.target.value)}
+                      placeholder="Contoh: Senior Fullstack Engineer"
+                      className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-orange-500 focus:outline-none transition"
+                    />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                    {recruiterPersonas.map((persona) => {
-                      const isSelected = selectedPersonaId === persona.id;
-                      return (
-                        <div
-                          key={persona.id}
-                          onClick={() => setSelectedPersonaId(persona.id)}
-                          className={`p-3 rounded-xl border transition-all cursor-pointer space-y-1.5 flex flex-col justify-between ${
-                            isSelected
-                              ? 'border-orange-500 bg-orange-50/70 dark:bg-orange-950/40 ring-2 ring-orange-500/20 shadow-xs'
-                              : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                  <div>
+                    <label className="text-xs font-extrabold text-slate-900 dark:text-white block mb-1">
+                      Tingkat Senioritas
+                    </label>
+                    <div className="grid grid-cols-4 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-semibold">
+                      {(['Entry', 'Mid', 'Senior', 'Manager'] as const).map((lvl) => (
+                        <button
+                          key={lvl}
+                          type="button"
+                          onClick={() => setTargetLevel(lvl)}
+                          className={`py-1.5 rounded-md transition text-center cursor-pointer ${
+                            targetLevel === lvl
+                              ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 font-bold shadow-xs'
+                              : 'text-slate-600 dark:text-slate-400'
                           }`}
                         >
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between gap-1">
-                              <span className="font-extrabold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-                                <Users className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-orange-500' : 'text-slate-400'}`} />
-                                <span>{persona.name}</span>
-                              </span>
-                              {isSelected ? (
-                                <Check className="w-4 h-4 text-orange-500 shrink-0" />
-                              ) : (
-                                <span className="text-[9px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shrink-0">
-                                  {persona.badge}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-snug">
-                              {persona.description}
-                            </p>
-                          </div>
-
-                          <div className="pt-1 flex items-center justify-between text-[9px] border-t border-slate-100 dark:border-slate-800">
-                            <span className="text-slate-400 font-semibold">Strictness:</span>
-                            <span className="font-bold text-slate-700 dark:text-slate-300 truncate max-w-[120px]">
-                              {persona.strictness}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Role & Document Selection */}
-                <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                        Nama Posisi Pekerjaan Target *
-                      </label>
-                      <input
-                        type="text"
-                        value={targetRole}
-                        onChange={(e) => setTargetRole(e.target.value)}
-                        placeholder="Contoh: Senior Fullstack Engineer"
-                        className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-orange-500 focus:outline-none transition"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                        Tingkat Senioritas
-                      </label>
-                      <div className="grid grid-cols-4 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-semibold">
-                        {(['Entry', 'Mid', 'Senior', 'Manager'] as const).map((lvl) => (
-                          <button
-                            key={lvl}
-                            type="button"
-                            onClick={() => setTargetLevel(lvl)}
-                            className={`py-1.5 rounded-md transition text-center cursor-pointer ${
-                              targetLevel === lvl
-                                ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 font-bold shadow-xs'
-                                : 'text-slate-600 dark:text-slate-400'
-                            }`}
-                          >
-                            {lvl}
-                          </button>
-                        ))}
-                      </div>
+                          {lvl}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* CV Source Selection */}
-                <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+              {/* CV File Source Selector */}
+              <div className="md:col-span-5 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-extrabold text-slate-900 dark:text-white block">
                     Pilih Berkas CV
                   </label>
-
-                  <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-semibold">
+                  <div className="flex items-center gap-1 text-[10px] font-bold">
                     <button
                       type="button"
                       onClick={() => setCvSourceMode('saved')}
-                      className={`py-1.5 px-2 rounded-md transition text-center cursor-pointer ${
+                      className={`px-2 py-0.5 rounded transition ${
                         cvSourceMode === 'saved'
-                          ? 'bg-white dark:bg-slate-900 text-navy-700 dark:text-white font-bold shadow-xs'
-                          : 'text-slate-600 dark:text-slate-400'
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                       }`}
                     >
                       Tersimpan
@@ -659,142 +689,394 @@ export const AiCvScreenerView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setCvSourceMode('upload')}
-                      className={`py-1.5 px-2 rounded-md transition text-center cursor-pointer ${
+                      className={`px-2 py-0.5 rounded transition ${
                         cvSourceMode === 'upload'
-                          ? 'bg-white dark:bg-slate-900 text-navy-700 dark:text-white font-bold shadow-xs'
-                          : 'text-slate-600 dark:text-slate-400'
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                       }`}
                     >
-                      Upload File
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCvSourceMode('text')}
-                      className={`py-1.5 px-2 rounded-md transition text-center cursor-pointer ${
-                        cvSourceMode === 'text'
-                          ? 'bg-white dark:bg-slate-900 text-navy-700 dark:text-white font-bold shadow-xs'
-                          : 'text-slate-600 dark:text-slate-400'
-                      }`}
-                    >
-                      Paste Teks
+                      Upload
                     </button>
                   </div>
+                </div>
 
-                  {cvSourceMode === 'saved' && (
-                    <div className="space-y-2">
-                      {mockSavedCVs.map((cv) => (
-                        <div
-                          key={cv.id}
-                          onClick={() => setSelectedCvId(cv.id)}
-                          className={`p-3.5 rounded-lg border transition-all cursor-pointer flex items-center justify-between gap-2 ${
-                            selectedCvId === cv.id
-                              ? 'border-navy-500 bg-navy-50/50 dark:bg-navy-950/40 ring-1 ring-navy-500/20 shadow-xs'
-                              : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <FileText
-                              className={`w-4 h-4 shrink-0 ${selectedCvId === cv.id ? 'text-navy-700 dark:text-navy-400' : 'text-slate-400'}`}
-                            />
-                            <div>
-                              <h4 className="text-xs font-bold text-slate-900 dark:text-white">{cv.candidateName}</h4>
-                              <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                                {cv.roleTitle} • {cv.updatedAt}
-                              </p>
-                            </div>
-                          </div>
-                          <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/60">
-                            {cv.atsScore}% ATS
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                {cvSourceMode === 'saved' ? (
+                  <select
+                    value={selectedCvId}
+                    onChange={(e) => setSelectedCvId(e.target.value)}
+                    className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-orange-500 focus:outline-none transition cursor-pointer"
+                  >
+                    {mockSavedCVs.map((cv) => (
+                      <option key={cv.id} value={cv.id}>
+                        {cv.candidateName} — {cv.roleTitle} ({cv.atsScore}% ATS)
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="relative">
+                    <input
+                      type="file"
+                      id="top-cv-upload"
+                      accept=".pdf,.docx,.doc,.txt"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setUploadedFile(file);
+                      }}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="top-cv-upload"
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-dashed border-orange-300 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 font-bold flex items-center justify-between cursor-pointer hover:bg-orange-100/60 transition"
+                    >
+                      <span className="truncate">
+                        {uploadedFile ? uploadedFile.name : 'Klik untuk Upload PDF/DOCX (Maks. 10MB)'}
+                      </span>
+                      <Upload className="w-3.5 h-3.5 shrink-0 ml-2 text-orange-500" />
+                    </label>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* MAIN 3-COLUMN GRID LAYOUT (Left List, Middle Preview, Right History) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            {/* COLUMN 1: Recruiter List (Pilih Tipe Recruiter - Left Column) */}
+            <div className="lg:col-span-3 space-y-4">
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                {/* Search Bar */}
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    value={personaSearchQuery}
+                    onChange={(e) => setPersonaSearchQuery(e.target.value)}
+                    placeholder="Cari recruiter atau perusahaan..."
+                    className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none transition"
+                  />
+                  {personaSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setPersonaSearchQuery('')}
+                      className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
                   )}
                 </div>
 
-                {/* Submit Action Button */}
-                <button
-                  type="button"
-                  onClick={handleStartRvePipeline}
-                  disabled={isProcessing}
-                  className="w-full py-4 rounded-xl bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-xs shadow-md shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 hover:-translate-y-0.5"
-                >
-                  <Sparkles className="w-4 h-4 fill-white" />
-                  <span>Jalankan CUTI Recruiter Vision Pipeline &amp; Buka Laporan</span>
-                </button>
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+                  <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                    Pilih Tipe Recruiter
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-400">
+                    {filteredPersonas.length} Tipe
+                  </span>
+                </div>
+
+                {/* Compact Vertical List of Recruiter Cards */}
+                <div className="space-y-2">
+                  {(showAllPersonas || personaSearchQuery
+                    ? filteredPersonas
+                    : filteredPersonas.slice(0, 7)
+                  ).map((persona) => {
+                    const isSelected = selectedPersonaId === persona.id;
+
+                    return (
+                      <div
+                        key={persona.id}
+                        onClick={() => {
+                          setSelectedPersonaId(persona.id);
+                          setExpandedPersonaId(persona.id);
+                        }}
+                        className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 group ${
+                          isSelected
+                            ? 'border-orange-500 bg-orange-50/90 dark:bg-orange-950/40 ring-1 ring-orange-500/20 shadow-xs'
+                            : 'border-slate-200 dark:border-slate-800 hover:border-orange-400 dark:hover:border-orange-500/60 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {/* Avatar Icon */}
+                          <div
+                            className={`p-2 rounded-xl shrink-0 transition ${
+                              isSelected
+                                ? 'bg-orange-500 text-white shadow-xs'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-orange-100 dark:group-hover:bg-orange-950 group-hover:text-orange-600'
+                            }`}
+                          >
+                            {persona.category === 'company' && <Building2 className="w-4 h-4" />}
+                            {persona.category === 'region' && <Globe className="w-4 h-4" />}
+                            {persona.category === 'special' && <GraduationCap className="w-4 h-4" />}
+                          </div>
+
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h4
+                                className={`font-black text-xs transition truncate ${
+                                  isSelected
+                                    ? 'text-orange-600 dark:text-orange-400'
+                                    : 'text-slate-900 dark:text-white group-hover:text-orange-600'
+                                }`}
+                              >
+                                {persona.name}
+                              </h4>
+                              {persona.isRecommended && (
+                                <span className="text-[8px] font-extrabold text-amber-700 bg-amber-100 dark:bg-amber-950 dark:text-amber-300 px-1 py-0.2 rounded border border-amber-300 dark:border-amber-800 shrink-0">
+                                  Recommended
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                              Fokus: {persona.focusArea}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Selected Indicator */}
+                        {isSelected && (
+                          <span className="p-0.5 rounded-full bg-orange-500 text-white shadow-xs shrink-0">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Show All Toggle Button */}
+                {!personaSearchQuery && filteredPersonas.length > 7 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllPersonas(!showAllPersonas)}
+                    className="w-full py-2 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 text-slate-600 dark:text-slate-300 text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer border border-slate-200 dark:border-slate-700"
+                  >
+                    <span>{showAllPersonas ? 'Ringkaskan List' : `Lihat ${filteredPersonas.length - 7} lainnya`}</span>
+                    {showAllPersonas ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                  </button>
+                )}
+              </div>
+
+              {/* Tips Footer Card */}
+              <div className="p-3.5 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 flex items-start gap-2.5 text-[11px] text-blue-900 dark:text-blue-200">
+                <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                <p className="leading-snug">
+                  <strong className="font-bold">Tips:</strong> Pilih recruiter yang paling relevan dengan posisi &amp; perusahaan impianmu. Kamu bisa ubah kapan saja untuk melihat perbedaan hasil evaluasi.
+                </p>
               </div>
             </div>
 
-            {/* Right Form: Riwayat Hasil Screening CV Saya */}
+            {/* COLUMN 2: Preview Recruiter (Middle Column ~250-350px Card) */}
             <div className="lg:col-span-5 space-y-4">
-              <div className="p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                  <div className="flex items-center gap-2">
-                    <History className="w-5 h-5 text-orange-500" />
+              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-wider block">
+                  Preview Recruiter
+                </span>
+
+                {/* Current Persona Header Card */}
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 rounded-2xl bg-orange-500 text-white shadow-md">
+                        {currentPersona.category === 'company' && <Building2 className="w-6 h-6" />}
+                        {currentPersona.category === 'region' && <Globe className="w-6 h-6" />}
+                        {currentPersona.category === 'special' && <GraduationCap className="w-6 h-6" />}
+                      </div>
+
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                            {currentPersona.name}
+                          </h3>
+                          <span className="text-[10px] font-extrabold text-amber-700 bg-amber-100 dark:bg-amber-950 dark:text-amber-300 px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-800">
+                            Best Match
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 pt-0.5">
+                          {currentPersona.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 block">
+                        {currentPersona.matchScore}%
+                      </span>
+                      <span className="text-[9px] font-bold text-slate-400 block uppercase">Match</span>
+                    </div>
+                  </div>
+
+                  {/* Sistem akan fokus pada: */}
+                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <span className="text-xs font-extrabold text-slate-900 dark:text-white block">
+                      Sistem akan fokus pada:
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      {currentPersona.highlights.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="px-2.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 flex items-start gap-1.5 text-[11px] font-bold text-slate-800 dark:text-slate-200 leading-snug"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                          <span className="break-words">{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Contoh Perusahaan */}
+                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <span className="text-xs font-extrabold text-slate-900 dark:text-white block">
+                      Contoh Perusahaan
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {currentPersona.companies.map((comp, idx) => (
+                        <span
+                          key={idx}
+                          className="px-3 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold"
+                        >
+                          {comp}
+                        </span>
+                      ))}
+                      <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs font-bold">
+                        +2
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Yang Paling Dinilai */}
+                  <div className="p-3.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 flex items-start gap-2.5 text-xs">
+                    <Lightbulb className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                     <div>
-                      <h3 className="text-xs font-extrabold text-slate-900 dark:text-white">
-                        Riwayat Screening CV Saya
-                      </h3>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                        Hasil evaluasi tersimpan otomatis tanpa perlu mengulang
+                      <span className="font-extrabold text-amber-900 dark:text-amber-200 block text-xs">
+                        Yang Paling Dinilai
+                      </span>
+                      <p className="text-[11px] text-amber-800 dark:text-amber-300 font-medium leading-snug pt-0.5">
+                        {currentPersona.evalFocus}
                       </p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
-                    {reportHistory.length} Hasil Tersimpan
+
+                  {/* Submit Action Button */}
+                  <button
+                    type="button"
+                    onClick={handleStartRvePipeline}
+                    disabled={isProcessing}
+                    className="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-xs shadow-md shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 hover:-translate-y-0.5 pt-1"
+                  >
+                    <CheckCircle2 className="w-4 h-4 fill-white" />
+                    <span>Gunakan Recruiter Ini &amp; Jalankan Pipeline</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* COLUMN 3: Riwayat Screening CV Saya (Right Column) */}
+            <div className="lg:col-span-4 space-y-4">
+              {/* Riwayat Card */}
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+                  <div className="flex items-center gap-1.5">
+                    <History className="w-4 h-4 text-orange-500" />
+                    <h3 className="text-xs font-black text-slate-900 dark:text-white">
+                      Riwayat Screening CV Saya
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-bold text-orange-600 hover:underline cursor-pointer">
+                    Lihat Semua
                   </span>
                 </div>
 
                 {reportHistory.length === 0 ? (
-                  <div className="p-8 text-center space-y-2 text-slate-400">
-                    <Bookmark className="w-8 h-8 mx-auto stroke-1" />
-                    <p className="text-xs font-medium">Belum ada riwayat hasil screening.</p>
+                  <div className="p-6 text-center space-y-1.5 text-slate-400">
+                    <Bookmark className="w-6 h-6 mx-auto stroke-1" />
+                    <p className="text-[11px] font-medium">Belum ada riwayat hasil screening.</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    {reportHistory.map((hist) => (
+                  <div className="space-y-2.5">
+                    {reportHistory.slice(0, 2).map((hist) => (
                       <div
                         key={hist.id}
                         onClick={() => handleLoadHistoryReport(hist)}
-                        className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-orange-500/50 hover:bg-orange-50/40 dark:hover:bg-orange-950/30 transition-all cursor-pointer space-y-2 group shadow-2xs"
+                        className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-orange-500/50 hover:bg-orange-50/40 dark:hover:bg-orange-950/30 transition-all cursor-pointer space-y-1.5 group shadow-2xs"
                       >
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="font-extrabold text-xs text-slate-900 dark:text-white group-hover:text-orange-600 transition">
-                              {hist.candidateName}
-                            </span>
-                            <span className="text-[9px] font-bold bg-navy-50 text-navy-700 dark:bg-navy-950 dark:text-navy-300 px-1.5 py-0.5 rounded border border-navy-200 dark:border-navy-800">
-                              {hist.personaName}
-                            </span>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={(e) => handleDeleteHistory(hist.id, e)}
-                            className="p-1 rounded text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950 transition opacity-0 group-hover:opacity-100"
-                            title="Hapus riwayat ini"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          <span className="font-black text-xs text-rose-600 dark:text-rose-400 group-hover:text-orange-600 transition">
+                            {hist.candidateName}
+                          </span>
+                          <span className="text-[9px] font-extrabold bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-200 dark:border-indigo-800">
+                            {hist.personaName}
+                          </span>
                         </div>
 
-                        <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
                           {hist.targetRole}
                         </p>
 
-                        <div className="flex items-center justify-between text-[10px] border-t border-slate-100 dark:border-slate-800/80 pt-2 text-slate-500 dark:text-slate-400">
+                        <div className="flex items-center justify-between text-[10px] border-t border-slate-100 dark:border-slate-800/80 pt-1.5 text-slate-400">
                           <span>{hist.timestamp}</span>
-
-                          <span className="font-black text-xs text-orange-500 flex items-center gap-1">
-                            <span className={`w-2 h-2 rounded-full ${hist.verdictStatus === 'interview' ? 'bg-emerald-500' : hist.verdictStatus === 'maybe' ? 'bg-amber-500' : 'bg-rose-500'}`} />
-                            {hist.consensusScore}% Consensus
-                            <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition" />
+                          <span className="font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block shrink-0" />
+                            {hist.consensusScore}% ATS
                           </span>
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
+              </div>
+
+              {/* Hasil Terbaru Mini Card */}
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2.5">
+                <span className="text-xs font-black text-slate-900 dark:text-white block border-b border-slate-100 dark:border-slate-800 pb-2">
+                  Hasil Terbaru
+                </span>
+
+                <div className="space-y-2 text-xs">
+                  {mockSavedCVs.map((cv) => (
+                    <div
+                      key={cv.id}
+                      onClick={() => handleStartRvePipeline()}
+                      className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
+                    >
+                      <div>
+                        <h5 className="font-bold text-xs text-slate-900 dark:text-white">{cv.candidateName}</h5>
+                        <p className="text-[10px] text-slate-400">{cv.roleTitle}</p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-1.5 py-0.5 rounded">
+                          {cv.atsScore}% ATS
+                        </span>
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Butuh Insight Lebih Dalam? Card */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-50/80 to-purple-50/80 dark:from-indigo-950/40 dark:to-purple-950/40 border border-indigo-200/80 dark:border-indigo-900/60 space-y-3">
+                <div className="flex items-start gap-2.5">
+                  <div className="p-2 rounded-xl bg-indigo-500 text-white shrink-0">
+                    <Sparkles className="w-4 h-4 fill-white" />
+                  </div>
+                  <div>
+                    <h5 className="font-extrabold text-xs text-slate-900 dark:text-white">
+                      Butuh insight lebih dalam?
+                    </h5>
+                    <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-snug pt-0.5">
+                      Lihat Laporan Intelligence Full-Width untuk analisis lengkap recruiter target.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setActivePhase('report')}
+                  className="w-full py-2 rounded-xl bg-white dark:bg-slate-900 hover:bg-indigo-50 text-indigo-600 dark:text-indigo-400 text-xs font-bold transition flex items-center justify-center gap-1 border border-indigo-200 dark:border-indigo-800 cursor-pointer shadow-2xs"
+                >
+                  <span>Lihat Laporan</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           </div>
@@ -804,32 +1086,6 @@ export const AiCvScreenerView: React.FC = () => {
       {/* PHASE 2: IMMERSIVE FULL-WIDTH REPORT VIEW */}
       {activePhase === 'report' && (
         <div className="space-y-6 w-full animate-in fade-in duration-300">
-          {/* Top Return Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
-            <button
-              type="button"
-              onClick={() => setActivePhase('setup')}
-              className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Kembali ke Formulir &amp; Riwayat</span>
-            </button>
-
-            <div className="flex items-center gap-3 text-xs">
-              <span className="text-slate-500 dark:text-slate-400 hidden sm:inline">
-                Target: <strong className="text-slate-800 dark:text-slate-200">{targetRole}</strong> ({currentPersona.name})
-              </span>
-              <button
-                type="button"
-                onClick={handleStartRvePipeline}
-                className="px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400 font-bold border border-orange-200 dark:border-orange-900 hover:bg-orange-100 transition flex items-center gap-1 cursor-pointer"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Analisis Ulang</span>
-              </button>
-            </div>
-          </div>
-
           {/* Header Banner */}
           <div className="p-5 sm:p-6 md:p-8 rounded-2xl bg-[#0D3BD9] border border-blue-500/50 shadow-xl relative overflow-hidden text-white">
             <div className="absolute -right-10 -bottom-10 w-64 h-64 rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
@@ -852,7 +1108,7 @@ export const AiCvScreenerView: React.FC = () => {
                     <Check className="w-3.5 h-3.5 text-emerald-400" /> Filter Mesin ATS
                   </span>
                   <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-md border border-white/15">
-                    <Check className="w-3.5 h-3.5 text-emerald-400" /> Multi-AI Recruiter (GPT-5, Gemini, Claude)
+                    <Check className="w-3.5 h-3.5 text-emerald-400" /> Multi-Screener Intelligence (Engine v2)
                   </span>
                 </div>
               </div>
@@ -926,7 +1182,7 @@ export const AiCvScreenerView: React.FC = () => {
                 <div className="flex items-center justify-between border-b border-white/20 pb-2">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 fill-white text-white" />
-                    <h3 className="font-extrabold text-xs uppercase tracking-wider">Ringkasan Evaluasi AI</h3>
+                    <h3 className="font-extrabold text-xs uppercase tracking-wider">Ringkasan Evaluasi Sistem</h3>
                   </div>
                   <span className="text-[10px] font-black bg-white/20 px-2 py-0.5 rounded border border-white/20">
                     Estimasi Peluang: {rveReport.topAiSummary.estimatedProbability}%
@@ -1117,7 +1373,7 @@ export const AiCvScreenerView: React.FC = () => {
               </div>
 
               {/* Timeline Stepper Navigation Bar */}
-              <div className="sticky top-0 z-30 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-lg">
+              <div className="sticky -top-2.5 sm:-top-5 z-30 -mt-2 sm:-mt-3 bg-white dark:bg-slate-900 p-2.5 sm:p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-lg transition-all">
                 <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar text-[11px] font-bold">
                   <a
                     href="#step-1-vision"
@@ -1335,10 +1591,10 @@ export const AiCvScreenerView: React.FC = () => {
                         <span>STEP 3 — Primary Selling Point</span>
                       </span>
                       <h3 className="font-black text-xl text-slate-900 dark:text-white">
-                        AI Recruiter Simulation (GPT-5 • Gemini • Claude)
+                        Simulasi Multi-Screener (Sistem v2)
                       </h3>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Perusahaan modern saat ini menyaring kandidat menggunakan prompt AI Recruiter. Kami mensimulasikannya secara bersamaan.
+                        Perusahaan modern saat ini menyaring kandidat menggunakan sistem penyaringan otomatis. Kami mensimulasikannya secara bersamaan.
                       </p>
                     </div>
 
@@ -1430,11 +1686,11 @@ export const AiCvScreenerView: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <Bot className="w-5 h-5 text-orange-500" />
                         <div>
-                          <h3 className="text-xs font-extrabold text-slate-900 dark:text-white">Tanya Recruiter AI</h3>
+                          <h3 className="text-xs font-extrabold text-slate-900 dark:text-white">Tanya Tim Recruiter</h3>
                           <p className="text-[10px] text-slate-500 dark:text-slate-400">Interaksi &amp; Konsultasi Hasil CV</p>
                         </div>
                       </div>
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" title="Recruiter AI Active" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" title="Tim Recruiter Aktif" />
                     </div>
 
                     {/* Message History */}
@@ -1491,7 +1747,7 @@ export const AiCvScreenerView: React.FC = () => {
                         value={inputChatText}
                         onChange={(e) => setInputChatText(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSendChatMessage()}
-                        placeholder="Tanyakan ke Recruiter AI..."
+                        placeholder="Tanyakan ke Tim Recruiter..."
                         className="flex-1 px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none transition"
                       />
                       <button
@@ -1570,7 +1826,7 @@ export const AiCvScreenerView: React.FC = () => {
 
                             <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-900/60 text-emerald-900 dark:text-emerald-200">
                               <span className="font-bold text-[10px] uppercase text-emerald-600 dark:text-emerald-400 block">
-                                Sesudah Optimasi AI:
+                                Sesudah Dioptimalkan:
                               </span>
                               <p className="mt-1 leading-snug">{fix.after}</p>
                             </div>

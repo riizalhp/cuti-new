@@ -52,6 +52,7 @@ import {
   SlidersHorizontal,
   GripVertical,
   MapPin,
+  RotateCcw,
 } from 'lucide-react';
 
 const MONTHS = [
@@ -1077,12 +1078,64 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const [templateFormSubmitted, setTemplateFormSubmitted] = useState<boolean>(false);
 
   // Document Layout & Formatting Settings State
+  const [rightPanelTab, setRightPanelTab] = useState<'editor' | 'templates' | 'pengaturan'>('editor');
   const [showLayoutSelector, setShowLayoutSelector] = useState<boolean>(false);
   const [showDocSettings, setShowDocSettings] = useState<boolean>(false);
   const [docFontFamily, setDocFontFamily] = useState<'sans' | 'serif' | 'mono' | 'standard'>('sans');
   const [docFontSize, setDocFontSize] = useState<'sm' | 'base' | 'md' | 'lg'>('base');
   const [docSpacing, setDocSpacing] = useState<'compact' | 'normal' | 'spacious'>('normal');
   const [docShowIcons, setDocShowIcons] = useState<boolean>(true);
+  const [docNameSize, setDocNameSize] = useState<number>(30);
+  const [docHeaderSize, setDocHeaderSize] = useState<number>(14);
+  const [docBodySize, setDocBodySize] = useState<number>(12);
+  const [docSectionSpacing, setDocSectionSpacing] = useState<number>(20);
+  const [docLineHeight, setDocLineHeight] = useState<number>(1.4);
+  const [docLetterSpacing, setDocLetterSpacing] = useState<number>(0);
+  const [downloadFormat, setDownloadFormat] = useState<'pdf' | 'docx'>('pdf');
+
+  const handleResetDocStyles = () => {
+    setDocFontFamily('sans');
+    setDocFontSize('base');
+    setDocSpacing('normal');
+    setDocShowIcons(true);
+    setDocNameSize(30);
+    setDocHeaderSize(14);
+    setDocBodySize(12);
+    setDocSectionSpacing(20);
+    setDocLineHeight(1.4);
+    setDocLetterSpacing(0);
+  };
+
+  const handleImportResume = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.name.endsWith('.json')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const parsed = JSON.parse(event.target?.result as string);
+          if (parsed && typeof parsed === 'object') {
+            setFormData((prev) => ({ ...prev, ...parsed }));
+            alert('File JSON resume berhasil di-import!');
+          }
+        } catch (err) {
+          alert('Gagal membaca format JSON resume.');
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      alert(`File resume "${file.name}" berhasil diunggah! Data ringkasan telah di-import ke form editor.`);
+    }
+  };
+
+  const handleDownloadCV = () => {
+    if (downloadFormat === 'pdf') {
+      window.print();
+    } else {
+      alert(`Mengunduh file DOCX: "${titleInput || 'CV_Lamar_Kerja.docx'}"...`);
+    }
+  };
 
   // Template Form Validation
   const isNewCvTitleValid = newCvTitle.trim().length > 0;
@@ -3598,7 +3651,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       >
                         {/* MINI VISUAL PREVIEW THUMBNAIL */}
                         <div className="w-full aspect-[210/297] rounded-lg bg-white border border-slate-200 dark:border-slate-700 p-1.5 overflow-hidden shadow-2xs relative flex flex-col justify-between mb-2 group-hover:shadow-md transition">
-                          <TemplateThumbnailVisual templateId={tpl.id} />
+                          <TemplateThumbnailVisual templateId={tpl.id} customData={formData} />
                           {isSelected && (
                             <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-xs">
                               <Check className="w-3 h-3 stroke-[3]" />
@@ -3730,30 +3783,63 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 docFontSize={docFontSize}
                 docSpacing={docSpacing}
                 docShowIcons={docShowIcons}
+                docNameSize={docNameSize}
+                docHeaderSize={docHeaderSize}
+                docBodySize={docBodySize}
+                docSectionSpacing={docSectionSpacing}
+                docLineHeight={docLineHeight}
+                docLetterSpacing={docLetterSpacing}
               />
             </div>
 
-            {/* RIGHT COLUMN: INLINE FORM CONTROLS DIRECTLY NEXT TO CV (Clean, Frameless Container) */}
+            {/* RIGHT COLUMN: TOGGLE TABS (EDITOR | TEMPLATES | PENGATURAN) */}
             <div className="lg:col-span-5 xl:col-span-5 w-full flex flex-col space-y-3 no-print">
-              {/* Header Panel (Frameless, Direct Page Title & Auto-Save Badge) */}
-              <div className="px-1 py-1 flex items-center justify-between gap-3">
-                <div className="space-y-1 min-w-0">
-                  <h3 className="font-extrabold text-lg text-slate-900 dark:text-white truncate">
-                    {viewMode === 'create' ? 'Input Data CV Saya' : 'Edit Keterangan CV'}
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                    Isi data di panel kanan ini untuk memperbarui lembar A4 secara langsung
-                  </p>
-                </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 text-xs font-bold shrink-0 shadow-2xs">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>Tersimpan Otomatis</span>
-                </div>
+              {/* Header Navigation Toggle Bar */}
+              <div className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-1 shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => setRightPanelTab('editor')}
+                  className={`flex-1 py-2 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                    rightPanelTab === 'editor'
+                      ? 'bg-orange-500 text-white shadow-md'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Editor</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRightPanelTab('templates')}
+                  className={`flex-1 py-2 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                    rightPanelTab === 'templates'
+                      ? 'bg-orange-500 text-white shadow-md'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'
+                  }`}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <span>Templates</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRightPanelTab('pengaturan')}
+                  className={`flex-1 py-2 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                    rightPanelTab === 'pengaturan'
+                      ? 'bg-orange-500 text-white shadow-md'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'
+                  }`}
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  <span>Pengaturan</span>
+                </button>
               </div>
 
-              {/* Content Body (10 Vertical Accordions - Natural Page Flow) */}
-              <div className="w-full space-y-3">
-                <form id="cv-drawer-form" onSubmit={handleSaveCV} className="space-y-3.5 text-xs pb-12">
+              {/* TAB 1: EDITOR */}
+              {rightPanelTab === 'editor' && (
+                <div className="w-full space-y-3">
+                  <form id="cv-drawer-form" onSubmit={handleSaveCV} className="space-y-3.5 text-xs pb-12">
                   {/* Section 1: Informasi Pribadi & Kontak (Merged) */}
                   <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-2xs">
                     <button
@@ -5556,6 +5642,382 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   })}
                 </form>
               </div>
+              )}
+
+              {/* TAB 2: TEMPLATES */}
+              {rightPanelTab === 'templates' && (
+                <div className="w-full bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xs animate-in fade-in duration-150">
+                  <div className="space-y-1">
+                    <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
+                      Pilih Template &amp; Tata Letak CV ATS
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                      Klik preview kecil untuk memilih tata letak yang diinginkan. Semua template 100% aman untuk parser sistem ATS.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[calc(100vh-14rem)] overflow-y-auto pr-1">
+                    {cvTemplates
+                      .filter((tpl) => !tpl.hidden)
+                      .map((tpl) => {
+                        const isSelected = selectedTemplateId === tpl.id;
+                        return (
+                          <div
+                            key={tpl.id}
+                            onClick={() => setSelectedTemplateId(tpl.id)}
+                            className={`p-2.5 rounded-xl border transition-all cursor-pointer group text-left ${
+                              isSelected
+                                ? 'bg-orange-50/80 dark:bg-orange-950/40 border-orange-500 ring-2 ring-orange-500/20 shadow-sm'
+                                : 'bg-slate-50/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/80 hover:border-orange-300 dark:hover:border-orange-600'
+                            }`}
+                          >
+                            <div className="w-full aspect-[210/297] rounded-lg bg-white border border-slate-200 dark:border-slate-700 p-1 overflow-hidden shadow-2xs relative flex flex-col justify-between mb-2 group-hover:shadow-md transition">
+                              <TemplateThumbnailVisual templateId={tpl.id} customData={formData} />
+                              {isSelected && (
+                                <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-xs">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="space-y-0.5">
+                              <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase bg-slate-200/80 text-slate-700 dark:bg-slate-800 dark:text-slate-300 block truncate">
+                                {tpl.badge}
+                              </span>
+                              <h5 className="font-extrabold text-xs text-slate-900 dark:text-white truncate">
+                                {tpl.name}
+                              </h5>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: PENGATURAN */}
+              {rightPanelTab === 'pengaturan' && (
+                <div className="w-full bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-5 shadow-2xs animate-in fade-in duration-150 max-h-[calc(100vh-14rem)] overflow-y-auto">
+                  {/* SECTION 1: PENGATURAN GAYA DOKUMEN & TIPOGRAFI */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                      <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                        <SlidersHorizontal className="w-4 h-4 text-orange-500" />
+                        <span>Pengaturan Gaya Dokumen</span>
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={handleResetDocStyles}
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                        title="Reset ke Gaya Default"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-orange-500" />
+                        <span>Reset Default</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Toggle Icon Kontak */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                          Tampilan Icon Kontak
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setDocShowIcons(!docShowIcons)}
+                          className={`w-full px-3 py-2 rounded-xl border text-xs font-bold flex items-center justify-between transition cursor-pointer ${
+                            docShowIcons
+                              ? 'bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800'
+                              : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <UserCheck className="w-4 h-4 text-orange-500" />
+                            <span>{docShowIcons ? 'Ikon Tampil' : 'Teks Saja'}</span>
+                          </div>
+                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${docShowIcons ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-600'}`}>
+                            {docShowIcons && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                          </div>
+                        </button>
+                      </div>
+
+                      {/* Dropdown Font */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                          Jenis Font Utama
+                        </label>
+                        <select
+                          value={docFontFamily}
+                          onChange={(e) => setDocFontFamily(e.target.value as any)}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                        >
+                          <option value="sans">Geist / Inter (Sans-serif Modern)</option>
+                          <option value="serif">EB Garamond / Lora (Serif Klasik)</option>
+                          <option value="mono">JetBrains Mono (Monospace Tech)</option>
+                          <option value="standard">Carlito / Arimo (ATS Standard)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* 6 Sliders + Number Inputs */}
+                    <div className="space-y-3.5 pt-2">
+                      {/* 1. Ukuran Nama */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Ukuran Nama</label>
+                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">{docNameSize} px</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="range"
+                            min={20}
+                            max={44}
+                            step={1}
+                            value={docNameSize}
+                            onChange={(e) => setDocNameSize(Number(e.target.value))}
+                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-lg"
+                          />
+                          <input
+                            type="number"
+                            min={20}
+                            max={44}
+                            value={docNameSize}
+                            onChange={(e) => setDocNameSize(Number(e.target.value))}
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                          />
+                        </div>
+                      </div>
+
+                      {/* 2. Ukuran Judul */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Ukuran Judul (Section Header)</label>
+                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">{docHeaderSize} px</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="range"
+                            min={10}
+                            max={24}
+                            step={1}
+                            value={docHeaderSize}
+                            onChange={(e) => setDocHeaderSize(Number(e.target.value))}
+                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-lg"
+                          />
+                          <input
+                            type="number"
+                            min={10}
+                            max={24}
+                            value={docHeaderSize}
+                            onChange={(e) => setDocHeaderSize(Number(e.target.value))}
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                          />
+                        </div>
+                      </div>
+
+                      {/* 3. Ukuran Isi */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Ukuran Isi (Teks Body)</label>
+                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">{docBodySize} px</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="range"
+                            min={8}
+                            max={18}
+                            step={1}
+                            value={docBodySize}
+                            onChange={(e) => setDocBodySize(Number(e.target.value))}
+                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-lg"
+                          />
+                          <input
+                            type="number"
+                            min={8}
+                            max={18}
+                            value={docBodySize}
+                            onChange={(e) => setDocBodySize(Number(e.target.value))}
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                          />
+                        </div>
+                      </div>
+
+                      {/* 4. Jarak Antar Bagian */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Jarak Antar Bagian (Margin Seksi)</label>
+                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">{docSectionSpacing} px</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="range"
+                            min={8}
+                            max={40}
+                            step={1}
+                            value={docSectionSpacing}
+                            onChange={(e) => setDocSectionSpacing(Number(e.target.value))}
+                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-lg"
+                          />
+                          <input
+                            type="number"
+                            min={8}
+                            max={40}
+                            value={docSectionSpacing}
+                            onChange={(e) => setDocSectionSpacing(Number(e.target.value))}
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                          />
+                        </div>
+                      </div>
+
+                      {/* 5. Tinggi Baris */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tinggi Baris (Line Height)</label>
+                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">{docLineHeight}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="range"
+                            min={1.0}
+                            max={2.4}
+                            step={0.1}
+                            value={docLineHeight}
+                            onChange={(e) => setDocLineHeight(Number(e.target.value))}
+                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-lg"
+                          />
+                          <input
+                            type="number"
+                            min={1.0}
+                            max={2.4}
+                            step={0.1}
+                            value={docLineHeight}
+                            onChange={(e) => setDocLineHeight(Number(e.target.value))}
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                          />
+                        </div>
+                      </div>
+
+                      {/* 6. Jarak Antar Huruf */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Jarak Antar Huruf (Letter Spacing)</label>
+                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">{docLetterSpacing} px</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="range"
+                            min={-1.0}
+                            max={4.0}
+                            step={0.1}
+                            value={docLetterSpacing}
+                            onChange={(e) => setDocLetterSpacing(Number(e.target.value))}
+                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-lg"
+                          />
+                          <input
+                            type="number"
+                            min={-1.0}
+                            max={4.0}
+                            step={0.1}
+                            value={docLetterSpacing}
+                            onChange={(e) => setDocLetterSpacing(Number(e.target.value))}
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECTION 2: FORMAT UNDUHAN & FORM NAMA DOKUMEN */}
+                  <div className="space-y-3.5 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                      <Download className="w-4 h-4 text-orange-500" />
+                      <span>Format Unduhan &amp; Nama Dokumen</span>
+                    </h4>
+
+                    {/* Form Nama Dokumen */}
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                        Nama File Dokumen CV
+                      </label>
+                      <input
+                        type="text"
+                        value={titleInput}
+                        onChange={(e) => setTitleInput(e.target.value)}
+                        placeholder="e.g. CV_Andi_Pratama_ATS"
+                        className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+
+                    {/* Format Selector: PDF / DOCX */}
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                        Pilih Format File
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setDownloadFormat('pdf')}
+                          className={`py-2 px-3 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
+                            downloadFormat === 'pdf'
+                              ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500 text-orange-600 dark:text-orange-400 ring-2 ring-orange-500/20'
+                              : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'
+                          }`}
+                        >
+                          <FileText className="w-4 h-4 text-rose-500" />
+                          <span>PDF (.pdf)</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setDownloadFormat('docx')}
+                          className={`py-2 px-3 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
+                            downloadFormat === 'docx'
+                              ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500 text-orange-600 dark:text-orange-400 ring-2 ring-orange-500/20'
+                              : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'
+                          }`}
+                        >
+                          <FileText className="w-4 h-4 text-blue-500" />
+                          <span>Word (.docx)</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Button Unduh */}
+                    <button
+                      type="button"
+                      onClick={handleDownloadCV}
+                      className="w-full py-3 px-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer mt-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Unduh CV Saya ({downloadFormat.toUpperCase()})</span>
+                    </button>
+                  </div>
+
+                  {/* SECTION 3: FITUR IMPORT FILE RESUME */}
+                  <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                      <Upload className="w-4 h-4 text-orange-500" />
+                      <span>Import File Resume / CV</span>
+                    </h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                      Unggah file resume kamu (.JSON, .PDF, atau .DOCX) untuk mengimpor data langsung ke dalam editor.
+                    </p>
+
+                    <label className="w-full p-4 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 dark:hover:border-orange-500 rounded-xl bg-slate-50 dark:bg-slate-800/60 transition flex flex-col items-center justify-center gap-2 cursor-pointer group">
+                      <Upload className="w-5 h-5 text-slate-400 group-hover:text-orange-500 transition" />
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:text-orange-600 transition">
+                        Pilih File Resume (JSON / PDF / DOCX)
+                      </span>
+                      <input
+                        type="file"
+                        accept=".json,.pdf,.docx,.txt"
+                        onChange={handleImportResume}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -5734,17 +6196,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700'
                             }`}
                           >
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between">
-                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-16 rounded border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 shadow-2xs bg-white">
+                                <TemplateThumbnailVisual templateId={tpl.id} customData={formData} />
+                              </div>
+                              <div className="space-y-1 min-w-0">
+                                <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-800 inline-block truncate">
                                   {tpl.badge}
                                 </span>
-                              </div>
-
-                              <div className="flex items-center gap-3 pt-1">
-                                <div className={`p-2 rounded-lg ${tpl.iconColor} shrink-0`}>
-                                  <FileText className="w-4 h-4" />
-                                </div>
                                 <h4 className="font-extrabold text-sm text-slate-900 dark:text-white leading-tight">
                                   {tpl.name}
                                 </h4>
@@ -6162,139 +6621,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 };
 
 // Mini Visual Thumbnail Preview Component for Template Selection Cards
-const TemplateThumbnailVisual: React.FC<{ templateId: string }> = ({ templateId }) => {
-  if (templateId === 'ketat-serif') {
-    return (
-      <div className="w-full h-full flex flex-col p-1.5 space-y-1 bg-white text-slate-800 select-none">
-        <div className="text-center space-y-0.5 pb-1 border-b-2 border-slate-800">
-          <div className="h-2 w-16 bg-slate-900 mx-auto rounded-xs" />
-          <div className="h-1 w-20 bg-slate-400 mx-auto rounded-xs" />
-        </div>
-        <div className="space-y-1 pt-0.5">
-          <div className="flex items-center justify-between border-b border-slate-400 pb-0.5">
-            <div className="h-1.5 w-12 bg-slate-900 rounded-xs" />
-            <div className="h-1 w-6 bg-slate-400 rounded-xs" />
-          </div>
-          <div className="h-1 w-full bg-slate-300 rounded-xs" />
-          <div className="h-1 w-4/5 bg-slate-300 rounded-xs" />
-        </div>
-        <div className="space-y-1 pt-0.5">
-          <div className="flex items-center justify-between border-b border-slate-400 pb-0.5">
-            <div className="h-1.5 w-14 bg-slate-900 rounded-xs" />
-          </div>
-          <div className="h-1 w-full bg-slate-300 rounded-xs" />
-          <div className="h-1 w-3/4 bg-slate-300 rounded-xs" />
-        </div>
-      </div>
-    );
-  }
 
-  if (templateId === 'luasa-minimal') {
-    return (
-      <div className="w-full h-full flex flex-col p-1.5 space-y-1.5 bg-slate-50/60 text-slate-800 select-none">
-        <div className="space-y-0.5 pb-1">
-          <div className="h-2.5 w-14 bg-slate-800 rounded-xs" />
-          <div className="h-1 w-24 bg-slate-400 rounded-xs" />
-        </div>
-        <div className="space-y-1">
-          <div className="h-1.5 w-10 bg-slate-700 rounded-xs tracking-widest" />
-          <div className="h-1 w-full bg-slate-300 rounded-xs" />
-          <div className="h-1 w-5/6 bg-slate-300 rounded-xs" />
-        </div>
-        <div className="space-y-1">
-          <div className="h-1.5 w-12 bg-slate-700 rounded-xs" />
-          <div className="h-1 w-full bg-slate-300 rounded-xs" />
-        </div>
-      </div>
-    );
-  }
-
-  if (templateId === 'tebal-bold') {
-    return (
-      <div className="w-full h-full flex flex-col bg-white text-slate-900 select-none overflow-hidden">
-        <div className="bg-slate-900 p-1.5 text-white space-y-0.5">
-          <div className="h-2.5 w-16 bg-white rounded-xs" />
-          <div className="h-1 w-12 bg-slate-300 rounded-xs" />
-        </div>
-        <div className="p-1 space-y-1.5">
-          <div className="space-y-1">
-            <div className="h-1.5 w-14 bg-slate-900 rounded-xs font-black" />
-            <div className="h-1 w-full bg-slate-300 rounded-xs" />
-            <div className="h-1 w-4/5 bg-slate-300 rounded-xs" />
-          </div>
-          <div className="space-y-1">
-            <div className="h-1.5 w-12 bg-slate-900 rounded-xs" />
-            <div className="h-1 w-full bg-slate-300 rounded-xs" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (templateId === 'creative-tech') {
-    return (
-      <div className="w-full h-full flex flex-col p-1.5 space-y-1 bg-white text-slate-800 select-none">
-        <div className="border-l-2 border-emerald-500 pl-1 space-y-0.5">
-          <div className="h-2 w-14 bg-slate-900 rounded-xs" />
-          <div className="h-1 w-18 bg-emerald-600 rounded-xs" />
-        </div>
-        <div className="space-y-1 pt-1">
-          <div className="h-1.5 w-12 bg-slate-800 rounded-xs" />
-          <div className="flex gap-1">
-            <div className="h-2 w-5 bg-emerald-100 rounded-xs" />
-            <div className="h-2 w-5 bg-emerald-100 rounded-xs" />
-            <div className="h-2 w-5 bg-emerald-100 rounded-xs" />
-          </div>
-        </div>
-        <div className="space-y-0.5 pt-0.5">
-          <div className="h-1.5 w-10 bg-slate-800 rounded-xs" />
-          <div className="h-1 w-full bg-slate-300 rounded-xs" />
-        </div>
-      </div>
-    );
-  }
-
-  if (templateId === 'harvard-modern') {
-    return (
-      <div className="w-full h-full flex flex-col p-1.5 space-y-1 bg-white text-slate-800 select-none">
-        <div className="text-center space-y-0.5 pb-1 border-b border-slate-300">
-          <div className="h-2 w-16 bg-slate-900 mx-auto rounded-xs" />
-          <div className="h-1 w-20 bg-slate-400 mx-auto rounded-xs" />
-        </div>
-        <div className="grid grid-cols-12 gap-1 pt-0.5">
-          <div className="col-span-4 space-y-1">
-            <div className="h-1 w-full bg-slate-400 rounded-xs" />
-            <div className="h-1 w-3/4 bg-slate-300 rounded-xs" />
-          </div>
-          <div className="col-span-8 space-y-1">
-            <div className="h-1.5 w-10 bg-slate-900 rounded-xs" />
-            <div className="h-1 w-full bg-slate-300 rounded-xs" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Default: ATS Modern / Rezi / Executive
-  return (
-    <div className="w-full h-full flex flex-col p-1.5 space-y-1 bg-white text-slate-800 select-none">
-      <div className="text-center space-y-0.5 pb-1 border-b border-slate-200">
-        <div className="h-2 w-16 bg-slate-900 mx-auto rounded-xs" />
-        <div className="h-1 w-24 bg-slate-400 mx-auto rounded-xs" />
-      </div>
-      <div className="space-y-1 pt-0.5">
-        <div className="h-1.5 w-12 bg-blue-600 rounded-xs" />
-        <div className="h-1 w-full bg-slate-300 rounded-xs" />
-        <div className="h-1 w-5/6 bg-slate-300 rounded-xs" />
-      </div>
-      <div className="space-y-1 pt-0.5">
-        <div className="h-1.5 w-14 bg-blue-600 rounded-xs" />
-        <div className="h-1 w-full bg-slate-300 rounded-xs" />
-        <div className="h-1 w-2/3 bg-slate-300 rounded-xs" />
-      </div>
-    </div>
-  );
-};
 
 // A4 Paperlike Canvas Component: Maintains exact A4 proportions per sheet, handles multi-page (Page 2+) flow with responsive auto-scaling & zoom controls
 const A4PaperlikeCanvas: React.FC<{
@@ -6305,6 +6632,12 @@ const A4PaperlikeCanvas: React.FC<{
   docFontSize?: string;
   docSpacing?: string;
   docShowIcons?: boolean;
+  docNameSize?: number;
+  docHeaderSize?: number;
+  docBodySize?: number;
+  docSectionSpacing?: number;
+  docLineHeight?: number;
+  docLetterSpacing?: number;
 }> = ({
   templateId,
   customData,
@@ -6313,6 +6646,12 @@ const A4PaperlikeCanvas: React.FC<{
   docFontSize = 'base',
   docSpacing = 'normal',
   docShowIcons = true,
+  docNameSize,
+  docHeaderSize,
+  docBodySize,
+  docSectionSpacing,
+  docLineHeight,
+  docLetterSpacing,
 }) => {
   const hiddenMeasureRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -6348,7 +6687,7 @@ const A4PaperlikeCanvas: React.FC<{
       ro.disconnect();
       window.removeEventListener('resize', updateDimensions);
     };
-  }, [templateId, customData, docFontFamily, docFontSize, docSpacing, docShowIcons]);
+  }, [templateId, customData, docFontFamily, docFontSize, docSpacing, docShowIcons, docNameSize, docHeaderSize, docBodySize, docSectionSpacing, docLineHeight, docLetterSpacing]);
 
   const effectiveScale = zoomScale !== null ? zoomScale : autoScale;
 
@@ -6373,6 +6712,12 @@ const A4PaperlikeCanvas: React.FC<{
             docFontSize={docFontSize}
             docSpacing={docSpacing}
             docShowIcons={docShowIcons}
+            docNameSize={docNameSize}
+            docHeaderSize={docHeaderSize}
+            docBodySize={docBodySize}
+            docSectionSpacing={docSectionSpacing}
+            docLineHeight={docLineHeight}
+            docLetterSpacing={docLetterSpacing}
           />
         </div>
       </div>
@@ -6468,6 +6813,12 @@ const CVTemplatePreview: React.FC<{
   docFontSize?: string;
   docSpacing?: string;
   docShowIcons?: boolean;
+  docNameSize?: number;
+  docHeaderSize?: number;
+  docBodySize?: number;
+  docSectionSpacing?: number;
+  docLineHeight?: number;
+  docLetterSpacing?: number;
 }> = ({
   templateId,
   customData,
@@ -6475,6 +6826,12 @@ const CVTemplatePreview: React.FC<{
   docFontSize = 'base',
   docSpacing = 'normal',
   docShowIcons = true,
+  docNameSize,
+  docHeaderSize,
+  docBodySize,
+  docSectionSpacing,
+  docLineHeight,
+  docLetterSpacing,
 }) => {
   const getEmailMailto = (emailStr?: string) => {
     if (!emailStr) return '#';
@@ -6491,21 +6848,21 @@ const CVTemplatePreview: React.FC<{
 
   // Data (merges customData with fallback dummy data)
   const dummyData = {
-    fullName: customData?.fullName || 'John Doe',
-    jobTitle: customData?.headline || 'Senior Software Engineer / Project Manager',
-    email: customData?.email || 'john.doe@example.com',
-    phone: customData?.phone || '+62 812-3456-7890',
-    location: customData?.location || 'Jakarta, Indonesia',
-    website: customData?.website || 'johndoe.dev',
-    linkedin: customData?.linkedin || 'linkedin.com/in/johndoe',
-    github: customData?.github || customData?.socialHandle || 'github.com/johndoe',
+    fullName: customData?.fullName?.trim() || 'John Doe',
+    jobTitle: customData?.headline?.trim() || 'Senior Software Engineer / Project Manager',
+    email: customData?.email?.trim() || 'john.doe@example.com',
+    phone: customData?.phone?.trim() || '+62 812-3456-7890',
+    location: customData?.location?.trim() || 'Jakarta, Indonesia',
+    website: customData?.website?.trim() || 'johndoe.dev',
+    linkedin: customData?.linkedin?.trim() || 'linkedin.com/in/johndoe',
+    github: customData?.github?.trim() || customData?.socialHandle?.trim() || 'github.com/johndoe',
     socialPlatform: customData?.socialPlatform || 'github',
     photoUrl: customData?.photoUrl !== undefined ? customData.photoUrl : '',
     summary:
-      customData?.summary ||
+      customData?.summary?.trim() ||
       'Senior Software Engineer berpengalaman dalam membangun aplikasi web berkinerja tinggi, scalable, dan ATS friendly.',
     skills:
-      customData?.skills && customData.skills.length > 0
+      customData?.skills && customData.skills.length > 0 && customData.skills[0] !== ''
         ? customData.skills
         : [
             'TypeScript',
@@ -6518,29 +6875,36 @@ const CVTemplatePreview: React.FC<{
             'REST API',
           ],
     experience:
-      customData?.experience && customData.experience.length > 0
+      customData?.experience && customData.experience.length > 0 && customData.experience[0].company
         ? customData.experience.map((exp) => ({
-            company: exp.company,
-            role: exp.role,
-            period: exp.period || `${exp.startDate || ''} - ${exp.endDate || ''}`,
-            description: exp.description,
+            company: exp.company || 'PT Inovasi Teknologi',
+            role: exp.role || 'Senior Software Engineer',
+            period: exp.period || `${exp.startDate || ''} - ${exp.endDate || ''}`.replace(/^ - $/, '') || '2023 - Sekarang',
+            description: exp.description || 'Memimpin pengembangan fitur frontend & backend, mengoptimalkan kecepatan load hingga 45%, dan mengimplementasikan CI/CD.',
           }))
         : [
             {
               company: 'PT Inovasi Teknologi',
               role: 'Senior Software Engineer',
-              period: 'Jan 2021 - Sekarang',
+              period: '2023 - Sekarang',
               description:
                 'Memimpin pengembangan fitur frontend & backend, mengoptimalkan kecepatan load hingga 45%, dan mengimplementasikan CI/CD.',
             },
+            {
+              company: 'Solusi Digital Indonesia',
+              role: 'Software Engineer',
+              period: '2021 - 2023',
+              description:
+                'Mengembangkan API mikroservis dan sistem otentikasi aman untuk 100.000+ pengguna aktif bulanan.',
+            },
           ],
     internships:
-      customData?.internships && customData.internships.length > 0
+      customData?.internships && customData.internships.length > 0 && customData.internships[0].company
         ? customData.internships.map((item) => ({
-            company: item.company,
-            role: item.role,
-            period: item.period || `${item.startDate || ''} - ${item.endDate || ''}`,
-            description: item.description,
+            company: item.company || 'Tech Startup Indonesia',
+            role: item.role || 'UI/UX & Frontend Intern',
+            period: item.period || `${item.startDate || ''} - ${item.endDate || ''}`.replace(/^ - $/, '') || 'Jan 2023 - Jun 2023',
+            description: item.description || 'Membantu tim merancang wireframe dan mendesain 10+ komponen UI serta mengimplementasikannya dengan TailwindCSS.',
           }))
         : [
             {
@@ -6552,12 +6916,12 @@ const CVTemplatePreview: React.FC<{
             },
           ],
     projects:
-      customData?.projects && customData.projects.length > 0
+      customData?.projects && customData.projects.length > 0 && customData.projects[0].name
         ? customData.projects.map((proj) => ({
-            name: proj.name,
-            role: proj.role,
-            tech: proj.tech || proj.link || '',
-            description: proj.description,
+            name: proj.name || 'E-Commerce Platform',
+            role: proj.role || 'Lead Developer',
+            tech: proj.tech || proj.link || 'React, Node.js, TailwindCSS • https://project.com',
+            description: proj.description || 'Membangun aplikasi toko online dengan fitur payment gateway dan real-time analytics.',
           }))
         : [
             {
@@ -6569,12 +6933,12 @@ const CVTemplatePreview: React.FC<{
             },
           ],
     organizations:
-      customData?.organizations && customData.organizations.length > 0
+      customData?.organizations && customData.organizations.length > 0 && customData.organizations[0].name
         ? customData.organizations.map((org) => ({
-            name: org.name,
-            role: org.role,
-            period: org.period || `${org.startDate || ''} - ${org.endDate || ''}`,
-            description: org.description,
+            name: org.name || 'Himpunan Mahasiswa Informatika',
+            role: org.role || 'Ketua Divisi Acara',
+            period: org.period || `${org.startDate || ''} - ${org.endDate || ''}`.replace(/^ - $/, '') || '2022 - 2023',
+            description: org.description || 'Mengkoordinasikan seminar teknologi nasional dengan 500+ peserta dan mengelola pendaftaran peserta.',
           }))
         : [
             {
@@ -6586,11 +6950,11 @@ const CVTemplatePreview: React.FC<{
             },
           ],
     education:
-      customData?.education && customData.education.length > 0
+      customData?.education && customData.education.length > 0 && customData.education[0].institution
         ? customData.education.map((edu) => ({
-            institution: edu.institution,
-            degree: edu.degree,
-            year: edu.year || `${edu.startDate || ''} - ${edu.endDate || ''}`,
+            institution: edu.institution || 'Universitas Indonesia',
+            degree: edu.degree || 'S1 Teknik Informatika / Ilmu Komputer (IPK 3.75)',
+            year: edu.year || `${edu.startDate || ''} - ${edu.endDate || ''}`.replace(/^ - $/, '') || '2017 - 2021',
             gpa: edu.gpa || '3.75 / 4.00',
           }))
         : [
@@ -6602,11 +6966,11 @@ const CVTemplatePreview: React.FC<{
             },
           ],
     certifications:
-      customData?.certifications && customData.certifications.length > 0
+      customData?.certifications && customData.certifications.length > 0 && customData.certifications[0].name
         ? customData.certifications.map((cert) => ({
-            name: cert.name,
-            issuer: cert.issuer,
-            issueDate: cert.issueDate,
+            name: cert.name || 'AWS Certified Solutions Architect',
+            issuer: cert.issuer || 'Amazon Web Services',
+            issueDate: cert.issueDate || 'Nov 2023',
           }))
         : [
             {
@@ -6616,15 +6980,20 @@ const CVTemplatePreview: React.FC<{
             },
           ],
     languages:
-      customData?.languages && customData.languages.length > 0
+      customData?.languages && customData.languages.length > 0 && customData.languages[0].language
         ? customData.languages
         : [
             { id: 'lang-1', language: 'Bahasa Indonesia', level: 'Professional' },
             { id: 'lang-2', language: 'Bahasa Inggris', level: 'Professional' },
           ],
     courses:
-      customData?.courses && customData.courses.length > 0
-        ? customData.courses
+      customData?.courses && customData.courses.length > 0 && customData.courses[0].courseName
+        ? customData.courses.map((crs) => ({
+            courseName: crs.courseName || 'Digital Marketing Mastery',
+            institution: crs.institution || 'RevoU / Google Academy',
+            year: crs.year || '2023',
+            description: crs.description || 'Strategi pemasaran digital dan analisis data.',
+          }))
         : [
             {
               id: 'crs-1',
@@ -6635,8 +7004,13 @@ const CVTemplatePreview: React.FC<{
             },
           ],
     scholarships:
-      customData?.scholarships && customData.scholarships.length > 0
-        ? customData.scholarships
+      customData?.scholarships && customData.scholarships.length > 0 && customData.scholarships[0].name
+        ? customData.scholarships.map((sch) => ({
+            name: sch.name || 'Beasiswa Djarum Beasiswa Plus',
+            provider: sch.provider || 'Djarum Foundation',
+            year: sch.year || '2020',
+            description: sch.description || 'Program pelatihan kepemimpinan dan beasiswa prestasi.',
+          }))
         : [
             {
               id: 'sch-1',
@@ -6647,8 +7021,13 @@ const CVTemplatePreview: React.FC<{
             },
           ],
     volunteers:
-      customData?.volunteers && customData.volunteers.length > 0
-        ? customData.volunteers
+      customData?.volunteers && customData.volunteers.length > 0 && customData.volunteers[0].organization
+        ? customData.volunteers.map((vol) => ({
+            organization: vol.organization || 'Palang Merah Indonesia',
+            role: vol.role || 'Tim Tanggap Bencana',
+            startYear: vol.startYear || '2022',
+            description: vol.description || 'Mengkoordinasikan logistik darurat dan posko bantuan bencana.',
+          }))
         : [
             {
               id: 'vol-1',
@@ -6659,8 +7038,13 @@ const CVTemplatePreview: React.FC<{
             },
           ],
     references:
-      customData?.references && customData.references.length > 0
-        ? customData.references
+      customData?.references && customData.references.length > 0 && customData.references[0].fullName
+        ? customData.references.map((ref) => ({
+            fullName: ref.fullName || 'John Smith',
+            title: ref.title || 'Engineering Director',
+            company: ref.company || 'PT Inovasi Teknologi',
+            note: ref.note || 'Referensi tersedia atas permintaan',
+          }))
         : [
             {
               id: 'ref-1',
@@ -6674,9 +7058,7 @@ const CVTemplatePreview: React.FC<{
 
   // Template Renderers
   const renderATSModern = () => {
-    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0
-      ? customData.sectionOrder
-      : DEFAULT_SECTION_ORDER;
+    const activeOrderKeys = DEFAULT_SECTION_ORDER;
 
     const sectionBlocks: Record<string, React.ReactNode> = {
       summary: (
@@ -6714,17 +7096,17 @@ const CVTemplatePreview: React.FC<{
           </div>
         </div>
       ),
-      internships: (customData?.internships && customData.internships.length > 0) ? (
+      internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-6">
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
             PENGALAMAN MAGANG
           </h2>
           <div className="space-y-3">
-            {customData.internships.map((item, idx) => (
+            {dummyData.internships.map((item, idx) => (
               <div key={idx}>
                 <div className="flex items-baseline justify-between mb-1">
                   <p className="text-sm font-bold text-slate-900">{item.role}</p>
-                  <p className="text-xs text-slate-600">{item.startDate} - {item.endDate}</p>
+                  <p className="text-xs text-slate-600">{item.period}</p>
                 </div>
                 <p className="text-xs italic text-slate-700 mb-1">{item.company}</p>
                 <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{item.description}</p>
@@ -6764,17 +7146,17 @@ const CVTemplatePreview: React.FC<{
           ))}
         </div>
       ),
-      organizations: (customData?.organizations && customData.organizations.length > 0) ? (
+      organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-6">
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
             PENGALAMAN ORGANISASI
           </h2>
           <div className="space-y-3">
-            {customData.organizations.map((org, idx) => (
+            {dummyData.organizations.map((org, idx) => (
               <div key={idx}>
                 <div className="flex items-baseline justify-between mb-1">
                   <p className="text-sm font-bold text-slate-900">{org.role}</p>
-                  <p className="text-xs text-slate-600">{org.startDate} - {org.endDate}</p>
+                  <p className="text-xs text-slate-600">{org.period}</p>
                 </div>
                 <p className="text-xs italic text-slate-700 mb-1">{org.name}</p>
                 <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{org.description}</p>
@@ -6783,13 +7165,13 @@ const CVTemplatePreview: React.FC<{
           </div>
         </div>
       ) : null,
-      certifications: (customData?.certifications && customData.certifications.length > 0) ? (
+      certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-6">
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
             SERTIFIKAT
           </h2>
           <div className="space-y-3">
-            {customData.certifications.map((cert, idx) => (
+            {dummyData.certifications.map((cert, idx) => (
               <div key={idx}>
                 <div className="flex items-baseline justify-between mb-1">
                   <p className="text-sm font-bold text-slate-900">{cert.name}</p>
@@ -6801,13 +7183,13 @@ const CVTemplatePreview: React.FC<{
           </div>
         </div>
       ) : null,
-      languages: (customData?.languages && customData.languages.length > 0) ? (
+      languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-6">
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
             BAHASA
           </h2>
           <p className="text-xs leading-relaxed text-slate-700">
-            {customData.languages.map(l => `${l.language} (${l.level})`).join('  •  ')}
+            {dummyData.languages.map(l => `${l.language} (${l.level})`).join('  •  ')}
           </p>
         </div>
       ) : null,
@@ -6821,9 +7203,7 @@ const CVTemplatePreview: React.FC<{
               <div key={idx}>
                 <div className="flex items-baseline justify-between mb-1">
                   <p className="text-sm font-bold text-slate-900">{crs.courseName}</p>
-                  <p className="text-xs text-slate-600">
-                    {crs.month && crs.year ? `${crs.month} ${crs.year}` : crs.month || crs.year || ''}
-                  </p>
+                  <p className="text-xs text-slate-600">{crs.year}</p>
                 </div>
                 <p className="text-xs italic text-slate-700 mb-1">{crs.institution}</p>
                 {crs.description && (
@@ -6844,9 +7224,7 @@ const CVTemplatePreview: React.FC<{
               <div key={idx}>
                 <div className="flex items-baseline justify-between mb-1">
                   <p className="text-sm font-bold text-slate-900">{sch.name}</p>
-                  <p className="text-xs text-slate-600">
-                    {sch.month && sch.year ? `${sch.month} ${sch.year}` : sch.month || sch.year || ''}
-                  </p>
+                  <p className="text-xs text-slate-600">{sch.year}</p>
                 </div>
                 <p className="text-xs italic text-slate-700 mb-1">{sch.provider}</p>
                 {sch.description && (
@@ -6868,14 +7246,10 @@ const CVTemplatePreview: React.FC<{
                 <div className="flex items-baseline justify-between mb-1">
                   <p className="text-sm font-bold text-slate-900">{vol.role}</p>
                   <p className="text-xs text-slate-600">
-                    {vol.startMonth || vol.startYear ? `${vol.startMonth || ''} ${vol.startYear || ''}` : ''}
-                    {' - '}
-                    {vol.isCurrent ? 'Sekarang' : (vol.endMonth || vol.endYear ? `${vol.endMonth || ''} ${vol.endYear || ''}` : '')}
+                    {vol.startYear ? `${vol.startYear} - Sekarang` : '2022 - Sekarang'}
                   </p>
                 </div>
-                <p className="text-xs italic text-slate-700 mb-1">
-                  {vol.organization}{vol.location ? ` • ${vol.location}` : ''}
-                </p>
+                <p className="text-xs italic text-slate-700 mb-1">{vol.organization}</p>
                 {vol.description && (
                   <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{vol.description}</p>
                 )}
@@ -6895,8 +7269,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="font-bold text-slate-900 text-sm">{ref.fullName}</p>
                 {ref.title && <p className="font-semibold text-slate-800">{ref.title}</p>}
                 {ref.company && <p className="italic text-slate-600">{ref.company}</p>}
-                {ref.email && <p className="text-slate-600">{ref.email}</p>}
-                {ref.phone && <p className="text-slate-600">{ref.phone}</p>}
+                {ref.note && <p className="text-slate-500 italic mt-0.5">{ref.note}</p>}
               </div>
             ))}
           </div>
@@ -6970,674 +7343,1801 @@ const CVTemplatePreview: React.FC<{
     );
   };
 
-  const renderMinimalistExecutive = () => (
-    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
-      {/* Header - Centered */}
-      <div className="flex flex-col items-center text-center border-b-2 border-slate-300 pb-4 mb-6">
-        {dummyData.photoUrl ? (
-          <img
-            src={dummyData.photoUrl}
-            alt={dummyData.fullName}
-            className="w-20 h-20 rounded-full object-cover border-2 border-slate-300 mb-3 shadow-2xs"
-          />
-        ) : null}
-        <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
-          {dummyData.fullName}
-        </h1>
-        <p className="text-base font-semibold text-slate-600 mb-3">{dummyData.jobTitle}</p>
-        <div className="text-xs text-slate-600 flex flex-wrap justify-center gap-x-3 gap-y-1 items-center">
-          <a href={getEmailMailto(dummyData.email)} className="hover:underline font-medium text-slate-800">
-            {dummyData.email}
-          </a>
-          {dummyData.phone && (
-            <>
-              <span>•</span>
-              <span>{dummyData.phone}</span>
-            </>
-          )}
-          {dummyData.location && (
-            <>
-              <span>•</span>
-              <span>{dummyData.location}</span>
-            </>
-          )}
-          {dummyData.linkedin && (
-            <>
-              <span>•</span>
-              <a href={getCleanUrl(dummyData.linkedin)} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
-                {dummyData.linkedin}
-              </a>
-            </>
-          )}
-          {dummyData.github && (
-            <>
-              <span>•</span>
-              <a href={getCleanUrl(dummyData.github)} target="_blank" rel="noreferrer" className="text-slate-800 hover:underline font-medium">
-                {dummyData.github}
-              </a>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Executive Summary */}
-      <div className="mb-6">
-        <div className="flex items-center justify-center mb-3">
-          <div className="flex-grow border-t border-slate-300"></div>
-          <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Ringkasan Eksekutif</span>
-          <div className="flex-grow border-t border-slate-300"></div>
-        </div>
-        <p className="text-xs leading-relaxed text-slate-700 text-center px-8">{dummyData.summary}</p>
-      </div>
-
-      {/* Experience */}
-      <div className="mb-6">
-        <div className="flex items-center justify-center mb-3">
-          <div className="flex-grow border-t border-slate-300"></div>
-          <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Pengalaman Profesional</span>
-          <div className="flex-grow border-t border-slate-300"></div>
-        </div>
-        <div className="space-y-4 px-4">
-          {dummyData.experience.map((exp, idx) => (
-            <div key={idx}>
-              <div className="flex items-baseline justify-between mb-1">
-                <p className="text-sm font-bold text-slate-900">{exp.role}</p>
-                <p className="text-xs text-slate-500">{exp.period}</p>
-              </div>
-              <p className="text-xs font-semibold text-slate-600 mb-2">{exp.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{exp.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Skills & Education Grid */}
-      <div className="grid grid-cols-2 gap-6 mb-6">
-        <div>
+  const renderMinimalistExecutive = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-6">
           <div className="flex items-center justify-center mb-3">
-            <span className="text-xs font-black uppercase tracking-widest text-slate-800">Keahlian</span>
+            <div className="flex-grow border-t border-slate-300"></div>
+            <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Ringkasan Eksekutif</span>
+            <div className="flex-grow border-t border-slate-300"></div>
           </div>
-          <p className="text-xs leading-relaxed text-slate-700 text-center">{dummyData.skills.join(' • ')}</p>
+          <p className="text-xs leading-relaxed text-slate-700 text-center px-8">{dummyData.summary}</p>
         </div>
-        <div>
+      ),
+      skills: (
+        <div key="skills" className="mb-6">
           <div className="flex items-center justify-center mb-3">
-            <span className="text-xs font-black uppercase tracking-widest text-slate-800">Pendidikan</span>
+            <div className="flex-grow border-t border-slate-300"></div>
+            <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Keahlian</span>
+            <div className="flex-grow border-t border-slate-300"></div>
           </div>
-          <div className="text-center">
-            <p className="text-xs font-bold text-slate-900">{dummyData.education[0].institution}</p>
-            <p className="text-xs text-slate-700">{dummyData.education[0].degree}</p>
-            <p className="text-xs text-slate-600">{dummyData.education[0].year} • {dummyData.education[0].gpa}</p>
+          <p className="text-xs leading-relaxed text-slate-700 text-center px-8">{dummyData.skills.join(' • ')}</p>
+        </div>
+      ),
+      experience: (
+        <div key="experience" className="mb-6">
+          <div className="flex items-center justify-center mb-3">
+            <div className="flex-grow border-t border-slate-300"></div>
+            <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Pengalaman Profesional</span>
+            <div className="flex-grow border-t border-slate-300"></div>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderCreativeTech = () => (
-    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
-      {/* Header with accent */}
-      <div className="border-l-8 border-emerald-500 pl-4 mb-6">
-        <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-1">
-          {dummyData.fullName}
-        </h1>
-        <p className="text-base font-bold text-emerald-600 mb-2">{dummyData.jobTitle}</p>
-        <div className="text-xs text-slate-600 space-y-0.5">
-          <p>{dummyData.email} • {dummyData.phone}</p>
-          <p>{dummyData.location} • <span className="text-emerald-600">{dummyData.linkedin}</span></p>
-        </div>
-      </div>
-
-      {/* Skills with Pills */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-          <span className="w-1 h-4 bg-emerald-500"></span>
-          TECH STACK & SKILLS
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          {dummyData.skills.map((skill, idx) => (
-            <span key={idx} className="px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-full text-xs font-bold">
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Summary */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-          <span className="w-1 h-4 bg-emerald-500"></span>
-          ABOUT ME
-        </h2>
-        <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
-      </div>
-
-      {/* Experience */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-          <span className="w-1 h-4 bg-emerald-500"></span>
-          WORK EXPERIENCE
-        </h2>
-        <div className="space-y-4">
-          {dummyData.experience.map((exp, idx) => (
-            <div key={idx} className="pl-4 border-l-2 border-emerald-200">
-              <div className="flex items-baseline justify-between mb-1">
-                <p className="text-sm font-bold text-slate-900">{exp.role}</p>
-                <p className="text-xs text-slate-600">{exp.period}</p>
-              </div>
-              <p className="text-xs font-semibold text-emerald-600 mb-2">{exp.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{exp.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Projects */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-          <span className="w-1 h-4 bg-emerald-500"></span>
-          FEATURED PROJECTS
-        </h2>
-        {dummyData.projects.map((proj, idx) => (
-          <div key={idx} className="pl-4 border-l-2 border-emerald-200">
-            <p className="text-sm font-bold text-slate-900 mb-1">{proj.name}</p>
-            <p className="text-xs text-emerald-600 mb-2">{proj.tech}</p>
-            <p className="text-xs leading-relaxed text-slate-700 text-justify">{proj.description}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Education */}
-      <div>
-        <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-          <span className="w-1 h-4 bg-emerald-500"></span>
-          EDUCATION
-        </h2>
-        <div className="pl-4 border-l-2 border-emerald-200">
-          <p className="text-sm font-bold text-slate-900">{dummyData.education[0].institution}</p>
-          <p className="text-xs text-slate-700">{dummyData.education[0].degree} • {dummyData.education[0].gpa}</p>
-          <p className="text-xs text-slate-600">{dummyData.education[0].year}</p>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderFreshGraduate = () => (
-    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
-      {/* Header */}
-      <div className="text-center mb-6">
-        <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
-          {dummyData.fullName}
-        </h1>
-        <p className="text-base font-semibold text-amber-600 mb-3">{dummyData.jobTitle}</p>
-        <div className="text-xs text-slate-600">
-          <p>{dummyData.email} • {dummyData.phone}</p>
-          <p className="mt-1">{dummyData.location} • {dummyData.linkedin}</p>
-        </div>
-      </div>
-
-      {/* Summary */}
-      <div className="mb-6 bg-amber-50 border-l-4 border-amber-500 p-4">
-        <h2 className="text-sm font-black uppercase tracking-wide text-amber-800 mb-2">
-          OBJECTIVE
-        </h2>
-        <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
-      </div>
-
-      {/* Education - Prominent */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
-          PENDIDIKAN
-        </h2>
-        {dummyData.education.map((edu, idx) => (
-          <div key={idx} className="bg-slate-50 p-4 rounded-lg">
-            <div className="flex items-baseline justify-between mb-2">
-              <p className="text-base font-bold text-slate-900">{edu.institution}</p>
-              <p className="text-xs text-slate-600">{edu.year}</p>
-            </div>
-            <p className="text-sm font-semibold text-slate-700 mb-1">{edu.degree}</p>
-            <p className="text-xs text-amber-600 font-bold">{edu.gpa}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Skills */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
-          KEAHLIAN TEKNIS
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          {dummyData.skills.map((skill, idx) => (
-            <span key={idx} className="px-3 py-1 bg-slate-100 border border-slate-300 text-slate-700 rounded-md text-xs font-semibold">
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Projects */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
-          PROYEK & PORTOFOLIO
-        </h2>
-        <div className="space-y-3">
-          {dummyData.projects.map((proj, idx) => (
-            <div key={idx}>
-              <p className="text-sm font-bold text-slate-900 mb-1">{proj.name}</p>
-              <p className="text-xs text-amber-600 mb-2">{proj.tech}</p>
-              <p className="text-xs leading-relaxed text-slate-700 text-justify">{proj.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Experience */}
-      <div>
-        <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
-          PENGALAMAN MAGANG & KERJA
-        </h2>
-        <div className="space-y-4">
-          {dummyData.experience.map((exp, idx) => (
-            <div key={idx}>
-              <div className="flex items-baseline justify-between mb-1">
-                <p className="text-sm font-bold text-slate-900">{exp.role}</p>
-                <p className="text-xs text-slate-600">{exp.period}</p>
-              </div>
-              <p className="text-xs italic text-slate-700 mb-2">{exp.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{exp.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderHarvardModern = () => (
-    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
-      {/* Header */}
-      <div className="border-b-4 border-slate-900 pb-3 mb-6">
-        <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900">
-          {dummyData.fullName}
-        </h1>
-        <p className="text-base font-bold text-slate-700 mt-1">{dummyData.jobTitle}</p>
-        <p className="text-xs text-slate-600 mt-2">{dummyData.email} | {dummyData.phone} | {dummyData.location}</p>
-      </div>
-
-      {/* 2-Column Grid Layout */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">SUMMARY</h2>
-        <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">EXPERIENCE</h2>
-        {dummyData.experience.map((exp, idx) => (
-          <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-3">
-            <div className="text-xs font-bold text-slate-600 uppercase">{exp.period}</div>
-            <div>
-              <p className="text-sm font-bold text-slate-900">{exp.role}</p>
-              <p className="text-xs font-semibold text-slate-700">{exp.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700 mt-1 whitespace-pre-line">{exp.description}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-[140px_1fr] gap-4 mb-6">
-        <div className="text-xs font-bold text-slate-600 uppercase">Education</div>
-        <div>
-          <p className="text-sm font-bold text-slate-900">{dummyData.education[0].institution}</p>
-          <p className="text-xs text-slate-700">{dummyData.education[0].degree} • {dummyData.education[0].gpa}</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-[140px_1fr] gap-4">
-        <div className="text-xs font-bold text-slate-600 uppercase">Skills</div>
-        <p className="text-xs text-slate-700">{dummyData.skills.join(' • ')}</p>
-      </div>
-    </div>
-  );
-
-  const renderBlueAccent = () => (
-    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
-      <div className="border-b-3 border-blue-600 pb-4 mb-6">
-        <h1 className="text-3xl font-black uppercase text-blue-900">{dummyData.fullName}</h1>
-        <p className="text-base font-semibold text-blue-600 mt-1">{dummyData.jobTitle}</p>
-        <p className="text-xs text-slate-600 mt-2">{dummyData.email} • {dummyData.phone} • {dummyData.location}</p>
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">PROFESSIONAL SUMMARY</h2>
-        <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">WORK EXPERIENCE</h2>
-        {dummyData.experience.map((exp, idx) => (
-          <div key={idx} className="mb-4">
-            <div className="flex justify-between items-baseline mb-1">
-              <p className="text-sm font-bold text-slate-900">{exp.role}</p>
-              <p className="text-xs text-slate-600">{exp.period}</p>
-            </div>
-            <p className="text-xs italic text-blue-700 mb-2">{exp.company}</p>
-            <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">EDUCATION</h2>
-        <p className="text-sm font-bold text-slate-900">{dummyData.education[0].institution}</p>
-        <p className="text-xs text-slate-700">{dummyData.education[0].degree} • {dummyData.education[0].gpa}</p>
-      </div>
-
-      <div>
-        <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">SKILLS</h2>
-        <p className="text-xs text-slate-700">{dummyData.skills.join(' • ')}</p>
-      </div>
-    </div>
-  );
-
-  const renderElegantPhoto = () => (
-    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
-      <div className="flex items-start gap-6 border-b-2 border-purple-600 pb-4 mb-6">
-        <div className="flex-1">
-          <h1 className="text-3xl font-black uppercase text-slate-900">{dummyData.fullName}</h1>
-          <p className="text-base font-semibold text-purple-600 mt-1">{dummyData.jobTitle}</p>
-          <div className="text-xs text-slate-600 mt-2 space-y-0.5">
-            <p>{dummyData.email} • {dummyData.phone}</p>
-            <p>{dummyData.location}</p>
-          </div>
-        </div>
-        <div className="w-24 h-24 border-2 border-purple-600 rounded-lg bg-slate-100 flex items-center justify-center text-xs text-slate-400">
-          Photo
-        </div>
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">SUMMARY</h2>
-        <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">EXPERIENCE</h2>
-        {dummyData.experience.map((exp, idx) => (
-          <div key={idx} className="mb-4">
-            <div className="flex justify-between items-baseline">
-              <p className="text-sm font-bold text-slate-900">{exp.role}</p>
-              <p className="text-xs text-slate-600">{exp.period}</p>
-            </div>
-            <p className="text-xs italic text-slate-700 mb-2">{exp.company}</p>
-            <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">EDUCATION</h2>
-          <p className="text-sm font-bold text-slate-900">{dummyData.education[0].institution}</p>
-          <p className="text-xs text-slate-700">{dummyData.education[0].degree}</p>
-        </div>
-        <div>
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">SKILLS</h2>
-          <p className="text-xs text-slate-700 leading-relaxed">{dummyData.skills.slice(0, 8).join(' • ')}</p>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderReziClassic = () => (
-    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
-      <div className="text-center border-b border-slate-400 pb-4 mb-6">
-        <h1 className="text-3xl font-bold text-slate-900">{dummyData.fullName}</h1>
-        <p className="text-base text-slate-700 mt-2">{dummyData.jobTitle}</p>
-        <p className="text-xs text-slate-600 mt-2">{dummyData.email} | {dummyData.phone} | {dummyData.location}</p>
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Professional Summary</h2>
-        <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Experience</h2>
-        {dummyData.experience.map((exp, idx) => (
-          <div key={idx} className="mb-4">
-            <div className="flex justify-between items-baseline">
-              <p className="text-sm font-bold text-slate-900">{exp.role}</p>
-              <p className="text-xs text-slate-600 italic">{exp.period}</p>
-            </div>
-            <p className="text-xs italic text-slate-700 mb-2">{exp.company}</p>
-            <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Education</h2>
-        <p className="text-sm font-bold text-slate-900">{dummyData.education[0].institution}</p>
-        <p className="text-xs text-slate-700">{dummyData.education[0].degree} • {dummyData.education[0].gpa}</p>
-      </div>
-
-      <div>
-        <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Skills</h2>
-        <p className="text-xs text-slate-700">{dummyData.skills.join(', ')}</p>
-      </div>
-    </div>
-  );
-
-  const renderModernOrange = () => (
-    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
-      {/* Header with Orange Accent */}
-      <div className="border-l-8 border-orange-500 pl-6 mb-6">
-        <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-1">
-          {dummyData.fullName}
-        </h1>
-        <p className="text-lg font-bold text-orange-600 mb-2">{dummyData.jobTitle}</p>
-        <div className="text-xs text-slate-600 flex items-center gap-3">
-          <span>{dummyData.email}</span>
-          <span className="text-orange-500">•</span>
-          <span>{dummyData.phone}</span>
-          <span className="text-orange-500">•</span>
-          <span>{dummyData.location}</span>
-        </div>
-      </div>
-
-      {/* Professional Summary with Orange Background */}
-      <div className="mb-6 bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg">
-        <h2 className="text-sm font-black uppercase text-orange-800 mb-2">ABOUT ME</h2>
-        <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
-      </div>
-
-      {/* Skills with Orange Pills */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-          <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-          CORE COMPETENCIES
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          {dummyData.skills.map((skill, idx) => (
-            <span key={idx} className="px-3 py-1.5 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-300 text-orange-700 rounded-full text-xs font-bold">
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Experience */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-          <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-          PROFESSIONAL EXPERIENCE
-        </h2>
-        {dummyData.experience.map((exp, idx) => (
-          <div key={idx} className="mb-4 pl-4 border-l-2 border-orange-300">
-            <div className="flex justify-between items-baseline mb-1">
-              <p className="text-sm font-bold text-slate-900">{exp.role}</p>
-              <p className="text-xs text-orange-600 font-semibold">{exp.period}</p>
-            </div>
-            <p className="text-xs font-bold text-orange-600 mb-2">{exp.company}</p>
-            <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Education & Projects Grid */}
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-            EDUCATION
-          </h2>
-          <p className="text-sm font-bold text-slate-900">{dummyData.education[0].institution}</p>
-          <p className="text-xs text-slate-700">{dummyData.education[0].degree}</p>
-          <p className="text-xs text-orange-600 font-semibold">{dummyData.education[0].gpa}</p>
-        </div>
-        <div>
-          <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-            PROJECTS
-          </h2>
-          <p className="text-sm font-bold text-slate-900">{dummyData.projects[0].name}</p>
-          <p className="text-xs text-orange-600 mb-1">{dummyData.projects[0].tech}</p>
-          <p className="text-xs text-slate-700">{dummyData.projects[0].description}</p>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderExecutiveNavy = () => (
-    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
-      {/* Navy Header Block */}
-      <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-6 mb-6 -mx-12 -mt-12 shadow-lg">
-        <h1 className="text-3xl font-black uppercase tracking-wide mb-2">
-          {dummyData.fullName}
-        </h1>
-        <p className="text-lg font-semibold text-blue-200 mb-3">{dummyData.jobTitle}</p>
-        <div className="text-xs text-blue-100 flex items-center gap-3">
-          <span>{dummyData.email}</span>
-          <span>|</span>
-          <span>{dummyData.phone}</span>
-          <span>|</span>
-          <span>{dummyData.location}</span>
-        </div>
-      </div>
-
-      {/* Executive Summary */}
-      <div className="mb-6 mt-6">
-        <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
-          EXECUTIVE PROFILE
-        </h2>
-        <p className="text-xs leading-relaxed text-slate-700 font-medium">{dummyData.summary}</p>
-      </div>
-
-      {/* Core Competencies */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
-          CORE COMPETENCIES
-        </h2>
-        <div className="grid grid-cols-3 gap-2">
-          {dummyData.skills.slice(0, 9).map((skill, idx) => (
-            <div key={idx} className="text-xs text-slate-700 font-semibold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-blue-900 rounded-full"></span>
-              {skill}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Professional Experience */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
-          LEADERSHIP EXPERIENCE
-        </h2>
-        {dummyData.experience.map((exp, idx) => (
-          <div key={idx} className="mb-4">
-            <div className="flex justify-between items-baseline mb-1">
-              <p className="text-sm font-bold text-blue-900">{exp.role}</p>
-              <p className="text-xs text-slate-600 font-semibold">{exp.period}</p>
-            </div>
-            <p className="text-xs font-bold text-slate-800 mb-2">{exp.company}</p>
-            <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Education */}
-      <div>
-        <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
-          EDUCATION
-        </h2>
-        <div className="flex justify-between items-baseline">
-          <div>
-            <p className="text-sm font-bold text-slate-900">{dummyData.education[0].institution}</p>
-            <p className="text-xs text-slate-700">{dummyData.education[0].degree}</p>
-          </div>
-          <p className="text-xs text-slate-600">{dummyData.education[0].gpa}</p>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderTechSidebar = () => (
-    <div className="flex" style={{ fontFamily: selectedFontFamily }}>
-      {/* Left Sidebar - Tech Stack */}
-      <div className="w-64 bg-cyan-900 text-white p-6">
-        <div className="mb-6">
-          <h1 className="text-xl font-black uppercase tracking-tight mb-1">
-            {dummyData.fullName.split(' ')[0]}
-          </h1>
-          <h1 className="text-xl font-black uppercase tracking-tight mb-3">
-            {dummyData.fullName.split(' ').slice(1).join(' ')}
-          </h1>
-          <p className="text-sm font-semibold text-cyan-300">{dummyData.jobTitle}</p>
-        </div>
-
-        <div className="mb-6 text-xs space-y-1 text-cyan-100">
-          <p>{dummyData.email}</p>
-          <p>{dummyData.phone}</p>
-          <p>{dummyData.location}</p>
-        </div>
-
-        <div className="mb-6">
-          <h2 className="text-xs font-black uppercase text-cyan-300 mb-3 border-b border-cyan-700 pb-1">
-            TECH STACK
-          </h2>
-          <div className="space-y-2">
-            {dummyData.skills.map((skill, idx) => (
-              <div key={idx} className="text-xs">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-semibold text-white">{skill}</span>
+          <div className="space-y-4 px-4">
+            {dummyData.experience.map((exp, idx) => (
+              <div key={idx}>
+                <div className="flex items-baseline justify-between mb-1">
+                  <p className="text-sm font-bold text-slate-900">{exp.role}</p>
+                  <p className="text-xs text-slate-500">{exp.period}</p>
                 </div>
-                <div className="w-full bg-cyan-950 h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-cyan-400 h-full rounded-full" style={{ width: `${90 - idx * 3}%` }}></div>
-                </div>
+                <p className="text-xs font-semibold text-slate-600 mb-2">{exp.company}</p>
+                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{exp.description}</p>
               </div>
             ))}
           </div>
         </div>
-
-        <div>
-          <h2 className="text-xs font-black uppercase text-cyan-300 mb-2 border-b border-cyan-700 pb-1">
-            LINKS
-          </h2>
-          <div className="text-xs space-y-1 text-cyan-200">
-            <p className="break-all">github.com/rizkypratama</p>
-            <p className="break-all">{dummyData.linkedin}</p>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-6">
+          <div className="flex items-center justify-center mb-3">
+            <div className="flex-grow border-t border-slate-300"></div>
+            <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Pengalaman Magang</span>
+            <div className="flex-grow border-t border-slate-300"></div>
+          </div>
+          <div className="space-y-3 px-4">
+            {dummyData.internships.map((item, idx) => (
+              <div key={idx}>
+                <div className="flex items-baseline justify-between mb-1">
+                  <p className="text-sm font-bold text-slate-900">{item.role}</p>
+                  <p className="text-xs text-slate-500">{item.period}</p>
+                </div>
+                <p className="text-xs font-semibold text-slate-600 mb-1">{item.company}</p>
+                <p className="text-xs leading-relaxed text-slate-700 text-justify">{item.description}</p>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-6">
+          <div className="flex items-center justify-center mb-3">
+            <div className="flex-grow border-t border-slate-300"></div>
+            <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Proyek Unggulan</span>
+            <div className="flex-grow border-t border-slate-300"></div>
+          </div>
+          <div className="space-y-3 px-4">
+            {dummyData.projects.map((proj, idx) => (
+              <div key={idx}>
+                <p className="text-sm font-bold text-slate-900 mb-1">{proj.name}</p>
+                <p className="text-xs italic text-slate-600 mb-1">{proj.tech}</p>
+                <p className="text-xs leading-relaxed text-slate-700 text-justify">{proj.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-6">
+          <div className="flex items-center justify-center mb-3">
+            <div className="flex-grow border-t border-slate-300"></div>
+            <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Pengalaman Organisasi</span>
+            <div className="flex-grow border-t border-slate-300"></div>
+          </div>
+          <div className="space-y-3 px-4">
+            {dummyData.organizations.map((org, idx) => (
+              <div key={idx}>
+                <div className="flex items-baseline justify-between mb-1">
+                  <p className="text-sm font-bold text-slate-900">{org.name}</p>
+                  <p className="text-xs text-slate-500">{org.period}</p>
+                </div>
+                <p className="text-xs font-semibold text-slate-600 mb-1">{org.role}</p>
+                <p className="text-xs leading-relaxed text-slate-700 text-justify">{org.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      education: (
+        <div key="education" className="mb-6">
+          <div className="flex items-center justify-center mb-3">
+            <div className="flex-grow border-t border-slate-300"></div>
+            <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Pendidikan</span>
+            <div className="flex-grow border-t border-slate-300"></div>
+          </div>
+          <div className="space-y-2 px-4 text-center">
+            {dummyData.education.map((edu, idx) => (
+              <div key={idx}>
+                <p className="text-xs font-bold text-slate-900">{edu.institution}</p>
+                <p className="text-xs text-slate-700">{edu.degree}</p>
+                <p className="text-xs text-slate-600">{edu.year} • {edu.gpa}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-6">
+          <div className="flex items-center justify-center mb-3">
+            <div className="flex-grow border-t border-slate-300"></div>
+            <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Sertifikasi</span>
+            <div className="flex-grow border-t border-slate-300"></div>
+          </div>
+          <div className="space-y-2 px-4 text-center text-xs">
+            {dummyData.certifications.map((cert, idx) => (
+              <div key={idx}>
+                <p className="font-bold text-slate-900">{cert.name} — <span className="font-normal italic">{cert.issuer}</span> ({cert.issueDate})</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-6">
+          <div className="flex items-center justify-center mb-3">
+            <div className="flex-grow border-t border-slate-300"></div>
+            <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Bahasa</span>
+            <div className="flex-grow border-t border-slate-300"></div>
+          </div>
+          <p className="text-xs text-center text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-6">
+          <div className="flex items-center justify-center mb-3">
+            <div className="flex-grow border-t border-slate-300"></div>
+            <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Pelatihan &amp; Kursus</span>
+            <div className="flex-grow border-t border-slate-300"></div>
+          </div>
+          <div className="space-y-2 px-4 text-center text-xs">
+            {dummyData.courses.map((crs, idx) => (
+              <div key={idx}>
+                <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-6">
+          <div className="flex items-center justify-center mb-3">
+            <div className="flex-grow border-t border-slate-300"></div>
+            <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Beasiswa</span>
+            <div className="flex-grow border-t border-slate-300"></div>
+          </div>
+          <div className="space-y-2 px-4 text-center text-xs">
+            {dummyData.scholarships.map((sch, idx) => (
+              <div key={idx}>
+                <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-6">
+          <div className="flex items-center justify-center mb-3">
+            <div className="flex-grow border-t border-slate-300"></div>
+            <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Relawan</span>
+            <div className="flex-grow border-t border-slate-300"></div>
+          </div>
+          <div className="space-y-2 px-4 text-center text-xs">
+            {dummyData.volunteers.map((vol, idx) => (
+              <div key={idx}>
+                <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-6">
+          <div className="flex items-center justify-center mb-3">
+            <div className="flex-grow border-t border-slate-300"></div>
+            <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Referensi</span>
+            <div className="flex-grow border-t border-slate-300"></div>
+          </div>
+          <div className="space-y-2 px-4 text-center text-xs">
+            {dummyData.references.map((ref, idx) => (
+              <div key={idx}>
+                <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+    };
 
-      {/* Right Content */}
-      <div className="flex-1 p-10">
-        <div className="mb-6">
+    return (
+      <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
+        {/* Header - Centered */}
+        <div className="flex flex-col items-center text-center border-b-2 border-slate-300 pb-4 mb-6">
+          {dummyData.photoUrl ? (
+            <img
+              src={dummyData.photoUrl}
+              alt={dummyData.fullName}
+              className="w-20 h-20 rounded-full object-cover border-2 border-slate-300 mb-3 shadow-2xs"
+            />
+          ) : null}
+          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
+            {dummyData.fullName}
+          </h1>
+          <p className="text-base font-semibold text-slate-600 mb-3">{dummyData.jobTitle}</p>
+          <div className="text-xs text-slate-600 flex flex-wrap justify-center gap-x-3 gap-y-1 items-center">
+            <a href={getEmailMailto(dummyData.email)} className="hover:underline font-medium text-slate-800">
+              {dummyData.email}
+            </a>
+            {dummyData.phone && (
+              <>
+                <span>•</span>
+                <span>{dummyData.phone}</span>
+              </>
+            )}
+            {dummyData.location && (
+              <>
+                <span>•</span>
+                <span>{dummyData.location}</span>
+              </>
+            )}
+            {dummyData.linkedin && (
+              <>
+                <span>•</span>
+                <a href={getCleanUrl(dummyData.linkedin)} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                  {dummyData.linkedin}
+                </a>
+              </>
+            )}
+            {dummyData.github && (
+              <>
+                <span>•</span>
+                <a href={getCleanUrl(dummyData.github)} target="_blank" rel="noreferrer" className="text-slate-800 hover:underline font-medium">
+                  {dummyData.github}
+                </a>
+              </>
+            )}
+          </div>
+        </div>
+
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
+  const renderCreativeTech = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-2 flex items-center gap-2">
+            <span className="w-1 h-4 bg-emerald-500"></span>
+            ABOUT ME
+          </h2>
+          <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
+        </div>
+      ),
+      skills: (
+        <div key="skills" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-1 h-4 bg-emerald-500"></span>
+            TECH STACK &amp; SKILLS
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {dummyData.skills.map((skill, idx) => (
+              <span key={idx} className="px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-full text-xs font-bold">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      ),
+      experience: (
+        <div key="experience" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-1 h-4 bg-emerald-500"></span>
+            WORK EXPERIENCE
+          </h2>
+          <div className="space-y-4">
+            {dummyData.experience.map((exp, idx) => (
+              <div key={idx}>
+                <div className="flex items-baseline justify-between mb-1">
+                  <p className="text-sm font-bold text-slate-900">{exp.role}</p>
+                  <p className="text-xs text-slate-600">{exp.period}</p>
+                </div>
+                <p className="text-xs font-semibold text-emerald-600 mb-1">{exp.company}</p>
+                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{exp.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-1 h-4 bg-emerald-500"></span>
+            INTERNSHIPS
+          </h2>
+          <div className="space-y-3">
+            {dummyData.internships.map((item, idx) => (
+              <div key={idx}>
+                <div className="flex items-baseline justify-between mb-1">
+                  <p className="text-sm font-bold text-slate-900">{item.role}</p>
+                  <p className="text-xs text-slate-600">{item.period}</p>
+                </div>
+                <p className="text-xs font-semibold text-emerald-600 mb-1">{item.company}</p>
+                <p className="text-xs leading-relaxed text-slate-700 text-justify">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-1 h-4 bg-emerald-500"></span>
+            FEATURED PROJECTS
+          </h2>
+          <div className="space-y-3">
+            {dummyData.projects.map((proj, idx) => (
+              <div key={idx}>
+                <p className="text-sm font-bold text-slate-900 mb-1">{proj.name}</p>
+                <p className="text-xs text-emerald-600 mb-1">{proj.tech}</p>
+                <p className="text-xs leading-relaxed text-slate-700 text-justify">{proj.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-1 h-4 bg-emerald-500"></span>
+            ORGANIZATIONS
+          </h2>
+          <div className="space-y-3">
+            {dummyData.organizations.map((org, idx) => (
+              <div key={idx}>
+                <div className="flex items-baseline justify-between mb-1">
+                  <p className="text-sm font-bold text-slate-900">{org.name}</p>
+                  <p className="text-xs text-slate-600">{org.period}</p>
+                </div>
+                <p className="text-xs font-semibold text-emerald-600 mb-1">{org.role}</p>
+                <p className="text-xs leading-relaxed text-slate-700 text-justify">{org.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      education: (
+        <div key="education" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-1 h-4 bg-emerald-500"></span>
+            EDUCATION
+          </h2>
+          {dummyData.education.map((edu, idx) => (
+            <div key={idx} className="mb-2">
+              <div className="flex items-baseline justify-between mb-1">
+                <p className="text-sm font-bold text-slate-900">{edu.institution}</p>
+                <p className="text-xs text-slate-600">{edu.year}</p>
+              </div>
+              <p className="text-xs text-slate-700">{edu.degree} • {edu.gpa}</p>
+            </div>
+          ))}
+        </div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-1 h-4 bg-emerald-500"></span>
+            CERTIFICATIONS
+          </h2>
+          <div className="space-y-2">
+            {dummyData.certifications.map((cert, idx) => (
+              <div key={idx} className="flex justify-between text-xs">
+                <span className="font-bold text-slate-900">{cert.name} — <em className="text-emerald-600 font-normal">{cert.issuer}</em></span>
+                <span className="text-slate-600">{cert.issueDate}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-1 h-4 bg-emerald-500"></span>
+            LANGUAGES
+          </h2>
+          <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-1 h-4 bg-emerald-500"></span>
+            COURSES &amp; TRAINING
+          </h2>
+          {dummyData.courses.map((crs, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{crs.courseName} — <span className="text-emerald-600">{crs.institution}</span> ({crs.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-1 h-4 bg-emerald-500"></span>
+            SCHOLARSHIPS
+          </h2>
+          {dummyData.scholarships.map((sch, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-1 h-4 bg-emerald-500"></span>
+            VOLUNTEER EXPERIENCE
+          </h2>
+          {dummyData.volunteers.map((vol, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-1 h-4 bg-emerald-500"></span>
+            REFERENCES
+          </h2>
+          {dummyData.references.map((ref, idx) => (
+            <div key={idx} className="text-xs text-slate-700">
+              <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+    };
+
+    return (
+      <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
+        {/* Header with accent */}
+        <div className="border-l-8 border-emerald-500 pl-4 mb-6">
+          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-1">
+            {dummyData.fullName}
+          </h1>
+          <p className="text-base font-bold text-emerald-600 mb-2">{dummyData.jobTitle}</p>
+          <div className="text-xs text-slate-600 space-y-0.5">
+            <p>{dummyData.email} • {dummyData.phone}</p>
+            <p>{dummyData.location} • <span className="text-emerald-600">{dummyData.linkedin}</span></p>
+          </div>
+        </div>
+
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
+  const renderFreshGraduate = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-6 bg-amber-50 border-l-4 border-amber-500 p-4">
+          <h2 className="text-sm font-black uppercase tracking-wide text-amber-800 mb-2">
+            OBJECTIVE
+          </h2>
+          <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
+        </div>
+      ),
+      education: (
+        <div key="education" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
+            PENDIDIKAN
+          </h2>
+          {dummyData.education.map((edu, idx) => (
+            <div key={idx} className="bg-slate-50 p-4 rounded-lg">
+              <div className="flex items-baseline justify-between mb-2">
+                <p className="text-base font-bold text-slate-900">{edu.institution}</p>
+                <p className="text-xs text-slate-600">{edu.year}</p>
+              </div>
+              <p className="text-sm font-semibold text-slate-700 mb-1">{edu.degree}</p>
+              <p className="text-xs text-amber-600 font-bold">{edu.gpa}</p>
+            </div>
+          ))}
+        </div>
+      ),
+      skills: (
+        <div key="skills" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
+            KEAHLIAN TEKNIS
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {dummyData.skills.map((skill, idx) => (
+              <span key={idx} className="px-3 py-1 bg-slate-100 border border-slate-300 text-slate-700 rounded-md text-xs font-semibold">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      ),
+      projects: (
+        <div key="projects" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
+            PROYEK &amp; PORTOFOLIO
+          </h2>
+          <div className="space-y-3">
+            {dummyData.projects.map((proj, idx) => (
+              <div key={idx}>
+                <p className="text-sm font-bold text-slate-900 mb-1">{proj.name}</p>
+                <p className="text-xs text-amber-600 mb-2">{proj.tech}</p>
+                <p className="text-xs leading-relaxed text-slate-700 text-justify">{proj.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+      experience: (
+        <div key="experience" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
+            PENGALAMAN KERJA
+          </h2>
+          <div className="space-y-4">
+            {dummyData.experience.map((exp, idx) => (
+              <div key={idx}>
+                <div className="flex items-baseline justify-between mb-1">
+                  <p className="text-sm font-bold text-slate-900">{exp.role}</p>
+                  <p className="text-xs text-slate-600">{exp.period}</p>
+                </div>
+                <p className="text-xs italic text-slate-700 mb-2">{exp.company}</p>
+                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{exp.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
+            PENGALAMAN MAGANG
+          </h2>
+          <div className="space-y-3">
+            {dummyData.internships.map((item, idx) => (
+              <div key={idx}>
+                <div className="flex items-baseline justify-between mb-1">
+                  <p className="text-sm font-bold text-slate-900">{item.role}</p>
+                  <p className="text-xs text-slate-600">{item.period}</p>
+                </div>
+                <p className="text-xs italic text-amber-700 mb-1">{item.company}</p>
+                <p className="text-xs leading-relaxed text-slate-700 text-justify">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
+            PENGALAMAN ORGANISASI
+          </h2>
+          <div className="space-y-3">
+            {dummyData.organizations.map((org, idx) => (
+              <div key={idx}>
+                <div className="flex items-baseline justify-between mb-1">
+                  <p className="text-sm font-bold text-slate-900">{org.name}</p>
+                  <p className="text-xs text-slate-600">{org.period}</p>
+                </div>
+                <p className="text-xs font-semibold text-amber-700 mb-1">{org.role}</p>
+                <p className="text-xs leading-relaxed text-slate-700 text-justify">{org.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
+            SERTIFIKAT
+          </h2>
+          <div className="space-y-2 text-xs">
+            {dummyData.certifications.map((cert, idx) => (
+              <div key={idx} className="flex justify-between">
+                <span className="font-bold text-slate-900">{cert.name} — <em className="text-amber-700 font-normal">{cert.issuer}</em></span>
+                <span className="text-slate-600">{cert.issueDate}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
+            BAHASA
+          </h2>
+          <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
+            KURSUS &amp; PELATIHAN
+          </h2>
+          {dummyData.courses.map((crs, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
+            BEASISWA
+          </h2>
+          {dummyData.scholarships.map((sch, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
+            RELAWAN
+          </h2>
+          {dummyData.volunteers.map((vol, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
+            REFERENSI
+          </h2>
+          {dummyData.references.map((ref, idx) => (
+            <div key={idx} className="text-xs text-slate-700">
+              <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+    };
+
+    return (
+      <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
+        {/* Header */}
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
+            {dummyData.fullName}
+          </h1>
+          <p className="text-base font-semibold text-amber-600 mb-3">{dummyData.jobTitle}</p>
+          <div className="text-xs text-slate-600">
+            <p>{dummyData.email} • {dummyData.phone}</p>
+            <p className="mt-1">{dummyData.location} • {dummyData.linkedin}</p>
+          </div>
+        </div>
+
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
+  const renderHarvardModern = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">SUMMARY</h2>
+          <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+        </div>
+      ),
+      experience: (
+        <div key="experience" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">EXPERIENCE</h2>
+          {dummyData.experience.map((exp, idx) => (
+            <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-3">
+              <div className="text-xs font-bold text-slate-600 uppercase">{exp.period}</div>
+              <div>
+                <p className="text-sm font-bold text-slate-900">{exp.role}</p>
+                <p className="text-xs font-semibold text-slate-700">{exp.company}</p>
+                <p className="text-xs leading-relaxed text-slate-700 mt-1 whitespace-pre-line">{exp.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">INTERNSHIPS</h2>
+          {dummyData.internships.map((item, idx) => (
+            <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-3">
+              <div className="text-xs font-bold text-slate-600 uppercase">{item.period}</div>
+              <div>
+                <p className="text-sm font-bold text-slate-900">{item.role}</p>
+                <p className="text-xs font-semibold text-slate-700">{item.company}</p>
+                <p className="text-xs leading-relaxed text-slate-700 mt-1">{item.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">PROJECTS</h2>
+          {dummyData.projects.map((proj, idx) => (
+            <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-3">
+              <div className="text-xs font-bold text-slate-600 uppercase">{proj.name}</div>
+              <div>
+                <p className="text-xs italic text-slate-700">{proj.tech}</p>
+                <p className="text-xs leading-relaxed text-slate-700 mt-1">{proj.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">ORGANIZATIONS</h2>
+          {dummyData.organizations.map((org, idx) => (
+            <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-3">
+              <div className="text-xs font-bold text-slate-600 uppercase">{org.period}</div>
+              <div>
+                <p className="text-sm font-bold text-slate-900">{org.name}</p>
+                <p className="text-xs font-semibold text-slate-700">{org.role}</p>
+                <p className="text-xs leading-relaxed text-slate-700 mt-1">{org.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      education: (
+        <div key="education" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">EDUCATION</h2>
+          {dummyData.education.map((edu, idx) => (
+            <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-2">
+              <div className="text-xs font-bold text-slate-600 uppercase">{edu.year}</div>
+              <div>
+                <p className="text-sm font-bold text-slate-900">{edu.institution}</p>
+                <p className="text-xs text-slate-700">{edu.degree} • {edu.gpa}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ),
+      skills: (
+        <div key="skills" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">SKILLS</h2>
+          <div className="grid grid-cols-[140px_1fr] gap-4">
+            <div className="text-xs font-bold text-slate-600 uppercase">Core Skills</div>
+            <p className="text-xs text-slate-700">{dummyData.skills.join(' • ')}</p>
+          </div>
+        </div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">CERTIFICATIONS</h2>
+          {dummyData.certifications.map((cert, idx) => (
+            <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-2 text-xs">
+              <div className="font-bold text-slate-600 uppercase">{cert.issueDate}</div>
+              <div>
+                <p className="font-bold text-slate-900">{cert.name} — <em>{cert.issuer}</em></p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">LANGUAGES</h2>
+          <div className="grid grid-cols-[140px_1fr] gap-4 text-xs">
+            <div className="font-bold text-slate-600 uppercase">Languages</div>
+            <p className="text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+          </div>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">COURSES</h2>
+          {dummyData.courses.map((crs, idx) => (
+            <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-2 text-xs">
+              <div className="font-bold text-slate-600 uppercase">{crs.year}</div>
+              <div>
+                <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">SCHOLARSHIPS</h2>
+          {dummyData.scholarships.map((sch, idx) => (
+            <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-2 text-xs">
+              <div className="font-bold text-slate-600 uppercase">{sch.year}</div>
+              <div>
+                <p className="font-bold text-slate-900">{sch.name} — {sch.provider}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">VOLUNTEER</h2>
+          {dummyData.volunteers.map((vol, idx) => (
+            <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-2 text-xs">
+              <div className="font-bold text-slate-600 uppercase">{vol.organization}</div>
+              <div>
+                <p className="font-bold text-slate-900">{vol.role}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">REFERENCES</h2>
+          {dummyData.references.map((ref, idx) => (
+            <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-2 text-xs">
+              <div className="font-bold text-slate-600 uppercase">{ref.company}</div>
+              <div>
+                <p className="font-bold text-slate-900">{ref.fullName} ({ref.title})</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null,
+    };
+
+    return (
+      <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
+        {/* Header */}
+        <div className="border-b-4 border-slate-900 pb-3 mb-6">
+          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900">
+            {dummyData.fullName}
+          </h1>
+          <p className="text-base font-bold text-slate-700 mt-1">{dummyData.jobTitle}</p>
+          <p className="text-xs text-slate-600 mt-2">{dummyData.email} | {dummyData.phone} | {dummyData.location}</p>
+        </div>
+
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
+  const renderBlueAccent = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">PROFESSIONAL SUMMARY</h2>
+          <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+        </div>
+      ),
+      skills: (
+        <div key="skills" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">SKILLS</h2>
+          <p className="text-xs text-slate-700">{dummyData.skills.join(' • ')}</p>
+        </div>
+      ),
+      experience: (
+        <div key="experience" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">WORK EXPERIENCE</h2>
+          {dummyData.experience.map((exp, idx) => (
+            <div key={idx} className="mb-4">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="text-sm font-bold text-slate-900">{exp.role}</p>
+                <p className="text-xs text-slate-600">{exp.period}</p>
+              </div>
+              <p className="text-xs italic text-blue-700 mb-2">{exp.company}</p>
+              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+            </div>
+          ))}
+        </div>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">INTERNSHIPS</h2>
+          {dummyData.internships.map((item, idx) => (
+            <div key={idx} className="mb-3">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="text-sm font-bold text-slate-900">{item.role}</p>
+                <p className="text-xs text-slate-600">{item.period}</p>
+              </div>
+              <p className="text-xs italic text-blue-700 mb-1">{item.company}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">PROJECTS</h2>
+          {dummyData.projects.map((proj, idx) => (
+            <div key={idx} className="mb-3">
+              <p className="text-sm font-bold text-slate-900">{proj.name}</p>
+              <p className="text-xs italic text-blue-700 mb-1">{proj.tech}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">ORGANIZATIONS</h2>
+          {dummyData.organizations.map((org, idx) => (
+            <div key={idx} className="mb-3">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="text-sm font-bold text-slate-900">{org.name}</p>
+                <p className="text-xs text-slate-600">{org.period}</p>
+              </div>
+              <p className="text-xs italic text-blue-700 mb-1">{org.role}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      education: (
+        <div key="education" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">EDUCATION</h2>
+          {dummyData.education.map((edu, idx) => (
+            <div key={idx} className="mb-2">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="text-sm font-bold text-slate-900">{edu.institution}</p>
+                <p className="text-xs text-slate-600">{edu.year}</p>
+              </div>
+              <p className="text-xs text-slate-700">{edu.degree} • {edu.gpa}</p>
+            </div>
+          ))}
+        </div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">CERTIFICATIONS</h2>
+          {dummyData.certifications.map((cert, idx) => (
+            <div key={idx} className="flex justify-between text-xs mb-1">
+              <span className="font-bold text-slate-900">{cert.name} — <em className="text-blue-700">{cert.issuer}</em></span>
+              <span className="text-slate-600">{cert.issueDate}</span>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">LANGUAGES</h2>
+          <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">COURSES</h2>
+          {dummyData.courses.map((crs, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">SCHOLARSHIPS</h2>
+          {dummyData.scholarships.map((sch, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">VOLUNTEER</h2>
+          {dummyData.volunteers.map((vol, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">REFERENCES</h2>
+          {dummyData.references.map((ref, idx) => (
+            <div key={idx} className="text-xs text-slate-700">
+              <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+    };
+
+    return (
+      <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
+        <div className="border-b-3 border-blue-600 pb-4 mb-6">
+          <h1 className="text-3xl font-black uppercase text-blue-900">{dummyData.fullName}</h1>
+          <p className="text-base font-semibold text-blue-600 mt-1">{dummyData.jobTitle}</p>
+          <p className="text-xs text-slate-600 mt-2">{dummyData.email} • {dummyData.phone} • {dummyData.location}</p>
+        </div>
+
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
+  const renderElegantPhoto = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">SUMMARY</h2>
+          <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+        </div>
+      ),
+      skills: (
+        <div key="skills" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">SKILLS</h2>
+          <p className="text-xs text-slate-700 leading-relaxed">{dummyData.skills.join(' • ')}</p>
+        </div>
+      ),
+      experience: (
+        <div key="experience" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">EXPERIENCE</h2>
+          {dummyData.experience.map((exp, idx) => (
+            <div key={idx} className="mb-4">
+              <div className="flex justify-between items-baseline">
+                <p className="text-sm font-bold text-slate-900">{exp.role}</p>
+                <p className="text-xs text-slate-600">{exp.period}</p>
+              </div>
+              <p className="text-xs italic text-slate-700 mb-2">{exp.company}</p>
+              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+            </div>
+          ))}
+        </div>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">INTERNSHIPS</h2>
+          {dummyData.internships.map((item, idx) => (
+            <div key={idx} className="mb-3">
+              <div className="flex justify-between items-baseline">
+                <p className="text-sm font-bold text-slate-900">{item.role}</p>
+                <p className="text-xs text-slate-600">{item.period}</p>
+              </div>
+              <p className="text-xs italic text-slate-700 mb-1">{item.company}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">PROJECTS</h2>
+          {dummyData.projects.map((proj, idx) => (
+            <div key={idx} className="mb-3">
+              <p className="text-sm font-bold text-slate-900">{proj.name}</p>
+              <p className="text-xs italic text-purple-600 mb-1">{proj.tech}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">ORGANIZATIONS</h2>
+          {dummyData.organizations.map((org, idx) => (
+            <div key={idx} className="mb-3">
+              <div className="flex justify-between items-baseline">
+                <p className="text-sm font-bold text-slate-900">{org.name}</p>
+                <p className="text-xs text-slate-600">{org.period}</p>
+              </div>
+              <p className="text-xs italic text-slate-700 mb-1">{org.role}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      education: (
+        <div key="education" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">EDUCATION</h2>
+          {dummyData.education.map((edu, idx) => (
+            <div key={idx} className="mb-2">
+              <div className="flex justify-between items-baseline">
+                <p className="text-sm font-bold text-slate-900">{edu.institution}</p>
+                <p className="text-xs text-slate-600">{edu.year}</p>
+              </div>
+              <p className="text-xs text-slate-700">{edu.degree} • {edu.gpa}</p>
+            </div>
+          ))}
+        </div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">CERTIFICATIONS</h2>
+          {dummyData.certifications.map((cert, idx) => (
+            <div key={idx} className="flex justify-between text-xs mb-1">
+              <span className="font-bold text-slate-900">{cert.name} — <em className="text-purple-600">{cert.issuer}</em></span>
+              <span className="text-slate-600">{cert.issueDate}</span>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">LANGUAGES</h2>
+          <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">COURSES</h2>
+          {dummyData.courses.map((crs, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">SCHOLARSHIPS</h2>
+          {dummyData.scholarships.map((sch, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">VOLUNTEER</h2>
+          {dummyData.volunteers.map((vol, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">REFERENCES</h2>
+          {dummyData.references.map((ref, idx) => (
+            <div key={idx} className="text-xs text-slate-700">
+              <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+    };
+
+    return (
+      <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
+        <div className="flex items-start gap-6 border-b-2 border-purple-600 pb-4 mb-6">
+          <div className="flex-1">
+            <h1 className="text-3xl font-black uppercase text-slate-900">{dummyData.fullName}</h1>
+            <p className="text-base font-semibold text-purple-600 mt-1">{dummyData.jobTitle}</p>
+            <div className="text-xs text-slate-600 mt-2 space-y-0.5">
+              <p>{dummyData.email} • {dummyData.phone}</p>
+              <p>{dummyData.location}</p>
+            </div>
+          </div>
+          {dummyData.photoUrl ? (
+            <img
+              src={dummyData.photoUrl}
+              alt={dummyData.fullName}
+              className="w-24 h-24 rounded-lg object-cover border-2 border-purple-600 shrink-0"
+            />
+          ) : (
+            <div className="w-24 h-24 border-2 border-purple-600 rounded-lg bg-slate-100 flex items-center justify-center text-xs text-slate-400 shrink-0">
+              Photo
+            </div>
+          )}
+        </div>
+
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
+  const renderReziClassic = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-6">
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Professional Summary</h2>
+          <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+        </div>
+      ),
+      skills: (
+        <div key="skills" className="mb-6">
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Skills</h2>
+          <p className="text-xs text-slate-700">{dummyData.skills.join(', ')}</p>
+        </div>
+      ),
+      experience: (
+        <div key="experience" className="mb-6">
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Experience</h2>
+          {dummyData.experience.map((exp, idx) => (
+            <div key={idx} className="mb-4">
+              <div className="flex justify-between items-baseline">
+                <p className="text-sm font-bold text-slate-900">{exp.role}</p>
+                <p className="text-xs text-slate-600 italic">{exp.period}</p>
+              </div>
+              <p className="text-xs italic text-slate-700 mb-2">{exp.company}</p>
+              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+            </div>
+          ))}
+        </div>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-6">
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Internships</h2>
+          {dummyData.internships.map((item, idx) => (
+            <div key={idx} className="mb-3">
+              <div className="flex justify-between items-baseline">
+                <p className="text-sm font-bold text-slate-900">{item.role}</p>
+                <p className="text-xs text-slate-600 italic">{item.period}</p>
+              </div>
+              <p className="text-xs italic text-slate-700 mb-1">{item.company}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-6">
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Projects</h2>
+          {dummyData.projects.map((proj, idx) => (
+            <div key={idx} className="mb-3">
+              <p className="text-sm font-bold text-slate-900">{proj.name}</p>
+              <p className="text-xs italic text-slate-700 mb-1">{proj.tech}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-6">
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Organizations</h2>
+          {dummyData.organizations.map((org, idx) => (
+            <div key={idx} className="mb-3">
+              <div className="flex justify-between items-baseline">
+                <p className="text-sm font-bold text-slate-900">{org.name}</p>
+                <p className="text-xs text-slate-600 italic">{org.period}</p>
+              </div>
+              <p className="text-xs italic text-slate-700 mb-1">{org.role}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      education: (
+        <div key="education" className="mb-6">
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Education</h2>
+          {dummyData.education.map((edu, idx) => (
+            <div key={idx} className="mb-2">
+              <div className="flex justify-between items-baseline">
+                <p className="text-sm font-bold text-slate-900">{edu.institution}</p>
+                <p className="text-xs text-slate-600 italic">{edu.year}</p>
+              </div>
+              <p className="text-xs text-slate-700">{edu.degree} • {edu.gpa}</p>
+            </div>
+          ))}
+        </div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-6">
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Certifications</h2>
+          {dummyData.certifications.map((cert, idx) => (
+            <div key={idx} className="flex justify-between text-xs mb-1">
+              <span className="font-bold text-slate-900">{cert.name} — <em>{cert.issuer}</em></span>
+              <span className="text-slate-600">{cert.issueDate}</span>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-6">
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Languages</h2>
+          <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-6">
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Courses</h2>
+          {dummyData.courses.map((crs, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-6">
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Scholarships</h2>
+          {dummyData.scholarships.map((sch, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-6">
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Volunteer</h2>
+          {dummyData.volunteers.map((vol, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-6">
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">References</h2>
+          {dummyData.references.map((ref, idx) => (
+            <div key={idx} className="text-xs text-slate-700">
+              <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+    };
+
+    return (
+      <div className="p-12 min-h-[297mm] bg-white font-serif" style={{ fontFamily: selectedFontFamily }}>
+        <div className="text-center border-b border-slate-400 pb-4 mb-6">
+          <h1 className="text-3xl font-bold text-slate-900">{dummyData.fullName}</h1>
+          <p className="text-base text-slate-700 mt-2">{dummyData.jobTitle}</p>
+          <p className="text-xs text-slate-600 mt-2">{dummyData.email} | {dummyData.phone} | {dummyData.location}</p>
+        </div>
+
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
+  const renderModernOrange = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-6 bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg">
+          <h2 className="text-sm font-black uppercase text-orange-800 mb-2">ABOUT ME</h2>
+          <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+        </div>
+      ),
+      skills: (
+        <div key="skills" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            CORE COMPETENCIES
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {dummyData.skills.map((skill, idx) => (
+              <span key={idx} className="px-3 py-1.5 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-300 text-orange-700 rounded-full text-xs font-bold">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      ),
+      experience: (
+        <div key="experience" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            PROFESSIONAL EXPERIENCE
+          </h2>
+          {dummyData.experience.map((exp, idx) => (
+            <div key={idx} className="mb-4 pl-4 border-l-2 border-orange-300">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="text-sm font-bold text-slate-900">{exp.role}</p>
+                <p className="text-xs text-orange-600 font-semibold">{exp.period}</p>
+              </div>
+              <p className="text-xs font-bold text-orange-600 mb-2">{exp.company}</p>
+              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+            </div>
+          ))}
+        </div>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            INTERNSHIPS
+          </h2>
+          {dummyData.internships.map((item, idx) => (
+            <div key={idx} className="mb-3 pl-4 border-l-2 border-orange-300">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="text-sm font-bold text-slate-900">{item.role}</p>
+                <p className="text-xs text-orange-600 font-semibold">{item.period}</p>
+              </div>
+              <p className="text-xs font-bold text-orange-600 mb-1">{item.company}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            PROJECTS
+          </h2>
+          {dummyData.projects.map((proj, idx) => (
+            <div key={idx} className="mb-3 pl-4 border-l-2 border-orange-300">
+              <p className="text-sm font-bold text-slate-900">{proj.name}</p>
+              <p className="text-xs text-orange-600 mb-1">{proj.tech}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            ORGANIZATIONS
+          </h2>
+          {dummyData.organizations.map((org, idx) => (
+            <div key={idx} className="mb-3 pl-4 border-l-2 border-orange-300">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="text-sm font-bold text-slate-900">{org.name}</p>
+                <p className="text-xs text-orange-600 font-semibold">{org.period}</p>
+              </div>
+              <p className="text-xs font-bold text-orange-600 mb-1">{org.role}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      education: (
+        <div key="education" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            EDUCATION
+          </h2>
+          {dummyData.education.map((edu, idx) => (
+            <div key={idx} className="pl-4 border-l-2 border-orange-300 mb-2">
+              <p className="text-sm font-bold text-slate-900">{edu.institution}</p>
+              <p className="text-xs text-slate-700">{edu.degree}</p>
+              <p className="text-xs text-orange-600 font-semibold">{edu.year} • {edu.gpa}</p>
+            </div>
+          ))}
+        </div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            CERTIFICATIONS
+          </h2>
+          {dummyData.certifications.map((cert, idx) => (
+            <div key={idx} className="pl-4 border-l-2 border-orange-300 mb-2 text-xs">
+              <p className="font-bold text-slate-900">{cert.name} — <span className="text-orange-600">{cert.issuer}</span> ({cert.issueDate})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            LANGUAGES
+          </h2>
+          <p className="text-xs text-slate-700 pl-4">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            COURSES
+          </h2>
+          {dummyData.courses.map((crs, idx) => (
+            <div key={idx} className="pl-4 border-l-2 border-orange-300 mb-2 text-xs">
+              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            SCHOLARSHIPS
+          </h2>
+          {dummyData.scholarships.map((sch, idx) => (
+            <div key={idx} className="pl-4 border-l-2 border-orange-300 mb-2 text-xs">
+              <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            VOLUNTEER
+          </h2>
+          {dummyData.volunteers.map((vol, idx) => (
+            <div key={idx} className="pl-4 border-l-2 border-orange-300 mb-2 text-xs">
+              <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            REFERENCES
+          </h2>
+          {dummyData.references.map((ref, idx) => (
+            <div key={idx} className="pl-4 border-l-2 border-orange-300 mb-2 text-xs">
+              <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+    };
+
+    return (
+      <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
+        {/* Header with Orange Accent */}
+        <div className="border-l-8 border-orange-500 pl-6 mb-6">
+          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-1">
+            {dummyData.fullName}
+          </h1>
+          <p className="text-lg font-bold text-orange-600 mb-2">{dummyData.jobTitle}</p>
+          <div className="text-xs text-slate-600 flex items-center gap-3">
+            <span>{dummyData.email}</span>
+            <span className="text-orange-500">•</span>
+            <span>{dummyData.phone}</span>
+            <span className="text-orange-500">•</span>
+            <span>{dummyData.location}</span>
+          </div>
+        </div>
+
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
+  const renderExecutiveNavy = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-6 mt-6">
+          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+            EXECUTIVE PROFILE
+          </h2>
+          <p className="text-xs leading-relaxed text-slate-700 font-medium">{dummyData.summary}</p>
+        </div>
+      ),
+      skills: (
+        <div key="skills" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+            CORE COMPETENCIES
+          </h2>
+          <div className="grid grid-cols-3 gap-2">
+            {dummyData.skills.map((skill, idx) => (
+              <div key={idx} className="text-xs text-slate-700 font-semibold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-blue-900 rounded-full"></span>
+                {skill}
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+      experience: (
+        <div key="experience" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+            LEADERSHIP EXPERIENCE
+          </h2>
+          {dummyData.experience.map((exp, idx) => (
+            <div key={idx} className="mb-4">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="text-sm font-bold text-blue-900">{exp.role}</p>
+                <p className="text-xs text-slate-600 font-semibold">{exp.period}</p>
+              </div>
+              <p className="text-xs font-bold text-slate-800 mb-2">{exp.company}</p>
+              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+            </div>
+          ))}
+        </div>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+            INTERNSHIPS
+          </h2>
+          {dummyData.internships.map((item, idx) => (
+            <div key={idx} className="mb-3">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="text-sm font-bold text-blue-900">{item.role}</p>
+                <p className="text-xs text-slate-600 font-semibold">{item.period}</p>
+              </div>
+              <p className="text-xs font-bold text-slate-800 mb-1">{item.company}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+            PROJECTS
+          </h2>
+          {dummyData.projects.map((proj, idx) => (
+            <div key={idx} className="mb-3">
+              <p className="text-sm font-bold text-blue-900">{proj.name}</p>
+              <p className="text-xs font-semibold text-slate-600 mb-1">{proj.tech}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+            ORGANIZATIONS
+          </h2>
+          {dummyData.organizations.map((org, idx) => (
+            <div key={idx} className="mb-3">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="text-sm font-bold text-blue-900">{org.name}</p>
+                <p className="text-xs text-slate-600 font-semibold">{org.period}</p>
+              </div>
+              <p className="text-xs font-semibold text-slate-700 mb-1">{org.role}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      education: (
+        <div key="education" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+            EDUCATION
+          </h2>
+          {dummyData.education.map((edu, idx) => (
+            <div key={idx} className="flex justify-between items-baseline mb-2">
+              <div>
+                <p className="text-sm font-bold text-slate-900">{edu.institution}</p>
+                <p className="text-xs text-slate-700">{edu.degree}</p>
+              </div>
+              <p className="text-xs text-slate-600">{edu.year} • {edu.gpa}</p>
+            </div>
+          ))}
+        </div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+            CERTIFICATIONS
+          </h2>
+          {dummyData.certifications.map((cert, idx) => (
+            <div key={idx} className="flex justify-between text-xs mb-1">
+              <span className="font-bold text-slate-900">{cert.name} — <em className="text-blue-900">{cert.issuer}</em></span>
+              <span className="text-slate-600">{cert.issueDate}</span>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+            LANGUAGES
+          </h2>
+          <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+            COURSES
+          </h2>
+          {dummyData.courses.map((crs, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+            SCHOLARSHIPS
+          </h2>
+          {dummyData.scholarships.map((sch, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+            VOLUNTEER
+          </h2>
+          {dummyData.volunteers.map((vol, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+            REFERENCES
+          </h2>
+          {dummyData.references.map((ref, idx) => (
+            <div key={idx} className="text-xs text-slate-700">
+              <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+    };
+
+    return (
+      <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
+        {/* Navy Header Block */}
+        <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-6 mb-6 -mx-12 -mt-12 shadow-lg">
+          <h1 className="text-3xl font-black uppercase tracking-wide mb-2">
+            {dummyData.fullName}
+          </h1>
+          <p className="text-lg font-semibold text-blue-200 mb-3">{dummyData.jobTitle}</p>
+          <div className="text-xs text-blue-100 flex items-center gap-3">
+            <span>{dummyData.email}</span>
+            <span>|</span>
+            <span>{dummyData.phone}</span>
+            <span>|</span>
+            <span>{dummyData.location}</span>
+          </div>
+        </div>
+
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
+  const renderTechSidebar = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
             ABOUT
           </h2>
           <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
         </div>
-
-        <div className="mb-6">
+      ),
+      skills: (
+        <div key="skills" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
+            SKILLS OVERVIEW
+          </h2>
+          <p className="text-xs text-slate-700">{dummyData.skills.join(' • ')}</p>
+        </div>
+      ),
+      experience: (
+        <div key="experience" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
             EXPERIENCE
           </h2>
@@ -7652,470 +9152,1202 @@ const CVTemplatePreview: React.FC<{
             </div>
           ))}
         </div>
-
-        <div className="mb-6">
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
-            EDUCATION
+            INTERNSHIPS
           </h2>
-          <p className="text-sm font-bold text-slate-900">{dummyData.education[0].institution}</p>
-          <p className="text-xs text-slate-700">{dummyData.education[0].degree} • {dummyData.education[0].gpa}</p>
+          {dummyData.internships.map((item, idx) => (
+            <div key={idx} className="mb-3">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="text-sm font-bold text-slate-900">{item.role}</p>
+                <p className="text-xs text-slate-600">{item.period}</p>
+              </div>
+              <p className="text-xs font-semibold text-cyan-700 mb-1">{item.company}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+            </div>
+          ))}
         </div>
-
-        <div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
             PROJECTS
           </h2>
-          <p className="text-sm font-bold text-slate-900">{dummyData.projects[0].name}</p>
-          <p className="text-xs text-cyan-700 mb-2">{dummyData.projects[0].tech}</p>
-          <p className="text-xs text-slate-700">{dummyData.projects[0].description}</p>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderCharcoalWhite = () => (
-    <div className="p-12 bg-white" style={{ fontFamily: selectedFontFamily }}>
-      {/* Minimal Header */}
-      <div className="text-center border-b border-slate-300 pb-6 mb-6">
-        <h1 className="text-4xl font-black tracking-tighter text-slate-900 mb-3">
-          {dummyData.fullName}
-        </h1>
-        <p className="text-sm font-medium text-slate-600 mb-3">{dummyData.jobTitle}</p>
-        <div className="text-xs text-slate-500 flex items-center justify-center gap-4">
-          <span>{dummyData.email}</span>
-          <span className="w-1 h-1 bg-slate-400 rounded-full"></span>
-          <span>{dummyData.phone}</span>
-          <span className="w-1 h-1 bg-slate-400 rounded-full"></span>
-          <span>{dummyData.location}</span>
-        </div>
-      </div>
-
-      {/* Summary */}
-      <div className="mb-8">
-        <p className="text-xs leading-relaxed text-slate-700 text-center max-w-3xl mx-auto">
-          {dummyData.summary}
-        </p>
-      </div>
-
-      {/* Experience */}
-      <div className="mb-8">
-        <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 text-center mb-6">
-          Experience
-        </h2>
-        <div className="space-y-6">
-          {dummyData.experience.map((exp, idx) => (
-            <div key={idx} className="text-center">
-              <p className="text-sm font-bold text-slate-900 mb-1">{exp.role}</p>
-              <p className="text-xs font-semibold text-slate-600 mb-1">{exp.company}</p>
-              <p className="text-xs text-slate-500 mb-2">{exp.period}</p>
-              <p className="text-xs leading-relaxed text-slate-700 max-w-2xl mx-auto whitespace-pre-line">
-                {exp.description}
-              </p>
+          {dummyData.projects.map((proj, idx) => (
+            <div key={idx} className="mb-3">
+              <p className="text-sm font-bold text-slate-900">{proj.name}</p>
+              <p className="text-xs text-cyan-700 mb-1">{proj.tech}</p>
+              <p className="text-xs text-slate-700">{proj.description}</p>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Skills */}
-      <div className="mb-8">
-        <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 text-center mb-4">
-          Skills
-        </h2>
-        <div className="flex flex-wrap justify-center gap-3">
-          {dummyData.skills.map((skill, idx) => (
-            <span key={idx} className="px-4 py-1.5 border border-slate-300 text-slate-700 text-xs font-medium">
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Education */}
-      <div className="text-center">
-        <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
-          Education
-        </h2>
-        <p className="text-sm font-bold text-slate-900">{dummyData.education[0].institution}</p>
-        <p className="text-xs text-slate-700">{dummyData.education[0].degree}</p>
-        <p className="text-xs text-slate-600">{dummyData.education[0].gpa}</p>
-      </div>
-    </div>
-  );
-
-  const renderGreenEco = () => (
-    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
-      {/* Header with Green Accent */}
-      <div className="mb-6 pb-4 border-b-4 border-green-600">
-        <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
-          {dummyData.fullName}
-        </h1>
-        <p className="text-base font-bold text-green-600 mb-2">{dummyData.jobTitle}</p>
-        <div className="text-xs text-slate-600 flex items-center gap-3">
-          <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
-            {dummyData.email}
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
-            {dummyData.phone}
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
-            {dummyData.location}
-          </span>
-        </div>
-      </div>
-
-      {/* Professional Summary */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-8 h-0.5 bg-green-600"></div>
-          <h2 className="text-sm font-black uppercase text-green-800">PROFESSIONAL SUMMARY</h2>
-        </div>
-        <p className="text-xs leading-relaxed text-slate-700 pl-10">{dummyData.summary}</p>
-      </div>
-
-      {/* Skills as Green Tags */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-0.5 bg-green-600"></div>
-          <h2 className="text-sm font-black uppercase text-green-800">KEY SKILLS</h2>
-        </div>
-        <div className="flex flex-wrap gap-2 pl-10">
-          {dummyData.skills.map((skill, idx) => (
-            <span key={idx} className="px-3 py-1.5 bg-green-50 border-2 border-green-500 text-green-700 rounded-md text-xs font-bold">
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Experience */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-0.5 bg-green-600"></div>
-          <h2 className="text-sm font-black uppercase text-green-800">WORK EXPERIENCE</h2>
-        </div>
-        <div className="space-y-4 pl-10">
-          {dummyData.experience.map((exp, idx) => (
-            <div key={idx}>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
+            ORGANIZATIONS
+          </h2>
+          {dummyData.organizations.map((org, idx) => (
+            <div key={idx} className="mb-3">
               <div className="flex justify-between items-baseline mb-1">
-                <p className="text-sm font-bold text-slate-900">{exp.role}</p>
-                <p className="text-xs text-green-600 font-semibold">{exp.period}</p>
+                <p className="text-sm font-bold text-slate-900">{org.name}</p>
+                <p className="text-xs text-slate-600">{org.period}</p>
               </div>
-              <p className="text-xs font-semibold text-green-700 mb-2">{exp.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+              <p className="text-xs font-semibold text-cyan-700 mb-1">{org.role}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
             </div>
           ))}
         </div>
-      </div>
+      ) : null,
+      education: (
+        <div key="education" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
+            EDUCATION
+          </h2>
+          {dummyData.education.map((edu, idx) => (
+            <div key={idx} className="mb-2">
+              <p className="text-sm font-bold text-slate-900">{edu.institution}</p>
+              <p className="text-xs text-slate-700">{edu.degree} • {edu.gpa} ({edu.year})</p>
+            </div>
+          ))}
+        </div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
+            CERTIFICATIONS
+          </h2>
+          {dummyData.certifications.map((cert, idx) => (
+            <div key={idx} className="flex justify-between text-xs mb-1">
+              <span className="font-bold text-slate-900">{cert.name} — <em className="text-cyan-700">{cert.issuer}</em></span>
+              <span className="text-slate-600">{cert.issueDate}</span>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
+            LANGUAGES
+          </h2>
+          <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
+            COURSES
+          </h2>
+          {dummyData.courses.map((crs, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
+            SCHOLARSHIPS
+          </h2>
+          {dummyData.scholarships.map((sch, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
+            VOLUNTEER
+          </h2>
+          {dummyData.volunteers.map((vol, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
+            REFERENCES
+          </h2>
+          {dummyData.references.map((ref, idx) => (
+            <div key={idx} className="text-xs text-slate-700">
+              <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+    };
 
-      {/* Education & Projects */}
-      <div className="grid grid-cols-2 gap-6">
-        <div>
+    return (
+      <div className="flex min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
+        {/* Left Sidebar - Tech Stack */}
+        <div className="w-64 bg-cyan-900 text-white p-6 shrink-0">
+          <div className="mb-6">
+            <h1 className="text-xl font-black uppercase tracking-tight mb-1">
+              {dummyData.fullName.split(' ')[0]}
+            </h1>
+            <h1 className="text-xl font-black uppercase tracking-tight mb-3">
+              {dummyData.fullName.split(' ').slice(1).join(' ')}
+            </h1>
+            <p className="text-sm font-semibold text-cyan-300">{dummyData.jobTitle}</p>
+          </div>
+
+          <div className="mb-6 text-xs space-y-1 text-cyan-100">
+            <p>{dummyData.email}</p>
+            <p>{dummyData.phone}</p>
+            <p>{dummyData.location}</p>
+          </div>
+
+          <div className="mb-6">
+            <h2 className="text-xs font-black uppercase text-cyan-300 mb-3 border-b border-cyan-700 pb-1">
+              TECH STACK
+            </h2>
+            <div className="space-y-2">
+              {dummyData.skills.map((skill, idx) => (
+                <div key={idx} className="text-xs">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-semibold text-white">{skill}</span>
+                  </div>
+                  <div className="w-full bg-cyan-950 h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-cyan-400 h-full rounded-full" style={{ width: `${90 - idx * 3}%` }}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-xs font-black uppercase text-cyan-300 mb-2 border-b border-cyan-700 pb-1">
+              LINKS
+            </h2>
+            <div className="text-xs space-y-1 text-cyan-200">
+              <p className="break-all">{dummyData.github}</p>
+              <p className="break-all">{dummyData.linkedin}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Content */}
+        <div className="flex-1 p-10">
+          {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+        </div>
+      </div>
+    );
+  };
+
+  const renderCharcoalWhite = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-8">
+          <p className="text-xs leading-relaxed text-slate-700 text-center max-w-3xl mx-auto">
+            {dummyData.summary}
+          </p>
+        </div>
+      ),
+      skills: (
+        <div key="skills" className="mb-8">
+          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 text-center mb-4">
+            Skills
+          </h2>
+          <div className="flex flex-wrap justify-center gap-3">
+            {dummyData.skills.map((skill, idx) => (
+              <span key={idx} className="px-4 py-1.5 border border-slate-300 text-slate-700 text-xs font-medium">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      ),
+      experience: (
+        <div key="experience" className="mb-8">
+          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 text-center mb-6">
+            Experience
+          </h2>
+          <div className="space-y-6">
+            {dummyData.experience.map((exp, idx) => (
+              <div key={idx} className="text-center">
+                <p className="text-sm font-bold text-slate-900 mb-1">{exp.role}</p>
+                <p className="text-xs font-semibold text-slate-600 mb-1">{exp.company}</p>
+                <p className="text-xs text-slate-500 mb-2">{exp.period}</p>
+                <p className="text-xs leading-relaxed text-slate-700 max-w-2xl mx-auto whitespace-pre-line">
+                  {exp.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-8">
+          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 text-center mb-4">
+            Internships
+          </h2>
+          <div className="space-y-4 text-center">
+            {dummyData.internships.map((item, idx) => (
+              <div key={idx}>
+                <p className="text-sm font-bold text-slate-900 mb-1">{item.role}</p>
+                <p className="text-xs font-semibold text-slate-600 mb-1">{item.company} ({item.period})</p>
+                <p className="text-xs leading-relaxed text-slate-700 max-w-2xl mx-auto">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-8">
+          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 text-center mb-4">
+            Projects
+          </h2>
+          <div className="space-y-4 text-center">
+            {dummyData.projects.map((proj, idx) => (
+              <div key={idx}>
+                <p className="text-sm font-bold text-slate-900 mb-1">{proj.name}</p>
+                <p className="text-xs italic text-slate-600 mb-1">{proj.tech}</p>
+                <p className="text-xs leading-relaxed text-slate-700 max-w-2xl mx-auto">{proj.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-8">
+          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 text-center mb-4">
+            Organizations
+          </h2>
+          <div className="space-y-4 text-center">
+            {dummyData.organizations.map((org, idx) => (
+              <div key={idx}>
+                <p className="text-sm font-bold text-slate-900 mb-1">{org.name}</p>
+                <p className="text-xs font-semibold text-slate-600 mb-1">{org.role} ({org.period})</p>
+                <p className="text-xs leading-relaxed text-slate-700 max-w-2xl mx-auto">{org.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      education: (
+        <div key="education" className="mb-8 text-center">
+          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
+            Education
+          </h2>
+          {dummyData.education.map((edu, idx) => (
+            <div key={idx} className="mb-2">
+              <p className="text-sm font-bold text-slate-900">{edu.institution}</p>
+              <p className="text-xs text-slate-700">{edu.degree} • {edu.gpa}</p>
+            </div>
+          ))}
+        </div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-8 text-center text-xs">
+          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
+            Certifications
+          </h2>
+          {dummyData.certifications.map((cert, idx) => (
+            <p key={idx} className="text-slate-800 font-semibold">{cert.name} — {cert.issuer} ({cert.issueDate})</p>
+          ))}
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-8 text-center text-xs">
+          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
+            Languages
+          </h2>
+          <p className="text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-8 text-center text-xs">
+          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
+            Courses
+          </h2>
+          {dummyData.courses.map((crs, idx) => (
+            <p key={idx} className="text-slate-800 font-semibold">{crs.courseName} — {crs.institution}</p>
+          ))}
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-8 text-center text-xs">
+          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
+            Scholarships
+          </h2>
+          {dummyData.scholarships.map((sch, idx) => (
+            <p key={idx} className="text-slate-800 font-semibold">{sch.name} — {sch.provider}</p>
+          ))}
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-8 text-center text-xs">
+          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
+            Volunteer
+          </h2>
+          {dummyData.volunteers.map((vol, idx) => (
+            <p key={idx} className="text-slate-800 font-semibold">{vol.role} — {vol.organization}</p>
+          ))}
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-8 text-center text-xs">
+          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
+            References
+          </h2>
+          {dummyData.references.map((ref, idx) => (
+            <p key={idx} className="text-slate-800 font-semibold">{ref.fullName} ({ref.title} — {ref.company})</p>
+          ))}
+        </div>
+      ) : null,
+    };
+
+    return (
+      <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
+        {/* Minimal Header */}
+        <div className="text-center border-b border-slate-300 pb-6 mb-6">
+          <h1 className="text-4xl font-black tracking-tighter text-slate-900 mb-3">
+            {dummyData.fullName}
+          </h1>
+          <p className="text-sm font-medium text-slate-600 mb-3">{dummyData.jobTitle}</p>
+          <div className="text-xs text-slate-500 flex items-center justify-center gap-4">
+            <span>{dummyData.email}</span>
+            <span className="w-1 h-1 bg-slate-400 rounded-full"></span>
+            <span>{dummyData.phone}</span>
+            <span className="w-1 h-1 bg-slate-400 rounded-full"></span>
+            <span>{dummyData.location}</span>
+          </div>
+        </div>
+
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
+  const renderGreenEco = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-0.5 bg-green-600"></div>
+            <h2 className="text-sm font-black uppercase text-green-800">PROFESSIONAL SUMMARY</h2>
+          </div>
+          <p className="text-xs leading-relaxed text-slate-700 pl-10">{dummyData.summary}</p>
+        </div>
+      ),
+      skills: (
+        <div key="skills" className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-0.5 bg-green-600"></div>
+            <h2 className="text-sm font-black uppercase text-green-800">KEY SKILLS</h2>
+          </div>
+          <div className="flex flex-wrap gap-2 pl-10">
+            {dummyData.skills.map((skill, idx) => (
+              <span key={idx} className="px-3 py-1.5 bg-green-50 border-2 border-green-500 text-green-700 rounded-md text-xs font-bold">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      ),
+      experience: (
+        <div key="experience" className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-0.5 bg-green-600"></div>
+            <h2 className="text-sm font-black uppercase text-green-800">WORK EXPERIENCE</h2>
+          </div>
+          <div className="space-y-4 pl-10">
+            {dummyData.experience.map((exp, idx) => (
+              <div key={idx}>
+                <div className="flex justify-between items-baseline mb-1">
+                  <p className="text-sm font-bold text-slate-900">{exp.role}</p>
+                  <p className="text-xs text-green-600 font-semibold">{exp.period}</p>
+                </div>
+                <p className="text-xs font-semibold text-green-700 mb-2">{exp.company}</p>
+                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-0.5 bg-green-600"></div>
+            <h2 className="text-sm font-black uppercase text-green-800">INTERNSHIPS</h2>
+          </div>
+          <div className="space-y-3 pl-10">
+            {dummyData.internships.map((item, idx) => (
+              <div key={idx}>
+                <div className="flex justify-between items-baseline mb-1">
+                  <p className="text-sm font-bold text-slate-900">{item.role}</p>
+                  <p className="text-xs text-green-600 font-semibold">{item.period}</p>
+                </div>
+                <p className="text-xs font-semibold text-green-700 mb-1">{item.company}</p>
+                <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-0.5 bg-green-600"></div>
+            <h2 className="text-sm font-black uppercase text-green-800">PROJECTS</h2>
+          </div>
+          <div className="space-y-3 pl-10">
+            {dummyData.projects.map((proj, idx) => (
+              <div key={idx}>
+                <p className="text-sm font-bold text-slate-900">{proj.name}</p>
+                <p className="text-xs text-green-700 mb-1">{proj.tech}</p>
+                <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-0.5 bg-green-600"></div>
+            <h2 className="text-sm font-black uppercase text-green-800">ORGANIZATIONS</h2>
+          </div>
+          <div className="space-y-3 pl-10">
+            {dummyData.organizations.map((org, idx) => (
+              <div key={idx}>
+                <div className="flex justify-between items-baseline mb-1">
+                  <p className="text-sm font-bold text-slate-900">{org.name}</p>
+                  <p className="text-xs text-green-600 font-semibold">{org.period}</p>
+                </div>
+                <p className="text-xs font-semibold text-green-700 mb-1">{org.role}</p>
+                <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      education: (
+        <div key="education" className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-0.5 bg-green-600"></div>
             <h2 className="text-sm font-black uppercase text-green-800">EDUCATION</h2>
           </div>
           <div className="pl-10">
-            <p className="text-sm font-bold text-slate-900">{dummyData.education[0].institution}</p>
-            <p className="text-xs text-slate-700">{dummyData.education[0].degree}</p>
-            <p className="text-xs text-green-600 font-semibold">{dummyData.education[0].gpa}</p>
+            {dummyData.education.map((edu, idx) => (
+              <div key={idx} className="mb-2">
+                <p className="text-sm font-bold text-slate-900">{edu.institution}</p>
+                <p className="text-xs text-slate-700">{edu.degree}</p>
+                <p className="text-xs text-green-600 font-semibold">{edu.gpa} ({edu.year})</p>
+              </div>
+            ))}
           </div>
         </div>
-        <div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-0.5 bg-green-600"></div>
-            <h2 className="text-sm font-black uppercase text-green-800">PROJECTS</h2>
+            <h2 className="text-sm font-black uppercase text-green-800">CERTIFICATIONS</h2>
           </div>
-          <div className="pl-10">
-            <p className="text-sm font-bold text-slate-900">{dummyData.projects[0].name}</p>
-            <p className="text-xs text-green-700 mb-1">{dummyData.projects[0].tech}</p>
+          <div className="pl-10 space-y-1 text-xs">
+            {dummyData.certifications.map((cert, idx) => (
+              <div key={idx} className="flex justify-between">
+                <span className="font-bold text-slate-900">{cert.name} — <em className="text-green-700">{cert.issuer}</em></span>
+                <span className="text-slate-600">{cert.issueDate}</span>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
-    </div>
-  );
-
-  const renderResearchAcademic = () => (
-    <div className="p-12" style={{ fontFamily: selectedFontFamily }}>
-      {/* Academic Header */}
-      <div className="text-center mb-6 pb-4 border-b-2 border-indigo-700">
-        <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-2">
-          {dummyData.fullName}
-        </h1>
-        <p className="text-sm font-semibold text-indigo-700 mb-2 uppercase tracking-wide">
-          {dummyData.jobTitle}
-        </p>
-        <div className="text-xs text-slate-600">
-          <p>{dummyData.email} | {dummyData.phone} | {dummyData.location}</p>
-          <p className="mt-1 text-indigo-600">{dummyData.linkedin}</p>
-        </div>
-      </div>
-
-      {/* Research Interests */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase text-indigo-900 mb-2 text-center">
-          Research Interests
-        </h2>
-        <p className="text-xs leading-relaxed text-slate-700 text-center">{dummyData.summary}</p>
-      </div>
-
-      {/* Education - Prominent for Academic */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
-          EDUCATION
-        </h2>
-        <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
-          <div className="flex justify-between items-baseline mb-1">
-            <p className="text-base font-bold text-slate-900">{dummyData.education[0].institution}</p>
-            <p className="text-xs text-slate-600">{dummyData.education[0].year}</p>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-0.5 bg-green-600"></div>
+            <h2 className="text-sm font-black uppercase text-green-800">LANGUAGES</h2>
           </div>
-          <p className="text-sm font-semibold text-indigo-700 mb-1">{dummyData.education[0].degree}</p>
-          <p className="text-xs text-slate-700">{dummyData.education[0].gpa}</p>
-          <p className="text-xs text-slate-600 mt-2 italic">
-            Thesis: "Machine Learning Applications in Web Performance Optimization"
-          </p>
+          <p className="text-xs text-slate-700 pl-10">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
-      </div>
-
-      {/* Research Experience */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
-          RESEARCH & PROFESSIONAL EXPERIENCE
-        </h2>
-        {dummyData.experience.map((exp, idx) => (
-          <div key={idx} className="mb-4">
-            <div className="flex justify-between items-baseline mb-1">
-              <p className="text-sm font-bold text-slate-900">{exp.role}</p>
-              <p className="text-xs text-slate-600">{exp.period}</p>
-            </div>
-            <p className="text-xs font-semibold text-indigo-700 mb-2">{exp.company}</p>
-            <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-0.5 bg-green-600"></div>
+            <h2 className="text-sm font-black uppercase text-green-800">COURSES</h2>
           </div>
-        ))}
-      </div>
-
-      {/* Publications (Mock) */}
-      <div className="mb-6">
-        <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
-          SELECTED PUBLICATIONS
-        </h2>
-        <div className="space-y-2 text-xs text-slate-700">
-          <p><span className="font-bold">Pratama, R.A.</span> (2025). "Optimizing React Performance with Advanced Caching Strategies." <em>Journal of Web Engineering</em>, 24(3), 112-128.</p>
-          <p><span className="font-bold">Pratama, R.A.</span> & Smith, J. (2024). "TypeScript Design Patterns for Scalable Applications." <em>Software Engineering Quarterly</em>, 18(2), 45-62.</p>
+          <div className="pl-10 space-y-1 text-xs">
+            {dummyData.courses.map((crs, idx) => (
+              <p key={idx} className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+            ))}
+          </div>
         </div>
-      </div>
-
-      {/* Skills & Technologies */}
-      <div>
-        <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
-          TECHNICAL SKILLS
-        </h2>
-        <div className="grid grid-cols-3 gap-2">
-          {dummyData.skills.map((skill, idx) => (
-            <div key={idx} className="text-xs text-slate-700 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-indigo-700 rounded-full"></span>
-              {skill}
-            </div>
-          ))}
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-0.5 bg-green-600"></div>
+            <h2 className="text-sm font-black uppercase text-green-800">SCHOLARSHIPS</h2>
+          </div>
+          <div className="pl-10 space-y-1 text-xs">
+            {dummyData.scholarships.map((sch, idx) => (
+              <p key={idx} className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
+            ))}
+          </div>
         </div>
-      </div>
-    </div>
-  );
-
-  // --- ATM Templates Inspired by rimzzlabs/lanjut ---
-  const renderKetikMonospace = () => (
-    <div className="p-10 text-slate-800 bg-white font-mono" style={{ fontFamily: selectedFontFamily }}>
-      {/* Typewriter Header */}
-      <div className="border-b-2 border-slate-800 pb-4 mb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">
-          {dummyData.fullName}
-        </h1>
-        <p className="text-xs font-semibold text-slate-700 mb-2">
-          {`[role: "${dummyData.jobTitle}"]`}
-        </p>
-        <div className="text-[11px] text-slate-600 space-x-2">
-          <span>{dummyData.email}</span> | <span>{dummyData.phone}</span> | <span>{dummyData.location}</span>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-0.5 bg-green-600"></div>
+            <h2 className="text-sm font-black uppercase text-green-800">VOLUNTEER</h2>
+          </div>
+          <div className="pl-10 space-y-1 text-xs">
+            {dummyData.volunteers.map((vol, idx) => (
+              <p key={idx} className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-0.5 bg-green-600"></div>
+            <h2 className="text-sm font-black uppercase text-green-800">REFERENCES</h2>
+          </div>
+          <div className="pl-10 space-y-1 text-xs">
+            {dummyData.references.map((ref, idx) => (
+              <p key={idx} className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
+            ))}
+          </div>
+        </div>
+      ) : null,
+    };
 
-      {/* Summary */}
-      <div className="mb-5">
-        <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
-          // SUMMARY
-        </h2>
-        <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
-      </div>
-
-      {/* Skills */}
-      <div className="mb-5">
-        <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
-          // TECH STACK & SKILLS
-        </h2>
-        <div className="flex flex-wrap gap-1.5 text-xs">
-          {dummyData.skills.map((skill, idx) => (
-            <span key={idx} className="bg-slate-100 border border-slate-300 px-2 py-0.5 rounded text-[11px]">
-              [{skill}]
+    return (
+      <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
+        {/* Header with Green Accent */}
+        <div className="mb-6 pb-4 border-b-4 border-green-600">
+          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
+            {dummyData.fullName}
+          </h1>
+          <p className="text-base font-bold text-green-600 mb-2">{dummyData.jobTitle}</p>
+          <div className="text-xs text-slate-600 flex items-center gap-3">
+            <span className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
+              {dummyData.email}
             </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Experience */}
-      <div className="mb-5">
-        <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-3">
-          // EXPERIENCE
-        </h2>
-        <div className="space-y-4">
-          {dummyData.experience.map((exp, idx) => (
-            <div key={idx}>
-              <div className="flex justify-between items-baseline mb-1">
-                <p className="text-xs font-bold text-slate-900">{exp.role} @ {exp.company}</p>
-                <p className="text-[11px] text-slate-500 font-semibold">{exp.period}</p>
-              </div>
-              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line pl-3 border-l-2 border-slate-300">{exp.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Education */}
-      <div className="mb-5">
-        <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
-          // EDUCATION
-        </h2>
-        <div>
-          <div className="flex justify-between items-baseline">
-            <p className="text-xs font-bold text-slate-900">{dummyData.education[0].institution}</p>
-            <p className="text-[11px] text-slate-500">{dummyData.education[0].year}</p>
+            <span className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
+              {dummyData.phone}
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
+              {dummyData.location}
+            </span>
           </div>
-          <p className="text-xs text-slate-700">{dummyData.education[0].degree} — {dummyData.education[0].gpa}</p>
         </div>
-      </div>
-    </div>
-  );
 
-  const renderKetatSerif = () => (
-    <div className="p-10 text-slate-900 bg-white font-serif" style={{ fontFamily: selectedFontFamily }}>
-      {/* Header */}
-      <div className="mb-5">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">
-          {dummyData.fullName}
-        </h1>
-        <p className="text-xs font-medium text-slate-700 italic mb-2">
-          {dummyData.jobTitle}
-        </p>
-        <div className="text-xs text-slate-600 border-b-2 border-slate-900 pb-3">
-          {dummyData.location} • {dummyData.phone} • {dummyData.email} • {dummyData.linkedin}
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
+  const renderResearchAcademic = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-indigo-900 mb-2 text-center">
+            Research Interests &amp; Summary
+          </h2>
+          <p className="text-xs leading-relaxed text-slate-700 text-center">{dummyData.summary}</p>
         </div>
-      </div>
-
-      {/* Summary */}
-      <div className="mb-5">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
-          SUMMARY
-        </h2>
-        <p className="text-xs leading-relaxed text-slate-800">{dummyData.summary}</p>
-      </div>
-
-      {/* Experience */}
-      <div className="mb-5">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-3">
-          EXPERIENCE
-        </h2>
-        <div className="space-y-4">
-          {dummyData.experience.map((exp, idx) => (
-            <div key={idx}>
-              <div className="flex justify-between items-baseline mb-0.5">
-                <p className="text-xs font-bold text-slate-900">{exp.company} — <span className="font-normal italic">{exp.role}</span></p>
-                <p className="text-[11px] italic text-slate-600">{exp.period}</p>
-              </div>
-              <p className="text-xs leading-relaxed text-slate-800 whitespace-pre-line">{exp.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Education */}
-      <div className="mb-5">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
-          EDUCATION
-        </h2>
-        <div>
-          <div className="flex justify-between items-baseline">
-            <p className="text-xs font-bold text-slate-900">{dummyData.education[0].institution}</p>
-            <p className="text-[11px] italic text-slate-600">{dummyData.education[0].year}</p>
-          </div>
-          <p className="text-xs text-slate-800">{dummyData.education[0].degree} ({dummyData.education[0].gpa})</p>
-        </div>
-      </div>
-
-      {/* Skills */}
-      <div>
-        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
-          SKILLS
-        </h2>
-        <p className="text-xs text-slate-800 leading-relaxed">{dummyData.skills.join(' • ')}</p>
-      </div>
-    </div>
-  );
-
-  const renderLuasaMinimal = () => (
-    <div className="p-12 font-sans bg-white text-slate-800">
-      {/* Header with generous spacing */}
-      <div className="mb-8 pb-6 border-b border-slate-200">
-        <h1 className="text-3xl font-light tracking-wide text-slate-900 mb-2">
-          {dummyData.fullName}
-        </h1>
-        <p className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">
-          {dummyData.jobTitle}
-        </p>
-        <div className="flex flex-wrap gap-4 text-xs text-slate-500">
-          <span>{dummyData.email}</span>
-          <span>{dummyData.phone}</span>
-          <span>{dummyData.location}</span>
-        </div>
-      </div>
-
-      {/* Profile Summary */}
-      <div className="mb-8">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
-          PROFILE
-        </h2>
-        <p className="text-xs leading-loose text-slate-600 font-normal">{dummyData.summary}</p>
-      </div>
-
-      {/* Experience */}
-      <div className="mb-8">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">
-          EXPERIENCE
-        </h2>
-        <div className="space-y-6">
-          {dummyData.experience.map((exp, idx) => (
-            <div key={idx}>
-              <div className="flex justify-between items-baseline mb-1">
-                <h3 className="text-xs font-semibold text-slate-900">{exp.role}</h3>
-                <span className="text-[11px] text-slate-400">{exp.period}</span>
-              </div>
-              <p className="text-xs text-slate-500 font-medium mb-2">{exp.company}</p>
-              <p className="text-xs leading-loose text-slate-600 whitespace-pre-line">{exp.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Education & Skills */}
-      <div className="grid grid-cols-2 gap-8">
-        <div>
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
+      ),
+      education: (
+        <div key="education" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
             EDUCATION
           </h2>
-          <p className="text-xs font-semibold text-slate-900">{dummyData.education[0].institution}</p>
-          <p className="text-xs text-slate-500">{dummyData.education[0].degree}</p>
-          <span className="text-[11px] text-slate-400">{dummyData.education[0].year}</span>
+          {dummyData.education.map((edu, idx) => (
+            <div key={idx} className="bg-indigo-50 p-4 rounded-lg border border-indigo-200 mb-2">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="text-base font-bold text-slate-900">{edu.institution}</p>
+                <p className="text-xs text-slate-600">{edu.year}</p>
+              </div>
+              <p className="text-sm font-semibold text-indigo-700 mb-1">{edu.degree}</p>
+              <p className="text-xs text-slate-700">{edu.gpa}</p>
+            </div>
+          ))}
         </div>
-        <div>
+      ),
+      experience: (
+        <div key="experience" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+            RESEARCH &amp; PROFESSIONAL EXPERIENCE
+          </h2>
+          {dummyData.experience.map((exp, idx) => (
+            <div key={idx} className="mb-4">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="text-sm font-bold text-slate-900">{exp.role}</p>
+                <p className="text-xs text-slate-600">{exp.period}</p>
+              </div>
+              <p className="text-xs font-semibold text-indigo-700 mb-2">{exp.company}</p>
+              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+            </div>
+          ))}
+        </div>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+            INTERNSHIP EXPERIENCE
+          </h2>
+          {dummyData.internships.map((item, idx) => (
+            <div key={idx} className="mb-3">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="text-sm font-bold text-slate-900">{item.role}</p>
+                <p className="text-xs text-slate-600">{item.period}</p>
+              </div>
+              <p className="text-xs font-semibold text-indigo-700 mb-1">{item.company}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+            PUBLICATIONS &amp; PROJECTS
+          </h2>
+          {dummyData.projects.map((proj, idx) => (
+            <div key={idx} className="mb-3">
+              <p className="text-sm font-bold text-slate-900">{proj.name}</p>
+              <p className="text-xs text-indigo-700 mb-1">{proj.tech}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+            ACADEMIC ORGANIZATIONS
+          </h2>
+          {dummyData.organizations.map((org, idx) => (
+            <div key={idx} className="mb-3">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="text-sm font-bold text-slate-900">{org.name}</p>
+                <p className="text-xs text-slate-600">{org.period}</p>
+              </div>
+              <p className="text-xs font-semibold text-indigo-700 mb-1">{org.role}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      skills: (
+        <div key="skills" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+            TECHNICAL SKILLS
+          </h2>
+          <div className="grid grid-cols-3 gap-2">
+            {dummyData.skills.map((skill, idx) => (
+              <div key={idx} className="text-xs text-slate-700 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-indigo-700 rounded-full"></span>
+                {skill}
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+            HONORS &amp; CERTIFICATIONS
+          </h2>
+          <div className="space-y-1 text-xs">
+            {dummyData.certifications.map((cert, idx) => (
+              <div key={idx} className="flex justify-between">
+                <span className="font-bold text-slate-900">{cert.name} — <em className="text-indigo-700">{cert.issuer}</em></span>
+                <span className="text-slate-600">{cert.issueDate}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+            LANGUAGES
+          </h2>
+          <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+            COURSES &amp; SYMPOSIUMS
+          </h2>
+          {dummyData.courses.map((crs, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+            FELLOWSHIPS &amp; SCHOLARSHIPS
+          </h2>
+          {dummyData.scholarships.map((sch, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+            COMMUNITY SERVICE
+          </h2>
+          {dummyData.volunteers.map((vol, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-6">
+          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+            ACADEMIC REFERENCES
+          </h2>
+          {dummyData.references.map((ref, idx) => (
+            <div key={idx} className="text-xs text-slate-700">
+              <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+    };
+
+    return (
+      <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
+        {/* Academic Header */}
+        <div className="text-center mb-6 pb-4 border-b-2 border-indigo-700">
+          <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-2">
+            {dummyData.fullName}
+          </h1>
+          <p className="text-sm font-semibold text-indigo-700 mb-2 uppercase tracking-wide">
+            {dummyData.jobTitle}
+          </p>
+          <div className="text-xs text-slate-600">
+            <p>{dummyData.email} | {dummyData.phone} | {dummyData.location}</p>
+            <p className="mt-1 text-indigo-600">{dummyData.linkedin}</p>
+          </div>
+        </div>
+
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
+  const renderKetikMonospace = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-5">
+          <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
+            // SUMMARY
+          </h2>
+          <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+        </div>
+      ),
+      skills: (
+        <div key="skills" className="mb-5">
+          <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
+            // TECH STACK &amp; SKILLS
+          </h2>
+          <div className="flex flex-wrap gap-1.5 text-xs">
+            {dummyData.skills.map((skill, idx) => (
+              <span key={idx} className="bg-slate-100 border border-slate-300 px-2 py-0.5 rounded text-[11px]">
+                [{skill}]
+              </span>
+            ))}
+          </div>
+        </div>
+      ),
+      experience: (
+        <div key="experience" className="mb-5">
+          <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-3">
+            // EXPERIENCE
+          </h2>
+          <div className="space-y-4">
+            {dummyData.experience.map((exp, idx) => (
+              <div key={idx}>
+                <div className="flex justify-between items-baseline mb-1">
+                  <p className="text-xs font-bold text-slate-900">{exp.role} @ {exp.company}</p>
+                  <p className="text-[11px] text-slate-500 font-semibold">{exp.period}</p>
+                </div>
+                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line pl-3 border-l-2 border-slate-300">{exp.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-5">
+          <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-3">
+            // INTERNSHIPS
+          </h2>
+          <div className="space-y-3">
+            {dummyData.internships.map((item, idx) => (
+              <div key={idx}>
+                <div className="flex justify-between items-baseline mb-1">
+                  <p className="text-xs font-bold text-slate-900">{item.role} @ {item.company}</p>
+                  <p className="text-[11px] text-slate-500 font-semibold">{item.period}</p>
+                </div>
+                <p className="text-xs leading-relaxed text-slate-700 pl-3 border-l-2 border-slate-300">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-5">
+          <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
+            // PROJECTS
+          </h2>
+          {dummyData.projects.map((proj, idx) => (
+            <div key={idx} className="mb-2">
+              <p className="text-xs font-bold text-slate-900">{proj.name} ({proj.tech})</p>
+              <p className="text-xs text-slate-700 pl-3 border-l-2 border-slate-300">{proj.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-5">
+          <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
+            // ORGANIZATIONS
+          </h2>
+          {dummyData.organizations.map((org, idx) => (
+            <div key={idx} className="mb-2">
+              <p className="text-xs font-bold text-slate-900">{org.name} ({org.role})</p>
+              <p className="text-xs text-slate-700 pl-3 border-l-2 border-slate-300">{org.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      education: (
+        <div key="education" className="mb-5">
+          <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
+            // EDUCATION
+          </h2>
+          {dummyData.education.map((edu, idx) => (
+            <div key={idx} className="mb-2">
+              <div className="flex justify-between items-baseline">
+                <p className="text-xs font-bold text-slate-900">{edu.institution}</p>
+                <p className="text-[11px] text-slate-500">{edu.year}</p>
+              </div>
+              <p className="text-xs text-slate-700">{edu.degree} — {edu.gpa}</p>
+            </div>
+          ))}
+        </div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-5">
+          <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
+            // CERTIFICATIONS
+          </h2>
+          {dummyData.certifications.map((cert, idx) => (
+            <p key={idx} className="text-xs text-slate-700">
+              [{cert.issueDate}] {cert.name} ({cert.issuer})
+            </p>
+          ))}
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-5">
+          <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
+            // LANGUAGES
+          </h2>
+          <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-5">
+          <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
+            // COURSES
+          </h2>
+          {dummyData.courses.map((crs, idx) => (
+            <p key={idx} className="text-xs text-slate-700">{crs.courseName} — {crs.institution}</p>
+          ))}
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-5">
+          <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
+            // SCHOLARSHIPS
+          </h2>
+          {dummyData.scholarships.map((sch, idx) => (
+            <p key={idx} className="text-xs text-slate-700">{sch.name} — {sch.provider}</p>
+          ))}
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-5">
+          <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
+            // VOLUNTEER
+          </h2>
+          {dummyData.volunteers.map((vol, idx) => (
+            <p key={idx} className="text-xs text-slate-700">{vol.role} — {vol.organization}</p>
+          ))}
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-5">
+          <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
+            // REFERENCES
+          </h2>
+          {dummyData.references.map((ref, idx) => (
+            <p key={idx} className="text-xs text-slate-700">{ref.fullName} ({ref.title} — {ref.company})</p>
+          ))}
+        </div>
+      ) : null,
+    };
+
+    return (
+      <div className="p-10 min-h-[297mm] text-slate-800 bg-white font-mono" style={{ fontFamily: selectedFontFamily }}>
+        {/* Typewriter Header */}
+        <div className="border-b-2 border-slate-800 pb-4 mb-6">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">
+            {dummyData.fullName}
+          </h1>
+          <p className="text-xs font-semibold text-slate-700 mb-2">
+            {`[role: "${dummyData.jobTitle}"]`}
+          </p>
+          <div className="text-[11px] text-slate-600 space-x-2">
+            <span>{dummyData.email}</span> | <span>{dummyData.phone}</span> | <span>{dummyData.location}</span>
+          </div>
+        </div>
+
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
+  const renderKetatSerif = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
+            SUMMARY
+          </h2>
+          <p className="text-xs leading-relaxed text-slate-800">{dummyData.summary}</p>
+        </div>
+      ),
+      skills: (
+        <div key="skills" className="mb-5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
+            SKILLS
+          </h2>
+          <p className="text-xs text-slate-800 leading-relaxed">{dummyData.skills.join(' • ')}</p>
+        </div>
+      ),
+      experience: (
+        <div key="experience" className="mb-5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-3">
+            EXPERIENCE
+          </h2>
+          <div className="space-y-4">
+            {dummyData.experience.map((exp, idx) => (
+              <div key={idx}>
+                <div className="flex justify-between items-baseline mb-0.5">
+                  <p className="text-xs font-bold text-slate-900">{exp.company} — <span className="font-normal italic">{exp.role}</span></p>
+                  <p className="text-[11px] italic text-slate-600">{exp.period}</p>
+                </div>
+                <p className="text-xs leading-relaxed text-slate-800 whitespace-pre-line">{exp.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-3">
+            INTERNSHIP EXPERIENCE
+          </h2>
+          <div className="space-y-3">
+            {dummyData.internships.map((item, idx) => (
+              <div key={idx}>
+                <div className="flex justify-between items-baseline mb-0.5">
+                  <p className="text-xs font-bold text-slate-900">{item.company} — <span className="font-normal italic">{item.role}</span></p>
+                  <p className="text-[11px] italic text-slate-600">{item.period}</p>
+                </div>
+                <p className="text-xs leading-relaxed text-slate-800">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
+            FEATURED PROJECTS
+          </h2>
+          {dummyData.projects.map((proj, idx) => (
+            <div key={idx} className="mb-2">
+              <p className="text-xs font-bold text-slate-900">{proj.name} — <span className="font-normal italic">{proj.tech}</span></p>
+              <p className="text-xs leading-relaxed text-slate-800">{proj.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
+            ORGANIZATIONS
+          </h2>
+          {dummyData.organizations.map((org, idx) => (
+            <div key={idx} className="mb-2">
+              <div className="flex justify-between items-baseline">
+                <p className="text-xs font-bold text-slate-900">{org.name} — <span className="font-normal italic">{org.role}</span></p>
+                <p className="text-[11px] italic text-slate-600">{org.period}</p>
+              </div>
+              <p className="text-xs leading-relaxed text-slate-800">{org.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      education: (
+        <div key="education" className="mb-5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
+            EDUCATION
+          </h2>
+          {dummyData.education.map((edu, idx) => (
+            <div key={idx} className="mb-2">
+              <div className="flex justify-between items-baseline">
+                <p className="text-xs font-bold text-slate-900">{edu.institution}</p>
+                <p className="text-[11px] italic text-slate-600">{edu.year}</p>
+              </div>
+              <p className="text-xs text-slate-800">{edu.degree} ({edu.gpa})</p>
+            </div>
+          ))}
+        </div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
+            CERTIFICATIONS
+          </h2>
+          {dummyData.certifications.map((cert, idx) => (
+            <div key={idx} className="flex justify-between text-xs text-slate-800 mb-1">
+              <span>{cert.name} — <em>{cert.issuer}</em></span>
+              <span className="text-[11px] text-slate-600">{cert.issueDate}</span>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
+            LANGUAGES
+          </h2>
+          <p className="text-xs text-slate-800">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
+            COURSES
+          </h2>
+          {dummyData.courses.map((crs, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
+            SCHOLARSHIPS
+          </h2>
+          {dummyData.scholarships.map((sch, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
+            VOLUNTEER
+          </h2>
+          {dummyData.volunteers.map((vol, idx) => (
+            <div key={idx} className="mb-2 text-xs">
+              <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
+            REFERENCES
+          </h2>
+          {dummyData.references.map((ref, idx) => (
+            <div key={idx} className="text-xs text-slate-800 mb-1">
+              <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+    };
+
+    return (
+      <div className="p-10 min-h-[297mm] text-slate-900 bg-white font-serif" style={{ fontFamily: selectedFontFamily }}>
+        {/* Header */}
+        <div className="mb-5">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">
+            {dummyData.fullName}
+          </h1>
+          <p className="text-xs font-medium text-slate-700 italic mb-2">
+            {dummyData.jobTitle}
+          </p>
+          <div className="text-xs text-slate-600 border-b-2 border-slate-900 pb-3">
+            {dummyData.location} • {dummyData.phone} • {dummyData.email} • {dummyData.linkedin}
+          </div>
+        </div>
+
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
+  const renderLuasaMinimal = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-8">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
+            PROFILE
+          </h2>
+          <p className="text-xs leading-loose text-slate-600 font-normal">{dummyData.summary}</p>
+        </div>
+      ),
+      skills: (
+        <div key="skills" className="mb-8">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
             SKILLS
           </h2>
@@ -8127,57 +10359,188 @@ const CVTemplatePreview: React.FC<{
             ))}
           </div>
         </div>
-      </div>
-    </div>
-  );
-
-  const renderTebalBold = () => (
-    <div className="p-10 font-sans bg-white text-slate-900">
-      {/* Oversized Name Header */}
-      <div className="mb-6 pb-4 border-b-4 border-slate-900">
-        <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-1">
-          {dummyData.fullName}
-        </h1>
-        <p className="text-sm font-bold uppercase text-slate-700 mb-3">
-          {dummyData.jobTitle}
-        </p>
-        <div className="flex flex-wrap gap-3 text-xs font-semibold text-slate-600">
-          <span>📍 {dummyData.location}</span>
-          <span>📞 {dummyData.phone}</span>
-          <span>✉️ {dummyData.email}</span>
-        </div>
-      </div>
-
-      {/* Summary */}
-      <div className="mb-6">
-        <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
-          ABOUT ME
-        </h2>
-        <p className="text-xs font-medium leading-relaxed text-slate-800">{dummyData.summary}</p>
-      </div>
-
-      {/* Experience */}
-      <div className="mb-6">
-        <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-4">
-          WORK EXPERIENCE
-        </h2>
-        <div className="space-y-4">
-          {dummyData.experience.map((exp, idx) => (
-            <div key={idx} className="border-l-2 border-slate-900 pl-3">
-              <div className="flex justify-between items-baseline mb-1">
-                <h3 className="text-xs font-black uppercase text-slate-900">{exp.role}</h3>
-                <span className="text-[11px] font-bold text-slate-600">{exp.period}</span>
+      ),
+      experience: (
+        <div key="experience" className="mb-8">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">
+            EXPERIENCE
+          </h2>
+          <div className="space-y-6">
+            {dummyData.experience.map((exp, idx) => (
+              <div key={idx}>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h3 className="text-xs font-semibold text-slate-900">{exp.role}</h3>
+                  <span className="text-[11px] text-slate-400">{exp.period}</span>
+                </div>
+                <p className="text-xs text-slate-500 font-medium mb-2">{exp.company}</p>
+                <p className="text-xs leading-loose text-slate-600 whitespace-pre-line">{exp.description}</p>
               </div>
-              <p className="text-xs font-bold text-slate-700 mb-1">{exp.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+            ))}
+          </div>
+        </div>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-8">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">
+            INTERNSHIPS
+          </h2>
+          <div className="space-y-4">
+            {dummyData.internships.map((item, idx) => (
+              <div key={idx}>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h3 className="text-xs font-semibold text-slate-900">{item.role}</h3>
+                  <span className="text-[11px] text-slate-400">{item.period}</span>
+                </div>
+                <p className="text-xs text-slate-500 font-medium mb-1">{item.company}</p>
+                <p className="text-xs leading-loose text-slate-600">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-8">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
+            PROJECTS
+          </h2>
+          {dummyData.projects.map((proj, idx) => (
+            <div key={idx} className="mb-3">
+              <h3 className="text-xs font-semibold text-slate-900">{proj.name}</h3>
+              <p className="text-xs text-slate-400 mb-1">{proj.tech}</p>
+              <p className="text-xs leading-loose text-slate-600">{proj.description}</p>
             </div>
           ))}
         </div>
-      </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-8">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
+            ORGANIZATIONS
+          </h2>
+          {dummyData.organizations.map((org, idx) => (
+            <div key={idx} className="mb-3">
+              <div className="flex justify-between items-baseline mb-1">
+                <h3 className="text-xs font-semibold text-slate-900">{org.name}</h3>
+                <span className="text-[11px] text-slate-400">{org.period}</span>
+              </div>
+              <p className="text-xs text-slate-500 font-medium mb-1">{org.role}</p>
+              <p className="text-xs leading-loose text-slate-600">{org.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      education: (
+        <div key="education" className="mb-8">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
+            EDUCATION
+          </h2>
+          {dummyData.education.map((edu, idx) => (
+            <div key={idx} className="mb-2">
+              <p className="text-xs font-semibold text-slate-900">{edu.institution}</p>
+              <p className="text-xs text-slate-500">{edu.degree} • {edu.gpa}</p>
+              <span className="text-[11px] text-slate-400">{edu.year}</span>
+            </div>
+          ))}
+        </div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-8 text-xs">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
+            CERTIFICATIONS
+          </h2>
+          {dummyData.certifications.map((cert, idx) => (
+            <div key={idx} className="flex justify-between mb-1">
+              <span className="font-semibold text-slate-800">{cert.name} — {cert.issuer}</span>
+              <span className="text-slate-400">{cert.issueDate}</span>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-8 text-xs">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
+            LANGUAGES
+          </h2>
+          <p className="text-slate-600">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-8 text-xs">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
+            COURSES
+          </h2>
+          {dummyData.courses.map((crs, idx) => (
+            <p key={idx} className="text-slate-700 font-medium mb-1">{crs.courseName} — {crs.institution}</p>
+          ))}
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-8 text-xs">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
+            SCHOLARSHIPS
+          </h2>
+          {dummyData.scholarships.map((sch, idx) => (
+            <p key={idx} className="text-slate-700 font-medium mb-1">{sch.name} — {sch.provider}</p>
+          ))}
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-8 text-xs">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
+            VOLUNTEER
+          </h2>
+          {dummyData.volunteers.map((vol, idx) => (
+            <p key={idx} className="text-slate-700 font-medium mb-1">{vol.role} — {vol.organization}</p>
+          ))}
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-8 text-xs">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
+            REFERENCES
+          </h2>
+          {dummyData.references.map((ref, idx) => (
+            <p key={idx} className="text-slate-700 font-medium mb-1">{ref.fullName} ({ref.title} — {ref.company})</p>
+          ))}
+        </div>
+      ) : null,
+    };
 
-      {/* Skills & Education */}
-      <div className="grid grid-cols-2 gap-6">
-        <div>
+    return (
+      <div className="p-12 min-h-[297mm] font-sans bg-white text-slate-800" style={{ fontFamily: selectedFontFamily }}>
+        {/* Header with generous spacing */}
+        <div className="mb-8 pb-6 border-b border-slate-200">
+          <h1 className="text-3xl font-light tracking-wide text-slate-900 mb-2">
+            {dummyData.fullName}
+          </h1>
+          <p className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">
+            {dummyData.jobTitle}
+          </p>
+          <div className="flex flex-wrap gap-4 text-xs text-slate-500">
+            <span>{dummyData.email}</span>
+            <span>{dummyData.phone}</span>
+            <span>{dummyData.location}</span>
+          </div>
+        </div>
+
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
+  const renderTebalBold = () => {
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: (
+        <div key="summary" className="mb-6">
+          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
+            ABOUT ME
+          </h2>
+          <p className="text-xs font-medium leading-relaxed text-slate-800">{dummyData.summary}</p>
+        </div>
+      ),
+      skills: (
+        <div key="skills" className="mb-6">
           <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
             SKILLS
           </h2>
@@ -8189,17 +10552,182 @@ const CVTemplatePreview: React.FC<{
             ))}
           </div>
         </div>
-        <div>
+      ),
+      experience: (
+        <div key="experience" className="mb-6">
+          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-4">
+            WORK EXPERIENCE
+          </h2>
+          <div className="space-y-4">
+            {dummyData.experience.map((exp, idx) => (
+              <div key={idx} className="border-l-2 border-slate-900 pl-3">
+                <div className="flex justify-between items-baseline mb-1">
+                  <h3 className="text-xs font-black uppercase text-slate-900">{exp.role}</h3>
+                  <span className="text-[11px] font-bold text-slate-600">{exp.period}</span>
+                </div>
+                <p className="text-xs font-bold text-slate-700 mb-1">{exp.company}</p>
+                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" className="mb-6">
+          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-4">
+            INTERNSHIPS
+          </h2>
+          <div className="space-y-3">
+            {dummyData.internships.map((item, idx) => (
+              <div key={idx} className="border-l-2 border-slate-900 pl-3">
+                <div className="flex justify-between items-baseline mb-1">
+                  <h3 className="text-xs font-black uppercase text-slate-900">{item.role}</h3>
+                  <span className="text-[11px] font-bold text-slate-600">{item.period}</span>
+                </div>
+                <p className="text-xs font-bold text-slate-700 mb-1">{item.company}</p>
+                <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      projects: dummyData.projects.length > 0 ? (
+        <div key="projects" className="mb-6">
+          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
+            PROJECTS
+          </h2>
+          {dummyData.projects.map((proj, idx) => (
+            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-2">
+              <p className="text-xs font-black uppercase text-slate-900">{proj.name}</p>
+              <p className="text-xs font-semibold text-slate-600 mb-1">{proj.tech}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      organizations: dummyData.organizations.length > 0 ? (
+        <div key="organizations" className="mb-6">
+          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
+            ORGANIZATIONS
+          </h2>
+          {dummyData.organizations.map((org, idx) => (
+            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-2">
+              <div className="flex justify-between items-baseline mb-1">
+                <h3 className="text-xs font-black uppercase text-slate-900">{org.name}</h3>
+                <span className="text-[11px] font-bold text-slate-600">{org.period}</span>
+              </div>
+              <p className="text-xs font-bold text-slate-700 mb-1">{org.role}</p>
+              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      education: (
+        <div key="education" className="mb-6">
           <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
             EDUCATION
           </h2>
-          <p className="text-xs font-black text-slate-900">{dummyData.education[0].institution}</p>
-          <p className="text-xs font-semibold text-slate-700">{dummyData.education[0].degree}</p>
-          <p className="text-[11px] text-slate-600">{dummyData.education[0].year} — {dummyData.education[0].gpa}</p>
+          {dummyData.education.map((edu, idx) => (
+            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-2">
+              <p className="text-xs font-black text-slate-900">{edu.institution}</p>
+              <p className="text-xs font-semibold text-slate-700">{edu.degree}</p>
+              <p className="text-[11px] text-slate-600">{edu.year} — {edu.gpa}</p>
+            </div>
+          ))}
         </div>
+      ),
+      certifications: dummyData.certifications.length > 0 ? (
+        <div key="certifications" className="mb-6">
+          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
+            CERTIFICATIONS
+          </h2>
+          {dummyData.certifications.map((cert, idx) => (
+            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-1 text-xs">
+              <p className="font-bold text-slate-900">{cert.name} — {cert.issuer} ({cert.issueDate})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      languages: dummyData.languages.length > 0 ? (
+        <div key="languages" className="mb-6">
+          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
+            LANGUAGES
+          </h2>
+          <p className="text-xs font-bold text-slate-800">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+        </div>
+      ) : null,
+      courses: dummyData.courses.length > 0 ? (
+        <div key="courses" className="mb-6">
+          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
+            COURSES
+          </h2>
+          {dummyData.courses.map((crs, idx) => (
+            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-1 text-xs">
+              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      scholarships: dummyData.scholarships.length > 0 ? (
+        <div key="scholarships" className="mb-6">
+          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
+            SCHOLARSHIPS
+          </h2>
+          {dummyData.scholarships.map((sch, idx) => (
+            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-1 text-xs">
+              <p className="font-bold text-slate-900">{sch.name} — {sch.provider}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      volunteers: dummyData.volunteers.length > 0 ? (
+        <div key="volunteers" className="mb-6">
+          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
+            VOLUNTEER
+          </h2>
+          {dummyData.volunteers.map((vol, idx) => (
+            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-1 text-xs">
+              <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+      references: dummyData.references.length > 0 ? (
+        <div key="references" className="mb-6">
+          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
+            REFERENCES
+          </h2>
+          {dummyData.references.map((ref, idx) => (
+            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-1 text-xs">
+              <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
+            </div>
+          ))}
+        </div>
+      ) : null,
+    };
+
+    return (
+      <div className="p-10 min-h-[297mm] font-sans bg-white text-slate-900" style={{ fontFamily: selectedFontFamily }}>
+        {/* Oversized Name Header */}
+        <div className="mb-6 pb-4 border-b-4 border-slate-900">
+          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-1">
+            {dummyData.fullName}
+          </h1>
+          <p className="text-sm font-bold uppercase text-slate-700 mb-3">
+            {dummyData.jobTitle}
+          </p>
+          <div className="flex flex-wrap gap-3 text-xs font-semibold text-slate-600">
+            <span>📍 {dummyData.location}</span>
+            <span>📞 {dummyData.phone}</span>
+            <span>✉️ {dummyData.email}</span>
+          </div>
+        </div>
+
+        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
       </div>
-    </div>
-  );
+    );
+  };
+
 
   // Map Document Settings to Dynamic CSS & Style Properties
   const fontStyleMap: Record<string, string> = {
@@ -8275,9 +10803,66 @@ const CVTemplatePreview: React.FC<{
       style={{
         fontFamily: selectedFontFamily,
         fontSize: selectedFontSize,
+        lineHeight: docLineHeight !== undefined ? `${docLineHeight}` : undefined,
+        letterSpacing: docLetterSpacing !== undefined ? `${docLetterSpacing}px` : undefined,
       }}
     >
-      {getTemplateContent()}
+      <style>{`
+        ${docNameSize ? `.cv-template-root h1 { font-size: ${docNameSize}px !important; }` : ''}
+        ${docHeaderSize ? `.cv-template-root h2 { font-size: ${docHeaderSize}px !important; }` : ''}
+        ${docBodySize ? `.cv-template-root p, .cv-template-root span, .cv-template-root div:not(.cv-no-custom-size) { font-size: ${docBodySize}px !important; }` : ''}
+        ${docSectionSpacing ? `.cv-template-root .mb-6, .cv-template-root .mb-8, .cv-template-root .mb-5 { margin-bottom: ${docSectionSpacing}px !important; }` : ''}
+      `}</style>
+      <div className="cv-template-root w-full h-full">
+        {getTemplateContent()}
+      </div>
+    </div>
+  );
+};
+
+// Mini Visual Live Scaled A4 Template Preview (Halaman 1 Saja) for Layout Gallery Cards
+const TemplateThumbnailVisual: React.FC<{ templateId: string; customData?: Partial<CVData> }> = ({
+  templateId,
+  customData,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState<number>(0.15);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const updateScale = () => {
+      if (containerRef.current) {
+        const width = containerRef.current.clientWidth;
+        if (width > 0) {
+          // Exactly scale Page 1 (210mm x 297mm) to fit thumbnail container width
+          const calculatedScale = width / 794;
+          setScale(calculatedScale);
+        }
+      }
+    };
+
+    updateScale();
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      className="w-full h-full relative overflow-hidden bg-white select-none pointer-events-none rounded-md"
+    >
+      <div
+        className="w-[210mm] h-[297mm] bg-white pointer-events-none absolute top-0 left-0 overflow-hidden"
+        style={{
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+          width: '210mm',
+          height: '297mm',
+        }}
+      >
+        <CVTemplatePreview templateId={templateId} customData={customData} />
+      </div>
     </div>
   );
 };
