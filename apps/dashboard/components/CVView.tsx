@@ -1,11 +1,17 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { cvApi } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { CvPromoModal } from '@/components/CvPromoModal';
+import { CvHrdFloatingCta } from '@/components/CvHrdFloatingCta';
+import { CvHrdModal } from '@/components/CvHrdModal';
+import { AiAssistantDrawer } from '@/components/ai/AiAssistantDrawer';
+import { BulletOptimizePopover } from '@/components/ai/BulletOptimizePopover';
 import { CustomSelect } from '@/components/ui/CustomSelect';
-import { CustomDatePicker } from '@/components/ui/CustomDatePicker';
+import { CustomDatePicker, isEndDateBeforeStartDate } from '@/components/ui/CustomDatePicker';
 import { AutoResizeTextarea } from '@/components/ui/AutoResizeTextarea';
+import { BulletPointListInput } from '@/components/ui/BulletPointListInput';
 import { INDONESIAN_CITIES } from '@/lib/indonesianCities';
 import {
   FileText,
@@ -53,13 +59,229 @@ import {
   GripVertical,
   MapPin,
   RotateCcw,
+  Camera,
+  Move,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Minus,
+  Mail,
+  Phone,
+  Linkedin,
+  Github,
+  Globe,
+  Instagram,
+  Dribbble,
+  Twitter,
+  Youtube,
+  Facebook,
+  AlignLeft,
+  AlignRight,
+  Image as ImageIcon,
 } from 'lucide-react';
+
+export const renderSocialIcon = (platform?: string, className = 'w-3.5 h-3.5 text-slate-700 shrink-0') => {
+  const p = (platform || 'github').toLowerCase();
+  switch (p) {
+    case 'instagram':
+      return <Instagram className={className} />;
+    case 'dribbble':
+      return <Dribbble className={className} />;
+    case 'twitter':
+    case 'x':
+      return <Twitter className={className} />;
+    case 'youtube':
+      return <Youtube className={className} />;
+    case 'facebook':
+      return <Facebook className={className} />;
+    case 'website':
+    case 'portofolio':
+      return <Globe className={className} />;
+    case 'linkedin':
+      return <Linkedin className={className} />;
+    case 'github':
+    default:
+      return <Github className={className} />;
+  }
+};
 
 const MONTHS = [
   'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 ];
 const YEARS = Array.from({ length: 45 }, (_, i) => String(2026 - i));
+
+export type MarginPresetType = 'normal' | 'narrow' | 'moderate' | 'wide' | 'mirrored' | 'custom';
+
+export const MARGIN_PRESETS: Record<Exclude<MarginPresetType, 'custom'>, {
+  name: string;
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+  labels: { top: string; bottom: string; left: string; right: string };
+}> = {
+  normal: {
+    name: 'Normal',
+    top: 2.54,
+    bottom: 2.54,
+    left: 2.54,
+    right: 2.54,
+    labels: { top: 'Top: 2,54 cm', bottom: 'Bottom: 2,54 cm', left: 'Left: 2,54 cm', right: 'Right: 2,54 cm' },
+  },
+  narrow: {
+    name: 'Narrow',
+    top: 1.27,
+    bottom: 1.27,
+    left: 1.27,
+    right: 1.27,
+    labels: { top: 'Top: 1,27 cm', bottom: 'Bottom: 1,27 cm', left: 'Left: 1,27 cm', right: 'Right: 1,27 cm' },
+  },
+  moderate: {
+    name: 'Moderate',
+    top: 2.54,
+    bottom: 2.54,
+    left: 1.91,
+    right: 1.91,
+    labels: { top: 'Top: 2,54 cm', bottom: 'Bottom: 2,54 cm', left: 'Left: 1,91 cm', right: 'Right: 1,91 cm' },
+  },
+  wide: {
+    name: 'Wide',
+    top: 2.54,
+    bottom: 2.54,
+    left: 5.08,
+    right: 5.08,
+    labels: { top: 'Top: 2,54 cm', bottom: 'Bottom: 2,54 cm', left: 'Left: 5,08 cm', right: 'Right: 5,08 cm' },
+  },
+  mirrored: {
+    name: 'Mirrored',
+    top: 2.54,
+    bottom: 2.54,
+    left: 3.18,
+    right: 2.54,
+    labels: { top: 'Top: 2,54 cm', bottom: 'Bottom: 2,54 cm', left: 'Inside: 3,18 cm', right: 'Outside: 2,54 cm' },
+  },
+};
+
+const RenderBulletDescription: React.FC<{ text?: string; className?: string }> = ({
+  text,
+  className = 'text-xs leading-relaxed text-slate-700 text-justify break-words [word-break:break-word]',
+}) => {
+  if (!text || !text.trim()) return null;
+  const lines = text
+    .split('\n')
+    .map((l) => l.replace(/^[\s•\-\*\d\.\)]+/, '').trim())
+    .filter(Boolean);
+
+  if (lines.length === 0) return null;
+
+  return (
+    <ul className="list-disc list-outside pl-4 space-y-1 my-1 break-words [word-break:break-word]">
+      {lines.map((line, idx) => (
+        <li key={idx} className={className}>
+          {line}
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+const RenderContactHeaderLinks: React.FC<{
+  dummyData: any;
+  separator?: string;
+  className?: string;
+  docLinkStyle?: 'blue' | 'underline' | 'plain';
+  docShowIcons?: boolean;
+}> = ({
+  dummyData,
+  separator = '•',
+  className = 'text-xs flex flex-wrap gap-x-3 gap-y-1.5 items-center text-slate-700',
+  docLinkStyle,
+  docShowIcons,
+}) => {
+  const activeStyle = docLinkStyle || dummyData?.linkStyle || 'blue';
+  const showIcons = docShowIcons !== undefined ? docShowIcons : (dummyData?.showIcons !== undefined ? dummyData.showIcons : true);
+
+  const getLinkClass = () => {
+    switch (activeStyle) {
+      case 'underline':
+        return 'text-slate-700 underline hover:text-blue-600 font-normal transition-colors';
+      case 'plain':
+        return 'text-slate-700 hover:underline font-normal transition-colors';
+      case 'blue':
+      default:
+        return 'text-blue-700 underline hover:text-blue-800 font-medium transition-colors';
+    }
+  };
+
+  const linkClass = getLinkClass();
+
+  return (
+    <div className={className}>
+      {dummyData.email && (
+        <span className="inline-flex items-center gap-1.5 text-slate-700">
+          {showIcons && <Mail className="w-3.5 h-3.5 text-slate-700 shrink-0" />}
+          <a href={getEmailMailto(dummyData.email)} className={linkClass}>
+            {dummyData.email}
+          </a>
+        </span>
+      )}
+      {dummyData.phone && (
+        <>
+          {!showIcons && dummyData.email && <span className="text-slate-700">{separator}</span>}
+          <span className="inline-flex items-center gap-1.5 text-slate-700">
+            {showIcons && <Phone className="w-3.5 h-3.5 text-slate-700 shrink-0" />}
+            <a href={getWaMeUrl(dummyData.phone)} target="_blank" rel="noopener noreferrer" className={linkClass}>
+              {dummyData.phone}
+            </a>
+          </span>
+        </>
+      )}
+      {dummyData.location && (
+        <>
+          {!showIcons && (dummyData.email || dummyData.phone) && <span className="text-slate-700">{separator}</span>}
+          <span className="inline-flex items-center gap-1.5 text-slate-700">
+            {showIcons && <MapPin className="w-3.5 h-3.5 text-slate-700 shrink-0" />}
+            <span className="text-slate-700 font-normal">{dummyData.location}</span>
+          </span>
+        </>
+      )}
+      {dummyData.linkedin && (
+        <>
+          {!showIcons && (dummyData.email || dummyData.phone || dummyData.location) && <span className="text-slate-700">{separator}</span>}
+          <span className="inline-flex items-center gap-1.5 text-slate-700">
+            {showIcons && <Linkedin className="w-3.5 h-3.5 text-slate-700 shrink-0" />}
+            <a href={getCleanUrl(dummyData.linkedin)} target="_blank" rel="noreferrer" className={linkClass}>
+              {dummyData.linkedin}
+            </a>
+          </span>
+        </>
+      )}
+      {dummyData.github && (
+        <>
+          {!showIcons && (dummyData.email || dummyData.phone || dummyData.location || dummyData.linkedin) && <span className="text-slate-700">{separator}</span>}
+          <span className="inline-flex items-center gap-1.5 text-slate-700">
+            {showIcons && renderSocialIcon(dummyData.socialPlatform)}
+            <a href={getSocialMediaUrl(dummyData.github, dummyData.socialPlatform)} target="_blank" rel="noreferrer" className={linkClass}>
+              {dummyData.github}
+            </a>
+          </span>
+        </>
+      )}
+      {dummyData.website && (
+        <>
+          {!showIcons && (dummyData.email || dummyData.phone || dummyData.location || dummyData.linkedin || dummyData.github) && <span className="text-slate-700">{separator}</span>}
+          <span className="inline-flex items-center gap-1.5 text-slate-700">
+            {showIcons && <Globe className="w-3.5 h-3.5 text-slate-700 shrink-0" />}
+            <a href={getCleanUrl(dummyData.website)} target="_blank" rel="noreferrer" className={linkClass}>
+              {dummyData.website}
+            </a>
+          </span>
+        </>
+      )}
+    </div>
+  );
+};
 
 const CitySearchInput = ({
   value,
@@ -195,10 +417,10 @@ const CVSectionCard = ({
     <div
       style={{
         transform: isPointerDragging ? `translateY(${dragOffsetY}px) scale(1.02)` : undefined,
-        zIndex: isPointerDragging ? 50 : 1,
+        zIndex: isPointerDragging ? 50 : undefined,
         transition: isPointerDragging ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
       }}
-      className={`border rounded-xl bg-white dark:bg-slate-900 transition-all duration-200 relative touch-none overflow-hidden ${
+      className={`border rounded-xl bg-white dark:bg-slate-900 transition-all duration-200 relative touch-none ${
         isPointerDragging
           ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 bg-white dark:bg-slate-900 cursor-grabbing'
           : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs'
@@ -240,6 +462,133 @@ const CVSectionCard = ({
   );
 };
 
+const COMMON_SKILL_SUGGESTIONS = [
+  'JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js', 'Express.js',
+  'Python', 'Java', 'C++', 'PHP', 'Laravel', 'HTML5 & CSS3', 'Tailwind CSS',
+  'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Docker', 'Git & GitHub',
+  'REST API', 'GraphQL', 'UI/UX Design', 'Figma', 'Graphic Design',
+  'Digital Marketing', 'SEO Optimization', 'Social Media Management',
+  'Copywriting', 'Content Writing', 'Data Analysis', 'Microsoft Excel',
+  'Microsoft Office', 'Project Management', 'Public Speaking', 'Communication',
+  'Problem Solving', 'Leadership', 'Time Management', 'Customer Service',
+];
+
+const SkillsEditorSection: React.FC<{
+  skills: string[];
+  onChange: (skills: string[]) => void;
+}> = ({ skills, onChange }) => {
+  const [inputValue, setInputValue] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const filteredSuggestions = useMemo(() => {
+    const q = inputValue.trim().toLowerCase();
+    if (!q) return COMMON_SKILL_SUGGESTIONS.filter((s) => !skills.includes(s)).slice(0, 8);
+    return COMMON_SKILL_SUGGESTIONS.filter(
+      (s) => s.toLowerCase().includes(q) && !skills.includes(s)
+    );
+  }, [inputValue, skills]);
+
+  const handleAddSkill = (skillToAdd?: string) => {
+    const name = (skillToAdd || inputValue).trim();
+    if (!name) return;
+    if (!skills.includes(name)) {
+      onChange([...skills, name]);
+    }
+    setInputValue('');
+    setShowDropdown(false);
+  };
+
+  const handleRemoveSkill = (idx: number) => {
+    onChange(skills.filter((_, i) => i !== idx));
+  };
+
+  return (
+    <div className="space-y-3.5">
+      <div>
+        <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">
+          Tambah Skill Utama (1 per 1)
+        </label>
+        <div className="relative flex items-center gap-2">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Cari atau ketik keahlian (contoh: React, Public Speaking)..."
+              value={inputValue}
+              onFocus={() => setShowDropdown(true)}
+              onChange={(e) => {
+                setInputValue(e.target.value);
+                setShowDropdown(true);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddSkill();
+                }
+              }}
+              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+            />
+
+            {/* Dropdown Suggestions */}
+            {showDropdown && (filteredSuggestions.length > 0 || inputValue.trim()) && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-30 max-h-48 overflow-y-auto p-1">
+                {filteredSuggestions.map((sug, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => handleAddSkill(sug)}
+                    className="w-full text-left px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/50 hover:text-teal-600 dark:hover:text-teal-400 rounded-lg transition cursor-pointer flex items-center justify-between"
+                  >
+                    <span>{sug}</span>
+                    <Plus className="w-3.5 h-3.5 opacity-60" />
+                  </button>
+                ))}
+                {inputValue.trim() && !filteredSuggestions.some(s => s.toLowerCase() === inputValue.trim().toLowerCase()) && (
+                  <button
+                    type="button"
+                    onClick={() => handleAddSkill(inputValue.trim())}
+                    className="w-full text-left px-3 py-2 text-xs font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition cursor-pointer flex items-center justify-between border-t border-slate-100 dark:border-slate-800 mt-1 pt-2"
+                  >
+                    <span>Tambah &quot;{inputValue.trim()}&quot; sebagai keahlian baru</span>
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => handleAddSkill()}
+            className="px-4 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition flex items-center gap-1 shrink-0 cursor-pointer shadow-2xs"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Tambah</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Added Skill Badges */}
+      <div className="flex flex-wrap gap-1.5 pt-1">
+        {skills.filter(Boolean).map((sk, skIdx) => (
+          <span
+            key={skIdx}
+            className="px-3 py-1.5 rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 text-xs font-bold flex items-center gap-2 shadow-2xs"
+          >
+            {sk}
+            <button
+              type="button"
+              onClick={() => handleRemoveSkill(skIdx)}
+              className="w-4 h-4 rounded-full bg-teal-200/60 dark:bg-teal-800/60 hover:bg-rose-500 hover:text-white text-teal-700 dark:text-teal-300 flex items-center justify-center transition cursor-pointer text-[10px]"
+            >
+              ✕
+            </button>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export interface ExperienceItem {
   id: string;
   role: string;
@@ -270,9 +619,12 @@ export interface ProjectItem {
   id: string;
   name: string;
   role: string;
-  link?: string;
   tech?: string;
-  date?: string;
+  url?: string;
+  link?: string; // legacy, dipertahankan untuk backward compat
+  date?: string; // legacy, dipertahankan untuk backward compat
+  startDate?: string;
+  endDate?: string;
   description: string;
 }
 
@@ -304,6 +656,7 @@ export interface CertificationItem {
   issuer: string;
   issueDate?: string;
   expiryDate?: string;
+  credentialId?: string;
   link?: string;
 }
 
@@ -323,8 +676,11 @@ export interface CourseItem {
   id: string;
   courseName: string;
   institution: string;
+  startDate?: string;
+  endDate?: string;
   month?: string;
   year?: string;
+  period?: string;
   description?: string;
 }
 
@@ -332,8 +688,11 @@ export interface ScholarshipItem {
   id: string;
   name: string;
   provider: string;
+  startDate?: string;
+  endDate?: string;
   month?: string;
   year?: string;
+  period?: string;
   description?: string;
 }
 
@@ -342,10 +701,13 @@ export interface VolunteerItem {
   organization: string;
   role: string;
   location?: string;
+  startDate?: string;
+  endDate?: string;
   startMonth?: string;
   startYear?: string;
   endMonth?: string;
   endYear?: string;
+  period?: string;
   isCurrent?: boolean;
   description?: string;
 }
@@ -373,6 +735,8 @@ export interface CVData {
   fullName: string;
   headline: string;
   photoUrl?: string;
+  photoShape?: 'circle' | 'square';
+  photoPosition?: 'left' | 'right';
 
   // 2. Informasi Kontak & Social Media
   email: string;
@@ -425,7 +789,78 @@ export interface CVData {
   references?: ReferenceItem[];
 
   templateId?: string;
+  docFontFamily?: 'sans' | 'serif' | 'mono' | 'standard';
+  docFontSize?: 'sm' | 'base' | 'md' | 'lg';
+  docSpacing?: 'compact' | 'normal' | 'spacious';
+  docShowIcons?: boolean;
+  docNameSize?: number;
+  docHeaderSize?: number;
+  docBodySize?: number;
+  docSectionSpacing?: number;
+  docLineHeight?: number;
+  docLetterSpacing?: number;
+  docLinkStyle?: 'blue' | 'underline' | 'plain';
+  docMarginPreset?: MarginPresetType;
+  docMarginTop?: number;
+  docMarginBottom?: number;
+  docMarginLeft?: number;
+  docMarginRight?: number;
+  docRefEmailHyperlink?: boolean;
+  docRefPhoneHyperlink?: boolean;
+  docProjectLinkStyle?: 'name' | 'text' | 'none';
 }
+
+export const getEmailMailto = (emailStr?: string) => {
+  if (!emailStr) return '#';
+  const clean = emailStr.replace(/^mailto:/i, '').trim();
+  return `mailto:${clean}`;
+};
+
+export const getCleanUrl = (url?: string, defaultPrefix = 'https://') => {
+  if (!url) return '#';
+  const trimmed = url.trim();
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('mailto:')) return trimmed;
+  return `${defaultPrefix}${trimmed}`;
+};
+
+export const getWaMeUrl = (phoneStr?: string) => {
+  if (!phoneStr) return '#';
+  let digits = phoneStr.replace(/\D/g, '');
+  if (digits.startsWith('0')) {
+    digits = '62' + digits.substring(1);
+  } else if (!digits.startsWith('62')) {
+    digits = '62' + digits;
+  }
+  return `https://wa.me/${digits}`;
+};
+
+export const getSocialMediaUrl = (handle?: string, platform = 'github') => {
+  if (!handle) return '#';
+  const trimmed = handle.trim();
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+  const cleanHandle = trimmed.replace(/^@/, '');
+  switch ((platform || '').toLowerCase()) {
+    case 'github':
+      return `https://github.com/${cleanHandle}`;
+    case 'linkedin':
+      return `https://linkedin.com/in/${cleanHandle}`;
+    case 'dribbble':
+      return `https://dribbble.com/${cleanHandle}`;
+    case 'pinterest':
+      return `https://pinterest.com/${cleanHandle}`;
+    case 'instagram':
+      return `https://instagram.com/${cleanHandle}`;
+    case 'tiktok':
+      return `https://tiktok.com/@${cleanHandle}`;
+    case 'twitter':
+    case 'x':
+      return `https://x.com/${cleanHandle}`;
+    default:
+      return getCleanUrl(trimmed);
+  }
+};
 
 export const DEFAULT_SECTION_ORDER = [
   'summary',
@@ -788,7 +1223,57 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   });
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [isHrdModalOpen, setIsHrdModalOpen] = useState(false);
   const [isFormDrawerOpen, setIsFormDrawerOpen] = useState(true);
+
+  // Contextual AI Assistant State
+  const [isAiDrawerOpen, setIsAiDrawerOpen] = useState(false);
+  const [aiDrawerSectionKey, setAiDrawerSectionKey] = useState('experience');
+  const [aiDrawerSectionTitle, setAiDrawerSectionTitle] = useState('Pengalaman Kerja');
+  const [aiDrawerContent, setAiDrawerContent] = useState('');
+  const [aiApplyHandler, setAiApplyHandler] = useState<((newVal: string, feedback: string) => void) | null>(null);
+
+  const [isBulletPopoverOpen, setIsBulletPopoverOpen] = useState(false);
+  const [targetBulletText, setTargetBulletText] = useState('');
+  const [bulletApplyHandler, setBulletApplyHandler] = useState<((newVal: string, feedback: string) => void) | null>(null);
+
+  const [aiToastMessage, setAiToastMessage] = useState<string | null>(null);
+
+  const handleOpenAiDrawer = (
+    key: string,
+    title: string,
+    content: string,
+    applyFn: (newVal: string, feedback: string) => void
+  ) => {
+    setAiDrawerSectionKey(key);
+    setAiDrawerSectionTitle(title);
+    setAiDrawerContent(content);
+    setAiApplyHandler(() => applyFn);
+    setIsAiDrawerOpen(true);
+  };
+
+  const handleOpenBulletPopover = (
+    bulletText: string,
+    applyFn: (newVal: string, feedback: string) => void
+  ) => {
+    setTargetBulletText(bulletText);
+    setBulletApplyHandler(() => applyFn);
+    setIsBulletPopoverOpen(true);
+  };
+
+  const handleAiSuccessFeedback = (feedbackMsg: string) => {
+    setAiToastMessage(feedbackMsg);
+    setTimeout(() => {
+      setAiToastMessage(null);
+    }, 4000);
+
+    if (selectedCV) {
+      const currentScore = selectedCV.atsScore ?? 85;
+      const newScore = Math.min(98, currentScore + 3);
+      setSelectedCV({ ...selectedCV, atsScore: newScore });
+    }
+  };
+  const [deletingCvTarget, setDeletingCvTarget] = useState<CVData | null>(null);
   const lastSavedSnapshotRef = useRef<string>('');
   const prevCvIdRef = useRef<string | undefined | null>(undefined);
 
@@ -797,21 +1282,23 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     setIsMounted(true);
   }, []);
 
-  // Load cvList from localStorage on mount
+  // Load cvList from API on mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('cuti_cv_list');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          setCvList(parsed);
-        } catch (e) {
-          console.error(e);
+    cvApi.getAll<CVData>().then((remoteCvs) => {
+      if (Array.isArray(remoteCvs) && remoteCvs.length > 0) {
+        setCvList(remoteCvs);
+      } else if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('cuti_cv_list');
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            setCvList(parsed);
+          } catch (e) {
+            console.error(e);
+          }
         }
-      } else {
-        localStorage.setItem('cuti_cv_list', JSON.stringify(initialCVs));
       }
-    }
+    });
   }, []);
 
   // Sync with cvId prop
@@ -849,18 +1336,40 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       }
     }
 
-    const cv = activeCvList.find((c) => c.id === cvId);
+    // Try finding in list or individual key
+    let cv = activeCvList.find((c) => c.id === cvId);
+    if (!cv && typeof window !== 'undefined') {
+      const storedSingle = localStorage.getItem(`cuti_cv_data_${cvId}`);
+      if (storedSingle) {
+        try {
+          cv = JSON.parse(storedSingle);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
     if (cv) {
       setSelectedCV(cv);
       setTitleInput(cv.title);
       setFormData({
+        firstName: cv.firstName || '',
+        lastName: cv.lastName || '',
         fullName: cv.fullName || '',
         headline: cv.headline || '',
+        photoUrl: cv.photoUrl || '',
         email: cv.email || '',
         phone: cv.phone || '',
+        website: cv.website || '',
+        linkedin: cv.linkedin || '',
+        github: cv.github || '',
+        city: cv.city || '',
+        province: cv.province || '',
+        country: cv.country || '',
         location: cv.location || '',
         summary: cv.summary || '',
         skills: cv.skills ? [...cv.skills] : [],
+        skillsList: cv.skillsList ? [...cv.skillsList] : [],
         experience: cv.experience ? [...cv.experience] : [],
         education: cv.education ? [...cv.education] : [],
         courses: cv.courses ? [...cv.courses] : [],
@@ -876,6 +1385,21 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       if (cv.templateId) {
         setSelectedTemplateId(cv.templateId);
       }
+      if (cv.docFontFamily) setDocFontFamily(cv.docFontFamily);
+      if (cv.docFontSize) setDocFontSize(cv.docFontSize);
+      if (cv.docSpacing) setDocSpacing(cv.docSpacing);
+      if (cv.docShowIcons !== undefined) setDocShowIcons(cv.docShowIcons);
+      if (cv.docNameSize !== undefined) setDocNameSize(cv.docNameSize);
+      if (cv.docHeaderSize !== undefined) setDocHeaderSize(cv.docHeaderSize);
+      if (cv.docBodySize !== undefined) setDocBodySize(cv.docBodySize);
+      if (cv.docSectionSpacing !== undefined) setDocSectionSpacing(cv.docSectionSpacing);
+      if (cv.docLineHeight !== undefined) setDocLineHeight(cv.docLineHeight);
+      if (cv.docLetterSpacing !== undefined) setDocLetterSpacing(cv.docLetterSpacing);
+      if (cv.docLinkStyle) setDocLinkStyle(cv.docLinkStyle);
+      if (cv.docMarginTop !== undefined) setDocMarginTop(cv.docMarginTop);
+      if (cv.docMarginBottom !== undefined) setDocMarginBottom(cv.docMarginBottom);
+      if (cv.docMarginLeft !== undefined) setDocMarginLeft(cv.docMarginLeft);
+      if (cv.docMarginRight !== undefined) setDocMarginRight(cv.docMarginRight);
     } else {
       const fallbackCv: CVData = {
         id: cvId,
@@ -1030,6 +1554,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           },
         ],
       };
+
       setSelectedCV(fallbackCv);
       setTitleInput(fallbackCv.title);
       setFormData({
@@ -1062,6 +1587,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         volunteers: fallbackCv.volunteers ? [...fallbackCv.volunteers] : [],
         references: fallbackCv.references ? [...fallbackCv.references] : [],
       });
+
+      if (typeof window !== 'undefined') {
+        const updatedList = [fallbackCv, ...activeCvList.filter((c) => c.id !== cvId)];
+        setCvList(updatedList);
+        localStorage.setItem('cuti_cv_list', JSON.stringify(updatedList));
+        localStorage.setItem(`cuti_cv_data_${cvId}`, JSON.stringify(fallbackCv));
+      }
     }
     setViewMode('preview');
     setIsFormDrawerOpen(true);
@@ -1085,13 +1617,42 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const [docFontSize, setDocFontSize] = useState<'sm' | 'base' | 'md' | 'lg'>('base');
   const [docSpacing, setDocSpacing] = useState<'compact' | 'normal' | 'spacious'>('normal');
   const [docShowIcons, setDocShowIcons] = useState<boolean>(true);
+  const [docPhotoPosition, setDocPhotoPosition] = useState<'left' | 'right'>('right');
   const [docNameSize, setDocNameSize] = useState<number>(30);
   const [docHeaderSize, setDocHeaderSize] = useState<number>(14);
   const [docBodySize, setDocBodySize] = useState<number>(12);
   const [docSectionSpacing, setDocSectionSpacing] = useState<number>(20);
   const [docLineHeight, setDocLineHeight] = useState<number>(1.4);
   const [docLetterSpacing, setDocLetterSpacing] = useState<number>(0);
+  const [docLinkStyle, setDocLinkStyle] = useState<'blue' | 'underline' | 'plain'>('blue');
+  const [docMarginPreset, setDocMarginPreset] = useState<MarginPresetType>('narrow');
+  const [docMarginTop, setDocMarginTop] = useState<number>(1.27);
+  const [docMarginBottom, setDocMarginBottom] = useState<number>(1.27);
+  const [docMarginLeft, setDocMarginLeft] = useState<number>(1.27);
+  const [docMarginRight, setDocMarginRight] = useState<number>(1.27);
+  const [docRefEmailHyperlink, setDocRefEmailHyperlink] = useState<boolean>(true);
+  const [docRefPhoneHyperlink, setDocRefPhoneHyperlink] = useState<boolean>(true);
+  const [docProjectLinkStyle, setDocProjectLinkStyle] = useState<'name' | 'text' | 'none'>('text');
   const [downloadFormat, setDownloadFormat] = useState<'pdf' | 'docx'>('pdf');
+
+  const handleSelectMarginPreset = (preset: Exclude<MarginPresetType, 'custom'>) => {
+    setDocMarginPreset(preset);
+    const data = MARGIN_PRESETS[preset];
+    if (data) {
+      setDocMarginTop(data.top);
+      setDocMarginBottom(data.bottom);
+      setDocMarginLeft(data.left);
+      setDocMarginRight(data.right);
+    }
+  };
+
+  const handleCustomMarginChange = (side: 'top' | 'bottom' | 'left' | 'right', val: number) => {
+    setDocMarginPreset('custom');
+    if (side === 'top') setDocMarginTop(val);
+    if (side === 'bottom') setDocMarginBottom(val);
+    if (side === 'left') setDocMarginLeft(val);
+    if (side === 'right') setDocMarginRight(val);
+  };
 
   const handleResetDocStyles = () => {
     setDocFontFamily('sans');
@@ -1104,6 +1665,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     setDocSectionSpacing(20);
     setDocLineHeight(1.4);
     setDocLetterSpacing(0);
+    setDocLinkStyle('blue');
+    setDocMarginPreset('narrow');
+    setDocMarginTop(1.27);
+    setDocMarginBottom(1.27);
+    setDocMarginLeft(1.27);
+    setDocMarginRight(1.27);
   };
 
   const handleImportResume = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1142,6 +1709,155 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const isNewCvJobTitleValid = newCvJobTitle.trim().length > 0;
   const isNewCvFileValid = newCvStartMode !== 'import' || newCvFile !== null;
   const isTemplateFormValid = isNewCvTitleValid && isNewCvJobTitleValid && isNewCvFileValid;
+
+  const handleCreateCvFromTemplate = () => {
+    setTemplateFormSubmitted(true);
+    if (!isTemplateFormValid) {
+      return;
+    }
+
+    const newId = `cv-${Date.now()}`;
+    const templateName = cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS';
+
+    let initialData: Partial<CVData> = {};
+    if (newCvStartMode === 'example') {
+      initialData = {
+        fullName: 'John Doe',
+        headline: newCvJobTitle || 'Software Engineer',
+        email: 'john.doe@example.com',
+        phone: '+62 812-3456-7890',
+        location: 'Jakarta, Indonesia',
+        summary: 'Senior Software Engineer berpengalaman dalam membangun aplikasi web berkinerja tinggi, scalable, dan ATS friendly.',
+        skills: ['TypeScript', 'React', 'Next.js', 'Node.js', 'Tailwind CSS', 'PostgreSQL', 'Git', 'REST API'],
+        experience: [
+          {
+            id: 'exp-1',
+            company: 'PT Inovasi Teknologi',
+            role: newCvJobTitle || 'Senior Software Engineer',
+            period: '2023 - Sekarang',
+            description: 'Memimpin pengembangan fitur frontend & backend, mengoptimalkan kecepatan load hingga 45%, dan mengimplementasikan CI/CD.',
+          },
+          {
+            id: 'exp-2',
+            company: 'Solusi Digital Indonesia',
+            role: 'Software Engineer',
+            period: '2021 - 2023',
+            description: 'Mengembangkan API mikroservis dan sistem otentikasi aman untuk 100.000+ pengguna aktif bulanan.',
+          },
+        ],
+        education: [
+          {
+            id: 'edu-1',
+            institution: 'Universitas Indonesia',
+            degree: 'S1 Teknik Informatika / Ilmu Komputer (IPK 3.75)',
+            year: '2017 - 2021',
+          },
+        ],
+      };
+    } else if (newCvStartMode === 'import') {
+      initialData = {
+        fullName: '',
+        headline: newCvJobTitle || '',
+        email: '',
+        phone: '',
+        location: '',
+        summary: newCvFile ? `Hasil impor dari dokumen: ${newCvFile.name}` : 'Dokumen CV diimpor.',
+        skills: ['Dokumen Diimpor'],
+        experience: [],
+        education: [],
+      };
+    } else {
+      initialData = {
+        fullName: '',
+        headline: newCvJobTitle || '',
+        email: '',
+        phone: '',
+        location: '',
+        summary: '',
+        skills: [],
+        experience: [],
+        education: [],
+      };
+    }
+
+    const newCV: CVData = {
+      id: newId,
+      title: newCvTitle || `CV ATS - ${templateName}`,
+      updatedAt: 'Hari ini',
+      atsScore: 85,
+      fullName: '',
+      headline: newCvJobTitle || '',
+      email: '',
+      phone: '',
+      location: '',
+      summary: '',
+      skills: [],
+      experience: [],
+      education: [],
+      templateId: selectedTemplateId,
+      ...initialData,
+    };
+
+    const updatedList = [newCV, ...cvList];
+    setCvList(updatedList);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cuti_cv_list', JSON.stringify(updatedList));
+    }
+    setShowTemplateModal(false);
+    setTemplateModalStep(1);
+    router.push(`/cv/${newId}`);
+  };
+
+  const handleSelectTemplateAndNext = () => {
+    const templateName = cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS';
+    setNewCvTitle(`CV ATS - ${templateName}`);
+    setNewCvJobTitle('');
+    setNewCvStartMode('example');
+    setNewCvFile(null);
+    setTemplateFormSubmitted(false);
+    setTemplateModalStep(2);
+  };
+
+  useEffect(() => {
+    if (!showTemplateModal) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (templateModalStep === 1) {
+        const availableTemplates = cvTemplates.filter((tpl) => !tpl.hidden);
+        const currentIndex = availableTemplates.findIndex((t) => t.id === selectedTemplateId);
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (currentIndex < availableTemplates.length - 1) {
+            setSelectedTemplateId(availableTemplates[currentIndex + 1].id);
+          } else if (currentIndex === -1 && availableTemplates.length > 0) {
+            setSelectedTemplateId(availableTemplates[0].id);
+          }
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (currentIndex > 0) {
+            setSelectedTemplateId(availableTemplates[currentIndex - 1].id);
+          }
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          handleSelectTemplateAndNext();
+        }
+      } else if (e.key === 'Escape') {
+        setShowTemplateModal(false);
+        setTemplateModalStep(1);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showTemplateModal, templateModalStep, selectedTemplateId, cvTemplates]);
+
+  useEffect(() => {
+    if (showTemplateModal && templateModalStep === 1 && selectedTemplateId) {
+      const selectedEl = document.getElementById(`template-card-${selectedTemplateId}`);
+      if (selectedEl) {
+        selectedEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, [selectedTemplateId, showTemplateModal, templateModalStep]);
 
   // AI CV Creation Wizard State
   const [aiWizardStep, setAiWizardStep] = useState<number>(1); // 1: Package, 2: Payment, 3: Data Option/Form, 4: Progress
@@ -1633,47 +2349,106 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const sectionOrderArrayRef = useRef<string[]>([]);
   const dragClientYRef = useRef<number | null>(null);
 
-  // Profile Photo Upload Ref & Handler (Canvas WebP Compression)
+  // Profile Photo Upload Ref & Handler (Interactive Crop, Resize & Position Adjustment)
   const photoFileInputRef = useRef<HTMLInputElement>(null);
+  const [showPhotoCropModal, setShowPhotoCropModal] = useState<boolean>(false);
+  const [rawPhotoDataUrl, setRawPhotoDataUrl] = useState<string>('');
+  const [photoScale, setPhotoScale] = useState<number>(1);
+  const [photoOffsetX, setPhotoOffsetX] = useState<number>(0);
+  const [photoOffsetY, setPhotoOffsetY] = useState<number>(0);
+  const [photoShape, setPhotoShape] = useState<'circle' | 'square'>('circle');
+  const [isDraggingPhoto, setIsDraggingPhoto] = useState<boolean>(false);
+  const photoDragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const formatPhone62 = (input: string): string => {
+    if (!input) return '+62 ';
+    let val = input.trim();
+    if (!val.startsWith('+62')) {
+      let digits = val.replace(/\D/g, '');
+      if (digits.startsWith('0')) {
+        digits = digits.substring(1);
+      } else if (digits.startsWith('62')) {
+        digits = digits.substring(2);
+      }
+      return `+62 ${digits}`;
+    }
+    return val;
+  };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Ukuran foto profil maksimal 2MB. Silakan pilih foto dengan ukuran lebih kecil.');
+      if (photoFileInputRef.current) photoFileInputRef.current.value = '';
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const maxDim = 400; // max dimension 400px for crisp avatar
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > maxDim) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          }
-        } else {
-          if (height > maxDim) {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          // Compress to WebP format at 82% quality
-          const webpDataUrl = canvas.toDataURL('image/webp', 0.82);
-          setFormData((prev) => ({ ...prev, photoUrl: webpDataUrl }));
-        }
-      };
-      img.src = event.target?.result as string;
+      setRawPhotoDataUrl(event.target?.result as string);
+      setPhotoScale(1);
+      setPhotoOffsetX(0);
+      setPhotoOffsetY(0);
+      setShowPhotoCropModal(true);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleEditExistingPhoto = () => {
+    if (!formData.photoUrl) return;
+    setRawPhotoDataUrl(rawPhotoDataUrl || formData.photoUrl);
+    setPhotoShape(formData.photoShape || 'circle');
+    setPhotoScale(1);
+    setPhotoOffsetX(0);
+    setPhotoOffsetY(0);
+    setShowPhotoCropModal(true);
+  };
+
+  const handleApplyCroppedPhoto = () => {
+    if (!rawPhotoDataUrl) return;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const containerSize = 280;
+      const baseCropSize = 160;
+      const cropSizeDisp = baseCropSize / photoScale;
+
+      const scaleRatio = Math.min(containerSize / img.width, containerSize / img.height);
+      const dispW = img.width * scaleRatio;
+      const dispH = img.height * scaleRatio;
+      const imgLeftDisp = (containerSize - dispW) / 2;
+      const imgTopDisp = (containerSize - dispH) / 2;
+
+      const cropLeftDisp = (containerSize / 2) + photoOffsetX - (cropSizeDisp / 2);
+      const cropTopDisp = (containerSize / 2) + photoOffsetY - (cropSizeDisp / 2);
+
+      const relXDisp = cropLeftDisp - imgLeftDisp;
+      const relYDisp = cropTopDisp - imgTopDisp;
+
+      const srcX = relXDisp / scaleRatio;
+      const srcY = relYDisp / scaleRatio;
+      const srcW = cropSizeDisp / scaleRatio;
+      const srcH = cropSizeDisp / scaleRatio;
+
+      const canvas = document.createElement('canvas');
+      const targetSize = 400; // 400x400 output WebP avatar
+      canvas.width = targetSize;
+      canvas.height = targetSize;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, targetSize, targetSize);
+
+        ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, targetSize, targetSize);
+
+        const webpDataUrl = canvas.toDataURL('image/webp', 0.88);
+        setFormData((prev) => ({ ...prev, photoUrl: webpDataUrl, photoShape }));
+        setShowPhotoCropModal(false);
+      }
+    };
+    img.src = rawPhotoDataUrl;
   };
 
   const activeSectionOrder = formData.sectionOrder && formData.sectionOrder.length > 0
@@ -2086,11 +2861,31 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subItemDragIdx === null]);
 
-  // Auto-save CV data to local storage ONLY when data changes AND after 1.5s idle inactivity (selesai mengisi)
+  // Auto-save CV data to local storage when data or styles change
   useEffect(() => {
     if (!isMounted || (viewMode !== 'create' && !cvId)) return;
 
-    const currentSnapshot = JSON.stringify({ formData, titleInput, selectedTemplateId });
+    const currentSnapshot = JSON.stringify({
+      formData,
+      titleInput,
+      selectedTemplateId,
+      docFontFamily,
+      docFontSize,
+      docSpacing,
+      docShowIcons,
+      docNameSize,
+      docHeaderSize,
+      docBodySize,
+      docSectionSpacing,
+      docLineHeight,
+      docLetterSpacing,
+      docLinkStyle,
+      docMarginPreset,
+      docMarginTop,
+      docMarginBottom,
+      docMarginLeft,
+      docMarginRight,
+    });
 
     // Set initial snapshot on first load without saving
     if (!lastSavedSnapshotRef.current) {
@@ -2101,7 +2896,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     // Skip auto-save if no data changed
     if (currentSnapshot === lastSavedSnapshotRef.current) return;
 
-    // Debounce timer: wait 1500ms (1.5s) without any activity before saving
+    // Debounce timer: 400ms idle before saving to local storage
     const timer = setTimeout(() => {
       const targetId = cvId && cvId !== 'create' ? cvId : 'cv-draft-local';
 
@@ -2113,32 +2908,69 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         updatedAt: 'Hari ini',
         atsScore: selectedCV ? selectedCV.atsScore : 88,
         templateId: selectedTemplateId,
+        docFontFamily,
+        docFontSize,
+        docSpacing,
+        docShowIcons,
+        docNameSize,
+        docHeaderSize,
+        docBodySize,
+        docSectionSpacing,
+        docLineHeight,
+        docLetterSpacing,
+        docLinkStyle,
+        docMarginPreset,
+        docMarginTop,
+        docMarginBottom,
+        docMarginLeft,
+        docMarginRight,
       } as CVData;
 
       setCvList((prevList) => {
         let updatedList = [...prevList];
-        if (cvId && cvId !== 'create') {
-          updatedList = prevList.map((cv) => (cv.id === cvId ? updatedCV : cv));
+        const existingIdx = prevList.findIndex((cv) => cv.id === targetId);
+        if (existingIdx >= 0) {
+          updatedList[existingIdx] = updatedCV;
         } else {
-          const existingIdx = prevList.findIndex((cv) => cv.id === 'cv-draft-local');
-          if (existingIdx >= 0) {
-            updatedList[existingIdx] = updatedCV;
-          } else {
-            updatedList = [updatedCV, ...prevList];
-          }
+          updatedList = [updatedCV, ...prevList];
         }
         if (typeof window !== 'undefined') {
           localStorage.setItem('cuti_cv_list', JSON.stringify(updatedList));
           localStorage.setItem('cuti_cv_active_draft', JSON.stringify(updatedCV));
+          localStorage.setItem(`cuti_cv_data_${targetId}`, JSON.stringify(updatedCV));
         }
         return updatedList;
       });
 
       lastSavedSnapshotRef.current = currentSnapshot;
-    }, 1500);
+    }, 400);
 
     return () => clearTimeout(timer);
-  }, [formData, titleInput, selectedTemplateId, cvId, viewMode, isMounted, selectedCV]);
+  }, [
+    formData,
+    titleInput,
+    selectedTemplateId,
+    cvId,
+    viewMode,
+    isMounted,
+    selectedCV,
+    docFontFamily,
+    docFontSize,
+    docSpacing,
+    docShowIcons,
+    docNameSize,
+    docHeaderSize,
+    docBodySize,
+    docSectionSpacing,
+    docLineHeight,
+    docLetterSpacing,
+    docLinkStyle,
+    docMarginPreset,
+    docMarginTop,
+    docMarginBottom,
+    docMarginLeft,
+    docMarginRight,
+  ]);
 
   const handleAddSkill = () => {
     if (skillInput.trim()) {
@@ -2231,43 +3063,47 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const handleSaveCV = (e: React.FormEvent) => {
     e.preventDefault();
     let updatedList = [...cvList];
-    
-    if (cvId && cvId !== 'create') {
-      const calculatedScore = selectedCV ? selectedCV.atsScore : 85;
-      const updatedCV: CVData = {
-        id: cvId,
-        title: titleInput || 'CV Tanpa Judul',
-        updatedAt: 'Hari ini',
-        atsScore: calculatedScore,
-        fullName: formData.fullName,
-        headline: formData.headline,
-        email: formData.email,
-        phone: formData.phone,
-        location: formData.location,
-        summary: formData.summary,
-        skills: [...formData.skills],
-        experience: [...formData.experience],
-        education: [...formData.education],
-        templateId: selectedTemplateId,
-      } as CVData;
-      updatedList = cvList.map((cv) => (cv.id === cvId ? updatedCV : cv));
+    const targetId = cvId && cvId !== 'create' ? cvId : `cv-${Date.now()}`;
+    const calculatedScore = selectedCV ? selectedCV.atsScore : 85 + (cvList.length % 8);
+
+    const updatedCV: CVData = {
+      ...(selectedCV || {}),
+      ...formData,
+      id: targetId,
+      title: titleInput || 'CV Tanpa Judul',
+      updatedAt: 'Hari ini',
+      atsScore: calculatedScore,
+      templateId: selectedTemplateId,
+      docFontFamily,
+      docFontSize,
+      docSpacing,
+      docShowIcons,
+      docNameSize,
+      docHeaderSize,
+      docBodySize,
+      docSectionSpacing,
+      docLineHeight,
+      docLetterSpacing,
+      docLinkStyle,
+      docMarginPreset,
+      docMarginTop,
+      docMarginBottom,
+      docMarginLeft,
+      docMarginRight,
+    } as CVData;
+
+    const existingIdx = cvList.findIndex((cv) => cv.id === targetId);
+    if (existingIdx >= 0) {
+      updatedList[existingIdx] = updatedCV;
     } else {
-      const newId = `cv-${Date.now()}`;
-      const calculatedScore = 85 + (cvList.length % 8);
-      const newCV: CVData = {
-        id: newId,
-        title: titleInput || 'CV Tanpa Judul',
-        updatedAt: 'Hari ini',
-        atsScore: calculatedScore,
-        ...formData,
-        templateId: selectedTemplateId,
-      };
-      updatedList = [newCV, ...cvList];
+      updatedList = [updatedCV, ...cvList];
     }
 
     setCvList(updatedList);
     if (typeof window !== 'undefined') {
       localStorage.setItem('cuti_cv_list', JSON.stringify(updatedList));
+      localStorage.setItem('cuti_cv_active_draft', JSON.stringify(updatedCV));
+      localStorage.setItem(`cuti_cv_data_${targetId}`, JSON.stringify(updatedCV));
     }
     router.push('/cv');
     resetForm();
@@ -2307,12 +3143,75 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     });
   };
 
-  const handleDeleteCV = (id: string) => {
-    const updated = cvList.filter((cv) => cv.id !== id);
+  const handleOpenCvDetail = (cv: CVData) => {
+    setSelectedCV(cv);
+    setTitleInput(cv.title);
+    setFormData({
+      firstName: cv.firstName || '',
+      lastName: cv.lastName || '',
+      fullName: cv.fullName || '',
+      headline: cv.headline || '',
+      photoUrl: cv.photoUrl || '',
+      email: cv.email || '',
+      phone: cv.phone || '',
+      website: cv.website || '',
+      linkedin: cv.linkedin || '',
+      github: cv.github || '',
+      city: cv.city || '',
+      province: cv.province || '',
+      country: cv.country || '',
+      location: cv.location || '',
+      summary: cv.summary || '',
+      skills: cv.skills ? [...cv.skills] : [],
+      skillsList: cv.skillsList ? [...cv.skillsList] : [],
+      experience: cv.experience ? [...cv.experience] : [],
+      education: cv.education ? [...cv.education] : [],
+      courses: cv.courses ? [...cv.courses] : [],
+      scholarships: cv.scholarships ? [...cv.scholarships] : [],
+      volunteers: cv.volunteers ? [...cv.volunteers] : [],
+      references: cv.references ? [...cv.references] : [],
+      internships: cv.internships ? [...cv.internships] : [],
+      projects: cv.projects ? [...cv.projects] : [],
+      organizations: cv.organizations ? [...cv.organizations] : [],
+      certifications: cv.certifications ? [...cv.certifications] : [],
+      languages: cv.languages ? [...cv.languages] : [],
+    });
+    if (cv.templateId) setSelectedTemplateId(cv.templateId);
+    if (cv.docFontFamily) setDocFontFamily(cv.docFontFamily);
+    if (cv.docFontSize) setDocFontSize(cv.docFontSize);
+    if (cv.docSpacing) setDocSpacing(cv.docSpacing);
+    if (cv.docShowIcons !== undefined) setDocShowIcons(cv.docShowIcons);
+    if (cv.docNameSize !== undefined) setDocNameSize(cv.docNameSize);
+    if (cv.docHeaderSize !== undefined) setDocHeaderSize(cv.docHeaderSize);
+    if (cv.docBodySize !== undefined) setDocBodySize(cv.docBodySize);
+    if (cv.docSectionSpacing !== undefined) setDocSectionSpacing(cv.docSectionSpacing);
+    if (cv.docLineHeight !== undefined) setDocLineHeight(cv.docLineHeight);
+    if (cv.docLetterSpacing !== undefined) setDocLetterSpacing(cv.docLetterSpacing);
+    if (cv.docLinkStyle) setDocLinkStyle(cv.docLinkStyle);
+    if (cv.docMarginTop !== undefined) setDocMarginTop(cv.docMarginTop);
+    if (cv.docMarginBottom !== undefined) setDocMarginBottom(cv.docMarginBottom);
+    if (cv.docMarginLeft !== undefined) setDocMarginLeft(cv.docMarginLeft);
+    if (cv.docMarginRight !== undefined) setDocMarginRight(cv.docMarginRight);
+
+    setViewMode('preview');
+    setIsFormDrawerOpen(true);
+    router.push(`/cv/${cv.id}`);
+  };
+
+  const handleDeleteCV = (cv: CVData) => {
+    setDeletingCvTarget(cv);
+  };
+
+  const handleConfirmDeleteCV = () => {
+    if (!deletingCvTarget) return;
+    const targetId = deletingCvTarget.id;
+    const updated = cvList.filter((c) => c.id !== targetId);
     setCvList(updated);
     if (typeof window !== 'undefined') {
       localStorage.setItem('cuti_cv_list', JSON.stringify(updated));
+      localStorage.removeItem(`cuti_cv_data_${targetId}`);
     }
+    setDeletingCvTarget(null);
   };
 
   const handleApplyPromo = () => {
@@ -2404,7 +3303,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   );
 
   return (
-    <div className="space-y-6" suppressHydrationWarning>
+    <div className="space-y-6 print:space-y-0 print:m-0 print:p-0" suppressHydrationWarning>
       {/* Header Banner - hanya tampil saat di Daftar CV (list view) */}
       {viewMode === 'list' && (
         <div className="bg-[#0D3BD9] rounded-xl p-6 text-white border border-blue-500/50 shadow-md flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -2542,11 +3441,17 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2.5 rounded-lg bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 border border-violet-100 dark:border-violet-900/40">
+                      <div
+                        onClick={() => handleOpenCvDetail(cv)}
+                        className="p-2.5 rounded-lg bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 border border-violet-100 dark:border-violet-900/40 cursor-pointer hover:bg-violet-100 dark:hover:bg-violet-900/60 transition"
+                      >
                         <FileText className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-1">
+                        <h3
+                          onClick={() => handleOpenCvDetail(cv)}
+                          className="font-bold text-sm text-slate-900 dark:text-white line-clamp-1 cursor-pointer hover:text-orange-500 dark:hover:text-orange-400 transition"
+                        >
                           {cv.title}
                         </h3>
                         <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -2589,16 +3494,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-1.5">
                     <button
-                      onClick={() => {
-                        router.push(`/cv/${cv.id}`);
-                      }}
+                      onClick={() => handleOpenCvDetail(cv)}
                       className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center gap-1.5 cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       <span>Lihat / Edit</span>
                     </button>
                     <button
-                      onClick={() => handleDeleteCV(cv.id)}
+                      onClick={() => handleDeleteCV(cv)}
                       className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition cursor-pointer"
                       title="Hapus CV"
                     >
@@ -3126,8 +4029,21 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   {/* Wizard Form Step 1: Data Diri */}
                   {wizardFormStep === 1 && (
                     <div className="space-y-4 text-xs">
-                      <div className="font-bold text-slate-900 dark:text-white text-sm">
-                        1. Data Diri &amp; Target Karir
+                      <div className="flex items-center justify-between font-bold text-slate-900 dark:text-white text-sm">
+                        <span>1. Data Diri &amp; Target Karir</span>
+                        <button
+                          type="button"
+                          onClick={() => setDocShowIcons(!docShowIcons)}
+                          className={`px-2.5 py-1 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                            docShowIcons
+                              ? 'bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800'
+                              : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                          }`}
+                          title="Klik untuk mengubah antara Tampilan Icon Kontak dan Teks Saja"
+                        >
+                          <UserCheck className="w-3.5 h-3.5 text-orange-500" />
+                          <span>{docShowIcons ? 'Icon Kontak: Aktif' : 'Icon Kontak: Teks Saja'}</span>
+                        </button>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -3162,12 +4078,31 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           />
                         </div>
                         <div>
-                          <label className="font-semibold block mb-1">No HP / WhatsApp *</label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="font-semibold block">No HP / WhatsApp *</label>
+                            {formData.phone && (
+                              <a
+                                href={getWaMeUrl(formData.phone)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-emerald-600 dark:text-emerald-400 font-bold hover:underline flex items-center gap-1"
+                              >
+                                <span>Tes wa.me</span>
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            )}
+                          </div>
                           <input
                             type="text"
                             placeholder="+62 812-3456-7890"
                             value={formData.phone}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+                            onChange={(e) => {
+                              let val = e.target.value;
+                              if (val && !val.startsWith('+62')) {
+                                val = formatPhone62(val);
+                              }
+                              setFormData((prev) => ({ ...prev, phone: val }));
+                            }}
                             className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
                           />
                         </div>
@@ -3524,9 +4459,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
       {/* VIEW MODE 4: MANUAL CREATION & EDIT VIEW */}
       {(viewMode === 'create' || viewMode === 'preview') && (
-        <div className="flex flex-col space-y-4 max-w-7xl mx-auto w-full">
+        <div className="cv-print-area-wrapper flex flex-col space-y-4 max-w-7xl mx-auto w-full print:space-y-0 print:max-w-none print:w-[210mm] print:m-0 print:p-0">
           {/* CONTROL TOOLBAR FOR LAYOUT & DOCUMENT SETTINGS */}
-          <div className="w-full bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-2xs no-print">
+          <div className="w-full bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-2xs no-print">
             {/* Left: Back to List & Active Layout Indicator */}
             <div className="flex items-center gap-3">
               <button
@@ -3549,233 +4484,19 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               </div>
             </div>
 
-            {/* Right: Controls & Download Actions */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Toggle Visual Template Selector */}
-              <button
-                type="button"
-                onClick={() => {
-                  setShowLayoutSelector(!showLayoutSelector);
-                  if (showDocSettings) setShowDocSettings(false);
-                }}
-                className={`px-3.5 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer border ${
-                  showLayoutSelector
-                    ? 'bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-700 shadow-2xs'
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
-                }`}
-              >
-                <LayoutGrid className="w-4 h-4 text-orange-500" />
-                <span>Pilih Template & Tata Letak</span>
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showLayoutSelector ? 'rotate-180' : ''}`} />
-              </button>
-
-              {/* Toggle Document Settings */}
-              <button
-                type="button"
-                onClick={() => {
-                  setShowDocSettings(!showDocSettings);
-                  if (showLayoutSelector) setShowLayoutSelector(false);
-                }}
-                className={`px-3.5 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer border ${
-                  showDocSettings
-                    ? 'bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-700 shadow-2xs'
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
-                }`}
-              >
-                <SlidersHorizontal className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-                <span>Pengaturan Dokumen</span>
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showDocSettings ? 'rotate-180' : ''}`} />
-              </button>
-
-              {/* Primary Download Button */}
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition cursor-pointer"
-              >
-                <Download className="w-4 h-4" />
-                <span>Unduh PDF A4</span>
-              </button>
+            {/* Right: ATS Score Indicator Badge */}
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold border border-emerald-200 dark:border-emerald-800/80 flex items-center gap-1.5 shadow-2xs">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>Skor ATS: {selectedCV?.atsScore ?? 95}%</span>
+              </span>
             </div>
           </div>
 
-          {/* VISUAL TEMPLATE SELECTOR GALLERY WITH MINI PREVIEWS */}
-          {showLayoutSelector && (
-            <div className="w-full bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4 animate-in fade-in duration-200 no-print shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                    <LayoutGrid className="w-4 h-4 text-orange-500" />
-                    <span>Pilih Template & Tata Letak CV ATS</span>
-                  </h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Klik preview kecil untuk memilih tata letak yang diinginkan. Semua template 100% aman untuk parser sistem ATS.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowLayoutSelector(false)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {cvTemplates
-                  .filter((tpl) => !tpl.hidden)
-                  .map((tpl) => {
-                    const isSelected = selectedTemplateId === tpl.id;
-                    return (
-                      <div
-                        key={tpl.id}
-                        onClick={() => {
-                          setSelectedTemplateId(tpl.id);
-                          if (selectedCV) {
-                            const updatedCV = { ...selectedCV, templateId: tpl.id };
-                            setSelectedCV(updatedCV);
-                            setCvList((prevList) => {
-                              const nextList = prevList.map((item) => (item.id === selectedCV.id ? updatedCV : item));
-                              if (typeof window !== 'undefined') {
-                                localStorage.setItem('cuti_cv_list', JSON.stringify(nextList));
-                              }
-                              return nextList;
-                            });
-                          }
-                        }}
-                        className={`group relative p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
-                          isSelected
-                            ? 'bg-orange-50/80 dark:bg-orange-950/40 border-orange-500 ring-2 ring-orange-500/30 shadow-md'
-                            : 'bg-slate-50/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:border-orange-300 dark:hover:border-orange-700'
-                        }`}
-                      >
-                        {/* MINI VISUAL PREVIEW THUMBNAIL */}
-                        <div className="w-full aspect-[210/297] rounded-lg bg-white border border-slate-200 dark:border-slate-700 p-1.5 overflow-hidden shadow-2xs relative flex flex-col justify-between mb-2 group-hover:shadow-md transition">
-                          <TemplateThumbnailVisual templateId={tpl.id} customData={formData} />
-                          {isSelected && (
-                            <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-xs">
-                              <Check className="w-3 h-3 stroke-[3]" />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Template Info */}
-                        <div className="space-y-1">
-                          <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase bg-slate-200/80 text-slate-700 dark:bg-slate-800 dark:text-slate-300 block truncate">
-                            {tpl.badge}
-                          </span>
-                          <h5 className="font-extrabold text-xs text-slate-900 dark:text-white truncate">
-                            {tpl.name}
-                          </h5>
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
-          )}
-
-          {/* DOCUMENT SETTINGS PANEL */}
-          {showDocSettings && (
-            <div className="w-full bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-5 animate-in fade-in duration-200 no-print shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                    <SlidersHorizontal className="w-4 h-4 text-orange-500" />
-                    <span>Pengaturan Dokumen & Tipografi</span>
-                  </h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Sesuaikan font, ukuran teks, spasi, dan tampilan ikon kontak sesuai kebutuhan.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowDocSettings(false)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                {/* Font Family Selection */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
-                    Jenis Font
-                  </label>
-                  <select
-                    value={docFontFamily}
-                    onChange={(e) => setDocFontFamily(e.target.value as any)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
-                  >
-                    <option value="sans">Geist / Inter (Sans-serif Modern)</option>
-                    <option value="serif">EB Garamond / Lora (Serif Klasik)</option>
-                    <option value="mono">JetBrains Mono (Monospace Tech)</option>
-                    <option value="standard">Carlito / Arimo (ATS Standard)</option>
-                  </select>
-                </div>
-
-                {/* Font Size Selection */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
-                    Ukuran Font
-                  </label>
-                  <select
-                    value={docFontSize}
-                    onChange={(e) => setDocFontSize(e.target.value as any)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
-                  >
-                    <option value="sm">Kecil (9.5 pt - Hemat Ruang)</option>
-                    <option value="base">Normal (10.5 pt - Ideal)</option>
-                    <option value="md">Sedang (11.5 pt - Standar)</option>
-                    <option value="lg">Besar (12.5 pt - Mudah Dibaca)</option>
-                  </select>
-                </div>
-
-                {/* Line & Section Spacing */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
-                    Spasi Paragraf & Margin
-                  </label>
-                  <select
-                    value={docSpacing}
-                    onChange={(e) => setDocSpacing(e.target.value as any)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
-                  >
-                    <option value="compact">Padat (Spasi Rapat)</option>
-                    <option value="normal">Normal (Spasi Seimbang)</option>
-                    <option value="spacious">Lega (Spasi Longgar)</option>
-                  </select>
-                </div>
-
-                {/* Contact Icons Toggle */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
-                    Ikon Kontak Header
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setDocShowIcons(!docShowIcons)}
-                    className={`w-full px-3 py-2 rounded-xl border text-xs font-bold flex items-center justify-between transition cursor-pointer ${
-                      docShowIcons
-                        ? 'bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800'
-                        : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
-                    }`}
-                  >
-                    <span>{docShowIcons ? 'Ikon Kontak Aktif' : 'Teks Kontak Saja'}</span>
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${docShowIcons ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-600'}`}>
-                      {docShowIcons && <Check className="w-2.5 h-2.5 stroke-[3]" />}
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* MAIN CONTENT: SPLIT SCREEN ON DESKTOP (LEFT: A4 CANVAS, RIGHT: INLINE FORM EDITOR) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="cv-print-area-wrapper grid grid-cols-1 lg:grid-cols-12 gap-6 items-start print:block print:w-[210mm] print:m-0 print:p-0">
             {/* LEFT COLUMN: CENTERED A4 CANVAS PREVIEW */}
-            <div className="lg:col-span-7 xl:col-span-7 w-full overflow-x-auto no-scrollbar pb-4 flex justify-center bg-slate-200/60 dark:bg-slate-950/80 p-4 md:p-6 rounded-xl border border-slate-300/60 dark:border-slate-800 lg:sticky lg:top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
+            <div className="cv-print-area-wrapper lg:col-span-7 xl:col-span-7 w-full overflow-x-auto no-scrollbar pb-4 flex justify-center bg-slate-200/60 dark:bg-slate-950/80 p-4 md:p-6 rounded-xl border border-slate-300/60 dark:border-slate-800 lg:sticky lg:top-4 max-h-[calc(100vh-2rem)] overflow-y-auto print:p-0 print:bg-transparent print:border-none print:max-h-none print:overflow-visible print:static print:block print:w-[210mm] print:m-0">
               <A4PaperlikeCanvas
                 templateId={selectedTemplateId}
                 customData={formData}
@@ -3783,12 +4504,21 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 docFontSize={docFontSize}
                 docSpacing={docSpacing}
                 docShowIcons={docShowIcons}
+                docPhotoPosition={docPhotoPosition}
                 docNameSize={docNameSize}
                 docHeaderSize={docHeaderSize}
                 docBodySize={docBodySize}
                 docSectionSpacing={docSectionSpacing}
                 docLineHeight={docLineHeight}
                 docLetterSpacing={docLetterSpacing}
+                docLinkStyle={docLinkStyle}
+                docProjectLinkStyle={docProjectLinkStyle}
+                docRefEmailHyperlink={docRefEmailHyperlink}
+                docRefPhoneHyperlink={docRefPhoneHyperlink}
+                docMarginTop={docMarginTop}
+                docMarginBottom={docMarginBottom}
+                docMarginLeft={docMarginLeft}
+                docMarginRight={docMarginRight}
               />
             </div>
 
@@ -3941,7 +4671,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               required
                               placeholder="e.g., +62 812 3456 7890"
                               value={formData.phone}
-                              onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+                              onChange={(e) => {
+                                let val = e.target.value;
+                                if (val && !val.startsWith('+62')) {
+                                  val = formatPhone62(val);
+                                }
+                                setFormData((prev) => ({ ...prev, phone: val }));
+                              }}
                               className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
                             />
                           </div>
@@ -3988,10 +4724,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 transition shadow-2xs"
                               >
                                 <option value="github">GitHub</option>
-                                <option value="linkedin">LinkedIn</option>
                                 <option value="dribbble">Dribbble</option>
-                                <option value="pinterest">Pinterest</option>
                                 <option value="instagram">Instagram</option>
+                                <option value="twitter">Twitter / X</option>
+                                <option value="youtube">YouTube</option>
+                                <option value="facebook">Facebook</option>
+                                <option value="pinterest">Pinterest</option>
                                 <option value="tiktok">TikTok</option>
                                 <option value="website">Portofolio / Website</option>
                                 <option value="other">Lainnya</option>
@@ -4003,12 +4741,20 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 placeholder={
                                   formData.socialPlatform === 'dribbble'
                                     ? 'e.g., dribbble.com/johndoe'
-                                    : formData.socialPlatform === 'pinterest'
-                                    ? 'e.g., pinterest.com/johndoe'
                                     : formData.socialPlatform === 'instagram'
                                     ? 'e.g., instagram.com/johndoe'
+                                    : formData.socialPlatform === 'twitter'
+                                    ? 'e.g., x.com/johndoe'
+                                    : formData.socialPlatform === 'youtube'
+                                    ? 'e.g., youtube.com/@johndoe'
+                                    : formData.socialPlatform === 'facebook'
+                                    ? 'e.g., facebook.com/johndoe'
+                                    : formData.socialPlatform === 'pinterest'
+                                    ? 'e.g., pinterest.com/johndoe'
                                     : formData.socialPlatform === 'tiktok'
                                     ? 'e.g., tiktok.com/@johndoe'
+                                    : formData.socialPlatform === 'website'
+                                    ? 'e.g., johndoe.dev'
                                     : 'e.g., github.com/johndoe'
                                 }
                                 value={formData.github || formData.socialHandle || ''}
@@ -4038,17 +4784,86 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             className="hidden"
                           />
                           {formData.photoUrl ? (
-                            <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
-                              <img
-                                src={formData.photoUrl}
-                                alt="Profil"
-                                className="w-14 h-14 rounded-full object-cover border-2 border-orange-500 shadow-2xs shrink-0 bg-white"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-bold text-slate-800 dark:text-white truncate">Foto Profil Terpasang</p>
-                                <p className="text-[11px] text-slate-500 dark:text-slate-400">Format WebP Terkompresi</p>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <img
+                                  src={formData.photoUrl}
+                                  alt="Profil"
+                                  className={`w-14 h-14 ${formData.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} object-cover border-2 border-orange-500 shadow-2xs shrink-0 bg-white`}
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-bold text-slate-800 dark:text-white truncate">Foto Profil Terpasang</p>
+                                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-[10px] text-slate-500 font-semibold">Bentuk:</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setFormData((prev) => ({ ...prev, photoShape: 'circle' }))}
+                                        className={`px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer ${
+                                          (formData.photoShape || 'circle') === 'circle'
+                                            ? 'bg-orange-500 text-white shadow-2xs'
+                                            : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300'
+                                        }`}
+                                      >
+                                        Lingkaran
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setFormData((prev) => ({ ...prev, photoShape: 'square' }))}
+                                        className={`px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer ${
+                                          formData.photoShape === 'square'
+                                            ? 'bg-orange-500 text-white shadow-2xs'
+                                            : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300'
+                                        }`}
+                                      >
+                                        Persegi
+                                      </button>
+                                    </div>
+
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-[10px] text-slate-500 font-semibold">Posisi:</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setFormData((prev) => ({ ...prev, photoPosition: 'left' }));
+                                          setDocPhotoPosition('left');
+                                        }}
+                                        className={`px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer ${
+                                          (formData.photoPosition || docPhotoPosition || 'right') === 'left'
+                                            ? 'bg-orange-500 text-white shadow-2xs'
+                                            : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300'
+                                        }`}
+                                      >
+                                        Kiri
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setFormData((prev) => ({ ...prev, photoPosition: 'right' }));
+                                          setDocPhotoPosition('right');
+                                        }}
+                                        className={`px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer ${
+                                          (formData.photoPosition || docPhotoPosition || 'right') === 'right'
+                                            ? 'bg-orange-500 text-white shadow-2xs'
+                                            : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300'
+                                        }`}
+                                      >
+                                        Kanan
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
                               <div className="flex items-center gap-1.5 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={handleEditExistingPhoto}
+                                  className="px-2.5 py-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950/40 dark:hover:bg-orange-900/60 dark:text-orange-400 text-xs font-semibold transition cursor-pointer flex items-center gap-1"
+                                  title="Atur Ukuran & Posisi Foto"
+                                >
+                                  <Maximize2 className="w-3.5 h-3.5" />
+                                  <span>Atur Ukuran</span>
+                                </button>
                                 <button
                                   type="button"
                                   onClick={() => photoFileInputRef.current?.click()}
@@ -4073,7 +4888,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 className="px-4 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-950/40 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-slate-700 transition cursor-pointer flex items-center gap-2"
                               >
                                 <Upload className="w-4 h-4 text-orange-500" />
-                                <span>Unggah Foto Profil (Auto Compress WebP)</span>
+                                <span>Unggah Foto Profil</span>
                               </button>
                               <span className="text-[11px] text-slate-400">PNG, JPG, WebP</span>
                             </div>
@@ -4094,11 +4909,29 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       title = 'Ringkasan Profesional';
                       accordionKey = 'sec2';
                       content = (
-                        <AutoResizeTextarea
-                          placeholder="e.g., Senior frontend engineer dengan 8+ tahun pengalaman..."
-                          value={formData.summary}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, summary: e.target.value }))}
-                        />
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <label className="font-semibold text-slate-700 dark:text-slate-300 block text-xs">
+                              Ringkasan Profil / Summary
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenAiDrawer('summary', 'Ringkasan Profesional', formData.summary, (newVal, feedback) => {
+                                setFormData((prev) => ({ ...prev, summary: newVal }));
+                                handleAiSuccessFeedback(feedback);
+                              })}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-extrabold text-[11px] border border-purple-200 dark:border-purple-800 transition cursor-pointer shadow-2xs"
+                            >
+                              <Sparkles className="w-3.5 h-3.5 fill-purple-600 text-purple-600" />
+                              <span>Bantu tulis dengan AI</span>
+                            </button>
+                          </div>
+                          <AutoResizeTextarea
+                            placeholder="e.g., Senior frontend engineer dengan 8+ tahun pengalaman..."
+                            value={formData.summary}
+                            onChange={(e) => setFormData((prev) => ({ ...prev, summary: e.target.value }))}
+                          />
+                        </div>
                       );
                     } else if (secKey === 'experience') {
                       title = 'Pengalaman Kerja';
@@ -4118,10 +4951,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 key={exp.id || expIdx}
                                 style={{
                                   transform: isDraggingThis ? `translateY(${subItemOffsetY}px) scale(1.02)` : undefined,
-                                  zIndex: isDraggingThis ? 50 : 1,
+                                  zIndex: isDraggingThis ? 50 : undefined,
                                   transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
                                 }}
-                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative overflow-hidden ${
+                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
                                   isDraggingThis
                                     ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
@@ -4194,137 +5027,57 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-3">
-                                  <div>
-                                    <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Lokasi</label>
-                                    <input
-                                      type="text"
-                                      placeholder="e.g., San Francisco, CA"
-                                      value={exp.location || ''}
-                                      onChange={(e) => {
-                                        const val = e.target.value;
-                                        setFormData((prev) => {
-                                          const arr = [...prev.experience];
-                                          arr[expIdx] = { ...arr[expIdx], location: val };
-                                          return { ...prev, experience: arr };
-                                        });
-                                      }}
-                                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Website Perusahaan</label>
-                                    <input
-                                      type="text"
-                                      placeholder="e.g., acmecorp.com"
-                                      value={exp.website || ''}
-                                      onChange={(e) => {
-                                        const val = e.target.value;
-                                        setFormData((prev) => {
-                                          const arr = [...prev.experience];
-                                          arr[expIdx] = { ...arr[expIdx], website: val };
-                                          return { ...prev, experience: arr };
-                                        });
-                                      }}
-                                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
-                                    />
-                                  </div>
+                                <div>
+                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Lokasi Perusahaan</label>
+                                  <CitySearchInput
+                                    value={exp.location || ''}
+                                    onChange={(val) => {
+                                      setFormData((prev) => {
+                                        const arr = [...prev.experience];
+                                        arr[expIdx] = { ...arr[expIdx], location: val };
+                                        return { ...prev, experience: arr };
+                                      });
+                                    }}
+                                  />
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-3">
-                                  <div>
-                                    <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Mulai Bekerja</label>
-                                    <div className="grid grid-cols-2 gap-2">
-                                      <select
-                                        value={startMonth}
-                                        onChange={(e) => {
-                                          const m = e.target.value;
-                                          setFormData((prev) => {
-                                            const arr = [...prev.experience];
-                                            arr[expIdx] = {
-                                              ...arr[expIdx],
-                                              startDate: `${m} ${startYear}`.trim(),
-                                            };
-                                            return { ...prev, experience: arr };
-                                          });
-                                        }}
-                                        className="w-full px-2.5 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs cursor-pointer"
-                                      >
-                                        <option value="">Bulan</option>
-                                        {['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'].map((m) => (
-                                          <option key={m} value={m}>{m}</option>
-                                        ))}
-                                      </select>
-                                      <select
-                                        value={startYear}
-                                        onChange={(e) => {
-                                          const y = e.target.value;
-                                          setFormData((prev) => {
-                                            const arr = [...prev.experience];
-                                            arr[expIdx] = {
-                                              ...arr[expIdx],
-                                              startDate: `${startMonth} ${y}`.trim(),
-                                            };
-                                            return { ...prev, experience: arr };
-                                          });
-                                        }}
-                                        className="w-full px-2.5 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs cursor-pointer"
-                                      >
-                                        <option value="">Tahun</option>
-                                        {Array.from({ length: 40 }, (_, i) => String(2026 - i)).map((y) => (
-                                          <option key={y} value={y}>{y}</option>
-                                        ))}
-                                      </select>
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Selesai Bekerja</label>
-                                    <div className="grid grid-cols-2 gap-2">
-                                      <select
-                                        disabled={exp.isCurrent}
-                                        value={endMonth}
-                                        onChange={(e) => {
-                                          const m = e.target.value;
-                                          setFormData((prev) => {
-                                            const arr = [...prev.experience];
-                                            arr[expIdx] = {
-                                              ...arr[expIdx],
-                                              endDate: `${m} ${endYear}`.trim(),
-                                            };
-                                            return { ...prev, experience: arr };
-                                          });
-                                        }}
-                                        className="w-full px-2.5 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 disabled:opacity-50 shadow-2xs cursor-pointer"
-                                      >
-                                        <option value="">Bulan</option>
-                                        {['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'].map((m) => (
-                                          <option key={m} value={m}>{m}</option>
-                                        ))}
-                                      </select>
-                                      <select
-                                        disabled={exp.isCurrent}
-                                        value={endYear}
-                                        onChange={(e) => {
-                                          const y = e.target.value;
-                                          setFormData((prev) => {
-                                            const arr = [...prev.experience];
-                                            arr[expIdx] = {
-                                              ...arr[expIdx],
-                                              endDate: `${endMonth} ${y}`.trim(),
-                                            };
-                                            return { ...prev, experience: arr };
-                                          });
-                                        }}
-                                        className="w-full px-2.5 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 disabled:opacity-50 shadow-2xs cursor-pointer"
-                                      >
-                                        <option value="">Tahun</option>
-                                        {Array.from({ length: 40 }, (_, i) => String(2026 - i)).map((y) => (
-                                          <option key={y} value={y}>{y}</option>
-                                        ))}
-                                      </select>
-                                    </div>
-                                  </div>
-                                </div>
+                                 <div className="grid grid-cols-2 gap-3">
+                                   <div>
+                                     <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Mulai Bekerja</label>
+                                     <CustomDatePicker
+                                       value={exp.startDate || ''}
+                                       onChange={(val) => {
+                                         setFormData((prev) => {
+                                           const arr = [...prev.experience];
+                                           arr[expIdx] = { ...arr[expIdx], startDate: val };
+                                           return { ...prev, experience: arr };
+                                         });
+                                       }}
+                                       placeholder="Mulai..."
+                                     />
+                                   </div>
+                                   <div>
+                                     <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Selesai Bekerja</label>
+                                     <CustomDatePicker
+                                       disabled={exp.isCurrent}
+                                       value={exp.isCurrent ? 'Sekarang' : (exp.endDate || '')}
+                                       minDate={exp.startDate || ''}
+                                       onChange={(val) => {
+                                         setFormData((prev) => {
+                                           const arr = [...prev.experience];
+                                           arr[expIdx] = {
+                                             ...arr[expIdx],
+                                             endDate: val,
+                                             isCurrent: val === 'Sekarang' || val === 'Saat Ini',
+                                           };
+                                           return { ...prev, experience: arr };
+                                         });
+                                       }}
+                                       placeholder="Selesai..."
+                                       allowPresent={true}
+                                     />
+                                   </div>
+                                 </div>
 
                                 <div className="flex items-center gap-2 pt-1">
                                   <input
@@ -4351,16 +5104,48 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 </div>
 
                                 <div>
-                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Deskripsi Tugas &amp; Pencapaian</label>
-                                  <AutoResizeTextarea
+                                  <div className="flex items-center justify-between mb-1.5">
+                                    <span className="font-semibold text-slate-700 dark:text-slate-300 block text-xs">
+                                      Deskripsi Tugas &amp; Pencapaian
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenAiDrawer('experience', `Pengalaman (${exp.role || 'Kerja'})`, exp.description, (newVal, feedback) => {
+                                        setFormData((prev) => {
+                                          const arr = [...prev.experience];
+                                          arr[expIdx] = { ...arr[expIdx], description: newVal };
+                                          return { ...prev, experience: arr };
+                                        });
+                                        handleAiSuccessFeedback(feedback);
+                                      })}
+                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-extrabold text-[11px] border border-purple-200 dark:border-purple-800 transition cursor-pointer shadow-2xs"
+                                    >
+                                      <Sparkles className="w-3.5 h-3.5 fill-purple-600 text-purple-600" />
+                                      <span>Bantu tulis dengan AI</span>
+                                    </button>
+                                  </div>
+
+                                  <BulletPointListInput
                                     placeholder="e.g., Memimpin tim frontend 5 orang, mengoptimalkan waktu muat aplikasi hingga 40%..."
                                     value={exp.description}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
+                                    onChange={(val) => {
                                       setFormData((prev) => {
                                         const arr = [...prev.experience];
                                         arr[expIdx] = { ...arr[expIdx], description: val };
                                         return { ...prev, experience: arr };
+                                      });
+                                    }}
+                                    onOptimizeBullet={(bulletText, bulletIdx) => {
+                                      handleOpenBulletPopover(bulletText, (newVal, feedback) => {
+                                        const lines = exp.description ? exp.description.split('\n') : [];
+                                        lines[bulletIdx] = newVal;
+                                        const updatedStr = lines.join('\n');
+                                        setFormData((prev) => {
+                                          const arr = [...prev.experience];
+                                          arr[expIdx] = { ...arr[expIdx], description: updatedStr };
+                                          return { ...prev, experience: arr };
+                                        });
+                                        handleAiSuccessFeedback(feedback);
                                       });
                                     }}
                                   />
@@ -4411,10 +5196,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 key={item.id || itemIdx}
                                 style={{
                                   transform: isDraggingThis ? `translateY(${subItemOffsetY}px) scale(1.02)` : undefined,
-                                  zIndex: isDraggingThis ? 50 : 1,
+                                  zIndex: isDraggingThis ? 50 : undefined,
                                   transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
                                 }}
-                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative overflow-hidden ${
+                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
                                   isDraggingThis
                                     ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
@@ -4487,58 +5272,65 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 </div>
                               </div>
 
+                              <div>
+                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Lokasi Perusahaan</label>
+                                <CitySearchInput
+                                  value={item.location || ''}
+                                  onChange={(val) => {
+                                    setFormData((prev) => {
+                                      const arr = [...(prev.internships || [])];
+                                      arr[itemIdx] = { ...arr[itemIdx], location: val };
+                                      return { ...prev, internships: arr };
+                                    });
+                                  }}
+                                />
+                              </div>
+
                               <div className="grid grid-cols-2 gap-3">
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Mulai</label>
-                                  <input
-                                    type="text"
-                                    placeholder="e.g., Jan 2023"
+                                  <CustomDatePicker
                                     value={item.startDate || ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
+                                    onChange={(val) => {
                                       setFormData((prev) => {
                                         const arr = [...(prev.internships || [])];
                                         arr[itemIdx] = { ...arr[itemIdx], startDate: val };
                                         return { ...prev, internships: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    placeholder="Mulai..."
                                   />
                                 </div>
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Selesai</label>
-                                  <input
-                                    type="text"
-                                    placeholder="e.g., Jun 2023"
+                                  <CustomDatePicker
                                     value={item.endDate || ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
+                                    minDate={item.startDate || ''}
+                                    onChange={(val) => {
                                       setFormData((prev) => {
                                         const arr = [...(prev.internships || [])];
                                         arr[itemIdx] = { ...arr[itemIdx], endDate: val };
                                         return { ...prev, internships: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    placeholder="Selesai..."
+                                    allowPresent={true}
                                   />
                                 </div>
                               </div>
 
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Deskripsi Tugas Magang</label>
-                                <AutoResizeTextarea
-                                  placeholder="e.g., Membantu tim merancang wireframe dan mendesain 10+ komponen UI..."
-                                  value={item.description}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.internships || [])];
-                                      arr[itemIdx] = { ...arr[itemIdx], description: val };
-                                      return { ...prev, internships: arr };
-                                    });
-                                  }}
-                                />
-                              </div>
+                              <BulletPointListInput
+                                label="Deskripsi Tugas Magang"
+                                placeholder="e.g., Membantu tim merancang wireframe dan mendesain 10+ komponen UI..."
+                                value={item.description}
+                                onChange={(val) => {
+                                  setFormData((prev) => {
+                                    const arr = [...(prev.internships || [])];
+                                    arr[itemIdx] = { ...arr[itemIdx], description: val };
+                                    return { ...prev, internships: arr };
+                                  });
+                                }}
+                              />
                             </div>
                           );
                           })}
@@ -4582,10 +5374,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 key={proj.id || projIdx}
                                 style={{
                                   transform: isDraggingThis ? `translateY(${subItemOffsetY}px) scale(1.02)` : undefined,
-                                  zIndex: isDraggingThis ? 50 : 1,
+                                  zIndex: isDraggingThis ? 50 : undefined,
                                   transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
                                 }}
-                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative overflow-hidden ${
+                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
                                   isDraggingThis
                                     ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
@@ -4658,39 +5450,88 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 </div>
                               </div>
 
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Teknologi / URL Proyek</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g., React, Node.js, TailwindCSS • https://project.com"
-                                  value={proj.link || ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.projects || [])];
-                                      arr[projIdx] = { ...arr[projIdx], link: val };
-                                      return { ...prev, projects: arr };
-                                    });
-                                  }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
-                                />
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Teknologi yang Digunakan</label>
+                                  <input
+                                    type="text"
+                                    placeholder="e.g., React, Node.js, TailwindCSS"
+                                    value={proj.tech || ''}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setFormData((prev) => {
+                                        const arr = [...(prev.projects || [])];
+                                        arr[projIdx] = { ...arr[projIdx], tech: val };
+                                        return { ...prev, projects: arr };
+                                      });
+                                    }}
+                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">URL / Link Proyek</label>
+                                  <input
+                                    type="text"
+                                    placeholder="e.g., https://github.com/user/project"
+                                    value={proj.url || proj.link || ''}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setFormData((prev) => {
+                                        const arr = [...(prev.projects || [])];
+                                        arr[projIdx] = { ...arr[projIdx], url: val, link: val };
+                                        return { ...prev, projects: arr };
+                                      });
+                                    }}
+                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                  />
+                                </div>
                               </div>
 
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Deskripsi Proyek</label>
-                                <AutoResizeTextarea
-                                  placeholder="e.g., Membangun aplikasi toko online dengan fitur payment gateway..."
-                                  value={proj.description}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.projects || [])];
-                                      arr[projIdx] = { ...arr[projIdx], description: val };
-                                      return { ...prev, projects: arr };
-                                    });
-                                  }}
-                                />
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Mulai Proyek</label>
+                                  <CustomDatePicker
+                                    value={proj.startDate || ''}
+                                    onChange={(val) => {
+                                      setFormData((prev) => {
+                                        const arr = [...(prev.projects || [])];
+                                        arr[projIdx] = { ...arr[projIdx], startDate: val };
+                                        return { ...prev, projects: arr };
+                                      });
+                                    }}
+                                    placeholder="Mulai..."
+                                  />
+                                </div>
+                                <div>
+                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Selesai Proyek</label>
+                                  <CustomDatePicker
+                                    value={proj.endDate || ''}
+                                    minDate={proj.startDate || ''}
+                                    onChange={(val) => {
+                                      setFormData((prev) => {
+                                        const arr = [...(prev.projects || [])];
+                                        arr[projIdx] = { ...arr[projIdx], endDate: val };
+                                        return { ...prev, projects: arr };
+                                      });
+                                    }}
+                                    placeholder="Selesai..."
+                                    allowPresent={true}
+                                  />
+                                </div>
                               </div>
+
+                              <BulletPointListInput
+                                label="Deskripsi Proyek & Hasil"
+                                placeholder="e.g., Membangun aplikasi toko online dengan fitur payment gateway..."
+                                value={proj.description}
+                                onChange={(val) => {
+                                  setFormData((prev) => {
+                                    const arr = [...(prev.projects || [])];
+                                    arr[projIdx] = { ...arr[projIdx], description: val };
+                                    return { ...prev, projects: arr };
+                                  });
+                                }}
+                              />
                             </div>
                           );
                           })}
@@ -4706,7 +5547,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                     id: `proj-${Date.now()}`,
                                     name: '',
                                     role: '',
+                                    tech: '',
+                                    url: '',
                                     link: '',
+                                    startDate: '',
+                                    endDate: '',
                                     description: '',
                                   },
                                 ],
@@ -4732,10 +5577,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 key={org.id || orgIdx}
                                 style={{
                                   transform: isDraggingThis ? `translateY(${subItemOffsetY}px) scale(1.02)` : undefined,
-                                  zIndex: isDraggingThis ? 50 : 1,
+                                  zIndex: isDraggingThis ? 50 : undefined,
                                   transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
                                 }}
-                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative overflow-hidden ${
+                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
                                   isDraggingThis
                                     ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
@@ -4811,55 +5656,48 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               <div className="grid grid-cols-2 gap-3">
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Mulai</label>
-                                  <input
-                                    type="text"
-                                    placeholder="e.g., 2022"
+                                  <CustomDatePicker
                                     value={org.startDate || ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
+                                    onChange={(val) => {
                                       setFormData((prev) => {
                                         const arr = [...(prev.organizations || [])];
                                         arr[orgIdx] = { ...arr[orgIdx], startDate: val };
                                         return { ...prev, organizations: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    placeholder="Mulai..."
                                   />
                                 </div>
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Selesai</label>
-                                  <input
-                                    type="text"
-                                    placeholder="e.g., 2023"
+                                  <CustomDatePicker
                                     value={org.endDate || ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
+                                    minDate={org.startDate || ''}
+                                    onChange={(val) => {
                                       setFormData((prev) => {
                                         const arr = [...(prev.organizations || [])];
                                         arr[orgIdx] = { ...arr[orgIdx], endDate: val };
                                         return { ...prev, organizations: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    placeholder="Selesai..."
+                                    allowPresent={true}
                                   />
                                 </div>
                               </div>
 
-                              <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Deskripsi Kegiatan</label>
-                                <AutoResizeTextarea
-                                  placeholder="e.g., Mengkoordinasikan seminar teknologi nasional dengan 500+ peserta..."
-                                  value={org.description}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.organizations || [])];
-                                      arr[orgIdx] = { ...arr[orgIdx], description: val };
-                                      return { ...prev, organizations: arr };
-                                    });
-                                  }}
-                                />
-                              </div>
+                              <BulletPointListInput
+                                label="Deskripsi Kegiatan & Peran"
+                                placeholder="e.g., Mengkoordinasikan seminar teknologi nasional dengan 500+ peserta..."
+                                value={org.description}
+                                onChange={(val) => {
+                                  setFormData((prev) => {
+                                    const arr = [...(prev.organizations || [])];
+                                    arr[orgIdx] = { ...arr[orgIdx], description: val };
+                                    return { ...prev, organizations: arr };
+                                  });
+                                }}
+                              />
                             </div>
                           );
                           })}
@@ -4902,10 +5740,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 key={edu.id || eduIdx}
                                 style={{
                                   transform: isDraggingThis ? `translateY(${subItemOffsetY}px) scale(1.02)` : undefined,
-                                  zIndex: isDraggingThis ? 50 : 1,
+                                  zIndex: isDraggingThis ? 50 : undefined,
                                   transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
                                 }}
-                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative overflow-hidden ${
+                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
                                   isDraggingThis
                                     ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
@@ -4980,22 +5818,36 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                               <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tahun Lulus / Periode</label>
-                                  <input
-                                    type="text"
-                                    placeholder="e.g., 2020 - 2024"
-                                    value={edu.year}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
+                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Masuk</label>
+                                  <CustomDatePicker
+                                    value={edu.startDate || ''}
+                                    onChange={(val) => {
                                       setFormData((prev) => {
                                         const arr = [...prev.education];
-                                        arr[eduIdx] = { ...arr[eduIdx], year: val };
+                                        arr[eduIdx] = { ...arr[eduIdx], startDate: val };
                                         return { ...prev, education: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    placeholder="Tahun masuk..."
                                   />
                                 </div>
+                                <div>
+                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Lulus</label>
+                                  <CustomDatePicker
+                                    value={edu.endDate || ''}
+                                    minDate={edu.startDate || ''}
+                                    onChange={(val) => {
+                                      setFormData((prev) => {
+                                        const arr = [...prev.education];
+                                        arr[eduIdx] = { ...arr[eduIdx], endDate: val };
+                                        return { ...prev, education: arr };
+                                      });
+                                    }}
+                                    placeholder="Tahun lulus..."
+                                    allowPresent={true}
+                                  />
+                                </div>
+                              </div>
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">IPK / Nilai (GPA)</label>
                                   <input
@@ -5013,7 +5865,19 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                     className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                   />
                                 </div>
-                              </div>
+
+                              <BulletPointListInput
+                                label="Deskripsi / Prestasi Akademik"
+                                placeholder="e.g., Ketua BEM, Asisten Dosen, Penelitian Tugas Akhir tentang..."
+                                value={edu.description || ''}
+                                onChange={(val) => {
+                                  setFormData((prev) => {
+                                    const arr = [...prev.education];
+                                    arr[eduIdx] = { ...arr[eduIdx], description: val };
+                                    return { ...prev, education: arr };
+                                  });
+                                }}
+                              />
                             </div>
                           );
                           })}
@@ -5030,7 +5894,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                     institution: '',
                                     degree: '',
                                     year: '',
+                                    startDate: '',
+                                    endDate: '',
                                     gpa: '',
+                                    description: '',
                                   },
                                 ],
                               }))
@@ -5108,21 +5975,55 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               </div>
 
                               <div>
-                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Terbit</label>
+                                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Credential ID</label>
                                 <input
                                   type="text"
-                                  placeholder="e.g., Nov 2023"
-                                  value={cert.issueDate || ''}
+                                  placeholder="e.g., ABC123XYZ atau kode unik dari penerbit"
+                                  value={cert.credentialId || ''}
                                   onChange={(e) => {
                                     const val = e.target.value;
                                     setFormData((prev) => {
                                       const arr = [...(prev.certifications || [])];
-                                      arr[certIdx] = { ...arr[certIdx], issueDate: val };
+                                      arr[certIdx] = { ...arr[certIdx], credentialId: val };
                                       return { ...prev, certifications: arr };
                                     });
                                   }}
                                   className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                 />
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Terbit</label>
+                                  <CustomDatePicker
+                                    value={cert.issueDate || ''}
+                                    onChange={(val) => {
+                                      setFormData((prev) => {
+                                        const arr = [...(prev.certifications || [])];
+                                        arr[certIdx] = { ...arr[certIdx], issueDate: val };
+                                        return { ...prev, certifications: arr };
+                                      });
+                                    }}
+                                    placeholder="Tanggal Terbit..."
+                                  />
+                                </div>
+                                <div>
+                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Link / URL Sertifikat</label>
+                                  <input
+                                    type="text"
+                                    placeholder="e.g., https://credential.net/123"
+                                    value={cert.link || ''}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setFormData((prev) => {
+                                        const arr = [...(prev.certifications || [])];
+                                        arr[certIdx] = { ...arr[certIdx], link: val };
+                                        return { ...prev, certifications: arr };
+                                      });
+                                    }}
+                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                  />
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -5154,44 +6055,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       title = 'Keahlian';
                       accordionKey = 'sec9';
                       content = (
-                        <div className="space-y-3.5">
-                          <div>
-                            <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Skill Utama</label>
-                            <input
-                              type="text"
-                              placeholder="e.g., React, TypeScript, Node.js, Next.js"
-                              value={formData.skills.join(', ')}
-                              onChange={(e) => {
-                                const arr = e.target.value.split(',').map((s) => s.trim());
-                                setFormData((prev) => ({ ...prev, skills: arr }));
-                              }}
-                              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
-                            />
-                          </div>
-
-                          <div className="flex flex-wrap gap-1.5 pt-1">
-                            {formData.skills.filter(Boolean).map((sk, skIdx) => (
-                              <span
-                                key={skIdx}
-                                className="px-2.5 py-1 rounded-md bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 text-xs font-semibold flex items-center gap-1.5"
-                              >
-                                {sk}
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setFormData((prev) => ({
-                                      ...prev,
-                                      skills: prev.skills.filter((_, i) => i !== skIdx),
-                                    }))
-                                  }
-                                  className="text-teal-500 hover:text-rose-500 cursor-pointer"
-                                >
-                                  ×
-                                </button>
-                              </span>
-                            ))}
-                          </div>
-                        </div>
+                        <SkillsEditorSection
+                          skills={formData.skills}
+                          onChange={(newSkills) => setFormData((prev) => ({ ...prev, skills: newSkills }))}
+                        />
                       );
                     } else if (secKey === 'languages') {
                       title = 'Bahasa';
@@ -5215,23 +6082,22 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 className="w-full px-3.5 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                               />
                               <div className="flex items-center gap-2">
-                                <select
+                                <CustomSelect
                                   value={lang.level}
-                                  onChange={(e) => {
-                                    const val = e.target.value as any;
+                                  onChange={(val) => {
                                     setFormData((prev) => {
                                       const arr = [...(prev.languages || [])];
-                                      arr[langIdx] = { ...arr[langIdx], level: val };
+                                      arr[langIdx] = { ...arr[langIdx], level: val as any };
                                       return { ...prev, languages: arr };
                                     });
                                   }}
-                                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs cursor-pointer"
-                                >
-                                  <option value="Native">Native (Penutur Asli)</option>
-                                  <option value="Professional">Professional (Lancar)</option>
-                                  <option value="Conversational">Conversational (Menengah)</option>
-                                  <option value="Basic">Basic (Dasar)</option>
-                                </select>
+                                  options={[
+                                    { value: 'Native', label: 'Native (Penutur Asli)' },
+                                    { value: 'Professional', label: 'Professional (Lancar)' },
+                                    { value: 'Conversational', label: 'Conversational (Menengah)' },
+                                    { value: 'Basic', label: 'Basic (Dasar)' },
+                                  ]}
+                                />
                                 <button
                                   type="button"
                                   onClick={() =>
@@ -5324,6 +6190,49 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   />
                                 </div>
                               </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tanggal Mulai</label>
+                                  <CustomDatePicker
+                                    value={crs.startDate || ''}
+                                    onChange={(val) => {
+                                      setFormData((prev) => {
+                                        const arr = [...(prev.courses || [])];
+                                        arr[crsIdx] = { ...arr[crsIdx], startDate: val };
+                                        return { ...prev, courses: arr };
+                                      });
+                                    }}
+                                    placeholder="Mulai..."
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tanggal Selesai</label>
+                                  <CustomDatePicker
+                                    value={crs.endDate || ''}
+                                    onChange={(val) => {
+                                      setFormData((prev) => {
+                                        const arr = [...(prev.courses || [])];
+                                        arr[crsIdx] = { ...arr[crsIdx], endDate: val };
+                                        return { ...prev, courses: arr };
+                                      });
+                                    }}
+                                    placeholder="Selesai..."
+                                    allowPresent={true}
+                                  />
+                                </div>
+                              </div>
+                              <BulletPointListInput
+                                label="Deskripsi & Pelaksanaan Pelatihan"
+                                placeholder="Tuliskan materi utama, proyek yang diselesaikan..."
+                                value={crs.description || ''}
+                                onChange={(val) => {
+                                  setFormData((prev) => {
+                                    const arr = [...(prev.courses || [])];
+                                    arr[crsIdx] = { ...arr[crsIdx], description: val };
+                                    return { ...prev, courses: arr };
+                                  });
+                                }}
+                              />
                             </div>
                           ))}
 
@@ -5403,6 +6312,49 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   />
                                 </div>
                               </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tanggal Mulai</label>
+                                  <CustomDatePicker
+                                    value={sch.startDate || ''}
+                                    onChange={(val) => {
+                                      setFormData((prev) => {
+                                        const arr = [...(prev.scholarships || [])];
+                                        arr[schIdx] = { ...arr[schIdx], startDate: val };
+                                        return { ...prev, scholarships: arr };
+                                      });
+                                    }}
+                                    placeholder="Mulai Beasiswa..."
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tanggal Selesai</label>
+                                  <CustomDatePicker
+                                    value={sch.endDate || ''}
+                                    onChange={(val) => {
+                                      setFormData((prev) => {
+                                        const arr = [...(prev.scholarships || [])];
+                                        arr[schIdx] = { ...arr[schIdx], endDate: val };
+                                        return { ...prev, scholarships: arr };
+                                      });
+                                    }}
+                                    placeholder="Selesai Beasiswa..."
+                                    allowPresent={true}
+                                  />
+                                </div>
+                              </div>
+                              <BulletPointListInput
+                                label="Deskripsi & Pencapaian Beasiswa"
+                                placeholder="Tuliskan cakupan beasiswa, prestasi yang diraih, dan kontribusi..."
+                                value={sch.description || ''}
+                                onChange={(val) => {
+                                  setFormData((prev) => {
+                                    const arr = [...(prev.scholarships || [])];
+                                    arr[schIdx] = { ...arr[schIdx], description: val };
+                                    return { ...prev, scholarships: arr };
+                                  });
+                                }}
+                              />
                             </div>
                           ))}
 
@@ -5448,7 +6400,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               </div>
                               <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-1">
-                                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Organisasi</label>
+                                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Organisasi / Komunitas</label>
                                   <input
                                     type="text"
                                     placeholder="e.g., Palang Merah Indonesia"
@@ -5465,7 +6417,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   />
                                 </div>
                                 <div className="space-y-1">
-                                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Peran / Peran Relawan</label>
+                                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Peran Relawan</label>
                                   <input
                                     type="text"
                                     placeholder="e.g., Tim Tanggap Bencana"
@@ -5482,6 +6434,50 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   />
                                 </div>
                               </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tanggal Mulai</label>
+                                  <CustomDatePicker
+                                    value={vol.startDate || ''}
+                                    onChange={(val) => {
+                                      setFormData((prev) => {
+                                        const arr = [...(prev.volunteers || [])];
+                                        arr[volIdx] = { ...arr[volIdx], startDate: val };
+                                        return { ...prev, volunteers: arr };
+                                      });
+                                    }}
+                                    placeholder="Mulai..."
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tanggal Selesai</label>
+                                  <CustomDatePicker
+                                    value={vol.endDate || ''}
+                                    minDate={vol.startDate || ''}
+                                    onChange={(val) => {
+                                      setFormData((prev) => {
+                                        const arr = [...(prev.volunteers || [])];
+                                        arr[volIdx] = { ...arr[volIdx], endDate: val };
+                                        return { ...prev, volunteers: arr };
+                                      });
+                                    }}
+                                    placeholder="Selesai / Masih Aktif..."
+                                    allowPresent={true}
+                                  />
+                                </div>
+                              </div>
+                              <BulletPointListInput
+                                label="Deskripsi Kegiatan Relawan"
+                                placeholder="Tuliskan peran, tanggung jawab, dan dampak kegiatan sosial..."
+                                value={vol.description || ''}
+                                onChange={(val) => {
+                                  setFormData((prev) => {
+                                    const arr = [...(prev.volunteers || [])];
+                                    arr[volIdx] = { ...arr[volIdx], description: val };
+                                    return { ...prev, volunteers: arr };
+                                  });
+                                }}
+                              />
                             </div>
                           ))}
 
@@ -5520,10 +6516,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 key={ref.id || refIdx}
                                 style={{
                                   transform: isDraggingThis ? `translateY(${subItemOffsetY}px) scale(1.02)` : undefined,
-                                  zIndex: isDraggingThis ? 50 : 1,
+                                  zIndex: isDraggingThis ? 50 : undefined,
                                   transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
                                 }}
-                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3 transition-all duration-200 relative overflow-hidden ${
+                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3 transition-all duration-200 relative ${
                                   isDraggingThis
                                     ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
@@ -5585,6 +6581,59 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         setFormData((prev) => {
                                           const arr = [...(prev.references || [])];
                                           arr[refIdx] = { ...arr[refIdx], title: val };
+                                          return { ...prev, references: arr };
+                                        });
+                                      }}
+                                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-3">
+                                  <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Perusahaan / Institusi</label>
+                                    <input
+                                      type="text"
+                                      placeholder="e.g., PT Tekno Nusantara"
+                                      value={ref.company || ''}
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        setFormData((prev) => {
+                                          const arr = [...(prev.references || [])];
+                                          arr[refIdx] = { ...arr[refIdx], company: val };
+                                          return { ...prev, references: arr };
+                                        });
+                                      }}
+                                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Email Kontak</label>
+                                    <input
+                                      type="email"
+                                      placeholder="john.smith@tekno.co.id"
+                                      value={ref.email || ''}
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        setFormData((prev) => {
+                                          const arr = [...(prev.references || [])];
+                                          arr[refIdx] = { ...arr[refIdx], email: val };
+                                          return { ...prev, references: arr };
+                                        });
+                                      }}
+                                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">No. HP / WhatsApp</label>
+                                    <input
+                                      type="text"
+                                      placeholder="+62 812-3456-7890"
+                                      value={ref.phone || ''}
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        setFormData((prev) => {
+                                          const arr = [...(prev.references || [])];
+                                          arr[refIdx] = { ...arr[refIdx], phone: val };
                                           return { ...prev, references: arr };
                                         });
                                       }}
@@ -5656,7 +6705,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[calc(100vh-14rem)] overflow-y-auto pr-1">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {cvTemplates
                       .filter((tpl) => !tpl.hidden)
                       .map((tpl) => {
@@ -5697,13 +6746,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
               {/* TAB 3: PENGATURAN */}
               {rightPanelTab === 'pengaturan' && (
-                <div className="w-full bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-5 shadow-2xs animate-in fade-in duration-150 max-h-[calc(100vh-14rem)] overflow-y-auto">
-                  {/* SECTION 1: PENGATURAN GAYA DOKUMEN & TIPOGRAFI */}
-                  <div className="space-y-4">
+                <div className="w-full bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-5 shadow-2xs animate-in fade-in duration-150">
+                  {/* SECTION 1: PENGATURAN MARGIN HALAMAN (WORD PRESET) */}
+                  <div className="space-y-3.5">
                     <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
                       <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                        <SlidersHorizontal className="w-4 h-4 text-orange-500" />
-                        <span>Pengaturan Gaya Dokumen</span>
+                        <LayoutGrid className="w-4 h-4 text-orange-500" />
+                        <span>Margin &amp; Layout Halaman</span>
                       </h4>
                       <button
                         type="button"
@@ -5714,6 +6763,152 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         <RotateCcw className="w-3.5 h-3.5 text-orange-500" />
                         <span>Reset Default</span>
                       </button>
+                    </div>
+
+                    {/* Preset Buttons Grid (Normal, Narrow, Moderate, Wide, Mirrored) */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                          Preset Margin Halaman (Word Style)
+                        </label>
+                        <span className="text-[11px] font-extrabold text-orange-600 dark:text-orange-400 capitalize">
+                          {docMarginPreset === 'custom' ? 'Kustom' : MARGIN_PRESETS[docMarginPreset]?.name || 'Normal'}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {(Object.keys(MARGIN_PRESETS) as Array<keyof typeof MARGIN_PRESETS>).map((key) => {
+                          const item = MARGIN_PRESETS[key];
+                          const isSelected = docMarginPreset === key;
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              onClick={() => handleSelectMarginPreset(key)}
+                              className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between gap-1.5 ${
+                                isSelected
+                                  ? 'bg-orange-50/90 dark:bg-orange-950/60 border-orange-500 text-orange-700 dark:text-orange-300 ring-2 ring-orange-500/20 shadow-2xs'
+                                  : 'bg-slate-50/80 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between w-full">
+                                <span className={`text-xs font-extrabold ${isSelected ? 'text-orange-700 dark:text-orange-300' : 'text-slate-900 dark:text-white'}`}>
+                                  {item.name}
+                                </span>
+                                {isSelected && (
+                                  <span className="w-4 h-4 rounded-full bg-orange-500 text-white flex items-center justify-center">
+                                    <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                  </span>
+                                )}
+                              </div>
+                              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                                <span>{item.labels.top}</span>
+                                <span>{item.labels.bottom}</span>
+                                <span>{item.labels.left}</span>
+                                <span>{item.labels.right}</span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Custom Margin Numeric Inputs */}
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/80 space-y-2">
+                      <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">
+                        Kustom Ukuran Margin (cm):
+                      </span>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <div>
+                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-0.5">Atas</label>
+                          <input
+                            type="number"
+                            step="0.05"
+                            min="0.5"
+                            max="6"
+                            value={docMarginTop}
+                            onChange={(e) => handleCustomMarginChange('top', Number(e.target.value))}
+                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-0.5">Bawah</label>
+                          <input
+                            type="number"
+                            step="0.05"
+                            min="0.5"
+                            max="6"
+                            value={docMarginBottom}
+                            onChange={(e) => handleCustomMarginChange('bottom', Number(e.target.value))}
+                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-0.5">Kiri</label>
+                          <input
+                            type="number"
+                            step="0.05"
+                            min="0.5"
+                            max="6"
+                            value={docMarginLeft}
+                            onChange={(e) => handleCustomMarginChange('left', Number(e.target.value))}
+                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-0.5">Kanan</label>
+                          <input
+                            type="number"
+                            step="0.05"
+                            min="0.5"
+                            max="6"
+                            value={docMarginRight}
+                            onChange={(e) => handleCustomMarginChange('right', Number(e.target.value))}
+                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECTION 2: PENGATURAN GAYA DOKUMEN & TIPOGRAFI */}
+                  <div className="space-y-4 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                      <SlidersHorizontal className="w-4 h-4 text-orange-500" />
+                      <span>Ukuran Font &amp; Gaya Tipografi</span>
+                    </h4>
+
+                    {/* Skala Ukuran Font Global */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                          Skala Ukuran Font Dokumen (Global)
+                        </label>
+                        <span className="text-[11px] font-extrabold text-orange-600 dark:text-orange-400 uppercase">
+                          {docFontSize}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-4 gap-2">
+                        {[
+                          { id: 'sm', label: 'Kecil', pct: '90%' },
+                          { id: 'base', label: 'Normal', pct: '100%' },
+                          { id: 'md', label: 'Sedang', pct: '108%' },
+                          { id: 'lg', label: 'Besar', pct: '118%' },
+                        ].map((fSize) => (
+                          <button
+                            key={fSize.id}
+                            type="button"
+                            onClick={() => setDocFontSize(fSize.id as any)}
+                            className={`py-2 px-2 rounded-xl border text-xs font-bold transition cursor-pointer text-center flex flex-col items-center justify-center gap-0.5 ${
+                              docFontSize === fSize.id
+                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500 text-orange-700 dark:text-orange-300 shadow-2xs ring-1 ring-orange-500'
+                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/80'
+                            }`}
+                          >
+                            <span>{fSize.label}</span>
+                            <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">{fSize.pct}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -5741,6 +6936,47 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         </button>
                       </div>
 
+                      {/* Selection Posisi Foto Profil Header */}
+                      <div className="space-y-1 sm:col-span-2">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                          <ImageIcon className="w-3.5 h-3.5 text-orange-500" />
+                          <span>Posisi Foto Profil Header</span>
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDocPhotoPosition('left');
+                              setFormData((prev) => ({ ...prev, photoPosition: 'left' }));
+                            }}
+                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                              docPhotoPosition === 'left'
+                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
+                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
+                            }`}
+                          >
+                            <AlignLeft className="w-3.5 h-3.5" />
+                            <span>Di Kiri (Left)</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDocPhotoPosition('right');
+                              setFormData((prev) => ({ ...prev, photoPosition: 'right' }));
+                            }}
+                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                              docPhotoPosition === 'right'
+                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
+                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
+                            }`}
+                          >
+                            <AlignRight className="w-3.5 h-3.5" />
+                            <span>Di Kanan (Right)</span>
+                          </button>
+                        </div>
+                      </div>
+
                       {/* Dropdown Font */}
                       <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
@@ -5751,13 +6987,145 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           onChange={(e) => setDocFontFamily(e.target.value as any)}
                           className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
                         >
-                          <option value="sans">Geist / Inter (Sans-serif Modern)</option>
+                          <option value="inter">Inter (Modern &amp; Clean)</option>
+                          <option value="roboto">Roboto (Clean Sans)</option>
+                          <option value="openSans">Open Sans (Neutral &amp; Friendly)</option>
+                          <option value="googleSans">Google Sans (Modern Product)</option>
+                          <option value="montserrat">Montserrat (Bold Editorial)</option>
+                          <option value="lato">Lato (Warm &amp; Professional)</option>
+                          <option value="sans">Geist / Inter (Default Sans)</option>
                           <option value="serif">EB Garamond / Lora (Serif Klasik)</option>
                           <option value="mono">JetBrains Mono (Monospace Tech)</option>
                           <option value="standard">Carlito / Arimo (ATS Standard)</option>
                         </select>
                       </div>
+
+                      {/* Selection Gaya Hyperlink */}
+                      <div className="space-y-1 sm:col-span-2">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                          <ExternalLink className="w-3.5 h-3.5 text-orange-500" />
+                          <span>Gaya Hyperlink / Tautan Kontak</span>
+                        </label>
+                        <div className="grid grid-cols-3 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setDocLinkStyle('blue')}
+                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                              docLinkStyle === 'blue'
+                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs'
+                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60'
+                            }`}
+                          >
+                            <span className="text-blue-600 dark:text-blue-400 underline font-semibold">Biru</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setDocLinkStyle('underline')}
+                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                              docLinkStyle === 'underline'
+                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs'
+                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60'
+                            }`}
+                          >
+                            <span className="text-slate-900 dark:text-white underline font-semibold">Underline Hitam</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setDocLinkStyle('plain')}
+                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                              docLinkStyle === 'plain'
+                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs'
+                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60'
+                            }`}
+                          >
+                            <span className="text-slate-700 dark:text-slate-300 font-normal">Teks Biasa</span>
+                          </button>
+                      </div>
+
+                      {/* Pengaturan Hyperlink Referensi */}
+                      <div className="space-y-1 sm:col-span-2">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                          <Mail className="w-3.5 h-3.5 text-orange-500" />
+                          <span>Hyperlink Referensi Kontak</span>
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setDocRefEmailHyperlink(!docRefEmailHyperlink)}
+                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
+                              docRefEmailHyperlink
+                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
+                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
+                            }`}
+                          >
+                            <span>Email (mailto:)</span>
+                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${docRefEmailHyperlink ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-600'}`}>
+                              {docRefEmailHyperlink && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                            </div>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDocRefPhoneHyperlink(!docRefPhoneHyperlink)}
+                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
+                              docRefPhoneHyperlink
+                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
+                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
+                            }`}
+                          >
+                            <span>HP (wa.me)</span>
+                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${docRefPhoneHyperlink ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-600'}`}>
+                              {docRefPhoneHyperlink && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Pengaturan Format Link Proyek */}
+                      <div className="space-y-1 sm:col-span-2">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                          <Globe className="w-3.5 h-3.5 text-orange-500" />
+                          <span>Format Tampilan Link Proyek di CV</span>
+                        </label>
+                        <div className="grid grid-cols-3 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setDocProjectLinkStyle('name')}
+                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer text-center ${
+                              docProjectLinkStyle === 'name'
+                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
+                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
+                            }`}
+                          >
+                            Hyperlink Nama
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDocProjectLinkStyle('text')}
+                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer text-center ${
+                              docProjectLinkStyle === 'text'
+                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
+                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
+                            }`}
+                          >
+                            Teks Dokumentasi
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDocProjectLinkStyle('none')}
+                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer text-center ${
+                              docProjectLinkStyle === 'none'
+                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
+                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
+                            }`}
+                          >
+                            Sembunyikan
+                          </button>
+                        </div>
+                      </div>
                     </div>
+                  </div>
 
                     {/* 6 Sliders + Number Inputs */}
                     <div className="space-y-3.5 pt-2">
@@ -5982,6 +7350,51 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       </div>
                     </div>
 
+                    {/* INLINE CARD: CV DIBUATKAN HRD (SECONDARY CONVERSION BEFORE DOWNLOAD) */}
+                    <div className="my-3.5 bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700/80 rounded-2xl p-4 space-y-3 shadow-xs">
+                      {/* Badge / Eyebrow */}
+                      <div className="flex items-center justify-between">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-navy-50 dark:bg-navy-950/80 text-navy-700 dark:text-navy-300 border border-navy-200/80 dark:border-navy-800 text-[11px] font-bold">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                          <span>CV Dibuatkan HRD</span>
+                        </div>
+                        <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400">
+                          Review HRD &amp; ATS
+                        </span>
+                      </div>
+
+                      {/* Headline & Description */}
+                      <div className="space-y-1">
+                        <h5 className="font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white leading-snug">
+                          Mau CV kamu lebih siap dilirik HRD?
+                        </h5>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                          Biarkan HR profesional menyusun dan mengoptimalkan CV kamu agar lebih siap digunakan untuk melamar.
+                        </p>
+                      </div>
+
+                      {/* Value & Action Button */}
+                      <div className="pt-2.5 flex items-center justify-between gap-3 border-t border-slate-200/60 dark:border-slate-700/50">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                            Layanan Professional
+                          </span>
+                          <span className="text-xs sm:text-sm font-extrabold text-navy-700 dark:text-navy-300">
+                            Mulai Rp79.000
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setIsHrdModalOpen(true)}
+                          className="px-3.5 py-2 rounded-xl bg-navy-600 hover:bg-navy-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer shrink-0"
+                        >
+                          <span>Buatkan CV</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
                     {/* Button Unduh */}
                     <button
                       type="button"
@@ -6145,9 +7558,82 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         </div>
       )}
 
+      {/* DELETE CONFIRMATION MODAL */}
+      {deletingCvTarget && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setDeletingCvTarget(null);
+          }}
+          className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-150"
+        >
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-150">
+            {/* Modal Icon & Header */}
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 border border-rose-200 dark:border-rose-800/60">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                  Hapus CV Ini?
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Apakah kamu yakin ingin menghapus CV{' '}
+                  <span className="font-bold text-slate-900 dark:text-slate-200">
+                    &quot;{deletingCvTarget.title || 'CV Tanpa Judul'}&quot;
+                  </span>
+                  ? Data yang dihapus dari local storage tidak dapat dikembalikan.
+                </p>
+              </div>
+            </div>
+
+            {/* Target Card Highlight Info */}
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs">
+              <div className="space-y-0.5">
+                <p className="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[220px]">
+                  {deletingCvTarget.title}
+                </p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Terakhir diubah: {deletingCvTarget.updatedAt || 'Hari ini'}
+                </p>
+              </div>
+              <span className="px-2.5 py-1 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[10px]">
+                Skor ATS: {deletingCvTarget.atsScore ?? 85}
+              </span>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setDeletingCvTarget(null)}
+                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDeleteCV}
+                className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-600/20 transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Ya, Hapus CV</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MODAL 3: PILIH TEMPLATE CV MANDIRI & KONFIGURASI */}
       {showTemplateModal && (
-        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowTemplateModal(false);
+              setTemplateModalStep(1);
+            }
+          }}
+          className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto"
+        >
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto">
             {/* Modal Header - Unified Blue Theme */}
             <div className="p-5 md:p-6 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between bg-gradient-to-r from-blue-900 via-slate-900 to-blue-950 text-white">
@@ -6189,6 +7675,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         return (
                           <div
                             key={tpl.id}
+                            id={`template-card-${tpl.id}`}
                             onClick={() => setSelectedTemplateId(tpl.id)}
                             className={`p-4 rounded-xl border transition-all cursor-pointer ${
                               isSelected
@@ -6243,15 +7730,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       Batal
                     </button>
                     <button
-                      onClick={() => {
-                        const templateName = cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS';
-                        setNewCvTitle(`CV ATS - ${templateName}`);
-                        setNewCvJobTitle('');
-                        setNewCvStartMode('example');
-                        setNewCvFile(null);
-                        setTemplateFormSubmitted(false);
-                        setTemplateModalStep(2);
-                      }}
+                      onClick={handleSelectTemplateAndNext}
                       className="px-6 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
                     >
                       <span>Gunakan Template Ini</span>
@@ -6301,6 +7780,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             type="text"
                             value={newCvTitle}
                             onChange={(e) => setNewCvTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleCreateCvFromTemplate();
+                              }
+                            }}
                             placeholder="Contoh: CV Loker Software Engineer 2026"
                             className={`w-full px-4 py-2.5 rounded-xl border text-xs font-medium focus:ring-2 transition ${
                               templateFormSubmitted && !isNewCvTitleValid
@@ -6329,6 +7814,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             type="text"
                             value={newCvJobTitle}
                             onChange={(e) => setNewCvJobTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleCreateCvFromTemplate();
+                              }
+                            }}
                             placeholder="Contoh: Senior Frontend Developer / Staff Administrasi"
                             className={`w-full px-4 py-2.5 rounded-xl border text-xs font-medium focus:ring-2 transition ${
                               templateFormSubmitted && !isNewCvJobTitleValid
@@ -6496,113 +7987,222 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     )}
                     <button
                       type="button"
-                      onClick={() => {
-                        setTemplateFormSubmitted(true);
-                        if (!isTemplateFormValid) {
-                          return;
-                        }
-
-                        const newId = `cv-${Date.now()}`;
-                      const templateName = cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS';
-
-                      let initialData: Partial<CVData> = {};
-                      if (newCvStartMode === 'example') {
-                        initialData = {
-                          fullName: 'John Doe',
-                          headline: newCvJobTitle || 'Software Engineer',
-                          email: 'john.doe@example.com',
-                          phone: '+62 812-3456-7890',
-                          location: 'Jakarta, Indonesia',
-                          summary: 'Senior Software Engineer berpengalaman dalam membangun aplikasi web berkinerja tinggi, scalable, dan ATS friendly.',
-                          skills: ['TypeScript', 'React', 'Next.js', 'Node.js', 'Tailwind CSS', 'PostgreSQL', 'Git', 'REST API'],
-                          experience: [
-                            {
-                              id: 'exp-1',
-                              company: 'PT Inovasi Teknologi',
-                              role: newCvJobTitle || 'Senior Software Engineer',
-                              period: '2023 - Sekarang',
-                              description: 'Memimpin pengembangan fitur frontend & backend, mengoptimalkan kecepatan load hingga 45%, dan mengimplementasikan CI/CD.',
-                            },
-                            {
-                              id: 'exp-2',
-                              company: 'Solusi Digital Indonesia',
-                              role: 'Software Engineer',
-                              period: '2021 - 2023',
-                              description: 'Mengembangkan API mikroservis dan sistem otentikasi aman untuk 100.000+ pengguna aktif bulanan.',
-                            },
-                          ],
-                          education: [
-                            {
-                              id: 'edu-1',
-                              institution: 'Universitas Indonesia',
-                              degree: 'S1 Teknik Informatika / Ilmu Komputer (IPK 3.75)',
-                              year: '2017 - 2021',
-                            },
-                          ],
-                        };
-                      } else if (newCvStartMode === 'import') {
-                        initialData = {
-                          fullName: '',
-                          headline: newCvJobTitle || '',
-                          email: '',
-                          phone: '',
-                          location: '',
-                          summary: newCvFile ? `Hasil impor dari dokumen: ${newCvFile.name}` : 'Dokumen CV diimpor.',
-                          skills: ['Dokumen Diimpor'],
-                          experience: [],
-                          education: [],
-                        };
-                      } else {
-                        // empty
-                        initialData = {
-                          fullName: '',
-                          headline: newCvJobTitle || '',
-                          email: '',
-                          phone: '',
-                          location: '',
-                          summary: '',
-                          skills: [],
-                          experience: [],
-                          education: [],
-                        };
-                      }
-
-                      const newCV: CVData = {
-                        id: newId,
-                        title: newCvTitle || `CV ATS - ${templateName}`,
-                        updatedAt: 'Hari ini',
-                        atsScore: 85,
-                        fullName: '',
-                        headline: newCvJobTitle || '',
-                        email: '',
-                        phone: '',
-                        location: '',
-                        summary: '',
-                        skills: [],
-                        experience: [],
-                        education: [],
-                        templateId: selectedTemplateId,
-                        ...initialData,
-                      };
-
-                      const updatedList = [newCV, ...cvList];
-                      setCvList(updatedList);
-                      if (typeof window !== 'undefined') {
-                        localStorage.setItem('cuti_cv_list', JSON.stringify(updatedList));
-                      }
-                      setShowTemplateModal(false);
-                      setTemplateModalStep(1);
-                      router.push(`/cv/${newId}`);
-                    }}
-                    className="px-6 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md"
-                  >
-                    <span>Buat &amp; Edit CV</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                      onClick={handleCreateCvFromTemplate}
+                      className="px-6 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md"
+                    >
+                      <span>Buat &amp; Edit CV</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
                 </div>
               </div>
             </>
           )}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL FOTO PROFIL: RESIZE & POSITION ADJUSTMENT */}
+      {showPhotoCropModal && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowPhotoCropModal(false);
+            }
+          }}
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto"
+        >
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 flex flex-col gap-5 shadow-2xl overflow-hidden my-auto animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Camera className="w-5 h-5 text-orange-500" />
+                  <span>Pengaturan &amp; Ukuran Foto Profil</span>
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Posisikan bingkai cropper di atas foto sebelum disimpan (Maks. 2MB).
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPhotoCropModal(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Interactive Preview Canvas Circle */}
+            <div className="flex flex-col items-center justify-center space-y-3">
+              <div
+                onMouseDown={(e) => {
+                  setIsDraggingPhoto(true);
+                  photoDragStartRef.current = { x: e.clientX - photoOffsetX, y: e.clientY - photoOffsetY };
+                }}
+                onMouseMove={(e) => {
+                  if (isDraggingPhoto) {
+                    setPhotoOffsetX(e.clientX - photoDragStartRef.current.x);
+                    setPhotoOffsetY(e.clientY - photoDragStartRef.current.y);
+                  }
+                }}
+                onMouseUp={() => setIsDraggingPhoto(false)}
+                onMouseLeave={() => setIsDraggingPhoto(false)}
+                onTouchStart={(e) => {
+                  if (e.touches.length === 1) {
+                    setIsDraggingPhoto(true);
+                    photoDragStartRef.current = { x: e.touches[0].clientX - photoOffsetX, y: e.touches[0].clientY - photoOffsetY };
+                  }
+                }}
+                onTouchMove={(e) => {
+                  if (isDraggingPhoto && e.touches.length === 1) {
+                    setPhotoOffsetX(e.touches[0].clientX - photoDragStartRef.current.x);
+                    setPhotoOffsetY(e.touches[0].clientY - photoDragStartRef.current.y);
+                  }
+                }}
+                onTouchEnd={() => setIsDraggingPhoto(false)}
+                className="w-[280px] h-[280px] border-2 border-slate-700/80 rounded-2xl overflow-hidden relative shadow-inner bg-slate-950 cursor-grab active:cursor-grabbing select-none flex items-center justify-center"
+              >
+                {/* Stationary Background Photo */}
+                <img
+                  src={rawPhotoDataUrl}
+                  alt="Crop Preview"
+                  draggable={false}
+                  className="max-w-full max-h-full object-contain pointer-events-none select-none"
+                />
+
+                {/* Movable Cropper Mask & Frame Overlay */}
+                {(() => {
+                  const baseCropSize = 160;
+                  const cropSize = baseCropSize / photoScale;
+                  const cx = 140 + photoOffsetX;
+                  const cy = 140 + photoOffsetY;
+                  const cropLeft = cx - cropSize / 2;
+                  const cropTop = cy - cropSize / 2;
+
+                  return (
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-10 select-none" viewBox="0 0 280 280">
+                      <defs>
+                        <mask id="cropper-mask-hole">
+                          <rect x="0" y="0" width="280" height="280" fill="white" />
+                          {photoShape === 'circle' ? (
+                            <circle cx={cx} cy={cy} r={cropSize / 2} fill="black" />
+                          ) : (
+                            <rect x={cropLeft} y={cropTop} width={cropSize} height={cropSize} rx="16" fill="black" />
+                          )}
+                        </mask>
+                      </defs>
+                      {/* Darkened overlay outside the cropper frame */}
+                      <rect x="0" y="0" width="280" height="280" fill="rgba(15, 23, 42, 0.65)" mask="url(#cropper-mask-hole)" />
+
+                      {/* Moving Cropper Frame Border */}
+                      {photoShape === 'circle' ? (
+                        <circle
+                          cx={cx}
+                          cy={cy}
+                          r={cropSize / 2}
+                          fill="none"
+                          stroke="#F97316"
+                          strokeWidth="3"
+                          strokeDasharray="6 3"
+                        />
+                      ) : (
+                        <rect
+                          x={cropLeft}
+                          y={cropTop}
+                          width={cropSize}
+                          height={cropSize}
+                          rx="16"
+                          fill="none"
+                          stroke="#F97316"
+                          strokeWidth="3"
+                          strokeDasharray="6 3"
+                        />
+                      )}
+                    </svg>
+                  );
+                })()}
+              </div>
+              {/* Zoom & Resize Slider Controls */}
+              <div className="w-full max-w-[280px] space-y-1.5 pt-1">
+                <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300 font-semibold">
+                  <span className="flex items-center gap-1">
+                    <ZoomOut className="w-3.5 h-3.5 text-slate-400" /> Ukuran (Zoom)
+                  </span>
+                  <span className="font-mono text-[11px] text-orange-600 dark:text-orange-400 font-bold">
+                    {Math.round(photoScale * 100)}%
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPhotoScale((prev) => Math.max(0.5, Math.round((prev - 0.1) * 100) / 100))}
+                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer"
+                    title="Perkecil"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2.5"
+                    step="0.05"
+                    value={photoScale}
+                    onChange={(e) => setPhotoScale(parseFloat(e.target.value))}
+                    className="w-full accent-orange-500 cursor-pointer h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPhotoScale((prev) => Math.min(2.5, Math.round((prev + 0.1) * 100) / 100))}
+                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer"
+                    title="Perbesar"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Shape Switcher */}
+              <div className="flex items-center justify-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setPhotoShape('circle')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                    photoShape === 'circle' ? 'bg-orange-500 text-white shadow-2xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                  }`}
+                >
+                  <div className="w-3.5 h-3.5 rounded-full border-2 border-current" />
+                  <span>Lingkaran</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPhotoShape('square')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                    photoShape === 'square' ? 'bg-orange-500 text-white shadow-2xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                  }`}
+                >
+                  <div className="w-3.5 h-3.5 rounded-xs border-2 border-current" />
+                  <span>Persegi</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setShowPhotoCropModal(false)}
+                className="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyCroppedPhoto}
+                className="px-5 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md"
+              >
+                <Check className="w-4 h-4" />
+                <span>Gunakan Foto Ini</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -6614,6 +8214,60 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         onStartService={() => {
           setAiWizardStep(1);
           setViewMode('ai-wizard');
+        }}
+      />
+
+      {/* FLOATING CTA: CV DIBUATKAN HRD */}
+      <CvHrdFloatingCta
+        onSelectService={() => {
+          setAiWizardStep(1);
+          setViewMode('ai-wizard');
+        }}
+      />
+
+      {/* MODAL: DETAIL LAYANAN CV DIBUATKAN HRD */}
+      <CvHrdModal
+        isOpen={isHrdModalOpen}
+        onClose={() => setIsHrdModalOpen(false)}
+        onSelectService={() => {
+          setAiWizardStep(1);
+          setViewMode('ai-wizard');
+        }}
+      />
+
+      {/* Toast Feedback Success AI */}
+      {aiToastMessage && (
+        <div className="fixed top-20 right-6 z-50 p-4 rounded-2xl bg-slate-900 text-white border border-emerald-500/50 shadow-2xl flex items-center gap-3 animate-in slide-in-from-top duration-300">
+          <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="font-extrabold text-xs text-white">Bullet berhasil diperbarui</div>
+            <div className="text-[11px] text-slate-300">{aiToastMessage}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Contextual AI Assistant Drawer */}
+      <AiAssistantDrawer
+        isOpen={isAiDrawerOpen}
+        onClose={() => setIsAiDrawerOpen(false)}
+        sectionKey={aiDrawerSectionKey}
+        sectionTitle={aiDrawerSectionTitle}
+        currentContent={aiDrawerContent}
+        onApplyContent={(newVal, feedback) => {
+          if (aiApplyHandler) aiApplyHandler(newVal, feedback);
+        }}
+        targetJobTitle={selectedCV?.headline || 'Professional'}
+      />
+
+      {/* Bullet Quick Action Rewrite Popover */}
+      <BulletOptimizePopover
+        isOpen={isBulletPopoverOpen}
+        onClose={() => setIsBulletPopoverOpen(false)}
+        bulletText={targetBulletText}
+        onApplyRewrite={(newVal, feedback) => {
+          if (bulletApplyHandler) bulletApplyHandler(newVal, feedback);
         }}
       />
     </div>
@@ -6632,12 +8286,21 @@ const A4PaperlikeCanvas: React.FC<{
   docFontSize?: string;
   docSpacing?: string;
   docShowIcons?: boolean;
+  docPhotoPosition?: 'left' | 'right';
   docNameSize?: number;
   docHeaderSize?: number;
   docBodySize?: number;
   docSectionSpacing?: number;
   docLineHeight?: number;
   docLetterSpacing?: number;
+  docLinkStyle?: 'blue' | 'underline' | 'plain';
+  docProjectLinkStyle?: 'name' | 'text' | 'none';
+  docRefEmailHyperlink?: boolean;
+  docRefPhoneHyperlink?: boolean;
+  docMarginTop?: number;
+  docMarginBottom?: number;
+  docMarginLeft?: number;
+  docMarginRight?: number;
 }> = ({
   templateId,
   customData,
@@ -6646,12 +8309,21 @@ const A4PaperlikeCanvas: React.FC<{
   docFontSize = 'base',
   docSpacing = 'normal',
   docShowIcons = true,
+  docPhotoPosition = 'right',
   docNameSize,
   docHeaderSize,
   docBodySize,
   docSectionSpacing,
   docLineHeight,
   docLetterSpacing,
+  docLinkStyle = 'blue',
+  docProjectLinkStyle = 'text',
+  docRefEmailHyperlink = true,
+  docRefPhoneHyperlink = true,
+  docMarginTop = 1.27,
+  docMarginBottom = 1.27,
+  docMarginLeft = 1.27,
+  docMarginRight = 1.27,
 }) => {
   const hiddenMeasureRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -6662,15 +8334,19 @@ const A4PaperlikeCanvas: React.FC<{
   useEffect(() => {
     const updateDimensions = () => {
       if (hiddenMeasureRef.current) {
-        setContentHeightPx(hiddenMeasureRef.current.scrollHeight);
+        const measuredH = hiddenMeasureRef.current.scrollHeight;
+        if (measuredH > 0) {
+          setContentHeightPx(measuredH);
+        }
       }
       if (containerRef.current) {
         const availW = containerRef.current.clientWidth - 24;
-        const a4W = 794; // approx px width of 210mm
-        if (availW > 0 && availW < a4W) {
-          setAutoScale(Number((availW / a4W).toFixed(2)));
-        } else {
-          setAutoScale(1);
+        const a4W = 794; // approx px width of 210mm (210 * 3.7795)
+        if (availW > 0) {
+          const computedScale = Number((availW / a4W).toFixed(3));
+          // Clamped scale from 0.35x up to 2.0x for large 27"-32" screens
+          const clampedScale = Math.min(Math.max(computedScale, 0.35), 2.0);
+          setAutoScale(clampedScale);
         }
       }
     };
@@ -6687,23 +8363,23 @@ const A4PaperlikeCanvas: React.FC<{
       ro.disconnect();
       window.removeEventListener('resize', updateDimensions);
     };
-  }, [templateId, customData, docFontFamily, docFontSize, docSpacing, docShowIcons, docNameSize, docHeaderSize, docBodySize, docSectionSpacing, docLineHeight, docLetterSpacing]);
+  }, [templateId, customData, docFontFamily, docFontSize, docSpacing, docShowIcons, docNameSize, docHeaderSize, docBodySize, docSectionSpacing, docLineHeight, docLetterSpacing, docLinkStyle, docProjectLinkStyle, docRefEmailHyperlink, docRefPhoneHyperlink, docMarginTop, docMarginBottom, docMarginLeft, docMarginRight]);
 
   const effectiveScale = zoomScale !== null ? zoomScale : autoScale;
 
-  // Standard A4 dimensions: 210mm x 297mm
-  const A4_HEIGHT_MM = 297;
-  const PADDING_TOP_MM = 12;
-  const PADDING_BOTTOM_MM = 12;
-  const PRINTABLE_HEIGHT_MM = A4_HEIGHT_MM - (PADDING_TOP_MM + PADDING_BOTTOM_MM); // 273mm
+  // Dynamic A4 margin & printable slice calculations
+  const marginTopMM = (docMarginTop ?? 1.27) * 10;
+  const marginBottomMM = (docMarginBottom ?? 1.27) * 10;
+  const verticalMarginsMM = marginTopMM + marginBottomMM;
+  const PRINTABLE_HEIGHT_MM = Math.max(100, 297 - verticalMarginsMM);
 
   const measuredHeightMM = contentHeightPx ? contentHeightPx * 0.26458333 : 250;
   const totalPages = Math.max(1, Math.ceil(measuredHeightMM / PRINTABLE_HEIGHT_MM));
 
   return (
-    <div ref={containerRef} className="w-full flex flex-col items-center gap-4 py-2">
+    <div ref={containerRef} className="cv-print-area w-full max-w-full overflow-x-auto flex flex-col items-center gap-4 py-2 print:p-0 print:m-0 print:w-[210mm]">
       {/* Hidden DOM measurement container */}
-      <div className="fixed top-[-9999px] left-[-9999px] opacity-0 pointer-events-none" aria-hidden="true">
+      <div className="fixed top-[-9999px] left-[-9999px] opacity-0 pointer-events-none print:hidden" aria-hidden="true">
         <div ref={hiddenMeasureRef} style={{ width: '210mm', background: '#ffffff' }}>
           <CVTemplatePreview
             templateId={templateId}
@@ -6718,16 +8394,24 @@ const A4PaperlikeCanvas: React.FC<{
             docSectionSpacing={docSectionSpacing}
             docLineHeight={docLineHeight}
             docLetterSpacing={docLetterSpacing}
+            docLinkStyle={docLinkStyle}
+            docProjectLinkStyle={docProjectLinkStyle}
+            docRefEmailHyperlink={docRefEmailHyperlink}
+            docRefPhoneHyperlink={docRefPhoneHyperlink}
+            docMarginTop={docMarginTop}
+            docMarginBottom={docMarginBottom}
+            docMarginLeft={docMarginLeft}
+            docMarginRight={docMarginRight}
           />
         </div>
       </div>
 
       {/* Render Paginated A4 Paper Sheets with Responsive Scale Wrapper */}
       <div
-        className="flex flex-col items-center gap-6 transition-transform duration-200 origin-top"
+        className="a4-paper-sheet-container flex flex-col items-center gap-6 transition-transform duration-200 origin-top print:gap-0 print:transform-none print:m-0"
         style={{
-          transform: effectiveScale < 1 ? `scale(${effectiveScale})` : undefined,
-          marginBottom: effectiveScale < 1 ? `-${(1 - effectiveScale) * 297 * 3.78 * totalPages}px` : undefined,
+          transform: effectiveScale !== 1 ? `scale(${effectiveScale})` : undefined,
+          marginBottom: effectiveScale !== 1 ? `${(effectiveScale - 1) * 297 * 3.7795 * totalPages}px` : undefined,
         }}
       >
         {Array.from({ length: totalPages }, (_, index) => {
@@ -6735,10 +8419,10 @@ const A4PaperlikeCanvas: React.FC<{
           const translateYMM = index * PRINTABLE_HEIGHT_MM;
 
           return (
-            <div key={pageNum} className="flex flex-col items-center w-full max-w-[210mm]">
+            <div key={pageNum} className="flex flex-col items-center w-full max-w-[210mm] print:w-[210mm] print:m-0 print:block print:p-0">
               {/* A4 Paperlike Sheet Card */}
               <div
-                className="a4-paper-sheet relative bg-white text-slate-900 shadow-2xl shadow-slate-900/15 border border-slate-300/80 dark:border-slate-700/80 rounded-[2px] overflow-hidden transition-all duration-300 hover:shadow-slate-900/25 shrink-0"
+                className="a4-paper-sheet relative bg-white text-slate-900 shadow-2xl shadow-slate-900/15 border border-slate-300/80 dark:border-slate-700/80 rounded-[2px] overflow-hidden transition-all duration-300 hover:shadow-slate-900/25 shrink-0 print:shadow-none print:border-none print:rounded-none print:m-0"
                 style={{
                   width: '210mm',
                   height: '297mm',
@@ -6756,10 +8440,8 @@ const A4PaperlikeCanvas: React.FC<{
 
                 {/* Printable Page Inner Layout */}
                 <div className="w-full h-full flex flex-col justify-between box-border">
-                  {/* Top Padding Spacer for Page 2+ */}
-                  {index > 0 ? (
-                    <div style={{ height: `${PADDING_TOP_MM}mm`, flexShrink: 0 }} />
-                  ) : null}
+                  {/* Page Top Margin Spacer */}
+                  <div style={{ height: `${docMarginTop ?? 1.27}cm`, width: '100%', flexShrink: 0 }} />
 
                   {/* Printable Content Slice Viewport */}
                   <div
@@ -6782,14 +8464,26 @@ const A4PaperlikeCanvas: React.FC<{
                         docFontSize={docFontSize}
                         docSpacing={docSpacing}
                         docShowIcons={docShowIcons}
+                        docNameSize={docNameSize}
+                        docHeaderSize={docHeaderSize}
+                        docBodySize={docBodySize}
+                        docSectionSpacing={docSectionSpacing}
+                        docLineHeight={docLineHeight}
+                        docLetterSpacing={docLetterSpacing}
+                        docLinkStyle={docLinkStyle}
+                        docProjectLinkStyle={docProjectLinkStyle}
+                        docRefEmailHyperlink={docRefEmailHyperlink}
+                        docRefPhoneHyperlink={docRefPhoneHyperlink}
+                        docMarginTop={docMarginTop}
+                        docMarginBottom={docMarginBottom}
+                        docMarginLeft={docMarginLeft}
+                        docMarginRight={docMarginRight}
                       />
                     </div>
                   </div>
 
-                  {/* Bottom Padding Spacer for Page 2+ */}
-                  {index > 0 ? (
-                    <div style={{ height: `${PADDING_BOTTOM_MM}mm`, flexShrink: 0 }} />
-                  ) : null}
+                  {/* Page Bottom Margin Spacer */}
+                  <div style={{ height: `${docMarginBottom ?? 1.27}cm`, width: '100%', flexShrink: 0 }} />
                 </div>
 
                 {/* Page Break Separation Indicator Line */}
@@ -6805,6 +8499,13 @@ const A4PaperlikeCanvas: React.FC<{
   );
 };
 
+const hasAnyValue = (arr?: any[]) => {
+  if (!arr || arr.length === 0) return false;
+  return arr.some((item) =>
+    Object.entries(item).some(([key, val]) => key !== 'id' && typeof val === 'string' && val.trim().length > 0)
+  );
+};
+
 // CV Template Preview Component with Full Data Support
 const CVTemplatePreview: React.FC<{
   templateId: string;
@@ -6813,12 +8514,21 @@ const CVTemplatePreview: React.FC<{
   docFontSize?: string;
   docSpacing?: string;
   docShowIcons?: boolean;
+  docPhotoPosition?: 'left' | 'right';
   docNameSize?: number;
   docHeaderSize?: number;
   docBodySize?: number;
   docSectionSpacing?: number;
   docLineHeight?: number;
   docLetterSpacing?: number;
+  docLinkStyle?: 'blue' | 'underline' | 'plain';
+  docProjectLinkStyle?: 'name' | 'text' | 'none';
+  docRefEmailHyperlink?: boolean;
+  docRefPhoneHyperlink?: boolean;
+  docMarginTop?: number;
+  docMarginBottom?: number;
+  docMarginLeft?: number;
+  docMarginRight?: number;
 }> = ({
   templateId,
   customData,
@@ -6826,28 +8536,26 @@ const CVTemplatePreview: React.FC<{
   docFontSize = 'base',
   docSpacing = 'normal',
   docShowIcons = true,
+  docPhotoPosition = 'right',
   docNameSize,
   docHeaderSize,
   docBodySize,
   docSectionSpacing,
   docLineHeight,
   docLetterSpacing,
+  docLinkStyle = 'blue',
+  docProjectLinkStyle = 'text',
+  docRefEmailHyperlink = true,
+  docRefPhoneHyperlink = true,
+  docMarginTop = 1.27,
+  docMarginBottom = 1.27,
+  docMarginLeft = 1.27,
+  docMarginRight = 1.27,
 }) => {
-  const getEmailMailto = (emailStr?: string) => {
-    if (!emailStr) return '#';
-    const clean = emailStr.replace(/^mailto:/i, '').trim();
-    return `mailto:${clean}`;
-  };
-
-  const getCleanUrl = (url?: string, defaultPrefix = 'https://') => {
-    if (!url) return '#';
-    const trimmed = url.trim();
-    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('mailto:')) return trimmed;
-    return `${defaultPrefix}${trimmed}`;
-  };
 
   // Data (merges customData with fallback dummy data)
   const dummyData = {
+    showIcons: (customData as any)?.showIcons !== undefined ? (customData as any).showIcons : docShowIcons,
     fullName: customData?.fullName?.trim() || 'John Doe',
     jobTitle: customData?.headline?.trim() || 'Senior Software Engineer / Project Manager',
     email: customData?.email?.trim() || 'john.doe@example.com',
@@ -6874,186 +8582,206 @@ const CVTemplatePreview: React.FC<{
             'Git',
             'REST API',
           ],
-    experience:
-      customData?.experience && customData.experience.length > 0 && customData.experience[0].company
-        ? customData.experience.map((exp) => ({
-            company: exp.company || 'PT Inovasi Teknologi',
-            role: exp.role || 'Senior Software Engineer',
-            period: exp.period || `${exp.startDate || ''} - ${exp.endDate || ''}`.replace(/^ - $/, '') || '2023 - Sekarang',
-            description: exp.description || 'Memimpin pengembangan fitur frontend & backend, mengoptimalkan kecepatan load hingga 45%, dan mengimplementasikan CI/CD.',
-          }))
-        : [
-            {
-              company: 'PT Inovasi Teknologi',
-              role: 'Senior Software Engineer',
-              period: '2023 - Sekarang',
-              description:
-                'Memimpin pengembangan fitur frontend & backend, mengoptimalkan kecepatan load hingga 45%, dan mengimplementasikan CI/CD.',
-            },
-            {
-              company: 'Solusi Digital Indonesia',
-              role: 'Software Engineer',
-              period: '2021 - 2023',
-              description:
-                'Mengembangkan API mikroservis dan sistem otentikasi aman untuk 100.000+ pengguna aktif bulanan.',
-            },
-          ],
-    internships:
-      customData?.internships && customData.internships.length > 0 && customData.internships[0].company
-        ? customData.internships.map((item) => ({
-            company: item.company || 'Tech Startup Indonesia',
-            role: item.role || 'UI/UX & Frontend Intern',
-            period: item.period || `${item.startDate || ''} - ${item.endDate || ''}`.replace(/^ - $/, '') || 'Jan 2023 - Jun 2023',
-            description: item.description || 'Membantu tim merancang wireframe dan mendesain 10+ komponen UI serta mengimplementasikannya dengan TailwindCSS.',
-          }))
-        : [
-            {
-              company: 'Tech Startup Indonesia',
-              role: 'UI/UX & Frontend Intern',
-              period: 'Jan 2023 - Jun 2023',
-              description:
-                'Membantu tim merancang wireframe dan mendesain 10+ komponen UI serta mengimplementasikannya dengan TailwindCSS.',
-            },
-          ],
-    projects:
-      customData?.projects && customData.projects.length > 0 && customData.projects[0].name
-        ? customData.projects.map((proj) => ({
-            name: proj.name || 'E-Commerce Platform',
-            role: proj.role || 'Lead Developer',
-            tech: proj.tech || proj.link || 'React, Node.js, TailwindCSS • https://project.com',
-            description: proj.description || 'Membangun aplikasi toko online dengan fitur payment gateway dan real-time analytics.',
-          }))
-        : [
-            {
-              name: 'E-Commerce Platform',
-              role: 'Lead Developer',
-              tech: 'React, Node.js, TailwindCSS • https://project.com',
-              description:
-                'Membangun aplikasi toko online dengan fitur payment gateway dan real-time analytics.',
-            },
-          ],
-    organizations:
-      customData?.organizations && customData.organizations.length > 0 && customData.organizations[0].name
-        ? customData.organizations.map((org) => ({
-            name: org.name || 'Himpunan Mahasiswa Informatika',
-            role: org.role || 'Ketua Divisi Acara',
-            period: org.period || `${org.startDate || ''} - ${org.endDate || ''}`.replace(/^ - $/, '') || '2022 - 2023',
-            description: org.description || 'Mengkoordinasikan seminar teknologi nasional dengan 500+ peserta dan mengelola pendaftaran peserta.',
-          }))
-        : [
-            {
-              name: 'Himpunan Mahasiswa Informatika',
-              role: 'Ketua Divisi Acara',
-              period: '2022 - 2023',
-              description:
-                'Mengkoordinasikan seminar teknologi nasional dengan 500+ peserta dan mengelola pendaftaran peserta.',
-            },
-          ],
-    education:
-      customData?.education && customData.education.length > 0 && customData.education[0].institution
-        ? customData.education.map((edu) => ({
-            institution: edu.institution || 'Universitas Indonesia',
-            degree: edu.degree || 'S1 Teknik Informatika / Ilmu Komputer (IPK 3.75)',
-            year: edu.year || `${edu.startDate || ''} - ${edu.endDate || ''}`.replace(/^ - $/, '') || '2017 - 2021',
-            gpa: edu.gpa || '3.75 / 4.00',
-          }))
-        : [
-            {
-              institution: 'Universitas Indonesia',
-              degree: 'S1 Teknik Informatika / Ilmu Komputer (IPK 3.75)',
-              year: '2017 - 2021',
-              gpa: '3.75 / 4.00',
-            },
-          ],
-    certifications:
-      customData?.certifications && customData.certifications.length > 0 && customData.certifications[0].name
-        ? customData.certifications.map((cert) => ({
-            name: cert.name || 'AWS Certified Solutions Architect',
-            issuer: cert.issuer || 'Amazon Web Services',
-            issueDate: cert.issueDate || 'Nov 2023',
-          }))
-        : [
-            {
-              name: 'AWS Certified Solutions Architect',
-              issuer: 'Amazon Web Services',
-              issueDate: 'Nov 2023',
-            },
-          ],
-    languages:
-      customData?.languages && customData.languages.length > 0 && customData.languages[0].language
-        ? customData.languages
-        : [
-            { id: 'lang-1', language: 'Bahasa Indonesia', level: 'Professional' },
-            { id: 'lang-2', language: 'Bahasa Inggris', level: 'Professional' },
-          ],
-    courses:
-      customData?.courses && customData.courses.length > 0 && customData.courses[0].courseName
-        ? customData.courses.map((crs) => ({
-            courseName: crs.courseName || 'Digital Marketing Mastery',
-            institution: crs.institution || 'RevoU / Google Academy',
-            year: crs.year || '2023',
-            description: crs.description || 'Strategi pemasaran digital dan analisis data.',
-          }))
-        : [
-            {
-              id: 'crs-1',
-              courseName: 'Digital Marketing Mastery',
-              institution: 'RevoU / Google Academy',
-              year: '2023',
-              description: 'Strategi pemasaran digital dan analisis data.',
-            },
-          ],
-    scholarships:
-      customData?.scholarships && customData.scholarships.length > 0 && customData.scholarships[0].name
-        ? customData.scholarships.map((sch) => ({
-            name: sch.name || 'Beasiswa Djarum Beasiswa Plus',
-            provider: sch.provider || 'Djarum Foundation',
-            year: sch.year || '2020',
-            description: sch.description || 'Program pelatihan kepemimpinan dan beasiswa prestasi.',
-          }))
-        : [
-            {
-              id: 'sch-1',
-              name: 'Beasiswa Djarum Beasiswa Plus',
-              provider: 'Djarum Foundation',
-              year: '2020',
-              description: 'Program pelatihan kepemimpinan dan beasiswa prestasi.',
-            },
-          ],
-    volunteers:
-      customData?.volunteers && customData.volunteers.length > 0 && customData.volunteers[0].organization
-        ? customData.volunteers.map((vol) => ({
-            organization: vol.organization || 'Palang Merah Indonesia',
-            role: vol.role || 'Tim Tanggap Bencana',
-            startYear: vol.startYear || '2022',
-            description: vol.description || 'Mengkoordinasikan logistik darurat dan posko bantuan bencana.',
-          }))
-        : [
-            {
-              id: 'vol-1',
-              organization: 'Palang Merah Indonesia',
-              role: 'Tim Tanggap Bencana',
-              startYear: '2022',
-              description: 'Mengkoordinasikan logistik darurat dan posko bantuan bencana.',
-            },
-          ],
-    references:
-      customData?.references && customData.references.length > 0 && customData.references[0].fullName
-        ? customData.references.map((ref) => ({
-            fullName: ref.fullName || 'John Smith',
-            title: ref.title || 'Engineering Director',
-            company: ref.company || 'PT Inovasi Teknologi',
-            note: ref.note || 'Referensi tersedia atas permintaan',
-          }))
-        : [
-            {
-              id: 'ref-1',
-              fullName: 'John Smith',
-              title: 'Engineering Director',
-              company: 'PT Inovasi Teknologi',
-              note: 'Referensi tersedia atas permintaan',
-            },
-          ],
+    experience: hasAnyValue(customData?.experience)
+      ? customData!.experience!.map((exp) => ({
+          company: exp.company || '',
+          role: exp.role || '',
+          location: exp.location || '',
+          period: (exp.startDate || exp.endDate)
+            ? `${exp.startDate || ''}${exp.endDate ? ` - ${exp.endDate}` : ''}`.trim()
+            : (exp.period || ''),
+          description: exp.description || '',
+        }))
+      : [
+          {
+            company: 'PT Inovasi Teknologi',
+            role: 'Senior Software Engineer',
+            location: 'Jakarta, Indonesia',
+            period: '2023 - Sekarang',
+            description:
+              'Memimpin pengembangan fitur frontend & backend, mengoptimalkan kecepatan load hingga 45%, dan mengimplementasikan CI/CD.',
+          },
+          {
+            company: 'Solusi Digital Indonesia',
+            role: 'Software Engineer',
+            location: 'Bandung, Indonesia',
+            period: '2021 - 2023',
+            description:
+              'Mengembangkan API mikroservis dan sistem otentikasi aman untuk 100.000+ pengguna aktif bulanan.',
+          },
+        ],
+    internships: hasAnyValue(customData?.internships)
+      ? customData!.internships!.map((item) => ({
+          company: item.company || '',
+          role: item.role || '',
+          location: item.location || '',
+          period: (item.startDate || item.endDate)
+            ? `${item.startDate || ''}${item.endDate ? ` - ${item.endDate}` : ''}`.trim()
+            : (item.period || ''),
+          description: item.description || '',
+        }))
+      : [
+          {
+            company: 'Tech Startup Indonesia',
+            role: 'UI/UX & Frontend Intern',
+            period: 'Jan 2023 - Jun 2023',
+            description:
+              'Membantu tim merancang wireframe dan mendesain 10+ komponen UI serta mengimplementasikannya dengan TailwindCSS.',
+          },
+        ],
+    projects: hasAnyValue(customData?.projects)
+      ? customData!.projects!.map((proj) => ({
+          name: proj.name || '',
+          role: proj.role || '',
+          tech: proj.tech || '',
+          url: proj.url || proj.link || '',
+          startDate: proj.startDate || '',
+          endDate: proj.endDate || '',
+          description: proj.description || '',
+        }))
+      : [
+          {
+            name: 'E-Commerce Platform',
+            role: 'Lead Developer',
+            tech: 'React, Node.js, TailwindCSS',
+            url: 'https://github.com/johndoe/ecommerce',
+            startDate: 'Jan 2023',
+            endDate: 'Mar 2024',
+            description:
+              'Membangun aplikasi toko online dengan fitur payment gateway dan real-time analytics.',
+          },
+        ],
+    organizations: hasAnyValue(customData?.organizations)
+      ? customData!.organizations!.map((org) => ({
+          name: org.name || '',
+          role: org.role || '',
+          period: (org.startDate || org.endDate)
+            ? `${org.startDate || ''}${org.endDate ? ` - ${org.endDate}` : ''}`.trim()
+            : (org.period || ''),
+          description: org.description || '',
+        }))
+      : [
+          {
+            name: 'Himpunan Mahasiswa Informatika',
+            role: 'Ketua Divisi Acara',
+            period: '2022 - 2023',
+            description:
+              'Mengkoordinasikan seminar teknologi nasional dengan 500+ peserta dan mengelola pendaftaran peserta.',
+          },
+        ],
+    education: hasAnyValue(customData?.education)
+      ? customData!.education!.map((edu) => ({
+          institution: edu.institution || '',
+          degree: edu.degree || '',
+          year: (edu.startDate || edu.endDate)
+            ? `${edu.startDate || ''}${edu.endDate ? ` - ${edu.endDate}` : ''}`.trim()
+            : (edu.year || ''),
+          startDate: edu.startDate || '',
+          endDate: edu.endDate || '',
+          gpa: edu.gpa || '',
+          description: edu.description || '',
+        }))
+      : [
+          {
+            institution: 'Universitas Indonesia',
+            degree: 'S1 Teknik Informatika / Ilmu Komputer (IPK 3.75)',
+            year: '2017 - 2021',
+            gpa: '3.75 / 4.00',
+          },
+        ],
+    photoShape: customData?.photoShape || 'circle',
+    photoPosition: customData?.photoPosition || docPhotoPosition || 'right',
+    linkStyle: (customData as any)?.linkStyle || docLinkStyle || 'blue',
+    certifications: hasAnyValue(customData?.certifications)
+      ? customData!.certifications!.map((cert) => ({
+          name: cert.name || '',
+          issuer: cert.issuer || '',
+          issueDate: cert.issueDate || '',
+          credentialId: cert.credentialId || '',
+          link: cert.link || '',
+        }))
+      : [
+          {
+            name: 'AWS Certified Solutions Architect',
+            issuer: 'Amazon Web Services',
+            issueDate: 'Nov 2023',
+            link: '',
+          },
+        ],
+    languages: hasAnyValue(customData?.languages)
+      ? customData!.languages!
+      : [
+          { id: 'lang-1', language: 'Bahasa Indonesia', level: 'Professional' },
+          { id: 'lang-2', language: 'Bahasa Inggris', level: 'Professional' },
+        ],
+    courses: hasAnyValue(customData?.courses)
+      ? customData!.courses!.map((crs) => ({
+          courseName: crs.courseName || '',
+          institution: crs.institution || '',
+          year: crs.startDate ? `${crs.startDate}${crs.endDate ? ` - ${crs.endDate}` : ''}` : (crs.year || ''),
+          description: crs.description || '',
+        }))
+      : [
+          {
+            id: 'crs-1',
+            courseName: 'Digital Marketing Mastery',
+            institution: 'RevoU / Google Academy',
+            year: '2023',
+            description: 'Strategi pemasaran digital dan analisis data.',
+          },
+        ],
+    scholarships: hasAnyValue(customData?.scholarships)
+      ? customData!.scholarships!.map((sch) => ({
+          name: sch.name || '',
+          provider: sch.provider || '',
+          year: sch.startDate ? `${sch.startDate}${sch.endDate ? ` - ${sch.endDate}` : ''}` : (sch.year || ''),
+          description: sch.description || '',
+        }))
+      : [
+          {
+            id: 'sch-1',
+            name: 'Beasiswa Djarum Beasiswa Plus',
+            provider: 'Djarum Foundation',
+            year: '2020',
+            description: 'Program pelatihan kepemimpinan dan beasiswa prestasi.',
+          },
+        ],
+    volunteers: hasAnyValue(customData?.volunteers)
+      ? customData!.volunteers!.map((vol) => ({
+          organization: vol.organization || '',
+          role: vol.role || '',
+          startYear: vol.startDate ? `${vol.startDate}${vol.endDate ? ` - ${vol.endDate}` : ''}` : (vol.startYear || ''),
+          description: vol.description || '',
+        }))
+      : [
+          {
+            id: 'vol-1',
+            organization: 'Palang Merah Indonesia',
+            role: 'Tim Tanggap Bencana',
+            startYear: '2022',
+            description: 'Mengkoordinasikan logistik darurat dan posko bantuan bencana.',
+          },
+        ],
+    references: hasAnyValue(customData?.references)
+      ? customData!.references!.map((ref) => ({
+          fullName: ref.fullName || '',
+          title: ref.title || '',
+          company: ref.company || '',
+          email: ref.email || '',
+          phone: ref.phone || '',
+          note: ref.note || '',
+        }))
+      : [
+          {
+            id: 'ref-1',
+            fullName: 'John Smith',
+            title: 'Engineering Director',
+            company: 'PT Inovasi Teknologi',
+            email: 'john.smith@inovasi.co.id',
+            phone: '+62 812-3456-7890',
+            note: '',
+          },
+        ],
   };
 
   // Template Renderers
@@ -7089,8 +8817,10 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-sm font-bold text-slate-900">{exp.role}</p>
                   <p className="text-xs text-slate-600">{exp.period}</p>
                 </div>
-                <p className="text-xs italic text-slate-700 mb-2">{exp.company}</p>
-                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{exp.description}</p>
+                <p className="text-xs italic text-slate-700 mb-0.5">
+                  {exp.company}{exp.location ? ` · ${exp.location}` : ''}
+                </p>
+                <RenderBulletDescription text={exp.description} />
               </div>
             ))}
           </div>
@@ -7108,8 +8838,10 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-sm font-bold text-slate-900">{item.role}</p>
                   <p className="text-xs text-slate-600">{item.period}</p>
                 </div>
-                <p className="text-xs italic text-slate-700 mb-1">{item.company}</p>
-                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{item.description}</p>
+                <p className="text-xs italic text-slate-700 mb-0.5">
+                  {item.company}{(item as any).location ? ` · ${(item as any).location}` : ''}
+                </p>
+                <RenderBulletDescription text={item.description} />
               </div>
             ))}
           </div>
@@ -7127,7 +8859,8 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600">{edu.year}</p>
               </div>
               <p className="text-xs text-slate-700">{edu.degree}</p>
-              <p className="text-xs text-slate-600">{edu.gpa}</p>
+              {edu.gpa && <p className="text-xs text-slate-600">{edu.gpa}</p>}
+              {(edu as any).description && <RenderBulletDescription text={(edu as any).description} />}
             </div>
           ))}
         </div>
@@ -7137,13 +8870,31 @@ const CVTemplatePreview: React.FC<{
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
             PROYEK UNGGULAN
           </h2>
-          {dummyData.projects.map((proj, idx) => (
-            <div key={idx}>
-              <p className="text-sm font-bold text-slate-900 mb-1">{proj.name}</p>
-              <p className="text-xs italic text-slate-600 mb-2">{proj.tech}</p>
-              <p className="text-xs leading-relaxed text-slate-700 text-justify">{proj.description}</p>
-            </div>
-          ))}
+          {dummyData.projects.map((proj, idx) => {
+            const projUrl = (proj as any).url || '';
+            const projTech = (proj as any).tech || '';
+            const projPeriod = ((proj as any).startDate || (proj as any).endDate)
+              ? `${(proj as any).startDate || ''}${(proj as any).endDate ? ` - ${(proj as any).endDate}` : ''}`.trim()
+              : '';
+            return (
+              <div key={idx} className="mb-3">
+                <div className="flex items-baseline justify-between mb-0.5">
+                  {docProjectLinkStyle === 'name' && projUrl ? (
+                    <a href={projUrl} target="_blank" rel="noreferrer" className="text-sm font-bold text-blue-700 hover:underline">{proj.name}</a>
+                  ) : (
+                    <p className="text-sm font-bold text-slate-900">{proj.name}</p>
+                  )}
+                  {projPeriod && <p className="text-xs text-slate-600">{projPeriod}</p>}
+                </div>
+                {proj.role && <p className="text-xs italic text-slate-700 mb-0.5">{proj.role}</p>}
+                {projTech && <p className="text-xs text-slate-600 mb-0.5">{projTech}</p>}
+                {docProjectLinkStyle === 'text' && projUrl && (
+                  <a href={projUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline mb-0.5 inline-block">🔗 Dokumentasi Proyek</a>
+                )}
+                <RenderBulletDescription text={proj.description} />
+              </div>
+            );
+          })}
         </div>
       ),
       organizations: dummyData.organizations.length > 0 ? (
@@ -7159,7 +8910,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs text-slate-600">{org.period}</p>
                 </div>
                 <p className="text-xs italic text-slate-700 mb-1">{org.name}</p>
-                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{org.description}</p>
+                <RenderBulletDescription text={org.description} />
               </div>
             ))}
           </div>
@@ -7177,7 +8928,10 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-sm font-bold text-slate-900">{cert.name}</p>
                   <p className="text-xs text-slate-600">{cert.issueDate}</p>
                 </div>
-                <p className="text-xs italic text-slate-700 mb-1">{cert.issuer}</p>
+                <p className="text-xs italic text-slate-700 mb-0.5">{cert.issuer}</p>
+                {(cert as any).credentialId && (
+                  <p className="text-xs text-slate-500">Credential ID: {(cert as any).credentialId}</p>
+                )}
               </div>
             ))}
           </div>
@@ -7206,9 +8960,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs text-slate-600">{crs.year}</p>
                 </div>
                 <p className="text-xs italic text-slate-700 mb-1">{crs.institution}</p>
-                {crs.description && (
-                  <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{crs.description}</p>
-                )}
+                <RenderBulletDescription text={crs.description} />
               </div>
             ))}
           </div>
@@ -7227,9 +8979,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs text-slate-600">{sch.year}</p>
                 </div>
                 <p className="text-xs italic text-slate-700 mb-1">{sch.provider}</p>
-                {sch.description && (
-                  <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{sch.description}</p>
-                )}
+                <RenderBulletDescription text={sch.description} />
               </div>
             ))}
           </div>
@@ -7250,9 +9000,7 @@ const CVTemplatePreview: React.FC<{
                   </p>
                 </div>
                 <p className="text-xs italic text-slate-700 mb-1">{vol.organization}</p>
-                {vol.description && (
-                  <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{vol.description}</p>
-                )}
+                <RenderBulletDescription text={vol.description} />
               </div>
             ))}
           </div>
@@ -7268,7 +9016,31 @@ const CVTemplatePreview: React.FC<{
               <div key={idx} className="text-xs text-slate-700">
                 <p className="font-bold text-slate-900 text-sm">{ref.fullName}</p>
                 {ref.title && <p className="font-semibold text-slate-800">{ref.title}</p>}
-                {ref.company && <p className="italic text-slate-600">{ref.company}</p>}
+                {ref.company && <p className="italic text-slate-600 mb-1">{ref.company}</p>}
+                {ref.email && (
+                  <p className="text-slate-600">
+                    Email:{' '}
+                    {docRefEmailHyperlink ? (
+                      <a href={getEmailMailto(ref.email)} className="text-blue-600 hover:underline">
+                        {ref.email}
+                      </a>
+                    ) : (
+                      ref.email
+                    )}
+                  </p>
+                )}
+                {ref.phone && (
+                  <p className="text-slate-600">
+                    HP:{' '}
+                    {docRefPhoneHyperlink ? (
+                      <a href={getWaMeUrl(ref.phone)} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                        {ref.phone}
+                      </a>
+                    ) : (
+                      ref.phone
+                    )}
+                  </p>
+                )}
                 {ref.note && <p className="text-slate-500 italic mt-0.5">{ref.note}</p>}
               </div>
             ))}
@@ -7280,59 +9052,19 @@ const CVTemplatePreview: React.FC<{
     return (
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
         {/* Header */}
-        <div className="border-b-4 border-slate-900 pb-4 mb-6 flex items-start justify-between gap-4">
+        <div className={`border-b-4 border-slate-900 pb-4 mb-6 flex items-start justify-between gap-4 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
           <div className="flex-1">
             <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
               {dummyData.fullName}
             </h1>
             <p className="text-base font-semibold text-slate-700 mb-3">{dummyData.jobTitle}</p>
-            <div className="text-xs text-slate-600 flex flex-wrap gap-x-3 gap-y-1 items-center">
-              <a href={getEmailMailto(dummyData.email)} className="hover:underline font-medium text-slate-800">
-                {dummyData.email}
-              </a>
-              {dummyData.phone && (
-                <>
-                  <span>•</span>
-                  <span>{dummyData.phone}</span>
-                </>
-              )}
-              {dummyData.location && (
-                <>
-                  <span>•</span>
-                  <span>{dummyData.location}</span>
-                </>
-              )}
-              {dummyData.linkedin && (
-                <>
-                  <span>•</span>
-                  <a href={getCleanUrl(dummyData.linkedin)} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
-                    {dummyData.linkedin}
-                  </a>
-                </>
-              )}
-              {dummyData.github && (
-                <>
-                  <span>•</span>
-                  <a href={getCleanUrl(dummyData.github)} target="_blank" rel="noreferrer" className="text-slate-800 hover:underline font-medium">
-                    {dummyData.github}
-                  </a>
-                </>
-              )}
-              {dummyData.website && (
-                <>
-                  <span>•</span>
-                  <a href={getCleanUrl(dummyData.website)} target="_blank" rel="noreferrer" className="text-teal-600 hover:underline">
-                    {dummyData.website}
-                  </a>
-                </>
-              )}
-            </div>
+            <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
           </div>
           {dummyData.photoUrl ? (
             <img
               src={dummyData.photoUrl}
               alt={dummyData.fullName}
-              className="w-20 h-20 rounded-lg object-cover border border-slate-300 shrink-0 shadow-2xs"
+              className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} object-cover border border-slate-300 shrink-0 shadow-2xs`}
             />
           ) : null}
         </div>
@@ -7381,7 +9113,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs text-slate-500">{exp.period}</p>
                 </div>
                 <p className="text-xs font-semibold text-slate-600 mb-2">{exp.company}</p>
-                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{exp.description}</p>
+                <RenderBulletDescription text={exp.description} />
               </div>
             ))}
           </div>
@@ -7402,7 +9134,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs text-slate-500">{item.period}</p>
                 </div>
                 <p className="text-xs font-semibold text-slate-600 mb-1">{item.company}</p>
-                <p className="text-xs leading-relaxed text-slate-700 text-justify">{item.description}</p>
+                <RenderBulletDescription text={item.description} />
               </div>
             ))}
           </div>
@@ -7420,7 +9152,7 @@ const CVTemplatePreview: React.FC<{
               <div key={idx}>
                 <p className="text-sm font-bold text-slate-900 mb-1">{proj.name}</p>
                 <p className="text-xs italic text-slate-600 mb-1">{proj.tech}</p>
-                <p className="text-xs leading-relaxed text-slate-700 text-justify">{proj.description}</p>
+                <RenderBulletDescription text={proj.description} />
               </div>
             ))}
           </div>
@@ -7441,7 +9173,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs text-slate-500">{org.period}</p>
                 </div>
                 <p className="text-xs font-semibold text-slate-600 mb-1">{org.role}</p>
-                <p className="text-xs leading-relaxed text-slate-700 text-justify">{org.description}</p>
+                <RenderBulletDescription text={org.description} />
               </div>
             ))}
           </div>
@@ -7560,51 +9292,19 @@ const CVTemplatePreview: React.FC<{
     return (
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
         {/* Header - Centered */}
-        <div className="flex flex-col items-center text-center border-b-2 border-slate-300 pb-4 mb-6">
+        <div className={`flex flex-col items-center text-center border-b-2 border-slate-300 pb-4 mb-6 ${dummyData.photoPosition === 'left' ? 'sm:flex-row-reverse sm:justify-between sm:text-left' : ''}`}>
           {dummyData.photoUrl ? (
             <img
               src={dummyData.photoUrl}
               alt={dummyData.fullName}
-              className="w-20 h-20 rounded-full object-cover border-2 border-slate-300 mb-3 shadow-2xs"
+              className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} object-cover border-2 border-slate-300 mb-3 shadow-2xs`}
             />
           ) : null}
           <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
             {dummyData.fullName}
           </h1>
           <p className="text-base font-semibold text-slate-600 mb-3">{dummyData.jobTitle}</p>
-          <div className="text-xs text-slate-600 flex flex-wrap justify-center gap-x-3 gap-y-1 items-center">
-            <a href={getEmailMailto(dummyData.email)} className="hover:underline font-medium text-slate-800">
-              {dummyData.email}
-            </a>
-            {dummyData.phone && (
-              <>
-                <span>•</span>
-                <span>{dummyData.phone}</span>
-              </>
-            )}
-            {dummyData.location && (
-              <>
-                <span>•</span>
-                <span>{dummyData.location}</span>
-              </>
-            )}
-            {dummyData.linkedin && (
-              <>
-                <span>•</span>
-                <a href={getCleanUrl(dummyData.linkedin)} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
-                  {dummyData.linkedin}
-                </a>
-              </>
-            )}
-            {dummyData.github && (
-              <>
-                <span>•</span>
-                <a href={getCleanUrl(dummyData.github)} target="_blank" rel="noreferrer" className="text-slate-800 hover:underline font-medium">
-                  {dummyData.github}
-                </a>
-              </>
-            )}
-          </div>
+          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center" />
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -7653,7 +9353,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs text-slate-600">{exp.period}</p>
                 </div>
                 <p className="text-xs font-semibold text-emerald-600 mb-1">{exp.company}</p>
-                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{exp.description}</p>
+                <RenderBulletDescription text={exp.description} />
               </div>
             ))}
           </div>
@@ -7673,7 +9373,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs text-slate-600">{item.period}</p>
                 </div>
                 <p className="text-xs font-semibold text-emerald-600 mb-1">{item.company}</p>
-                <p className="text-xs leading-relaxed text-slate-700 text-justify">{item.description}</p>
+                <RenderBulletDescription text={item.description} />
               </div>
             ))}
           </div>
@@ -7690,7 +9390,7 @@ const CVTemplatePreview: React.FC<{
               <div key={idx}>
                 <p className="text-sm font-bold text-slate-900 mb-1">{proj.name}</p>
                 <p className="text-xs text-emerald-600 mb-1">{proj.tech}</p>
-                <p className="text-xs leading-relaxed text-slate-700 text-justify">{proj.description}</p>
+                <RenderBulletDescription text={proj.description} />
               </div>
             ))}
           </div>
@@ -7710,7 +9410,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs text-slate-600">{org.period}</p>
                 </div>
                 <p className="text-xs font-semibold text-emerald-600 mb-1">{org.role}</p>
-                <p className="text-xs leading-relaxed text-slate-700 text-justify">{org.description}</p>
+                <RenderBulletDescription text={org.description} />
               </div>
             ))}
           </div>
@@ -7820,10 +9520,7 @@ const CVTemplatePreview: React.FC<{
             {dummyData.fullName}
           </h1>
           <p className="text-base font-bold text-emerald-600 mb-2">{dummyData.jobTitle}</p>
-          <div className="text-xs text-slate-600 space-y-0.5">
-            <p>{dummyData.email} • {dummyData.phone}</p>
-            <p>{dummyData.location} • <span className="text-emerald-600">{dummyData.linkedin}</span></p>
-          </div>
+          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -7883,7 +9580,7 @@ const CVTemplatePreview: React.FC<{
               <div key={idx}>
                 <p className="text-sm font-bold text-slate-900 mb-1">{proj.name}</p>
                 <p className="text-xs text-amber-600 mb-2">{proj.tech}</p>
-                <p className="text-xs leading-relaxed text-slate-700 text-justify">{proj.description}</p>
+                <RenderBulletDescription text={proj.description} />
               </div>
             ))}
           </div>
@@ -7902,7 +9599,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs text-slate-600">{exp.period}</p>
                 </div>
                 <p className="text-xs italic text-slate-700 mb-2">{exp.company}</p>
-                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line text-justify">{exp.description}</p>
+                <RenderBulletDescription text={exp.description} />
               </div>
             ))}
           </div>
@@ -7921,7 +9618,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs text-slate-600">{item.period}</p>
                 </div>
                 <p className="text-xs italic text-amber-700 mb-1">{item.company}</p>
-                <p className="text-xs leading-relaxed text-slate-700 text-justify">{item.description}</p>
+                <RenderBulletDescription text={item.description} />
               </div>
             ))}
           </div>
@@ -7940,7 +9637,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs text-slate-600">{org.period}</p>
                 </div>
                 <p className="text-xs font-semibold text-amber-700 mb-1">{org.role}</p>
-                <p className="text-xs leading-relaxed text-slate-700 text-justify">{org.description}</p>
+                <RenderBulletDescription text={org.description} />
               </div>
             ))}
           </div>
@@ -8027,10 +9724,7 @@ const CVTemplatePreview: React.FC<{
             {dummyData.fullName}
           </h1>
           <p className="text-base font-semibold text-amber-600 mb-3">{dummyData.jobTitle}</p>
-          <div className="text-xs text-slate-600">
-            <p>{dummyData.email} • {dummyData.phone}</p>
-            <p className="mt-1">{dummyData.location} • {dummyData.linkedin}</p>
-          </div>
+          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center" />
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -8056,7 +9750,7 @@ const CVTemplatePreview: React.FC<{
               <div>
                 <p className="text-sm font-bold text-slate-900">{exp.role}</p>
                 <p className="text-xs font-semibold text-slate-700">{exp.company}</p>
-                <p className="text-xs leading-relaxed text-slate-700 mt-1 whitespace-pre-line">{exp.description}</p>
+                <RenderBulletDescription text={exp.description} />
               </div>
             </div>
           ))}
@@ -8071,7 +9765,7 @@ const CVTemplatePreview: React.FC<{
               <div>
                 <p className="text-sm font-bold text-slate-900">{item.role}</p>
                 <p className="text-xs font-semibold text-slate-700">{item.company}</p>
-                <p className="text-xs leading-relaxed text-slate-700 mt-1">{item.description}</p>
+                <RenderBulletDescription text={item.description} />
               </div>
             </div>
           ))}
@@ -8085,7 +9779,7 @@ const CVTemplatePreview: React.FC<{
               <div className="text-xs font-bold text-slate-600 uppercase">{proj.name}</div>
               <div>
                 <p className="text-xs italic text-slate-700">{proj.tech}</p>
-                <p className="text-xs leading-relaxed text-slate-700 mt-1">{proj.description}</p>
+                <RenderBulletDescription text={proj.description} />
               </div>
             </div>
           ))}
@@ -8100,7 +9794,7 @@ const CVTemplatePreview: React.FC<{
               <div>
                 <p className="text-sm font-bold text-slate-900">{org.name}</p>
                 <p className="text-xs font-semibold text-slate-700">{org.role}</p>
-                <p className="text-xs leading-relaxed text-slate-700 mt-1">{org.description}</p>
+                <RenderBulletDescription text={org.description} />
               </div>
             </div>
           ))}
@@ -8212,8 +9906,7 @@ const CVTemplatePreview: React.FC<{
           <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900">
             {dummyData.fullName}
           </h1>
-          <p className="text-base font-bold text-slate-700 mt-1">{dummyData.jobTitle}</p>
-          <p className="text-xs text-slate-600 mt-2">{dummyData.email} | {dummyData.phone} | {dummyData.location}</p>
+          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center mt-2" />
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -8246,7 +9939,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600">{exp.period}</p>
               </div>
               <p className="text-xs italic text-blue-700 mb-2">{exp.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+              <RenderBulletDescription text={exp.description} />
             </div>
           ))}
         </div>
@@ -8261,7 +9954,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600">{item.period}</p>
               </div>
               <p className="text-xs italic text-blue-700 mb-1">{item.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+              <RenderBulletDescription text={item.description} />
             </div>
           ))}
         </div>
@@ -8273,7 +9966,7 @@ const CVTemplatePreview: React.FC<{
             <div key={idx} className="mb-3">
               <p className="text-sm font-bold text-slate-900">{proj.name}</p>
               <p className="text-xs italic text-blue-700 mb-1">{proj.tech}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
+              <RenderBulletDescription text={proj.description} />
             </div>
           ))}
         </div>
@@ -8288,7 +9981,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600">{org.period}</p>
               </div>
               <p className="text-xs italic text-blue-700 mb-1">{org.role}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+              <RenderBulletDescription text={org.description} />
             </div>
           ))}
         </div>
@@ -8371,7 +10064,7 @@ const CVTemplatePreview: React.FC<{
         <div className="border-b-3 border-blue-600 pb-4 mb-6">
           <h1 className="text-3xl font-black uppercase text-blue-900">{dummyData.fullName}</h1>
           <p className="text-base font-semibold text-blue-600 mt-1">{dummyData.jobTitle}</p>
-          <p className="text-xs text-slate-600 mt-2">{dummyData.email} • {dummyData.phone} • {dummyData.location}</p>
+          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap gap-x-3 gap-y-1 items-center mt-2" />
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -8404,7 +10097,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600">{exp.period}</p>
               </div>
               <p className="text-xs italic text-slate-700 mb-2">{exp.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+              <RenderBulletDescription text={exp.description} />
             </div>
           ))}
         </div>
@@ -8419,7 +10112,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600">{item.period}</p>
               </div>
               <p className="text-xs italic text-slate-700 mb-1">{item.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+              <RenderBulletDescription text={item.description} />
             </div>
           ))}
         </div>
@@ -8431,7 +10124,7 @@ const CVTemplatePreview: React.FC<{
             <div key={idx} className="mb-3">
               <p className="text-sm font-bold text-slate-900">{proj.name}</p>
               <p className="text-xs italic text-purple-600 mb-1">{proj.tech}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
+              <RenderBulletDescription text={proj.description} />
             </div>
           ))}
         </div>
@@ -8446,7 +10139,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600">{org.period}</p>
               </div>
               <p className="text-xs italic text-slate-700 mb-1">{org.role}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+              <RenderBulletDescription text={org.description} />
             </div>
           ))}
         </div>
@@ -8526,23 +10219,20 @@ const CVTemplatePreview: React.FC<{
 
     return (
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
-        <div className="flex items-start gap-6 border-b-2 border-purple-600 pb-4 mb-6">
+        <div className={`flex items-start gap-6 border-b-2 border-purple-600 pb-4 mb-6 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
           <div className="flex-1">
             <h1 className="text-3xl font-black uppercase text-slate-900">{dummyData.fullName}</h1>
             <p className="text-base font-semibold text-purple-600 mt-1">{dummyData.jobTitle}</p>
-            <div className="text-xs text-slate-600 mt-2 space-y-0.5">
-              <p>{dummyData.email} • {dummyData.phone}</p>
-              <p>{dummyData.location}</p>
-            </div>
+            <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap gap-x-3 gap-y-1 items-center mt-2" />
           </div>
           {dummyData.photoUrl ? (
             <img
               src={dummyData.photoUrl}
               alt={dummyData.fullName}
-              className="w-24 h-24 rounded-lg object-cover border-2 border-purple-600 shrink-0"
+              className={`w-24 h-24 ${dummyData.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} object-cover border-2 border-purple-600 shrink-0`}
             />
           ) : (
-            <div className="w-24 h-24 border-2 border-purple-600 rounded-lg bg-slate-100 flex items-center justify-center text-xs text-slate-400 shrink-0">
+            <div className={`w-24 h-24 border-2 border-purple-600 ${dummyData.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} bg-slate-100 flex items-center justify-center text-xs text-slate-400 shrink-0`}>
               Photo
             </div>
           )}
@@ -8703,7 +10393,7 @@ const CVTemplatePreview: React.FC<{
         <div className="text-center border-b border-slate-400 pb-4 mb-6">
           <h1 className="text-3xl font-bold text-slate-900">{dummyData.fullName}</h1>
           <p className="text-base text-slate-700 mt-2">{dummyData.jobTitle}</p>
-          <p className="text-xs text-slate-600 mt-2">{dummyData.email} | {dummyData.phone} | {dummyData.location}</p>
+          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center mt-2" />
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -8903,13 +10593,7 @@ const CVTemplatePreview: React.FC<{
             {dummyData.fullName}
           </h1>
           <p className="text-lg font-bold text-orange-600 mb-2">{dummyData.jobTitle}</p>
-          <div className="text-xs text-slate-600 flex items-center gap-3">
-            <span>{dummyData.email}</span>
-            <span className="text-orange-500">•</span>
-            <span>{dummyData.phone}</span>
-            <span className="text-orange-500">•</span>
-            <span>{dummyData.location}</span>
-          </div>
+          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -9103,13 +10787,7 @@ const CVTemplatePreview: React.FC<{
             {dummyData.fullName}
           </h1>
           <p className="text-lg font-semibold text-blue-200 mb-3">{dummyData.jobTitle}</p>
-          <div className="text-xs text-blue-100 flex items-center gap-3">
-            <span>{dummyData.email}</span>
-            <span>|</span>
-            <span>{dummyData.phone}</span>
-            <span>|</span>
-            <span>{dummyData.location}</span>
-          </div>
+          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" />
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -9299,10 +10977,8 @@ const CVTemplatePreview: React.FC<{
             <p className="text-sm font-semibold text-cyan-300">{dummyData.jobTitle}</p>
           </div>
 
-          <div className="mb-6 text-xs space-y-1 text-cyan-100">
-            <p>{dummyData.email}</p>
-            <p>{dummyData.phone}</p>
-            <p>{dummyData.location}</p>
+          <div className="mb-6">
+            <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-col gap-1" />
           </div>
 
           <div className="mb-6">
@@ -9514,13 +11190,7 @@ const CVTemplatePreview: React.FC<{
             {dummyData.fullName}
           </h1>
           <p className="text-sm font-medium text-slate-600 mb-3">{dummyData.jobTitle}</p>
-          <div className="text-xs text-slate-500 flex items-center justify-center gap-4">
-            <span>{dummyData.email}</span>
-            <span className="w-1 h-1 bg-slate-400 rounded-full"></span>
-            <span>{dummyData.phone}</span>
-            <span className="w-1 h-1 bg-slate-400 rounded-full"></span>
-            <span>{dummyData.location}</span>
-          </div>
+          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center" />
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -9736,20 +11406,7 @@ const CVTemplatePreview: React.FC<{
             {dummyData.fullName}
           </h1>
           <p className="text-base font-bold text-green-600 mb-2">{dummyData.jobTitle}</p>
-          <div className="text-xs text-slate-600 flex items-center gap-3">
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
-              {dummyData.email}
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
-              {dummyData.phone}
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
-              {dummyData.location}
-            </span>
-          </div>
+          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -9948,10 +11605,7 @@ const CVTemplatePreview: React.FC<{
           <p className="text-sm font-semibold text-indigo-700 mb-2 uppercase tracking-wide">
             {dummyData.jobTitle}
           </p>
-          <div className="text-xs text-slate-600">
-            <p>{dummyData.email} | {dummyData.phone} | {dummyData.location}</p>
-            <p className="mt-1 text-indigo-600">{dummyData.linkedin}</p>
-          </div>
+          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center" />
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -10134,9 +11788,7 @@ const CVTemplatePreview: React.FC<{
           <p className="text-xs font-semibold text-slate-700 mb-2">
             {`[role: "${dummyData.jobTitle}"]`}
           </p>
-          <div className="text-[11px] text-slate-600 space-x-2">
-            <span>{dummyData.email}</span> | <span>{dummyData.phone}</span> | <span>{dummyData.location}</span>
-          </div>
+          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" className="text-[11px] flex flex-wrap gap-x-2 gap-y-1 items-center" />
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -10325,8 +11977,8 @@ const CVTemplatePreview: React.FC<{
           <p className="text-xs font-medium text-slate-700 italic mb-2">
             {dummyData.jobTitle}
           </p>
-          <div className="text-xs text-slate-600 border-b-2 border-slate-900 pb-3">
-            {dummyData.location} • {dummyData.phone} • {dummyData.email} • {dummyData.linkedin}
+          <div className="border-b-2 border-slate-900 pb-3">
+            <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
           </div>
         </div>
 
@@ -10516,11 +12168,7 @@ const CVTemplatePreview: React.FC<{
           <p className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">
             {dummyData.jobTitle}
           </p>
-          <div className="flex flex-wrap gap-4 text-xs text-slate-500">
-            <span>{dummyData.email}</span>
-            <span>{dummyData.phone}</span>
-            <span>{dummyData.location}</span>
-          </div>
+          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -10716,11 +12364,7 @@ const CVTemplatePreview: React.FC<{
           <p className="text-sm font-bold uppercase text-slate-700 mb-3">
             {dummyData.jobTitle}
           </p>
-          <div className="flex flex-wrap gap-3 text-xs font-semibold text-slate-600">
-            <span>📍 {dummyData.location}</span>
-            <span>📞 {dummyData.phone}</span>
-            <span>✉️ {dummyData.email}</span>
-          </div>
+          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -10731,6 +12375,12 @@ const CVTemplatePreview: React.FC<{
 
   // Map Document Settings to Dynamic CSS & Style Properties
   const fontStyleMap: Record<string, string> = {
+    inter: "'Inter', sans-serif",
+    roboto: "'Roboto', sans-serif",
+    openSans: "'Open Sans', sans-serif",
+    googleSans: "'Google Sans', 'Plus Jakarta Sans', -apple-system, sans-serif",
+    montserrat: "'Montserrat', sans-serif",
+    lato: "'Lato', sans-serif",
     sans: "'Inter', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     serif: "'EB Garamond', 'Lora', 'Georgia', Cambria, 'Times New Roman', serif",
     mono: "'JetBrains Mono', 'Courier Prime', 'Fira Code', 'Consolas', monospace",
@@ -10799,7 +12449,7 @@ const CVTemplatePreview: React.FC<{
 
   return (
     <div
-      className={`w-full min-h-[297mm] bg-white text-slate-900 transition-all duration-200 ${selectedSpacingClass} ${!docShowIcons ? '[&_svg]:hidden [&_.contact-icon]:hidden' : ''}`}
+      className={`w-full min-h-[297mm] bg-white text-slate-900 transition-all duration-200 ${selectedSpacingClass}`}
       style={{
         fontFamily: selectedFontFamily,
         fontSize: selectedFontSize,
@@ -10808,6 +12458,19 @@ const CVTemplatePreview: React.FC<{
       }}
     >
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lato:wght@400;700;900&family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&family=Roboto:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        .cv-template-root {
+          --cv-margin-top: ${docMarginTop}cm;
+          --cv-margin-bottom: ${docMarginBottom}cm;
+          --cv-margin-left: ${docMarginLeft}cm;
+          --cv-margin-right: ${docMarginRight}cm;
+        }
+        .cv-template-root > div {
+          padding-left: var(--cv-margin-left) !important;
+          padding-right: var(--cv-margin-right) !important;
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+        }
         ${docNameSize ? `.cv-template-root h1 { font-size: ${docNameSize}px !important; }` : ''}
         ${docHeaderSize ? `.cv-template-root h2 { font-size: ${docHeaderSize}px !important; }` : ''}
         ${docBodySize ? `.cv-template-root p, .cv-template-root span, .cv-template-root div:not(.cv-no-custom-size) { font-size: ${docBodySize}px !important; }` : ''}

@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useModals } from '@/context/ModalContext';
+import { userApi } from '../lib/api';
 import {
   User,
   Mail,
@@ -40,6 +41,7 @@ import {
   Check,
   Settings,
 } from 'lucide-react';
+import { handleLogout } from '@/lib/auth';
 
 interface ProfileViewProps {
   initialSubTab?: 'profil' | 'karir' | 'keamanan' | 'langganan' | 'pengaturan';
@@ -56,7 +58,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const themeMode = (theme || 'system') as 'light' | 'dark' | 'system';
   const setSpecificThemeMode = (mode: 'light' | 'dark' | 'system') => setTheme(mode);
   const onOpenUpgradeModal = openUpgrade;
-  const onLogout = () => router.push('/login');
+  const onLogout = handleLogout;
 
   const [activeSubTab, setActiveSubTab] = useState<'profil' | 'karir' | 'keamanan' | 'langganan' | 'pengaturan'>(initialSubTab);
   const [prevInitialSubTab, setPrevInitialSubTab] = useState(initialSubTab);
@@ -68,19 +70,27 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
   // Form States for Profile
   const [profileData, setProfileData] = useState({
-    fullName: 'Andi Pratama',
-    headline: 'Senior Full Stack Engineer & Frontend Specialist',
-    email: 'andi.pratama@email.com',
-    phone: '+62 812 3456 7890',
-    location: 'Jakarta Selatan, DKI Jakarta',
-    bio: 'Software engineer dengan pengalaman 5+ tahun dalam membangun aplikasi web performa tinggi menggunakan React, Next.js, TypeScript, dan Node.js. Berfokus pada arsitektur UI modern dan pengalaman pengguna yang responsif.',
-    linkedin: 'https://linkedin.com/in/andipratama',
-    github: 'https://github.com/andipratama',
-    website: 'https://andipratama.dev',
-    expectedSalary: 'Rp 20.000.000 - Rp 25.000.000',
-    experienceYears: '5 Tahun',
-    workPreference: 'Hybrid / Remote',
+    fullName: 'Pengguna AmbilCUTI',
+    headline: 'Pencari Kerja & Professional',
+    email: 'user@ambilcuti.id',
+    phone: '+62 812 0000 0000',
+    location: 'Jakarta, Indonesia',
+    bio: 'Pengguna aktif AmbilCUTI yang sedang mempersiapkan karir profesional.',
+    linkedin: '',
+    github: '',
+    website: '',
+    expectedSalary: 'Rp 10.000.000 - Rp 15.000.000',
+    experienceYears: '1-3 Tahun',
+    workPreference: 'Hybrid',
   });
+
+  useEffect(() => {
+    userApi.getProfile().then((remoteProfile) => {
+      if (remoteProfile) {
+        setProfileData((prev) => ({ ...prev, ...remoteProfile }));
+      }
+    });
+  }, []);
 
   // Notification Preferences
   const [notifications, setNotifications] = useState({
@@ -109,8 +119,13 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
   const [isSavedToast, setIsSavedToast] = useState(false);
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+      await userApi.updateProfile(profileData);
+    } catch {
+      // ignore
+    }
     setIsSavedToast(true);
     setTimeout(() => setIsSavedToast(false), 3000);
   };

@@ -1,3 +1,5 @@
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -53,18 +55,27 @@
   * {
     @apply border-border;
   }
+  html {
+    zoom: 0.8;
+    background-color: #F8FAFC;
+    min-height: 125vh;
+    font-family: 'Satoshi', sans-serif;
+  }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Satoshi', sans-serif;
+    background-color: #F8FAFC;
+    min-height: 125vh;
   }
 }
 
-/* Glassmorphism utilities */
+/* Glassmorphism & Custom Card utilities */
 .glass {
-  @apply bg-white/10 backdrop-blur-md border border-white/20;
+  @apply bg-white border border-slate-200 shadow-sm;
 }
 
 .glass-card {
-  @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl shadow-2xl;
+  @apply bg-white border border-slate-200 rounded-2xl shadow-sm transition-all duration-200;
 }
 
 /* Custom Styled Textarea - Non-resizable & Modern Custom UI */
@@ -89,16 +100,16 @@ textarea::-webkit-scrollbar-track {
 }
 
 textarea::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.35);
+  background: rgba(148, 163, 184, 0.35);
   border-radius: 9999px;
 }
 
 textarea::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.6);
+  background: rgba(148, 163, 184, 0.6);
 }
 
 textarea::placeholder {
-  color: #9CA3AF;
+  color: #94A3B8;
   opacity: 0.85;
 }
 
@@ -107,44 +118,38 @@ textarea::placeholder {
   font-family: inherit;
   line-height: 1.6;
   border-radius: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid #E2E8F0;
+  background-color: #FFFFFF;
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
-  color: #ffffff;
+  color: #0F172A;
   outline: none;
   transition: all 0.2s ease-in-out;
 }
 
 .custom-textarea:focus {
-  border-color: #a855f7;
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
+  border-color: #F97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
 }
 
-/* Custom Styled Select / Dropdown - Non-native System UI */
+/* Custom Styled Select / Dropdown */
 select {
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
   appearance: none !important;
   font-family: inherit;
   cursor: pointer !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23C084FC' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E") !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E") !important;
   background-repeat: no-repeat !important;
-  background-position: right 0.5rem center !important;
+  background-position: right 0.75rem center !important;
   background-size: 0.85em 0.85em !important;
-  padding-right: 1.75rem !important;
-  padding-left: 0.5rem !important;
+  padding-right: 2rem !important;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
-select + svg.pointer-events-none,
-select ~ svg.pointer-events-none {
-  display: none !important;
-}
-
 select option {
-  background-color: #0f172a !important;
-  color: #f8fafc !important;
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
   padding: 0.5rem 0.75rem !important;
 }
 
@@ -154,19 +159,19 @@ select option {
   appearance: none !important;
   font-family: inherit;
   border-radius: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid #E2E8F0;
+  background-color: #FFFFFF;
   padding: 0.625rem 2.5rem 0.625rem 0.875rem;
   font-size: 0.875rem;
-  color: #ffffff;
+  color: #0F172A;
   outline: none;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 }
 
 .custom-select:focus, .custom-dropdown:focus {
-  border-color: #a855f7;
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
+  border-color: #F97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
 }
 
 

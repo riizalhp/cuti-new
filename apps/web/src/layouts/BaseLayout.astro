@@ -30,7 +30,7 @@ const siteSchema = {
   operatingSystem: 'All',
   offers: {
     '@type': 'Offer',
-    price: '149000',
+    price: '99000',
     priceCurrency: 'IDR',
     priceValidUntil: '2030-12-31',
     availability: 'https://schema.org/InStock',
@@ -86,16 +86,6 @@ const siteSchema = {
   <body>
     <slot />
     <script is:inline>
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.12 });
-      document.querySelectorAll('[data-reveal]').forEach((el) => observer.observe(el));
-
       const menuButton = document.querySelector('[data-menu-button]');
       const menu = document.querySelector('[data-menu]');
       menuButton?.addEventListener('click', () => {
@@ -107,6 +97,179 @@ const siteSchema = {
         menuButton?.setAttribute('aria-expanded', 'false');
         menu.classList.remove('is-open');
       }));
+    </script>
+    <script>
+      import { gsap } from 'gsap';
+      import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (!prefersReducedMotion) {
+        // 1. Hero Entrance Animation (Timeline)
+        const heroCopyEls = document.querySelectorAll('.hero-copy > *');
+        if (heroCopyEls.length > 0) {
+          gsap.fromTo(
+            heroCopyEls,
+            { autoAlpha: 0, y: 35 },
+            { autoAlpha: 1, y: 0, duration: 0.85, stagger: 0.12, ease: 'power3.out' }
+          );
+        }
+
+        const heroVisual = document.querySelector('.hero-visual');
+        if (heroVisual) {
+          gsap.fromTo(
+            heroVisual,
+            { autoAlpha: 0, scale: 0.94 },
+            { autoAlpha: 1, scale: 1, duration: 1.1, ease: 'power3.out', delay: 0.2 }
+          );
+        }
+
+        const heroStickers = document.querySelectorAll('.hero-sticker');
+        if (heroStickers.length > 0) {
+          gsap.fromTo(
+            heroStickers,
+            { autoAlpha: 0, scale: 0.7, y: 25 },
+            { autoAlpha: 1, scale: 1, y: 0, duration: 0.75, stagger: 0.15, ease: 'back.out(1.7)', delay: 0.5 }
+          );
+        }
+
+        // 2. Feature Cards ScrollTrigger (Stagger Reveal)
+        const featureCards = document.querySelectorAll('.feature-card');
+        if (featureCards.length > 0) {
+          gsap.fromTo(
+            featureCards,
+            { autoAlpha: 0, y: 50 },
+            {
+              scrollTrigger: {
+                trigger: '.feature-grid',
+                start: 'top 80%',
+              },
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.8,
+              stagger: 0.15,
+              ease: 'power2.out',
+            }
+          );
+        }
+
+        // 3. Section Headings ScrollTrigger
+        const headings = document.querySelectorAll('.section-heading');
+        headings.forEach((heading) => {
+          gsap.fromTo(
+            heading,
+            { autoAlpha: 0, y: 30 },
+            {
+              scrollTrigger: {
+                trigger: heading,
+                start: 'top 85%',
+              },
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.8,
+              ease: 'power2.out',
+            }
+          );
+        });
+
+        // 4. Steps ScrollTrigger
+        const stepItems = document.querySelectorAll('.steps li');
+        if (stepItems.length > 0) {
+          gsap.fromTo(
+            stepItems,
+            { autoAlpha: 0, x: -40 },
+            {
+              scrollTrigger: {
+                trigger: '.steps',
+                start: 'top 80%',
+              },
+              autoAlpha: 1,
+              x: 0,
+              duration: 0.7,
+              stagger: 0.12,
+              ease: 'power2.out',
+            }
+          );
+        }
+
+        // 5. Access Section & Price Card
+        const accessCopy = document.querySelector('.access-copy');
+        const priceCard = document.querySelector('.price-card');
+        if (accessCopy && priceCard) {
+          gsap.fromTo(
+            accessCopy,
+            { autoAlpha: 0, x: -50 },
+            {
+              scrollTrigger: {
+                trigger: '.access-section',
+                start: 'top 75%',
+              },
+              autoAlpha: 1,
+              x: 0,
+              duration: 0.9,
+              ease: 'power3.out',
+            }
+          );
+
+          gsap.fromTo(
+            priceCard,
+            { autoAlpha: 0, x: 50, scale: 0.92 },
+            {
+              scrollTrigger: {
+                trigger: '.access-section',
+                start: 'top 75%',
+              },
+              autoAlpha: 1,
+              x: 0,
+              scale: 1,
+              duration: 0.9,
+              ease: 'power3.out',
+            }
+          );
+        }
+
+        // 6. FAQ Details Reveal
+        const faqItems = document.querySelectorAll('.faq-list details');
+        if (faqItems.length > 0) {
+          gsap.fromTo(
+            faqItems,
+            { autoAlpha: 0, y: 25 },
+            {
+              scrollTrigger: {
+                trigger: '.faq-list',
+                start: 'top 85%',
+              },
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.6,
+              stagger: 0.1,
+              ease: 'power2.out',
+            }
+          );
+        }
+
+        // 7. Company Cards ScrollTrigger (User Distribution)
+        const companyCards = document.querySelectorAll('.company-card');
+        if (companyCards.length > 0) {
+          gsap.fromTo(
+            companyCards,
+            { autoAlpha: 0, y: 30 },
+            {
+              scrollTrigger: {
+                trigger: '.category-tabs-container',
+                start: 'top 80%',
+              },
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.6,
+              stagger: 0.08,
+              ease: 'power2.out',
+            }
+          );
+        }
+      }
     </script>
   </body>
 </html>

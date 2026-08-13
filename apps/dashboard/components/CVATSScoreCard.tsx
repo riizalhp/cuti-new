@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { cvApi } from '@/lib/api';
 import { FileText, Award, Sliders, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
 
 interface CVATSScoreCardProps {
@@ -15,7 +16,20 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
 }) => {
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
-  const atsScore = 86;
+  const [atsScore, setAtsScore] = useState(86);
+  const [cvTitle, setCvTitle] = useState('CV_Utama.pdf');
+
+  useEffect(() => {
+    cvApi.getAll().then((cvs) => {
+      if (Array.isArray(cvs) && cvs.length > 0) {
+        const primary = cvs.find((c: any) => c.isPrimary) || cvs[0];
+        if (primary) {
+          if (primary.atsScore) setAtsScore(primary.atsScore);
+          if (primary.title) setCvTitle(primary.title);
+        }
+      }
+    });
+  }, []);
 
   const components = [
     { name: 'Kata Kunci (Keywords)', score: 90, status: 'Sangat Baik' },
@@ -38,7 +52,7 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
                 CV ATS Score
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[140px] sm:max-w-none">
-                CV_Andi_Pratama_2026.pdf
+                {cvTitle}
               </p>
             </div>
           </div>

@@ -1,4 +1,7 @@
 ---
+import { getGoogleAuthUrl } from '../utils/env';
+
+const googleAuthUrl = getGoogleAuthUrl();
 ---
 
 <div id="login-modal" class="login-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="login-modal-title">
@@ -16,8 +19,41 @@
       <p class="login-modal-subtitle">Akses cepat dan aman untuk mengelola CV, lamaran, serta misimu.</p>
     </div>
 
+    <form id="dummy-login-form" class="login-form space-y-3">
+      <div class="input-group">
+        <label for="login-username" class="input-label">Email atau Username</label>
+        <input 
+          type="text" 
+          id="login-username" 
+          name="username" 
+          placeholder="contoh: user@ambilcuti.id" 
+          class="modal-input" 
+          required 
+        />
+      </div>
+
+      <div class="input-group">
+        <label for="login-password" class="input-label">Kata Sandi</label>
+        <input 
+          type="password" 
+          id="login-password" 
+          name="password" 
+          placeholder="••••••••" 
+          class="modal-input" 
+          required 
+        />
+      </div>
+
+      <button type="submit" class="button submit-login-btn">
+        <span>Masuk ke Beranda</span>
+        <span class="btn-arrow">↗</span>
+      </button>
+    </form>
+
+    <div class="divider-text">atau</div>
+
     <div class="login-action-container">
-      <a href="https://app.cuti.online/api/auth/google" class="button google-auth-btn">
+      <a href={googleAuthUrl} class="button google-auth-btn">
         <div class="btn-left">
           <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
             <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
@@ -32,7 +68,7 @@
     </div>
 
     <div class="login-modal-footer">
-      <p>Belum punya akun? <button type="button" class="text-button" data-open-register data-close-login>Daftar dengan Google ↗</button></p>
+      <p>Belum punya akun? <button type="button" class="text-button" data-open-register data-close-login>Daftar Akun Baru ↗</button></p>
     </div>
   </div>
 </div>
@@ -148,8 +184,99 @@
     margin-bottom: 8px;
   }
 
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .input-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+  }
+
+  .modal-input {
+    width: 100%;
+    height: 46px;
+    padding: 0 16px;
+    background: #ffffff;
+    border: 1.5px solid var(--ink);
+    border-radius: 12px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .modal-input:focus {
+    border-color: var(--cobalt);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--cobalt) 20%, transparent);
+  }
+
+  .submit-login-btn {
+    min-height: 48px;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    border: 1.5px solid var(--ink);
+    border-radius: 12px;
+    color: #ffffff;
+    background: var(--ink);
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+  }
+
+  .submit-login-btn:hover {
+    transform: translateY(-2px);
+    background: var(--cobalt);
+  }
+
+  .divider-text {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--ink) 50%, transparent);
+    margin: 8px 0 14px;
+    position: relative;
+  }
+
+  .divider-text::before,
+  .divider-text::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 38%;
+    height: 1px;
+    background: color-mix(in srgb, var(--ink) 20%, transparent);
+  }
+
+  .divider-text::before {
+    left: 0;
+  }
+
+  .divider-text::after {
+    right: 0;
+  }
+
   .google-auth-btn {
-    min-height: 54px;
+    min-height: 50px;
     width: 100%;
     display: inline-flex;
     align-items: center;
@@ -229,8 +356,8 @@
         modal.classList.add('is-active');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
-        const googleBtn = modal.querySelector('.google-auth-btn');
-        if (googleBtn) googleBtn.focus();
+        const userInput = modal.querySelector('#login-username');
+        if (userInput) userInput.focus();
       }
 
       function closeModal() {
@@ -248,6 +375,36 @@
 
       document.querySelectorAll('[data-close-login]').forEach((btn) => {
         btn.onclick = () => closeModal();
+      });
+
+      // Form submit for Username/Password -> Redirects directly to http://localhost:3000/beranda
+      const loginForm = modal.querySelector('#dummy-login-form');
+      if (loginForm) {
+        loginForm.onsubmit = (e) => {
+          e.preventDefault();
+          const submitBtn = loginForm.querySelector('.submit-login-btn span');
+          if (submitBtn) submitBtn.innerText = 'Masuk...';
+          const usernameInput = modal.querySelector('#login-username');
+          const val = usernameInput ? usernameInput.value : 'user@ambilcuti.id';
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('cuti_user_session', JSON.stringify({
+              name: val.split('@')[0] || 'Pengguna',
+              email: val,
+            }));
+          }
+          window.location.href = 'http://localhost:3000/beranda';
+        };
+      }
+
+      // Google auth button -> Redirects directly to http://localhost:3000/beranda
+      document.querySelectorAll('.google-auth-btn').forEach((btn) => {
+        btn.onclick = (e) => {
+          e.preventDefault();
+          const targetUrl = 'http://localhost:3000/beranda';
+          const textSpan = btn.querySelector('span');
+          if (textSpan) textSpan.innerText = 'Memproses...';
+          window.location.href = targetUrl;
+        };
       });
 
       document.addEventListener('keydown', (e) => {

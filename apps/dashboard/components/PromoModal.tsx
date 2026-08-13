@@ -201,7 +201,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                <span>Auto-Apply Lowongan Kerja</span>
+                <span>Analisis CV & Job Match</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />

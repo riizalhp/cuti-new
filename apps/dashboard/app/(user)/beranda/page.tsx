@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useModals } from '@/context/ModalContext';
 import { ActionCenterCard } from '@/components/ActionCenterCard';
+import { ContextualMarketingCard } from '@/components/ContextualMarketingCard';
 import { ApplicationSummaryCard } from '@/components/ApplicationSummaryCard';
 import { ApplicationChartCard } from '@/components/ApplicationChartCard';
 import { UpcomingScheduleCard } from '@/components/UpcomingScheduleCard';
@@ -23,9 +24,13 @@ export default function BerandaPage() {
       {/* 1. Action Center: Top Priority Hub */}
       <section id="section-action-center" className="w-full">
         <ActionCenterCard
-          userName="Andi"
-          onPrimaryAction={() => router.push('/interview')}
+          onPrimaryAction={() => router.push('/scrape-jobs')}
         />
+      </section>
+
+      {/* 1.5 Contextual Marketing Nudge */}
+      <section id="section-contextual-marketing" className="w-full">
+        <ContextualMarketingCard />
       </section>
 
       {/* 2. Ringkasan 4 KPI Utama */}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Eye,
   Flame,
@@ -33,6 +33,7 @@ import {
   X,
   CornerDownRight,
   Sliders,
+  SlidersHorizontal,
   Gauge,
   Users,
   CheckSquare,
@@ -40,6 +41,7 @@ import {
   Smile,
   Compass,
   FileCheck,
+  FileCheck2,
   History,
   ArrowLeft,
   Trash2,
@@ -50,6 +52,7 @@ import {
   ChevronDown,
   ChevronUp,
   GraduationCap,
+  Play,
 } from 'lucide-react';
 import {
   runFullRvePipeline,
@@ -62,8 +65,9 @@ import { A4HeatmapCanvas } from './rve/A4HeatmapCanvas';
 const mockSavedCVs = [
   {
     id: 'cv-1',
+    title: 'CV Fullstack Engineer (Utama)',
     candidateName: 'Rizky Ramadhan, S.Kom',
-    roleTitle: 'Senior Fullstack Engineer',
+    roleTitle: 'Fullstack Developer',
     email: 'rizky.dev@email.com',
     phone: '+62 812-3456-7890',
     location: 'Jakarta, Indonesia',
@@ -93,11 +97,12 @@ const mockSavedCVs = [
     ],
     skills: ['React.js', 'Next.js', 'TypeScript', 'Node.js', 'PostgreSQL', 'Tailwind CSS'],
     hobbiesAndMisc: 'Bahasa Indonesia (Native), Bahasa Inggris (Professional). Hobi: Catur & Futsal.',
-    updatedAt: '22 Juli 2026',
+    updatedAt: '5 menit lalu',
     atsScore: 88,
   },
   {
     id: 'cv-2',
+    title: 'CV Data Analyst Specialist',
     candidateName: 'Amanda Putri, S.Stat',
     roleTitle: 'Data Analyst Specialist',
     email: 'amanda.data@email.com',
@@ -346,9 +351,67 @@ interface SavedReportHistoryItem {
   selectedPersonaId: string;
 }
 
+const MODULE_CONFIGS = [
+  {
+    id: 'vision' as const,
+    label: 'Recruiter Vision (Pandangan HRD 6 Detik & Heatmap)',
+    shortLabel: 'Recruiter Vision',
+    badgeTitle: 'Human Simulation',
+    anchorId: 'step-vision',
+    icon: Eye,
+    color: 'text-rose-500',
+    badgeBg: 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900/60',
+    pipelineText: 'Recruiter Vision — Memprediksi Pola Mata HRD 6 Detik...',
+  },
+  {
+    id: 'ats' as const,
+    label: 'ATS Compatibility Matrix (Kata Kunci & Format ATS)',
+    shortLabel: 'ATS Matrix',
+    badgeTitle: 'Machine Filter',
+    anchorId: 'step-ats',
+    icon: BarChart3,
+    color: 'text-blue-500',
+    badgeBg: 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900/60',
+    pipelineText: 'ATS Compatibility — Menguji Kata Kunci & Format Mesin ATS...',
+  },
+  {
+    id: 'aiScreener' as const,
+    label: 'Simulasi Multi-Screener (Evaluasi Konsensus Recruiter)',
+    shortLabel: 'Multi-Screener',
+    badgeTitle: 'Primary Selling Point',
+    anchorId: 'step-ai-screener',
+    icon: Bot,
+    color: 'text-emerald-500',
+    badgeBg: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/60',
+    pipelineText: 'Multi-Screener Intelligence — Menguji Evaluasi Konsensus Recruiter...',
+  },
+  {
+    id: 'forecast' as const,
+    label: 'Hiring Forecast (Prediksi Pertanyaan Wawancara)',
+    shortLabel: 'Hiring Forecast',
+    badgeTitle: 'Interview Forecast',
+    anchorId: 'step-prediction',
+    icon: TrendingUp,
+    color: 'text-purple-500',
+    badgeBg: 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-900/60',
+    pipelineText: 'Hiring Forecast — Menghitung Peluang & Prediksi Wawancara...',
+  },
+  {
+    id: 'improvement' as const,
+    label: 'Auto Improvement (Perbaikan Otomatis Kalimat CV)',
+    shortLabel: 'Auto Improvement',
+    badgeTitle: 'Auto Improvement',
+    anchorId: 'step-improvement',
+    icon: Sparkles,
+    color: 'text-amber-500',
+    badgeBg: 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900/60',
+    pipelineText: 'Auto Improvement — Menyusun Langkah Perbaikan CV Instant...',
+  },
+];
+
 export const AiCvScreenerView: React.FC = () => {
-  // Phase / View State: 'report' (Full Width Immersive Pipeline) vs 'setup' (Form Input & History List)
-  const [activePhase, setActivePhase] = useState<'setup' | 'report'>('report');
+  // Phase / View State: 'setup' (Form Input & Recruiter Selection) vs 'report' (Full Width Immersive Pipeline)
+  const [activePhase, setActivePhase] = useState<'setup' | 'report'>('setup');
 
   // Saved History State
   const [reportHistory, setReportHistory] = useState<SavedReportHistoryItem[]>([
@@ -385,15 +448,61 @@ export const AiCvScreenerView: React.FC = () => {
   const [selectedCvId, setSelectedCvId] = useState<string>('cv-1');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [rawCvText, setRawCvText] = useState('');
+  const [isChangeCvModalOpen, setIsChangeCvModalOpen] = useState<boolean>(false);
 
   // Target Job Role & Recruiter Persona
   const [targetRole, setTargetRole] = useState('Senior Fullstack Engineer');
-  const [targetLevel, setTargetLevel] = useState<'Entry' | 'Mid' | 'Senior' | 'Manager'>('Mid');
+  const [targetLevel, setTargetLevel] = useState<'Entry' | 'Junior' | 'Mid' | 'Senior'>('Mid');
   const [selectedPersonaId, setSelectedPersonaId] = useState<string>('startup');
+
+  // Custom Seniority Dropdown Popover State & Click Outside Ref
+  const [isSeniorityDropdownOpen, setIsSeniorityDropdownOpen] = useState(false);
+  const seniorityRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (seniorityRef.current && !seniorityRef.current.contains(e.target as Node)) {
+        setIsSeniorityDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const SENIORITY_OPTIONS = [
+    { value: 'Entry', label: 'Entry-Level (0 - 1 Tahun)' },
+    { value: 'Junior', label: 'Junior-Level (1 - 3 Tahun)' },
+    { value: 'Mid', label: 'Mid-Level (3 - 5 Tahun)' },
+    { value: 'Senior', label: 'Senior-Level (5+ Tahun)' },
+  ] as const;
 
   // Interactive Fixes State & One-Click Auto Optimization State
   const [appliedFixes, setAppliedFixes] = useState<string[]>([]);
   const [isAutoOptimizing, setIsAutoOptimizing] = useState(false);
+
+  // Selected Modules Checklist State
+  const [selectedModules, setSelectedModules] = useState<{
+    vision: boolean;
+    ats: boolean;
+    aiScreener: boolean;
+    forecast: boolean;
+    improvement: boolean;
+  }>({
+    vision: true,
+    ats: true,
+    aiScreener: true,
+    forecast: true,
+    improvement: true,
+  });
+
+  const toggleModule = (key: keyof typeof selectedModules) => {
+    setSelectedModules((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      // Ensure at least one module is selected
+      if (!Object.values(next).some(Boolean)) return prev;
+      return next;
+    });
+  };
 
   // Simulation & Pipeline State
   const [isProcessing, setIsProcessing] = useState(false);
@@ -467,13 +576,27 @@ export const AiCvScreenerView: React.FC = () => {
     );
   }, [cvSourceMode, selectedCvId, uploadedFile, rawCvText, targetRole, appliedFixes]);
 
-  const pipelineStepsList = [
-    'STEP 1: Recruiter Vision — Memprediksi Pola Mata HRD 6 Detik...',
-    'STEP 2: ATS Compatibility — Menguji Kata Kunci & Format Mesin ATS...',
-    'STEP 3: Multi-Screener Intelligence — Menguji Evaluasi Konsensus Recruiter (Engine v2)...',
-    'STEP 4: Hiring Probability — Menghitung Skor Konsensus Peluang Panggilan Wawancara...',
-    'STEP 5: Improvement Engine — Menyusun Langkah Optimasi CV Instant...',
-  ];
+  const activeStepMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    let step = 1;
+    MODULE_CONFIGS.forEach((mod) => {
+      if (selectedModules[mod.id]) {
+        map[mod.id] = step;
+        step++;
+      }
+    });
+    return map;
+  }, [selectedModules]);
+
+  const activePipelineSteps = useMemo(() => {
+    return MODULE_CONFIGS.filter((mod) => selectedModules[mod.id]).map((mod) => {
+      const stepNum = activeStepMap[mod.id];
+      return {
+        id: mod.id,
+        text: `STEP ${stepNum}: ${mod.pipelineText}`,
+      };
+    });
+  }, [selectedModules, activeStepMap]);
 
   const handleFillDemoData = () => {
     setCvSourceMode('saved');
@@ -497,7 +620,7 @@ export const AiCvScreenerView: React.FC = () => {
     let step = 0;
     const interval = setInterval(() => {
       step += 1;
-      if (step < pipelineStepsList.length) {
+      if (step < activePipelineSteps.length) {
         setPipelineStep(step);
       } else {
         clearInterval(interval);
@@ -530,7 +653,7 @@ export const AiCvScreenerView: React.FC = () => {
 
         setReportHistory((prev) => [newHistItem, ...prev.filter((h) => h.id !== newHistItem.id)]);
       }
-    }, 400);
+    }, 450);
   };
 
   const handleLoadHistoryReport = (hist: SavedReportHistoryItem) => {
@@ -627,9 +750,53 @@ export const AiCvScreenerView: React.FC = () => {
 
           {/* Configuration Card: Position, Seniority & CV File Source */}
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-              {/* Position Title & Level */}
-              <div className="md:col-span-7 space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+              {/* KIRI: Pilih Berkas CV / CV Aktif (Gaya match-cv) */}
+              <div className="md:col-span-6 space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-900 dark:text-white block mb-1">
+                  Pilih Berkas CV
+                </label>
+                <div className="bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 p-3.5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-[#1F3578]/10 dark:bg-blue-950 text-[#1F3578] dark:text-blue-400 flex items-center justify-center shrink-0">
+                      <FileCheck2 className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          CV Aktif:
+                        </span>
+                        <span className="text-xs font-black text-slate-900 dark:text-white truncate max-w-[200px]">
+                          {cvSourceMode === 'upload' && uploadedFile
+                            ? uploadedFile.name
+                            : (selectedSavedCv.title || selectedSavedCv.candidateName)}
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1 shrink-0">
+                          <Star className="w-3 h-3 text-emerald-600 fill-emerald-600" />
+                          <span>{selectedSavedCv.atsScore}% ATS</span>
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                        {cvSourceMode === 'upload'
+                          ? 'Berkas Unggahan Lokal'
+                          : `${selectedSavedCv.roleTitle} • Terakhir dianalisis ${selectedSavedCv.updatedAt}`}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsChangeCvModalOpen(true)}
+                    className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-[#1F3578] dark:text-blue-300 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-2xs"
+                  >
+                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                    <span>Ganti CV</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* KANAN: Nama Posisi Pekerjaan Target + Tingkat Senioritas (Dropdown) */}
+              <div className="md:col-span-6 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-extrabold text-slate-900 dark:text-white block mb-1">
@@ -640,7 +807,7 @@ export const AiCvScreenerView: React.FC = () => {
                       value={targetRole}
                       onChange={(e) => setTargetRole(e.target.value)}
                       placeholder="Contoh: Senior Fullstack Engineer"
-                      className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-orange-500 focus:outline-none transition"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-orange-500 focus:outline-none transition"
                     />
                   </div>
 
@@ -648,93 +815,53 @@ export const AiCvScreenerView: React.FC = () => {
                     <label className="text-xs font-extrabold text-slate-900 dark:text-white block mb-1">
                       Tingkat Senioritas
                     </label>
-                    <div className="grid grid-cols-4 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-semibold">
-                      {(['Entry', 'Mid', 'Senior', 'Manager'] as const).map((lvl) => (
-                        <button
-                          key={lvl}
-                          type="button"
-                          onClick={() => setTargetLevel(lvl)}
-                          className={`py-1.5 rounded-md transition text-center cursor-pointer ${
-                            targetLevel === lvl
-                              ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 font-bold shadow-xs'
-                              : 'text-slate-600 dark:text-slate-400'
+                    <div className="relative" ref={seniorityRef}>
+                      <button
+                        type="button"
+                        onClick={() => setIsSeniorityDropdownOpen((prev) => !prev)}
+                        className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium flex items-center justify-between focus:ring-2 focus:ring-orange-500 focus:outline-none transition cursor-pointer shadow-2xs"
+                      >
+                        <span>
+                          {SENIORITY_OPTIONS.find((o) => o.value === targetLevel)?.label || targetLevel}
+                        </span>
+                        <ChevronDown
+                          className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                            isSeniorityDropdownOpen ? 'rotate-180 text-orange-500' : ''
                           }`}
-                        >
-                          {lvl}
-                        </button>
-                      ))}
+                        />
+                      </button>
+
+                      {isSeniorityDropdownOpen && (
+                        <div className="absolute z-50 left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl text-xs py-1 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+                          {SENIORITY_OPTIONS.map((opt) => {
+                            const isSelected = targetLevel === opt.value;
+                            return (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => {
+                                  setTargetLevel(opt.value);
+                                  setIsSeniorityDropdownOpen(false);
+                                }}
+                                className={`w-full text-left px-3.5 py-2.5 font-medium transition cursor-pointer flex items-center justify-between ${
+                                  isSelected
+                                    ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 font-bold'
+                                    : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-orange-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
+                                  <span>{opt.label}</span>
+                                </div>
+                                {isSelected && <Check className="w-3.5 h-3.5 text-orange-500 shrink-0" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* CV File Source Selector */}
-              <div className="md:col-span-5 space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-extrabold text-slate-900 dark:text-white block">
-                    Pilih Berkas CV
-                  </label>
-                  <div className="flex items-center gap-1 text-[10px] font-bold">
-                    <button
-                      type="button"
-                      onClick={() => setCvSourceMode('saved')}
-                      className={`px-2 py-0.5 rounded transition ${
-                        cvSourceMode === 'saved'
-                          ? 'bg-orange-500 text-white'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                      }`}
-                    >
-                      Tersimpan
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCvSourceMode('upload')}
-                      className={`px-2 py-0.5 rounded transition ${
-                        cvSourceMode === 'upload'
-                          ? 'bg-orange-500 text-white'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                      }`}
-                    >
-                      Upload
-                    </button>
-                  </div>
-                </div>
-
-                {cvSourceMode === 'saved' ? (
-                  <select
-                    value={selectedCvId}
-                    onChange={(e) => setSelectedCvId(e.target.value)}
-                    className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-orange-500 focus:outline-none transition cursor-pointer"
-                  >
-                    {mockSavedCVs.map((cv) => (
-                      <option key={cv.id} value={cv.id}>
-                        {cv.candidateName} — {cv.roleTitle} ({cv.atsScore}% ATS)
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <div className="relative">
-                    <input
-                      type="file"
-                      id="top-cv-upload"
-                      accept=".pdf,.docx,.doc,.txt"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) setUploadedFile(file);
-                      }}
-                      className="hidden"
-                    />
-                    <label
-                      htmlFor="top-cv-upload"
-                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-dashed border-orange-300 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 font-bold flex items-center justify-between cursor-pointer hover:bg-orange-100/60 transition"
-                    >
-                      <span className="truncate">
-                        {uploadedFile ? uploadedFile.name : 'Klik untuk Upload PDF/DOCX (Maks. 10MB)'}
-                      </span>
-                      <Upload className="w-3.5 h-3.5 shrink-0 ml-2 text-orange-500" />
-                    </label>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -956,15 +1083,66 @@ export const AiCvScreenerView: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Submit Action Button */}
+                  {/* Module Checkbox Selection */}
+                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-extrabold text-slate-900 dark:text-white">
+                        Pilih Fitur Screening yang Diuji:
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-bold">
+                        {Object.values(selectedModules).filter(Boolean).length} / 5 Diuji
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5 text-xs">
+                      {MODULE_CONFIGS.map((item) => {
+                        const isChecked = selectedModules[item.id];
+                        const stepNum = activeStepMap[item.id];
+                        const ItemIcon = item.icon;
+
+                        return (
+                          <div
+                            key={item.id}
+                            onClick={() => toggleModule(item.id)}
+                            className={`p-2.5 rounded-xl border transition-all flex items-center justify-between cursor-pointer select-none ${
+                              isChecked
+                                ? 'bg-orange-50/70 dark:bg-orange-950/30 border-orange-300 dark:border-orange-800 text-slate-900 dark:text-white font-bold shadow-2xs'
+                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 font-medium opacity-60 hover:opacity-100'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 min-w-0 pr-2">
+                              <ItemIcon className={`w-4 h-4 shrink-0 ${item.color}`} />
+                              <span className="text-[11px] truncate leading-tight">{item.label}</span>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              {isChecked && (
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-orange-500 text-white shadow-2xs">
+                                  STEP {stepNum}
+                                </span>
+                              )}
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => {}}
+                                className="w-4 h-4 accent-orange-500 rounded cursor-pointer pointer-events-none"
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Submit Action Button: Mulai Screening */}
                   <button
                     type="button"
                     onClick={handleStartRvePipeline}
                     disabled={isProcessing}
-                    className="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-xs shadow-md shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 hover:-translate-y-0.5 pt-1"
+                    className="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-sm shadow-md shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 hover:-translate-y-0.5 mt-2"
                   >
-                    <CheckCircle2 className="w-4 h-4 fill-white" />
-                    <span>Gunakan Recruiter Ini &amp; Jalankan Pipeline</span>
+                    <Play className="w-4 h-4 fill-white" />
+                    <span>Mulai Screening</span>
                   </button>
                 </div>
               </div>
@@ -972,13 +1150,13 @@ export const AiCvScreenerView: React.FC = () => {
 
             {/* COLUMN 3: Riwayat Screening CV Saya (Right Column) */}
             <div className="lg:col-span-4 space-y-4">
-              {/* Riwayat Card */}
-              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+              {/* Riwayat & Hasil Screening Card (Merged into 1 Card) */}
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
                   <div className="flex items-center gap-1.5">
                     <History className="w-4 h-4 text-orange-500" />
                     <h3 className="text-xs font-black text-slate-900 dark:text-white">
-                      Riwayat Screening CV Saya
+                      Riwayat &amp; Hasil Screening CV
                     </h3>
                   </div>
                   <span className="text-[10px] font-bold text-orange-600 hover:underline cursor-pointer">
@@ -986,70 +1164,71 @@ export const AiCvScreenerView: React.FC = () => {
                   </span>
                 </div>
 
-                {reportHistory.length === 0 ? (
-                  <div className="p-6 text-center space-y-1.5 text-slate-400">
-                    <Bookmark className="w-6 h-6 mx-auto stroke-1" />
-                    <p className="text-[11px] font-medium">Belum ada riwayat hasil screening.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2.5">
-                    {reportHistory.slice(0, 2).map((hist) => (
-                      <div
-                        key={hist.id}
-                        onClick={() => handleLoadHistoryReport(hist)}
-                        className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-orange-500/50 hover:bg-orange-50/40 dark:hover:bg-orange-950/30 transition-all cursor-pointer space-y-1.5 group shadow-2xs"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-black text-xs text-rose-600 dark:text-rose-400 group-hover:text-orange-600 transition">
-                            {hist.candidateName}
-                          </span>
-                          <span className="text-[9px] font-extrabold bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-200 dark:border-indigo-800">
-                            {hist.personaName}
-                          </span>
+                {/* Section 1: Riwayat Sesi Screening Terakhir */}
+                {reportHistory.length > 0 && (
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                      Riwayat Sesi Screening:
+                    </span>
+                    <div className="space-y-2">
+                      {reportHistory.slice(0, 2).map((hist) => (
+                        <div
+                          key={hist.id}
+                          onClick={() => handleLoadHistoryReport(hist)}
+                          className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-orange-500/50 hover:bg-orange-50/40 dark:hover:bg-orange-950/30 transition-all cursor-pointer space-y-1.5 group shadow-2xs"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-black text-xs text-rose-600 dark:text-rose-400 group-hover:text-orange-600 transition">
+                              {hist.candidateName}
+                            </span>
+                            <span className="text-[9px] font-extrabold bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-200 dark:border-indigo-800">
+                              {hist.personaName}
+                            </span>
+                          </div>
+
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                            {hist.targetRole}
+                          </p>
+
+                          <div className="flex items-center justify-between text-[10px] border-t border-slate-100 dark:border-slate-800/80 pt-1.5 text-slate-400">
+                            <span>{hist.timestamp}</span>
+                            <span className="font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block shrink-0" />
+                              {hist.consensusScore}% ATS
+                            </span>
+                          </div>
                         </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                          {hist.targetRole}
-                        </p>
+                {/* Section 2: Berkas CV & Skor Terbaru */}
+                <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                    Hasil CV Terbaru:
+                  </span>
 
-                        <div className="flex items-center justify-between text-[10px] border-t border-slate-100 dark:border-slate-800/80 pt-1.5 text-slate-400">
-                          <span>{hist.timestamp}</span>
-                          <span className="font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block shrink-0" />
-                            {hist.consensusScore}% ATS
+                  <div className="space-y-2 text-xs">
+                    {mockSavedCVs.map((cv) => (
+                      <div
+                        key={cv.id}
+                        onClick={() => handleStartRvePipeline()}
+                        className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
+                      >
+                        <div>
+                          <h5 className="font-bold text-xs text-slate-900 dark:text-white">{cv.candidateName}</h5>
+                          <p className="text-[10px] text-slate-400">{cv.roleTitle}</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-1.5 py-0.5 rounded">
+                            {cv.atsScore}% ATS
                           </span>
+                          <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
                         </div>
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
-
-              {/* Hasil Terbaru Mini Card */}
-              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2.5">
-                <span className="text-xs font-black text-slate-900 dark:text-white block border-b border-slate-100 dark:border-slate-800 pb-2">
-                  Hasil Terbaru
-                </span>
-
-                <div className="space-y-2 text-xs">
-                  {mockSavedCVs.map((cv) => (
-                    <div
-                      key={cv.id}
-                      onClick={() => handleStartRvePipeline()}
-                      className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
-                    >
-                      <div>
-                        <h5 className="font-bold text-xs text-slate-900 dark:text-white">{cv.candidateName}</h5>
-                        <p className="text-[10px] text-slate-400">{cv.roleTitle}</p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-1.5 py-0.5 rounded">
-                          {cv.atsScore}% ATS
-                        </span>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </div>
 
@@ -1086,43 +1265,44 @@ export const AiCvScreenerView: React.FC = () => {
       {/* PHASE 2: IMMERSIVE FULL-WIDTH REPORT VIEW */}
       {activePhase === 'report' && (
         <div className="space-y-6 w-full animate-in fade-in duration-300">
-          {/* Header Banner */}
-          <div className="p-5 sm:p-6 md:p-8 rounded-2xl bg-[#0D3BD9] border border-blue-500/50 shadow-xl relative overflow-hidden text-white">
-            <div className="absolute -right-10 -bottom-10 w-64 h-64 rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-              <div className="space-y-2 max-w-3xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-400 text-slate-950 shadow-xs">
-                  <Sparkles className="w-3.5 h-3.5 fill-slate-950" />
-                  <span>CUTI CV Intelligence Platform</span>
-                </div>
+          {/* Top Bar Navigation for Report View */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setActivePhase('setup')}
+                className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                <ArrowLeft className="w-4 h-4 text-orange-500" />
+                <span>Ubah Recruiter &amp; CV</span>
+              </button>
 
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
-                  Apakah CV Anda Akan Dipanggil Interview?
-                </h1>
+              <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block" />
 
-                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-200 pt-1 font-medium">
-                  <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-md border border-white/15">
-                    <Check className="w-3.5 h-3.5 text-emerald-400" /> Mata Recruiter (6 Detik)
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                    Hasil Evaluasi Screening CV
+                  </h2>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
+                    Recruiter: {currentPersona.name}
                   </span>
-                  <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-md border border-white/15">
-                    <Check className="w-3.5 h-3.5 text-emerald-400" /> Filter Mesin ATS
-                  </span>
-                  <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-md border border-white/15">
-                    <Check className="w-3.5 h-3.5 text-emerald-400" /> Multi-Screener Intelligence (Engine v2)
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                    Posisi: {targetRole}
                   </span>
                 </div>
               </div>
+            </div>
 
-              <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={handleFillDemoData}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/15 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs"
-                >
-                  <Sparkles className="w-4 h-4 text-amber-300" />
-                  <span>Isi Data Demo</span>
-                </button>
-              </div>
+            <div className="flex items-center gap-2 self-end sm:self-auto">
+              <button
+                type="button"
+                onClick={handleFillDemoData}
+                className="px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 text-xs font-bold border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>Isi Data Demo</span>
+              </button>
             </div>
           </div>
 
@@ -1138,15 +1318,15 @@ export const AiCvScreenerView: React.FC = () => {
 
               <div className="space-y-1.5">
                 <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
-                  CUTI Recruiter Vision Pipeline Sedang Berjalan
+                  Proses Screening Sedang Berjalan ({activePipelineSteps.length} Fitur Diuji)
                 </h3>
                 <p className="text-xs text-orange-600 dark:text-orange-400 font-bold animate-pulse">
-                  {pipelineStepsList[pipelineStep]}
+                  {activePipelineSteps[pipelineStep]?.text || 'Menyelesaikan analisis...'}
                 </p>
               </div>
 
               <div className="space-y-2 max-w-md mx-auto text-left">
-                {pipelineStepsList.map((stepText, idx) => (
+                {activePipelineSteps.map((stepItem, idx) => (
                   <div key={idx} className="flex items-center gap-2 text-xs">
                     {idx < pipelineStep ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -1164,7 +1344,7 @@ export const AiCvScreenerView: React.FC = () => {
                           : 'text-slate-400 dark:text-slate-500'
                       }
                     >
-                      {stepText}
+                      {stepItem.text}
                     </span>
                   </div>
                 ))}
@@ -1374,61 +1554,37 @@ export const AiCvScreenerView: React.FC = () => {
 
               {/* Timeline Stepper Navigation Bar */}
               <div className="sticky -top-2.5 sm:-top-5 z-30 -mt-2 sm:-mt-3 bg-white dark:bg-slate-900 p-2.5 sm:p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-lg transition-all">
-                <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar text-[11px] font-bold">
-                  <a
-                    href="#step-1-vision"
-                    className="px-3.5 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 hover:bg-orange-100 transition shrink-0 flex items-center gap-1.5 border border-orange-200 dark:border-orange-900/60"
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>STEP 1: Recruiter Vision</span>
-                  </a>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />
-                  <a
-                    href="#step-2-ats"
-                    className="px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/60 text-slate-700 dark:text-slate-300 hover:text-orange-600 transition shrink-0 flex items-center gap-1.5"
-                  >
-                    <BarChart3 className="w-3.5 h-3.5 text-navy-500" />
-                    <span>STEP 2: ATS Matrix</span>
-                  </a>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />
-                  <a
-                    href="#step-3-ai-screener"
-                    className="px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/60 text-slate-700 dark:text-slate-300 hover:text-orange-600 transition shrink-0 flex items-center gap-1.5"
-                  >
-                    <Bot className="w-3.5 h-3.5 text-emerald-500" />
-                    <span>STEP 3: AI Recruiter</span>
-                  </a>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />
-                  <a
-                    href="#step-4-prediction"
-                    className="px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/60 text-slate-700 dark:text-slate-300 hover:text-orange-600 transition shrink-0 flex items-center gap-1.5"
-                  >
-                    <TrendingUp className="w-3.5 h-3.5 text-blue-500" />
-                    <span>STEP 4: Hiring Forecast</span>
-                  </a>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />
-                  <a
-                    href="#step-5-improvement"
-                    className="px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/60 text-slate-700 dark:text-slate-300 hover:text-orange-600 transition shrink-0 flex items-center gap-1.5"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                    <span>STEP 5: Auto Improvement</span>
-                  </a>
+                <div className="flex items-center justify-start gap-2 overflow-x-auto no-scrollbar text-[11px] font-bold">
+                  {MODULE_CONFIGS.filter((mod) => selectedModules[mod.id]).map((mod) => {
+                    const stepNum = activeStepMap[mod.id];
+                    const ModIcon = mod.icon;
+                    return (
+                      <a
+                        key={mod.id}
+                        href={`#${mod.anchorId}`}
+                        className="px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/60 text-slate-700 dark:text-slate-300 hover:text-orange-600 transition shrink-0 flex items-center gap-1.5"
+                      >
+                        <ModIcon className={`w-3.5 h-3.5 ${mod.color}`} />
+                        <span>STEP {stepNum}: {mod.shortLabel}</span>
+                      </a>
+                    );
+                  })}
                 </div>
               </div>
 
               {/* CONTINUOUS FULL-WIDTH PIPELINE SECTIONS */}
               <div className="space-y-8 w-full">
                 {/* STEP 1: RECRUITER VISION & HEATMAP */}
+                {selectedModules.vision && (
                 <div
-                  id="step-1-vision"
+                  id="step-vision"
                   className="p-6 md:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 scroll-mt-20"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
                     <div className="space-y-1">
                       <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/60 inline-flex items-center gap-1">
                         <Eye className="w-3 h-3 text-rose-600" />
-                        <span>STEP 1 — Human Simulation</span>
+                        <span>STEP {activeStepMap.vision} — Human Simulation</span>
                       </span>
                       <h3 className="font-black text-xl text-slate-900 dark:text-white">
                         Recruiter Vision (Simulasi Pandangan HRD 6 Detik)
@@ -1525,17 +1681,19 @@ export const AiCvScreenerView: React.FC = () => {
                     />
                   </div>
                 </div>
+                )}
 
                 {/* STEP 2: ATS COMPATIBILITY MATRIX */}
+                {selectedModules.ats && (
                 <div
-                  id="step-2-ats"
+                  id="step-ats"
                   className="p-6 md:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 scroll-mt-20"
                 >
                   <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                     <div className="space-y-1">
                       <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60 inline-flex items-center gap-1">
                         <BarChart3 className="w-3 h-3 text-blue-600" />
-                        <span>STEP 2 — Machine Filter</span>
+                        <span>STEP {activeStepMap.ats} — Machine Filter</span>
                       </span>
                       <h3 className="font-black text-xl text-slate-900 dark:text-white">
                         ATS Compatibility &amp; Keyword Density Matrix
@@ -1578,17 +1736,19 @@ export const AiCvScreenerView: React.FC = () => {
                     ))}
                   </div>
                 </div>
+                )}
 
                 {/* STEP 3: AI RECRUITER SIMULATION (GPT-5, Gemini, Claude Cards) */}
+                {selectedModules.aiScreener && (
                 <div
-                  id="step-3-ai-screener"
+                  id="step-ai-screener"
                   className="p-6 md:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 scroll-mt-20"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
                     <div className="space-y-1">
                       <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/60 inline-flex items-center gap-1">
                         <Bot className="w-3 h-3 text-emerald-600" />
-                        <span>STEP 3 — Primary Selling Point</span>
+                        <span>STEP {activeStepMap.aiScreener} — Primary Selling Point</span>
                       </span>
                       <h3 className="font-black text-xl text-slate-900 dark:text-white">
                         Simulasi Multi-Screener (Sistem v2)
@@ -1645,10 +1805,12 @@ export const AiCvScreenerView: React.FC = () => {
                     ))}
                   </div>
                 </div>
+                )}
 
                 {/* STEP 4: HIRING FORECAST & INTERACTIVE CHATBOT */}
+                {selectedModules.forecast && (
                 <div
-                  id="step-4-prediction"
+                  id="step-prediction"
                   className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start scroll-mt-20"
                 >
                   {/* Left: Predicted Questions */}
@@ -1657,7 +1819,7 @@ export const AiCvScreenerView: React.FC = () => {
                       <div className="space-y-1">
                         <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-900/60 inline-flex items-center gap-1">
                           <TrendingUp className="w-3 h-3 text-purple-600" />
-                          <span>STEP 4 — Interview Forecast</span>
+                          <span>STEP {activeStepMap.forecast} — Interview Forecast</span>
                         </span>
                         <h3 className="font-black text-lg text-slate-900 dark:text-white">
                           Prediksi Pertanyaan Wawancara dari Hotspot CV
@@ -1760,17 +1922,19 @@ export const AiCvScreenerView: React.FC = () => {
                     </div>
                   </div>
                 </div>
+                )}
 
                 {/* STEP 5: AUTO IMPROVEMENT & REWRITE FIXES */}
+                {selectedModules.improvement && (
                 <div
-                  id="step-5-improvement"
+                  id="step-improvement"
                   className="p-6 md:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 scroll-mt-20"
                 >
                   <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                     <div className="space-y-1">
                       <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60 inline-flex items-center gap-1">
                         <Sparkles className="w-3 h-3 text-amber-600" />
-                        <span>STEP 5 — Auto Improvement</span>
+                        <span>STEP {activeStepMap.improvement} — Auto Improvement</span>
                       </span>
                       <h3 className="font-black text-xl text-slate-900 dark:text-white">
                         Perbandingan Sebelum &amp; Sesudah Kalimat CV
@@ -1836,9 +2000,144 @@ export const AiCvScreenerView: React.FC = () => {
                     })}
                   </div>
                 </div>
+                )}
               </div>
             </div>
           )}
+        </div>
+      )}
+      {/* MODAL: GANTI CV */}
+      {isChangeCvModalOpen && (
+        <div
+          onClick={() => setIsChangeCvModalOpen(false)}
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative border border-slate-200 dark:border-slate-800 cursor-default"
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                <FileText className="w-5 h-5 text-[#3B5CC4] dark:text-blue-400" />
+                <span>Pilih Profil CV Aktif / Upload File</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsChangeCvModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Mode Switcher */}
+            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setCvSourceMode('saved')}
+                className={`flex-1 py-1.5 rounded-lg transition text-center cursor-pointer ${
+                  cvSourceMode === 'saved'
+                    ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                CV Tersimpan ({mockSavedCVs.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setCvSourceMode('upload')}
+                className={`flex-1 py-1.5 rounded-lg transition text-center cursor-pointer ${
+                  cvSourceMode === 'upload'
+                    ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                Upload Baru (PDF/DOCX)
+              </button>
+            </div>
+
+            {/* Content based on Mode */}
+            {cvSourceMode === 'saved' ? (
+              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                {mockSavedCVs.map((cv) => {
+                  const isSelected = selectedCvId === cv.id && cvSourceMode === 'saved';
+                  return (
+                    <div
+                      key={cv.id}
+                      onClick={() => {
+                        setSelectedCvId(cv.id);
+                        setCvSourceMode('saved');
+                        setIsChangeCvModalOpen(false);
+                      }}
+                      className={`p-3.5 rounded-xl border transition cursor-pointer flex items-start justify-between gap-3 ${
+                        isSelected
+                          ? 'border-[#3B5CC4] bg-blue-50/60 dark:bg-blue-950/40 ring-2 ring-[#3B5CC4]/20'
+                          : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                      }`}
+                    >
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                          {cv.title || cv.candidateName}
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          {cv.roleTitle} • Diperbarui {cv.updatedAt}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-0.5">
+                          <Star className="w-2.5 h-2.5 text-emerald-600 fill-emerald-600" />
+                          <span>{cv.atsScore}% ATS</span>
+                        </span>
+                        {isSelected && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#3B5CC4] text-white shrink-0">
+                            Aktif
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="space-y-3 p-4 bg-orange-50/40 dark:bg-orange-950/20 rounded-xl border border-dashed border-orange-300 dark:border-orange-800 text-center">
+                <Upload className="w-8 h-8 text-orange-500 mx-auto" />
+                <div>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">
+                    Upload Berkas CV (PDF, DOCX, TXT)
+                  </p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Ukuran berkas maksimal 10MB
+                  </p>
+                </div>
+                <input
+                  type="file"
+                  id="modal-cv-upload"
+                  accept=".pdf,.docx,.doc,.txt"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setUploadedFile(file);
+                      setCvSourceMode('upload');
+                      setIsChangeCvModalOpen(false);
+                    }
+                  }}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="modal-cv-upload"
+                  className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-[#F97316] hover:bg-orange-600 text-white font-bold text-xs cursor-pointer shadow-md transition gap-2"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Pilih Berkas Komputer</span>
+                </label>
+                {uploadedFile && (
+                  <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                    Terpilih: {uploadedFile.name}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

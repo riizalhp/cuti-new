@@ -1085,8 +1085,14 @@ export const CvMatchAnalysisView: React.FC = () => {
 
       {/* MODAL: GANTI CV */}
       {isChangeCvModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
+        <div
+          onClick={() => setIsChangeCvModalOpen(false)}
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative cursor-default"
+          >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-[#3B5CC4]" />

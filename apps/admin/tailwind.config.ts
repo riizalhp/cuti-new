@@ -9,6 +9,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Satoshi", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -44,8 +47,21 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
         admin: {
-          DEFAULT: "hsl(280 65% 60%)",
-          foreground: "hsl(0 0% 100%)",
+          DEFAULT: "#1F3578",
+          foreground: "#ffffff",
+        },
+        navy: {
+          50: "#F0F4FE",
+          100: "#DDE6FC",
+          500: "#3B5CC4",
+          700: "#1F3578",
+          800: "#152556",
+          900: "#0B132B",
+          950: "#060B18",
+        },
+        brand: {
+          orange: "#F97316",
+          navy: "#1F3578",
         },
       },
       borderRadius: {
@@ -69,6 +85,10 @@ const config: Config = {
       },
       backdropBlur: {
         xs: '2px',
+      },
+      boxShadow: {
+        xs: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        '2xs': '0 1px 1px 0 rgba(0, 0, 0, 0.03)',
       },
     },
   },

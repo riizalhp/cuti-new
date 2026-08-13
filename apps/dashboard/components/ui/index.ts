@@ -14,3 +14,11 @@ export { Skeleton } from "./skeleton";
 
 export { AutoResizeTextarea } from "./AutoResizeTextarea";
 export type { AutoResizeTextareaProps } from "./AutoResizeTextarea";
+
+export { CitySearchInput } from "./CitySearchInput";
+
+export { MajorSearchInput } from "./MajorSearchInput";
+
+export { SchoolSearchInput } from "./SchoolSearchInput";
+
+export { PositionSearchInput } from "./PositionSearchInput";

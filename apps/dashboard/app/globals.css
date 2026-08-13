@@ -107,7 +107,39 @@
 }
 
 html {
-  font-size: 80%; /* Makes 100% zoom look like 80% zoom - smaller, more content visible */
+  font-size: 80%; /* Base compact font for small laptops */
+  transition: font-size 0.15s ease-out;
+}
+
+/* Fluid responsive root scaling across all PC screen sizes */
+@media (min-width: 1440px) {
+  html {
+    font-size: 87.5%; /* 14px base rem for 14"-15" laptops & 24" FHD */
+  }
+}
+
+@media (min-width: 1680px) {
+  html {
+    font-size: 93.75%; /* 15px base rem for 24"-27" FHD/2K */
+  }
+}
+
+@media (min-width: 1920px) {
+  html {
+    font-size: 100%; /* 16px standard base rem for 27" monitors */
+  }
+}
+
+@media (min-width: 2560px) {
+  html {
+    font-size: 112.5%; /* 18px base rem for 27"-32" 2K/QHD screens */
+  }
+}
+
+@media (min-width: 3440px) {
+  html {
+    font-size: 125%; /* 20px base rem for 32" 4K & Ultra-wide displays */
+  }
 }
 
 body {
@@ -455,32 +487,118 @@ select option {
 /* Print Media Styles for A4 CV Paper Sheets */
 @media print {
   @page {
-    size: A4 portrait;
-    margin: 0;
+    size: A4 portrait !important;
+    margin: 0 !important;
   }
 
-  body {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Strict rule: Hide all interactive & non-printable UI elements */
+  .no-print,
+  .no-print *,
+  header,
+  footer,
+  nav,
+  aside,
+  button,
+  [role="navigation"],
+  .sidebar,
+  .header {
+    display: none !important;
+  }
+
+  html, body {
+    width: 210mm !important;
+    height: auto !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: #ffffff !important;
     color: #000000 !important;
+    overflow: visible !important;
+  }
+
+  /* Reset ONLY parent containers carrying the .cv-print-area-wrapper class */
+  #__next,
+  main,
+  #main-content-scroll,
+  .cv-print-area-wrapper {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: static !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    width: 210mm !important;
+    max-width: 210mm !important;
+  }
+
+  .cv-print-area {
+    display: block !important;
+    width: 210mm !important;
     margin: 0 !important;
     padding: 0 !important;
   }
 
-  header, footer, nav, aside, button, .no-print, [role="navigation"] {
-    display: none !important;
+  .a4-paper-sheet-container {
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    display: block !important;
+    width: 210mm !important;
+  }
+
+  .a4-paper-sheet-container > div {
+    display: block !important;
+    width: 210mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .a4-paper-sheet-container > div:not(:last-child),
+  .a4-paper-sheet:not(:last-child) {
+    page-break-after: always !important;
+    break-after: page !important;
   }
 
   .a4-paper-sheet {
     box-shadow: none !important;
     border: none !important;
     margin: 0 !important;
+    padding: 0 !important;
     border-radius: 0 !important;
-    page-break-after: always !important;
-    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
     width: 210mm !important;
     height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .a4-paper-sheet:last-child,
+  .a4-paper-sheet-container > div:last-child {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
   }
 }
+
+
+
+
 
 
 

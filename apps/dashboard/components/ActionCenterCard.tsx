@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, Calendar, FileCheck, Target, ArrowRight } from 'lucide-react';
+import { userApi } from '@/lib/api';
+import { Sparkles, Calendar, FileCheck, Target, ArrowRight, FileText, CheckCircle2, Rocket, Search } from 'lucide-react';
 
 interface ActionCenterCardProps {
   userName?: string;
@@ -10,18 +11,106 @@ interface ActionCenterCardProps {
 }
 
 export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
-  userName = 'Andi',
+  userName: propUserName,
   onPrimaryAction,
 }) => {
   const router = useRouter();
+  const [greeting, setGreeting] = useState('Selamat datang');
+  const [displayName, setDisplayName] = useState(propUserName || 'Pengguna');
+  const [userIntent, setUserIntent] = useState<string | null>(null);
 
-  const getGreeting = () => {
+  useEffect(() => {
     const hour = new Date().getHours();
-    if (hour < 11) return 'Selamat pagi';
-    if (hour < 15) return 'Selamat siang';
-    if (hour < 18) return 'Selamat sore';
-    return 'Selamat malam';
+    if (hour < 11) setGreeting('Selamat pagi');
+    else if (hour < 15) setGreeting('Selamat siang');
+    else if (hour < 18) setGreeting('Selamat sore');
+    else setGreeting('Selamat malam');
+
+    userApi.getProfile().then((profile) => {
+      if (profile && profile.fullName) {
+        setDisplayName(profile.fullName.split(' ')[0]);
+      }
+    });
+
+    if (typeof window !== 'undefined') {
+      try {
+        const sessionStr = localStorage.getItem('cuti_user_session');
+        if (sessionStr) {
+          const parsed = JSON.parse(sessionStr);
+          if (parsed.intent) {
+            setUserIntent(parsed.intent);
+          }
+          if (parsed.name) {
+            setDisplayName(parsed.name.split(' ')[0]);
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to parse session', e);
+      }
+    }
+  }, []);
+
+  // Intent Specific Hero Data
+  const getHeroContent = () => {
+    switch (userIntent) {
+      case 'cari_kerja':
+        return {
+          title: `Selamat datang, ${displayName}`,
+          subtitle: '18 lowongan yang cocok untukmu',
+          primaryCtaText: 'Cari Lowongan',
+          primaryCtaHref: '/scrape-jobs',
+          secondaryText: 'Lengkapi profil',
+          secondaryHref: '/pengaturan',
+          badgeText: 'Cari Kerja',
+          icon: Search,
+        };
+      case 'buat_cv':
+        return {
+          title: `Yuk selesaikan CV-mu, ${displayName}.`,
+          subtitle: 'Progres kelengkapan draf CV saat ini: 75%',
+          primaryCtaText: 'Lanjutkan CV',
+          primaryCtaHref: '/cv',
+          badgeText: 'Buat CV',
+          icon: FileText,
+          progress: '75%',
+        };
+      case 'perbaiki_cv':
+        return {
+          title: `CV kamu punya beberapa bagian yang bisa diperkuat, ${displayName}.`,
+          subtitle: 'Skor kesiapan ATS awal: 72/100 dengan 3 catatan perbaikan',
+          primaryCtaText: 'Lihat Hasil Analisis',
+          primaryCtaHref: '/cv',
+          badgeText: 'Perbaiki CV',
+          icon: Sparkles,
+        };
+      case 'cepat_dapat_kerja':
+        return {
+          title: `Siap mulai melamar, ${displayName}?`,
+          subtitle: 'Seluruh persiapan dasar kariermu sudah lengkap!',
+          primaryCtaText: 'Lihat Lowongan Cocok',
+          primaryCtaHref: '/scrape-jobs',
+          badgeText: 'Career Setup',
+          icon: Rocket,
+          stats: [
+            { label: 'CV', val: 'Siap' },
+            { label: 'Job Match', val: '24' },
+            { label: 'Lamaran', val: '0' },
+            { label: 'Profil', val: '85%' },
+          ],
+        };
+      default:
+        return {
+          title: `${greeting}, ${displayName}`,
+          subtitle: 'Berikut 3 prioritas penting yang perlu kamu selesaikan hari ini:',
+          primaryCtaText: 'Mulai Dari Prioritas Utama',
+          primaryCtaHref: '/interview',
+          badgeText: 'Action Center',
+          icon: Sparkles,
+        };
+    }
   };
+
+  const heroContent = getHeroContent();
 
   const priorityItems = [
     {
@@ -47,12 +136,12 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
     {
       id: 'jobs-match',
       title: '3 lowongan baru match di atas 85%',
-      time: 'Posisi: Frontend Developer, Tech Lead',
+      time: 'Posisi: Frontend Developer, Admin Staff',
       badge: 'Rekomendasi',
       badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
       icon: Target,
       actionText: 'Lihat Match',
-      href: '/match-cv',
+      href: '/scrape-jobs',
     },
   ];
 
@@ -69,26 +158,50 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
             <div className="flex items-center gap-2 mb-1">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30 uppercase tracking-wider">
                 <Sparkles className="w-3 h-3 text-orange-400" />
-                Action Center
+                {heroContent.badgeText}
               </span>
-              <span className="text-xs text-slate-400">| Priority Hub</span>
+              <span className="text-xs text-slate-400">| Personalized Dashboard</span>
             </div>
+
             <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
-              {getGreeting()}, <span className="text-orange-400">{userName}</span>
+              {heroContent.title}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-300 mt-0.5">
-              Berikut 3 prioritas penting yang perlu kamu selesaikan hari ini untuk mempercepat panggilan kerja:
+            <p className="text-xs sm:text-sm text-slate-300 mt-0.5 font-medium">
+              {heroContent.subtitle}
             </p>
+
+            {/* Quick Stats Grid if Cepat Dapat Kerja */}
+            {heroContent.stats && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                {heroContent.stats.map((st) => (
+                  <span key={st.label} className="px-2.5 py-1 rounded-lg bg-white/10 text-xs font-bold text-slate-200 border border-white/10 flex items-center gap-1.5">
+                    <span className="text-slate-400 font-normal">{st.label}:</span>
+                    <span className="text-orange-400">{st.val}</span>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Primary CTA Button (Must be orange-500 per global rules) */}
-          <button
-            onClick={onPrimaryAction || (() => router.push(priorityItems[0].href))}
-            className="w-full md:w-auto shrink-0 bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white px-5 py-3 rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
-          >
-            <span>Mulai Dari Prioritas Utama</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          {/* Primary CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
+            <button
+              onClick={onPrimaryAction || (() => router.push(heroContent.primaryCtaHref))}
+              className="w-full sm:w-auto shrink-0 bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white px-5 py-3 rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
+            >
+              <span>{heroContent.primaryCtaText}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+
+            {heroContent.secondaryText && (
+              <button
+                onClick={() => router.push(heroContent.secondaryHref || '/pengaturan')}
+                className="w-full sm:w-auto px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer text-center"
+              >
+                {heroContent.secondaryText}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Priority Action Cards Grid */}

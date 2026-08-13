@@ -91,7 +91,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'scrape-jobs', label: 'Scraper Lowongan', href: '/scrape-jobs', icon: Globe, badge: 'Baru' },
         { id: 'cari-lowongan', label: 'Cari Lowongan', href: 'https://loker.cuti.online', icon: Compass },
         { id: 'match-cv', label: 'Match CV & Job', href: '/match-cv', icon: Sparkles },
-        { id: 'auto-apply', label: 'Auto Apply', href: '/auto-apply', icon: Send, badge: 'Beta' },
         { id: 'surat-lamaran', label: 'Surat Lamaran', href: '/surat-lamaran', icon: Mail },
       ],
     },

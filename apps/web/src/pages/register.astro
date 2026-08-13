@@ -2,6 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import LoginModal from '../components/LoginModal.astro';
 import RegisterModal from '../components/RegisterModal.astro';
+import { getGoogleAuthUrl } from '../utils/env';
+
+const googleAuthUrl = getGoogleAuthUrl();
 ---
 
 <BaseLayout 
@@ -55,7 +58,7 @@ import RegisterModal from '../components/RegisterModal.astro';
         </div>
 
         <div class="action-box">
-          <a href="https://app.cuti.online/api/auth/google" class="button google-auth-btn">
+          <a href={googleAuthUrl} class="button google-auth-btn">
             <div class="btn-left">
               <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
                 <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
@@ -260,3 +263,15 @@ import RegisterModal from '../components/RegisterModal.astro';
     color: var(--ink);
   }
 </style>
+
+<script is:inline>
+  document.querySelectorAll('.google-auth-btn').forEach((btn) => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      const targetUrl = btn.getAttribute('href') || 'http://localhost:3000/onboarding';
+      const textSpan = btn.querySelector('span');
+      if (textSpan) textSpan.innerText = 'Memproses...';
+      window.location.href = targetUrl;
+    };
+  });
+</script>

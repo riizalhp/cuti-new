@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { trackerApi, cvApi } from '@/lib/api';
 import {
   Briefcase,
   Users,
@@ -17,45 +18,67 @@ interface ApplicationSummaryCardProps {
 }
 
 export const ApplicationSummaryCard: React.FC<ApplicationSummaryCardProps> = ({ onViewTracker }) => {
+  const [totalApps, setTotalApps] = useState(12);
+  const [interviewCount, setInterviewCount] = useState(4);
+  const [offeringCount, setOfferingCount] = useState(1);
+  const [atsScore, setAtsScore] = useState(89);
+
+  useEffect(() => {
+    trackerApi.getAll().then((apps) => {
+      if (Array.isArray(apps) && apps.length > 0) {
+        setTotalApps(apps.length);
+        setInterviewCount(apps.filter((a: any) => a.status === 'Interview').length);
+        setOfferingCount(apps.filter((a: any) => a.status === 'Offering').length);
+      }
+    });
+
+    cvApi.getAll().then((cvs) => {
+      if (Array.isArray(cvs) && cvs.length > 0) {
+        const primary = cvs.find((c: any) => c.isPrimary) || cvs[0];
+        if (primary && primary.atsScore) setAtsScore(primary.atsScore);
+      }
+    });
+  }, []);
+
   const stats = [
     {
       title: 'Lamaran Aktif',
-      value: '12',
+      value: String(totalApps),
       badge: '+3 pekan ini',
-      subtitle: '8 dalam proses peninjauan',
+      subtitle: `${Math.max(1, Math.round(totalApps * 0.6))} dalam proses peninjauan`,
       icon: Briefcase,
       color: 'bg-violet-50 text-violet-600 dark:bg-violet-950/80 dark:text-violet-400 border border-violet-100 dark:border-violet-900/50',
-      progress: 65,
+      progress: Math.min(100, Math.round((totalApps / 15) * 100)),
       progressColor: 'bg-violet-500',
     },
     {
       title: 'Interview',
-      value: '4',
-      badge: '2 Menunggu',
-      subtitle: 'Sesi berikutnya: Besok, 14:00',
+      value: String(interviewCount),
+      badge: 'Menunggu',
+      subtitle: interviewCount > 0 ? 'Sesi aktif dijadwalkan' : 'Belum ada jadwal',
       icon: Users,
       color: 'bg-amber-50 text-amber-600 dark:bg-amber-950/80 dark:text-amber-400 border border-amber-100 dark:border-amber-900/50',
-      progress: 40,
+      progress: Math.min(100, interviewCount * 25),
       progressColor: 'bg-amber-500',
     },
     {
       title: 'Offering',
-      value: '1',
-      badge: 'Astra Intl',
-      subtitle: 'Batas respon: 3 hari lagi',
+      value: String(offeringCount),
+      badge: offeringCount > 0 ? 'Diterima' : 'Dalam Proses',
+      subtitle: offeringCount > 0 ? 'Penawaran kerja diterima' : 'Target bulan ini',
       icon: Award,
       color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/80 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50',
-      progress: 100,
+      progress: offeringCount > 0 ? 100 : 0,
       progressColor: 'bg-emerald-500',
     },
     {
       title: 'ATS Match Score',
-      value: '89%',
-      badge: 'Sangat Relevan',
+      value: `${atsScore}%`,
+      badge: atsScore >= 85 ? 'Sangat Relevan' : 'Cukup Baik',
       subtitle: 'Dioptimasi untuk Tech & Mgmt',
       icon: Zap,
       color: 'bg-purple-50 text-purple-600 dark:bg-purple-950/80 dark:text-purple-400 border border-purple-100 dark:border-purple-900/50',
-      progress: 89,
+      progress: atsScore,
       progressColor: 'bg-purple-500',
     },
   ];

@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useModals } from '@/context/ModalContext';
+import { userApi } from '@/lib/api';
 import {
   Sun,
   Moon,
@@ -26,6 +27,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+import { handleLogout } from '@/lib/auth';
+
 interface HeaderProps {
   currentUser?: { name: string; email: string };
   onToggleSidebar?: () => void;
@@ -33,7 +36,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  currentUser = { name: 'Andi Pratama', email: 'andi.pratama@email.com' },
+  currentUser: propUser,
   onToggleSidebar,
   isSidebarCollapsed = false,
 }) => {
@@ -45,8 +48,23 @@ export const Header: React.FC<HeaderProps> = ({
   const onOpenUpgradeModal = openUpgrade;
   const onOpenPromoModal = openPromo;
   const onOpenProfile = (tab?: string) => router.push('/pengaturan');
-  const onLogout = () => router.push('/login');
+  const onLogout = handleLogout;
   const onSwitchToAdminPortal = () => router.push('/admin');
+
+  const [currentUser, setCurrentUser] = useState(
+    propUser || { name: 'Pengguna AmbilCUTI', email: 'user@ambilcuti.id' }
+  );
+
+  useEffect(() => {
+    userApi.getProfile().then((profile) => {
+      if (profile && profile.fullName) {
+        setCurrentUser({
+          name: profile.fullName,
+          email: profile.email || 'user@ambilcuti.id',
+        });
+      }
+    });
+  }, []);
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { trackerApi } from '../lib/api';
 import {
   Briefcase,
   Plus,
@@ -265,6 +266,15 @@ export const TrackerView: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
 
+  // Fetch real applications from API on mount
+  useEffect(() => {
+    trackerApi.getAll<ApplicationItem>().then((remoteApps) => {
+      if (Array.isArray(remoteApps) && remoteApps.length > 0) {
+        setApps(remoteApps);
+      }
+    });
+  }, []);
+
   // Pointer Drag and Drop State
   const [activeDragItem, setActiveDragItem] = useState<ApplicationItem | null>(null);
   const [dragPos, setDragPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -340,7 +350,7 @@ export const TrackerView: React.FC = () => {
     const finalPortal = newPortal === 'Lainnya' ? (customPortal.trim() || 'Custom Portal') : newPortal;
 
     const newApp: ApplicationItem = {
-      id: `app-${apps.length + 1}`,
+      id: `app-${Date.now()}`,
       company: newCompany,
       position: newPosition,
       location: newLocation || 'Jakarta',
@@ -353,6 +363,7 @@ export const TrackerView: React.FC = () => {
     };
 
     setApps([newApp, ...apps]);
+    trackerApi.create(newApp);
     setIsAddModalOpen(false);
     resetForm();
   };
@@ -372,12 +383,14 @@ export const TrackerView: React.FC = () => {
 
   const handleDeleteApp = (id: string) => {
     setApps((prev) => prev.filter((a) => a.id !== id));
+    trackerApi.delete(id);
   };
 
   const handleUpdateStatus = (id: string, status: ApplicationItem['status']) => {
     setApps((prev) =>
       prev.map((a) => (a.id === id ? { ...a, status } : a))
     );
+    trackerApi.updateStatus(id, status);
   };
 
   const filteredApps = apps.filter((a) => {

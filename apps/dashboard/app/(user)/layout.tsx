@@ -4,13 +4,17 @@ import React, { useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { useModals } from '@/context/ModalContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { FloatingAiAssistant } from '@/components/ai/FloatingAiAssistant';
 
 export default function UserLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const { openUpgrade } = useModals();
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isCvPage = pathname === '/cv' || pathname?.startsWith('/cv/');
 
   const toggleSidebarCollapse = () => {
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
@@ -45,11 +49,14 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
 
         <main
           id="main-content-scroll"
-          className="flex-1 overflow-y-auto p-3.5 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 w-full no-scrollbar"
+          className="flex-1 overflow-y-auto p-3.5 sm:p-6 lg:p-8 w-full no-scrollbar"
         >
-          {children}
+          <div className="w-full max-w-full xl:max-w-[1500px] 2xl:max-w-[1800px] 3xl:max-w-[2200px] mx-auto space-y-6 lg:space-y-8">
+            {children}
+          </div>
         </main>
 
+        {!isCvPage && <FloatingAiAssistant />}
       </div>
     </div>
   );

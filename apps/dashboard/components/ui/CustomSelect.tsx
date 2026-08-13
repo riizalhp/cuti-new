@@ -52,7 +52,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between gap-2 ${pyClass} rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-medium shadow-2xs hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
+        className={`w-full flex items-center justify-between gap-2 ${pyClass} rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-medium shadow-2xs hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         <span className="truncate">
           {selectedOption && selectedOption.value !== '' ? (
@@ -61,7 +61,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
             <span className="text-slate-400 font-normal">{placeholder}</span>
           )}
         </span>
-        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-teal-600 dark:text-teal-400' : ''}`} />
+        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-orange-500 dark:text-orange-400' : ''}`} />
       </button>
 
       {isOpen && (
@@ -78,12 +78,12 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                 }}
                 className={`w-full flex items-center justify-between px-3.5 py-2 text-left transition cursor-pointer ${
                   isSelected
-                    ? 'bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 font-bold'
-                    : 'text-slate-700 dark:text-slate-200 hover:bg-teal-50/60 dark:hover:bg-slate-800/80 font-medium'
+                    ? 'bg-orange-50 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 font-bold'
+                    : 'text-slate-700 dark:text-slate-200 hover:bg-orange-50/60 dark:hover:bg-slate-800/80 font-medium'
                 }`}
               >
                 <span className="truncate">{opt.label}</span>
-                {isSelected && <Check className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0 ml-2" />}
+                {isSelected && <Check className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400 shrink-0 ml-2" />}
               </button>
             );
           })}

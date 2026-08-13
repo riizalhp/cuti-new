@@ -7,7 +7,13 @@ import {
   FixationPoint,
   AtsCorrelationItem,
 } from './RveEnginePipeline';
-import { Sparkles, Mail, Phone, MapPin } from 'lucide-react';
+import {
+  Sparkles,
+  Mail,
+  Phone,
+  MapPin,
+  Plus,
+} from 'lucide-react';
 
 interface A4HeatmapCanvasProps {
   parsedData: CvParsedData;
@@ -43,6 +49,72 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
 
   // Store calculated text DOM positions for F-Pattern SVG trajectory & badges
   const [domFixations, setDomFixations] = useState<TextDomPosition[]>([]);
+
+  // State for CV bullet point sections
+  const [cvExperience, setCvExperience] = useState(parsedData.experience);
+  const [cvSkills, setCvSkills] = useState(parsedData.skills);
+  const [cvEducation, setCvEducation] = useState(parsedData.education);
+  const [cvMiscPoints, setCvMiscPoints] = useState<string[]>([
+    'Bahasa Indonesia (Native)',
+    'Bahasa Inggris (Professional / Working Proficiency)',
+    'Kemampuan Problem Solving & Manajemen Waktu',
+  ]);
+
+  // Keep state synced if parsedData updates from parent
+  useEffect(() => {
+    setCvExperience(parsedData.experience);
+    setCvSkills(parsedData.skills);
+    setCvEducation(parsedData.education);
+  }, [parsedData]);
+
+  // Add Achievement Point to Experience
+  const handleAddAchievement = (expId: string) => {
+    setCvExperience((prev) =>
+      prev.map((exp) => {
+        if (exp.id === expId) {
+          return {
+            ...exp,
+            achievements: [
+              ...exp.achievements,
+              `Poin pencapaian baru (+25% peningkatan efisiensi & metrik kerja)`,
+            ],
+          };
+        }
+        return exp;
+      })
+    );
+  };
+
+  // Add Skill Tag
+  const handleAddSkill = () => {
+    const defaultNewSkills = ['Docker', 'GraphQL', 'Tailwind CSS', 'Redux Toolkit', 'Jest Unit Test'];
+    const unusedSkill = defaultNewSkills.find((s) => !cvSkills.includes(s)) || `Skill Baru #${cvSkills.length + 1}`;
+    setCvSkills((prev) => [...prev, unusedSkill]);
+  };
+
+  // Add Education Bullet Line
+  const handleAddEducation = () => {
+    setCvEducation((prev) => [
+      ...prev,
+      {
+        id: `edu-new-${Date.now()}`,
+        institution: 'Universitas Indonesia / Sertifikasi BNSP',
+        degree: 'Sertifikasi Keahlian Khusus / Program Pelatihan',
+        period: '2020 — 2024',
+        gpa: 'Lulus IPK 3.85',
+      },
+    ]);
+  };
+
+  // Add Misc Info Line
+  const handleAddMiscPoint = () => {
+    setCvMiscPoints((prev) => [
+      ...prev,
+      `Poin Informasi Tambahan Baru #${prev.length + 1} (Sertifikasi Profesional / Keahlian Khusus)`,
+    ]);
+  };
+
+
 
   // Function to highlight metric numbers in achievements
   const renderAchievementWithMetrics = (text: string) => {
@@ -177,43 +249,47 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
   }, [parsedData, viewMode, showOverlay]);
 
   return (
-    <div className="relative w-full flex justify-center overflow-x-auto py-2">
-      {/* Outer A4 Paper Container with Shadow & Border */}
-      <div
-        ref={containerRef}
-        className="relative w-full max-w-[650px] aspect-[1/1.414] bg-white text-slate-900 rounded-lg border border-slate-300 shadow-2xl overflow-hidden font-sans p-4 sm:p-7 md:p-9 flex flex-col justify-between select-none shrink-0"
-        style={{ fontFamily: 'Inter, var(--font-inter), sans-serif' }}
-      >
-        {/* HTML5 Canvas Heatmap Overlay - Aligned 100% with DOM text elements */}
-        <canvas
-          ref={canvasRef}
-          className={`absolute inset-0 w-full h-full pointer-events-none transition-opacity duration-300 z-20 ${
-            showOverlay && viewMode === 'heatmap' ? 'opacity-90 blur-[1px]' : 'opacity-0'
-          }`}
-        />
+    <div className="w-full flex flex-col items-center py-2 space-y-3">
+      {/* Static Document Canvas Wrapper */}
+      <div className="w-full max-w-4xl overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+        {/* Outer A4 Paper Container */}
+        <div
+          ref={containerRef}
+          onDragStart={(e) => e.preventDefault()}
+          className="relative w-full aspect-[1/1.414] bg-white text-slate-900 rounded-lg shadow-2xl overflow-hidden font-sans p-4 sm:p-7 md:p-9 flex flex-col justify-between select-none shrink-0"
+          style={{ fontFamily: 'Inter, var(--font-inter), sans-serif', userSelect: 'none', WebkitUserSelect: 'none' }}
+        >
 
-        {/* F-Pattern Reading Path Lines SVG Layer */}
-        {showOverlay && viewMode === 'f-pattern' && domFixations.length > 1 && (
-          <svg className="absolute inset-0 w-full h-full pointer-events-none z-30">
-            <defs>
-              <linearGradient id="f-path-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#EF4444" stopOpacity="0.9" />
-                <stop offset="50%" stopColor="#F97316" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.6" />
-              </linearGradient>
-            </defs>
-            <polyline
-              points={domFixations
-                .map((fp) => `${fp.x + fp.width / 2},${fp.y + fp.height / 2}`)
-                .join(' ')}
-              fill="none"
-              stroke="url(#f-path-grad)"
-              strokeWidth="3.5"
-              strokeDasharray="6,4"
-              className="animate-pulse"
-            />
-          </svg>
-        )}
+          {/* HTML5 Canvas Heatmap Overlay - Aligned 100% with DOM text elements */}
+          <canvas
+            ref={canvasRef}
+            className={`absolute inset-0 w-full h-full pointer-events-none transition-opacity duration-300 z-20 ${
+              showOverlay && viewMode === 'heatmap' ? 'opacity-90 blur-[1px]' : 'opacity-0'
+            }`}
+          />
+
+          {/* F-Pattern Reading Path Lines SVG Layer */}
+          {showOverlay && viewMode === 'f-pattern' && domFixations.length > 1 && (
+            <svg className="absolute inset-0 w-full h-full pointer-events-none z-30">
+              <defs>
+                <linearGradient id="f-path-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#EF4444" stopOpacity="0.9" />
+                  <stop offset="50%" stopColor="#F97316" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.6" />
+                </linearGradient>
+              </defs>
+              <polyline
+                points={domFixations
+                  .map((fp) => `${fp.x + fp.width / 2},${fp.y + fp.height / 2}`)
+                  .join(' ')}
+                fill="none"
+                stroke="url(#f-path-grad)"
+                strokeWidth="3.5"
+                strokeDasharray="6,4"
+                className="animate-pulse"
+              />
+            </svg>
+          )}
 
         {/* 1. CV HEADER SECTION */}
         <div className="relative z-10 border-b border-slate-200 pb-4 space-y-1">
@@ -273,21 +349,32 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
           </p>
         </div>
 
-        {/* 3. PENGALAMAN KERJA (EXPERIENCE) */}
+        {/* 3. PENGALAMAN KERJA (EXPERIENCE) - PER-POIN PER-BARIS */}
         <div className="relative z-10 space-y-3 py-3 border-b border-slate-100 flex-1">
           <div className="flex justify-between items-center">
             <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 border-l-3 border-orange-500 pl-2">
               Pengalaman Kerja
             </h2>
-            {showOverlay && (
-              <span className="px-2 py-0.5 rounded text-[10px] font-black bg-rose-600 text-white shadow-xs z-30">
-                Hotspot #2 (94%)
-              </span>
-            )}
+            <div className="flex items-center gap-2 pointer-events-auto">
+              {showOverlay && (
+                <span className="px-2 py-0.5 rounded text-[10px] font-black bg-rose-600 text-white shadow-xs z-30">
+                  Hotspot #2 (94%)
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => handleAddAchievement(cvExperience[0]?.id || 'exp-1')}
+                className="px-2 py-0.5 rounded bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-300 text-[10px] font-bold border border-orange-200 dark:border-orange-800 transition flex items-center gap-1 cursor-pointer z-40 shadow-2xs"
+                title="Tambah Baris Poin Pencapaian Pengalaman Kerja"
+              >
+                <Plus className="w-3 h-3 text-orange-500" />
+                <span>Tambah Baris</span>
+              </button>
+            </div>
           </div>
 
           <div className="space-y-3">
-            {parsedData.experience.map((exp) => (
+            {cvExperience.map((exp) => (
               <div key={exp.id} className="space-y-1 text-xs">
                 <div className="flex justify-between items-baseline">
                   <span
@@ -300,6 +387,7 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
                   </span>
                   <span className="text-[11px] font-semibold text-slate-500">{exp.period}</span>
                 </div>
+                {/* Per-poin Per-baris Bullet Items */}
                 <ul className="list-disc list-inside text-slate-700 space-y-1 pl-1 text-[11px]">
                   {exp.achievements.map((ach, idx) => (
                     <li key={idx} className="leading-relaxed">
@@ -312,20 +400,31 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
           </div>
         </div>
 
-        {/* 4. SKILLS & TECH STACK */}
+        {/* 4. SKILLS & TECH STACK - PER-POIN PER-BARIS */}
         <div className="relative z-10 space-y-1.5 py-3 border-b border-slate-100">
           <div className="flex justify-between items-center">
             <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 border-l-3 border-orange-500 pl-2">
               Keterampilan &amp; Tech Stack
             </h2>
-            {showOverlay && (
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500 text-slate-950 z-30">
-                Scan 78%
-              </span>
-            )}
+            <div className="flex items-center gap-2 pointer-events-auto">
+              {showOverlay && (
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500 text-slate-950 z-30">
+                  Scan 78%
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={handleAddSkill}
+                className="px-2 py-0.5 rounded bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-300 text-[10px] font-bold border border-orange-200 dark:border-orange-800 transition flex items-center gap-1 cursor-pointer z-40 shadow-2xs"
+                title="Tambah Baris Skill / Keterampilan Baru"
+              >
+                <Plus className="w-3 h-3 text-orange-500" />
+                <span>Tambah Skill</span>
+              </button>
+            </div>
           </div>
           <div className="flex flex-wrap gap-1.5 pt-0.5">
-            {parsedData.skills.map((sk) => (
+            {cvSkills.map((sk) => (
               <span
                 key={sk}
                 data-heatmap="skill-badge"
@@ -339,38 +438,66 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
           </div>
         </div>
 
-        {/* 5. PENDIDIKAN & INFORMASI TAMBAHAN (COLD ZONE) */}
+        {/* 5. PENDIDIKAN & INFORMASI TAMBAHAN - PER-POIN PER-BARIS */}
         <div className="relative z-10 space-y-2 pt-2">
           <div className="flex justify-between items-center">
             <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 border-l-3 border-orange-500 pl-2">
               Pendidikan &amp; Kualifikasi
             </h2>
-            {showOverlay && (
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500 text-white z-30">
-                Cold Zone (22%)
-              </span>
-            )}
-          </div>
-          {parsedData.education.map((edu) => (
-            <div
-              key={edu.id}
-              data-heatmap="education"
-              data-heatmap-intensity="0.52"
-              data-heatmap-label="Data Pendidikan"
-              className="flex justify-between text-xs text-slate-700"
-            >
-              <span className="font-bold">{edu.degree} — {edu.institution}</span>
-              <span className="text-slate-500 font-semibold">{edu.gpa}</span>
+            <div className="flex items-center gap-2 pointer-events-auto">
+              {showOverlay && (
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500 text-white z-30">
+                  Cold Zone (22%)
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={handleAddEducation}
+                className="px-2 py-0.5 rounded bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-300 text-[10px] font-bold border border-orange-200 dark:border-orange-800 transition flex items-center gap-1 cursor-pointer z-40 shadow-2xs"
+                title="Tambah Baris Pendidikan / Kualifikasi Baru"
+              >
+                <Plus className="w-3 h-3 text-orange-500" />
+                <span>Tambah Baris</span>
+              </button>
             </div>
-          ))}
-          <p
-            data-heatmap="cold-zone"
-            data-heatmap-intensity="0.22"
-            data-heatmap-label="Informasi Tambahan / Cold Zone"
-            className="text-[10px] text-slate-400 border-t border-slate-100 pt-1.5 inline-block"
-          >
-            {parsedData.hobbiesAndMisc}
-          </p>
+          </div>
+
+          <ul className="list-disc list-inside text-slate-700 space-y-1 pl-1 text-[11px]">
+            {cvEducation.map((edu) => (
+              <li
+                key={edu.id}
+                data-heatmap="education"
+                data-heatmap-intensity="0.52"
+                data-heatmap-label="Data Pendidikan"
+                className="leading-relaxed"
+              >
+                <span className="font-bold">{edu.degree}</span> — <span className="font-semibold text-navy-700">{edu.institution}</span> <span className="text-slate-500 font-normal">({edu.gpa})</span>
+              </li>
+            ))}
+          </ul>
+
+          {/* INFORMASI TAMBAHAN PER-BARIS */}
+          <div className="space-y-1.5 border-t border-slate-100 pt-2">
+            <div className="flex justify-between items-center">
+              <span className="text-[11px] font-bold text-slate-800">Informasi Tambahan &amp; Kualifikasi:</span>
+              <button
+                type="button"
+                onClick={handleAddMiscPoint}
+                className="px-2 py-0.5 rounded bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-300 text-[10px] font-bold border border-orange-200 dark:border-orange-800 transition flex items-center gap-1 cursor-pointer z-40 pointer-events-auto shadow-2xs"
+                title="Tambah Baris Informasi Tambahan Baru"
+              >
+                <Plus className="w-3 h-3 text-orange-500" />
+                <span>Tambah Baris Info</span>
+              </button>
+            </div>
+            <ul className="list-disc list-inside text-slate-700 space-y-1 pl-1 text-[11px]">
+              {cvMiscPoints.map((misc, idx) => (
+                <li key={idx} className="leading-relaxed">
+                  {misc}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         {/* OVERLAY MODE: Bounded Boxes Wireframe */}
@@ -447,6 +574,7 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 };

@@ -1,18 +1,26 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from 'next-themes';
 import { ModalProvider } from '@/context/ModalContext';
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem
+      defaultTheme="light"
+      enableSystem={false}
+      forcedTheme={!mounted ? 'light' : undefined}
       disableTransitionOnChange
     >
       <ModalProvider>{children}</ModalProvider>
     </ThemeProvider>
   );
 }
+
