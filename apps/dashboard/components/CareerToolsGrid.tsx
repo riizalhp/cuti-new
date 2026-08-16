@@ -147,7 +147,7 @@ export const CareerToolsGrid: React.FC = () => {
             Percepat proses melamar kerja dengan alat otomatis
           </p>
         </div>
-        <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 backdrop-blur-md flex items-center gap-1.5">
+        <span className="px-3 py-1 rounded-[10px] text-xs font-black bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 backdrop-blur-md flex items-center gap-1.5">
           <Zap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
           5 Tools Siap Pakai
         </span>
@@ -164,10 +164,10 @@ export const CareerToolsGrid: React.FC = () => {
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <div className={`p-2.5 rounded-xl ${t.color} backdrop-blur-sm shadow-xs`}>
+                  <div className={`p-2.5 rounded-[10px] ${t.color} backdrop-blur-sm shadow-xs`}>
                     <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-[10px] font-extrabold text-slate-700 dark:text-slate-300 bg-white/40 dark:bg-slate-800/80 px-2 py-0.5 rounded-full border border-white/40 dark:border-white/10">
+                  <span className="text-[10px] font-extrabold text-slate-700 dark:text-slate-300 bg-white/40 dark:bg-slate-800/80 px-2 py-0.5 rounded-[10px] border border-white/40 dark:border-white/10">
                     {t.badge}
                   </span>
                 </div>
@@ -196,7 +196,7 @@ export const CareerToolsGrid: React.FC = () => {
             {/* Modal Header */}
             <div className="p-5 border-b border-white/20 dark:border-white/10 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <span className="p-2 rounded-xl bg-violet-500/20 text-violet-600 dark:text-violet-400">
+                <span className="p-2 rounded-[10px] bg-violet-500/20 text-violet-600 dark:text-violet-400">
                   <Sparkles className="w-5 h-5" />
                 </span>
                 <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
@@ -222,7 +222,7 @@ export const CareerToolsGrid: React.FC = () => {
                   value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
                   placeholder="Contoh: Lowongan Admin Penjualan di PT Maju Bersama, kualifikasi: Menguasai Excel, komunikasi baik, lokasi Jakarta Pusat..."
-                  className="w-full bg-white/40 dark:bg-slate-800/50 border border-white/30 dark:border-white/10 rounded-xl p-3.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-violet-500 backdrop-blur-md resize-none"
+                  className="w-full bg-white/40 dark:bg-slate-800/50 border border-white/30 dark:border-white/10 rounded-[10px] p-3.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-violet-500 backdrop-blur-md resize-none"
                 ></textarea>
               </div>
 
@@ -269,7 +269,7 @@ export const CareerToolsGrid: React.FC = () => {
                       )}
                     </button>
                   </div>
-                  <div className="p-4 rounded-xl bg-white/50 dark:bg-slate-800/60 border border-white/30 dark:border-white/10 text-xs text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap max-h-60 overflow-y-auto backdrop-blur-md">
+                  <div className="p-4 rounded-[10px] bg-white/50 dark:bg-slate-800/60 border border-white/30 dark:border-white/10 text-xs text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap max-h-60 overflow-y-auto backdrop-blur-md">
                     {outputVal}
                   </div>
                 </div>

@@ -181,12 +181,18 @@ importers:
 
   apps/dashboard:
     dependencies:
+      '@cuti/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@google/genai':
         specifier: ^2.4.0
         version: 2.15.0
       '@hookform/resolvers':
         specifier: ^5.2.1
         version: 5.7.1(@sinclair/typebox@0.27.12)(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(effect@3.21.0)(react-hook-form@7.84.0(react@19.2.4))(zod@3.25.76)
+      '@lottiefiles/dotlottie-react':
+        specifier: ^0.19.14
+        version: 0.19.14(react@19.2.4)
       '@radix-ui/react-accordion':
         specifier: ^1.2.1
         version: 1.2.20(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1693,6 +1699,16 @@ packages:
   '@ljharb/through@2.3.14':
     resolution: {integrity: sha512-ajBvlKpWucBB17FuQYUShqpqy8GRgYEpJW0vWJbUu1CV9lWyrDCapy0lScU8T8Z6qn49sSwJB3+M+evYIdGg+A==}
     engines: {node: '>= 0.4'}
+
+  '@lottiefiles/dotlottie-react@0.19.14':
+    resolution: {integrity: sha512-rnBQOXhJp5kO1fBN5lMwRcavxJxQ37TvK0RVoohokaZA4yrt9Yk1hy5RnicSTn5/UvBLtK2wEDuu3UBylCgkHw==}
+    engines: {node: '>=18.17.0', npm: '>=9.5.0'}
+    peerDependencies:
+      react: ^17 || ^18 || ^19
+
+  '@lottiefiles/dotlottie-web@0.79.1':
+    resolution: {integrity: sha512-UKk+DmY2yurQs2T02AekNGVLD+fSGlygHKnf9485LCWF+CUvMSUXizAgR2qDGFUH2APj2i58nk21QhfVi9EG6g==}
+    engines: {node: '>=18.17.0', npm: '>=9.5.0'}
 
   '@lukeed/csprng@1.1.0':
     resolution: {integrity: sha512-Z7C/xXCiGWsg0KuKsHTKJxbWhpI3Vs5GwLfOean7MGyVFGqdRgBbAjOCh6u4bbjPc/8MJ2pZmK/0DLdCbivLDA==}
@@ -8866,6 +8882,13 @@ snapshots:
   '@ljharb/through@2.3.14':
     dependencies:
       call-bind: 1.0.9
+
+  '@lottiefiles/dotlottie-react@0.19.14(react@19.2.4)':
+    dependencies:
+      '@lottiefiles/dotlottie-web': 0.79.1
+      react: 19.2.4
+
+  '@lottiefiles/dotlottie-web@0.79.1': {}
 
   '@lukeed/csprng@1.1.0': {}
 

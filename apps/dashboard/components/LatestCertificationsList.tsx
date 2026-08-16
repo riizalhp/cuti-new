@@ -67,10 +67,10 @@ export const LatestCertificationsList: React.FC = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
+          <div className="p-2 rounded-[10px] bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
             <Award className="w-5 h-5" />
           </div>
           <div>
@@ -90,7 +90,7 @@ export const LatestCertificationsList: React.FC = () => {
           return (
             <div
               key={cert.id}
-              className="p-4 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-amber-300 dark:hover:border-amber-700 transition flex flex-col justify-between"
+              className="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-amber-300 dark:hover:border-amber-700 transition flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -117,7 +117,7 @@ export const LatestCertificationsList: React.FC = () => {
               <button
                 onClick={() => handleRegister(cert.id)}
                 disabled={isReg}
-                className={`mt-4 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg font-bold text-xs transition ${
+                className={`mt-4 w-full flex items-center justify-center gap-1.5 py-2 rounded-[10px] font-bold text-xs transition ${
                   isReg
                     ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                     : 'bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold shadow-sm'

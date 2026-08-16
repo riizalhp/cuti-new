@@ -3,25 +3,26 @@ import { CvResponse } from '@cuti/types';
 export type CvResponseDto = CvResponse;
 
 export function mapCvToResponse(cv: any): CvResponseDto {
+  const data = (cv.data as any) || {};
   return {
     id: cv.id,
-    userId: cv.userId,
+    userId: cv.user_id,
     title: cv.title,
-    templateId: cv.templateId,
-    personalInfo: cv.personalInfo,
-    summary: cv.summary,
-    experiences: cv.experiences,
-    education: cv.education,
-    skills: cv.skills,
-    certifications: cv.certifications,
-    projects: cv.projects,
-    languages: cv.languages,
-    atsScore: cv.atsScore,
-    completeness: cv.completeness,
-    status: cv.status,
-    isPrimary: cv.isPrimary,
-    pdfUrl: cv.pdfUrl,
-    createdAt: cv.createdAt.toISOString(),
-    updatedAt: cv.updatedAt.toISOString(),
+    templateId: cv.template_id,
+    personalInfo: data.personalInfo ?? null,
+    summary: data.summary ?? null,
+    experiences: data.experiences ?? [],
+    education: data.education ?? [],
+    skills: data.skills ?? [],
+    certifications: data.certifications ?? [],
+    projects: data.projects ?? [],
+    languages: data.languages ?? [],
+    atsScore: data.atsScore ?? 0,
+    completeness: data.completeness ?? 0,
+    status: cv.status?.toLowerCase?.() || 'draft',
+    isPrimary: cv.is_active ?? false,
+    pdfUrl: null,
+    createdAt: cv.created_at?.toISOString?.() || cv.created_at,
+    updatedAt: cv.updated_at?.toISOString?.() || cv.updated_at,
   };
 }

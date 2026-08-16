@@ -142,10 +142,10 @@ font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, s
 ```
 
 ### Usage
-- **Logo square** → `rounded-xl` (12px)
-- **Buttons** → `rounded-xl` (12px)
-- **Nav items** → `rounded-xl` (12px)
-- **Cards** → `rounded-xl` (12px), `rounded-2xl` (16px) for sections
+- **Logo square** → `rounded-[10px]` (12px)
+- **Buttons** → `rounded-[10px]` (10px)
+- **Nav items** → `rounded-[10px]` (12px)
+- **Cards** → `rounded-[10px]` (12px), `rounded-[10px]` (16px) for sections
 - **Badges** → `rounded-full` (9999px)
 
 ---
@@ -171,7 +171,7 @@ font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, s
 
 #### Active State
 ```html
-<button class="w-full flex items-center rounded-xl text-xs font-semibold transition-all duration-200 group relative justify-between px-3.5 py-2.5 bg-indigo-600 text-white shadow-md shadow-indigo-600/20 dark:bg-indigo-500">
+<button class="w-full flex items-center rounded-[10px] text-xs font-semibold transition-all duration-200 group relative justify-between px-3.5 py-2.5 bg-indigo-600 text-white shadow-md shadow-indigo-600/20 dark:bg-indigo-500">
   <div class="flex items-center gap-3">
     <svg class="w-4 h-4 shrink-0 transition-transform group-hover:scale-110 text-white">...</svg>
     <span class="truncate">Beranda</span>
@@ -181,7 +181,7 @@ font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, s
 
 #### Inactive State
 ```html
-<button class="w-full flex items-center rounded-xl text-xs font-semibold transition-all duration-200 group relative justify-between px-3.5 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+<button class="w-full flex items-center rounded-[10px] text-xs font-semibold transition-all duration-200 group relative justify-between px-3.5 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
   <div class="flex items-center gap-3">
     <svg class="w-4 h-4 shrink-0 transition-transform group-hover:scale-110 text-slate-400 dark:text-slate-400">...</svg>
     <span class="truncate">CV Saya</span>
@@ -229,7 +229,7 @@ font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, s
 
 #### Primary
 ```html
-<button class="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl font-bold text-xs transition shadow-sm bg-indigo-600 hover:bg-indigo-700 text-white">
+<button class="w-full flex items-center justify-center gap-1.5 py-2 rounded-[10px] font-bold text-xs transition shadow-sm bg-indigo-600 hover:bg-indigo-700 text-white">
   <svg class="w-3.5 h-3.5">...</svg>
   <span>Daftar Acara (Gratis)</span>
 </button>
@@ -237,7 +237,7 @@ font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, s
 
 #### Accent
 ```html
-<button class="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-md transition cursor-pointer">
+<button class="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-[10px] bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-md transition cursor-pointer">
   <span>Upgrade Sekarang</span>
   <svg class="w-3.5 h-3.5">...</svg>
 </button>
@@ -245,7 +245,7 @@ font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, s
 
 #### Secondary/Ghost
 ```html
-<button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-xs font-semibold transition-colors cursor-pointer border bg-white dark:bg-slate-900 p-0 h-9 w-9 rounded-xl border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0">
+<button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-xs font-semibold transition-colors cursor-pointer border bg-white dark:bg-slate-900 p-0 h-9 w-9 rounded-[10px] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0">
   <svg class="w-5 h-5">...</svg>
 </button>
 ```
@@ -254,21 +254,21 @@ font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, s
 
 #### Standard Card
 ```html
-<div class="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-indigo-300 dark:hover:border-indigo-700 transition">
+<div class="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-indigo-300 dark:hover:border-indigo-700 transition">
   <!-- content -->
 </div>
 ```
 
 #### Section Card (White)
 ```html
-<div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+<div class="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
   <!-- content -->
 </div>
 ```
 
 #### Premium Gradient Card
 ```html
-<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 p-4 text-white shadow-lg border border-indigo-700/40">
+<div class="relative overflow-hidden rounded-[10px] bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 p-4 text-white shadow-lg border border-indigo-700/40">
   <div class="absolute top-0 right-0 -mr-6 -mt-6 w-20 h-20 bg-amber-400/20 rounded-full blur-xl pointer-events-none"></div>
   <!-- content -->
 </div>
@@ -276,7 +276,7 @@ font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, s
 
 ### 7.5 JOB CARD (Complete)
 ```html
-<div class="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-indigo-300 dark:hover:border-indigo-700 transition flex flex-col justify-between">
+<div class="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-indigo-300 dark:hover:border-indigo-700 transition flex flex-col justify-between">
   <div>
     <div class="flex items-center justify-between mb-2">
       <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">Job Fair</span>
@@ -293,7 +293,7 @@ font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, s
     </div>
     <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">Description...</p>
   </div>
-  <button class="mt-4 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl font-bold text-xs transition shadow-sm bg-indigo-600 hover:bg-indigo-700 text-white">
+  <button class="mt-4 w-full flex items-center justify-center gap-1.5 py-2 rounded-[10px] font-bold text-xs transition shadow-sm bg-indigo-600 hover:bg-indigo-700 text-white">
     <svg class="w-3.5 h-3.5 text-amber-300">...</svg>
     <span>Daftar Acara (Gratis)</span>
   </button>
@@ -550,7 +550,7 @@ app/
 
 1. **Custom dark background** → `#090d16` not standard Tailwind
 2. **Satoshi font** → Premium font from Fontshare
-3. **Rounded-xl default** → Not rounded-lg
+3. **Rounded-xl default** → Not rounded-[10px]
 4. **Indigo-600 primary** → Not indigo-500
 5. **Amber-400 accent** → Not yellow
 6. **Text sizes** → Heavy use of `text-[10px]`, `text-[11px]` (non-standard)

@@ -69,11 +69,11 @@ export const AICareerAssistantCard: React.FC = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-navy-900 via-slate-900 to-indigo-950 rounded-2xl p-5 md:p-6 text-white border border-slate-800/80 shadow-lg flex flex-col justify-between h-full space-y-4">
+    <div className="bg-gradient-to-br from-navy-900 via-slate-900 to-indigo-950 rounded-[10px] p-5 md:p-6 text-white border border-slate-800/80 shadow-lg flex flex-col justify-between h-full space-y-4">
       <div>
         <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold shadow-md shrink-0">
+            <div className="w-10 h-10 rounded-[10px] bg-orange-500 text-white flex items-center justify-center font-bold shadow-md shrink-0">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -81,7 +81,7 @@ export const AICareerAssistantCard: React.FC = () => {
                 <h3 className="font-extrabold text-base text-white">
                   Konsultan Karir (Personal Advisor)
                 </h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500 text-white uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-emerald-500 text-white uppercase tracking-wider">
                   Aktif
                 </span>
               </div>
@@ -100,7 +100,7 @@ export const AICareerAssistantCard: React.FC = () => {
               <button
                 key={idx}
                 onClick={() => handleConsult(`Tolong berikan detail panduan untuk: ${s.title}`)}
-                className="p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-left transition group flex flex-col justify-between space-y-2 cursor-pointer"
+                className="p-3 rounded-[10px] bg-white/5 hover:bg-white/10 border border-white/10 text-left transition group flex flex-col justify-between space-y-2 cursor-pointer"
               >
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
@@ -120,7 +120,7 @@ export const AICareerAssistantCard: React.FC = () => {
       </div>
 
       {/* Custom Consultation Prompt Box */}
-      <div className="bg-slate-950/80 p-3 rounded-xl border border-white/10">
+      <div className="bg-slate-950/80 p-3 rounded-[10px] border border-white/10">
         <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
           Tanyakan Apapun Pada Konsultan Karir:
         </label>
@@ -131,12 +131,12 @@ export const AICareerAssistantCard: React.FC = () => {
             onChange={(e) => setPrompt(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleConsult()}
             placeholder="Contoh: Bagaimana cara nego gaji untuk posisi Junior Web Dev?"
-            className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-orange-400 transition"
+            className="flex-1 bg-slate-900 border border-slate-700 rounded-[10px] px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-orange-400 transition"
           />
           <button
             onClick={() => handleConsult()}
             disabled={loading || !prompt.trim()}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-xs transition cursor-pointer border-0 shrink-0"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-[10px] bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-xs transition cursor-pointer border-0 shrink-0"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -151,7 +151,7 @@ export const AICareerAssistantCard: React.FC = () => {
 
         {/* Output Box */}
         {aiResponse && (
-          <div className="mt-3 p-3.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-slate-200 leading-relaxed max-h-48 overflow-y-auto">
+          <div className="mt-3 p-3.5 rounded-[10px] bg-slate-900 border border-white/10 text-xs text-slate-200 leading-relaxed max-h-48 overflow-y-auto">
             <div className="flex items-center gap-2 text-orange-400 font-bold mb-1.5">
               <Sparkles className="w-4 h-4" />
               <span>Rekomendasi Konsultan Karir:</span>

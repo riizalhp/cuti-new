@@ -45,7 +45,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
       <div className="glass-card bg-white/90 dark:bg-slate-900/90 rounded-[32px] border border-white/30 dark:border-white/10 shadow-2xl w-full max-w-xl p-6 relative overflow-hidden">
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 bg-white/20 dark:bg-white/10 transition cursor-pointer"
+          className="absolute top-5 right-5 p-2 rounded-[10px] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 bg-white/20 dark:bg-white/10 transition cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -84,7 +84,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
               }`}
             >
               <span>Tahunan (Rp 29.000/bln)</span>
-              <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase">
+              <span className="px-2 py-0.5 rounded-[10px] bg-amber-400 text-slate-950 text-[9px] font-black uppercase">
                 Hemat 40%
               </span>
             </button>
@@ -120,7 +120,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
         </div>
 
         {success ? (
-          <div className="p-3 bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 rounded-full text-center font-black text-xs flex items-center justify-center gap-2">
+          <div className="p-3 bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 rounded-[10px] text-center font-black text-xs flex items-center justify-center gap-2">
             <ShieldCheck className="w-4 h-4" />
             <span>Selamat! Akun Premium Pass Anda telah aktif!</span>
           </div>

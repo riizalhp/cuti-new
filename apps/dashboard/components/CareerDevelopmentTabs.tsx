@@ -138,7 +138,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
   ];
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors space-y-4">
+    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors space-y-4">
       {/* Header & Tabs Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
         <div>
@@ -151,7 +151,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
         </div>
 
         {/* Tab Buttons Pill */}
-        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-[10px] overflow-x-auto no-scrollbar">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -159,7 +159,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                className={`px-3 py-1.5 rounded-[10px] text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                   isActive
                     ? 'bg-white dark:bg-slate-900 text-violet-600 dark:text-violet-400 shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -180,7 +180,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
             <div
               key={art.id}
               onClick={() => setActiveModalItem(art)}
-              className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition cursor-pointer flex flex-col justify-between group space-y-3"
+              className="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition cursor-pointer flex flex-col justify-between group space-y-3"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
@@ -217,7 +217,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
               href={crs.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition cursor-pointer flex flex-col justify-between group space-y-3 no-underline"
+              className="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition cursor-pointer flex flex-col justify-between group space-y-3 no-underline"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
@@ -253,7 +253,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
               href={cert.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition cursor-pointer flex flex-col justify-between group space-y-3 no-underline"
+              className="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition cursor-pointer flex flex-col justify-between group space-y-3 no-underline"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
@@ -289,7 +289,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
               href={ev.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition cursor-pointer flex flex-col justify-between group space-y-3 no-underline"
+              className="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition cursor-pointer flex flex-col justify-between group space-y-3 no-underline"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
@@ -320,15 +320,15 @@ export const CareerDevelopmentTabs: React.FC = () => {
       {/* Modal detail for Article tab */}
       {activeModalItem && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg p-6 relative">
+          <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg p-6 relative">
             <button
               onClick={() => setActiveModalItem(null)}
-              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+              className="absolute top-4 right-4 p-1.5 rounded-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300">
+            <span className="px-2.5 py-0.5 rounded-[10px] text-xs font-bold bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300">
               {activeModalItem.category}
             </span>
 
@@ -336,14 +336,14 @@ export const CareerDevelopmentTabs: React.FC = () => {
               {activeModalItem.title}
             </h3>
 
-            <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 leading-relaxed my-4 space-y-2">
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-[10px] border border-slate-200/80 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 leading-relaxed my-4 space-y-2">
               <p className="font-semibold">{activeModalItem.desc}</p>
               <p>{activeModalItem.content}</p>
             </div>
 
             <button
               onClick={() => setActiveModalItem(null)}
-              className="w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition cursor-pointer border-0"
+              className="w-full py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition cursor-pointer border-0"
             >
               Tutup Panduan
             </button>

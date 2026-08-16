@@ -66,11 +66,11 @@
   --space-24: 96px;
 
   /* Border Radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 20px;
+  --radius-sm: 10px;
+  --radius-md: 10px;
+  --radius-lg: 10px;
+  --radius-xl: 10px;
+  --radius-2xl: 10px;
   --radius-full: 9999px;
 
   /* Shadows */
@@ -204,7 +204,7 @@ body {
 
 /* Neo Skeuomorphism (Soft Skeuomorphic Pill Buttons) */
 .btn-neo-skeuo {
-  border-radius: 9999px;
+  border-radius: 10px;
   background: #0D3BD9;
   color: #ffffff;
   box-shadow:
@@ -224,7 +224,7 @@ body {
 }
 
 .btn-neo-skeuo-light {
-  border-radius: 9999px;
+  border-radius: 10px;
   background: #ffffff;
   color: #0D3BD9;
   box-shadow:
@@ -243,7 +243,7 @@ body {
 }
 
 .btn-neo-skeuo-accent {
-  border-radius: 9999px;
+  border-radius: 10px;
   background: #0D3BD9;
   color: #ffffff;
   box-shadow:

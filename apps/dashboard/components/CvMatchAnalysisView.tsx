@@ -377,10 +377,10 @@ export const CvMatchAnalysisView: React.FC = () => {
   return (
     <div className="space-y-5 w-full max-w-7xl mx-auto pb-12">
       {/* 2. COMPACT HERO SECTION (100–120px SaaS Dashboard Style) */}
-      <div className="relative overflow-hidden rounded-2xl bg-[#0D3BD9] text-white p-4 sm:p-5 md:p-6 shadow-md border border-blue-500/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="relative overflow-hidden rounded-[10px] bg-[#0D3BD9] text-white p-4 sm:p-5 md:p-6 shadow-md border border-blue-500/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="relative z-10 space-y-1">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#F97316] text-white flex items-center gap-1">
+            <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-[#F97316] text-white flex items-center gap-1">
               <Trophy className="w-3 h-3 text-amber-200" /> Leaderboard Hub
             </span>
             <span className="text-[11px] text-blue-100 font-medium">
@@ -401,7 +401,7 @@ export const CvMatchAnalysisView: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsAddModalOpen(true)}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#F97316] hover:bg-orange-600 text-white font-extrabold text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-[10px] bg-[#F97316] hover:bg-orange-600 text-white font-extrabold text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>Tambah Lowongan</span>
@@ -415,9 +415,9 @@ export const CvMatchAnalysisView: React.FC = () => {
       {/* 3. ACTIVE CV SUMMARY BAR & 11. PROGRESS METRICS */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
         {/* Active CV Bar (7 Cols) */}
-        <div className="lg:col-span-7 bg-white rounded-xl border border-slate-200 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="lg:col-span-7 bg-white rounded-[10px] border border-slate-200 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#1F3578]/10 text-[#1F3578] flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-[10px] bg-[#1F3578]/10 text-[#1F3578] flex items-center justify-center shrink-0">
               <FileCheck2 className="w-5 h-5" />
             </div>
             <div>
@@ -442,7 +442,7 @@ export const CvMatchAnalysisView: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsChangeCvModalOpen(true)}
-            className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#1F3578] text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+            className="px-3 py-1.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 text-[#1F3578] text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
             <span>Ganti CV</span>
@@ -450,7 +450,7 @@ export const CvMatchAnalysisView: React.FC = () => {
         </div>
 
         {/* 11. Dashboard Live Progress Summary (5 Cols) */}
-        <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200 p-3.5 shadow-2xs flex items-center justify-between gap-2 text-center text-xs">
+        <div className="lg:col-span-5 bg-white rounded-[10px] border border-slate-200 p-3.5 shadow-2xs flex items-center justify-between gap-2 text-center text-xs">
           <div className="flex-1 border-r border-slate-100 pr-2">
             <span className="text-[10px] font-bold text-slate-400 block uppercase">Lowongan</span>
             <span className="font-extrabold text-slate-900 text-sm">{totalAnalyzed} Target</span>
@@ -484,7 +484,7 @@ export const CvMatchAnalysisView: React.FC = () => {
             </div>
 
             {/* Mode Switch Button */}
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-[11px] font-bold">
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-[10px] text-[11px] font-bold">
               <button
                 type="button"
                 onClick={() => setViewMode('detail')}
@@ -530,7 +530,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                     setSelectedJobId(job.id);
                     setViewMode('detail');
                   }}
-                  className={`p-3.5 rounded-xl border transition cursor-pointer space-y-2.5 relative ${
+                  className={`p-3.5 rounded-[10px] border transition cursor-pointer space-y-2.5 relative ${
                     isSelected
                       ? 'border-[#3B5CC4] bg-blue-50/60 ring-2 ring-[#3B5CC4]/20 shadow-xs'
                       : 'border-slate-200 hover:bg-slate-50/80 bg-white'
@@ -604,7 +604,7 @@ export const CvMatchAnalysisView: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsAddModalOpen(true)}
-            className="w-full py-3 rounded-xl border-2 border-dashed border-slate-300 hover:border-[#3B5CC4] hover:bg-blue-50/50 text-[#1F3578] font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-3 rounded-[10px] border-2 border-dashed border-slate-300 hover:border-[#3B5CC4] hover:bg-blue-50/50 text-[#1F3578] font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer"
           >
             <Plus className="w-4 h-4 text-[#F97316]" />
             <span>Tambah Target Lowongan Baru</span>
@@ -615,7 +615,7 @@ export const CvMatchAnalysisView: React.FC = () => {
         <div className="lg:col-span-7 sticky top-6 space-y-4">
           {viewMode === 'compare' && compareJobsData.length >= 2 ? (
             /* 12. VISUAL BAR GRAPH COMPARISON MODE (GoTo vs Shopee) */
-            <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-5 shadow-2xs">
+            <div className="bg-white rounded-[10px] border border-slate-200 p-5 space-y-5 shadow-2xs">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
                   <span className="text-[10px] font-extrabold text-[#F97316] uppercase tracking-wider block">
@@ -629,7 +629,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setViewMode('detail')}
-                  className="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition cursor-pointer"
+                  className="px-2.5 py-1 rounded-[10px] border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition cursor-pointer"
                 >
                   Kembali ke Detail
                 </button>
@@ -704,7 +704,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                 </div>
 
                 {/* Summary Winner Card */}
-                <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 space-y-1">
+                <div className="p-3.5 rounded-[10px] bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 space-y-1">
                   <span className="font-extrabold text-emerald-700 uppercase tracking-wider block text-[10px]">
                     Kesimpulan Pilihan Terbaik
                   </span>
@@ -717,7 +717,7 @@ export const CvMatchAnalysisView: React.FC = () => {
             </div>
           ) : (
             /* 5. TABBED DETAIL ATS PANEL FOR SELECTED JOB */
-            <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-5 shadow-2xs">
+            <div className="bg-white rounded-[10px] border border-slate-200 p-5 space-y-5 shadow-2xs">
               {/* Target Job Header info */}
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
@@ -729,17 +729,17 @@ export const CvMatchAnalysisView: React.FC = () => {
                   </h3>
                 </div>
 
-                <span className="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                <span className="px-2.5 py-1 rounded-[10px] text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
                   {selectedJob.matchScore}% ATS
                 </span>
               </div>
 
               {/* 5. FOUR CLEAN TABS */}
-              <div className="grid grid-cols-4 gap-1 p-1 bg-slate-100 rounded-lg text-xs font-extrabold">
+              <div className="grid grid-cols-4 gap-1 p-1 bg-slate-100 rounded-[10px] text-xs font-extrabold">
                 <button
                   type="button"
                   onClick={() => setActiveTab('overview')}
-                  className={`py-2 text-center rounded-md transition cursor-pointer ${
+                  className={`py-2 text-center rounded-[10px] transition cursor-pointer ${
                     activeTab === 'overview' ? 'bg-white text-[#1F3578] shadow-2xs' : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
@@ -748,7 +748,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setActiveTab('keywords')}
-                  className={`py-2 text-center rounded-md transition cursor-pointer ${
+                  className={`py-2 text-center rounded-[10px] transition cursor-pointer ${
                     activeTab === 'keywords' ? 'bg-white text-[#1F3578] shadow-2xs' : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
@@ -757,7 +757,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setActiveTab('gap')}
-                  className={`py-2 text-center rounded-md transition cursor-pointer ${
+                  className={`py-2 text-center rounded-[10px] transition cursor-pointer ${
                     activeTab === 'gap' ? 'bg-white text-[#1F3578] shadow-2xs' : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
@@ -766,7 +766,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setActiveTab('insights')}
-                  className={`py-2 text-center rounded-md transition cursor-pointer ${
+                  className={`py-2 text-center rounded-[10px] transition cursor-pointer ${
                     activeTab === 'insights' ? 'bg-white text-[#1F3578] shadow-2xs' : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
@@ -778,7 +778,7 @@ export const CvMatchAnalysisView: React.FC = () => {
               {activeTab === 'overview' && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-                    <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
+                    <div className="p-2.5 rounded-[10px] bg-slate-50 border border-slate-100 space-y-1">
                       <span className="text-[10px] font-bold text-slate-400 block">Hard Skill</span>
                       <span className="font-extrabold text-[#1F3578] text-sm">{selectedJob.breakdown.hardSkills}%</span>
                       <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
@@ -786,7 +786,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
+                    <div className="p-2.5 rounded-[10px] bg-slate-50 border border-slate-100 space-y-1">
                       <span className="text-[10px] font-bold text-slate-400 block">Soft Skill</span>
                       <span className="font-extrabold text-[#1F3578] text-sm">{selectedJob.breakdown.softSkills}%</span>
                       <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
@@ -794,7 +794,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
+                    <div className="p-2.5 rounded-[10px] bg-slate-50 border border-slate-100 space-y-1">
                       <span className="text-[10px] font-bold text-slate-400 block">Pengalaman</span>
                       <span className="font-extrabold text-[#1F3578] text-sm">{selectedJob.breakdown.experience}%</span>
                       <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
@@ -802,7 +802,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
+                    <div className="p-2.5 rounded-[10px] bg-slate-50 border border-slate-100 space-y-1">
                       <span className="text-[10px] font-bold text-slate-400 block">Pendidikan</span>
                       <span className="font-extrabold text-[#1F3578] text-sm">{selectedJob.breakdown.education}%</span>
                       <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
@@ -811,7 +811,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
+                  <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-[10px] border border-slate-100">
                     <strong className="font-bold text-slate-900">Deskripsi Ringkas Target:</strong> {selectedJob.description}
                   </p>
                 </div>
@@ -864,7 +864,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                           key={idx}
                           type="button"
                           onClick={() => handleSimulateAddKeyword(selectedJob.id, kw)}
-                          className="px-2.5 py-1 rounded-lg font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition flex items-center gap-1 cursor-pointer"
+                          className="px-2.5 py-1 rounded-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition flex items-center gap-1 cursor-pointer"
                         >
                           <Plus className="w-3 h-3 text-amber-600" />
                           <span>{kw}</span>
@@ -909,7 +909,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => alert(`Posisi ${selectedJob.company} berhasil ditambahkan ke Tracker!`)}
-                  className="w-full sm:w-auto px-3 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold transition text-center cursor-pointer"
+                  className="w-full sm:w-auto px-3 py-2 rounded-[10px] border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold transition text-center cursor-pointer"
                 >
                   + Tracker Lamaran
                 </button>
@@ -918,7 +918,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => alert(`CV berhasil dioptimalkan khusus untuk lowongan ${selectedJob.company}!`)}
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#F97316] hover:bg-orange-600 text-white font-extrabold text-xs shadow-md transition text-center cursor-pointer flex items-center justify-center gap-1.5"
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-[#F97316] hover:bg-orange-600 text-white font-extrabold text-xs shadow-md transition text-center cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Sparkles className="w-4 h-4 text-white" />
                   <span>Optimasi CV (Rekomendasi Utama)</span>
@@ -932,7 +932,7 @@ export const CvMatchAnalysisView: React.FC = () => {
       {/* 6. MODAL: TAMBAH LOWONGAN TARGET */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-[10px] max-w-lg w-full p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
                 <PlusCircle className="w-5 h-5 text-[#F97316]" />
@@ -958,7 +958,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                     key={idx}
                     type="button"
                     onClick={() => handleApplyPreset(preset)}
-                    className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
+                    className="px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
                   >
                     + {preset.company} ({preset.position})
                   </button>
@@ -976,7 +976,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                   value={newPosition}
                   onChange={(e) => setNewPosition(e.target.value)}
                   placeholder="Contoh: Frontend Engineer"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-[#3B5CC4] focus:outline-none"
+                  className="w-full px-3 py-2 rounded-[10px] border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-[#3B5CC4] focus:outline-none"
                 />
               </div>
 
@@ -988,7 +988,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                   value={newCompany}
                   onChange={(e) => setNewCompany(e.target.value)}
                   placeholder="Contoh: GoTo / Shopee / Tokopedia"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-[#3B5CC4] focus:outline-none"
+                  className="w-full px-3 py-2 rounded-[10px] border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-[#3B5CC4] focus:outline-none"
                 />
               </div>
 
@@ -1000,7 +1000,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
                   placeholder="Tempelkan persyaratan pekerjaan dari portal karir di sini..."
-                  className="w-full p-3 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-[#3B5CC4] focus:outline-none resize-none"
+                  className="w-full p-3 rounded-[10px] border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-[#3B5CC4] focus:outline-none resize-none"
                 />
               </div>
             </div>
@@ -1010,7 +1010,7 @@ export const CvMatchAnalysisView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(false)}
-                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50 transition cursor-pointer"
+                className="px-4 py-2 rounded-[10px] border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50 transition cursor-pointer"
               >
                 Batal
               </button>
@@ -1019,7 +1019,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                 type="button"
                 onClick={handleRunAnalysis}
                 disabled={isAnalyzing}
-                className="px-5 py-2.5 rounded-lg bg-[#F97316] hover:bg-orange-600 text-white font-extrabold text-xs shadow-md transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-[10px] bg-[#F97316] hover:bg-orange-600 text-white font-extrabold text-xs shadow-md transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
               >
                 {isAnalyzing ? (
                   <>
@@ -1041,7 +1041,7 @@ export const CvMatchAnalysisView: React.FC = () => {
       {/* 9. MODAL: LIHAT SEMUA KEYWORDS */}
       {isKeywordsModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+          <div className="bg-white rounded-[10px] max-w-md w-full p-6 space-y-4 shadow-2xl relative">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
                 <Target className="w-4 h-4 text-[#3B5CC4]" />
@@ -1074,7 +1074,7 @@ export const CvMatchAnalysisView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsKeywordsModalOpen(false)}
-                className="px-4 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 cursor-pointer"
+                className="px-4 py-1.5 rounded-[10px] bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 cursor-pointer"
               >
                 Tutup
               </button>
@@ -1091,7 +1091,7 @@ export const CvMatchAnalysisView: React.FC = () => {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative cursor-default"
+            className="bg-white rounded-[10px] max-w-lg w-full p-6 space-y-4 shadow-2xl relative cursor-default"
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
@@ -1115,7 +1115,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                     setSelectedCvId(cv.id);
                     setIsChangeCvModalOpen(false);
                   }}
-                  className={`p-3.5 rounded-xl border transition cursor-pointer flex items-start justify-between gap-3 ${
+                  className={`p-3.5 rounded-[10px] border transition cursor-pointer flex items-start justify-between gap-3 ${
                     selectedCvId === cv.id
                       ? 'border-[#3B5CC4] bg-blue-50/60 ring-2 ring-[#3B5CC4]/20'
                       : 'border-slate-200 hover:bg-slate-50'

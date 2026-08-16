@@ -52,7 +52,7 @@ export const CvPromoModal: React.FC<CvPromoModalProps> = ({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg relative overflow-hidden flex flex-col cursor-default"
+        className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg relative overflow-hidden flex flex-col cursor-default"
       >
         {/* Decorative Top Header */}
         <div className="relative bg-[#0D3BD9] p-6 text-white overflow-hidden">
@@ -64,7 +64,7 @@ export const CvPromoModal: React.FC<CvPromoModalProps> = ({
           <button
             type="button"
             onClick={handleDismiss}
-            className="absolute top-4 right-4 z-30 w-9 h-9 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition cursor-pointer shrink-0 border border-white/20 shadow-xs"
+            className="absolute top-4 right-4 z-30 w-9 h-9 rounded-[10px] bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition cursor-pointer shrink-0 border border-white/20 shadow-xs"
             aria-label="Tutup Promo"
           >
             <X className="w-5 h-5 pointer-events-none" />
@@ -72,7 +72,7 @@ export const CvPromoModal: React.FC<CvPromoModalProps> = ({
 
           {/* Title & Badge */}
           <div className="relative z-10 space-y-2.5">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-orange-500 text-white shadow-xs">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-[11px] font-extrabold uppercase tracking-wider bg-orange-500 text-white shadow-xs">
               <Sparkles className="w-3.5 h-3.5 fill-white" />
               <span>Layanan Otomasi CV &amp; Garansi HR Review</span>
             </div>
@@ -90,7 +90,7 @@ export const CvPromoModal: React.FC<CvPromoModalProps> = ({
         {/* Modal Body */}
         <div className="p-6 space-y-5 bg-white dark:bg-slate-900 flex-1">
           {/* Features List */}
-          <div className="space-y-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800">
+          <div className="space-y-3 p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800">
             <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-500" />
               <span>Keunggulan Layanan CV CUTI:</span>
@@ -112,7 +112,7 @@ export const CvPromoModal: React.FC<CvPromoModalProps> = ({
           </div>
 
           {/* Pricing Highlight Badge */}
-          <div className="flex items-center justify-between p-3.5 rounded-xl bg-orange-50 dark:bg-amber-950/30 border border-orange-200 dark:border-amber-800/50">
+          <div className="flex items-center justify-between p-3.5 rounded-[10px] bg-orange-50 dark:bg-amber-950/30 border border-orange-200 dark:border-amber-800/50">
             <div className="flex items-center gap-2 text-orange-950 dark:text-orange-200">
               <Clock className="w-4 h-4 text-orange-500 shrink-0" />
               <span className="text-xs font-bold">Harga Promo Terjangkau:</span>
@@ -127,7 +127,7 @@ export const CvPromoModal: React.FC<CvPromoModalProps> = ({
           <div className="space-y-3 pt-1">
             <Button
               onClick={handleStart}
-              className="w-full py-3.5 h-auto rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs md:text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3.5 h-auto rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs md:text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <Sparkles className="w-4 h-4 text-white" />
               <span>Mulai Buatkan CV Otomatis (Rp 29rb)</span>

@@ -42,7 +42,7 @@ export const CvHrdModal: React.FC<CvHrdModalProps> = ({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-md relative overflow-hidden flex flex-col cursor-default"
+        className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-md relative overflow-hidden flex flex-col cursor-default"
       >
         {/* Top Decorative Header */}
         <div className="relative bg-[#1F3578] p-6 text-white overflow-hidden">
@@ -53,7 +53,7 @@ export const CvHrdModal: React.FC<CvHrdModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer shrink-0 border border-white/20"
+            className="absolute top-4 right-4 z-20 w-8 h-8 rounded-[10px] bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer shrink-0 border border-white/20"
             aria-label="Tutup Modal"
           >
             <X className="w-4 h-4 pointer-events-none" />
@@ -61,7 +61,7 @@ export const CvHrdModal: React.FC<CvHrdModalProps> = ({
 
           {/* Badge & Title */}
           <div className="relative z-10 space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-orange-500 text-white shadow-xs">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-[10px] font-extrabold uppercase tracking-wider bg-orange-500 text-white shadow-xs">
               <Sparkles className="w-3.5 h-3.5 fill-white" />
               <span>Layanan HR Professional</span>
             </div>
@@ -79,7 +79,7 @@ export const CvHrdModal: React.FC<CvHrdModalProps> = ({
         {/* Modal Content Body */}
         <div className="p-6 space-y-5 bg-white dark:bg-slate-900 flex-1">
           {/* Features List */}
-          <div className="space-y-2.5 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800">
+          <div className="space-y-2.5 p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800">
             <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 pb-1 border-b border-slate-200/60 dark:border-slate-700/60">
               <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
               <span>Fasilitas Penulisan CV:</span>
@@ -105,7 +105,7 @@ export const CvHrdModal: React.FC<CvHrdModalProps> = ({
           </div>
 
           {/* Pricing Info */}
-          <div className="flex items-center justify-between p-3.5 rounded-xl bg-orange-50 dark:bg-amber-950/40 border border-orange-200/80 dark:border-amber-800/50">
+          <div className="flex items-center justify-between p-3.5 rounded-[10px] bg-orange-50 dark:bg-amber-950/40 border border-orange-200/80 dark:border-amber-800/50">
             <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
               <Briefcase className="w-4 h-4 text-orange-500 shrink-0" />
               <span className="text-xs font-bold">Investasi Layanan:</span>
@@ -119,7 +119,7 @@ export const CvHrdModal: React.FC<CvHrdModalProps> = ({
           <div className="space-y-2.5 pt-1">
             <Button
               onClick={handlePrimaryClick}
-              className="w-full py-3.5 h-auto rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs md:text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3.5 h-auto rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs md:text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <span>Buatkan CV Saya</span>
               <ArrowRight className="w-4 h-4" />

@@ -20,10 +20,10 @@ export const TipsAndInsightCard: React.FC = () => {
   ];
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
+          <div className="p-2 rounded-[10px] bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
             <Lightbulb className="w-5 h-5" />
           </div>
           <div>
@@ -43,7 +43,7 @@ export const TipsAndInsightCard: React.FC = () => {
           return (
             <div
               key={idx}
-              className="p-3.5 rounded-lg bg-amber-50/40 dark:bg-slate-800/40 border border-amber-100 dark:border-slate-800 flex flex-col justify-between"
+              className="p-3.5 rounded-[10px] bg-amber-50/40 dark:bg-slate-800/40 border border-amber-100 dark:border-slate-800 flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-2">

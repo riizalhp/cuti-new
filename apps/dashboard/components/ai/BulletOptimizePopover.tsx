@@ -68,7 +68,7 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden cursor-default space-y-4 p-5 animate-in zoom-in-95"
+        className="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] shadow-2xl overflow-hidden cursor-default space-y-4 p-5 animate-in zoom-in-95"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -80,14 +80,14 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center transition"
+            className="w-6 h-6 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center transition"
           >
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Selected Bullet Preview */}
-        <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 italic truncate">
+        <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 italic truncate">
           "{bulletText || 'Poin pengalaman yang dipilih'}"
         </div>
 
@@ -101,7 +101,7 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
             <button
               type="button"
               onClick={() => setSelectedGoal('impact')}
-              className={`p-2.5 rounded-xl border flex items-center justify-between transition cursor-pointer ${
+              className={`p-2.5 rounded-[10px] border flex items-center justify-between transition cursor-pointer ${
                 selectedGoal === 'impact'
                   ? 'bg-purple-50 dark:bg-purple-950/60 border-purple-500 text-purple-700 dark:text-purple-300'
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
@@ -117,7 +117,7 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
             <button
               type="button"
               onClick={() => setSelectedGoal('ats')}
-              className={`p-2.5 rounded-xl border flex items-center justify-between transition cursor-pointer ${
+              className={`p-2.5 rounded-[10px] border flex items-center justify-between transition cursor-pointer ${
                 selectedGoal === 'ats'
                   ? 'bg-purple-50 dark:bg-purple-950/60 border-purple-500 text-purple-700 dark:text-purple-300'
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
@@ -133,7 +133,7 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
             <button
               type="button"
               onClick={() => setSelectedGoal('metrics')}
-              className={`p-2.5 rounded-xl border flex items-center justify-between transition cursor-pointer ${
+              className={`p-2.5 rounded-[10px] border flex items-center justify-between transition cursor-pointer ${
                 selectedGoal === 'metrics'
                   ? 'bg-purple-50 dark:bg-purple-950/60 border-purple-500 text-purple-700 dark:text-purple-300'
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
@@ -149,7 +149,7 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
             <button
               type="button"
               onClick={() => setSelectedGoal('concise')}
-              className={`p-2.5 rounded-xl border flex items-center justify-between transition cursor-pointer ${
+              className={`p-2.5 rounded-[10px] border flex items-center justify-between transition cursor-pointer ${
                 selectedGoal === 'concise'
                   ? 'bg-purple-50 dark:bg-purple-950/60 border-purple-500 text-purple-700 dark:text-purple-300'
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
@@ -169,7 +169,7 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
           type="button"
           disabled={isLoading}
           onClick={handleRewrite}
-          className="w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-md shadow-purple-600/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          className="w-full py-2.5 px-4 rounded-[10px] bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-md shadow-purple-600/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
         >
           {isLoading ? (
             <span>Processing AI...</span>

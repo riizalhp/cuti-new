@@ -19,7 +19,9 @@ const googleAuthUrl = getGoogleAuthUrl();
       <p class="login-modal-subtitle">Akses cepat dan aman untuk mengelola CV, lamaran, serta misimu.</p>
     </div>
 
-    <form id="dummy-login-form" class="login-form space-y-3">
+    <form id="dummy-login-form" class="login-form space-y-3" action="javascript:void(0);" onsubmit="return false;">
+      <div id="login-error-alert" class="modal-err-box" style="display: none; padding: 8px 12px; border-radius: 8px; background: #FEE2E2; border: 1px solid #EF4444; color: #991B1B; font-size: 12px; font-weight: 600;"></div>
+
       <div class="input-group">
         <label for="login-username" class="input-label">Email atau Username</label>
         <input 
@@ -68,7 +70,7 @@ const googleAuthUrl = getGoogleAuthUrl();
     </div>
 
     <div class="login-modal-footer">
-      <p>Belum punya akun? <button type="button" class="text-button" data-open-register data-close-login>Daftar Akun Baru ↗</button></p>
+      <p>Belum punya akun? <a href="/register" class="text-button" data-open-register>Daftar Akun Baru ↗</a></p>
     </div>
   </div>
 </div>
@@ -348,76 +350,264 @@ const googleAuthUrl = getGoogleAuthUrl();
 
 <script is:inline>
   (() => {
-    function initLoginModal() {
-      const modal = document.getElementById('login-modal');
-      if (!modal) return;
+    function initAuthModals() {
+      const loginModal = document.getElementById('login-modal');
+      const registerModal = document.getElementById('register-modal');
 
-      function openModal() {
-        modal.classList.add('is-active');
-        modal.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
-        const userInput = modal.querySelector('#login-username');
-        if (userInput) userInput.focus();
+      function openLogin() {
+        if (registerModal) {
+          registerModal.classList.remove('is-active');
+          registerModal.setAttribute('aria-hidden', 'true');
+        }
+        if (loginModal) {
+          loginModal.classList.add('is-active');
+          loginModal.setAttribute('aria-hidden', 'false');
+          document.body.style.overflow = 'hidden';
+          const userInput = loginModal.querySelector('#login-username');
+          if (userInput) userInput.focus();
+        }
       }
 
-      function closeModal() {
-        modal.classList.remove('is-active');
-        modal.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
+      function closeLogin() {
+        if (loginModal) {
+          loginModal.classList.remove('is-active');
+          loginModal.setAttribute('aria-hidden', 'true');
+          document.body.style.overflow = '';
+        }
       }
 
-      document.querySelectorAll('[data-open-login]').forEach((btn) => {
-        btn.onclick = (e) => {
-          e.preventDefault();
-          openModal();
-        };
-      });
-
-      document.querySelectorAll('[data-close-login]').forEach((btn) => {
-        btn.onclick = () => closeModal();
-      });
-
-      // Form submit for Username/Password -> Redirects directly to http://localhost:3000/beranda
-      const loginForm = modal.querySelector('#dummy-login-form');
-      if (loginForm) {
-        loginForm.onsubmit = (e) => {
-          e.preventDefault();
-          const submitBtn = loginForm.querySelector('.submit-login-btn span');
-          if (submitBtn) submitBtn.innerText = 'Masuk...';
-          const usernameInput = modal.querySelector('#login-username');
-          const val = usernameInput ? usernameInput.value : 'user@ambilcuti.id';
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('cuti_user_session', JSON.stringify({
-              name: val.split('@')[0] || 'Pengguna',
-              email: val,
-            }));
-          }
-          window.location.href = 'http://localhost:3000/beranda';
-        };
+      function openRegister() {
+        if (loginModal) {
+          loginModal.classList.remove('is-active');
+          loginModal.setAttribute('aria-hidden', 'true');
+        }
+        if (registerModal) {
+          registerModal.classList.add('is-active');
+          registerModal.setAttribute('aria-hidden', 'false');
+          document.body.style.overflow = 'hidden';
+          const nameInput = registerModal.querySelector('#modal-reg-name');
+          if (nameInput) nameInput.focus();
+        } else {
+          window.location.href = '/register';
+        }
       }
 
-      // Google auth button -> Redirects directly to http://localhost:3000/beranda
-      document.querySelectorAll('.google-auth-btn').forEach((btn) => {
-        btn.onclick = (e) => {
-          e.preventDefault();
-          const targetUrl = 'http://localhost:3000/beranda';
-          const textSpan = btn.querySelector('span');
-          if (textSpan) textSpan.innerText = 'Memproses...';
-          window.location.href = targetUrl;
-        };
-      });
+      function closeRegister() {
+        if (registerModal) {
+          registerModal.classList.remove('is-active');
+          registerModal.setAttribute('aria-hidden', 'true');
+          document.body.style.overflow = '';
+        }
+      }
 
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('is-active')) {
-          closeModal();
+      // Delegate all click events for opening/closing modals
+      document.addEventListener('click', (e) => {
+        const target = e.target;
+        if (!target) return;
+
+        if (target.closest('[data-open-login]')) {
+          e.preventDefault();
+          openLogin();
+          return;
+        }
+
+        if (target.closest('[data-close-login]')) {
+          e.preventDefault();
+          closeLogin();
+          return;
+        }
+
+        if (target.closest('[data-open-register]')) {
+          e.preventDefault();
+          openRegister();
+          return;
+        }
+
+        if (target.closest('[data-close-register]')) {
+          e.preventDefault();
+          closeRegister();
+          return;
         }
       });
+
+      // Escape key closes modals
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeLogin();
+          closeRegister();
+        }
+      });
+
+      // 1. Handle Login Form Submit
+      if (loginModal) {
+        const loginForm = loginModal.querySelector('#dummy-login-form');
+        const loginErr = loginModal.querySelector('#login-error-alert');
+
+        if (loginForm) {
+          loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (loginErr) loginErr.style.display = 'none';
+
+            const submitBtn = loginForm.querySelector('.submit-login-btn span');
+            if (submitBtn) submitBtn.innerText = 'Memeriksa...';
+
+            const usernameInput = loginModal.querySelector('#login-username');
+            const passwordInput = loginModal.querySelector('#login-password');
+
+            const emailOrUser = usernameInput ? usernameInput.value.trim() : '';
+            const password = passwordInput ? passwordInput.value : '';
+
+            try {
+              const res = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailOrUser, password }),
+              });
+
+              const result = await res.json();
+
+              if (!res.ok || !result.success) {
+                if (loginErr) {
+                  loginErr.innerText = result.message || 'Email atau kata sandi tidak valid.';
+                  loginErr.style.display = 'block';
+                }
+                if (submitBtn) submitBtn.innerText = 'Masuk ke Beranda';
+                return;
+              }
+
+              localStorage.setItem('cuti_user_session', JSON.stringify({
+                id: result.data.id,
+                name: result.data.name,
+                email: result.data.email,
+                role: result.data.role,
+              }));
+
+              window.location.href = 'http://localhost:3000/beranda';
+            } catch (err) {
+              console.error('Login error:', err);
+              if (loginErr) {
+                loginErr.innerText = 'Tidak dapat terhubung ke server database. Silakan coba lagi.';
+                loginErr.style.display = 'block';
+              }
+              if (submitBtn) submitBtn.innerText = 'Masuk ke Beranda';
+            }
+          });
+        }
+
+        // Login Google Auth Button
+        loginModal.querySelectorAll('.google-auth-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const textSpan = btn.querySelector('span');
+            if (textSpan) textSpan.innerText = 'Memproses...';
+            window.location.href = 'http://localhost:3000/beranda';
+          });
+        });
+      }
+
+      // 2. Handle Register Modal Form Submit
+      if (registerModal) {
+        const regForm = registerModal.querySelector('#modal-register-form');
+        const regErr = registerModal.querySelector('#modal-reg-err');
+
+        if (regForm) {
+          regForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (regErr) regErr.style.display = 'none';
+
+            const nameInput = registerModal.querySelector('#modal-reg-name');
+            const emailInput = registerModal.querySelector('#modal-reg-email');
+            const passInput = registerModal.querySelector('#modal-reg-password');
+
+            const name = nameInput ? nameInput.value.trim() : '';
+            const email = emailInput ? emailInput.value.trim() : '';
+            const pass = passInput ? passInput.value : '';
+
+            if (!name || !email || !pass) {
+              if (regErr) {
+                regErr.innerText = 'Mohon lengkapi semua isian formulir.';
+                regErr.style.display = 'block';
+              }
+              return;
+            }
+
+            if (pass.length < 6) {
+              if (regErr) {
+                regErr.innerText = 'Kata sandi minimal 6 karakter.';
+                regErr.style.display = 'block';
+              }
+              return;
+            }
+
+            const submitBtn = regForm.querySelector('.submit-login-btn span');
+            if (submitBtn) submitBtn.innerText = 'Menyimpan ke Database...';
+
+            try {
+              const res = await fetch('http://localhost:3000/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password: pass }),
+              });
+
+              const result = await res.json();
+
+              if (!res.ok || !result.success) {
+                if (regErr) {
+                  regErr.innerText = result.message || 'Gagal mendaftar. Silakan coba lagi.';
+                  regErr.style.display = 'block';
+                }
+                if (submitBtn) submitBtn.innerText = 'Daftar Akun Baru';
+                return;
+              }
+
+              localStorage.setItem('cuti_user_session', JSON.stringify({
+                id: result.data.id,
+                name: result.data.name,
+                email: result.data.email,
+                role: result.data.role,
+                registeredAt: new Date().toISOString(),
+              }));
+
+              if (submitBtn) submitBtn.innerText = 'Pendaftaran Berhasil! Menuju Onboarding...';
+
+              setTimeout(() => {
+                window.location.href = 'http://localhost:3000/onboarding';
+              }, 300);
+            } catch (err) {
+              console.error('Register error:', err);
+              if (regErr) {
+                regErr.innerText = 'Tidak dapat terhubung ke server database (localhost:3000).';
+                regErr.style.display = 'block';
+              }
+              if (submitBtn) submitBtn.innerText = 'Daftar Akun Baru';
+            }
+          });
+        }
+
+        // Register Modal Google Auth Button
+        registerModal.querySelectorAll('.google-auth-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const textSpan = btn.querySelector('span');
+            if (textSpan) textSpan.innerText = 'Memproses Pendaftaran...';
+            try {
+              localStorage.setItem('cuti_user_session', JSON.stringify({
+                name: 'Google User',
+                email: 'user@gmail.com',
+                role: 'user',
+                provider: 'google',
+              }));
+            } catch (err) {}
+            window.location.href = 'http://localhost:3000/onboarding';
+          });
+        });
+      }
     }
 
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initLoginModal);
+      document.addEventListener('DOMContentLoaded', initAuthModals);
     } else {
-      initLoginModal();
+      initAuthModals();
     }
   })();
 </script>

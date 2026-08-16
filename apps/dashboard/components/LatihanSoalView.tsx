@@ -552,7 +552,7 @@ export const LatihanSoalView: React.FC = () => {
         {/* Exam Header */}
         <header className="bg-slate-950 border-b border-slate-800 px-4 md:px-8 py-3 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-violet-600/30 text-violet-400 border border-violet-500/30">
+            <div className="p-2 rounded-[10px] bg-violet-600/30 text-violet-400 border border-violet-500/30">
               <GraduationCap className="w-5 h-5" />
             </div>
             <div>
@@ -568,7 +568,7 @@ export const LatihanSoalView: React.FC = () => {
           {/* Realtime Timer & Submit Button */}
           <div className="flex items-center gap-3">
             <div
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border font-mono font-bold text-xs ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-[10px] border font-mono font-bold text-xs ${
                 secondsRemaining < 180
                   ? 'bg-rose-950/80 border-rose-500 text-rose-300 animate-pulse'
                   : 'bg-slate-900 border-slate-700 text-amber-300'
@@ -581,7 +581,7 @@ export const LatihanSoalView: React.FC = () => {
             <Button
               size="sm"
               onClick={() => setConfirmSubmitModalOpen(true)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-4 rounded-lg cursor-pointer shadow-md"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-4 rounded-[10px] cursor-pointer shadow-md"
             >
               <CheckCircle2 className="w-4 h-4 mr-1.5" />
               <span>Selesaikan Test</span>
@@ -592,18 +592,18 @@ export const LatihanSoalView: React.FC = () => {
         {/* Exam Body Layout */}
         <div className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Question Box (Left - 3 Cols) */}
-          <div className="lg:col-span-3 flex flex-col justify-between bg-slate-950/70 rounded-2xl border border-slate-800 p-6 md:p-8 shadow-2xl relative">
+          <div className="lg:col-span-3 flex flex-col justify-between bg-slate-950/70 rounded-[10px] border border-slate-800 p-6 md:p-8 shadow-2xl relative">
             <div className="space-y-6">
               {/* Question Header & Flag Toggle */}
               <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                <span className="px-3 py-1 rounded-full text-xs font-black bg-violet-950 text-violet-300 border border-violet-800">
+                <span className="px-3 py-1 rounded-[10px] text-xs font-black bg-violet-950 text-violet-300 border border-violet-800">
                   Nomor {currentQuestionIdx + 1}
                 </span>
 
                 <button
                   type="button"
                   onClick={() => toggleFlagQuestion(currentQ.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-extrabold text-xs transition cursor-pointer border ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] font-extrabold text-xs transition cursor-pointer border ${
                     isCurrentFlagged
                       ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md'
                       : 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700'
@@ -622,7 +622,7 @@ export const LatihanSoalView: React.FC = () => {
 
                 {/* Optional Code Snippet */}
                 {currentQ.codeSnippet && (
-                  <pre className="p-4 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs text-amber-300 overflow-x-auto">
+                  <pre className="p-4 rounded-[10px] bg-slate-900 border border-slate-800 font-mono text-xs text-amber-300 overflow-x-auto">
                     <code>{currentQ.codeSnippet}</code>
                   </pre>
                 )}
@@ -639,14 +639,14 @@ export const LatihanSoalView: React.FC = () => {
                         <div
                           key={opt.id}
                           onClick={() => handleAnswerSelect(currentQ.id, opt.id)}
-                          className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center gap-3 ${
+                          className={`p-4 rounded-[10px] border transition-all cursor-pointer flex items-center gap-3 ${
                             isSelected
                               ? 'bg-violet-600/30 border-violet-500 text-white ring-2 ring-violet-500/40 shadow-lg'
                               : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-900'
                           }`}
                         >
                           <div
-                            className={`w-8 h-8 rounded-lg font-black text-xs flex items-center justify-center shrink-0 border ${
+                            className={`w-8 h-8 rounded-[10px] font-black text-xs flex items-center justify-center shrink-0 border ${
                               isSelected
                                 ? 'bg-violet-600 text-white border-violet-400'
                                 : 'bg-slate-800 text-slate-400 border-slate-700'
@@ -685,14 +685,14 @@ export const LatihanSoalView: React.FC = () => {
                         <div
                           key={opt.id}
                           onClick={handleCheckboxToggle}
-                          className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center gap-3 ${
+                          className={`p-4 rounded-[10px] border transition-all cursor-pointer flex items-center gap-3 ${
                             isChecked
                               ? 'bg-violet-600/30 border-violet-500 text-white ring-2 ring-violet-500/40'
                               : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700'
                           }`}
                         >
                           <div
-                            className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border ${
+                            className={`w-6 h-6 rounded-[10px] flex items-center justify-center shrink-0 border ${
                               isChecked
                                 ? 'bg-violet-600 border-violet-400 text-white'
                                 : 'bg-slate-800 border-slate-700 text-transparent'
@@ -718,7 +718,7 @@ export const LatihanSoalView: React.FC = () => {
                       value={String(userAnswers[currentQ.id] || '')}
                       onChange={(e) => handleAnswerSelect(currentQ.id, e.target.value)}
                       placeholder="Masukkan teks/angka jawaban..."
-                      className="w-full px-4 py-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 font-mono text-sm focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30"
+                      className="w-full px-4 py-3.5 rounded-[10px] bg-slate-900 border border-slate-700 text-white placeholder-slate-500 font-mono text-sm focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30"
                     />
                   </div>
                 )}
@@ -731,7 +731,7 @@ export const LatihanSoalView: React.FC = () => {
                 variant="outline"
                 disabled={currentQuestionIdx === 0}
                 onClick={() => setCurrentQuestionIdx((prev) => prev - 1)}
-                className="bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800 rounded-lg cursor-pointer text-xs font-bold"
+                className="bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800 rounded-[10px] cursor-pointer text-xs font-bold"
               >
                 <ChevronLeft className="w-4 h-4 mr-1" />
                 <span>Sebelumnya</span>
@@ -744,7 +744,7 @@ export const LatihanSoalView: React.FC = () => {
               {currentQuestionIdx < activeQuizPackage.questions.length - 1 ? (
                 <Button
                   onClick={() => setCurrentQuestionIdx((prev) => prev + 1)}
-                  className="bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-xs px-5 rounded-lg cursor-pointer"
+                  className="bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-xs px-5 rounded-[10px] cursor-pointer"
                 >
                   <span>Selanjutnya</span>
                   <ChevronRight className="w-4 h-4 ml-1" />
@@ -752,7 +752,7 @@ export const LatihanSoalView: React.FC = () => {
               ) : (
                 <Button
                   onClick={() => setConfirmSubmitModalOpen(true)}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-5 rounded-lg cursor-pointer shadow-md"
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-5 rounded-[10px] cursor-pointer shadow-md"
                 >
                   <span>Selesai &amp; Kirim</span>
                   <CheckCircle2 className="w-4 h-4 ml-1" />
@@ -762,7 +762,7 @@ export const LatihanSoalView: React.FC = () => {
           </div>
 
           {/* Question Navigation Palette Grid (Right Sidebar - 1 Col) */}
-          <div className="bg-slate-950/70 rounded-2xl border border-slate-800 p-5 space-y-5 h-fit">
+          <div className="bg-slate-950/70 rounded-[10px] border border-slate-800 p-5 space-y-5 h-fit">
             <div>
               <h3 className="font-extrabold text-sm text-white flex items-center gap-2">
                 <Layers className="w-4 h-4 text-violet-400" />
@@ -776,15 +776,15 @@ export const LatihanSoalView: React.FC = () => {
             {/* Color Legend */}
             <div className="grid grid-cols-3 gap-1.5 text-[10px] font-bold border-y border-slate-800 py-3">
               <div className="flex items-center gap-1.5 text-slate-300">
-                <span className="w-3 h-3 rounded-md bg-emerald-500 shrink-0" />
+                <span className="w-3 h-3 rounded-[10px] bg-emerald-500 shrink-0" />
                 <span>Terjawab</span>
               </div>
               <div className="flex items-center gap-1.5 text-slate-300">
-                <span className="w-3 h-3 rounded-md bg-amber-500 shrink-0" />
+                <span className="w-3 h-3 rounded-[10px] bg-amber-500 shrink-0" />
                 <span>Ragu-Ragu</span>
               </div>
               <div className="flex items-center gap-1.5 text-slate-300">
-                <span className="w-3 h-3 rounded-md bg-slate-800 shrink-0 border border-slate-700" />
+                <span className="w-3 h-3 rounded-[10px] bg-slate-800 shrink-0 border border-slate-700" />
                 <span>Kosong</span>
               </div>
             </div>
@@ -812,7 +812,7 @@ export const LatihanSoalView: React.FC = () => {
                     key={q.id}
                     type="button"
                     onClick={() => setCurrentQuestionIdx(idx)}
-                    className={`h-10 rounded-lg border text-xs flex items-center justify-center transition cursor-pointer ${btnStyle}`}
+                    className={`h-10 rounded-[10px] border text-xs flex items-center justify-center transition cursor-pointer ${btnStyle}`}
                   >
                     {idx + 1}
                   </button>
@@ -823,7 +823,7 @@ export const LatihanSoalView: React.FC = () => {
             <Button
               variant="outline"
               onClick={() => setConfirmSubmitModalOpen(true)}
-              className="w-full py-2.5 bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-200 text-xs font-extrabold rounded-lg cursor-pointer"
+              className="w-full py-2.5 bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-200 text-xs font-extrabold rounded-[10px] cursor-pointer"
             >
               Cek Rincian Jawaban
             </Button>
@@ -833,7 +833,7 @@ export const LatihanSoalView: React.FC = () => {
         {/* Confirmation Submit Modal */}
         {confirmSubmitModalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+            <div className="bg-slate-900 border border-slate-800 rounded-[10px] p-6 max-w-md w-full space-y-4 shadow-2xl">
               <div className="flex items-center gap-3 text-amber-400">
                 <AlertCircle className="w-6 h-6" />
                 <h3 className="text-lg font-black text-white">Konfirmasi Selesai Ujian</h3>
@@ -853,13 +853,13 @@ export const LatihanSoalView: React.FC = () => {
                 <Button
                   variant="outline"
                   onClick={() => setConfirmSubmitModalOpen(false)}
-                  className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 rounded-lg text-xs font-bold cursor-pointer"
+                  className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 rounded-[10px] text-xs font-bold cursor-pointer"
                 >
                   Kembali Periksa
                 </Button>
                 <Button
                   onClick={handleFinishExam}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-extrabold cursor-pointer"
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-[10px] text-xs font-extrabold cursor-pointer"
                 >
                   Kirim Jawaban
                 </Button>
@@ -881,14 +881,14 @@ export const LatihanSoalView: React.FC = () => {
       <div className="space-y-6 max-w-5xl mx-auto pb-12 animate-in fade-in duration-300">
         {/* Score Header Card */}
         <div
-          className={`p-6 md:p-8 rounded-2xl border shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden ${
+          className={`p-6 md:p-8 rounded-[10px] border shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden ${
             isPassed
               ? 'bg-gradient-to-br from-emerald-950 via-slate-900 to-violet-950 border-emerald-500/40 text-white'
               : 'bg-gradient-to-br from-amber-950 via-slate-900 to-rose-950 border-amber-500/40 text-white'
           }`}
         >
           <div className="space-y-2 text-center md:text-left z-10">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-white/10 border border-white/20">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-xs font-extrabold uppercase tracking-wider bg-white/10 border border-white/20">
               <Award className="w-4 h-4 text-amber-400" />
               <span>Hasil Latihan Soal</span>
             </div>
@@ -906,7 +906,7 @@ export const LatihanSoalView: React.FC = () => {
           </div>
 
           {/* Big Score Badge */}
-          <div className="flex flex-col items-center justify-center p-6 rounded-xl bg-slate-950/60 border border-white/10 shrink-0 z-10 min-w-[160px]">
+          <div className="flex flex-col items-center justify-center p-6 rounded-[10px] bg-slate-950/60 border border-white/10 shrink-0 z-10 min-w-[160px]">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
               SKOR AKHIR
             </span>
@@ -925,7 +925,7 @@ export const LatihanSoalView: React.FC = () => {
               setIsExamFinished(false);
             }}
             variant="outline"
-            className="rounded-lg font-bold text-xs cursor-pointer border-slate-300 dark:border-slate-700"
+            className="rounded-[10px] font-bold text-xs cursor-pointer border-slate-300 dark:border-slate-700"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             <span>Kembali ke Katalog Soal</span>
@@ -934,7 +934,7 @@ export const LatihanSoalView: React.FC = () => {
           <div className="flex items-center gap-2">
             <Button
               onClick={() => handleStartQuiz(activeQuizPackage)}
-              className="bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-bold text-xs cursor-pointer"
+              className="bg-violet-600 hover:bg-violet-700 text-white rounded-[10px] font-bold text-xs cursor-pointer"
             >
               <RotateCcw className="w-4 h-4 mr-1.5" />
               <span>Coba Latihan Lagi</span>
@@ -967,7 +967,7 @@ export const LatihanSoalView: React.FC = () => {
               return (
                 <div
                   key={q.id}
-                  className="p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4"
+                  className="p-6 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4"
                 >
                   {/* Status Banner */}
                   <div className="flex items-center justify-between">
@@ -1002,7 +1002,7 @@ export const LatihanSoalView: React.FC = () => {
                   </p>
 
                   {/* Answer Comparison */}
-                  <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-2 text-xs">
+                  <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-2 text-xs">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-slate-500">Jawaban Anda:</span>
                       <span
@@ -1023,7 +1023,7 @@ export const LatihanSoalView: React.FC = () => {
                   </div>
 
                   {/* Detailed Explanation */}
-                  <div className="p-4 rounded-lg bg-violet-50/70 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/60 space-y-2 text-xs">
+                  <div className="p-4 rounded-[10px] bg-violet-50/70 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/60 space-y-2 text-xs">
                     <div className="flex items-center gap-1.5 text-violet-900 dark:text-violet-300 font-extrabold">
                       <BookOpen className="w-4 h-4 text-violet-600 dark:text-violet-400" />
                       <span>Pembahasan Soal:</span>
@@ -1052,11 +1052,11 @@ export const LatihanSoalView: React.FC = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
       {/* Top Banner Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-[#0D3BD9] p-6 md:p-8 text-white shadow-xl border border-blue-500/50">
+      <div className="relative overflow-hidden rounded-[10px] bg-[#0D3BD9] p-6 md:p-8 text-white shadow-xl border border-blue-500/50">
         <div className="absolute top-0 right-0 -mr-10 -mt-10 w-48 h-48 bg-amber-400/20 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 space-y-3 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-amber-400 text-slate-950 shadow-md">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] text-xs font-extrabold uppercase tracking-wider bg-amber-400 text-slate-950 shadow-md">
             <GraduationCap className="w-4 h-4 fill-slate-950" />
             <span>Bank Soal &amp; Try Out Interaktif</span>
           </div>
@@ -1076,7 +1076,7 @@ export const LatihanSoalView: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveSubTab('catalog')}
-            className={`px-4 py-2.5 rounded-lg text-xs font-extrabold transition flex items-center gap-2 cursor-pointer ${
+            className={`px-4 py-2.5 rounded-[10px] text-xs font-extrabold transition flex items-center gap-2 cursor-pointer ${
               activeSubTab === 'catalog'
                 ? 'bg-violet-600 text-white shadow-md shadow-violet-600/20'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -1088,7 +1088,7 @@ export const LatihanSoalView: React.FC = () => {
 
           <button
             onClick={() => setActiveSubTab('my-quizzes')}
-            className={`px-4 py-2.5 rounded-lg text-xs font-extrabold transition flex items-center gap-2 cursor-pointer ${
+            className={`px-4 py-2.5 rounded-[10px] text-xs font-extrabold transition flex items-center gap-2 cursor-pointer ${
               activeSubTab === 'my-quizzes'
                 ? 'bg-violet-600 text-white shadow-md shadow-violet-600/20'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -1096,7 +1096,7 @@ export const LatihanSoalView: React.FC = () => {
           >
             <FileCheck2 className="w-4 h-4" />
             <span>Latihan Soal Saya</span>
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-white/20 font-black">
+            <span className="px-1.5 py-0.5 rounded-[10px] text-[10px] bg-white/20 font-black">
               {myQuizzes.length}
             </span>
           </button>
@@ -1116,7 +1116,7 @@ export const LatihanSoalView: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Cari topik latihan (misal: BUMN, React, CPNS, TOEFL)..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-violet-500 shadow-xs"
+                className="w-full pl-10 pr-4 py-2.5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-violet-500 shadow-xs"
               />
             </div>
 
@@ -1126,7 +1126,7 @@ export const LatihanSoalView: React.FC = () => {
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-2 rounded-lg text-xs font-bold shrink-0 transition cursor-pointer ${
+                  className={`px-3 py-2 rounded-[10px] text-xs font-bold shrink-0 transition cursor-pointer ${
                     selectedCategory === cat
                       ? 'bg-slate-900 text-white dark:bg-violet-600'
                       : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -1148,22 +1148,22 @@ export const LatihanSoalView: React.FC = () => {
               return (
                 <div
                   key={quiz.id}
-                  className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 group"
+                  className="p-6 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 group"
                 >
                   <div className="space-y-3">
                     {/* Badge & Category */}
                     <div className="flex items-center justify-between">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                      <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase tracking-wide bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
                         {quiz.category}
                       </span>
 
                       {quiz.isPremium ? (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 flex items-center gap-1">
+                        <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 flex items-center gap-1">
                           <Lock className="w-3 h-3 text-amber-600" />
                           <span>Rp {quiz.price.toLocaleString('id-ID')}</span>
                         </span>
                       ) : (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 flex items-center gap-1">
+                        <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 flex items-center gap-1">
                           <Unlock className="w-3 h-3 text-emerald-600" />
                           <span>GRATIS</span>
                         </span>
@@ -1198,7 +1198,7 @@ export const LatihanSoalView: React.FC = () => {
 
                     {/* Previous Score Status if Attempted */}
                     {hasAttempted && (
-                      <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+                      <div className="p-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
                         <span className="font-bold text-slate-500">Skor Terakhir:</span>
                         <span className="font-black text-emerald-600 dark:text-emerald-400">
                           {lastScore} / 100
@@ -1210,7 +1210,7 @@ export const LatihanSoalView: React.FC = () => {
                   {/* CTA Action Button */}
                   <Button
                     onClick={() => handleStartQuiz(quiz)}
-                    className={`w-full py-2.5 rounded-lg font-extrabold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                    className={`w-full py-2.5 rounded-[10px] font-extrabold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 ${
                       isUnlocked
                         ? 'bg-violet-600 hover:bg-violet-700 text-white shadow-xs'
                         : 'bg-amber-400 hover:bg-amber-500 text-slate-950 shadow-xs'
@@ -1255,7 +1255,7 @@ export const LatihanSoalView: React.FC = () => {
               return (
                 <div
                   key={quiz.id}
-                  className="p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  className="p-5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                 >
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
@@ -1289,7 +1289,7 @@ export const LatihanSoalView: React.FC = () => {
                   <div className="flex items-center gap-2 shrink-0">
                     <Button
                       onClick={() => handleStartQuiz(quiz)}
-                      className="bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-xs px-4 rounded-lg cursor-pointer"
+                      className="bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-xs px-4 rounded-[10px] cursor-pointer"
                     >
                       <Play className="w-3.5 h-3.5 mr-1 fill-current" />
                       <span>{isCompleted ? 'Coba Ulangi' : 'Kerjakan Sekarang'}</span>
@@ -1305,7 +1305,7 @@ export const LatihanSoalView: React.FC = () => {
       {/* --- PAYMENT MODAL CHECKOUT FLOW --- */}
       {paymentModalOpen && selectedQuizForPayment && (
         <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full overflow-hidden flex flex-col">
+          <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full overflow-hidden flex flex-col">
             {/* Payment Header */}
             <div className="p-5 bg-[#0D3BD9] text-white flex items-center justify-between border-b border-blue-500/50">
               <div className="space-y-0.5">
@@ -1317,7 +1317,7 @@ export const LatihanSoalView: React.FC = () => {
               </div>
               <button
                 onClick={() => setPaymentModalOpen(false)}
-                className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition cursor-pointer"
+                className="p-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 text-white transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1340,7 +1340,7 @@ export const LatihanSoalView: React.FC = () => {
               ) : (
                 <>
                   {/* Item Detail */}
-                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2">
+                  <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2">
                     <span className="text-[10px] font-bold text-violet-600 uppercase">
                       {selectedQuizForPayment.category}
                     </span>
@@ -1365,13 +1365,13 @@ export const LatihanSoalView: React.FC = () => {
                           value={promoCode}
                           onChange={(e) => setPromoCode(e.target.value)}
                           placeholder="Masukkan kode promo..."
-                          className="w-full pl-9 pr-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono font-bold uppercase text-slate-900 dark:text-white"
+                          className="w-full pl-9 pr-3 py-2 rounded-[10px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono font-bold uppercase text-slate-900 dark:text-white"
                         />
                       </div>
                       <Button
                         size="sm"
                         onClick={handleApplyCoupon}
-                        className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-lg cursor-pointer"
+                        className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-[10px] cursor-pointer"
                       >
                         Pakai
                       </Button>
@@ -1403,7 +1403,7 @@ export const LatihanSoalView: React.FC = () => {
                             key={pm.id}
                             type="button"
                             onClick={() => setPaymentMethod(pm.id as any)}
-                            className={`p-3 rounded-lg border text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                            className={`p-3 rounded-[10px] border text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
                               isSelected
                                 ? 'bg-violet-50 dark:bg-violet-950 border-violet-500 text-violet-700 dark:text-violet-300'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
@@ -1418,7 +1418,7 @@ export const LatihanSoalView: React.FC = () => {
                   </div>
 
                   {/* Price Calculation Summary */}
-                  <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-1.5 text-xs">
+                  <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-1.5 text-xs">
                     <div className="flex justify-between text-slate-500">
                       <span>Harga Asli:</span>
                       <span>Rp {selectedQuizForPayment.price.toLocaleString('id-ID')}</span>
@@ -1441,7 +1441,7 @@ export const LatihanSoalView: React.FC = () => {
                   <Button
                     onClick={handleExecutePayment}
                     disabled={isProcessingPayment}
-                    className="w-full py-3 h-auto rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-xs shadow-md transition cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full py-3 h-auto rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-xs shadow-md transition cursor-pointer flex items-center justify-center gap-2"
                   >
                     {isProcessingPayment ? (
                       <span>Memproses Pembayaran...</span>

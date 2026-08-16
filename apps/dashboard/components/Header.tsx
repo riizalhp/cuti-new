@@ -56,6 +56,23 @@ export const Header: React.FC<HeaderProps> = ({
   );
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const sessionStr = localStorage.getItem('cuti_user_session');
+        if (sessionStr) {
+          const parsed = JSON.parse(sessionStr);
+          if (parsed.name) {
+            setCurrentUser({
+              name: parsed.name,
+              email: parsed.email || 'user@ambilcuti.id',
+            });
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to parse session in Header', e);
+      }
+    }
+
     userApi.getProfile().then((profile) => {
       if (profile && profile.fullName) {
         setCurrentUser({
@@ -132,7 +149,7 @@ export const Header: React.FC<HeaderProps> = ({
               <h1 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Hi, {currentUser.name.split(' ')[0] || 'User'}
               </h1>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 backdrop-blur-xs">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 backdrop-blur-xs">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 Lifetime Pass
               </span>
@@ -171,7 +188,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={toggleDarkMode}
             aria-label="Toggle Mode Terang / Gelap"
-            className="flex items-center gap-2 p-1.5 px-3 rounded-full text-slate-800 dark:text-slate-200 bg-white/30 dark:bg-slate-900/50 hover:bg-white/50 dark:hover:bg-slate-800/80 border border-white/40 dark:border-white/10 transition-all shadow-xs backdrop-blur-md cursor-pointer"
+            className="flex items-center gap-2 p-1.5 px-3 rounded-[10px] text-slate-800 dark:text-slate-200 bg-white/30 dark:bg-slate-900/50 hover:bg-white/50 dark:hover:bg-slate-800/80 border border-white/40 dark:border-white/10 transition-all shadow-xs backdrop-blur-md cursor-pointer"
             title={isDarkMode ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap'}
           >
             {isDarkMode ? (
@@ -215,7 +232,7 @@ export const Header: React.FC<HeaderProps> = ({
                       Notifikasi
                     </h3>
                     {unreadCount > 0 && (
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-violet-500/20 text-violet-700 dark:text-violet-300 border border-violet-500/30">
+                      <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black bg-violet-500/20 text-violet-700 dark:text-violet-300 border border-violet-500/30">
                         {unreadCount} Baru
                       </span>
                     )}
@@ -242,7 +259,7 @@ export const Header: React.FC<HeaderProps> = ({
                   {notifications.map((n) => (
                     <div
                       key={n.id}
-                      className={`p-3.5 rounded-xl border text-xs transition backdrop-blur-md ${
+                      className={`p-3.5 rounded-[10px] border text-xs transition backdrop-blur-md ${
                         n.unread
                           ? 'bg-violet-500/10 border-violet-500/30 text-slate-900 dark:text-slate-100'
                           : 'bg-white/30 dark:bg-slate-800/40 border-white/20 dark:border-white/10 text-slate-700 dark:text-slate-300'
@@ -312,7 +329,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate font-medium">
                     {currentUser.email}
                   </p>
-                  <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-400/20 text-amber-800 dark:text-amber-300 border border-amber-400/30">
+                  <span className="inline-block mt-1 px-2.5 py-0.5 rounded-[10px] text-[9px] font-black uppercase bg-amber-400/20 text-amber-800 dark:text-amber-300 border border-amber-400/30">
                     Pro Member
                   </span>
                 </div>
@@ -322,7 +339,7 @@ export const Header: React.FC<HeaderProps> = ({
                     setShowProfileMenu(false);
                     if (onOpenProfile) onOpenProfile('profil');
                   }}
-                  className="w-full px-3 py-2 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 transition"
+                  className="w-full px-3 py-2 rounded-[10px] text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 transition"
                 >
                   <User className="w-4 h-4 text-violet-500" />
                   <span>Profil Saya</span>
@@ -333,7 +350,7 @@ export const Header: React.FC<HeaderProps> = ({
                     setShowProfileMenu(false);
                     if (onOpenProfile) onOpenProfile('pengaturan');
                   }}
-                  className="w-full px-3 py-2 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 transition"
+                  className="w-full px-3 py-2 rounded-[10px] text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 transition"
                 >
                   <Settings className="w-4 h-4 text-violet-500" />
                   <span>Pengaturan Akun</span>
@@ -345,7 +362,7 @@ export const Header: React.FC<HeaderProps> = ({
                       setShowProfileMenu(false);
                       onSwitchToAdminPortal();
                     }}
-                    className="w-full px-3 py-2 rounded-lg text-xs font-bold text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/50 flex items-center gap-2.5 transition"
+                    className="w-full px-3 py-2 rounded-[10px] text-xs font-bold text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/50 flex items-center gap-2.5 transition"
                   >
                     <ShieldCheck className="w-4 h-4 text-violet-600 dark:text-violet-400" />
                     <span>Portal Super Admin</span>
@@ -359,7 +376,7 @@ export const Header: React.FC<HeaderProps> = ({
                     setShowProfileMenu(false);
                     if (onLogout) onLogout();
                   }}
-                  className="w-full px-3 py-2 rounded-lg text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 flex items-center gap-2.5 transition"
+                  className="w-full px-3 py-2 rounded-[10px] text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 flex items-center gap-2.5 transition"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Keluar / Logout</span>

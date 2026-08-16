@@ -24,16 +24,16 @@ export class CvOwnerGuard implements CanActivate {
       throw new ForbiddenException('CV ID not provided');
     }
 
-    const cv = await this.prisma.cV.findUnique({
+    const cv = await this.prisma.cv_projects.findUnique({
       where: { id: cvId },
-      select: { userId: true },
+      select: { user_id: true },
     });
 
     if (!cv) {
       throw new NotFoundException('CV not found');
     }
 
-    if (cv.userId !== user.id) {
+    if (cv.user_id !== user.id) {
       throw new ForbiddenException('You do not own this CV');
     }
 

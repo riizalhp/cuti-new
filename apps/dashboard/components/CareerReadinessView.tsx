@@ -144,7 +144,7 @@ export const CareerReadinessView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-[#0D3BD9] rounded-xl p-6 text-white border border-blue-500/50 shadow-md">
+      <div className="bg-[#0D3BD9] rounded-[10px] p-6 text-white border border-blue-500/50 shadow-md">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs">
@@ -160,13 +160,13 @@ export const CareerReadinessView: React.FC = () => {
           </div>
 
           {/* Overall Score Circle Card */}
-          <div className="p-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/15 flex items-center gap-4 shrink-0">
+          <div className="p-4 bg-white/10 backdrop-blur-md rounded-[10px] border border-white/15 flex items-center gap-4 shrink-0">
             <div className="relative flex items-center justify-center w-16 h-16 rounded-full bg-violet-600 text-amber-300 font-black text-xl border-4 border-amber-400 shadow-md">
               {readinessScore}%
             </div>
             <div>
               <span className="text-[10px] text-slate-300 uppercase tracking-wider block font-bold">Status Kesiapan</span>
-              <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-extrabold mt-1 ${currentBadge.color}`}>
+              <span className={`inline-block px-2.5 py-1 rounded-[10px] text-xs font-extrabold mt-1 ${currentBadge.color}`}>
                 {currentBadge.label}
               </span>
             </div>
@@ -177,7 +177,7 @@ export const CareerReadinessView: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2 mt-6 pt-4 border-t border-white/10 text-xs font-semibold">
           <button
             onClick={() => setActiveSubTab('pilar')}
-            className={`px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 ${
               activeSubTab === 'pilar'
                 ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
@@ -189,7 +189,7 @@ export const CareerReadinessView: React.FC = () => {
 
           <button
             onClick={() => setActiveSubTab('tes')}
-            className={`px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 ${
               activeSubTab === 'tes'
                 ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
@@ -201,7 +201,7 @@ export const CareerReadinessView: React.FC = () => {
 
           <button
             onClick={() => setActiveSubTab('roadmap')}
-            className={`px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 ${
               activeSubTab === 'roadmap'
                 ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
@@ -213,7 +213,7 @@ export const CareerReadinessView: React.FC = () => {
 
           <button
             onClick={() => setActiveSubTab('sertifikat')}
-            className={`px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 ${
               activeSubTab === 'sertifikat'
                 ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
@@ -234,12 +234,12 @@ export const CareerReadinessView: React.FC = () => {
             return (
               <div
                 key={p.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4 shadow-xs flex flex-col justify-between"
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 space-y-4 shadow-xs flex flex-col justify-between"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2.5 rounded-lg bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400">
+                      <div className="p-2.5 rounded-[10px] bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400">
                         <Icon className="w-5 h-5" />
                       </div>
                       <h4 className="font-bold text-sm text-slate-900 dark:text-white">{p.title}</h4>
@@ -264,7 +264,7 @@ export const CareerReadinessView: React.FC = () => {
                     {p.desc}
                   </p>
 
-                  <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-[11px] space-y-0.5">
+                  <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-[11px] space-y-0.5">
                     <strong className="text-violet-600 dark:text-violet-400 block font-bold">Saran Perbaikan:</strong>
                     <span className="text-slate-600 dark:text-slate-300">{p.recommendation}</span>
                   </div>
@@ -277,7 +277,7 @@ export const CareerReadinessView: React.FC = () => {
 
       {/* SUBTAB 2: TES DIAGNOSTIK KESIAPAN */}
       {activeSubTab === 'tes' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-6 shadow-xs">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 space-y-6 shadow-xs">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
             <div>
               <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
@@ -305,7 +305,7 @@ export const CareerReadinessView: React.FC = () => {
                       <button
                         key={optIndex}
                         onClick={() => handleSelectOption(q.id, opt.points)}
-                        className={`w-full text-left p-3.5 rounded-lg border text-xs transition flex items-center justify-between gap-3 ${
+                        className={`w-full text-left p-3.5 rounded-[10px] border text-xs transition flex items-center justify-between gap-3 ${
                           isSelected
                             ? 'bg-violet-50/80 dark:bg-violet-950/60 border-violet-500 text-violet-900 dark:text-violet-200 font-bold'
                             : 'bg-slate-50/50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-violet-300'
@@ -333,7 +333,7 @@ export const CareerReadinessView: React.FC = () => {
                 setTestAnswers({});
                 setIsTestSubmitted(false);
               }}
-              className="px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset Jawaban</span>
@@ -342,7 +342,7 @@ export const CareerReadinessView: React.FC = () => {
             <button
               onClick={handleCalculateTest}
               disabled={Object.keys(testAnswers).length < testQuestions.length}
-              className="px-6 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-bold text-xs transition shadow-md shadow-violet-600/20 flex items-center gap-2"
+              className="px-6 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-bold text-xs transition shadow-md shadow-violet-600/20 flex items-center gap-2"
             >
               <BarChart2 className="w-4 h-4" />
               <span>Hitung Skor Kesiapan Baru</span>
@@ -350,7 +350,7 @@ export const CareerReadinessView: React.FC = () => {
           </div>
 
           {isTestSubmitted && (
-            <div className="p-5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 space-y-2 animate-in fade-in duration-300">
+            <div className="p-5 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 space-y-2 animate-in fade-in duration-300">
               <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-sm">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                 <span>Skor Kesiapan Anda Berhasil Diperbarui: {readinessScore} / 100</span>
@@ -365,15 +365,15 @@ export const CareerReadinessView: React.FC = () => {
 
       {/* SUBTAB 3: ROADMAP PEMBENAHAN */}
       {activeSubTab === 'roadmap' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-6 shadow-xs">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 space-y-6 shadow-xs">
           <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
             <Target className="w-5 h-5 text-violet-600" />
             <span>Rencana Aksi 3 Minggu Mencapai 100% Ready</span>
           </h3>
 
           <div className="space-y-4">
-            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2">
-              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300 border border-violet-200">
+            <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2">
+              <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300 border border-violet-200">
                 Minggu 1: Pembenahan Fondasi Dokumen
               </span>
               <h4 className="font-bold text-xs text-slate-900 dark:text-white">Optimasi CV ATS & Profil LinkedIn</h4>
@@ -382,8 +382,8 @@ export const CareerReadinessView: React.FC = () => {
               </p>
             </div>
 
-            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2">
-              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300 border border-violet-200">
+            <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2">
+              <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300 border border-violet-200">
                 Minggu 2: Latihan Komunikasi & Interview
               </span>
               <h4 className="font-bold text-xs text-slate-900 dark:text-white">Simulasi AI Interview & Pertanyaan Jebakan</h4>
@@ -392,8 +392,8 @@ export const CareerReadinessView: React.FC = () => {
               </p>
             </div>
 
-            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2">
-              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300 border border-violet-200">
+            <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2">
+              <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300 border border-violet-200">
                 Minggu 3: Eksekusi Pelamaran & Networking
               </span>
               <h4 className="font-bold text-xs text-slate-900 dark:text-white">Aktivitas Tracker & Program Referral</h4>
@@ -407,8 +407,8 @@ export const CareerReadinessView: React.FC = () => {
 
       {/* SUBTAB 4: SERTIFIKAT READINESS */}
       {activeSubTab === 'sertifikat' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-6 shadow-xs text-center">
-          <div className="max-w-2xl mx-auto p-8 rounded-xl bg-[#0D3BD9] text-white border-2 border-amber-400 shadow-xl space-y-4">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 space-y-6 shadow-xs text-center">
+          <div className="max-w-2xl mx-auto p-8 rounded-[10px] bg-[#0D3BD9] text-white border-2 border-amber-400 shadow-xl space-y-4">
             <div className="flex items-center justify-center gap-2 text-amber-400">
               <ShieldCheck className="w-8 h-8" />
             </div>
@@ -433,7 +433,7 @@ export const CareerReadinessView: React.FC = () => {
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
                 onClick={() => alert('Sertifikat siap diunduh dalam format PDF!')}
-                className="px-4 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow-md"
+                className="px-4 py-2 rounded-[10px] bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow-md"
               >
                 <Download className="w-4 h-4" />
                 <span>Unduh PDF</span>
@@ -441,7 +441,7 @@ export const CareerReadinessView: React.FC = () => {
 
               <button
                 onClick={() => alert('Link sertifikat berhasil disalin untuk dipasang di LinkedIn!')}
-                className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition flex items-center gap-1.5 border border-white/20"
+                className="px-4 py-2 rounded-[10px] bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition flex items-center gap-1.5 border border-white/20"
               >
                 <Share2 className="w-4 h-4" />
                 <span>Bagikan ke LinkedIn</span>

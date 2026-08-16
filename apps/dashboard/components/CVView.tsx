@@ -330,7 +330,7 @@ const CitySearchInput = ({
             onChange(e.target.value);
             setIsOpen(true);
           }}
-          className="w-full pl-9 pr-8 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+          className="w-full pl-9 pr-8 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
         />
         {query ? (
           <button
@@ -350,7 +350,7 @@ const CitySearchInput = ({
       </div>
 
       {isOpen && filteredCities.length > 0 && (
-        <div className="absolute z-50 left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl text-xs py-1 divide-y divide-slate-100 dark:divide-slate-800/50">
+        <div className="absolute z-50 left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] shadow-xl text-xs py-1 divide-y divide-slate-100 dark:divide-slate-800/50">
           {filteredCities.map((city) => (
             <button
               key={city}
@@ -374,7 +374,7 @@ const CitySearchInput = ({
         </div>
       )}
       {isOpen && filteredCities.length === 0 && (
-        <div className="absolute z-50 left-0 right-0 mt-1 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl text-xs text-slate-500 text-center">
+        <div className="absolute z-50 left-0 right-0 mt-1 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] shadow-xl text-xs text-slate-500 text-center">
           Kota tidak ditemukan. Kamu tetap bisa menggunakan kata kunci ini.
         </div>
       )}
@@ -420,7 +420,7 @@ const CVSectionCard = ({
         zIndex: isPointerDragging ? 50 : undefined,
         transition: isPointerDragging ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
       }}
-      className={`border rounded-xl bg-white dark:bg-slate-900 transition-all duration-200 relative touch-none ${
+      className={`border rounded-[10px] bg-white dark:bg-slate-900 transition-all duration-200 relative touch-none ${
         isPointerDragging
           ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 bg-white dark:bg-slate-900 cursor-grabbing'
           : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs'
@@ -428,7 +428,7 @@ const CVSectionCard = ({
     >
       <div
         onClick={onToggle}
-        className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition border-b border-slate-100 dark:border-slate-800 rounded-t-xl cursor-pointer select-none group"
+        className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition border-b border-slate-100 dark:border-slate-800 rounded-t-[10px] cursor-pointer select-none group"
       >
         <div className="flex items-center gap-2.5 min-w-0">
           <div
@@ -436,7 +436,7 @@ const CVSectionCard = ({
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             onClick={(e) => e.stopPropagation()}
-            className="cursor-grab active:cursor-grabbing p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition shrink-0 bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 touch-none select-none"
+            className="cursor-grab active:cursor-grabbing p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 touch-none select-none"
             title="Tarik untuk mengatur posisi section di CV"
           >
             <GripVertical className="w-4 h-4" />
@@ -525,18 +525,18 @@ const SkillsEditorSection: React.FC<{
                   handleAddSkill();
                 }
               }}
-              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
             />
 
             {/* Dropdown Suggestions */}
             {showDropdown && (filteredSuggestions.length > 0 || inputValue.trim()) && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-30 max-h-48 overflow-y-auto p-1">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] shadow-xl z-30 max-h-48 overflow-y-auto p-1">
                 {filteredSuggestions.map((sug, i) => (
                   <button
                     key={i}
                     type="button"
                     onClick={() => handleAddSkill(sug)}
-                    className="w-full text-left px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/50 hover:text-teal-600 dark:hover:text-teal-400 rounded-lg transition cursor-pointer flex items-center justify-between"
+                    className="w-full text-left px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/50 hover:text-teal-600 dark:hover:text-teal-400 rounded-[10px] transition cursor-pointer flex items-center justify-between"
                   >
                     <span>{sug}</span>
                     <Plus className="w-3.5 h-3.5 opacity-60" />
@@ -546,7 +546,7 @@ const SkillsEditorSection: React.FC<{
                   <button
                     type="button"
                     onClick={() => handleAddSkill(inputValue.trim())}
-                    className="w-full text-left px-3 py-2 text-xs font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition cursor-pointer flex items-center justify-between border-t border-slate-100 dark:border-slate-800 mt-1 pt-2"
+                    className="w-full text-left px-3 py-2 text-xs font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition cursor-pointer flex items-center justify-between border-t border-slate-100 dark:border-slate-800 mt-1 pt-2"
                   >
                     <span>Tambah &quot;{inputValue.trim()}&quot; sebagai keahlian baru</span>
                     <Plus className="w-3.5 h-3.5" />
@@ -559,7 +559,7 @@ const SkillsEditorSection: React.FC<{
           <button
             type="button"
             onClick={() => handleAddSkill()}
-            className="px-4 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition flex items-center gap-1 shrink-0 cursor-pointer shadow-2xs"
+            className="px-4 py-2.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition flex items-center gap-1 shrink-0 cursor-pointer shadow-2xs"
           >
             <Plus className="w-4 h-4" />
             <span>Tambah</span>
@@ -572,7 +572,7 @@ const SkillsEditorSection: React.FC<{
         {skills.filter(Boolean).map((sk, skIdx) => (
           <span
             key={skIdx}
-            className="px-3 py-1.5 rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 text-xs font-bold flex items-center gap-2 shadow-2xs"
+            className="px-3 py-1.5 rounded-[10px] bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 text-xs font-bold flex items-center gap-2 shadow-2xs"
           >
             {sk}
             <button
@@ -3306,7 +3306,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     <div className="space-y-6 print:space-y-0 print:m-0 print:p-0" suppressHydrationWarning>
       {/* Header Banner - hanya tampil saat di Daftar CV (list view) */}
       {viewMode === 'list' && (
-        <div className="bg-[#0D3BD9] rounded-xl p-6 text-white border border-blue-500/50 shadow-md flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="bg-[#0D3BD9] rounded-[10px] p-6 text-white border border-blue-500/50 shadow-md flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-blue-200 font-semibold text-xs mb-1">
               <FileText className="w-4 h-4" />
@@ -3328,7 +3328,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 setAiWizardStep(1);
                 setViewMode('ai-wizard');
               }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow-md transition-all cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow-md transition-all cursor-pointer"
             >
               <Sparkles className="w-4 h-4 text-slate-950" />
               <span>Buatkan CV oleh AI &amp; Tim</span>
@@ -3338,7 +3338,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               onClick={() => {
                 setShowTemplateModal(true);
               }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Buat CV Mandiri</span>
@@ -3355,7 +3355,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
 
           {/* Search & Actions Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-lg border border-slate-200 dark:border-slate-800">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-[10px] border border-slate-200 dark:border-slate-800">
             <div className="relative w-full sm:w-80">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -3363,7 +3363,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 placeholder="Cari CV berdasarkan judul atau kata kunci..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full pl-9 pr-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
             <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
@@ -3375,13 +3375,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Card Order Active (Sedang Ditinjau) */}
             {activeOrder && (
-              <div className="bg-gradient-to-br from-amber-50/40 via-white to-orange-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-amber-950/30 border-2 border-amber-400/80 dark:border-amber-500/60 rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden">
+              <div className="bg-gradient-to-br from-amber-50/40 via-white to-orange-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-amber-950/30 border-2 border-amber-400/80 dark:border-amber-500/60 rounded-[10px] p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden">
                 <div className="absolute -top-12 -right-12 w-28 h-28 bg-amber-400/10 rounded-full blur-xl pointer-events-none" />
 
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2.5 rounded-lg bg-amber-100 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60">
+                      <div className="p-2.5 rounded-[10px] bg-amber-100 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60">
                         <Sparkles className="w-5 h-5 animate-pulse" />
                       </div>
                       <div>
@@ -3393,13 +3393,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         </p>
                       </div>
                     </div>
-                    <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800 flex items-center gap-1.5 shrink-0 shadow-2xs">
+                    <span className="px-2.5 py-1 rounded-[10px] text-[11px] font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800 flex items-center gap-1.5 shrink-0 shadow-2xs">
                       <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 animate-spin" />
                       <span>Sedang Ditinjau</span>
                     </span>
                   </div>
 
-                  <div className="p-3.5 rounded-lg bg-white/80 dark:bg-slate-800/60 border border-amber-200/70 dark:border-slate-800 space-y-2 mb-4 shadow-xs">
+                  <div className="p-3.5 rounded-[10px] bg-white/80 dark:bg-slate-800/60 border border-amber-200/70 dark:border-slate-800 space-y-2 mb-4 shadow-xs">
                     <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center justify-between">
                       <span>Proses Penyempurnaan HR</span>
                       <span className="text-amber-600 dark:text-amber-400 font-bold">{activeOrder.progress}%</span>
@@ -3424,7 +3424,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                   <button
                     onClick={() => setViewMode('ai-progress')}
-                    className="px-4 py-2 rounded-lg text-xs font-extrabold text-white bg-orange-500 hover:bg-orange-600 shadow-md transition flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2 rounded-[10px] text-xs font-extrabold text-white bg-orange-500 hover:bg-orange-600 shadow-md transition flex items-center gap-1.5 cursor-pointer"
                   >
                     <span>Lihat Progress</span>
                     <ChevronRight className="w-4 h-4" />
@@ -3436,14 +3436,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             {filteredCVs.map((cv) => (
               <div
                 key={cv.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm hover:border-violet-300 dark:hover:border-violet-700/60 transition-all flex flex-col justify-between"
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-sm hover:border-violet-300 dark:hover:border-violet-700/60 transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2.5">
                       <div
                         onClick={() => handleOpenCvDetail(cv)}
-                        className="p-2.5 rounded-lg bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 border border-violet-100 dark:border-violet-900/40 cursor-pointer hover:bg-violet-100 dark:hover:bg-violet-900/60 transition"
+                        className="p-2.5 rounded-[10px] bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 border border-violet-100 dark:border-violet-900/40 cursor-pointer hover:bg-violet-100 dark:hover:bg-violet-900/60 transition"
                       >
                         <FileText className="w-5 h-5" />
                       </div>
@@ -3459,13 +3459,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         </p>
                       </div>
                     </div>
-                    <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 flex items-center gap-1 shrink-0">
+                    <span className="px-2.5 py-1 rounded-[10px] text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 flex items-center gap-1 shrink-0">
                       <Award className="w-3.5 h-3.5" />
                       <span>ATS {cv.atsScore}%</span>
                     </span>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-2 mb-4">
+                  <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-2 mb-4">
                     <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                       {cv.fullName} - <span className="text-violet-600 dark:text-violet-400">{cv.headline}</span>
                     </div>
@@ -3495,14 +3495,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => handleOpenCvDetail(cv)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 py-1.5 rounded-[10px] text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center gap-1.5 cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       <span>Lihat / Edit</span>
                     </button>
                     <button
                       onClick={() => handleDeleteCV(cv)}
-                      className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition cursor-pointer"
+                      className="p-1.5 rounded-[10px] text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition cursor-pointer"
                       title="Hapus CV"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -3513,7 +3513,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     onClick={() => {
                       alert(`Mengunduh versi PDF dari ${cv.title}...`);
                     }}
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-violet-600 hover:bg-violet-700 transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                    className="px-3 py-1.5 rounded-[10px] text-xs font-bold text-white bg-violet-600 hover:bg-violet-700 transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Download PDF</span>
@@ -3529,7 +3529,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       {viewMode === 'ai-wizard' && (
         <div className="space-y-6">
           {/* Stepper Header */}
-          <div className="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="font-extrabold text-base md:text-lg text-slate-900 dark:text-white flex items-center gap-2">
@@ -3551,7 +3551,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
             <div className="grid grid-cols-3 gap-2">
               <div
-                className={`p-2.5 rounded-lg border text-center transition ${
+                className={`p-2.5 rounded-[10px] border text-center transition ${
                   aiWizardStep === 1
                     ? 'bg-violet-50 dark:bg-violet-950/80 border-violet-500 text-violet-700 dark:text-violet-300 font-bold'
                     : aiWizardStep > 1
@@ -3564,7 +3564,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               </div>
 
               <div
-                className={`p-2.5 rounded-lg border text-center transition ${
+                className={`p-2.5 rounded-[10px] border text-center transition ${
                   aiWizardStep === 2
                     ? 'bg-violet-50 dark:bg-violet-950/80 border-violet-500 text-violet-700 dark:text-violet-300 font-bold'
                     : aiWizardStep > 2
@@ -3577,7 +3577,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               </div>
 
               <div
-                className={`p-2.5 rounded-lg border text-center transition ${
+                className={`p-2.5 rounded-[10px] border text-center transition ${
                   aiWizardStep === 3
                     ? 'bg-violet-50 dark:bg-violet-950/80 border-violet-500 text-violet-700 dark:text-violet-300 font-bold'
                     : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 font-medium'
@@ -3608,14 +3608,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     <div
                       key={pkg.id}
                       onClick={() => setSelectedPackage(pkg)}
-                      className={`relative p-5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+                      className={`relative p-5 rounded-[10px] border transition-all cursor-pointer flex flex-col justify-between ${
                         isSelected
                           ? 'bg-violet-50/50 dark:bg-violet-950/40 border-violet-500 ring-2 ring-violet-500/20 shadow-md'
                           : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-violet-300'
                       }`}
                     >
                       {pkg.popular && (
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black text-[10px] uppercase tracking-wider flex items-center gap-1 shadow-2xs">
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-[10px] bg-amber-500 text-slate-950 font-black text-[10px] uppercase tracking-wider flex items-center gap-1 shadow-2xs">
                           <Crown className="w-3 h-3" />
                           <span>{pkg.badge}</span>
                         </div>
@@ -3628,7 +3628,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               {pkg.name}
                             </span>
                             {!pkg.popular && pkg.badge && (
-                              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                              <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                                 {pkg.badge}
                               </span>
                             )}
@@ -3660,7 +3660,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             setSelectedPackage(pkg);
                             setAiWizardStep(2);
                           }}
-                          className={`w-full py-2.5 rounded-lg font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                          className={`w-full py-2.5 rounded-[10px] font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
                             isSelected
                               ? 'bg-violet-600 hover:bg-violet-700 text-white shadow-xs'
                               : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200'
@@ -3681,7 +3681,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           {aiWizardStep === 2 && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               {/* Left Column: Metode Pembayaran */}
-              <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 space-y-5 shadow-sm">
+              <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 space-y-5 shadow-sm">
                 <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
                   <h4 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
                     <CreditCard className="w-4 h-4 text-violet-500" />
@@ -3696,14 +3696,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   {/* QRIS */}
                   <label
                     onClick={() => setSelectedPaymentMethod('qris')}
-                    className={`p-4 rounded-lg border flex items-center justify-between cursor-pointer transition ${
+                    className={`p-4 rounded-[10px] border flex items-center justify-between cursor-pointer transition ${
                       selectedPaymentMethod === 'qris'
                         ? 'bg-violet-50/60 dark:bg-violet-950/50 border-violet-500 ring-2 ring-violet-500/20'
                         : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-violet-200'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-violet-600 dark:text-violet-400">
+                      <div className="p-2.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-violet-600 dark:text-violet-400">
                         <QrCode className="w-5 h-5" />
                       </div>
                       <div>
@@ -3730,14 +3730,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   {/* BCA */}
                   <label
                     onClick={() => setSelectedPaymentMethod('bca')}
-                    className={`p-4 rounded-lg border flex items-center justify-between cursor-pointer transition ${
+                    className={`p-4 rounded-[10px] border flex items-center justify-between cursor-pointer transition ${
                       selectedPaymentMethod === 'bca'
                         ? 'bg-violet-50/60 dark:bg-violet-950/50 border-violet-500 ring-2 ring-violet-500/20'
                         : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-violet-200'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-violet-600 dark:text-violet-400">
+                      <div className="p-2.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-violet-600 dark:text-violet-400">
                         <Building className="w-5 h-5" />
                       </div>
                       <div>
@@ -3761,14 +3761,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   {/* Mandiri */}
                   <label
                     onClick={() => setSelectedPaymentMethod('mandiri')}
-                    className={`p-4 rounded-lg border flex items-center justify-between cursor-pointer transition ${
+                    className={`p-4 rounded-[10px] border flex items-center justify-between cursor-pointer transition ${
                       selectedPaymentMethod === 'mandiri'
                         ? 'bg-violet-50/60 dark:bg-violet-950/50 border-violet-500 ring-2 ring-violet-500/20'
                         : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-violet-200'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-violet-600 dark:text-violet-400">
+                      <div className="p-2.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-violet-600 dark:text-violet-400">
                         <Wallet className="w-5 h-5" />
                       </div>
                       <div>
@@ -3791,7 +3791,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 </div>
 
                 {/* Promo Voucher Code */}
-                <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2">
+                <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2">
                   <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">
                     Punya Kode Voucher Diskon?
                   </label>
@@ -3801,12 +3801,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       placeholder="Masukkan kode (Coba: CUTIAI10)"
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value)}
-                      className="flex-1 px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white uppercase font-mono"
+                      className="flex-1 px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white uppercase font-mono"
                     />
                     <button
                       type="button"
                       onClick={handleApplyPromo}
-                      className="px-4 py-2 rounded-lg bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs transition cursor-pointer"
+                      className="px-4 py-2 rounded-[10px] bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs transition cursor-pointer"
                     >
                       Gunakan
                     </button>
@@ -3821,7 +3821,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               </div>
 
               {/* Right Column: Ringkasan Rincian Order */}
-              <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 space-y-5 shadow-sm">
+              <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 space-y-5 shadow-sm">
                 <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
                   <h4 className="font-extrabold text-base text-slate-900 dark:text-white">
                     Ringkasan Pesanan
@@ -3859,7 +3859,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   </div>
                 </div>
 
-                <div className="p-3 rounded-lg bg-violet-50/50 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/40 text-[11px] text-slate-600 dark:text-slate-300 space-y-1">
+                <div className="p-3 rounded-[10px] bg-violet-50/50 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/40 text-[11px] text-slate-600 dark:text-slate-300 space-y-1">
                   <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 text-violet-500" />
                     <span>Garansi Keamanan &amp; Kualitas CUTI</span>
@@ -3874,7 +3874,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     type="button"
                     onClick={handleSimulatePayment}
                     disabled={isProcessingPayment}
-                    className="w-full py-3 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full py-3 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {isProcessingPayment ? (
                       <>
@@ -3892,7 +3892,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   <button
                     type="button"
                     onClick={() => setAiWizardStep(1)}
-                    className="w-full py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                    className="w-full py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
                   >
                     Kembali Pilih Paket
                   </button>
@@ -3906,9 +3906,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             <div className="space-y-6">
               {dataSelectionOption === null ? (
                 /* CHOICE SCREEN: EXISTING DATA VS NEW FORM */
-                <div className="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm max-w-3xl mx-auto">
+                <div className="bg-white dark:bg-slate-900 rounded-[10px] p-6 border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm max-w-3xl mx-auto">
                   <div className="text-center space-y-1 border-b border-slate-100 dark:border-slate-800 pb-4">
-                    <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-violet-50 dark:bg-violet-950 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-800 inline-block">
+                    <span className="px-3 py-1 rounded-[10px] text-[11px] font-bold bg-violet-50 dark:bg-violet-950 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-800 inline-block">
                       Langkah 3: Pengisian &amp; Sumber Data CV
                     </span>
                     <h4 className="font-extrabold text-lg text-slate-900 dark:text-white">
@@ -3926,10 +3926,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         setDataSelectionOption('existing');
                         handleCompleteOrder('existing');
                       }}
-                      className="p-5 rounded-xl border-2 border-violet-500 bg-violet-50/40 dark:bg-violet-950/30 hover:bg-violet-50 dark:hover:bg-violet-950/60 transition cursor-pointer flex flex-col justify-between space-y-4 shadow-sm"
+                      className="p-5 rounded-[10px] border-2 border-violet-500 bg-violet-50/40 dark:bg-violet-950/30 hover:bg-violet-50 dark:hover:bg-violet-950/60 transition cursor-pointer flex flex-col justify-between space-y-4 shadow-sm"
                     >
                       <div className="space-y-3">
-                        <div className="p-3 rounded-lg bg-violet-600 text-white w-fit">
+                        <div className="p-3 rounded-[10px] bg-violet-600 text-white w-fit">
                           <UserCheck className="w-6 h-6" />
                         </div>
                         <div>
@@ -3945,7 +3945,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         </div>
 
                         {/* Existing Data Summary Preview */}
-                        <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-violet-200 dark:border-violet-800/60 text-xs space-y-1.5">
+                        <div className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-violet-200 dark:border-violet-800/60 text-xs space-y-1.5">
                           <div className="font-bold text-slate-800 dark:text-slate-200">
                             {formData.fullName || 'Budi Santoso'}
                           </div>
@@ -3963,7 +3963,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                       <button
                         type="button"
-                        className="w-full py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="w-full py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <Check className="w-4 h-4" />
                         <span>Pakai Data Ini &amp; Kirim ke Tim AI</span>
@@ -3973,10 +3973,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     {/* OPTION B: FILL NEW FORM */}
                     <div
                       onClick={() => setDataSelectionOption('new')}
-                      className="p-5 rounded-xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 transition cursor-pointer flex flex-col justify-between space-y-4 shadow-sm"
+                      className="p-5 rounded-[10px] border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 transition cursor-pointer flex flex-col justify-between space-y-4 shadow-sm"
                     >
                       <div className="space-y-3">
-                        <div className="p-3 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 w-fit">
+                        <div className="p-3 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 w-fit">
                           <Plus className="w-6 h-6" />
                         </div>
                         <div>
@@ -3988,7 +3988,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           </p>
                         </div>
 
-                        <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs text-slate-500 space-y-1">
+                        <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs text-slate-500 space-y-1">
                           <div>&bull; Form terstruktur (Data Diri, Edu, Pengalaman)</div>
                           <div>&bull; Catatan Khusus untuk Tim HR</div>
                           <div>&bull; Unggah Berkas Pelengkap (.PDF / .DOCX)</div>
@@ -3997,7 +3997,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                       <button
                         type="button"
-                        className="w-full py-2.5 rounded-lg bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="w-full py-2.5 rounded-[10px] bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <span>Mulai Isi Form Baru</span>
                         <ArrowRight className="w-4 h-4" />
@@ -4007,7 +4007,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 </div>
               ) : (
                 /* NEW FORM WIZARD STEPS */
-                <div className="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm max-w-3xl mx-auto">
+                <div className="bg-white dark:bg-slate-900 rounded-[10px] p-6 border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm max-w-3xl mx-auto">
                   <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                     <div>
                       <h4 className="font-extrabold text-base text-slate-900 dark:text-white">
@@ -4034,7 +4034,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         <button
                           type="button"
                           onClick={() => setDocShowIcons(!docShowIcons)}
-                          className={`px-2.5 py-1 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                          className={`px-2.5 py-1 rounded-[10px] border text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
                             docShowIcons
                               ? 'bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800'
                               : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
@@ -4054,7 +4054,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             placeholder="Contoh: Budi Santoso"
                             value={formData.fullName}
                             onChange={(e) => setFormData((prev) => ({ ...prev, fullName: e.target.value }))}
-                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
+                            className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
                           />
                         </div>
                         <div>
@@ -4064,7 +4064,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             placeholder="Contoh: Senior Full Stack Engineer"
                             value={formData.headline}
                             onChange={(e) => setFormData((prev) => ({ ...prev, headline: e.target.value }))}
-                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
+                            className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
                           />
                         </div>
                         <div>
@@ -4074,7 +4074,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             placeholder="budi@email.com"
                             value={formData.email}
                             onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
+                            className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
                           />
                         </div>
                         <div>
@@ -4103,7 +4103,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               }
                               setFormData((prev) => ({ ...prev, phone: val }));
                             }}
-                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
+                            className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
                           />
                         </div>
                       </div>
@@ -4115,7 +4115,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           placeholder="Jelaskan secara singkat latar belakang profesional kamu..."
                           value={formData.summary}
                           onChange={(e) => setFormData((prev) => ({ ...prev, summary: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 resize-none"
+                          className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 resize-none"
                         />
                       </div>
 
@@ -4123,7 +4123,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         <button
                           type="button"
                           onClick={() => setWizardFormStep(2)}
-                          className="px-5 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer"
+                          className="px-5 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer"
                         >
                           <span>Lanjut ke Pengalaman</span>
                           <ArrowRight className="w-4 h-4" />
@@ -4139,14 +4139,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         2. Pengalaman Kerja &amp; Pendidikan
                       </div>
 
-                      <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-2">
+                      <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-2">
                         <div className="font-bold text-slate-800 dark:text-slate-200">Tambah Pengalaman Kerja Utama</div>
                         <input
                           type="text"
                           placeholder="Nama Perusahaan (e.g. PT Tech Inovasi)"
                           value={expCompany}
                           onChange={(e) => setExpCompany(e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                          className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
                         />
                         <div className="grid grid-cols-2 gap-2">
                           <input
@@ -4154,14 +4154,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             placeholder="Posisi / Jabatan"
                             value={expRole}
                             onChange={(e) => setExpRole(e.target.value)}
-                            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                            className="px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
                           />
                           <input
                             type="text"
                             placeholder="Periode (e.g. 2022 - Sekarang)"
                             value={expPeriod}
                             onChange={(e) => setExpPeriod(e.target.value)}
-                            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                            className="px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
                           />
                         </div>
                         <textarea
@@ -4169,12 +4169,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           placeholder="Deskripsi tugas &amp; pencapaian..."
                           value={expDesc}
                           onChange={(e) => setExpDesc(e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 resize-none"
+                          className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 resize-none"
                         />
                         <button
                           type="button"
                           onClick={handleAddExperience}
-                          className="w-full py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold transition cursor-pointer"
+                          className="w-full py-2 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold transition cursor-pointer"
                         >
                           + Simpan Item Pengalaman
                         </button>
@@ -4182,7 +4182,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                       {/* Display added experience items */}
                       {formData.experience.map((exp, idx) => (
-                        <div key={idx} className="p-2.5 rounded-lg bg-violet-50 dark:bg-violet-950/60 border border-violet-200 dark:border-violet-800 flex justify-between items-center">
+                        <div key={idx} className="p-2.5 rounded-[10px] bg-violet-50 dark:bg-violet-950/60 border border-violet-200 dark:border-violet-800 flex justify-between items-center">
                           <div>
                             <div className="font-bold text-slate-900 dark:text-white">{exp.role} @ {exp.company}</div>
                             <div className="text-[10px] text-slate-500">{exp.period}</div>
@@ -4195,14 +4195,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         <button
                           type="button"
                           onClick={() => setWizardFormStep(1)}
-                          className="px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 font-bold text-xs"
+                          className="px-4 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 font-bold text-xs"
                         >
                           Kembali
                         </button>
                         <button
                           type="button"
                           onClick={() => setWizardFormStep(3)}
-                          className="px-5 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer"
+                          className="px-5 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer"
                         >
                           <span>Lanjut ke Skill &amp; Catatan</span>
                           <ArrowRight className="w-4 h-4" />
@@ -4232,19 +4232,19 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 handleAddSkill();
                               }
                             }}
-                            className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
+                            className="flex-1 px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
                           />
                           <button
                             type="button"
                             onClick={handleAddSkill}
-                            className="px-4 py-2 rounded-lg bg-slate-900 text-white font-bold"
+                            className="px-4 py-2 rounded-[10px] bg-slate-900 text-white font-bold"
                           >
                             Tambah
                           </button>
                         </div>
                         <div className="flex flex-wrap gap-1.5 pt-1">
                           {formData.skills.map((sk, idx) => (
-                            <span key={idx} className="px-2.5 py-1 rounded-lg bg-violet-50 dark:bg-violet-950 text-violet-700 dark:text-violet-300 font-bold border border-violet-200 dark:border-violet-800">
+                            <span key={idx} className="px-2.5 py-1 rounded-[10px] bg-violet-50 dark:bg-violet-950 text-violet-700 dark:text-violet-300 font-bold border border-violet-200 dark:border-violet-800">
                               {sk}
                             </span>
                           ))}
@@ -4258,7 +4258,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           placeholder="Contoh: Mohon tekankan skill kepemimpinan dan pengalaman di e-commerce..."
                           value={aiNote}
                           onChange={(e) => setAiNote(e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 resize-none"
+                          className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 resize-none"
                         />
                       </div>
 
@@ -4266,14 +4266,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         <button
                           type="button"
                           onClick={() => setWizardFormStep(2)}
-                          className="px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 font-bold text-xs"
+                          className="px-4 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 font-bold text-xs"
                         >
                           Kembali
                         </button>
                         <button
                           type="button"
                           onClick={() => handleCompleteOrder('new')}
-                          className="px-6 py-3 rounded-lg bg-[#0D3BD9] hover:bg-[#0B33BD] text-white font-extrabold text-xs shadow-md flex items-center gap-2 cursor-pointer"
+                          className="px-6 py-3 rounded-[10px] bg-[#0D3BD9] hover:bg-[#0B33BD] text-white font-extrabold text-xs shadow-md flex items-center gap-2 cursor-pointer"
                         >
                           <Send className="w-4 h-4" />
                           <span>Kirim Data &amp; Mulai Pengerjaan AI</span>
@@ -4292,11 +4292,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       {viewMode === 'ai-progress' && activeOrder && (
         <div className="space-y-6">
           {/* Main Order Tracker Card */}
-          <div className="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-[10px] p-6 border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+                  <span className="px-2.5 py-1 rounded-[10px] text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1">
                     <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                     <span>Dalam Proses Pengerjaan Tim</span>
                   </span>
@@ -4313,14 +4313,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowDraftModal(true)}
-                  className="px-4 py-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/80 text-[#0D3BD9] dark:text-blue-300 hover:bg-blue-100 font-bold text-xs border border-blue-200 dark:border-blue-800/60 transition flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2.5 rounded-[10px] bg-blue-50 dark:bg-blue-950/80 text-[#0D3BD9] dark:text-blue-300 hover:bg-blue-100 font-bold text-xs border border-blue-200 dark:border-blue-800/60 transition flex items-center gap-1.5 cursor-pointer"
                 >
                   <Eye className="w-4 h-4" />
                   <span>Pratinjau Draf CV</span>
                 </button>
                 <button
                   onClick={() => setShowChatModal(true)}
-                  className="px-4 py-2.5 rounded-lg bg-[#0D3BD9] hover:bg-[#0B33BD] text-white font-bold text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  className="px-4 py-2.5 rounded-[10px] bg-[#0D3BD9] hover:bg-[#0B33BD] text-white font-bold text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer"
                 >
                   <MessageSquare className="w-4 h-4" />
                   <span>Chat Tim HR</span>
@@ -4329,7 +4329,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             </div>
 
             {/* Overall Progress Meter */}
-            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
+            <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
               <div className="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white">
                 <span>Progress Pengerjaan Kualitas CV: {activeOrder.progress}%</span>
                 <span className="text-[#0D3BD9] dark:text-blue-400 flex items-center gap-1">
@@ -4419,7 +4419,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             </div>
 
             {/* HR Specialist Info Card */}
-            <div className="p-4 rounded-lg bg-violet-50/60 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="p-4 rounded-[10px] bg-violet-50/60 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-violet-600 text-white font-bold flex items-center justify-center text-sm shadow-xs shrink-0">
                   SM
@@ -4437,7 +4437,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <button
                 type="button"
                 onClick={() => setShowChatModal(true)}
-                className="px-3.5 py-2 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-violet-600 dark:text-violet-300 font-bold text-xs border border-violet-200 dark:border-violet-800 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2 rounded-[10px] bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-violet-600 dark:text-violet-300 font-bold text-xs border border-violet-200 dark:border-violet-800 transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
                 <span>Kirim Pesan ke HR</span>
@@ -4448,7 +4448,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
-                className="px-5 py-2.5 rounded-lg bg-slate-900 dark:bg-slate-800 text-white font-bold text-xs hover:bg-slate-800 transition cursor-pointer"
+                className="px-5 py-2.5 rounded-[10px] bg-slate-900 dark:bg-slate-800 text-white font-bold text-xs hover:bg-slate-800 transition cursor-pointer"
               >
                 Kembali ke Daftar CV Saya
               </button>
@@ -4461,13 +4461,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       {(viewMode === 'create' || viewMode === 'preview') && (
         <div className="cv-print-area-wrapper flex flex-col space-y-4 max-w-7xl mx-auto w-full print:space-y-0 print:max-w-none print:w-[210mm] print:m-0 print:p-0">
           {/* CONTROL TOOLBAR FOR LAYOUT & DOCUMENT SETTINGS */}
-          <div className="w-full bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-2xs no-print">
+          <div className="w-full bg-white dark:bg-slate-900 p-3.5 rounded-[10px] border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-2xs no-print">
             {/* Left: Back to List & Active Layout Indicator */}
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
-                className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 transition cursor-pointer"
+                className="px-3.5 py-2 rounded-[10px] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 transition cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Kembali</span>
@@ -4477,7 +4477,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline">Tata Letak:</span>
-                <span className="px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 text-xs font-bold border border-orange-200 dark:border-orange-800/60 flex items-center gap-1.5">
+                <span className="px-3 py-1 rounded-[10px] bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 text-xs font-bold border border-orange-200 dark:border-orange-800/60 flex items-center gap-1.5">
                   <LayoutGrid className="w-3.5 h-3.5 text-orange-500" />
                   <span>{cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS Standard'}</span>
                 </span>
@@ -4486,7 +4486,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
             {/* Right: ATS Score Indicator Badge */}
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold border border-emerald-200 dark:border-emerald-800/80 flex items-center gap-1.5 shadow-2xs">
+              <span className="px-3 py-1.5 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold border border-emerald-200 dark:border-emerald-800/80 flex items-center gap-1.5 shadow-2xs">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>Skor ATS: {selectedCV?.atsScore ?? 95}%</span>
               </span>
@@ -4496,7 +4496,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           {/* MAIN CONTENT: SPLIT SCREEN ON DESKTOP (LEFT: A4 CANVAS, RIGHT: INLINE FORM EDITOR) */}
           <div className="cv-print-area-wrapper grid grid-cols-1 lg:grid-cols-12 gap-6 items-start print:block print:w-[210mm] print:m-0 print:p-0">
             {/* LEFT COLUMN: CENTERED A4 CANVAS PREVIEW */}
-            <div className="cv-print-area-wrapper lg:col-span-7 xl:col-span-7 w-full overflow-x-auto no-scrollbar pb-4 flex justify-center bg-slate-200/60 dark:bg-slate-950/80 p-4 md:p-6 rounded-xl border border-slate-300/60 dark:border-slate-800 lg:sticky lg:top-4 max-h-[calc(100vh-2rem)] overflow-y-auto print:p-0 print:bg-transparent print:border-none print:max-h-none print:overflow-visible print:static print:block print:w-[210mm] print:m-0">
+            <div className="cv-print-area-wrapper lg:col-span-7 xl:col-span-7 w-full overflow-x-auto no-scrollbar pb-4 flex justify-center bg-slate-200/60 dark:bg-slate-950/80 p-4 md:p-6 rounded-[10px] border border-slate-300/60 dark:border-slate-800 lg:sticky lg:top-4 max-h-[calc(100vh-2rem)] overflow-y-auto print:p-0 print:bg-transparent print:border-none print:max-h-none print:overflow-visible print:static print:block print:w-[210mm] print:m-0">
               <A4PaperlikeCanvas
                 templateId={selectedTemplateId}
                 customData={formData}
@@ -4525,11 +4525,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             {/* RIGHT COLUMN: TOGGLE TABS (EDITOR | TEMPLATES | PENGATURAN) */}
             <div className="lg:col-span-5 xl:col-span-5 w-full flex flex-col space-y-3 no-print">
               {/* Header Navigation Toggle Bar */}
-              <div className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-1 shadow-2xs">
+              <div className="p-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-1 shadow-2xs">
                 <button
                   type="button"
                   onClick={() => setRightPanelTab('editor')}
-                  className={`flex-1 py-2 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                  className={`flex-1 py-2 px-3 rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
                     rightPanelTab === 'editor'
                       ? 'bg-orange-500 text-white shadow-md'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'
@@ -4542,7 +4542,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 <button
                   type="button"
                   onClick={() => setRightPanelTab('templates')}
-                  className={`flex-1 py-2 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                  className={`flex-1 py-2 px-3 rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
                     rightPanelTab === 'templates'
                       ? 'bg-orange-500 text-white shadow-md'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'
@@ -4555,7 +4555,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 <button
                   type="button"
                   onClick={() => setRightPanelTab('pengaturan')}
-                  className={`flex-1 py-2 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                  className={`flex-1 py-2 px-3 rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
                     rightPanelTab === 'pengaturan'
                       ? 'bg-orange-500 text-white shadow-md'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'
@@ -4571,7 +4571,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 <div className="w-full space-y-3">
                   <form id="cv-drawer-form" onSubmit={handleSaveCV} className="space-y-3.5 text-xs pb-12">
                   {/* Section 1: Informasi Pribadi & Kontak (Merged) */}
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-2xs">
+                  <div className="border border-slate-200 dark:border-slate-800 rounded-[10px] bg-white dark:bg-slate-900 shadow-2xs">
                     <button
                       type="button"
                       onClick={() => toggleAccordion('sec1')}
@@ -4605,7 +4605,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   fullName: `${newFirst} ${prev.lastName || ''}`.trim(),
                                 }));
                               }}
-                              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
                             />
                           </div>
                           <div>
@@ -4622,7 +4622,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   fullName: `${prev.firstName || ''} ${newLast}`.trim(),
                                 }));
                               }}
-                              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
                             />
                           </div>
                         </div>
@@ -4634,7 +4634,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             placeholder="e.g., Senior Frontend Engineer"
                             value={formData.headline}
                             onChange={(e) => setFormData((prev) => ({ ...prev, headline: e.target.value }))}
-                            className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                            className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
                           />
                         </div>
 
@@ -4661,7 +4661,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               placeholder="e.g., john.doe@example.com"
                               value={formData.email}
                               onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
                             />
                           </div>
                           <div>
@@ -4678,7 +4678,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 }
                                 setFormData((prev) => ({ ...prev, phone: val }));
                               }}
-                              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
                             />
                           </div>
                         </div>
@@ -4691,7 +4691,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               placeholder="e.g., johndoe.dev"
                               value={formData.website || ''}
                               onChange={(e) => setFormData((prev) => ({ ...prev, website: e.target.value }))}
-                              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
                             />
                           </div>
                           <div>
@@ -4701,7 +4701,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               placeholder="e.g., linkedin.com/in/johndoe"
                               value={formData.linkedin || ''}
                               onChange={(e) => setFormData((prev) => ({ ...prev, linkedin: e.target.value }))}
-                              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
                             />
                           </div>
                         </div>
@@ -4721,7 +4721,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                     socialPlatform: e.target.value,
                                   }))
                                 }
-                                className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 transition shadow-2xs"
+                                className="w-full px-3 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 transition shadow-2xs"
                               >
                                 <option value="github">GitHub</option>
                                 <option value="dribbble">Dribbble</option>
@@ -4765,7 +4765,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                     socialHandle: e.target.value,
                                   }))
                                 }
-                                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                                className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
                               />
                             </div>
                           </div>
@@ -4784,12 +4784,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             className="hidden"
                           />
                           {formData.photoUrl ? (
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-[10px] border border-slate-200 dark:border-slate-700">
                               <div className="flex items-center gap-3 min-w-0">
                                 <img
                                   src={formData.photoUrl}
                                   alt="Profil"
-                                  className={`w-14 h-14 ${formData.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} object-cover border-2 border-orange-500 shadow-2xs shrink-0 bg-white`}
+                                  className={`w-14 h-14 ${formData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border-2 border-orange-500 shadow-2xs shrink-0 bg-white`}
                                 />
                                 <div className="flex-1 min-w-0">
                                   <p className="text-xs font-bold text-slate-800 dark:text-white truncate">Foto Profil Terpasang</p>
@@ -4858,7 +4858,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 <button
                                   type="button"
                                   onClick={handleEditExistingPhoto}
-                                  className="px-2.5 py-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950/40 dark:hover:bg-orange-900/60 dark:text-orange-400 text-xs font-semibold transition cursor-pointer flex items-center gap-1"
+                                  className="px-2.5 py-1.5 rounded-[10px] bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950/40 dark:hover:bg-orange-900/60 dark:text-orange-400 text-xs font-semibold transition cursor-pointer flex items-center gap-1"
                                   title="Atur Ukuran & Posisi Foto"
                                 >
                                   <Maximize2 className="w-3.5 h-3.5" />
@@ -4867,14 +4867,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 <button
                                   type="button"
                                   onClick={() => photoFileInputRef.current?.click()}
-                                  className="px-2.5 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white text-xs font-semibold transition cursor-pointer"
+                                  className="px-2.5 py-1.5 rounded-[10px] bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white text-xs font-semibold transition cursor-pointer"
                                 >
                                   Ganti
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setFormData((prev) => ({ ...prev, photoUrl: '' }))}
-                                  className="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-400 text-xs font-semibold transition cursor-pointer"
+                                  className="px-2.5 py-1.5 rounded-[10px] bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-400 text-xs font-semibold transition cursor-pointer"
                                 >
                                   Hapus
                                 </button>
@@ -4885,7 +4885,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               <button
                                 type="button"
                                 onClick={() => photoFileInputRef.current?.click()}
-                                className="px-4 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-950/40 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-slate-700 transition cursor-pointer flex items-center gap-2"
+                                className="px-4 py-2.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-950/40 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-slate-700 transition cursor-pointer flex items-center gap-2"
                               >
                                 <Upload className="w-4 h-4 text-orange-500" />
                                 <span>Unggah Foto Profil</span>
@@ -4920,7 +4920,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 setFormData((prev) => ({ ...prev, summary: newVal }));
                                 handleAiSuccessFeedback(feedback);
                               })}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-extrabold text-[11px] border border-purple-200 dark:border-purple-800 transition cursor-pointer shadow-2xs"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-extrabold text-[11px] border border-purple-200 dark:border-purple-800 transition cursor-pointer shadow-2xs"
                             >
                               <Sparkles className="w-3.5 h-3.5 fill-purple-600 text-purple-600" />
                               <span>Bantu tulis dengan AI</span>
@@ -4954,7 +4954,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   zIndex: isDraggingThis ? 50 : undefined,
                                   transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
                                 }}
-                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
+                                className={`border rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
                                   isDraggingThis
                                     ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
@@ -4966,7 +4966,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       onPointerDown={(e) => handleSubItemPointerDown(e, 'experience', expIdx)}
                                       onPointerMove={(e) => handleSubItemPointerMove(e, 'experience', expIdx)}
                                       onPointerUp={handleSubItemPointerUp}
-                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
                                       title="Tarik untuk mengatur posisi"
                                     >
                                       <GripVertical className="w-3.5 h-3.5" />
@@ -4984,7 +4984,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         experience: prev.experience.filter((_, i) => i !== expIdx),
                                       }))
                                     }
-                                    className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                    className="w-7 h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
@@ -5005,7 +5005,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, experience: arr };
                                         });
                                       }}
-                                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                                      className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
                                     />
                                   </div>
                                   <div>
@@ -5022,7 +5022,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, experience: arr };
                                         });
                                       }}
-                                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                                      className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
                                     />
                                   </div>
                                 </div>
@@ -5118,7 +5118,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         });
                                         handleAiSuccessFeedback(feedback);
                                       })}
-                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-extrabold text-[11px] border border-purple-200 dark:border-purple-800 transition cursor-pointer shadow-2xs"
+                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-extrabold text-[11px] border border-purple-200 dark:border-purple-800 transition cursor-pointer shadow-2xs"
                                     >
                                       <Sparkles className="w-3.5 h-3.5 fill-purple-600 text-purple-600" />
                                       <span>Bantu tulis dengan AI</span>
@@ -5176,7 +5176,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Pengalaman Kerja</span>
@@ -5199,7 +5199,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   zIndex: isDraggingThis ? 50 : undefined,
                                   transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
                                 }}
-                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
+                                className={`border rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
                                   isDraggingThis
                                     ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
@@ -5211,7 +5211,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       onPointerDown={(e) => handleSubItemPointerDown(e, 'internships', itemIdx)}
                                       onPointerMove={(e) => handleSubItemPointerMove(e, 'internships', itemIdx)}
                                       onPointerUp={handleSubItemPointerUp}
-                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
                                       title="Tarik untuk mengatur posisi"
                                     >
                                       <GripVertical className="w-3.5 h-3.5" />
@@ -5229,7 +5229,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         internships: (prev.internships || []).filter((_, i) => i !== itemIdx),
                                       }))
                                     }
-                                    className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                    className="w-7 h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
@@ -5250,7 +5250,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, internships: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                   />
                                 </div>
                                 <div>
@@ -5267,7 +5267,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, internships: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                   />
                                 </div>
                               </div>
@@ -5354,7 +5354,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Pengalaman Magang</span>
@@ -5377,7 +5377,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   zIndex: isDraggingThis ? 50 : undefined,
                                   transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
                                 }}
-                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
+                                className={`border rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
                                   isDraggingThis
                                     ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
@@ -5389,7 +5389,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       onPointerDown={(e) => handleSubItemPointerDown(e, 'projects', projIdx)}
                                       onPointerMove={(e) => handleSubItemPointerMove(e, 'projects', projIdx)}
                                       onPointerUp={handleSubItemPointerUp}
-                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
                                       title="Tarik untuk mengatur posisi"
                                     >
                                       <GripVertical className="w-3.5 h-3.5" />
@@ -5407,7 +5407,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         projects: (prev.projects || []).filter((_, i) => i !== projIdx),
                                       }))
                                     }
-                                    className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                    className="w-7 h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
@@ -5428,7 +5428,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, projects: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                   />
                                 </div>
                                 <div>
@@ -5445,7 +5445,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, projects: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                   />
                                 </div>
                               </div>
@@ -5465,7 +5465,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, projects: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                   />
                                 </div>
                                 <div>
@@ -5482,7 +5482,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, projects: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                   />
                                 </div>
                               </div>
@@ -5557,7 +5557,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Proyek</span>
@@ -5580,7 +5580,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   zIndex: isDraggingThis ? 50 : undefined,
                                   transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
                                 }}
-                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
+                                className={`border rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
                                   isDraggingThis
                                     ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
@@ -5592,7 +5592,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       onPointerDown={(e) => handleSubItemPointerDown(e, 'organizations', orgIdx)}
                                       onPointerMove={(e) => handleSubItemPointerMove(e, 'organizations', orgIdx)}
                                       onPointerUp={handleSubItemPointerUp}
-                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
                                       title="Tarik untuk mengatur posisi"
                                     >
                                       <GripVertical className="w-3.5 h-3.5" />
@@ -5610,7 +5610,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         organizations: (prev.organizations || []).filter((_, i) => i !== orgIdx),
                                       }))
                                     }
-                                    className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                    className="w-7 h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
@@ -5631,7 +5631,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, organizations: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                   />
                                 </div>
                                 <div>
@@ -5648,7 +5648,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, organizations: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                   />
                                 </div>
                               </div>
@@ -5720,7 +5720,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Pengalaman Organisasi</span>
@@ -5743,7 +5743,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   zIndex: isDraggingThis ? 50 : undefined,
                                   transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
                                 }}
-                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
+                                className={`border rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
                                   isDraggingThis
                                     ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
@@ -5755,7 +5755,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       onPointerDown={(e) => handleSubItemPointerDown(e, 'education', eduIdx)}
                                       onPointerMove={(e) => handleSubItemPointerMove(e, 'education', eduIdx)}
                                       onPointerUp={handleSubItemPointerUp}
-                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
                                       title="Tarik untuk mengatur posisi"
                                     >
                                       <GripVertical className="w-3.5 h-3.5" />
@@ -5773,7 +5773,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         education: prev.education.filter((_, i) => i !== eduIdx),
                                       }))
                                     }
-                                    className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                    className="w-7 h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
@@ -5794,7 +5794,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, education: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                   />
                                 </div>
                                 <div>
@@ -5811,7 +5811,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, education: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                   />
                                 </div>
                               </div>
@@ -5862,7 +5862,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, education: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                   />
                                 </div>
 
@@ -5902,7 +5902,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Pendidikan</span>
@@ -5917,7 +5917,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           {(formData.certifications || []).map((cert, certIdx) => (
                             <div
                               key={cert.id || certIdx}
-                              className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3.5 shadow-2xs"
+                              className="border border-slate-200 dark:border-slate-800 rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3.5 shadow-2xs"
                             >
                               <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
                                 <span className="font-bold text-xs text-slate-800 dark:text-white">
@@ -5931,7 +5931,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       certifications: (prev.certifications || []).filter((_, i) => i !== certIdx),
                                     }))
                                   }
-                                  className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                  className="w-7 h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -5952,7 +5952,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, certifications: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                   />
                                 </div>
                                 <div>
@@ -5969,7 +5969,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, certifications: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                   />
                                 </div>
                               </div>
@@ -5988,7 +5988,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       return { ...prev, certifications: arr };
                                     });
                                   }}
-                                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                  className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                 />
                               </div>
 
@@ -6021,7 +6021,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, certifications: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                                   />
                                 </div>
                               </div>
@@ -6044,7 +6044,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Sertifikat</span>
@@ -6079,7 +6079,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                     return { ...prev, languages: arr };
                                   });
                                 }}
-                                className="w-full px-3.5 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                className="w-full px-3.5 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
                               />
                               <div className="flex items-center gap-2">
                                 <CustomSelect
@@ -6106,7 +6106,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       languages: (prev.languages || []).filter((_, i) => i !== langIdx),
                                     }))
                                   }
-                                  className="p-2 rounded-lg bg-rose-500 text-white hover:bg-rose-600 transition cursor-pointer"
+                                  className="p-2 rounded-[10px] bg-rose-500 text-white hover:bg-rose-600 transition cursor-pointer"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -6125,7 +6125,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Bahasa</span>
@@ -6138,7 +6138,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       content = (
                         <div className="space-y-4">
                           {(formData.courses || []).map((crs, crsIdx) => (
-                            <div key={crs.id || crsIdx} className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3 shadow-2xs relative">
+                            <div key={crs.id || crsIdx} className="border border-slate-200 dark:border-slate-800 rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3 shadow-2xs relative">
                               <div className="flex items-center justify-between">
                                 <span className="font-bold text-xs text-slate-700 dark:text-slate-300">Kursus #{crsIdx + 1}</span>
                                 <button
@@ -6169,7 +6169,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, courses: arr };
                                       });
                                     }}
-                                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
+                                    className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -6186,7 +6186,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, courses: arr };
                                       });
                                     }}
-                                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
+                                    className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
                                   />
                                 </div>
                               </div>
@@ -6247,7 +6247,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Pelatihan</span>
@@ -6260,7 +6260,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       content = (
                         <div className="space-y-4">
                           {(formData.scholarships || []).map((sch, schIdx) => (
-                            <div key={sch.id || schIdx} className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3 shadow-2xs relative">
+                            <div key={sch.id || schIdx} className="border border-slate-200 dark:border-slate-800 rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3 shadow-2xs relative">
                               <div className="flex items-center justify-between">
                                 <span className="font-bold text-xs text-slate-700 dark:text-slate-300">Beasiswa #{schIdx + 1}</span>
                                 <button
@@ -6291,7 +6291,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, scholarships: arr };
                                       });
                                     }}
-                                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
+                                    className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -6308,7 +6308,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, scholarships: arr };
                                       });
                                     }}
-                                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
+                                    className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
                                   />
                                 </div>
                               </div>
@@ -6369,7 +6369,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Beasiswa</span>
@@ -6382,7 +6382,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       content = (
                         <div className="space-y-4">
                           {(formData.volunteers || []).map((vol, volIdx) => (
-                            <div key={vol.id || volIdx} className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3 shadow-2xs relative">
+                            <div key={vol.id || volIdx} className="border border-slate-200 dark:border-slate-800 rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3 shadow-2xs relative">
                               <div className="flex items-center justify-between">
                                 <span className="font-bold text-xs text-slate-700 dark:text-slate-300">Volunteer #{volIdx + 1}</span>
                                 <button
@@ -6413,7 +6413,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, volunteers: arr };
                                       });
                                     }}
-                                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
+                                    className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -6430,7 +6430,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, volunteers: arr };
                                       });
                                     }}
-                                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
+                                    className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
                                   />
                                 </div>
                               </div>
@@ -6492,7 +6492,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Volunteer</span>
@@ -6504,7 +6504,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       accordionKey = 'sec14';
                       content = (
                         <div className="space-y-4">
-                          <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-xl text-amber-800 dark:text-amber-300 text-xs italic leading-relaxed">
+                          <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-[10px] text-amber-800 dark:text-amber-300 text-xs italic leading-relaxed">
                             Note: Disarankan menulis &quot;Referensi tersedia atas permintaan&quot; pada CV Anda dan memberikan informasi ini secara terpisah saat diminta.
                           </div>
 
@@ -6519,7 +6519,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   zIndex: isDraggingThis ? 50 : undefined,
                                   transition: isDraggingThis ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
                                 }}
-                                className={`border rounded-xl p-4 bg-white dark:bg-slate-900 space-y-3 transition-all duration-200 relative ${
+                                className={`border rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3 transition-all duration-200 relative ${
                                   isDraggingThis
                                     ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
@@ -6531,7 +6531,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       onPointerDown={(e) => handleSubItemPointerDown(e, 'references', refIdx)}
                                       onPointerMove={(e) => handleSubItemPointerMove(e, 'references', refIdx)}
                                       onPointerUp={handleSubItemPointerUp}
-                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
                                       title="Tarik untuk mengatur posisi"
                                     >
                                       <GripVertical className="w-3.5 h-3.5" />
@@ -6567,7 +6567,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, references: arr };
                                         });
                                       }}
-                                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
                                     />
                                   </div>
                                   <div className="space-y-1">
@@ -6584,7 +6584,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, references: arr };
                                         });
                                       }}
-                                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
                                     />
                                   </div>
                                 </div>
@@ -6603,7 +6603,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, references: arr };
                                         });
                                       }}
-                                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
                                     />
                                   </div>
                                   <div className="space-y-1">
@@ -6620,7 +6620,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, references: arr };
                                         });
                                       }}
-                                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
                                     />
                                   </div>
                                   <div className="space-y-1">
@@ -6637,7 +6637,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, references: arr };
                                         });
                                       }}
-                                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
                                     />
                                   </div>
                                 </div>
@@ -6656,7 +6656,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Referensi</span>
@@ -6695,7 +6695,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
               {/* TAB 2: TEMPLATES */}
               {rightPanelTab === 'templates' && (
-                <div className="w-full bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xs animate-in fade-in duration-150">
+                <div className="w-full bg-white dark:bg-slate-900 p-4 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xs animate-in fade-in duration-150">
                   <div className="space-y-1">
                     <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
                       Pilih Template &amp; Tata Letak CV ATS
@@ -6714,13 +6714,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           <div
                             key={tpl.id}
                             onClick={() => setSelectedTemplateId(tpl.id)}
-                            className={`p-2.5 rounded-xl border transition-all cursor-pointer group text-left ${
+                            className={`p-2.5 rounded-[10px] border transition-all cursor-pointer group text-left ${
                               isSelected
                                 ? 'bg-orange-50/80 dark:bg-orange-950/40 border-orange-500 ring-2 ring-orange-500/20 shadow-sm'
                                 : 'bg-slate-50/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/80 hover:border-orange-300 dark:hover:border-orange-600'
                             }`}
                           >
-                            <div className="w-full aspect-[210/297] rounded-lg bg-white border border-slate-200 dark:border-slate-700 p-1 overflow-hidden shadow-2xs relative flex flex-col justify-between mb-2 group-hover:shadow-md transition">
+                            <div className="w-full aspect-[210/297] rounded-[10px] bg-white border border-slate-200 dark:border-slate-700 p-1 overflow-hidden shadow-2xs relative flex flex-col justify-between mb-2 group-hover:shadow-md transition">
                               <TemplateThumbnailVisual templateId={tpl.id} customData={formData} />
                               {isSelected && (
                                 <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-xs">
@@ -6746,7 +6746,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
               {/* TAB 3: PENGATURAN */}
               {rightPanelTab === 'pengaturan' && (
-                <div className="w-full bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-5 shadow-2xs animate-in fade-in duration-150">
+                <div className="w-full bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-5 shadow-2xs animate-in fade-in duration-150">
                   {/* SECTION 1: PENGATURAN MARGIN HALAMAN (WORD PRESET) */}
                   <div className="space-y-3.5">
                     <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -6757,7 +6757,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       <button
                         type="button"
                         onClick={handleResetDocStyles}
-                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                        className="px-2.5 py-1 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
                         title="Reset ke Gaya Default"
                       >
                         <RotateCcw className="w-3.5 h-3.5 text-orange-500" />
@@ -6784,7 +6784,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               key={key}
                               type="button"
                               onClick={() => handleSelectMarginPreset(key)}
-                              className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between gap-1.5 ${
+                              className={`p-3 rounded-[10px] border text-left transition cursor-pointer flex flex-col justify-between gap-1.5 ${
                                 isSelected
                                   ? 'bg-orange-50/90 dark:bg-orange-950/60 border-orange-500 text-orange-700 dark:text-orange-300 ring-2 ring-orange-500/20 shadow-2xs'
                                   : 'bg-slate-50/80 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300'
@@ -6813,7 +6813,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     </div>
 
                     {/* Custom Margin Numeric Inputs */}
-                    <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/80 space-y-2">
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-[10px] border border-slate-200 dark:border-slate-700/80 space-y-2">
                       <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">
                         Kustom Ukuran Margin (cm):
                       </span>
@@ -6827,7 +6827,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max="6"
                             value={docMarginTop}
                             onChange={(e) => handleCustomMarginChange('top', Number(e.target.value))}
-                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                         <div>
@@ -6839,7 +6839,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max="6"
                             value={docMarginBottom}
                             onChange={(e) => handleCustomMarginChange('bottom', Number(e.target.value))}
-                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                         <div>
@@ -6851,7 +6851,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max="6"
                             value={docMarginLeft}
                             onChange={(e) => handleCustomMarginChange('left', Number(e.target.value))}
-                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                         <div>
@@ -6863,7 +6863,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max="6"
                             value={docMarginRight}
                             onChange={(e) => handleCustomMarginChange('right', Number(e.target.value))}
-                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                       </div>
@@ -6898,7 +6898,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             key={fSize.id}
                             type="button"
                             onClick={() => setDocFontSize(fSize.id as any)}
-                            className={`py-2 px-2 rounded-xl border text-xs font-bold transition cursor-pointer text-center flex flex-col items-center justify-center gap-0.5 ${
+                            className={`py-2 px-2 rounded-[10px] border text-xs font-bold transition cursor-pointer text-center flex flex-col items-center justify-center gap-0.5 ${
                               docFontSize === fSize.id
                                 ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500 text-orange-700 dark:text-orange-300 shadow-2xs ring-1 ring-orange-500'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/80'
@@ -6920,7 +6920,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         <button
                           type="button"
                           onClick={() => setDocShowIcons(!docShowIcons)}
-                          className={`w-full px-3 py-2 rounded-xl border text-xs font-bold flex items-center justify-between transition cursor-pointer ${
+                          className={`w-full px-3 py-2 rounded-[10px] border text-xs font-bold flex items-center justify-between transition cursor-pointer ${
                             docShowIcons
                               ? 'bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800'
                               : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
@@ -6949,7 +6949,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               setDocPhotoPosition('left');
                               setFormData((prev) => ({ ...prev, photoPosition: 'left' }));
                             }}
-                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
                               docPhotoPosition === 'left'
                                 ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
@@ -6965,7 +6965,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               setDocPhotoPosition('right');
                               setFormData((prev) => ({ ...prev, photoPosition: 'right' }));
                             }}
-                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
                               docPhotoPosition === 'right'
                                 ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
@@ -6985,7 +6985,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         <select
                           value={docFontFamily}
                           onChange={(e) => setDocFontFamily(e.target.value as any)}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                          className="w-full px-3 py-2 rounded-[10px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
                         >
                           <option value="inter">Inter (Modern &amp; Clean)</option>
                           <option value="roboto">Roboto (Clean Sans)</option>
@@ -7010,7 +7010,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           <button
                             type="button"
                             onClick={() => setDocLinkStyle('blue')}
-                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
                               docLinkStyle === 'blue'
                                 ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60'
@@ -7022,7 +7022,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           <button
                             type="button"
                             onClick={() => setDocLinkStyle('underline')}
-                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
                               docLinkStyle === 'underline'
                                 ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60'
@@ -7034,7 +7034,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           <button
                             type="button"
                             onClick={() => setDocLinkStyle('plain')}
-                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
                               docLinkStyle === 'plain'
                                 ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60'
@@ -7054,7 +7054,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           <button
                             type="button"
                             onClick={() => setDocRefEmailHyperlink(!docRefEmailHyperlink)}
-                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
                               docRefEmailHyperlink
                                 ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
@@ -7068,7 +7068,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           <button
                             type="button"
                             onClick={() => setDocRefPhoneHyperlink(!docRefPhoneHyperlink)}
-                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
                               docRefPhoneHyperlink
                                 ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
@@ -7092,7 +7092,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           <button
                             type="button"
                             onClick={() => setDocProjectLinkStyle('name')}
-                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer text-center ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer text-center ${
                               docProjectLinkStyle === 'name'
                                 ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
@@ -7103,7 +7103,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           <button
                             type="button"
                             onClick={() => setDocProjectLinkStyle('text')}
-                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer text-center ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer text-center ${
                               docProjectLinkStyle === 'text'
                                 ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
@@ -7114,7 +7114,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           <button
                             type="button"
                             onClick={() => setDocProjectLinkStyle('none')}
-                            className={`px-3 py-2 rounded-xl border text-xs font-bold transition cursor-pointer text-center ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer text-center ${
                               docProjectLinkStyle === 'none'
                                 ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
@@ -7143,7 +7143,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={1}
                             value={docNameSize}
                             onChange={(e) => setDocNameSize(Number(e.target.value))}
-                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-lg"
+                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
                           />
                           <input
                             type="number"
@@ -7151,7 +7151,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max={44}
                             value={docNameSize}
                             onChange={(e) => setDocNameSize(Number(e.target.value))}
-                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                       </div>
@@ -7170,7 +7170,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={1}
                             value={docHeaderSize}
                             onChange={(e) => setDocHeaderSize(Number(e.target.value))}
-                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-lg"
+                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
                           />
                           <input
                             type="number"
@@ -7178,7 +7178,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max={24}
                             value={docHeaderSize}
                             onChange={(e) => setDocHeaderSize(Number(e.target.value))}
-                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                       </div>
@@ -7197,7 +7197,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={1}
                             value={docBodySize}
                             onChange={(e) => setDocBodySize(Number(e.target.value))}
-                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-lg"
+                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
                           />
                           <input
                             type="number"
@@ -7205,7 +7205,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max={18}
                             value={docBodySize}
                             onChange={(e) => setDocBodySize(Number(e.target.value))}
-                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                       </div>
@@ -7224,7 +7224,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={1}
                             value={docSectionSpacing}
                             onChange={(e) => setDocSectionSpacing(Number(e.target.value))}
-                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-lg"
+                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
                           />
                           <input
                             type="number"
@@ -7232,7 +7232,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max={40}
                             value={docSectionSpacing}
                             onChange={(e) => setDocSectionSpacing(Number(e.target.value))}
-                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                       </div>
@@ -7251,7 +7251,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={0.1}
                             value={docLineHeight}
                             onChange={(e) => setDocLineHeight(Number(e.target.value))}
-                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-lg"
+                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
                           />
                           <input
                             type="number"
@@ -7260,7 +7260,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={0.1}
                             value={docLineHeight}
                             onChange={(e) => setDocLineHeight(Number(e.target.value))}
-                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                       </div>
@@ -7279,7 +7279,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={0.1}
                             value={docLetterSpacing}
                             onChange={(e) => setDocLetterSpacing(Number(e.target.value))}
-                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-lg"
+                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
                           />
                           <input
                             type="number"
@@ -7288,7 +7288,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={0.1}
                             value={docLetterSpacing}
                             onChange={(e) => setDocLetterSpacing(Number(e.target.value))}
-                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                       </div>
@@ -7312,7 +7312,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         value={titleInput}
                         onChange={(e) => setTitleInput(e.target.value)}
                         placeholder="e.g. CV_Andi_Pratama_ATS"
-                        className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3.5 py-2 rounded-[10px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
                     </div>
 
@@ -7325,7 +7325,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         <button
                           type="button"
                           onClick={() => setDownloadFormat('pdf')}
-                          className={`py-2 px-3 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
+                          className={`py-2 px-3 rounded-[10px] border text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
                             downloadFormat === 'pdf'
                               ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500 text-orange-600 dark:text-orange-400 ring-2 ring-orange-500/20'
                               : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'
@@ -7338,7 +7338,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         <button
                           type="button"
                           onClick={() => setDownloadFormat('docx')}
-                          className={`py-2 px-3 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
+                          className={`py-2 px-3 rounded-[10px] border text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
                             downloadFormat === 'docx'
                               ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500 text-orange-600 dark:text-orange-400 ring-2 ring-orange-500/20'
                               : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'
@@ -7351,10 +7351,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     </div>
 
                     {/* INLINE CARD: CV DIBUATKAN HRD (SECONDARY CONVERSION BEFORE DOWNLOAD) */}
-                    <div className="my-3.5 bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700/80 rounded-2xl p-4 space-y-3 shadow-xs">
+                    <div className="my-3.5 bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700/80 rounded-[10px] p-4 space-y-3 shadow-xs">
                       {/* Badge / Eyebrow */}
                       <div className="flex items-center justify-between">
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-navy-50 dark:bg-navy-950/80 text-navy-700 dark:text-navy-300 border border-navy-200/80 dark:border-navy-800 text-[11px] font-bold">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] bg-navy-50 dark:bg-navy-950/80 text-navy-700 dark:text-navy-300 border border-navy-200/80 dark:border-navy-800 text-[11px] font-bold">
                           <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                           <span>CV Dibuatkan HRD</span>
                         </div>
@@ -7387,7 +7387,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         <button
                           type="button"
                           onClick={() => setIsHrdModalOpen(true)}
-                          className="px-3.5 py-2 rounded-xl bg-navy-600 hover:bg-navy-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer shrink-0"
+                          className="px-3.5 py-2 rounded-[10px] bg-navy-600 hover:bg-navy-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer shrink-0"
                         >
                           <span>Buatkan CV</span>
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -7399,7 +7399,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     <button
                       type="button"
                       onClick={handleDownloadCV}
-                      className="w-full py-3 px-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer mt-2"
+                      className="w-full py-3 px-4 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer mt-2"
                     >
                       <Download className="w-4 h-4" />
                       <span>Unduh CV Saya ({downloadFormat.toUpperCase()})</span>
@@ -7416,7 +7416,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       Unggah file resume kamu (.JSON, .PDF, atau .DOCX) untuk mengimpor data langsung ke dalam editor.
                     </p>
 
-                    <label className="w-full p-4 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 dark:hover:border-orange-500 rounded-xl bg-slate-50 dark:bg-slate-800/60 transition flex flex-col items-center justify-center gap-2 cursor-pointer group">
+                    <label className="w-full p-4 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 dark:hover:border-orange-500 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 transition flex flex-col items-center justify-center gap-2 cursor-pointer group">
                       <Upload className="w-5 h-5 text-slate-400 group-hover:text-orange-500 transition" />
                       <span className="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:text-orange-600 transition">
                         Pilih File Resume (JSON / PDF / DOCX)
@@ -7439,10 +7439,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       {/* MODAL 1: PRATINJAU DRAF CV AI (DRAFT MODAL) */}
       {showDraftModal && (
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 font-bold text-xs">
+                <span className="p-1.5 rounded-[10px] bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 font-bold text-xs">
                   Draf Sementara
                 </span>
                 <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">
@@ -7451,14 +7451,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               </div>
               <button
                 onClick={() => setShowDraftModal(false)}
-                className="p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg cursor-pointer"
+                className="p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-[10px] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="p-6 overflow-y-auto no-scrollbar space-y-4 bg-slate-100 dark:bg-slate-950">
-              <div className="p-6 bg-white text-slate-900 border border-slate-300 rounded-lg space-y-4 shadow-sm text-xs">
+              <div className="p-6 bg-white text-slate-900 border border-slate-300 rounded-[10px] space-y-4 shadow-sm text-xs">
                 <div className="border-b border-slate-900 pb-2">
                   <h2 className="text-xl font-black uppercase text-slate-900">{formData.fullName || 'BUDI SANTOSO'}</h2>
                   <p className="font-bold text-violet-700 uppercase mt-0.5">{formData.headline || 'Senior Full Stack Engineer'}</p>
@@ -7483,7 +7483,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2 bg-white dark:bg-slate-900">
               <button
                 onClick={() => setShowDraftModal(false)}
-                className="px-4 py-2 rounded-lg bg-slate-900 text-white font-bold text-xs cursor-pointer"
+                className="px-4 py-2 rounded-[10px] bg-slate-900 text-white font-bold text-xs cursor-pointer"
               >
                 Tutup Pratinjau
               </button>
@@ -7495,7 +7495,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       {/* MODAL 2: CHAT WITH HR SPECIALIST */}
       {showChatModal && activeOrder && (
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 w-full max-w-md h-[500px] flex flex-col shadow-2xl overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 w-full max-w-md h-[500px] flex flex-col shadow-2xl overflow-hidden">
             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-violet-900 text-white">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-full bg-violet-600 font-bold flex items-center justify-center text-xs">
@@ -7520,7 +7520,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   }`}
                 >
                   <div
-                    className={`p-3 rounded-xl text-xs leading-relaxed ${
+                    className={`p-3 rounded-[10px] text-xs leading-relaxed ${
                       msg.sender === 'user'
                         ? 'bg-violet-600 text-white rounded-br-none'
                         : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none shadow-2xs'
@@ -7545,11 +7545,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     handleSendChatMessage();
                   }
                 }}
-                className="flex-1 px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
+                className="flex-1 px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
               />
               <button
                 onClick={handleSendChatMessage}
-                className="p-2.5 rounded-lg bg-violet-600 text-white hover:bg-violet-700 transition cursor-pointer"
+                className="p-2.5 rounded-[10px] bg-violet-600 text-white hover:bg-violet-700 transition cursor-pointer"
               >
                 <Send className="w-4 h-4" />
               </button>
@@ -7566,10 +7566,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           }}
           className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-150"
         >
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-150">
+          <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-150">
             {/* Modal Icon & Header */}
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 border border-rose-200 dark:border-rose-800/60">
+              <div className="w-12 h-12 rounded-[10px] bg-rose-100 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 border border-rose-200 dark:border-rose-800/60">
                 <Trash2 className="w-6 h-6" />
               </div>
               <div className="space-y-1">
@@ -7587,7 +7587,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             </div>
 
             {/* Target Card Highlight Info */}
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs">
+            <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs">
               <div className="space-y-0.5">
                 <p className="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[220px]">
                   {deletingCvTarget.title}
@@ -7596,7 +7596,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   Terakhir diubah: {deletingCvTarget.updatedAt || 'Hari ini'}
                 </p>
               </div>
-              <span className="px-2.5 py-1 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[10px]">
+              <span className="px-2.5 py-1 rounded-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[10px]">
                 Skor ATS: {deletingCvTarget.atsScore ?? 85}
               </span>
             </div>
@@ -7606,14 +7606,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <button
                 type="button"
                 onClick={() => setDeletingCvTarget(null)}
-                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                className="px-4 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={handleConfirmDeleteCV}
-                className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-600/20 transition flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2.5 rounded-[10px] bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-600/20 transition flex items-center gap-1.5 cursor-pointer"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Ya, Hapus CV</span>
@@ -7634,7 +7634,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           }}
           className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto"
         >
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto">
             {/* Modal Header - Unified Blue Theme */}
             <div className="p-5 md:p-6 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between bg-gradient-to-r from-blue-900 via-slate-900 to-blue-950 text-white">
               <div className="space-y-1">
@@ -7656,7 +7656,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   setShowTemplateModal(false);
                   setTemplateModalStep(1);
                 }}
-                className="p-1.5 text-slate-300 hover:text-white rounded-lg bg-white/10 hover:bg-white/20 transition cursor-pointer shrink-0"
+                className="p-1.5 text-slate-300 hover:text-white rounded-[10px] bg-white/10 hover:bg-white/20 transition cursor-pointer shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -7677,7 +7677,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             key={tpl.id}
                             id={`template-card-${tpl.id}`}
                             onClick={() => setSelectedTemplateId(tpl.id)}
-                            className={`p-4 rounded-xl border transition-all cursor-pointer ${
+                            className={`p-4 rounded-[10px] border transition-all cursor-pointer ${
                               isSelected
                                 ? 'bg-blue-50 dark:bg-blue-950/70 border-blue-600 ring-2 ring-blue-600/30 shadow-md'
                                 : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700'
@@ -7703,7 +7703,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                   {/* Right: A4 Preview with Dummy Data */}
                   <div className="flex-1 overflow-y-auto bg-slate-200/80 dark:bg-slate-950 p-4 md:p-6 flex justify-center items-start">
-                    <div className="relative w-[105mm] h-[148.5mm] shadow-2xl rounded-sm border border-slate-300 dark:border-slate-800 bg-white overflow-hidden shrink-0 my-auto">
+                    <div className="relative w-[105mm] h-[148.5mm] shadow-2xl rounded-[10px] border border-slate-300 dark:border-slate-800 bg-white overflow-hidden shrink-0 my-auto">
                       <div
                         className="w-[210mm] min-h-[297mm] bg-white origin-top-left scale-50 pointer-events-none"
                         style={{ fontFamily: "'Satoshi', sans-serif" }}
@@ -7725,13 +7725,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         setShowTemplateModal(false);
                         setTemplateModalStep(1);
                       }}
-                      className="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
+                      className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
                     >
                       Batal
                     </button>
                     <button
                       onClick={handleSelectTemplateAndNext}
-                      className="px-6 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+                      className="px-6 py-2 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
                     >
                       <span>Gunakan Template Ini</span>
                       <ArrowRight className="w-4 h-4" />
@@ -7743,7 +7743,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <>
                 {/* STEP 2: Modal Body - 2 Column Layout (Left: Title & Job Target, Right: Start Mode) */}
                 <div className="p-6 md:p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 space-y-6 flex-1">
-                  <div className="w-full bg-white dark:bg-slate-900 p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                  <div className="w-full bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-sm">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                       {/* Sisi Kiri: Template Info + Nama & Lowongan Target */}
                       <div className="space-y-5">
@@ -7751,7 +7751,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         {(() => {
                           const tpl = cvTemplates.find((t) => t.id === selectedTemplateId) || cvTemplates[0];
                           return (
-                            <div className="p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 flex items-center justify-between">
+                            <div className="p-4 rounded-[10px] bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 flex items-center justify-between">
                               <div className="space-y-1">
                                 <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">
                                   Template Terpilih
@@ -7787,7 +7787,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               }
                             }}
                             placeholder="Contoh: CV Loker Software Engineer 2026"
-                            className={`w-full px-4 py-2.5 rounded-xl border text-xs font-medium focus:ring-2 transition ${
+                            className={`w-full px-4 py-2.5 rounded-[10px] border text-xs font-medium focus:ring-2 transition ${
                               templateFormSubmitted && !isNewCvTitleValid
                                 ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100 focus:ring-rose-500 focus:border-rose-500'
                                 : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-blue-500 focus:border-blue-500'
@@ -7821,7 +7821,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               }
                             }}
                             placeholder="Contoh: Senior Frontend Developer / Staff Administrasi"
-                            className={`w-full px-4 py-2.5 rounded-xl border text-xs font-medium focus:ring-2 transition ${
+                            className={`w-full px-4 py-2.5 rounded-[10px] border text-xs font-medium focus:ring-2 transition ${
                               templateFormSubmitted && !isNewCvJobTitleValid
                                 ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100 focus:ring-rose-500 focus:border-rose-500'
                                 : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-blue-500 focus:border-blue-500'
@@ -7849,14 +7849,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           {/* Option 1: Mulai dari contoh */}
                           <div
                             onClick={() => setNewCvStartMode('example')}
-                            className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-4 ${
+                            className={`p-4 rounded-[10px] border transition-all cursor-pointer flex items-center justify-between gap-4 ${
                               newCvStartMode === 'example'
                                 ? 'bg-blue-50 dark:bg-blue-950/70 border-blue-600 ring-2 ring-blue-600/30 shadow-xs'
                                 : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300'
                             }`}
                           >
                             <div className="flex items-center gap-3">
-                              <div className="p-2.5 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 shrink-0">
+                              <div className="p-2.5 rounded-[10px] bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 shrink-0">
                                 <FileText className="w-5 h-5" />
                               </div>
                               <div>
@@ -7874,14 +7874,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           {/* Option 2: Kosongkan */}
                           <div
                             onClick={() => setNewCvStartMode('empty')}
-                            className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-4 ${
+                            className={`p-4 rounded-[10px] border transition-all cursor-pointer flex items-center justify-between gap-4 ${
                               newCvStartMode === 'empty'
                                 ? 'bg-blue-50 dark:bg-blue-950/70 border-blue-600 ring-2 ring-blue-600/30 shadow-xs'
                                 : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300'
                             }`}
                           >
                             <div className="flex items-center gap-3">
-                              <div className="p-2.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300 shrink-0">
+                              <div className="p-2.5 rounded-[10px] bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300 shrink-0">
                                 <Plus className="w-5 h-5" />
                               </div>
                               <div>
@@ -7899,7 +7899,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           {/* Option 3: Impor file */}
                           <div
                             onClick={() => setNewCvStartMode('import')}
-                            className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col gap-3 ${
+                            className={`p-4 rounded-[10px] border transition-all cursor-pointer flex flex-col gap-3 ${
                               newCvStartMode === 'import'
                                 ? 'bg-blue-50 dark:bg-blue-950/70 border-blue-600 ring-2 ring-blue-600/30 shadow-xs'
                                 : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300'
@@ -7907,7 +7907,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           >
                             <div className="flex items-center justify-between gap-4">
                               <div className="flex items-center gap-3">
-                                <div className="p-2.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 shrink-0">
+                                <div className="p-2.5 rounded-[10px] bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 shrink-0">
                                   <Upload className="w-5 h-5" />
                                 </div>
                                 <div>
@@ -7938,7 +7938,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 />
                                 <label
                                   htmlFor="cv-import-file"
-                                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs cursor-pointer transition shadow-xs"
+                                  className="inline-flex items-center gap-2 px-4 py-2 rounded-[10px] bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs cursor-pointer transition shadow-xs"
                                 >
                                   <Upload className="w-4 h-4" />
                                   <span>{newCvFile ? 'Ganti File' : 'Pilih File CV'}</span>
@@ -7972,7 +7972,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   <button
                     type="button"
                     onClick={() => setTemplateModalStep(1)}
-                    className="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer flex items-center gap-1"
+                    className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer flex items-center gap-1"
                   >
                     <ArrowLeft className="w-4 h-4" />
                     <span>Kembali ke Templat</span>
@@ -7980,7 +7980,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                   <div className="flex items-center gap-3">
                     {templateFormSubmitted && !isTemplateFormValid && (
-                      <span className="text-xs font-extrabold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 bg-rose-50 dark:bg-rose-950/60 px-3 py-1.5 rounded-lg border border-rose-200 dark:border-rose-800">
+                      <span className="text-xs font-extrabold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 bg-rose-50 dark:bg-rose-950/60 px-3 py-1.5 rounded-[10px] border border-rose-200 dark:border-rose-800">
                         <AlertCircle className="w-4 h-4 shrink-0 animate-bounce text-rose-500" />
                         <span>Harap isi semua kolom wajib (*)</span>
                       </span>
@@ -7988,7 +7988,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     <button
                       type="button"
                       onClick={handleCreateCvFromTemplate}
-                      className="px-6 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md"
+                      className="px-6 py-2.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md"
                     >
                       <span>Buat &amp; Edit CV</span>
                       <ArrowRight className="w-4 h-4" />
@@ -8011,7 +8011,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           }}
           className="fixed inset-0 bg-slate-950/80 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto"
         >
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 flex flex-col gap-5 shadow-2xl overflow-hidden my-auto animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 flex flex-col gap-5 shadow-2xl overflow-hidden my-auto animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
                 <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
@@ -8025,7 +8025,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <button
                 type="button"
                 onClick={() => setShowPhotoCropModal(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -8059,7 +8059,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   }
                 }}
                 onTouchEnd={() => setIsDraggingPhoto(false)}
-                className="w-[280px] h-[280px] border-2 border-slate-700/80 rounded-2xl overflow-hidden relative shadow-inner bg-slate-950 cursor-grab active:cursor-grabbing select-none flex items-center justify-center"
+                className="w-[280px] h-[280px] border-2 border-slate-700/80 rounded-[10px] overflow-hidden relative shadow-inner bg-slate-950 cursor-grab active:cursor-grabbing select-none flex items-center justify-center"
               >
                 {/* Stationary Background Photo */}
                 <img
@@ -8135,7 +8135,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   <button
                     type="button"
                     onClick={() => setPhotoScale((prev) => Math.max(0.5, Math.round((prev - 0.1) * 100) / 100))}
-                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer"
+                    className="p-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer"
                     title="Perkecil"
                   >
                     <Minus className="w-4 h-4" />
@@ -8147,12 +8147,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     step="0.05"
                     value={photoScale}
                     onChange={(e) => setPhotoScale(parseFloat(e.target.value))}
-                    className="w-full accent-orange-500 cursor-pointer h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none"
+                    className="w-full accent-orange-500 cursor-pointer h-2 bg-slate-200 dark:bg-slate-700 rounded-[10px] appearance-none"
                   />
                   <button
                     type="button"
                     onClick={() => setPhotoScale((prev) => Math.min(2.5, Math.round((prev + 0.1) * 100) / 100))}
-                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer"
+                    className="p-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer"
                     title="Perbesar"
                   >
                     <Plus className="w-4 h-4" />
@@ -8165,7 +8165,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 <button
                   type="button"
                   onClick={() => setPhotoShape('circle')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1.5 rounded-[10px] text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
                     photoShape === 'circle' ? 'bg-orange-500 text-white shadow-2xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
                   }`}
                 >
@@ -8175,11 +8175,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 <button
                   type="button"
                   onClick={() => setPhotoShape('square')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1.5 rounded-[10px] text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
                     photoShape === 'square' ? 'bg-orange-500 text-white shadow-2xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
                   }`}
                 >
-                  <div className="w-3.5 h-3.5 rounded-xs border-2 border-current" />
+                  <div className="w-3.5 h-3.5 rounded-[10px] border-2 border-current" />
                   <span>Persegi</span>
                 </button>
               </div>
@@ -8190,14 +8190,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <button
                 type="button"
                 onClick={() => setShowPhotoCropModal(false)}
-                className="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
+                className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={handleApplyCroppedPhoto}
-                className="px-5 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md"
+                className="px-5 py-2 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md"
               >
                 <Check className="w-4 h-4" />
                 <span>Gunakan Foto Ini</span>
@@ -8237,7 +8237,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
       {/* Toast Feedback Success AI */}
       {aiToastMessage && (
-        <div className="fixed top-20 right-6 z-50 p-4 rounded-2xl bg-slate-900 text-white border border-emerald-500/50 shadow-2xl flex items-center gap-3 animate-in slide-in-from-top duration-300">
+        <div className="fixed top-20 right-6 z-50 p-4 rounded-[10px] bg-slate-900 text-white border border-emerald-500/50 shadow-2xl flex items-center gap-3 animate-in slide-in-from-top duration-300">
           <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-5 h-5" />
           </div>
@@ -9064,7 +9064,7 @@ const CVTemplatePreview: React.FC<{
             <img
               src={dummyData.photoUrl}
               alt={dummyData.fullName}
-              className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} object-cover border border-slate-300 shrink-0 shadow-2xs`}
+              className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border border-slate-300 shrink-0 shadow-2xs`}
             />
           ) : null}
         </div>
@@ -9297,7 +9297,7 @@ const CVTemplatePreview: React.FC<{
             <img
               src={dummyData.photoUrl}
               alt={dummyData.fullName}
-              className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} object-cover border-2 border-slate-300 mb-3 shadow-2xs`}
+              className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border-2 border-slate-300 mb-3 shadow-2xs`}
             />
           ) : null}
           <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
@@ -9332,7 +9332,7 @@ const CVTemplatePreview: React.FC<{
           </h2>
           <div className="flex flex-wrap gap-2">
             {dummyData.skills.map((skill, idx) => (
-              <span key={idx} className="px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-full text-xs font-bold">
+              <span key={idx} className="px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-[10px] text-xs font-bold">
                 {skill}
               </span>
             ))}
@@ -9545,7 +9545,7 @@ const CVTemplatePreview: React.FC<{
             PENDIDIKAN
           </h2>
           {dummyData.education.map((edu, idx) => (
-            <div key={idx} className="bg-slate-50 p-4 rounded-lg">
+            <div key={idx} className="bg-slate-50 p-4 rounded-[10px]">
               <div className="flex items-baseline justify-between mb-2">
                 <p className="text-base font-bold text-slate-900">{edu.institution}</p>
                 <p className="text-xs text-slate-600">{edu.year}</p>
@@ -9563,7 +9563,7 @@ const CVTemplatePreview: React.FC<{
           </h2>
           <div className="flex flex-wrap gap-2">
             {dummyData.skills.map((skill, idx) => (
-              <span key={idx} className="px-3 py-1 bg-slate-100 border border-slate-300 text-slate-700 rounded-md text-xs font-semibold">
+              <span key={idx} className="px-3 py-1 bg-slate-100 border border-slate-300 text-slate-700 rounded-[10px] text-xs font-semibold">
                 {skill}
               </span>
             ))}
@@ -10229,10 +10229,10 @@ const CVTemplatePreview: React.FC<{
             <img
               src={dummyData.photoUrl}
               alt={dummyData.fullName}
-              className={`w-24 h-24 ${dummyData.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} object-cover border-2 border-purple-600 shrink-0`}
+              className={`w-24 h-24 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border-2 border-purple-600 shrink-0`}
             />
           ) : (
-            <div className={`w-24 h-24 border-2 border-purple-600 ${dummyData.photoShape === 'square' ? 'rounded-lg' : 'rounded-full'} bg-slate-100 flex items-center justify-center text-xs text-slate-400 shrink-0`}>
+            <div className={`w-24 h-24 border-2 border-purple-600 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} bg-slate-100 flex items-center justify-center text-xs text-slate-400 shrink-0`}>
               Photo
             </div>
           )}
@@ -10405,7 +10405,7 @@ const CVTemplatePreview: React.FC<{
     const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
     const sectionBlocks: Record<string, React.ReactNode> = {
       summary: (
-        <div key="summary" className="mb-6 bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg">
+        <div key="summary" className="mb-6 bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-[10px]">
           <h2 className="text-sm font-black uppercase text-orange-800 mb-2">ABOUT ME</h2>
           <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
         </div>
@@ -10418,7 +10418,7 @@ const CVTemplatePreview: React.FC<{
           </h2>
           <div className="flex flex-wrap gap-2">
             {dummyData.skills.map((skill, idx) => (
-              <span key={idx} className="px-3 py-1.5 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-300 text-orange-700 rounded-full text-xs font-bold">
+              <span key={idx} className="px-3 py-1.5 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-300 text-orange-700 rounded-[10px] text-xs font-bold">
                 {skill}
               </span>
             ))}
@@ -11218,7 +11218,7 @@ const CVTemplatePreview: React.FC<{
           </div>
           <div className="flex flex-wrap gap-2 pl-10">
             {dummyData.skills.map((skill, idx) => (
-              <span key={idx} className="px-3 py-1.5 bg-green-50 border-2 border-green-500 text-green-700 rounded-md text-xs font-bold">
+              <span key={idx} className="px-3 py-1.5 bg-green-50 border-2 border-green-500 text-green-700 rounded-[10px] text-xs font-bold">
                 {skill}
               </span>
             ))}
@@ -11431,7 +11431,7 @@ const CVTemplatePreview: React.FC<{
             EDUCATION
           </h2>
           {dummyData.education.map((edu, idx) => (
-            <div key={idx} className="bg-indigo-50 p-4 rounded-lg border border-indigo-200 mb-2">
+            <div key={idx} className="bg-indigo-50 p-4 rounded-[10px] border border-indigo-200 mb-2">
               <div className="flex justify-between items-baseline mb-1">
                 <p className="text-base font-bold text-slate-900">{edu.institution}</p>
                 <p className="text-xs text-slate-600">{edu.year}</p>
@@ -12005,7 +12005,7 @@ const CVTemplatePreview: React.FC<{
           </h2>
           <div className="flex flex-wrap gap-1.5">
             {dummyData.skills.map((skill, idx) => (
-              <span key={idx} className="text-xs text-slate-600 bg-slate-100 px-2 py-1 rounded-sm">
+              <span key={idx} className="text-xs text-slate-600 bg-slate-100 px-2 py-1 rounded-[10px]">
                 {skill}
               </span>
             ))}
@@ -12513,7 +12513,7 @@ const TemplateThumbnailVisual: React.FC<{ templateId: string; customData?: Parti
   return (
     <div
       ref={containerRef}
-      className="w-full h-full relative overflow-hidden bg-white select-none pointer-events-none rounded-md"
+      className="w-full h-full relative overflow-hidden bg-white select-none pointer-events-none rounded-[10px]"
     >
       <div
         className="w-[210mm] h-[297mm] bg-white pointer-events-none absolute top-0 left-0 overflow-hidden"

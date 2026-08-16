@@ -400,13 +400,13 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
   return (
     <div className="space-y-8 pb-12 font-sans">
       {/* Header Banner */}
-      <div className="p-6 md:p-8 rounded-2xl bg-[#0D3BD9] text-white border border-blue-500/50 shadow-xl relative overflow-hidden">
+      <div className="p-6 md:p-8 rounded-[10px] bg-[#0D3BD9] text-white border border-blue-500/50 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-violet-500/20 text-violet-300 border border-violet-500/30">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] text-xs font-bold bg-violet-500/20 text-violet-300 border border-violet-500/30">
               <Linkedin className="w-3.5 h-3.5 text-violet-400" />
               <span>Ekstraktor &amp; Auditor LinkedIn</span>
             </div>
@@ -424,7 +424,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
             <button
               type="button"
               onClick={onOpenUpgradeModal}
-              className="px-4 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-xs font-extrabold transition shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 cursor-pointer shrink-0"
+              className="px-4 py-2.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white text-xs font-extrabold transition shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 cursor-pointer shrink-0"
             >
               <Zap className="w-4 h-4 text-amber-200" />
               <span>Pilih Paket Access</span>
@@ -434,10 +434,10 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
       </div>
 
       {/* SINGLE MAIN INPUT CARD: LINK URL LINKEDIN */}
-      <div className="p-6 md:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md space-y-6">
+      <div className="p-6 md:p-8 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-950 flex items-center justify-center text-violet-600 dark:text-violet-400 shrink-0">
+            <div className="w-10 h-10 rounded-[10px] bg-violet-100 dark:bg-violet-950 flex items-center justify-center text-violet-600 dark:text-violet-400 shrink-0">
               <Linkedin className="w-5 h-5" />
             </div>
             <div>
@@ -455,14 +455,14 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
             <button
               type="button"
               onClick={() => handleFillDemoLink('https://linkedin.com/in/andipratama-dev', 'Full Stack Engineer')}
-              className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950 text-slate-700 dark:text-slate-300 font-bold text-[11px] border border-slate-200 dark:border-slate-700 transition cursor-pointer"
+              className="px-2.5 py-1 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950 text-slate-700 dark:text-slate-300 font-bold text-[11px] border border-slate-200 dark:border-slate-700 transition cursor-pointer"
             >
               Full Stack
             </button>
             <button
               type="button"
               onClick={() => handleFillDemoLink('https://linkedin.com/in/siti-rahma-uiux', 'UI/UX Designer')}
-              className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950 text-slate-700 dark:text-slate-300 font-bold text-[11px] border border-slate-200 dark:border-slate-700 transition cursor-pointer"
+              className="px-2.5 py-1 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950 text-slate-700 dark:text-slate-300 font-bold text-[11px] border border-slate-200 dark:border-slate-700 transition cursor-pointer"
             >
               UI/UX Designer
             </button>
@@ -483,7 +483,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                   placeholder="https://linkedin.com/in/username-kamu"
                   value={profileUrl}
                   onChange={(e) => setProfileUrl(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                  className="w-full pl-10 pr-4 py-3 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
                 />
               </div>
             </div>
@@ -499,7 +499,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                   placeholder="Contoh: Full Stack Developer"
                   value={targetRole}
                   onChange={(e) => setTargetRole(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                  className="w-full pl-10 pr-4 py-3 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
                 />
               </div>
             </div>
@@ -508,7 +508,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
           <button
             type="submit"
             disabled={isLoading || !profileUrl}
-            className="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm transition shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="w-full py-3.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-black text-sm transition shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {isLoading ? (
               <>
@@ -526,7 +526,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
 
         {/* LOADING STEP ANIMATION INDICATOR */}
         {isLoading && (
-          <div className="p-5 rounded-xl bg-violet-50/80 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-900/60 space-y-4 animate-in fade-in duration-300">
+          <div className="p-5 rounded-[10px] bg-violet-50/80 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-900/60 space-y-4 animate-in fade-in duration-300">
             <div className="flex items-center gap-2 text-violet-700 dark:text-violet-300 font-extrabold text-xs">
               <RefreshCw className="w-4 h-4 animate-spin text-orange-500" />
               <span>Proses Ekstraksi &amp; Penilaian Sedang Berjalan...</span>
@@ -573,10 +573,10 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
       {hasAnalyzed && !isLoading && (
         <div className="space-y-8 animate-in fade-in duration-500">
           {/* PHASE 1 OUTPUT: HASIL SCRAPING / EKSTRAKSI DATA LINKEDIN */}
-          <div className="p-6 md:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md space-y-6">
+          <div className="p-6 md:p-8 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                <div className="w-10 h-10 rounded-[10px] bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
                   <Database className="w-5 h-5" />
                 </div>
                 <div>
@@ -584,7 +584,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                     <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
                       1. Hasil Ekstraksi Data Profil LinkedIn
                     </h2>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                    <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                       Ter-ekstrak Lengkap
                     </span>
                   </div>
@@ -596,7 +596,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
             </div>
 
             {/* Profile Info Header Badge */}
-            <div className="p-5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="p-5 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-full bg-violet-600 text-white font-black text-xl flex items-center justify-center shrink-0 shadow-md">
                   {scrapedData.name.charAt(0)}
@@ -626,7 +626,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                   href={profileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3.5 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-violet-600 font-bold text-xs transition flex items-center gap-1.5 shadow-xs"
+                  className="px-3.5 py-2 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-violet-600 font-bold text-xs transition flex items-center gap-1.5 shadow-xs"
                 >
                   <Linkedin className="w-3.5 h-3.5 text-violet-600" />
                   <span>Buka Link LinkedIn</span>
@@ -637,7 +637,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
             {/* Extracted Sections Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
               {/* About / Summary Ter-ekstrak */}
-              <div className="p-4 rounded-xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2">
+              <div className="p-4 rounded-[10px] bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2">
                 <div className="flex items-center gap-2 text-slate-900 dark:text-white font-extrabold">
                   <FileText className="w-4 h-4 text-violet-500" />
                   <span>Bio / About Ter-ekstrak</span>
@@ -648,7 +648,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
               </div>
 
               {/* Skill Utama Ter-ekstrak */}
-              <div className="p-4 rounded-xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2">
+              <div className="p-4 rounded-[10px] bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2">
                 <div className="flex items-center gap-2 text-slate-900 dark:text-white font-extrabold">
                   <Code2 className="w-4 h-4 text-emerald-500" />
                   <span>Skill Utama Ter-ekstrak</span>
@@ -657,7 +657,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                   {scrapedData.skills.map((sk, idx) => (
                     <span
                       key={idx}
-                      className="px-2.5 py-1 rounded-lg bg-violet-50 dark:bg-violet-950/60 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800 font-semibold text-[11px]"
+                      className="px-2.5 py-1 rounded-[10px] bg-violet-50 dark:bg-violet-950/60 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800 font-semibold text-[11px]"
                     >
                       {sk}
                     </span>
@@ -666,7 +666,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
               </div>
 
               {/* Pengalaman Kerja Ter-ekstrak */}
-              <div className="p-4 rounded-xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3 md:col-span-2">
+              <div className="p-4 rounded-[10px] bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3 md:col-span-2">
                 <div className="flex items-center gap-2 text-slate-900 dark:text-white font-extrabold">
                   <Briefcase className="w-4 h-4 text-amber-500" />
                   <span>Riwayat Pengalaman Kerja Ter-ekstrak</span>
@@ -675,7 +675,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                   {scrapedData.experience.map((exp, idx) => (
                     <div
                       key={idx}
-                      className="p-3.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-1"
+                      className="p-3.5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-1"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-bold text-slate-900 dark:text-white">
@@ -698,7 +698,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
 
               {/* Sertifikasi & Lisensi Ter-ekstrak */}
               {scrapedData.certifications && scrapedData.certifications.length > 0 && (
-                <div className="p-4 rounded-xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3 md:col-span-2">
+                <div className="p-4 rounded-[10px] bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3 md:col-span-2">
                   <div className="flex items-center gap-2 text-slate-900 dark:text-white font-extrabold">
                     <Award className="w-4 h-4 text-purple-500" />
                     <span>Sertifikasi &amp; Lisensi Ter-ekstrak</span>
@@ -707,7 +707,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                     {scrapedData.certifications.map((cert, idx) => (
                       <div
                         key={idx}
-                        className="p-3.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-1"
+                        className="p-3.5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-1"
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
@@ -731,7 +731,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
 
               {/* Proyek & Portofolio Ter-ekstrak */}
               {scrapedData.projects && scrapedData.projects.length > 0 && (
-                <div className="p-4 rounded-xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3 md:col-span-2">
+                <div className="p-4 rounded-[10px] bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3 md:col-span-2">
                   <div className="flex items-center gap-2 text-slate-900 dark:text-white font-extrabold">
                     <FolderGit2 className="w-4 h-4 text-blue-500" />
                     <span>Proyek &amp; Portofolio Ter-ekstrak</span>
@@ -740,7 +740,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                     {scrapedData.projects.map((proj, idx) => (
                       <div
                         key={idx}
-                        className="p-3.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-1.5"
+                        className="p-3.5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-1.5"
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-bold text-slate-900 dark:text-white">
@@ -795,7 +795,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
 
               {/* Pendidikan Ter-ekstrak */}
               {scrapedData.education && scrapedData.education.length > 0 && (
-                <div className="p-4 rounded-xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2 md:col-span-2">
+                <div className="p-4 rounded-[10px] bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2 md:col-span-2">
                   <div className="flex items-center gap-2 text-slate-900 dark:text-white font-extrabold">
                     <GraduationCap className="w-4 h-4 text-indigo-500" />
                     <span>Pendidikan Ter-ekstrak</span>
@@ -804,7 +804,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                     {scrapedData.education.map((edu, idx) => (
                       <div
                         key={idx}
-                        className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex-1 min-w-[200px]"
+                        className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex-1 min-w-[200px]"
                       >
                         <span className="font-bold text-slate-900 dark:text-white block">
                           {edu.degree}
@@ -821,7 +821,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
           </div>
 
           {/* PHASE 2 OUTPUT: HASIL PENILAIAN & REKOMENDASI OPTIMASI */}
-          <div className="p-6 md:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md space-y-6">
+          <div className="p-6 md:p-8 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md space-y-6">
             {/* Header Score Overview */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
@@ -829,7 +829,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                   <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
                     2. Hasil Penilaian &amp; Rekomendasi Optimasi
                   </h2>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300">
+                  <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-bold bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300">
                     {analysisResult.profileStatus}
                   </span>
                 </div>
@@ -859,23 +859,23 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
 
             {/* Score Breakdown Bar */}
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-center space-y-1">
+              <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-center space-y-1">
                 <span className="text-[10px] text-slate-400 font-semibold block truncate">Headline</span>
                 <span className="font-black text-slate-900 dark:text-white block text-base">{analysisResult.scoreBreakdown.headline}%</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-center space-y-1">
+              <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-center space-y-1">
                 <span className="text-[10px] text-slate-400 font-semibold block truncate">Bio / About</span>
                 <span className="font-black text-slate-900 dark:text-white block text-base">{analysisResult.scoreBreakdown.about}%</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-center space-y-1">
+              <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-center space-y-1">
                 <span className="text-[10px] text-slate-400 font-semibold block truncate">Pengalaman</span>
                 <span className="font-black text-slate-900 dark:text-white block text-base">{analysisResult.scoreBreakdown.experience}%</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-center space-y-1">
+              <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-center space-y-1">
                 <span className="text-[10px] text-slate-400 font-semibold block truncate">Kata Kunci</span>
                 <span className="font-black text-slate-900 dark:text-white block text-base">{analysisResult.scoreBreakdown.keywords}%</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-center space-y-1 col-span-2 sm:col-span-1">
+              <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-center space-y-1 col-span-2 sm:col-span-1">
                 <span className="text-[10px] text-slate-400 font-semibold block truncate">Interaksi</span>
                 <span className="font-black text-slate-900 dark:text-white block text-base">{analysisResult.scoreBreakdown.engagement}%</span>
               </div>
@@ -883,19 +883,19 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
 
             {/* Quick Navigation Links */}
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold text-slate-500">
-              <a href="#audit-findings" className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950/60 hover:text-violet-600 dark:hover:text-violet-300 transition shrink-0 flex items-center gap-1.5">
+              <a href="#audit-findings" className="px-3 py-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950/60 hover:text-violet-600 dark:hover:text-violet-300 transition shrink-0 flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-violet-500" />
                 <span>Audit HR</span>
               </a>
-              <a href="#headline-recommendations" className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950/60 hover:text-violet-600 dark:hover:text-violet-300 transition shrink-0 flex items-center gap-1.5">
+              <a href="#headline-recommendations" className="px-3 py-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950/60 hover:text-violet-600 dark:hover:text-violet-300 transition shrink-0 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                 <span>Headline</span>
               </a>
-              <a href="#about-draft" className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950/60 hover:text-violet-600 dark:hover:text-violet-300 transition shrink-0 flex items-center gap-1.5">
+              <a href="#about-draft" className="px-3 py-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950/60 hover:text-violet-600 dark:hover:text-violet-300 transition shrink-0 flex items-center gap-1.5">
                 <FileText className="w-3.5 h-3.5 text-violet-500" />
                 <span>Draf Bio</span>
               </a>
-              <a href="#keywords-seo" className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950/60 hover:text-violet-600 dark:hover:text-violet-300 transition shrink-0 flex items-center gap-1.5">
+              <a href="#keywords-seo" className="px-3 py-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950/60 hover:text-violet-600 dark:hover:text-violet-300 transition shrink-0 flex items-center gap-1.5">
                 <Target className="w-3.5 h-3.5 text-emerald-500" />
                 <span>SEO Skill</span>
               </a>
@@ -917,7 +917,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                   {analysisResult.auditFindings.map((finding, idx) => (
                     <div
                       key={idx}
-                      className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 flex items-start gap-3"
+                      className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 flex items-start gap-3"
                     >
                       {finding.status === 'good' && (
                         <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
@@ -973,7 +973,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                   {analysisResult.headlines.map((item, idx) => (
                     <div
                       key={idx}
-                      className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 space-y-3 relative group"
+                      className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 space-y-3 relative group"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-bold text-violet-600 dark:text-violet-400 text-xs">
@@ -982,7 +982,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                         <button
                           type="button"
                           onClick={() => handleCopy(item.text, `headline-${idx}`)}
-                          className="p-1.5 rounded-lg bg-violet-50 dark:bg-violet-950/80 hover:bg-violet-100 text-violet-600 dark:text-violet-300 transition flex items-center gap-1 font-bold text-[10px] cursor-pointer"
+                          className="p-1.5 rounded-[10px] bg-violet-50 dark:bg-violet-950/80 hover:bg-violet-100 text-violet-600 dark:text-violet-300 transition flex items-center gap-1 font-bold text-[10px] cursor-pointer"
                         >
                           {copiedIndex === `headline-${idx}` ? (
                             <>
@@ -998,7 +998,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                         </button>
                       </div>
 
-                      <p className="font-medium text-slate-900 dark:text-white leading-relaxed text-xs bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800 font-mono">
+                      <p className="font-medium text-slate-900 dark:text-white leading-relaxed text-xs bg-white dark:bg-slate-900 p-3 rounded-[10px] border border-slate-200 dark:border-slate-800 font-mono">
                         {item.text}
                       </p>
 
@@ -1024,7 +1024,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                   <button
                     type="button"
                     onClick={() => handleCopy(analysisResult.optimizedAbout, 'about-text')}
-                    className="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-bold transition flex items-center gap-1.5 cursor-pointer text-[11px]"
+                    className="px-3 py-1.5 rounded-[10px] bg-violet-600 hover:bg-violet-500 text-white font-bold transition flex items-center gap-1.5 cursor-pointer text-[11px]"
                   >
                     {copiedIndex === 'about-text' ? (
                       <>
@@ -1040,7 +1040,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                   </button>
                 </div>
 
-                <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 font-mono text-slate-800 dark:text-slate-200 text-xs leading-relaxed whitespace-pre-line shadow-xs">
+                <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 font-mono text-slate-800 dark:text-slate-200 text-xs leading-relaxed whitespace-pre-line shadow-xs">
                   {analysisResult.optimizedAbout}
                 </div>
               </div>
@@ -1063,7 +1063,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                     {analysisResult.keySkills.map((skill, idx) => (
                       <span
                         key={idx}
-                        className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-semibold text-[11px] flex items-center gap-1"
+                        className="px-2.5 py-1 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-semibold text-[11px] flex items-center gap-1"
                       >
                         <Check className="w-3 h-3 text-emerald-500" />
                         <span>{skill}</span>
@@ -1081,7 +1081,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                     {analysisResult.missingKeywords.map((skill, idx) => (
                       <span
                         key={idx}
-                        className="px-2.5 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/60 font-semibold text-[11px]"
+                        className="px-2.5 py-1 rounded-[10px] bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/60 font-semibold text-[11px]"
                       >
                         + {skill}
                       </span>

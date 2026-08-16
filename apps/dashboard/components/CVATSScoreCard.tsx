@@ -39,12 +39,12 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
   ];
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-full transition-all space-y-4">
+    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-full transition-all space-y-4">
       <div>
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/50">
+            <div className="w-8 h-8 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/50">
               <FileText className="w-4 h-4" />
             </div>
             <div>
@@ -65,14 +65,14 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
         </div>
 
         {/* Score Summary Badge Box */}
-        <div className="flex items-center justify-between bg-emerald-50/70 dark:bg-emerald-950/30 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/40 my-3">
+        <div className="flex items-center justify-between bg-emerald-50/70 dark:bg-emerald-950/30 p-3 rounded-[10px] border border-emerald-100 dark:border-emerald-900/40 my-3">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span className="text-xs font-bold text-slate-900 dark:text-white">
               Status ATS: Terbaca 92% Akurat
             </span>
           </div>
-          <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded-md">
+          <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded-[10px]">
             Sangat Baik
           </span>
         </div>
@@ -125,7 +125,7 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
       {/* Action Button */}
       <button
         onClick={onOptimizeClick || (() => router.push('/cv'))}
-        className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs shadow-md shadow-violet-600/20 transition cursor-pointer border-0"
+        className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs shadow-md shadow-violet-600/20 transition cursor-pointer border-0"
       >
         <Sliders className="w-3.5 h-3.5" />
         <span>Optimalkan CV Sekarang</span>

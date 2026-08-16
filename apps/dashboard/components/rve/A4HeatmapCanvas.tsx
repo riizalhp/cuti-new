@@ -251,12 +251,12 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
   return (
     <div className="w-full flex flex-col items-center py-2 space-y-3">
       {/* Static Document Canvas Wrapper */}
-      <div className="w-full max-w-4xl overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+      <div className="w-full max-w-4xl overflow-hidden rounded-[10px] border border-slate-200 dark:border-slate-800">
         {/* Outer A4 Paper Container */}
         <div
           ref={containerRef}
           onDragStart={(e) => e.preventDefault()}
-          className="relative w-full aspect-[1/1.414] bg-white text-slate-900 rounded-lg shadow-2xl overflow-hidden font-sans p-4 sm:p-7 md:p-9 flex flex-col justify-between select-none shrink-0"
+          className="relative w-full aspect-[1/1.414] bg-white text-slate-900 rounded-[10px] shadow-2xl overflow-hidden font-sans p-4 sm:p-7 md:p-9 flex flex-col justify-between select-none shrink-0"
           style={{ fontFamily: 'Inter, var(--font-inter), sans-serif', userSelect: 'none', WebkitUserSelect: 'none' }}
         >
 
@@ -548,7 +548,7 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
         {/* OVERLAY MODE: ATS Matrix Layer */}
         {showOverlay && viewMode === 'ats-matrix' && (
           <div className="absolute inset-0 pointer-events-none z-30 p-7 md:p-9 space-y-2 bg-slate-900/15 backdrop-blur-[0.5px]">
-            <div className="p-3 bg-slate-900/90 text-white rounded-lg space-y-2 text-xs">
+            <div className="p-3 bg-slate-900/90 text-white rounded-[10px] space-y-2 text-xs">
               <div className="flex items-center gap-2 border-b border-slate-700 pb-1.5 font-extrabold text-orange-400">
                 <Sparkles className="w-4 h-4" />
                 <span>Analisis Korelasi Visibilitas Heatmap vs Kata Kunci ATS</span>

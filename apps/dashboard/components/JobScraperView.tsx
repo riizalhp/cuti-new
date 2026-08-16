@@ -385,24 +385,24 @@ export const JobScraperView: React.FC = () => {
     <div className="space-y-6 md:space-y-8 w-full pb-12">
       {/* Toast Notification Floating */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-[10px] shadow-2xl border border-slate-700 flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-5 duration-300">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Top Banner / Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-[#0D3BD9] text-white p-6 sm:p-8 shadow-xl">
+      <div className="relative overflow-hidden rounded-[10px] bg-[#0D3BD9] text-white p-6 sm:p-8 shadow-xl">
         <div className="relative z-10 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-[11px] font-extrabold bg-amber-400 text-slate-950 flex items-center gap-1.5 shadow-sm">
+            <span className="px-3 py-1 rounded-[10px] text-[11px] font-extrabold bg-amber-400 text-slate-950 flex items-center gap-1.5 shadow-sm">
               <Globe className="w-3.5 h-3.5" /> Scraper Lowongan Pekerjaan
             </span>
-            <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-white/10 text-white backdrop-blur-xs border border-white/15 flex items-center gap-1.5">
+            <span className="px-3 py-1 rounded-[10px] text-[11px] font-semibold bg-white/10 text-white backdrop-blur-xs border border-white/15 flex items-center gap-1.5">
               <div className={`w-2 h-2 rounded-full ${isScanning ? 'bg-emerald-400 animate-ping' : 'bg-slate-400'}`} />
               {isScanning ? 'Memindai Real-time' : 'Siaga'}
             </span>
-            <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-white/10 text-white backdrop-blur-xs border border-white/15 hidden sm:flex items-center gap-1">
+            <span className="px-3 py-1 rounded-[10px] text-[11px] font-semibold bg-white/10 text-white backdrop-blur-xs border border-white/15 hidden sm:flex items-center gap-1">
               <Layers className="w-3 h-3 text-amber-300" /> 6 Portal Loker Terkonek
             </span>
           </div>
@@ -427,7 +427,7 @@ export const JobScraperView: React.FC = () => {
           <div className="glass-card p-6 md:p-8 space-y-6">
             <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800/80 pb-4">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
+                <div className="w-8 h-8 rounded-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
                   <Search className="w-4 h-4" />
                 </div>
                 <div>
@@ -440,7 +440,7 @@ export const JobScraperView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsFilterDrawerOpen(true)}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 transition"
+                className="px-3 py-1.5 rounded-[10px] border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 transition"
               >
                 <SlidersHorizontal className="w-3.5 h-3.5 text-blue-500" />
                 <span>Filter Lanjutan</span>
@@ -459,7 +459,7 @@ export const JobScraperView: React.FC = () => {
                   onChange={(e) => setKeyword(e.target.value)}
                   placeholder="Contoh: Frontend Developer, Admin Perkantoran, Data Analyst"
                   disabled={isScanning}
-                  className="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60 transition"
+                  className="w-full pl-9 pr-4 py-2.5 text-xs rounded-[10px] border border-slate-300 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60 transition"
                 />
                 <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
               </div>
@@ -473,7 +473,7 @@ export const JobScraperView: React.FC = () => {
                     type="button"
                     disabled={isScanning}
                     onClick={() => setKeyword(preset)}
-                    className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition ${
+                    className={`px-2.5 py-1 rounded-[10px] text-[10px] font-bold transition ${
                       keyword === preset
                         ? 'bg-blue-600 text-white shadow-xs'
                         : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -498,7 +498,7 @@ export const JobScraperView: React.FC = () => {
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="Contoh: Jakarta (Hybrid), Remote"
                     disabled={isScanning}
-                    className="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60 transition"
+                    className="w-full pl-9 pr-4 py-2.5 text-xs rounded-[10px] border border-slate-300 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60 transition"
                   />
                   <MapPin className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
                 </div>
@@ -513,7 +513,7 @@ export const JobScraperView: React.FC = () => {
                     value={postedDate}
                     onChange={(e) => setPostedDate(e.target.value)}
                     disabled={isScanning}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60 appearance-none transition"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-300 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60 appearance-none transition"
                   >
                     <option value="24h">24 Jam Terakhir</option>
                     <option value="3d">3 Hari Terakhir</option>
@@ -545,7 +545,7 @@ export const JobScraperView: React.FC = () => {
                       type="button"
                       disabled={isScanning}
                       onClick={() => handleTogglePortal(portal.id)}
-                      className={`p-3 rounded-xl border text-left transition flex flex-col justify-between cursor-pointer ${
+                      className={`p-3 rounded-[10px] border text-left transition flex flex-col justify-between cursor-pointer ${
                         isSelected
                           ? 'border-blue-600 bg-blue-500/10 text-slate-900 dark:text-white ring-1 ring-blue-500/30'
                           : 'border-slate-200 dark:border-slate-800 bg-white/40 dark:bg-slate-900/40 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
@@ -581,7 +581,7 @@ export const JobScraperView: React.FC = () => {
               <button
                 type="button"
                 onClick={handleToggleScan}
-                className={`px-6 py-3 rounded-xl font-extrabold text-xs transition duration-200 shadow-md flex items-center gap-2 cursor-pointer ${
+                className={`px-6 py-3 rounded-[10px] font-extrabold text-xs transition duration-200 shadow-md flex items-center gap-2 cursor-pointer ${
                   isScanning
                     ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/20'
                     : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20'
@@ -606,14 +606,14 @@ export const JobScraperView: React.FC = () => {
         {/* Right Column: Console Log Terminal & Quick Stats (5-cols) */}
         <div className="xl:col-span-5 space-y-6 flex flex-col justify-between">
           {/* Terminal Console Card */}
-          <div className="glass-card bg-slate-950 text-slate-200 border border-slate-800 p-6 rounded-2xl flex-1 flex flex-col justify-between">
+          <div className="glass-card bg-slate-950 text-slate-200 border border-slate-800 p-6 rounded-[10px] flex-1 flex flex-col justify-between">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <Code className="w-4 h-4 text-emerald-400" />
                 <h3 className="font-extrabold text-xs text-white">Console Log Pemindaian (Real-time)</h3>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                <span className="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded-[10px] flex items-center gap-1">
                   <div className={`w-1.5 h-1.5 rounded-full ${isScanning ? 'bg-emerald-400 animate-ping' : 'bg-slate-400'}`} />
                   LIVE
                 </span>
@@ -629,7 +629,7 @@ export const JobScraperView: React.FC = () => {
             </div>
 
             {/* Terminal Body */}
-            <div className="flex-1 min-h-[260px] max-h-[300px] font-mono text-[10px] leading-relaxed overflow-y-auto my-3 space-y-1.5 p-3 bg-slate-900/80 border border-slate-900 rounded-xl no-scrollbar flex flex-col-reverse">
+            <div className="flex-1 min-h-[260px] max-h-[300px] font-mono text-[10px] leading-relaxed overflow-y-auto my-3 space-y-1.5 p-3 bg-slate-900/80 border border-slate-900 rounded-[10px] no-scrollbar flex flex-col-reverse">
               <div ref={consoleEndRef} />
               {logs.length === 0 ? (
                 <div className="text-slate-500 italic py-12 text-center flex flex-col items-center justify-center gap-2">
@@ -666,8 +666,8 @@ export const JobScraperView: React.FC = () => {
 
           {/* Quick Stats Bento Cards */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="glass-card p-4 rounded-xl border border-slate-200/60 dark:border-slate-800 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-extrabold">
+            <div className="glass-card p-4 rounded-[10px] border border-slate-200/60 dark:border-slate-800 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-extrabold">
                 <Briefcase className="w-5 h-5" />
               </div>
               <div>
@@ -676,8 +676,8 @@ export const JobScraperView: React.FC = () => {
               </div>
             </div>
 
-            <div className="glass-card p-4 rounded-xl border border-slate-200/60 dark:border-slate-800 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-extrabold">
+            <div className="glass-card p-4 rounded-[10px] border border-slate-200/60 dark:border-slate-800 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-extrabold">
                 <Bookmark className="w-5 h-5" />
               </div>
               <div>
@@ -700,17 +700,17 @@ export const JobScraperView: React.FC = () => {
               <Database className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <span>Daftar Lowongan Hasil Pemindaian</span>
             </h3>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
+            <span className="px-2.5 py-0.5 rounded-[10px] text-xs font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
               {filteredJobs.length}
             </span>
           </div>
 
           <div className="flex items-center gap-2.5">
             {/* Filter Tabs */}
-            <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl">
+            <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-[10px]">
               <button
                 onClick={() => setActiveTab('all')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                className={`px-3 py-1.5 rounded-[10px] text-xs font-bold transition ${
                   activeTab === 'all'
                     ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -720,7 +720,7 @@ export const JobScraperView: React.FC = () => {
               </button>
               <button
                 onClick={() => setActiveTab('saved')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 ${
+                className={`px-3 py-1.5 rounded-[10px] text-xs font-bold transition flex items-center gap-1 ${
                   activeTab === 'saved'
                     ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -738,7 +738,7 @@ export const JobScraperView: React.FC = () => {
                 value={searchFilter}
                 onChange={(e) => setSearchFilter(e.target.value)}
                 placeholder="Cari lowongan / perusahaan..."
-                className="pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="pl-8 pr-3 py-1.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
             </div>
@@ -758,12 +758,12 @@ export const JobScraperView: React.FC = () => {
               <div
                 key={job.id}
                 onClick={() => setSelectedJobForDetail(job)}
-                className="glass-card p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 hover:border-blue-500/50 dark:hover:border-blue-500/50 hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col justify-between group relative"
+                className="glass-card p-5 rounded-[10px] border border-slate-200/80 dark:border-slate-800/80 hover:border-blue-500/50 dark:hover:border-blue-500/50 hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col justify-between group relative"
               >
                 <div className="space-y-3">
                   {/* Top Badges (Portal & Match Score) */}
                   <div className="flex items-center justify-between">
-                    <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase ${
+                    <span className={`px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase ${
                       job.portal === 'LinkedIn'
                         ? 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
                         : job.portal === 'Jobstreet'
@@ -776,14 +776,14 @@ export const JobScraperView: React.FC = () => {
                     </span>
 
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800 flex items-center gap-1">
+                      <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800 flex items-center gap-1">
                         <Sparkles className="w-3 h-3" /> Match: {job.matchScore}%
                       </span>
                       <button
                         type="button"
                         onClick={(e) => handleToggleSaveJob(job.id, e)}
                         title={job.isSaved ? 'Hapus dari Tersimpan' : 'Simpan ke Tracker'}
-                        className={`p-1.5 rounded-lg transition ${
+                        className={`p-1.5 rounded-[10px] transition ${
                           job.isSaved
                             ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800'
                             : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -822,7 +822,7 @@ export const JobScraperView: React.FC = () => {
                     {job.skills.slice(0, 3).map((skill) => (
                       <span
                         key={skill}
-                        className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300"
+                        className="px-2 py-0.5 rounded-[10px] text-[10px] font-medium bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300"
                       >
                         {skill}
                       </span>
@@ -869,10 +869,10 @@ export const JobScraperView: React.FC = () => {
             <div className="p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 uppercase">
+                  <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 uppercase">
                     {selectedJobForDetail.portal}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800 flex items-center gap-1">
+                  <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-bold bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800 flex items-center gap-1">
                     <Sparkles className="w-3 h-3" /> Match: {selectedJobForDetail.matchScore}%
                   </span>
                 </div>
@@ -887,7 +887,7 @@ export const JobScraperView: React.FC = () => {
 
               <button
                 onClick={() => setSelectedJobForDetail(null)}
-                className="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                className="p-2 rounded-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -896,7 +896,7 @@ export const JobScraperView: React.FC = () => {
             {/* Drawer Body Scrollable */}
             <div className="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
               {/* Meta Summary Cards */}
-              <div className="grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+              <div className="grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-[10px] border border-slate-100 dark:border-slate-800">
                 <div className="space-y-1">
                   <span className="text-[10px] text-slate-400 font-bold uppercase block">Lokasi Kerja</span>
                   <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
@@ -918,7 +918,7 @@ export const JobScraperView: React.FC = () => {
                 <h4 className="font-extrabold text-slate-900 dark:text-white text-xs uppercase tracking-wider flex items-center gap-1.5">
                   <FileText className="w-4 h-4 text-blue-500" /> Deskripsi Pekerjaan Ekstraksi
                 </h4>
-                <p className="text-slate-600 dark:text-slate-300 leading-relaxed bg-white/50 dark:bg-slate-900/50 p-3.5 rounded-xl border border-slate-200/60 dark:border-slate-800">
+                <p className="text-slate-600 dark:text-slate-300 leading-relaxed bg-white/50 dark:bg-slate-900/50 p-3.5 rounded-[10px] border border-slate-200/60 dark:border-slate-800">
                   {selectedJobForDetail.description}
                 </p>
               </div>
@@ -947,7 +947,7 @@ export const JobScraperView: React.FC = () => {
                   {selectedJobForDetail.skills.map((skill) => (
                     <span
                       key={skill}
-                      className="px-3 py-1 rounded-lg text-xs font-bold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
+                      className="px-3 py-1 rounded-[10px] text-xs font-bold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
                     >
                       {skill}
                     </span>
@@ -961,7 +961,7 @@ export const JobScraperView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleToggleSaveJob(selectedJobForDetail.id)}
-                className={`px-4 py-2.5 rounded-xl font-bold text-xs transition border flex items-center gap-1.5 ${
+                className={`px-4 py-2.5 rounded-[10px] font-bold text-xs transition border flex items-center gap-1.5 ${
                   selectedJobForDetail.isSaved
                     ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
                     : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
@@ -975,7 +975,7 @@ export const JobScraperView: React.FC = () => {
                 href={selectedJobForDetail.portalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-5 py-2.5 rounded-xl font-extrabold text-xs bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/20 transition flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-[10px] font-extrabold text-xs bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/20 transition flex items-center gap-1.5"
               >
                 <span>Buka Lowongan Asli</span>
                 <ExternalLink className="w-4 h-4" />
@@ -1000,7 +1000,7 @@ export const JobScraperView: React.FC = () => {
               </h3>
               <button
                 onClick={() => setIsFilterDrawerOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="p-1.5 rounded-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1011,7 +1011,7 @@ export const JobScraperView: React.FC = () => {
                 <label className="font-bold text-slate-700 dark:text-slate-300 block">Tipe Pekerjaan</label>
                 <div className="grid grid-cols-2 gap-2">
                   {['Full-time', 'Contract', 'Internship', 'Remote'].map((type) => (
-                    <label key={type} className="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 font-medium cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <label key={type} className="flex items-center gap-2 p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-800 font-medium cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800">
                       <input type="checkbox" defaultChecked className="rounded text-blue-600 focus:ring-blue-500" />
                       <span>{type}</span>
                     </label>
@@ -1021,7 +1021,7 @@ export const JobScraperView: React.FC = () => {
 
               <div className="space-y-1.5">
                 <label className="font-bold text-slate-700 dark:text-slate-300 block">Rentang Gaji Minimum (per bulan)</label>
-                <select className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+                <select className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
                   <option value="0">Semua Rentang Gaji</option>
                   <option value="3000000">&gt; Rp 3.000.000</option>
                   <option value="5000000">&gt; Rp 5.000.000</option>
@@ -1035,7 +1035,7 @@ export const JobScraperView: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Contoh: Unpaid, MLM, Sales Canvas"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"
+                  className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"
                 />
               </div>
             </div>
@@ -1043,7 +1043,7 @@ export const JobScraperView: React.FC = () => {
             <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-end gap-2">
               <button
                 onClick={() => setIsFilterDrawerOpen(false)}
-                className="px-4 py-2.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white shadow-md transition"
+                className="px-4 py-2.5 rounded-[10px] font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white shadow-md transition"
               >
                 Terapkan Parameter
               </button>

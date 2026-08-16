@@ -76,14 +76,14 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
   const progressPercent = Math.round((completedCount / steps.length) * 100);
 
   return (
-    <div className="bg-[#0D3BD9] rounded-xl p-5 md:p-6 text-white shadow-lg border border-blue-500/30">
+    <div className="bg-[#0D3BD9] rounded-[10px] p-5 md:p-6 text-white shadow-lg border border-blue-500/30">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
         {/* Left Info & Steps */}
         <div className="lg:col-span-8 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-violet-500/30 text-violet-200 border border-violet-400/30 flex items-center gap-1">
+                <span className="px-2.5 py-0.5 rounded-[10px] text-[11px] font-bold bg-violet-500/30 text-violet-200 border border-violet-400/30 flex items-center gap-1">
                   <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                   Panduan Pengguna Baru
                 </span>
@@ -113,7 +113,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
                 <button
                   key={step.id}
                   onClick={() => toggleStep(step.id)}
-                  className={`p-3 rounded-lg border text-left transition flex items-start gap-3 relative overflow-hidden ${
+                  className={`p-3 rounded-[10px] border text-left transition flex items-start gap-3 relative overflow-hidden ${
                     step.status === 'completed'
                       ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-100 hover:bg-emerald-900/50'
                       : step.status === 'in_progress'
@@ -122,7 +122,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
                   }`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${step.color}`}
+                    className={`w-8 h-8 rounded-[10px] flex items-center justify-center flex-shrink-0 ${step.color}`}
                   >
                     <Icon className="w-4 h-4" />
                   </div>
@@ -146,13 +146,13 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
         </div>
 
         {/* Right Motivation Banner for Premium Pass Trial */}
-        <div className="lg:col-span-4 bg-gradient-to-b from-violet-800/60 to-slate-900/80 rounded-lg p-4 border border-amber-400/30 flex flex-col justify-between h-full space-y-3 relative overflow-hidden shadow-md">
+        <div className="lg:col-span-4 bg-gradient-to-b from-violet-800/60 to-slate-900/80 rounded-[10px] p-4 border border-amber-400/30 flex flex-col justify-between h-full space-y-3 relative overflow-hidden shadow-md">
           <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
 
           <div>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center border border-amber-400/30">
+                <div className="w-8 h-8 rounded-[10px] bg-amber-400/20 text-amber-300 flex items-center justify-center border border-amber-400/30">
                   <Crown className="w-4 h-4" />
                 </div>
                 <div>
@@ -164,7 +164,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
                   </p>
                 </div>
               </div>
-              <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              <span className="px-2 py-0.5 rounded-[10px] text-[9px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 Akses Ditolak HRD: 0%
               </span>
             </div>
@@ -183,7 +183,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
                 onActionClick('premium');
               }
             }}
-            className="w-full py-2.5 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs transition shadow-md shadow-amber-400/20 flex items-center justify-center gap-2 group cursor-pointer"
+            className="w-full py-2.5 rounded-[10px] bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs transition shadow-md shadow-amber-400/20 flex items-center justify-center gap-2 group cursor-pointer"
           >
             <Zap className="w-4 h-4 fill-slate-950" />
             <span>Coba Premium Pass Sekarang</span>

@@ -7,15 +7,16 @@ export class TemplateService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    const templates = await this.prisma.template.findMany({
-      orderBy: { createdAt: 'desc' },
+    const templates = await this.prisma.cv_templates.findMany({
+      where: { is_active: true },
+      orderBy: { sort_order: 'asc' },
     });
 
     return templates.map(mapTemplateToResponse);
   }
 
   async findOne(id: string) {
-    const template = await this.prisma.template.findUnique({
+    const template = await this.prisma.cv_templates.findUnique({
       where: { id },
     });
 

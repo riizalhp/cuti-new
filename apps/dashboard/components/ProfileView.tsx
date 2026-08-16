@@ -85,6 +85,24 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   });
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const sessionStr = localStorage.getItem('cuti_user_session');
+        if (sessionStr) {
+          const parsed = JSON.parse(sessionStr);
+          if (parsed.name || parsed.email) {
+            setProfileData((prev) => ({
+              ...prev,
+              fullName: parsed.name || prev.fullName,
+              email: parsed.email || prev.email,
+            }));
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to parse session in ProfileView', e);
+      }
+    }
+
     userApi.getProfile().then((remoteProfile) => {
       if (remoteProfile) {
         setProfileData((prev) => ({ ...prev, ...remoteProfile }));
@@ -134,7 +152,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     <div className="space-y-6 max-w-6xl mx-auto">
       {/* Toast Notification */}
       {isSavedToast && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-emerald-600 text-white shadow-xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-[10px] bg-emerald-600 text-white shadow-xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300">
           <CheckCircle2 className="w-5 h-5 text-white" />
           <div>
             <h4 className="font-bold text-xs">Perubahan Berhasil Disimpan</h4>
@@ -144,7 +162,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       )}
 
       {/* Main Profile Header Card */}
-      <div className="bg-[#0D3BD9] rounded-2xl p-6 md:p-8 text-white border border-blue-500/50 shadow-xl relative overflow-hidden">
+      <div className="bg-[#0D3BD9] rounded-[10px] p-6 md:p-8 text-white border border-blue-500/50 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -157,12 +175,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 width={96}
                 height={96}
                 referrerPolicy="no-referrer"
-                className="w-24 h-24 rounded-xl object-cover border-4 border-amber-400 shadow-md transition group-hover:opacity-90"
+                className="w-24 h-24 rounded-[10px] object-cover border-4 border-amber-400 shadow-md transition group-hover:opacity-90"
               />
               <button
                 type="button"
                 onClick={() => alert('Fitur unggah foto profil baru dapat diakses.')}
-                className="absolute -bottom-2 -right-2 p-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white shadow-md border-2 border-slate-900 transition"
+                className="absolute -bottom-2 -right-2 p-2 rounded-[10px] bg-violet-600 hover:bg-violet-500 text-white shadow-md border-2 border-slate-900 transition"
                 title="Ubah Foto Profil"
               >
                 <Camera className="w-4 h-4" />
@@ -172,7 +190,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 <h2 className="text-2xl font-black text-white">{profileData.fullName}</h2>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-400 text-slate-950 shadow-xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[10px] text-xs font-bold bg-amber-400 text-slate-950 shadow-xs">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   Member Lifetime
                 </span>
@@ -199,7 +217,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
           {/* Quick Stat / Action */}
           <div className="w-full md:w-auto flex flex-col sm:flex-row items-center gap-3 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-white/10">
-            <div className="px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 w-full sm:w-auto text-center sm:text-left">
+            <div className="px-4 py-3 rounded-[10px] bg-white/10 backdrop-blur-md border border-white/15 w-full sm:w-auto text-center sm:text-left">
               <span className="text-[10px] uppercase font-bold text-slate-300 block">Kesiapan Kerja</span>
               <span className="text-lg font-black text-amber-300">85% (Job Ready)</span>
             </div>
@@ -207,7 +225,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             {onOpenUpgradeModal && (
               <button
                 onClick={onOpenUpgradeModal}
-                className="w-full sm:w-auto px-4 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-extrabold text-xs transition shadow-md flex items-center justify-center gap-1.5"
+                className="w-full sm:w-auto px-4 py-3 rounded-[10px] bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-extrabold text-xs transition shadow-md flex items-center justify-center gap-1.5"
               >
                 <Sparkles className="w-4 h-4" />
                 <span>Lihat Fitur Pro</span>
@@ -220,7 +238,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         <div className="flex flex-wrap items-center gap-2 mt-8 pt-4 border-t border-white/10 text-xs font-semibold">
           <button
             onClick={() => setActiveSubTab('profil')}
-            className={`px-4 py-2.5 rounded-lg transition flex items-center gap-2 ${
+            className={`px-4 py-2.5 rounded-[10px] transition flex items-center gap-2 ${
               activeSubTab === 'profil'
                 ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
@@ -232,7 +250,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
           <button
             onClick={() => setActiveSubTab('karir')}
-            className={`px-4 py-2.5 rounded-lg transition flex items-center gap-2 ${
+            className={`px-4 py-2.5 rounded-[10px] transition flex items-center gap-2 ${
               activeSubTab === 'karir'
                 ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
@@ -244,7 +262,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
           <button
             onClick={() => setActiveSubTab('keamanan')}
-            className={`px-4 py-2.5 rounded-lg transition flex items-center gap-2 ${
+            className={`px-4 py-2.5 rounded-[10px] transition flex items-center gap-2 ${
               activeSubTab === 'keamanan'
                 ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
@@ -256,7 +274,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
           <button
             onClick={() => setActiveSubTab('langganan')}
-            className={`px-4 py-2.5 rounded-lg transition flex items-center gap-2 ${
+            className={`px-4 py-2.5 rounded-[10px] transition flex items-center gap-2 ${
               activeSubTab === 'langganan'
                 ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
@@ -268,7 +286,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
           <button
             onClick={() => setActiveSubTab('pengaturan')}
-            className={`px-4 py-2.5 rounded-lg transition flex items-center gap-2 ${
+            className={`px-4 py-2.5 rounded-[10px] transition flex items-center gap-2 ${
               activeSubTab === 'pengaturan'
                 ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
@@ -282,7 +300,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
       {/* SUBTAB 1: INFORMASI PRIBADI */}
       {activeSubTab === 'profil' && (
-        <form onSubmit={handleSaveProfile} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 md:p-8 space-y-6 shadow-xs">
+        <form onSubmit={handleSaveProfile} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 md:p-8 space-y-6 shadow-xs">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
               <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
@@ -303,7 +321,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 required
                 value={profileData.fullName}
                 onChange={(e) => setProfileData({ ...profileData, fullName: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
               />
             </div>
 
@@ -314,7 +332,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 required
                 value={profileData.headline}
                 onChange={(e) => setProfileData({ ...profileData, headline: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
               />
             </div>
 
@@ -325,7 +343,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 required
                 value={profileData.email}
                 onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
               />
             </div>
 
@@ -335,7 +353,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 type="text"
                 value={profileData.phone}
                 onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
               />
             </div>
 
@@ -345,7 +363,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 type="text"
                 value={profileData.location}
                 onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
               />
             </div>
 
@@ -355,7 +373,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 rows={4}
                 value={profileData.bio}
                 onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none resize-none"
+                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none resize-none"
               />
             </div>
           </div>
@@ -370,7 +388,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   placeholder="LinkedIn URL"
                   value={profileData.linkedin}
                   onChange={(e) => setProfileData({ ...profileData, linkedin: e.target.value })}
-                  className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
+                  className="w-full pl-9 pr-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
                 />
               </div>
 
@@ -381,7 +399,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   placeholder="GitHub URL"
                   value={profileData.github}
                   onChange={(e) => setProfileData({ ...profileData, github: e.target.value })}
-                  className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
+                  className="w-full pl-9 pr-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
                 />
               </div>
 
@@ -392,7 +410,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   placeholder="Portofolio Website URL"
                   value={profileData.website}
                   onChange={(e) => setProfileData({ ...profileData, website: e.target.value })}
-                  className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
+                  className="w-full pl-9 pr-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
                 />
               </div>
             </div>
@@ -401,7 +419,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           <div className="flex justify-end pt-2">
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition shadow-md shadow-violet-600/20 flex items-center gap-2"
+              className="px-6 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition shadow-md shadow-violet-600/20 flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
               <span>Simpan Perubahan Profil</span>
@@ -412,7 +430,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
       {/* SUBTAB 2: PREFERENSI KARIR */}
       {activeSubTab === 'karir' && (
-        <form onSubmit={handleSaveProfile} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 md:p-8 space-y-6 shadow-xs">
+        <form onSubmit={handleSaveProfile} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 md:p-8 space-y-6 shadow-xs">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
               <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
@@ -434,7 +452,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   type="text"
                   value={profileData.expectedSalary}
                   onChange={(e) => setProfileData({ ...profileData, expectedSalary: e.target.value })}
-                  className="w-full pl-9 pr-3 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
+                  className="w-full pl-9 pr-3 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
                 />
               </div>
             </div>
@@ -445,7 +463,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 type="text"
                 value={profileData.experienceYears}
                 onChange={(e) => setProfileData({ ...profileData, experienceYears: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
+                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
               />
             </div>
 
@@ -455,7 +473,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 <select
                   value={profileData.workPreference}
                   onChange={(e) => setProfileData({ ...profileData, workPreference: e.target.value })}
-                  className="w-full px-3.5 py-2.5 pr-10 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none appearance-none cursor-pointer"
+                  className="w-full px-3.5 py-2.5 pr-10 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none appearance-none cursor-pointer"
                 >
                   <option value="Hybrid / Remote">Hybrid / Remote (Fleksibel)</option>
                   <option value="Full Remote">Full Remote</option>
@@ -469,7 +487,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           <div className="flex justify-end pt-2">
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition shadow-md shadow-violet-600/20 flex items-center gap-2"
+              className="px-6 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition shadow-md shadow-violet-600/20 flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
               <span>Simpan Preferensi Karir</span>
@@ -481,7 +499,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       {/* SUBTAB 3: KEAMANAN & AKUN */}
       {activeSubTab === 'keamanan' && (
         <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 md:p-8 space-y-6 shadow-xs">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 md:p-8 space-y-6 shadow-xs">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
                 <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
@@ -509,7 +527,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   required
                   value={passwordForm.currentPassword}
                   onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
                 />
               </div>
 
@@ -520,7 +538,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   required
                   value={passwordForm.newPassword}
                   onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
                 />
               </div>
 
@@ -531,13 +549,13 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   required
                   value={passwordForm.confirmPassword}
                   onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
                 />
               </div>
 
               <button
                 type="submit"
-                className="px-6 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition shadow-md shadow-violet-600/20 flex items-center gap-2"
+                className="px-6 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition shadow-md shadow-violet-600/20 flex items-center gap-2"
               >
                 <Lock className="w-4 h-4" />
                 <span>Perbarui Kata Sandi</span>
@@ -545,24 +563,24 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </form>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 md:p-8 space-y-4 shadow-xs">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 md:p-8 space-y-4 shadow-xs">
             <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
               <Smartphone className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               <span>Verifikasi 2-Langkah & Perangkat Aktif</span>
             </h3>
-            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
+            <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
               <div>
                 <h4 className="font-bold text-xs text-slate-900 dark:text-white">Autentikasi Dua Faktor</h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">Lindungi akun dengan verifikasi kode OTP saat login dari perangkat baru.</p>
               </div>
-              <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              <span className="px-3 py-1 rounded-[10px] text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                 Aktif
               </span>
             </div>
           </div>
 
           {/* Logout Section Card */}
-          <div className="bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-xl p-6 md:p-8 space-y-3 shadow-xs">
+          <div className="bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-[10px] p-6 md:p-8 space-y-3 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className="font-extrabold text-base text-rose-700 dark:text-rose-400 flex items-center gap-2">
@@ -578,7 +596,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 <button
                   type="button"
                   onClick={onLogout}
-                  className="px-5 py-2.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition shadow-md flex items-center justify-center gap-2 shrink-0"
+                  className="px-5 py-2.5 rounded-[10px] bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition shadow-md flex items-center justify-center gap-2 shrink-0"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Keluar / Logout</span>
@@ -591,7 +609,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
       {/* SUBTAB 4: KEANGGOTAAN & LANGGANAN */}
       {activeSubTab === 'langganan' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 md:p-8 space-y-6 shadow-xs">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 md:p-8 space-y-6 shadow-xs">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
               <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
@@ -604,10 +622,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
           </div>
 
-          <div className="p-6 rounded-xl bg-gradient-to-r from-amber-500/10 via-violet-500/10 to-amber-500/10 border-2 border-amber-400/50 space-y-4">
+          <div className="p-6 rounded-[10px] bg-gradient-to-r from-amber-500/10 via-violet-500/10 to-amber-500/10 border-2 border-amber-400/50 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-950">
+                <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-950">
                   AKSES AKTIF LIFETIME
                 </span>
                 <h4 className="text-xl font-black text-slate-900 dark:text-white mt-1">
@@ -625,22 +643,22 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 text-xs">
-              <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+              <div className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 <span className="font-bold block text-slate-900 dark:text-white">AI CV ATS Checker</span>
                 <span className="text-[10px] text-slate-400">Unlimited Generation</span>
               </div>
-              <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+              <div className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 <span className="font-bold block text-slate-900 dark:text-white">Simulasi AI Interview</span>
                 <span className="text-[10px] text-slate-400">Unlimited Sesi Latihan</span>
               </div>
-              <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+              <div className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 <span className="font-bold block text-slate-900 dark:text-white">Tracker Lamaran Pro</span>
                 <span className="text-[10px] text-slate-400">Unlimited Multi-Job Logs</span>
               </div>
-              <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+              <div className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 <span className="font-bold block text-slate-900 dark:text-white">Program Misi & Cuan</span>
                 <span className="text-[10px] text-slate-400">Bonus Koin 2x lipat</span>
@@ -654,7 +672,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       {activeSubTab === 'pengaturan' && (
         <div className="space-y-6">
           {/* Theme Preference Control */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 md:p-8 space-y-6 shadow-xs">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 md:p-8 space-y-6 shadow-xs">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
                 <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
@@ -671,14 +689,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <button
                 type="button"
                 onClick={() => setSpecificThemeMode && setSpecificThemeMode('light')}
-                className={`p-4 rounded-xl border text-left transition flex flex-col justify-between space-y-3 ${
+                className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 ${
                   themeMode === 'light'
                     ? 'border-violet-600 bg-violet-50/50 dark:bg-violet-950/40 ring-2 ring-violet-500/20'
                     : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-violet-300'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-amber-100 text-amber-700">
+                  <div className="p-2 rounded-[10px] bg-amber-100 text-amber-700">
                     <Sun className="w-5 h-5" />
                   </div>
                   {themeMode === 'light' && <CheckCircle2 className="w-5 h-5 text-violet-600" />}
@@ -692,14 +710,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <button
                 type="button"
                 onClick={() => setSpecificThemeMode && setSpecificThemeMode('dark')}
-                className={`p-4 rounded-xl border text-left transition flex flex-col justify-between space-y-3 ${
+                className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 ${
                   themeMode === 'dark'
                     ? 'border-violet-600 bg-violet-50/50 dark:bg-violet-950/40 ring-2 ring-violet-500/20'
                     : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-violet-300'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-violet-950 text-violet-400">
+                  <div className="p-2 rounded-[10px] bg-violet-950 text-violet-400">
                     <Moon className="w-5 h-5" />
                   </div>
                   {themeMode === 'dark' && <CheckCircle2 className="w-5 h-5 text-violet-600" />}
@@ -713,14 +731,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <button
                 type="button"
                 onClick={() => setSpecificThemeMode && setSpecificThemeMode('system')}
-                className={`p-4 rounded-xl border text-left transition flex flex-col justify-between space-y-3 ${
+                className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 ${
                   themeMode === 'system'
                     ? 'border-violet-600 bg-violet-50/50 dark:bg-violet-950/40 ring-2 ring-violet-500/20'
                     : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-violet-300'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
+                  <div className="p-2 rounded-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
                     <Laptop className="w-5 h-5" />
                   </div>
                   {themeMode === 'system' && <CheckCircle2 className="w-5 h-5 text-violet-600" />}
@@ -734,7 +752,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
 
           {/* Notifications Preference Control */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 md:p-8 space-y-6 shadow-xs">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 md:p-8 space-y-6 shadow-xs">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
                 <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
@@ -748,7 +766,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
 
             <div className="space-y-4">
-              <label className="flex items-center justify-between p-3.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 cursor-pointer">
+              <label className="flex items-center justify-between p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 cursor-pointer">
                 <div>
                   <span className="font-bold text-xs text-slate-900 dark:text-white block">Email Rekomendasi Lowongan Kerja</span>
                   <span className="text-[11px] text-slate-500 dark:text-slate-400">Dapatkan email otomatis saat ada lowongan yang cocok dengan CV kamu.</span>
@@ -761,7 +779,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 />
               </label>
 
-              <label className="flex items-center justify-between p-3.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 cursor-pointer">
+              <label className="flex items-center justify-between p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 cursor-pointer">
                 <div>
                   <span className="font-bold text-xs text-slate-900 dark:text-white block">Email Pengingat Jadwal Interview</span>
                   <span className="text-[11px] text-slate-500 dark:text-slate-400">Notifikasi 1 hari sebelum jadwal interview di Tracker.</span>
@@ -774,7 +792,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 />
               </label>
 
-              <label className="flex items-center justify-between p-3.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 cursor-pointer">
+              <label className="flex items-center justify-between p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 cursor-pointer">
                 <div>
                   <span className="font-bold text-xs text-slate-900 dark:text-white block">Pengingat WhatsApp Harian</span>
                   <span className="text-[11px] text-slate-500 dark:text-slate-400">Terima pengingat misi harian dan klaim koin via WhatsApp.</span>
@@ -790,7 +808,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
 
           {/* Regional & Language Settings */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 md:p-8 space-y-6 shadow-xs">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 md:p-8 space-y-6 shadow-xs">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
                 <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
@@ -814,7 +832,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                       setIsSavedToast(true);
                       setTimeout(() => setIsSavedToast(false), 3000);
                     }}
-                    className="w-full p-2.5 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500 appearance-none cursor-pointer"
+                    className="w-full p-2.5 pr-8 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500 appearance-none cursor-pointer"
                   >
                     <option value="id">Bahasa Indonesia (ID)</option>
                     <option value="en">English (US)</option>
@@ -829,7 +847,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   <select
                     value={timezone}
                     onChange={(e) => setTimezone(e.target.value)}
-                    className="w-full p-2.5 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500 appearance-none cursor-pointer"
+                    className="w-full p-2.5 pr-8 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500 appearance-none cursor-pointer"
                   >
                     <option value="Asia/Jakarta (WIB - GMT+7)">Asia/Jakarta (WIB - GMT+7)</option>
                     <option value="Asia/Makassar (WITA - GMT+8)">Asia/Makassar (WITA - GMT+8)</option>
@@ -845,7 +863,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   <select
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
-                    className="w-full p-2.5 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500 appearance-none cursor-pointer"
+                    className="w-full p-2.5 pr-8 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500 appearance-none cursor-pointer"
                   >
                     <option value="IDR (Rp)">IDR - Rupiah Indonesia (Rp)</option>
                     <option value="USD ($)">USD - US Dollar ($)</option>
@@ -858,7 +876,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
 
           {/* Privacy & Data Export */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 md:p-8 space-y-4 shadow-xs">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 md:p-8 space-y-4 shadow-xs">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
                 <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
@@ -871,7 +889,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
               <div className="space-y-1 text-center sm:text-left">
                 <h4 className="font-bold text-xs text-slate-900 dark:text-white">Arsip Portofolio Karier</h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">Termasuk 3 versi CV ATS, 2 Surat Lamaran, dan 14 log lamaran kerja.</p>
@@ -886,7 +904,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     alert('File backup data akun berhasil diunduh (karierkita-data-backup.json)');
                   }, 1200);
                 }}
-                className="px-4 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs transition shadow-sm flex items-center gap-2 shrink-0"
+                className="px-4 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs transition shadow-sm flex items-center gap-2 shrink-0"
               >
                 <Download className={`w-4 h-4 ${isExportingData ? 'animate-bounce' : ''}`} />
                 <span>{isExportingData ? 'Menyiapkan File...' : 'Unduh Data Saya (.JSON)'}</span>
@@ -895,7 +913,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
 
           {/* Danger Zone: Account Deactivation & Deletion */}
-          <div className="bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-xl p-6 md:p-8 space-y-4 shadow-xs">
+          <div className="bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-[10px] p-6 md:p-8 space-y-4 shadow-xs">
             <div className="flex items-center gap-2 border-b border-rose-200/80 dark:border-rose-900/40 pb-3">
               <ShieldAlert className="w-5 h-5 text-rose-600 dark:text-rose-400" />
               <div>
@@ -918,7 +936,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <button
                 type="button"
                 onClick={() => setShowDeleteAccountModal(true)}
-                className="px-4 py-2.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition shadow-sm flex items-center gap-2 shrink-0"
+                className="px-4 py-2.5 rounded-[10px] bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition shadow-sm flex items-center gap-2 shrink-0"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Hapus Akun Permanen</span>
@@ -931,8 +949,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       {/* MODAL KONFIRMASI HAPUS AKUN */}
       {showDeleteAccountModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-rose-800 rounded-2xl p-6 max-w-md w-full space-y-5 shadow-2xl text-slate-100 animate-in zoom-in-95 duration-200">
-            <div className="w-12 h-12 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-400 flex items-center justify-center">
+          <div className="bg-slate-900 border border-rose-800 rounded-[10px] p-6 max-w-md w-full space-y-5 shadow-2xl text-slate-100 animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-[10px] bg-rose-500/20 border border-rose-500/30 text-rose-400 flex items-center justify-center">
               <ShieldAlert className="w-6 h-6" />
             </div>
 
@@ -952,7 +970,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 placeholder="Ketik HAPUS"
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-white font-mono uppercase focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full px-3.5 py-2 text-xs rounded-[10px] border border-slate-700 bg-slate-800 text-white font-mono uppercase focus:outline-none focus:ring-2 focus:ring-rose-500"
               />
             </div>
 
@@ -963,7 +981,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   setShowDeleteAccountModal(false);
                   setDeleteConfirmText('');
                 }}
-                className="flex-1 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition border border-slate-700"
+                className="flex-1 py-2.5 rounded-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition border border-slate-700"
               >
                 Batal
               </button>
@@ -975,7 +993,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   setShowDeleteAccountModal(false);
                   if (onLogout) onLogout();
                 }}
-                className={`flex-1 py-2.5 rounded-lg font-extrabold text-xs transition flex items-center justify-center gap-2 ${
+                className={`flex-1 py-2.5 rounded-[10px] font-extrabold text-xs transition flex items-center justify-center gap-2 ${
                   deleteConfirmText === 'HAPUS'
                     ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/30 cursor-pointer'
                     : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'

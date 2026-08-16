@@ -24,12 +24,12 @@ export const CareerReadinessCard: React.FC<CareerReadinessCardProps> = ({
   const score = 78;
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-full space-y-4 transition-all">
+    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-full space-y-4 transition-all">
       <div>
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 flex items-center justify-center border border-violet-100 dark:border-violet-900/50">
+            <div className="w-8 h-8 rounded-[10px] bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 flex items-center justify-center border border-violet-100 dark:border-violet-900/50">
               <TrendingUp className="w-4 h-4" />
             </div>
             <div>
@@ -50,14 +50,14 @@ export const CareerReadinessCard: React.FC<CareerReadinessCardProps> = ({
         </div>
 
         {/* Score Summary Badge Box matching CV ATS Score */}
-        <div className="flex items-center justify-between bg-violet-50/70 dark:bg-violet-950/30 p-3 rounded-xl border border-violet-100 dark:border-violet-900/40 my-3">
+        <div className="flex items-center justify-between bg-violet-50/70 dark:bg-violet-950/30 p-3 rounded-[10px] border border-violet-100 dark:border-violet-900/40 my-3">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-violet-600 dark:text-violet-400 shrink-0" />
             <span className="text-xs font-bold text-slate-900 dark:text-white">
               Status Berkas: 3/4 Komponen Lengkap
             </span>
           </div>
-          <span className="text-[10px] font-bold text-violet-700 dark:text-violet-300 bg-violet-100 dark:bg-violet-950 px-2 py-0.5 rounded-md">
+          <span className="text-[10px] font-bold text-violet-700 dark:text-violet-300 bg-violet-100 dark:bg-violet-950 px-2 py-0.5 rounded-[10px]">
             Siap Melamar
           </span>
         </div>
@@ -90,7 +90,7 @@ export const CareerReadinessCard: React.FC<CareerReadinessCardProps> = ({
             {readinessChecklist.map((item, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 text-xs"
+                className="flex items-center justify-between p-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 text-xs"
               >
                 <div className="flex items-center gap-2">
                   {item.status ? (
@@ -108,7 +108,7 @@ export const CareerReadinessCard: React.FC<CareerReadinessCardProps> = ({
                   </div>
                 </div>
                 <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-[10px] ${
                     item.status
                       ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                       : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
@@ -125,7 +125,7 @@ export const CareerReadinessCard: React.FC<CareerReadinessCardProps> = ({
       {/* Primary CTA (orange-500 per global guidelines) */}
       <button
         onClick={onBoostClick || (() => router.push('/readiness'))}
-        className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition cursor-pointer border-0"
+        className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition cursor-pointer border-0"
       >
         <Sparkles className="w-3.5 h-3.5 text-white" />
         <span>Tingkatkan Kesiapan Karier</span>

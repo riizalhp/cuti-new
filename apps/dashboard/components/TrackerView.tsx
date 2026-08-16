@@ -24,6 +24,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { CustomSelect } from '@/components/ui/CustomSelect';
+import { DotLottiePlayer } from '@/components/DotLottiePlayer';
 
 export interface ApplicationItem {
   id: string;
@@ -486,7 +487,7 @@ export const TrackerView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-[#0D3BD9] rounded-xl p-6 text-white border border-blue-500/50 shadow-md">
+      <div className="bg-[#0D3BD9] rounded-[10px] p-6 text-white border border-blue-500/50 shadow-md">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-blue-200 font-semibold text-xs mb-1">
@@ -503,7 +504,7 @@ export const TrackerView: React.FC = () => {
 
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#0D3BD9] hover:bg-[#0B33BD] text-white font-bold text-xs shadow-md transition-all shrink-0 border border-white/20"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-[10px] bg-[#0D3BD9] hover:bg-[#0B33BD] text-white font-bold text-xs shadow-md transition-all shrink-0 border border-white/20"
           >
             <Plus className="w-4 h-4" />
             <span>Tambah Lamaran Baru</span>
@@ -512,19 +513,19 @@ export const TrackerView: React.FC = () => {
 
         {/* Mini Pipeline Stats Bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-slate-800/80">
-          <div className="p-3 rounded-lg bg-slate-800/60 border border-slate-700/60">
+          <div className="p-3 rounded-[10px] bg-slate-800/60 border border-slate-700/60">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Lamaran</span>
             <span className="text-xl font-black text-white">{counts.total}</span>
           </div>
-          <div className="p-3 rounded-lg bg-sky-950/40 border border-sky-800/40">
+          <div className="p-3 rounded-[10px] bg-sky-950/40 border border-sky-800/40">
             <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider block">Proses Screening</span>
             <span className="text-xl font-black text-sky-300">{counts.terkirim}</span>
           </div>
-          <div className="p-3 rounded-lg bg-amber-950/40 border border-amber-800/40">
+          <div className="p-3 rounded-[10px] bg-amber-950/40 border border-amber-800/40">
             <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">Tahap Interview</span>
             <span className="text-xl font-black text-amber-300">{counts.interview}</span>
           </div>
-          <div className="p-3 rounded-lg bg-emerald-950/40 border border-emerald-800/40">
+          <div className="p-3 rounded-[10px] bg-emerald-950/40 border border-emerald-800/40">
             <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">Job Offering</span>
             <span className="text-xl font-black text-emerald-300">{counts.offering}</span>
           </div>
@@ -532,13 +533,13 @@ export const TrackerView: React.FC = () => {
       </div>
 
       {/* Control Bar: View Switcher (Kanban vs Table), Search, and Status Filter */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xs">
         <div className="flex flex-wrap items-center gap-3">
           {/* Toggle View Mode Buttons */}
-          <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shrink-0">
+          <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-[10px] border border-slate-200 dark:border-slate-700 shrink-0">
             <button
               onClick={() => setViewMode('kanban')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-bold transition ${
                 viewMode === 'kanban'
                   ? 'bg-violet-600 text-white shadow-2xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -549,7 +550,7 @@ export const TrackerView: React.FC = () => {
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-bold transition ${
                 viewMode === 'table'
                   ? 'bg-violet-600 text-white shadow-2xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -568,7 +569,7 @@ export const TrackerView: React.FC = () => {
               placeholder="Cari perusahaan atau posisi..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>
         </div>
@@ -579,7 +580,7 @@ export const TrackerView: React.FC = () => {
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`px-3 py-1 rounded-[10px] text-xs font-semibold whitespace-nowrap transition-all ${
                 filterStatus === status
                   ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-2xs'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -603,7 +604,7 @@ export const TrackerView: React.FC = () => {
                 <div
                   key={col.status}
                   data-column-status={col.status}
-                  className={`snap-center shrink-0 w-[85vw] sm:w-[320px] lg:w-auto rounded-xl border transition-all duration-200 p-3 space-y-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xs ${
+                  className={`snap-center shrink-0 w-[85vw] sm:w-[320px] lg:w-auto rounded-[10px] border transition-all duration-200 p-3 space-y-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xs ${
                     isOver
                       ? 'border-violet-500 ring-2 ring-violet-500/40 bg-violet-50/50 dark:bg-violet-950/30 scale-[1.01]'
                       : `${col.colorClass}`
@@ -612,11 +613,19 @@ export const TrackerView: React.FC = () => {
                   {/* Column Header */}
                   <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-800">
                     <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold border ${col.badgeBg}`}>
-                        {col.label}
+                      <span className={`px-2.5 py-0.5 rounded-[10px] text-[11px] font-bold border flex items-center gap-1.5 ${col.badgeBg}`}>
+                        {col.status === 'Offering' && columnApps.length > 0 && (
+                          <DotLottiePlayer
+                            src="/animations/offering-celebration.json"
+                            autoplay={true}
+                            loop={true}
+                            className="w-4 h-4"
+                          />
+                        )}
+                        <span>{col.label}</span>
                       </span>
                     </div>
-                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700">
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-[10px] border border-slate-200 dark:border-slate-700">
                       {columnApps.length}
                     </span>
                   </div>
@@ -624,10 +633,22 @@ export const TrackerView: React.FC = () => {
                   {/* Cards List in Column */}
                   <div className="space-y-3 min-h-[220px] transition-all">
                     {columnApps.length === 0 ? (
-                      <div className={`p-6 text-center text-slate-400 text-[11px] border border-dashed rounded-lg transition ${
+                      <div className={`p-6 text-center text-slate-400 text-[11px] border border-dashed rounded-[10px] transition flex flex-col items-center justify-center gap-1.5 ${
                         isOver ? 'border-violet-400 bg-violet-500/10 text-violet-600 dark:text-violet-300 font-bold' : 'border-slate-200 dark:border-slate-800'
                       }`}>
-                        {isOver ? 'Lepas di sini' : 'Kosong (Tarik kartu ke sini)'}
+                        {col.status === 'Offering' ? (
+                          <>
+                            <DotLottiePlayer
+                              src="/animations/offering-celebration.json"
+                              autoplay={true}
+                              loop={false}
+                              className="w-10 h-10 opacity-70"
+                            />
+                            <span>{isOver ? 'Lepas tawaran di sini!' : 'Belum ada tawaran'}</span>
+                          </>
+                        ) : (
+                          <span>{isOver ? 'Lepas di sini' : 'Kosong (Tarik kartu ke sini)'}</span>
+                        )}
                       </div>
                     ) : (
                       columnApps.map((app) => {
@@ -637,7 +658,7 @@ export const TrackerView: React.FC = () => {
                           return (
                             <div
                               key={app.id}
-                              className="h-[95px] rounded-xl border-2 border-dashed border-violet-400/60 bg-violet-50/40 dark:bg-violet-950/20 transition-all flex items-center justify-center text-violet-500 dark:text-violet-400 text-xs font-semibold select-none"
+                              className="h-[95px] rounded-[10px] border-2 border-dashed border-violet-400/60 bg-violet-50/40 dark:bg-violet-950/20 transition-all flex items-center justify-center text-violet-500 dark:text-violet-400 text-xs font-semibold select-none"
                             >
                               Pindahkan ke kolom baru...
                             </div>
@@ -650,7 +671,7 @@ export const TrackerView: React.FC = () => {
                           <div
                             key={app.id}
                             onPointerDown={(e) => handlePointerDownCard(e, app)}
-                            className={`group ${palette.bg} rounded-xl p-3.5 border ${palette.border} ${palette.hoverBorder} shadow-2xs hover:shadow-md transition-all space-y-2.5 cursor-grab active:cursor-grabbing relative select-none touch-none overflow-hidden`}
+                            className={`group ${palette.bg} rounded-[10px] p-3.5 border ${palette.border} ${palette.hoverBorder} shadow-2xs hover:shadow-md transition-all space-y-2.5 cursor-grab active:cursor-grabbing relative select-none touch-none overflow-hidden`}
                           >
                             {/* Top Accent Strip */}
                             <div className={`absolute top-0 left-0 right-0 h-1 ${palette.accentBar}`} />
@@ -720,7 +741,7 @@ export const TrackerView: React.FC = () => {
                                 )}
                               </div>
                               {app.salary !== '-' && (
-                                <div className={`flex items-center gap-1.5 font-bold px-2 py-0.5 rounded-md ${palette.tagBg} ${palette.tagText} max-w-full min-w-0 mt-1`}>
+                                <div className={`flex items-center gap-1.5 font-bold px-2 py-0.5 rounded-[10px] ${palette.tagBg} ${palette.tagText} max-w-full min-w-0 mt-1`}>
                                   <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0" title={app.salary}>
                                     {app.salary}
                                   </span>
@@ -750,7 +771,7 @@ export const TrackerView: React.FC = () => {
                   pointerEvents: 'none',
                   zIndex: 9999,
                 }}
-                className={`${dragPalette.bg} rounded-xl p-3.5 border-2 border-violet-500 shadow-2xl scale-[1.03] rotate-1 space-y-2.5 opacity-100 ring-4 ring-violet-500/20 select-none overflow-hidden`}
+                className={`${dragPalette.bg} rounded-[10px] p-3.5 border-2 border-violet-500 shadow-2xl scale-[1.03] rotate-1 space-y-2.5 opacity-100 ring-4 ring-violet-500/20 select-none overflow-hidden`}
               >
                 {/* Top Accent Strip */}
                 <div className={`absolute top-0 left-0 right-0 h-1 ${dragPalette.accentBar}`} />
@@ -805,7 +826,7 @@ export const TrackerView: React.FC = () => {
                     )}
                   </div>
                   {activeDragItem.salary !== '-' && (
-                    <div className={`flex items-center gap-1.5 font-bold px-2 py-0.5 rounded-md ${dragPalette.tagBg} ${dragPalette.tagText} max-w-full min-w-0 mt-1`}>
+                    <div className={`flex items-center gap-1.5 font-bold px-2 py-0.5 rounded-[10px] ${dragPalette.tagBg} ${dragPalette.tagText} max-w-full min-w-0 mt-1`}>
                       <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0" title={activeDragItem.salary}>
                         {activeDragItem.salary}
                       </span>
@@ -820,7 +841,7 @@ export const TrackerView: React.FC = () => {
 
       {/* VIEW 2: LIST TABEL */}
       {viewMode === 'table' && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
@@ -946,8 +967,16 @@ export const TrackerView: React.FC = () => {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
                 {sortedAndFilteredApps.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="p-8 text-center text-slate-400">
-                      Tidak ada lamaran ditemukan.
+                    <td colSpan={8} className="p-12 text-center text-slate-400">
+                      <DotLottiePlayer
+                        src="/animations/empty-tracker.json"
+                        autoplay={true}
+                        loop={true}
+                        className="w-20 h-20 mx-auto mb-2"
+                        fallback={<Briefcase className="w-10 h-10 mx-auto text-slate-300 mb-2" />}
+                      />
+                      <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Tidak ada lamaran ditemukan</p>
+                      <p className="text-xs text-slate-400 mt-0.5">Coba sesuaikan kata kunci pencarian atau filter status kamu</p>
                     </td>
                   </tr>
                 ) : (
@@ -1017,7 +1046,7 @@ export const TrackerView: React.FC = () => {
                       <td className="p-4 text-right whitespace-nowrap">
                         <button
                           onClick={() => handleDeleteApp(app.id)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition"
+                          className="p-1.5 rounded-[10px] text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition"
                           title="Hapus"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -1046,7 +1075,7 @@ export const TrackerView: React.FC = () => {
             {/* Drawer Header */}
             <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-violet-600 dark:bg-violet-500 text-white flex items-center justify-center shadow-md shadow-violet-600/20 shrink-0">
+                <div className="w-10 h-10 rounded-[10px] bg-violet-600 dark:bg-violet-500 text-white flex items-center justify-center shadow-md shadow-violet-600/20 shrink-0">
                   <Briefcase className="w-5 h-5" />
                 </div>
                 <div>
@@ -1061,7 +1090,7 @@ export const TrackerView: React.FC = () => {
 
               <button
                 onClick={() => setIsAddModalOpen(false)}
-                className="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                className="p-2 rounded-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
                 title="Tutup Sidebar"
               >
                 <X className="w-5 h-5" />
@@ -1082,7 +1111,7 @@ export const TrackerView: React.FC = () => {
                       placeholder="Contoh: PT GoTo Gojek Tokopedia"
                       value={newCompany}
                       onChange={(e) => setNewCompany(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
                     />
                   </div>
                 </div>
@@ -1097,7 +1126,7 @@ export const TrackerView: React.FC = () => {
                     placeholder="Contoh: Senior Frontend Engineer"
                     value={newPosition}
                     onChange={(e) => setNewPosition(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
                   />
                 </div>
 
@@ -1111,7 +1140,7 @@ export const TrackerView: React.FC = () => {
                       placeholder="Jakarta (Hybrid)"
                       value={newLocation}
                       onChange={(e) => setNewLocation(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
                     />
                   </div>
                   <div>
@@ -1123,7 +1152,7 @@ export const TrackerView: React.FC = () => {
                       placeholder="23 Juli 2026"
                       value={newAppliedDate}
                       onChange={(e) => setNewAppliedDate(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
                     />
                   </div>
                 </div>
@@ -1161,7 +1190,7 @@ export const TrackerView: React.FC = () => {
                         placeholder="Contoh: Indeed / Deel / Karir.com / Telegram"
                         value={customPortal}
                         onChange={(e) => setCustomPortal(e.target.value)}
-                        className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                        className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
                       />
                     </div>
                   )}
@@ -1175,7 +1204,7 @@ export const TrackerView: React.FC = () => {
                       placeholder="Contoh: https://linkedin.com/jobs/view/123456"
                       value={newPortalUrl}
                       onChange={(e) => setNewPortalUrl(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
                     />
                   </div>
                 </div>
@@ -1201,7 +1230,7 @@ export const TrackerView: React.FC = () => {
                       placeholder="Rp 15.000.000"
                       value={newSalary}
                       onChange={(e) => setNewSalary(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
                     />
                   </div>
                 </div>
@@ -1215,7 +1244,7 @@ export const TrackerView: React.FC = () => {
                     placeholder="Catatan interview, kontak HRD/Recruiter, link lowongan, dsb..."
                     value={newNotes}
                     onChange={(e) => setNewNotes(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition resize-none"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition resize-none"
                   />
                 </div>
               </div>
@@ -1225,13 +1254,13 @@ export const TrackerView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-5 py-2.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800 transition cursor-pointer"
+                  className="px-5 py-2.5 rounded-[10px] text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-lg text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-600/20 transition cursor-pointer flex items-center gap-1.5"
+                  className="px-6 py-2.5 rounded-[10px] text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-600/20 transition cursor-pointer flex items-center gap-1.5"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Simpan Lamaran</span>

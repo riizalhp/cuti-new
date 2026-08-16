@@ -146,7 +146,7 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-navy-900 to-slate-950 text-white p-5 sm:p-6 shadow-xl border border-slate-800/80 transition-all">
+    <div className="relative overflow-hidden rounded-[10px] bg-gradient-to-br from-slate-900 via-navy-900 to-slate-950 text-white p-5 sm:p-6 shadow-xl border border-slate-800/80 transition-all">
       {/* Subtle Background Glow Decorative Element */}
       <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-1/3 -mb-16 w-48 h-48 bg-violet-500/10 rounded-full blur-2xl pointer-events-none" />
@@ -156,7 +156,7 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30 uppercase tracking-wider">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[10px] text-[10px] font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30 uppercase tracking-wider">
                 <Sparkles className="w-3 h-3 text-orange-400" />
                 {heroContent.badgeText}
               </span>
@@ -174,7 +174,7 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
             {heroContent.stats && (
               <div className="flex flex-wrap gap-2 pt-2">
                 {heroContent.stats.map((st) => (
-                  <span key={st.label} className="px-2.5 py-1 rounded-lg bg-white/10 text-xs font-bold text-slate-200 border border-white/10 flex items-center gap-1.5">
+                  <span key={st.label} className="px-2.5 py-1 rounded-[10px] bg-white/10 text-xs font-bold text-slate-200 border border-white/10 flex items-center gap-1.5">
                     <span className="text-slate-400 font-normal">{st.label}:</span>
                     <span className="text-orange-400">{st.val}</span>
                   </span>
@@ -187,7 +187,7 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
             <button
               onClick={onPrimaryAction || (() => router.push(heroContent.primaryCtaHref))}
-              className="w-full sm:w-auto shrink-0 bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white px-5 py-3 rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
+              className="w-full sm:w-auto shrink-0 bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white px-5 py-3 rounded-[10px] font-bold text-xs sm:text-sm shadow-lg shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
             >
               <span>{heroContent.primaryCtaText}</span>
               <ArrowRight className="w-4 h-4" />
@@ -196,7 +196,7 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
             {heroContent.secondaryText && (
               <button
                 onClick={() => router.push(heroContent.secondaryHref || '/pengaturan')}
-                className="w-full sm:w-auto px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer text-center"
+                className="w-full sm:w-auto px-4 py-3 rounded-[10px] bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer text-center"
               >
                 {heroContent.secondaryText}
               </button>
@@ -212,11 +212,11 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
               <div
                 key={item.id}
                 onClick={() => router.push(item.href)}
-                className="group relative bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-xl p-3.5 border border-white/10 transition-all cursor-pointer flex flex-col justify-between space-y-3"
+                className="group relative bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-[10px] p-3.5 border border-white/10 transition-all cursor-pointer flex flex-col justify-between space-y-3"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-white/10 text-orange-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <div className="w-8 h-8 rounded-[10px] bg-white/10 text-orange-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                       <Icon className="w-4 h-4" />
                     </div>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${item.badgeColor}`}>

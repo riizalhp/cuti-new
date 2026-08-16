@@ -68,10 +68,10 @@ export const LatestCoursesList: React.FC = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400">
+          <div className="p-2 rounded-[10px] bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400">
             <GraduationCap className="w-5 h-5" />
           </div>
           <div>
@@ -91,7 +91,7 @@ export const LatestCoursesList: React.FC = () => {
           return (
             <div
               key={c.id}
-              className="p-4 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-violet-300 dark:hover:border-violet-700 transition flex flex-col justify-between"
+              className="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-violet-300 dark:hover:border-violet-700 transition flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -124,7 +124,7 @@ export const LatestCoursesList: React.FC = () => {
               <button
                 onClick={() => handleEnroll(c.id)}
                 disabled={isEnrolled}
-                className={`mt-4 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg font-bold text-xs transition ${
+                className={`mt-4 w-full flex items-center justify-center gap-1.5 py-2 rounded-[10px] font-bold text-xs transition ${
                   isEnrolled
                     ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                     : 'bg-violet-600 hover:bg-violet-700 text-white shadow-sm'

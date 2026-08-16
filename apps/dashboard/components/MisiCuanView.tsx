@@ -38,6 +38,7 @@ import {
   PlayCircle,
   AlertCircle,
 } from 'lucide-react';
+import { DotLottiePlayer } from '@/components/DotLottiePlayer';
 
 export type MissionStatus = 'Tersedia' | 'Sedang Ditinjau' | 'Selesai';
 
@@ -375,7 +376,7 @@ export const MisiCuanView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Gamification Header Banner */}
-      <div className="bg-[#0D3BD9] rounded-xl p-6 text-white border border-blue-500/50 shadow-md">
+      <div className="bg-[#0D3BD9] rounded-[10px] p-6 text-white border border-blue-500/50 shadow-md">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs">
@@ -393,7 +394,7 @@ export const MisiCuanView: React.FC = () => {
           {/* Balance Cards Group */}
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             {/* Koin Balance Box */}
-            <div className="p-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 min-w-[170px] space-y-1">
+            <div className="p-4 rounded-[10px] bg-white/10 backdrop-blur-md border border-white/15 min-w-[170px] space-y-1">
               <div className="flex items-center justify-between text-slate-300 text-[10px] font-bold uppercase tracking-wider">
                 <span>Saldo Koin</span>
                 <Coins className="w-4 h-4 text-amber-400" />
@@ -404,7 +405,7 @@ export const MisiCuanView: React.FC = () => {
             </div>
 
             {/* Level XP Box */}
-            <div className="p-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 min-w-[170px] space-y-1">
+            <div className="p-4 rounded-[10px] bg-white/10 backdrop-blur-md border border-white/15 min-w-[170px] space-y-1">
               <div className="flex items-center justify-between text-slate-300 text-[10px] font-bold uppercase tracking-wider">
                 <span>Level Karier</span>
                 <Award className="w-4 h-4 text-violet-400" />
@@ -432,7 +433,7 @@ export const MisiCuanView: React.FC = () => {
           <button
             onClick={handleDailyCheckin}
             disabled={isCheckedInToday}
-            className={`px-4 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1.5 ${
+            className={`px-4 py-2 rounded-[10px] font-bold transition flex items-center justify-center gap-1.5 ${
               isCheckedInToday
                 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default'
                 : 'bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-md'
@@ -447,7 +448,7 @@ export const MisiCuanView: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2 mt-4 text-xs font-semibold">
           <button
             onClick={() => setActiveSubTab('misi')}
-            className={`px-4 py-2 rounded-lg transition flex items-center gap-1.5 cursor-pointer ${
+            className={`px-4 py-2 rounded-[10px] transition flex items-center gap-1.5 cursor-pointer ${
               activeSubTab === 'misi'
                 ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
@@ -459,7 +460,7 @@ export const MisiCuanView: React.FC = () => {
 
           <button
             onClick={() => setActiveSubTab('riwayat')}
-            className={`px-4 py-2 rounded-lg transition flex items-center gap-1.5 cursor-pointer ${
+            className={`px-4 py-2 rounded-[10px] transition flex items-center gap-1.5 cursor-pointer ${
               activeSubTab === 'riwayat'
                 ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
@@ -475,7 +476,7 @@ export const MisiCuanView: React.FC = () => {
       {activeSubTab === 'misi' && (
         <div className="space-y-4">
           {/* Header & Filter Rows (Status & Category) */}
-          <div className="flex flex-col gap-3 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+          <div className="flex flex-col gap-3 p-4 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-500" />
@@ -491,7 +492,7 @@ export const MisiCuanView: React.FC = () => {
                   <button
                     key={st}
                     onClick={() => setStatusFilter(st)}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
+                    className={`px-3 py-1 rounded-[10px] text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
                       statusFilter === st
                         ? 'bg-orange-500 text-white shadow-xs'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -518,7 +519,7 @@ export const MisiCuanView: React.FC = () => {
                   <button
                     key={cat}
                     onClick={() => setMissionFilter(cat)}
-                    className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition cursor-pointer ${
+                    className={`px-2.5 py-0.5 rounded-[10px] text-[11px] font-bold transition cursor-pointer ${
                       missionFilter === cat
                         ? 'bg-slate-900 text-white dark:bg-slate-700 shadow-xs'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -533,7 +534,7 @@ export const MisiCuanView: React.FC = () => {
 
           {/* Mission Grid */}
           {filteredMissions.length === 0 ? (
-            <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
+            <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-2">
               <Target className="w-10 h-10 text-slate-300 mx-auto" />
               <h4 className="font-bold text-sm text-slate-700 dark:text-slate-300">Tidak ada misi dalam kategori/status ini</h4>
               <p className="text-xs text-slate-400">Coba ubah filter di atas untuk melihat misi lainnya.</p>
@@ -547,12 +548,12 @@ export const MisiCuanView: React.FC = () => {
                   <div
                     key={m.id}
                     onClick={() => setSelectedMissionDetail(m)}
-                    className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-3.5 cursor-pointer hover:border-orange-500/70 hover:shadow-md transition group"
+                    className="p-5 rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-3.5 cursor-pointer hover:border-orange-500/70 hover:shadow-md transition group"
                   >
                     {/* Top Bar: Category + Status Badge + Estimasi Waktu */}
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                        <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                           {m.category}
                         </span>
 
@@ -620,7 +621,7 @@ export const MisiCuanView: React.FC = () => {
 
       {/* SUBTAB 2: RIWAYAT MISI DISELESAIKAN & PENUKARAN */}
       {activeSubTab === 'riwayat' && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 space-y-5 shadow-xs">
+        <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 p-5 space-y-5 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
               <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
@@ -638,7 +639,7 @@ export const MisiCuanView: React.FC = () => {
                 <button
                   key={filterCat}
                   onClick={() => setHistoryFilter(filterCat)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                  className={`px-3 py-1 rounded-[10px] text-xs font-bold transition cursor-pointer ${
                     historyFilter === filterCat
                       ? 'bg-orange-500 text-white shadow-xs'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -661,7 +662,7 @@ export const MisiCuanView: React.FC = () => {
                 .map((log) => (
                   <div key={log.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-start gap-3">
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold shrink-0 mt-0.5 ${
+                      <div className={`w-9 h-9 rounded-[10px] flex items-center justify-center font-bold shrink-0 mt-0.5 ${
                         log.category === 'Penukaran Reward'
                           ? 'bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400 border border-purple-200 dark:border-purple-800'
                           : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
@@ -691,7 +692,7 @@ export const MisiCuanView: React.FC = () => {
                       }`}>
                         {log.rewardText}
                       </span>
-                      <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                      <span className="inline-block px-2.5 py-0.5 rounded-[10px] text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                         {log.status}
                       </span>
                     </div>
@@ -707,11 +708,11 @@ export const MisiCuanView: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 transition-opacity">
           <div className="absolute inset-0" onClick={() => setSelectedMissionDetail(null)} />
 
-          <div className="relative z-10 w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 space-y-0">
+          <div className="relative z-10 w-full max-w-lg bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 space-y-0">
             {/* Modal Header */}
             <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-lg bg-orange-100 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold shrink-0">
+                <div className="w-9 h-9 rounded-[10px] bg-orange-100 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold shrink-0">
                   <Target className="w-5 h-5" />
                 </div>
                 <div>
@@ -737,7 +738,7 @@ export const MisiCuanView: React.FC = () => {
 
               <button
                 onClick={() => setSelectedMissionDetail(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                className="p-1.5 rounded-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -760,7 +761,7 @@ export const MisiCuanView: React.FC = () => {
               </div>
 
               {/* Mission Meta Info Box */}
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-3 text-xs">
+              <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-3 text-xs">
                 <div>
                   <span className="text-[10px] text-slate-400 uppercase font-bold block">Estimasi Waktu</span>
                   <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1 mt-0.5">
@@ -786,7 +787,7 @@ export const MisiCuanView: React.FC = () => {
                   </h4>
                   <div className="space-y-2">
                     {selectedMissionDetail.detailedSteps.map((step, idx) => (
-                      <div key={idx} className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 flex items-start gap-3">
+                      <div key={idx} className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 flex items-start gap-3">
                         <span className="w-5 h-5 rounded-full bg-slate-900 dark:bg-slate-700 text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
                           {idx + 1}
                         </span>
@@ -801,7 +802,7 @@ export const MisiCuanView: React.FC = () => {
 
               {/* Syarat & Ketentuan */}
               {selectedMissionDetail.terms && (
-                <div className="p-3.5 rounded-lg bg-amber-50/60 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50 space-y-1">
+                <div className="p-3.5 rounded-[10px] bg-amber-50/60 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50 space-y-1">
                   <span className="text-xs font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
                     <AlertCircle className="w-4 h-4 text-amber-500" />
                     Syarat &amp; Ketentuan Pengerjaan:
@@ -814,7 +815,7 @@ export const MisiCuanView: React.FC = () => {
 
               {/* Submitted Proof Info (If already submitted) */}
               {selectedMissionDetail.submissionProof && (
-                <div className="p-4 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 space-y-2">
+                <div className="p-4 rounded-[10px] bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 space-y-2">
                   <div className="flex items-center justify-between text-xs font-bold text-blue-900 dark:text-blue-300">
                     <span className="flex items-center gap-1.5">
                       <FileText className="w-4 h-4 text-blue-500" />
@@ -848,18 +849,18 @@ export const MisiCuanView: React.FC = () => {
             <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between gap-3">
               <button
                 onClick={() => setSelectedMissionDetail(null)}
-                className="px-4 py-2.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                className="px-4 py-2.5 rounded-[10px] text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               >
                 Tutup
               </button>
 
               {selectedMissionDetail.status === 'Selesai' ? (
-                <button disabled className="px-5 py-2.5 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 cursor-default flex items-center gap-1.5">
+                <button disabled className="px-5 py-2.5 rounded-[10px] text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 cursor-default flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                   <span>Misi Telah Selesai</span>
                 </button>
               ) : selectedMissionDetail.status === 'Sedang Ditinjau' ? (
-                <button disabled className="px-5 py-2.5 rounded-lg text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-default flex items-center gap-1.5">
+                <button disabled className="px-5 py-2.5 rounded-[10px] text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-default flex items-center gap-1.5">
                   <Hourglass className="w-4 h-4 text-amber-500" />
                   <span>Sedang Ditinjau oleh Tim</span>
                 </button>
@@ -874,7 +875,7 @@ export const MisiCuanView: React.FC = () => {
                     setProofScreenshotName(null);
                     setIsSubmissionSuccess(false);
                   }}
-                  className="px-6 py-2.5 rounded-lg text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-md transition cursor-pointer flex items-center gap-1.5"
+                  className="px-6 py-2.5 rounded-[10px] text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-md transition cursor-pointer flex items-center gap-1.5"
                 >
                   <Zap className="w-4 h-4" />
                   <span>Kerjakan Misi</span>
@@ -894,7 +895,7 @@ export const MisiCuanView: React.FC = () => {
             {/* Header */}
             <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center shadow-md shrink-0">
+                <div className="w-10 h-10 rounded-[10px] bg-orange-500 text-white flex items-center justify-center shadow-md shrink-0">
                   <Upload className="w-5 h-5" />
                 </div>
                 <div>
@@ -909,7 +910,7 @@ export const MisiCuanView: React.FC = () => {
 
               <button
                 onClick={() => setSubmittingMissionProof(null)}
-                className="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                className="p-2 rounded-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -918,9 +919,17 @@ export const MisiCuanView: React.FC = () => {
             {/* Content Body */}
             {isSubmissionSuccess ? (
               <div className="p-8 text-center space-y-4 flex-1 flex flex-col justify-center items-center">
-                <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-200 dark:border-emerald-800 shadow-lg">
-                  <CheckCheck className="w-8 h-8" />
-                </div>
+                <DotLottiePlayer
+                  src="/animations/coin-reward.json"
+                  autoplay={true}
+                  loop={false}
+                  className="w-24 h-24 mx-auto"
+                  fallback={
+                    <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-200 dark:border-emerald-800 shadow-lg mx-auto">
+                      <CheckCheck className="w-8 h-8" />
+                    </div>
+                  }
+                />
 
                 <div className="space-y-1">
                   <h4 className="text-lg font-extrabold text-slate-900 dark:text-white">
@@ -931,7 +940,7 @@ export const MisiCuanView: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 w-full text-left text-xs space-y-2">
+                <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 w-full text-left text-xs space-y-2">
                   <div className="flex justify-between text-slate-500">
                     <span>Misi:</span>
                     <span className="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[200px]">{submittingMissionProof.title}</span>
@@ -948,7 +957,7 @@ export const MisiCuanView: React.FC = () => {
 
                 <button
                   onClick={() => setSubmittingMissionProof(null)}
-                  className="w-full py-3 rounded-lg bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition cursor-pointer"
+                  className="w-full py-3 rounded-[10px] bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition cursor-pointer"
                 >
                   Selesai &amp; Kembali ke Misi Cuan
                 </button>
@@ -979,7 +988,7 @@ export const MisiCuanView: React.FC = () => {
                 className="p-6 space-y-5 overflow-y-auto flex-1"
               >
                 {/* Mission Summary Card */}
-                <div className="p-4 rounded-xl bg-orange-50/70 dark:bg-orange-950/30 border border-orange-100 dark:border-orange-900/50 space-y-1">
+                <div className="p-4 rounded-[10px] bg-orange-50/70 dark:bg-orange-950/30 border border-orange-100 dark:border-orange-900/50 space-y-1">
                   <span className="text-[10px] font-bold text-orange-800 dark:text-orange-300 uppercase tracking-wider block">
                     {submittingMissionProof.category} • Misi Cuan by {submittingMissionProof.organizer}
                   </span>
@@ -996,7 +1005,7 @@ export const MisiCuanView: React.FC = () => {
                   
                   <div
                     onClick={() => setProofScreenshotName('tangkapan_layar_misi_berhasil.png')}
-                    className={`p-4 rounded-xl border-2 border-dashed transition cursor-pointer text-center space-y-2 ${
+                    className={`p-4 rounded-[10px] border-2 border-dashed transition cursor-pointer text-center space-y-2 ${
                       proofScreenshotName
                         ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30'
                         : 'border-slate-300 dark:border-slate-700 hover:border-orange-500 bg-slate-50 dark:bg-slate-800/40'
@@ -1033,7 +1042,7 @@ export const MisiCuanView: React.FC = () => {
                       value={proofLink}
                       onChange={(e) => setProofLink(e.target.value)}
                       placeholder="https://..."
-                      className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none pl-9"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none pl-9"
                     />
                     <LinkIcon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
@@ -1052,12 +1061,12 @@ export const MisiCuanView: React.FC = () => {
                     value={proofNotes}
                     onChange={(e) => setProofNotes(e.target.value)}
                     placeholder="Tuliskan keterangan detail pengerjaan misi kamu..."
-                    className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
                   />
                 </div>
 
                 {/* Warning Info */}
-                <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
+                <div className="p-3 rounded-[10px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                   <span>Pastikan bukti pengerjaan valid dan asli. Pengiriman bukti palsu dapat menyebabkan akun dibekukan.</span>
                 </div>
@@ -1067,13 +1076,13 @@ export const MisiCuanView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setSubmittingMissionProof(null)}
-                    className="px-5 py-2.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                    className="px-5 py-2.5 rounded-[10px] text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 rounded-lg text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-md transition cursor-pointer flex items-center gap-1.5"
+                    className="px-6 py-2.5 rounded-[10px] text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-md transition cursor-pointer flex items-center gap-1.5"
                   >
                     <Upload className="w-4 h-4" />
                     <span>Kirim Bukti Misi</span>

@@ -1,29 +1,25 @@
 export interface TemplateResponseDto {
   id: string;
   name: string;
-  category: string;
+  slug: string;
   description: string | null;
-  previewUrl: string;
-  htmlContent: string;
-  cssContent: string;
-  isPremium: boolean;
-  price: number | null;
+  previewImageUrl: string | null;
+  targetPositions: any;
+  isActive: boolean;
+  sortOrder: number;
   createdAt: string;
-  updatedAt: string;
 }
 
 export function mapTemplateToResponse(template: any): TemplateResponseDto {
   return {
     id: template.id,
     name: template.name,
-    category: template.category,
+    slug: template.slug,
     description: template.description,
-    previewUrl: template.previewUrl,
-    htmlContent: template.htmlContent,
-    cssContent: template.cssContent,
-    isPremium: template.isPremium,
-    price: template.price,
-    createdAt: template.createdAt.toISOString(),
-    updatedAt: template.updatedAt.toISOString(),
+    previewImageUrl: template.preview_image_url,
+    targetPositions: template.target_positions,
+    isActive: template.is_active,
+    sortOrder: template.sort_order,
+    createdAt: template.created_at?.toISOString?.() || template.created_at,
   };
 }

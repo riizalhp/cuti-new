@@ -16,14 +16,68 @@ const googleAuthUrl = getGoogleAuthUrl();
         <span class="brand-mark">C</span>
       </div>
       <h2 id="register-modal-title" class="login-modal-title">Daftar Akun <em>CUTI</em></h2>
-      <p class="login-modal-subtitle">Bergabung sekarang dengan Google untuk membuka akses seluruh fitur kariermu.</p>
+      <p class="login-modal-subtitle">Bergabung sekarang untuk membuka akses seluruh fitur kariermu.</p>
     </div>
 
-    <div class="register-benefits">
-      <div class="benefit-item"><b>✓</b> <span>CV ATS Builder Instan</span></div>
-      <div class="benefit-item"><b>✓</b> <span>Job Tracker Unlimited</span></div>
-      <div class="benefit-item"><b>✓</b> <span>Misi Berhadiah Saldo</span></div>
+    <!-- Success state -->
+    <div id="modal-register-success-state" class="modal-success-box" style="display: none;">
+      <div class="modal-success-icon">✓</div>
+      <h3>Pendaftaran Berhasil!</h3>
+      <p id="modal-register-success-msg">Akun kamu siap digunakan.</p>
+      <a href="http://localhost:3000/onboarding" class="button submit-login-btn mt-2" style="width: 100%; justify-content: center; text-decoration: none;">
+        <span>Lanjut ke Onboarding</span>
+        <span class="btn-arrow">↗</span>
+      </a>
     </div>
+
+    <!-- Register Form inside Modal -->
+    <form id="modal-register-form" class="modal-register-form" action="javascript:void(0);" onsubmit="return false;">
+      <div id="modal-reg-err" class="modal-err-box" style="display: none;"></div>
+
+      <div class="input-group">
+        <label for="modal-reg-name" class="input-label">Nama Lengkap</label>
+        <input 
+          type="text" 
+          id="modal-reg-name" 
+          name="name" 
+          placeholder="contoh: Budi Pratama" 
+          class="modal-input" 
+          required 
+        />
+      </div>
+
+      <div class="input-group">
+        <label for="modal-reg-email" class="input-label">Email</label>
+        <input 
+          type="email" 
+          id="modal-reg-email" 
+          name="email" 
+          placeholder="contoh: budi@gmail.com" 
+          class="modal-input" 
+          required 
+        />
+      </div>
+
+      <div class="input-group">
+        <label for="modal-reg-password" class="input-label">Kata Sandi</label>
+        <input 
+          type="password" 
+          id="modal-reg-password" 
+          name="password" 
+          placeholder="Min. 6 karakter" 
+          class="modal-input" 
+          minlength="6"
+          required 
+        />
+      </div>
+
+      <button type="submit" class="button submit-login-btn">
+        <span>Daftar Akun Baru</span>
+        <span class="btn-arrow">↗</span>
+      </button>
+    </form>
+
+    <div class="divider-text">atau daftar dengan</div>
 
     <div class="login-action-container">
       <a href={googleAuthUrl} class="button google-auth-btn">
@@ -41,7 +95,7 @@ const googleAuthUrl = getGoogleAuthUrl();
     </div>
 
     <div class="login-modal-footer">
-      <p>Sudah punya akun? <button type="button" class="text-button" data-open-login data-close-register>Masuk di sini ↗</button></p>
+      <p>Sudah punya akun? <a href="#" class="text-button" data-open-login>Masuk di sini ↗</a></p>
     </div>
   </div>
 </div>
@@ -79,8 +133,8 @@ const googleAuthUrl = getGoogleAuthUrl();
     position: relative;
     z-index: 2;
     width: 100%;
-    max-width: 440px;
-    padding: 40px 32px 32px;
+    max-width: 420px;
+    padding: 36px 30px 28px;
     background: var(--paper);
     border: 2px solid var(--ink);
     box-shadow: 10px 10px 0 var(--ink);
@@ -100,7 +154,7 @@ const googleAuthUrl = getGoogleAuthUrl();
     height: 36px;
     display: grid;
     place-items: center;
-    border: 1px solid var(--ink);
+    border: 1.5px solid var(--ink);
     border-radius: 50%;
     background: var(--paper);
     color: var(--ink);
@@ -118,19 +172,19 @@ const googleAuthUrl = getGoogleAuthUrl();
 
   .login-modal-header {
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
 
   .brand-mark-wrapper {
     display: flex;
     justify-content: center;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .login-modal-title {
     margin: 0;
     font-family: var(--sans);
-    font-size: clamp(2rem, 3.5vw, 2.6rem);
+    font-size: clamp(1.8rem, 3vw, 2.3rem);
     line-height: 1;
     letter-spacing: -0.04em;
     color: var(--ink);
@@ -144,101 +198,216 @@ const googleAuthUrl = getGoogleAuthUrl();
   }
 
   .login-modal-subtitle {
-    margin: 10px 0 0;
-    font-size: 14px;
+    margin: 8px 0 0;
+    font-size: 13px;
     color: color-mix(in srgb, var(--ink) 70%, transparent);
-    line-height: 1.45;
+    line-height: 1.4;
   }
 
-  .register-benefits {
+  .modal-register-form {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 24px;
-    padding: 16px;
-    background: var(--periwinkle);
-    border: 1px solid var(--ink);
-    border-radius: 12px;
+    gap: 12px;
+    margin-bottom: 10px;
   }
 
-  .benefit-item {
+  .input-group {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    font-weight: 600;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .input-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
     color: var(--ink);
   }
 
-  .benefit-item b {
-    display: grid;
-    place-items: center;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: var(--lime);
+  .modal-input {
+    width: 100%;
+    height: 46px;
+    padding: 0 16px;
+    background: #ffffff;
+    border: 1.5px solid var(--ink);
+    border-radius: 12px;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    font-weight: 500;
     color: var(--ink);
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .modal-input::placeholder {
+    color: color-mix(in srgb, var(--ink) 45%, transparent);
+    font-size: 13px;
+  }
+
+  .modal-input:focus {
+    border-color: var(--cobalt);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .submit-login-btn {
+    min-height: 48px;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    color: #ffffff;
+    background: var(--ink);
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 2px;
+    transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+
+  .submit-login-btn:hover {
+    transform: translateY(-2px);
+    background: var(--cobalt);
+    border-color: var(--cobalt);
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  .divider-text {
+    text-align: center;
     font-size: 11px;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--ink) 50%, transparent);
+    margin: 10px 0 12px;
+    position: relative;
+  }
+
+  .divider-text::before,
+  .divider-text::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 28%;
+    height: 1px;
+    background: color-mix(in srgb, var(--ink) 20%, transparent);
+  }
+
+  .divider-text::before {
+    left: 0;
+  }
+
+  .divider-text::after {
+    right: 0;
   }
 
   .login-action-container {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    margin-bottom: 8px;
+    gap: 10px;
+    margin-bottom: 6px;
   }
 
   .google-auth-btn {
-    min-height: 54px;
+    min-height: 48px;
     width: 100%;
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 22px;
+    padding: 0 18px;
     border: 1px solid var(--cobalt);
     border-radius: 999px;
     color: var(--paper);
     background: var(--cobalt);
     font-family: var(--sans);
     font-weight: 600;
-    font-size: 15px;
-    transition: transform 0.25s, color 0.25s, background 0.25s;
+    font-size: 14px;
+    transition: transform 0.25s, color 0.25s, background 0.25s, box-shadow 0.25s;
   }
 
   .google-auth-btn:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     color: var(--cobalt);
     background: var(--paper);
+    box-shadow: 4px 4px 0 var(--ink);
   }
 
   .btn-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
   }
 
   .btn-left svg {
     background: #ffffff;
     border-radius: 50%;
-    padding: 3px;
+    padding: 2.5px;
     box-sizing: content-box;
   }
 
   .btn-arrow {
-    font-size: 20px;
+    font-size: 18px;
     line-height: 1;
   }
 
-  .login-modal-footer {
-    margin-top: 24px;
+  .modal-err-box {
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #FEE2E2;
+    border: 1.5px solid #EF4444;
+    color: #991B1B;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .modal-success-box {
+    padding: 20px 16px;
+    background: #ECFDF5;
+    border: 1.5px solid #10B981;
+    border-radius: 10px;
     text-align: center;
-    padding-top: 18px;
+    margin-bottom: 14px;
+  }
+
+  .modal-success-icon {
+    width: 36px;
+    height: 36px;
+    margin: 0 auto 8px;
+    background: #10B981;
+    color: #ffffff;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .modal-success-box h3 {
+    margin: 0 0 4px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #065F46;
+  }
+
+  .modal-success-box p {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: #047857;
+  }
+
+  .login-modal-footer {
+    margin-top: 18px;
+    text-align: center;
+    padding-top: 14px;
     border-top: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
   }
 
   .login-modal-footer p {
     margin: 0;
-    font-size: 13px;
+    font-size: 12.5px;
     color: color-mix(in srgb, var(--ink) 75%, transparent);
   }
 
@@ -258,60 +427,3 @@ const googleAuthUrl = getGoogleAuthUrl();
     color: var(--ink);
   }
 </style>
-
-<script is:inline>
-  (() => {
-    function initRegisterModal() {
-      const modal = document.getElementById('register-modal');
-      if (!modal) return;
-
-      function openModal() {
-        modal.classList.add('is-active');
-        modal.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
-        const googleBtn = modal.querySelector('.google-auth-btn');
-        if (googleBtn) googleBtn.focus();
-      }
-
-      function closeModal() {
-        modal.classList.remove('is-active');
-        modal.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
-      }
-
-      document.querySelectorAll('[data-open-register]').forEach((btn) => {
-        btn.onclick = (e) => {
-          e.preventDefault();
-          closeModal();
-          openModal();
-        };
-      });
-
-      document.querySelectorAll('[data-close-register]').forEach((btn) => {
-        btn.onclick = () => closeModal();
-      });
-
-      const registerGoogleBtn = modal.querySelector('.google-auth-btn');
-      if (registerGoogleBtn) {
-        registerGoogleBtn.onclick = (e) => {
-          e.preventDefault();
-          const textSpan = registerGoogleBtn.querySelector('span');
-          if (textSpan) textSpan.innerText = 'Memproses Pendaftaran...';
-          window.location.href = 'http://localhost:3000/onboarding';
-        };
-      }
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('is-active')) {
-          closeModal();
-        }
-      });
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initRegisterModal);
-    } else {
-      initRegisterModal();
-    }
-  })();
-</script>

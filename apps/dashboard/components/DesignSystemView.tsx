@@ -46,17 +46,17 @@ export const DesignSystemView: React.FC = () => {
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-12">
       {/* Page Header */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 lg:p-8 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-[10px] p-6 lg:p-8 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
         <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2 max-w-2xl">
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-800 flex items-center gap-1.5">
+              <span className="px-3 py-1 rounded-[10px] text-xs font-bold bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-800 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-violet-500" />
                 DESIGN.md Standard
               </span>
-              <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
+              <span className="px-2.5 py-0.5 rounded-[10px] text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
                 v2.4 Active
               </span>
             </div>
@@ -71,7 +71,7 @@ export const DesignSystemView: React.FC = () => {
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => setIsDemoDrawerOpen(true)}
-              className="px-4 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs shadow-md shadow-violet-600/20 transition flex items-center gap-2 cursor-pointer"
+              className="px-4 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs shadow-md shadow-violet-600/20 transition flex items-center gap-2 cursor-pointer"
             >
               <SlidersHorizontal className="w-4 h-4" />
               <span>Uji Drawer Kanan</span>
@@ -79,7 +79,7 @@ export const DesignSystemView: React.FC = () => {
             <a
               href="#design-md-doc"
               onClick={() => copyToClipboard('DESIGN.md active rule set', 'Aturan')}
-              className="px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs border border-slate-200/80 dark:border-slate-700 transition flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs border border-slate-200/80 dark:border-slate-700 transition flex items-center gap-1.5 cursor-pointer"
             >
               <BookOpen className="w-4 h-4 text-slate-500" />
               <span>{copiedCode === 'Aturan' ? 'Tersalin!' : 'Aturan DESIGN.md'}</span>
@@ -102,7 +102,7 @@ export const DesignSystemView: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveSubTab(tab.id as any)}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                className={`px-4 py-2 rounded-[10px] text-xs font-bold transition flex items-center gap-2 whitespace-nowrap cursor-pointer ${
                   isActive
                     ? 'bg-violet-600 text-white shadow-xs'
                     : 'bg-slate-100/80 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700'
@@ -128,8 +128,8 @@ export const DesignSystemView: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Pilar 1 */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-lg bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 border border-violet-100 dark:border-violet-900/50 flex items-center justify-center">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-3">
+              <div className="w-10 h-10 rounded-[10px] bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 border border-violet-100 dark:border-violet-900/50 flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">Strict Lucide Icons Only</h3>
@@ -139,8 +139,8 @@ export const DesignSystemView: React.FC = () => {
             </div>
 
             {/* Pilar 2 */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-950/80 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/50 flex items-center justify-center">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-3">
+              <div className="w-10 h-10 rounded-[10px] bg-purple-50 dark:bg-purple-950/80 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/50 flex items-center justify-center">
                 <LayoutGrid className="w-5 h-5" />
               </div>
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">Bento Grid Architecture</h3>
@@ -150,8 +150,8 @@ export const DesignSystemView: React.FC = () => {
             </div>
 
             {/* Pilar 3 */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/50 flex items-center justify-center">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-3">
+              <div className="w-10 h-10 rounded-[10px] bg-amber-50 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/50 flex items-center justify-center">
                 <SlidersHorizontal className="w-5 h-5" />
               </div>
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">Right-Hand Slide-in Drawer</h3>
@@ -161,8 +161,8 @@ export const DesignSystemView: React.FC = () => {
             </div>
 
             {/* Pilar 4 */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-center">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-3">
+              <div className="w-10 h-10 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-center">
                 <Zap className="w-5 h-5" />
               </div>
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">Shadcn UI &amp; Accessibility</h3>
@@ -187,43 +187,43 @@ export const DesignSystemView: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Swatch 1: Primary Brand Indigo */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-sm text-slate-900 dark:text-white">Primary Indigo</span>
                 <span className="text-[10px] font-mono bg-violet-50 dark:bg-violet-950 text-violet-600 dark:text-violet-400 px-2 py-0.5 rounded">Brand Color</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <div className="h-12 rounded-lg bg-violet-600 flex items-end p-2 text-[10px] font-bold text-white shadow-xs">#4F46E5</div>
-                <div className="h-12 rounded-lg bg-violet-500 flex items-end p-2 text-[10px] font-bold text-white shadow-xs">#6366F1</div>
-                <div className="h-12 rounded-lg bg-violet-50 dark:bg-violet-950 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800 flex items-end p-2 text-[10px] font-bold">50 / 950</div>
+                <div className="h-12 rounded-[10px] bg-violet-600 flex items-end p-2 text-[10px] font-bold text-white shadow-xs">#4F46E5</div>
+                <div className="h-12 rounded-[10px] bg-violet-500 flex items-end p-2 text-[10px] font-bold text-white shadow-xs">#6366F1</div>
+                <div className="h-12 rounded-[10px] bg-violet-50 dark:bg-violet-950 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800 flex items-end p-2 text-[10px] font-bold">50 / 950</div>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">Digunakan untuk tombol utama, tab aktif, badge AI, dan elemen penting.</p>
             </div>
 
             {/* Swatch 2: Success & Offering (Emerald) */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-sm text-slate-900 dark:text-white">Success Emerald</span>
                 <span className="text-[10px] font-mono bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded">Status Positive</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <div className="h-12 rounded-lg bg-emerald-600 flex items-end p-2 text-[10px] font-bold text-white shadow-xs">#059669</div>
-                <div className="h-12 rounded-lg bg-emerald-500 flex items-end p-2 text-[10px] font-bold text-white shadow-xs">#10B981</div>
-                <div className="h-12 rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-end p-2 text-[10px] font-bold">50 / 950</div>
+                <div className="h-12 rounded-[10px] bg-emerald-600 flex items-end p-2 text-[10px] font-bold text-white shadow-xs">#059669</div>
+                <div className="h-12 rounded-[10px] bg-emerald-500 flex items-end p-2 text-[10px] font-bold text-white shadow-xs">#10B981</div>
+                <div className="h-12 rounded-[10px] bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-end p-2 text-[10px] font-bold">50 / 950</div>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">Digunakan untuk status Offering, komisi referral, dan indikator pencapaian.</p>
             </div>
 
             {/* Swatch 3: Warning & Interview (Amber) */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-sm text-slate-900 dark:text-white">Warning Amber</span>
                 <span className="text-[10px] font-mono bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded">Action Pending</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <div className="h-12 rounded-lg bg-amber-600 flex items-end p-2 text-[10px] font-bold text-white shadow-xs">#D97706</div>
-                <div className="h-12 rounded-lg bg-amber-500 flex items-end p-2 text-[10px] font-bold text-white shadow-xs">#F59E0B</div>
-                <div className="h-12 rounded-lg bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-end p-2 text-[10px] font-bold">50 / 950</div>
+                <div className="h-12 rounded-[10px] bg-amber-600 flex items-end p-2 text-[10px] font-bold text-white shadow-xs">#D97706</div>
+                <div className="h-12 rounded-[10px] bg-amber-500 flex items-end p-2 text-[10px] font-bold text-white shadow-xs">#F59E0B</div>
+                <div className="h-12 rounded-[10px] bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-end p-2 text-[10px] font-bold">50 / 950</div>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">Digunakan untuk sesi interview mendatang, deadline pending, dan misi aktif.</p>
             </div>
@@ -233,7 +233,7 @@ export const DesignSystemView: React.FC = () => {
 
       {/* SECTION 3: TYPOGRAPHY SHOWCASE */}
       {(activeSubTab === 'overview' || activeSubTab === 'typography') && (
-        <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-6">
+        <section className="bg-white dark:bg-slate-900 p-6 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
             <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Type className="w-5 h-5 text-violet-500" />
@@ -244,7 +244,7 @@ export const DesignSystemView: React.FC = () => {
 
           <div className="space-y-4">
             {/* Display H1 */}
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-2">
+            <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-2">
               <div>
                 <p className="text-xs font-bold text-violet-600 dark:text-violet-400 font-mono mb-1">Page Title / Hero Heading (text-2xl / font-extrabold)</p>
                 <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Ringkasan Progres Karir &amp; Lamaran Kerja</h1>
@@ -253,7 +253,7 @@ export const DesignSystemView: React.FC = () => {
             </div>
 
             {/* H2 Section */}
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-2">
+            <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-2">
               <div>
                 <p className="text-xs font-bold text-violet-600 dark:text-violet-400 font-mono mb-1">Card Header / Sub-section (text-base / font-bold)</p>
                 <h2 className="text-base font-bold text-slate-900 dark:text-white">Daftar Lamaran Terkirim Bulan Ini</h2>
@@ -262,7 +262,7 @@ export const DesignSystemView: React.FC = () => {
             </div>
 
             {/* Body */}
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-2">
+            <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-2">
               <div>
                 <p className="text-xs font-bold text-violet-600 dark:text-violet-400 font-mono mb-1">Body Text (text-sm / font-medium)</p>
                 <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -273,10 +273,10 @@ export const DesignSystemView: React.FC = () => {
             </div>
 
             {/* Monospace Code */}
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-2">
+            <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-2">
               <div>
                 <p className="text-xs font-bold text-violet-600 dark:text-violet-400 font-mono mb-1">Code &amp; Referral Token (font-mono / font-bold)</p>
-                <code className="text-sm font-mono font-bold text-slate-900 dark:text-white tracking-wider bg-white dark:bg-slate-900 px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700">
+                <code className="text-sm font-mono font-bold text-slate-900 dark:text-white tracking-wider bg-white dark:bg-slate-900 px-3 py-1 rounded-[10px] border border-slate-200 dark:border-slate-700">
                   KARIER-AI-2026-SUPER
                 </code>
               </div>
@@ -298,27 +298,27 @@ export const DesignSystemView: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Buttons Showcase */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-4">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2">
                 Variasi Tombol (Button Styles)
               </h3>
 
               <div className="flex flex-wrap gap-3 items-center">
-                <button className="px-4 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs shadow-md shadow-violet-600/20 transition flex items-center gap-1.5 cursor-pointer">
+                <button className="px-4 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs shadow-md shadow-violet-600/20 transition flex items-center gap-1.5 cursor-pointer">
                   <Plus className="w-4 h-4" />
                   <span>Primary Indigo</span>
                 </button>
 
-                <button className="px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer">
+                <button className="px-4 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer">
                   Secondary Ghost
                 </button>
 
-                <button className="px-3.5 py-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-bold text-xs border border-emerald-200/80 dark:border-emerald-800/60 transition flex items-center gap-1 cursor-pointer">
+                <button className="px-3.5 py-2 rounded-[10px] bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-bold text-xs border border-emerald-200/80 dark:border-emerald-800/60 transition flex items-center gap-1 cursor-pointer">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Success Outline</span>
                 </button>
 
-                <button className="px-3.5 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-bold text-xs border border-rose-200/80 dark:border-rose-800/60 transition flex items-center gap-1 cursor-pointer">
+                <button className="px-3.5 py-2 rounded-[10px] bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-bold text-xs border border-rose-200/80 dark:border-rose-800/60 transition flex items-center gap-1 cursor-pointer">
                   <XCircle className="w-3.5 h-3.5" />
                   <span>Danger Action</span>
                 </button>
@@ -326,26 +326,26 @@ export const DesignSystemView: React.FC = () => {
             </div>
 
             {/* Badges & Pills */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-4">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2">
                 Badges, Tags &amp; Live Indicators
               </h3>
 
               <div className="flex flex-wrap gap-2 items-center">
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-violet-50 dark:bg-violet-950 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-800 flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-violet-50 dark:bg-violet-950 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-800 flex items-center gap-1">
                   <Sparkles className="w-3 h-3 text-violet-500" />
                   AI Recommended
                 </span>
 
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                <span className="px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
                   Offering Received
                 </span>
 
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                <span className="px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
                   Interview Besok
                 </span>
 
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800">
+                <span className="px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800">
                   ATS Score 92%
                 </span>
               </div>
@@ -353,7 +353,7 @@ export const DesignSystemView: React.FC = () => {
           </div>
 
           {/* Interactive Right Drawer Preview Trigger Card */}
-          <div className="bg-[#0D3BD9] rounded-2xl p-6 text-white border border-blue-500/50 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="bg-[#0D3BD9] rounded-[10px] p-6 text-white border border-blue-500/50 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="w-5 h-5 text-violet-400" />
@@ -366,7 +366,7 @@ export const DesignSystemView: React.FC = () => {
 
             <button
               onClick={() => setIsDemoDrawerOpen(true)}
-              className="px-5 py-3 rounded-lg bg-white hover:bg-slate-100 text-violet-900 font-extrabold text-xs shadow-lg transition flex items-center gap-2 shrink-0 cursor-pointer"
+              className="px-5 py-3 rounded-[10px] bg-white hover:bg-slate-100 text-violet-900 font-extrabold text-xs shadow-lg transition flex items-center gap-2 shrink-0 cursor-pointer"
             >
               <ExternalLink className="w-4 h-4 text-violet-600" />
               <span>Uji Coba Drawer Kanan</span>
@@ -387,7 +387,7 @@ export const DesignSystemView: React.FC = () => {
             {/* Header Drawer */}
             <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center shadow-md">
+                <div className="w-10 h-10 rounded-[10px] bg-violet-600 text-white flex items-center justify-center shadow-md">
                   <SlidersHorizontal className="w-5 h-5" />
                 </div>
                 <div>
@@ -398,7 +398,7 @@ export const DesignSystemView: React.FC = () => {
 
               <button
                 onClick={() => setIsDemoDrawerOpen(false)}
-                className="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                className="p-2 rounded-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -406,7 +406,7 @@ export const DesignSystemView: React.FC = () => {
 
             {/* Content Body */}
             <div className="p-6 overflow-y-auto space-y-4 flex-1">
-              <div className="p-4 rounded-xl bg-violet-50/60 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/40 space-y-2">
+              <div className="p-4 rounded-[10px] bg-violet-50/60 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/40 space-y-2">
                 <p className="text-xs font-bold text-violet-900 dark:text-violet-200 flex items-center gap-1.5">
                   <Info className="w-4 h-4 text-violet-600 dark:text-violet-400" />
                   <span>Kompatibilitas DESIGN.md</span>
@@ -424,7 +424,7 @@ export const DesignSystemView: React.FC = () => {
                   <input
                     type="text"
                     defaultValue="PT Tech Innovasi Indonesia"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
                   />
                 </div>
 
@@ -432,7 +432,7 @@ export const DesignSystemView: React.FC = () => {
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                     Contoh Pilihan Status Tahapan
                   </label>
-                  <select className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white">
+                  <select className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white">
                     <option>Screening CV</option>
                     <option>Interview User</option>
                     <option>Offering Letter</option>
@@ -445,13 +445,13 @@ export const DesignSystemView: React.FC = () => {
             <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-end gap-2.5">
               <button
                 onClick={() => setIsDemoDrawerOpen(false)}
-                className="px-5 py-2.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800 transition cursor-pointer"
+                className="px-5 py-2.5 rounded-[10px] text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800 transition cursor-pointer"
               >
                 Tutup Demo
               </button>
               <button
                 onClick={() => setIsDemoDrawerOpen(false)}
-                className="px-6 py-2.5 rounded-lg text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white shadow-md transition cursor-pointer"
+                className="px-6 py-2.5 rounded-[10px] text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white shadow-md transition cursor-pointer"
               >
                 Simpan Perubahan
               </button>

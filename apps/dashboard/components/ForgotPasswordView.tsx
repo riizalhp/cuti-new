@@ -188,7 +188,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
       {/* Top Header Navigation */}
       <div className="absolute top-6 left-6 right-6 flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#0D3BD9] flex items-center justify-center font-black text-white text-lg shadow-lg">
+          <div className="w-10 h-10 rounded-[10px] bg-[#0D3BD9] flex items-center justify-center font-black text-white text-lg shadow-lg">
             C
           </div>
           <div>
@@ -205,7 +205,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
           {toggleDarkMode && (
             <button
               onClick={toggleDarkMode}
-              className="p-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-xs font-semibold text-slate-300 transition flex items-center gap-2"
+              className="p-2.5 rounded-[10px] bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-xs font-semibold text-slate-300 transition flex items-center gap-2"
             >
               {isDarkMode ? 'Mode Terang' : 'Mode Gelap'}
             </button>
@@ -213,7 +213,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
 
           <button
             onClick={onBackToLogin}
-            className="px-4 py-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-200 transition flex items-center gap-2 group"
+            className="px-4 py-2.5 rounded-[10px] bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-200 transition flex items-center gap-2 group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform text-violet-400" />
             <span>Kembali ke Login</span>
@@ -222,12 +222,12 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
       </div>
 
       {/* Main Container Card */}
-      <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden relative z-10 backdrop-blur-xl mt-16 mb-8">
+      <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 bg-slate-900/90 border border-slate-800 rounded-[10px] shadow-2xl overflow-hidden relative z-10 backdrop-blur-xl mt-16 mb-8">
         
         {/* Left Side: Security Guidance & Info */}
         <div className="lg:col-span-5 bg-gradient-to-br from-violet-950 via-slate-900 to-slate-950 p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800 relative">
           <div className="space-y-6">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-violet-500/20 text-violet-300 border border-violet-500/30">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-xs font-bold bg-violet-500/20 text-violet-300 border border-violet-500/30">
               <ShieldCheck className="w-3.5 h-3.5 text-violet-400" />
               <span>Verifikasi Aman 256-bit</span>
             </span>
@@ -335,7 +335,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
           {step === 1 && (
             <div className="space-y-6">
               <div>
-                <div className="w-12 h-12 rounded-xl bg-violet-600/20 border border-violet-500/30 text-violet-400 flex items-center justify-center mb-4">
+                <div className="w-12 h-12 rounded-[10px] bg-violet-600/20 border border-violet-500/30 text-violet-400 flex items-center justify-center mb-4">
                   <KeyRound className="w-6 h-6" />
                 </div>
                 <h3 className="text-xl font-extrabold text-white">
@@ -347,7 +347,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
               </div>
 
               {errorMessage && (
-                <div className="p-3 rounded-lg bg-rose-950/80 border border-rose-800 text-rose-200 text-xs flex items-center gap-2">
+                <div className="p-3 rounded-[10px] bg-rose-950/80 border border-rose-800 text-rose-200 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
                   <span>{errorMessage}</span>
                 </div>
@@ -366,12 +366,12 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
                       placeholder="andi.pratama@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 text-xs rounded-lg border border-slate-700 bg-slate-800/80 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      className="w-full pl-10 pr-4 py-2.5 text-xs rounded-[10px] border border-slate-700 bg-slate-800/80 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
                     />
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-violet-950/50 border border-violet-800/40 text-xs text-violet-200 flex items-start gap-2.5">
+                <div className="p-3.5 rounded-[10px] bg-violet-950/50 border border-violet-800/40 text-xs text-violet-200 flex items-start gap-2.5">
                   <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                   <p className="text-[11px] leading-relaxed">
                     Sistem akan secara otomatis mengirimkan kode verifikasi 6-digit rahasia ke alamat email di atas.
@@ -381,7 +381,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-xs transition shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-[10px] bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-xs transition shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
@@ -411,7 +411,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
           {step === 2 && (
             <div className="space-y-6">
               <div>
-                <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center mb-4">
+                <div className="w-12 h-12 rounded-[10px] bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center mb-4">
                   <Clock className="w-6 h-6" />
                 </div>
                 <h3 className="text-xl font-extrabold text-white">
@@ -423,14 +423,14 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
               </div>
 
               {errorMessage && (
-                <div className="p-3 rounded-lg bg-rose-950/80 border border-rose-800 text-rose-200 text-xs flex items-center gap-2">
+                <div className="p-3 rounded-[10px] bg-rose-950/80 border border-rose-800 text-rose-200 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
                   <span>{errorMessage}</span>
                 </div>
               )}
 
               {/* Demo Auto-Fill Shortcut */}
-              <div className="p-3 rounded-lg bg-slate-800/80 border border-slate-700 flex items-center justify-between gap-2">
+              <div className="p-3 rounded-[10px] bg-slate-800/80 border border-slate-700 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 text-xs text-slate-300">
                   <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
                   <span>Ingin isi otomatis kode demo?</span>
@@ -438,7 +438,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
                 <button
                   type="button"
                   onClick={handleAutoFillDemoOtp}
-                  className="px-3 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs transition"
+                  className="px-3 py-1 rounded-[10px] bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs transition"
                 >
                   Isi (123456)
                 </button>
@@ -460,7 +460,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
                         value={digit}
                         onChange={(e) => handleOtpChange(idx, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                        className="w-10 h-12 sm:w-12 sm:h-14 text-center font-black text-lg sm:text-xl rounded-lg border border-slate-700 bg-slate-800/90 text-amber-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-500 focus:outline-none transition"
+                        className="w-10 h-12 sm:w-12 sm:h-14 text-center font-black text-lg sm:text-xl rounded-[10px] border border-slate-700 bg-slate-800/90 text-amber-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-500 focus:outline-none transition"
                       />
                     ))}
                   </div>
@@ -488,7 +488,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="flex-1 py-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition border border-slate-700"
+                    className="flex-1 py-3 rounded-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition border border-slate-700"
                   >
                     Ubah Email
                   </button>
@@ -496,7 +496,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="flex-2 py-3 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-xs transition shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2"
+                    className="flex-2 py-3 rounded-[10px] bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-xs transition shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2"
                   >
                     {isLoading ? (
                       <RefreshCw className="w-4 h-4 animate-spin" />
@@ -516,7 +516,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
           {step === 3 && (
             <div className="space-y-6">
               <div>
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mb-4">
+                <div className="w-12 h-12 rounded-[10px] bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mb-4">
                   <Lock className="w-6 h-6" />
                 </div>
                 <h3 className="text-xl font-extrabold text-white">
@@ -528,7 +528,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
               </div>
 
               {errorMessage && (
-                <div className="p-3 rounded-lg bg-rose-950/80 border border-rose-800 text-rose-200 text-xs flex items-center gap-2">
+                <div className="p-3 rounded-[10px] bg-rose-950/80 border border-rose-800 text-rose-200 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
                   <span>{errorMessage}</span>
                 </div>
@@ -548,7 +548,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
                       placeholder="Minimal 8 karakter"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full pl-10 pr-10 py-2.5 text-xs rounded-lg border border-slate-700 bg-slate-800/80 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      className="w-full pl-10 pr-10 py-2.5 text-xs rounded-[10px] border border-slate-700 bg-slate-800/80 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
                     />
                     <button
                       type="button"
@@ -562,7 +562,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
 
                 {/* Password Strength Bar */}
                 {newPassword && (
-                  <div className="p-3 rounded-lg bg-slate-800/60 border border-slate-700/80 space-y-2">
+                  <div className="p-3 rounded-[10px] bg-slate-800/60 border border-slate-700/80 space-y-2">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-slate-400 font-medium">Kekuatan Kata Sandi:</span>
                       <span className={`font-bold ${
@@ -602,7 +602,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
                       placeholder="Ulangi kata sandi baru"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full pl-10 pr-10 py-2.5 text-xs rounded-lg border border-slate-700 bg-slate-800/80 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      className="w-full pl-10 pr-10 py-2.5 text-xs rounded-[10px] border border-slate-700 bg-slate-800/80 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
                     />
                     <button
                       type="button"
@@ -617,7 +617,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-xs transition shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2 mt-4"
+                  className="w-full py-3 rounded-[10px] bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-xs transition shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2 mt-4"
                 >
                   {isLoading ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
@@ -648,7 +648,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-emerald-950/60 border border-emerald-800/50 text-emerald-200 text-xs flex items-center justify-center gap-2">
+              <div className="p-4 rounded-[10px] bg-emerald-950/60 border border-emerald-800/50 text-emerald-200 text-xs flex items-center justify-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>Status Akun: Aman &amp; Terverifikasi</span>
               </div>
@@ -662,7 +662,7 @@ export const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = () => {
                     onBackToLogin();
                   }
                 }}
-                className="w-full py-3.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-[10px] bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
               >
                 <span>Masuk Sekarang dengan Kata Sandi Baru</span>
                 <ArrowRight className="w-4 h-4" />

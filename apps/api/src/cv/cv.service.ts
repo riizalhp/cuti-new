@@ -4,6 +4,7 @@ import { CreateCvDto } from './dto/create-cv.dto';
 import { UpdateCvDto } from './dto/update-cv.dto';
 import { AtsCalculatorService } from './services/ats-calculator.service';
 import { mapCvToResponse } from './dto/cv-response.dto';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class CvService {
@@ -38,21 +39,30 @@ export class CvService {
     if (dto.languages?.length) filledSections++;
     const completeness = (filledSections / totalSections) * 100;
 
-    const cv = await this.prisma.cV.create({
+    const cvData = {
+      personalInfo: dto.personalInfo,
+      summary: dto.summary,
+      experiences: dto.experiences,
+      education: dto.education,
+      skills: dto.skills,
+      certifications: dto.certifications,
+      projects: dto.projects,
+      languages: dto.languages,
+      atsScore,
+      completeness,
+    };
+
+    const cv = await this.prisma.cv_projects.create({
       data: {
-        userId,
+        id: crypto.randomUUID(),
+        user_id: userId,
         title: dto.title,
-        templateId: dto.templateId,
-        ...(dto.personalInfo && { personalInfo: dto.personalInfo }),
-        ...(dto.summary && { summary: dto.summary }),
-        ...(dto.experiences && { experiences: dto.experiences }),
-        ...(dto.education && { education: dto.education }),
-        ...(dto.skills && { skills: dto.skills }),
-        ...(dto.certifications && { certifications: dto.certifications }),
-        ...(dto.projects && { projects: dto.projects }),
-        ...(dto.languages && { languages: dto.languages }),
-        atsScore,
-        completeness,
+        template_id: dto.templateId ?? 'default',
+        target_position: (dto.personalInfo as any)?.targetPosition || dto.title || 'General',
+        data: cvData,
+        status: 'DRAFT',
+        is_active: true,
+        updated_at: new Date(),
       },
     });
 
@@ -63,13 +73,13 @@ export class CvService {
     const skip = (page - 1) * limit;
 
     const [cvs, total] = await Promise.all([
-      this.prisma.cV.findMany({
-        where: { userId },
-        orderBy: { updatedAt: 'desc' },
+      this.prisma.cv_projects.findMany({
+        where: { user_id: userId },
+        orderBy: { updated_at: 'desc' },
         skip,
         take: limit,
       }),
-      this.prisma.cV.count({ where: { userId } }),
+      this.prisma.cv_projects.count({ where: { user_id: userId } }),
     ]);
 
     return {
@@ -84,7 +94,7 @@ export class CvService {
   }
 
   async findOne(id: string) {
-    const cv = await this.prisma.cV.findUnique({
+    const cv = await this.prisma.cv_projects.findUnique({
       where: { id },
     });
 
@@ -97,7 +107,7 @@ export class CvService {
 
   async update(id: string, dto: UpdateCvDto) {
     // Get existing CV
-    const existingCv = await this.prisma.cV.findUnique({
+    const existingCv = await this.prisma.cv_projects.findUnique({
       where: { id },
     });
 
@@ -105,20 +115,21 @@ export class CvService {
       throw new NotFoundException('CV not found');
     }
 
+    const existingData = (existingCv.data as any) || {};
+
     // Merge existing data with updates
     const updatedData = {
-      personalInfo: dto.personalInfo ?? existingCv.personalInfo,
-      summary: dto.summary ?? existingCv.summary,
-      experiences: dto.experiences ?? existingCv.experiences,
-      education: dto.education ?? existingCv.education,
-      skills: dto.skills ?? existingCv.skills,
-      certifications: dto.certifications ?? existingCv.certifications,
-      projects: dto.projects ?? existingCv.projects,
-      languages: dto.languages ?? existingCv.languages,
+      personalInfo: dto.personalInfo ?? existingData.personalInfo,
+      summary: dto.summary ?? existingData.summary,
+      experiences: dto.experiences ?? existingData.experiences,
+      education: dto.education ?? existingData.education,
+      skills: dto.skills ?? existingData.skills,
+      certifications: dto.certifications ?? existingData.certifications,
+      projects: dto.projects ?? existingData.projects,
+      languages: dto.languages ?? existingData.languages,
     };
 
     // Recalculate ATS score with updated data
-    // Cast JsonValue fields to the types expected by ATS calculator
     const atsScore = this.atsCalculator.calculateScore({
       personalInfo: (updatedData.personalInfo as any) ?? undefined,
       summary: (updatedData.summary as string) ?? undefined,
@@ -143,21 +154,17 @@ export class CvService {
     if (updatedData.languages && Array.isArray(updatedData.languages) && updatedData.languages.length > 0) filledSections++;
     const completeness = (filledSections / totalSections) * 100;
 
-    const cv = await this.prisma.cV.update({
+    const cv = await this.prisma.cv_projects.update({
       where: { id },
       data: {
         ...(dto.title && { title: dto.title }),
-        ...(dto.templateId !== undefined && { templateId: dto.templateId }),
-        ...(dto.personalInfo !== undefined && { personalInfo: dto.personalInfo }),
-        ...(dto.summary !== undefined && { summary: dto.summary }),
-        ...(dto.experiences !== undefined && { experiences: dto.experiences }),
-        ...(dto.education !== undefined && { education: dto.education }),
-        ...(dto.skills !== undefined && { skills: dto.skills }),
-        ...(dto.certifications !== undefined && { certifications: dto.certifications }),
-        ...(dto.projects !== undefined && { projects: dto.projects }),
-        ...(dto.languages !== undefined && { languages: dto.languages }),
-        atsScore,
-        completeness,
+        ...(dto.templateId !== undefined && { template_id: dto.templateId }),
+        data: {
+          ...updatedData,
+          atsScore,
+          completeness,
+        },
+        updated_at: new Date(),
       },
     });
 
@@ -165,7 +172,7 @@ export class CvService {
   }
 
   async remove(id: string) {
-    const cv = await this.prisma.cV.findUnique({
+    const cv = await this.prisma.cv_projects.findUnique({
       where: { id },
     });
 
@@ -173,7 +180,7 @@ export class CvService {
       throw new NotFoundException('CV not found');
     }
 
-    await this.prisma.cV.delete({
+    await this.prisma.cv_projects.delete({
       where: { id },
     });
 
@@ -181,7 +188,7 @@ export class CvService {
   }
 
   async setPrimary(id: string, userId: string) {
-    const cv = await this.prisma.cV.findUnique({
+    const cv = await this.prisma.cv_projects.findUnique({
       where: { id },
     });
 
@@ -190,15 +197,15 @@ export class CvService {
     }
 
     // Unset all other CVs as primary
-    await this.prisma.cV.updateMany({
-      where: { userId, isPrimary: true },
-      data: { isPrimary: false },
+    await this.prisma.cv_projects.updateMany({
+      where: { user_id: userId, is_active: true },
+      data: { is_active: false },
     });
 
     // Set this CV as primary
-    const updatedCv = await this.prisma.cV.update({
+    const updatedCv = await this.prisma.cv_projects.update({
       where: { id },
-      data: { isPrimary: true },
+      data: { is_active: true, updated_at: new Date() },
     });
 
     return mapCvToResponse(updatedCv);

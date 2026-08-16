@@ -55,11 +55,11 @@ export const RecentActivityTimeline: React.FC = () => {
   ];
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors h-full flex flex-col justify-between">
+    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors h-full flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+            <div className="p-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
               <Clock className="w-5 h-5" />
             </div>
             <div>
@@ -89,7 +89,7 @@ export const RecentActivityTimeline: React.FC = () => {
                 </div>
 
                 {/* Content Box */}
-                <div className="flex-1 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition">
+                <div className="flex-1 p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
                       <h4 className="font-bold text-xs text-slate-900 dark:text-white">
@@ -117,7 +117,7 @@ export const RecentActivityTimeline: React.FC = () => {
       <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800">
         <button
           onClick={() => window.location.href = '/tracker'}
-          className="w-full text-center py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer border-0"
+          className="w-full text-center py-2 px-3 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer border-0"
         >
           Lihat Selengkapnya di Tracker →
         </button>

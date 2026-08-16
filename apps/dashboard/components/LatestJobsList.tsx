@@ -62,16 +62,16 @@ export const LatestJobsList: React.FC = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors space-y-4">
+    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 flex items-center justify-center border border-orange-100 dark:border-orange-900/50">
+          <div className="w-8 h-8 rounded-[10px] bg-orange-50 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 flex items-center justify-center border border-orange-100 dark:border-orange-900/50">
             <Briefcase className="w-4 h-4" />
           </div>
           <div>
             <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
               <span>Lowongan Paling Relevan Untukmu</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300">
+              <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300">
                 Match &gt;85%
               </span>
             </h3>
@@ -96,11 +96,11 @@ export const LatestJobsList: React.FC = () => {
           return (
             <div
               key={job.id}
-              className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition flex flex-col justify-between space-y-3"
+              className="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition flex flex-col justify-between space-y-3"
             >
               <div>
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                  <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                     Match {job.matchScore}
                   </span>
                   <span className="text-[10px] text-slate-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-800">
@@ -135,7 +135,7 @@ export const LatestJobsList: React.FC = () => {
               <div className="flex items-center gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-800">
                 <button
                   onClick={() => setSelectedJob(job)}
-                  className="flex-1 py-2 px-2 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer border-0"
+                  className="flex-1 py-2 px-2 rounded-[10px] bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer border-0"
                 >
                   Detail
                 </button>
@@ -143,7 +143,7 @@ export const LatestJobsList: React.FC = () => {
                 <button
                   onClick={() => handleApply(job.id)}
                   disabled={isApplied}
-                  className={`flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer border-0 ${
+                  className={`flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-[10px] font-bold text-xs transition shadow-sm cursor-pointer border-0 ${
                     isApplied
                       ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                       : 'bg-orange-500 hover:bg-orange-600 text-white'
@@ -170,15 +170,15 @@ export const LatestJobsList: React.FC = () => {
       {/* Job Detail Modal */}
       {selectedJob && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg p-6 relative">
+          <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg p-6 relative">
             <button
               onClick={() => setSelectedJob(null)}
-              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+              className="absolute top-4 right-4 p-1.5 rounded-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+            <span className="px-2.5 py-0.5 rounded-[10px] text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
               Match Score {selectedJob.matchScore}
             </span>
 
@@ -189,7 +189,7 @@ export const LatestJobsList: React.FC = () => {
               {selectedJob.company} • {selectedJob.location}
             </p>
 
-            <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-xl space-y-2 text-xs mb-4 border border-slate-100 dark:border-slate-700">
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-[10px] space-y-2 text-xs mb-4 border border-slate-100 dark:border-slate-700">
               <p className="text-slate-600 dark:text-slate-300">
                 <strong className="text-slate-900 dark:text-white">Estimasi Gaji:</strong> {selectedJob.salary}
               </p>
@@ -213,7 +213,7 @@ export const LatestJobsList: React.FC = () => {
                 setSelectedJob(null);
               }}
               disabled={appliedJobs.includes(selectedJob.id)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:bg-emerald-600 text-white font-bold text-xs shadow-md transition cursor-pointer border-0"
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 disabled:bg-emerald-600 text-white font-bold text-xs shadow-md transition cursor-pointer border-0"
             >
               {appliedJobs.includes(selectedJob.id) ? (
                 <>

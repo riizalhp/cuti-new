@@ -107,10 +107,11 @@ Mobile:  w-72 (288px) fixed overlay with -translate-x-full when closed
 
 ### Border Radius
 ```
-Cards:          rounded-2xl  (16px)
-Buttons/Inputs: rounded-xl   (12px)
+Cards:          rounded-[10px]  (16px)
+Buttons:        rounded-[10px] (10px)
+Inputs:         rounded-[10px]   (12px)
 Badges:         rounded-full
-Icons bg:       rounded-xl   (12px)
+Icons bg:       rounded-[10px]   (12px)
 ```
 
 ### Shadows
@@ -182,7 +183,7 @@ export const Button = forwardRef(({ variant = 'primary', className, children, ..
   <button
     ref={ref}
     className={cn(
-      'flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition cursor-pointer',
+      'flex items-center justify-center gap-1.5 py-2 px-3 rounded-[10px] text-xs font-semibold transition cursor-pointer',
       variants[variant],
       className
     )}
@@ -245,7 +246,7 @@ export const Badge = ({ color = 'info', children, className }) => (
 
 #### Base Card
 ```tsx
-<div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 
+<div className="p-4 rounded-[10px] border border-slate-200 dark:border-slate-800 
                 bg-white dark:bg-slate-900 shadow-sm transition-colors
                 hover:border-indigo-300 dark:hover:border-indigo-700">
   {/* Content */}
@@ -254,7 +255,7 @@ export const Badge = ({ color = 'info', children, className }) => (
 
 #### Gradient Card (Premium)
 ```tsx
-<div className="relative overflow-hidden rounded-2xl 
+<div className="relative overflow-hidden rounded-[10px] 
                 bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950
                 border border-indigo-700/40 p-4 text-white shadow-lg">
   <div className="absolute top-0 right-0 -mr-6 -mt-6 w-20 h-20 
@@ -265,7 +266,7 @@ export const Badge = ({ color = 'info', children, className }) => (
 
 #### Job/Content Card
 ```tsx
-<div className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 
+<div className="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 
                 bg-slate-50/50 dark:bg-slate-800/40 
                 hover:border-indigo-300 dark:hover:border-indigo-700 
                 transition flex flex-col justify-between">
@@ -286,7 +287,7 @@ const hoverColors = {
 
 export const Card = ({ hover = 'indigo', children, className }) => (
   <div className={cn(
-    'p-4 rounded-xl border border-slate-200 dark:border-slate-800',
+    'p-4 rounded-[10px] border border-slate-200 dark:border-slate-800',
     'bg-white dark:bg-slate-900 shadow-sm transition-colors',
     hoverColors[hover],
     className
@@ -297,7 +298,7 @@ export const Card = ({ hover = 'indigo', children, className }) => (
 
 export const CardGradient = ({ children, className }) => (
   <div className={cn(
-    'relative overflow-hidden rounded-2xl',
+    'relative overflow-hidden rounded-[10px]',
     'bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950',
     'border border-indigo-700/40 p-4 text-white shadow-lg',
     className
@@ -334,7 +335,7 @@ export const NavItem = ({ icon: Icon, label, badge, active, onClick }) => (
   <button
     onClick={onClick}
     className={cn(
-      'w-full flex items-center rounded-xl text-xs font-semibold',
+      'w-full flex items-center rounded-[10px] text-xs font-semibold',
       'transition-all duration-200 group relative justify-between px-3.5 py-2.5',
       active 
         ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
@@ -359,14 +360,14 @@ export const NavItem = ({ icon: Icon, label, badge, active, onClick }) => (
 
 ```tsx
 // Text Input
-<input className="w-full px-3 py-2 rounded-xl border border-slate-200 
+<input className="w-full px-3 py-2 rounded-[10px] border border-slate-200 
                   dark:border-slate-800 bg-white dark:bg-slate-900
                   text-sm text-slate-900 dark:text-slate-100
                   placeholder:text-slate-400 dark:placeholder:text-slate-500
                   focus:outline-none focus:ring-2 focus:ring-indigo-500" />
 
 // Select
-<select className="w-full px-3 py-2 rounded-xl border border-slate-200 
+<select className="w-full px-3 py-2 rounded-[10px] border border-slate-200 
                    dark:border-slate-800 bg-white dark:bg-slate-900
                    text-sm text-slate-900 dark:text-slate-100
                    focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -382,7 +383,7 @@ export const NavItem = ({ icon: Icon, label, badge, active, onClick }) => (
 
 // Modal
 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl 
+  <div className="bg-white dark:bg-slate-900 rounded-[10px] shadow-2xl 
                   border border-slate-200 dark:border-slate-800 
                   max-w-md w-full p-6">
     {/* Content */}
@@ -575,7 +576,7 @@ export function ThemeToggle() {
   return (
     <button 
       onClick={toggle}
-      className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 
+      className="p-2 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-800 
                  text-slate-600 dark:text-slate-300 transition"
       aria-label="Toggle theme"
     >
@@ -730,7 +731,7 @@ export function cn(...inputs: ClassValue[]) {
 ### Section Header
 ```tsx
 <div className="flex items-center gap-2 mb-4">
-  <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 
+  <div className="p-2 rounded-[10px] bg-indigo-50 dark:bg-indigo-950/60 
                   text-indigo-600 dark:text-indigo-400">
     <Icon className="w-5 h-5" />
   </div>
@@ -784,7 +785,7 @@ import Image from 'next/image'
   alt="Description"
   width={400}
   height={300}
-  className="rounded-xl"
+  className="rounded-[10px]"
 />
 ```
 

@@ -60,17 +60,17 @@ export const ApplicationChartCard: React.FC = () => {
   ];
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex flex-col justify-between h-full space-y-4">
+    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex flex-col justify-between h-full space-y-4">
       {/* Header Row */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 flex items-center justify-center border border-violet-100 dark:border-violet-900/50">
+          <div className="w-8 h-8 rounded-[10px] bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 flex items-center justify-center border border-violet-100 dark:border-violet-900/50">
             <TrendingUp className="w-4 h-4" />
           </div>
           <div>
             <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
               <span>Progress &amp; Funnel Lamaran</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300">
+              <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300">
                 4 Tahapan
               </span>
             </h3>
@@ -97,11 +97,11 @@ export const ApplicationChartCard: React.FC = () => {
             <div
               key={step.id}
               onClick={() => router.push('/tracker')}
-              className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition cursor-pointer flex flex-col space-y-2 group"
+              className="p-3 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition cursor-pointer flex flex-col space-y-2 group"
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="p-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">
+                  <div className="p-1.5 rounded-[10px] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">
                     <Icon className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400" />
                   </div>
                   <div className="truncate">
@@ -118,7 +118,7 @@ export const ApplicationChartCard: React.FC = () => {
                   <span className="text-xs font-extrabold text-slate-900 dark:text-white">
                     {step.count}
                   </span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${step.badgeColor}`}>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-[10px] ${step.badgeColor}`}>
                     {step.rate}
                   </span>
                 </div>
@@ -137,7 +137,7 @@ export const ApplicationChartCard: React.FC = () => {
       </div>
 
       {/* Insight & Action Box */}
-      <div className="p-3 rounded-xl bg-violet-50/80 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/60 space-y-2">
+      <div className="p-3 rounded-[10px] bg-violet-50/80 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/60 space-y-2">
         <div className="flex items-start gap-2 text-xs">
           <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
           <div className="flex-1">
@@ -154,7 +154,7 @@ export const ApplicationChartCard: React.FC = () => {
       {/* Footer Action Button matching UpcomingScheduleCard */}
       <button
         onClick={() => router.push('/tracker')}
-        className="w-full text-center py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer border-0"
+        className="w-full text-center py-2 px-3 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer border-0"
       >
         Analisis Detail Conversion Rate di Tracker →
       </button>

@@ -81,7 +81,7 @@ export const BulletPointListInput: React.FC<BulletPointListInputProps> = ({
       )}
 
       {/* A4-paper-like lines container */}
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden shadow-2xs">
+      <div className="rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden shadow-2xs">
         {lines.map((line, idx) => (
           <div
             key={idx}
@@ -108,7 +108,7 @@ export const BulletPointListInput: React.FC<BulletPointListInputProps> = ({
               <button
                 type="button"
                 onClick={() => onOptimizeBullet(line, idx)}
-                className="px-2 py-1 mr-1 text-[10px] font-extrabold text-purple-700 dark:text-purple-300 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/80 border border-purple-200 dark:border-purple-800 rounded-lg transition shrink-0 cursor-pointer opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 flex items-center gap-1"
+                className="px-2 py-1 mr-1 text-[10px] font-extrabold text-purple-700 dark:text-purple-300 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/80 border border-purple-200 dark:border-purple-800 rounded-[10px] transition shrink-0 cursor-pointer opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 flex items-center gap-1"
                 title="Optimalkan bullet ini dengan AI"
                 tabIndex={-1}
               >
@@ -121,7 +121,7 @@ export const BulletPointListInput: React.FC<BulletPointListInputProps> = ({
             <button
               type="button"
               onClick={() => handleRemoveLine(idx)}
-              className={`p-2 mr-1 text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition shrink-0 cursor-pointer opacity-0 group-hover:opacity-100 ${
+              className={`p-2 mr-1 text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-[10px] transition shrink-0 cursor-pointer opacity-0 group-hover:opacity-100 ${
                 (lines.length > 1 || line) ? '' : 'pointer-events-none'
               }`}
               title="Hapus baris ini"
@@ -137,7 +137,7 @@ export const BulletPointListInput: React.FC<BulletPointListInputProps> = ({
       <button
         type="button"
         onClick={handleAddLine}
-        className="px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-900/60 text-orange-600 dark:text-orange-400 font-bold text-xs border border-orange-200/80 dark:border-orange-800/60 transition flex items-center gap-1.5 cursor-pointer shadow-2xs mt-1"
+        className="px-3 py-1.5 rounded-[10px] bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-900/60 text-orange-600 dark:text-orange-400 font-bold text-xs border border-orange-200/80 dark:border-orange-800/60 transition flex items-center gap-1.5 cursor-pointer shadow-2xs mt-1"
       >
         <Plus className="w-3.5 h-3.5" />
         <span>Tambah Baris</span>

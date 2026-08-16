@@ -177,7 +177,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {onCloseMobile && (
             <button
               onClick={onCloseMobile}
-              className="md:hidden p-1.5 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              className="md:hidden p-1.5 rounded-[10px] text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
               aria-label="Tutup Menu"
             >
               <X className="w-5 h-5" />
@@ -224,7 +224,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           }}
                           title={titleAttr}
                           className={cn(
-                            'w-full flex items-center rounded-xl text-xs font-bold transition-all duration-200 group relative cursor-pointer',
+                            'w-full flex items-center rounded-[10px] text-xs font-bold transition-all duration-200 group relative cursor-pointer',
                             !isExpanded
                               ? 'justify-center p-3'
                               : 'justify-between px-3.5 py-2.5',
@@ -348,7 +348,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onOpenUpgradeModal();
                 if (onCloseMobile) onCloseMobile();
               }}
-              className="w-full group bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-between py-2 px-3.5 rounded-xl text-xs font-bold transition shadow-md shadow-orange-500/20 cursor-pointer border-0"
+              className="w-full group bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-between py-2 px-3.5 rounded-[10px] text-xs font-bold transition shadow-md shadow-orange-500/20 cursor-pointer border-0"
             >
               <span>Upgrade Sekarang</span>
               <span className="w-6 h-6 rounded-full bg-white/20 text-white flex items-center justify-center shadow-inner group-hover:translate-x-0.5 transition-transform duration-200">

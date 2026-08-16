@@ -129,7 +129,7 @@ export const PositionSearchInput: React.FC<PositionSearchInputProps> = ({
           {selectedPositions.map((pos) => (
             <span
               key={pos}
-              className="px-3 py-1.5 rounded-full text-xs font-bold bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 flex items-center gap-1.5 shadow-2xs"
+              className="px-3 py-1.5 rounded-[10px] text-xs font-bold bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 flex items-center gap-1.5 shadow-2xs"
             >
               <Briefcase size={12} className="text-orange-500 shrink-0" />
               <span>{pos}</span>
@@ -160,7 +160,7 @@ export const PositionSearchInput: React.FC<PositionSearchInputProps> = ({
               setIsOpen(true);
               setSelectedIndex(-1);
             }}
-            className="w-full pl-10 pr-24 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition shadow-2xs"
+            className="w-full pl-10 pr-24 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition shadow-2xs"
           />
 
           <div className="absolute right-2 flex items-center gap-1">
@@ -186,7 +186,7 @@ export const PositionSearchInput: React.FC<PositionSearchInputProps> = ({
                   setIsOpen(!isOpen);
                 }
               }}
-              className="px-3 py-1 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[11px] rounded-lg transition cursor-pointer shadow-2xs"
+              className="px-3 py-1 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[11px] rounded-[10px] transition cursor-pointer shadow-2xs"
             >
               Tambah
             </button>
@@ -195,7 +195,7 @@ export const PositionSearchInput: React.FC<PositionSearchInputProps> = ({
 
         {/* Aligned Dropdown Popover */}
         {isOpen && displayOptions.length > 0 && (
-          <div className="absolute z-50 left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl text-xs py-1 divide-y divide-slate-100 dark:divide-slate-800/50">
+          <div className="absolute z-50 left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] shadow-xl text-xs py-1 divide-y divide-slate-100 dark:divide-slate-800/50">
             <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between">
               <span>POSISI TERPOPULER</span>
             </div>

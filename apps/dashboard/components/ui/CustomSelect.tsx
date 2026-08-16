@@ -52,7 +52,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between gap-2 ${pyClass} rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-medium shadow-2xs hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
+        className={`w-full flex items-center justify-between gap-2 ${pyClass} rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-medium shadow-2xs hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         <span className="truncate">
           {selectedOption && selectedOption.value !== '' ? (
@@ -65,7 +65,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 left-0 right-0 mt-1.5 max-h-56 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-xl py-1 text-xs animate-in fade-in-80 zoom-in-95 duration-150">
+        <div className="absolute z-50 left-0 right-0 mt-1.5 max-h-56 overflow-y-auto rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-xl py-1 text-xs animate-in fade-in-80 zoom-in-95 duration-150">
           {formattedOptions.map((opt) => {
             const isSelected = opt.value === value;
             return (

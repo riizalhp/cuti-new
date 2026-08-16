@@ -262,7 +262,7 @@ Gunakan Bahasa Indonesia kasual, ringkas, dan membangun kepercayaan.
 
 2. **Bento Grid Architecture**:
    - Pengelompokan informasi secara modular menggunakan Tailwind Grid (`grid-cols-12` atau `grid-cols-1 md:grid-cols-3`).
-   - Hirarki visual jelas dengan padding proporsional (`p-5`, `p-6`), batas border bersih (`border-slate-200 dark:border-slate-800`), dan sudut terukur (`rounded-2xl`).
+   - Hirarki visual jelas dengan padding proporsional (`p-5`, `p-6`), batas border bersih (`border-slate-200 dark:border-slate-800`), dan sudut terukur (`rounded-[10px]`).
 
 3. **Right-Hand Slide-in Drawer**:
    - Seluruh formulir interaktif kompleks (misalnya: *Tambah Lamaran*, *Detail ATS*, *Edit Profil*) WAJIB menggunakan slide-in drawer yang meluncur dari kanan layar (`fixed inset-0 z-50 justify-end slide-in-from-right`), BUKAN modal pop-up di tengah.
@@ -301,10 +301,10 @@ Gunakan Bahasa Indonesia kasual, ringkas, dan membangun kepercayaan.
 
 #### Button Styles
 
-- **Primary Indigo Button**: `px-4 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs shadow-md shadow-violet-600/20 transition flex items-center gap-1.5`
-- **Secondary Ghost Button**: `px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition`
-- **Success Outline Button**: `px-3.5 py-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-bold text-xs border border-emerald-200/80 dark:border-emerald-800/60 transition flex items-center gap-1`
-- **Danger Action Button**: `px-3.5 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-bold text-xs border border-rose-200/80 dark:border-rose-800/60 transition flex items-center gap-1`
+- **Primary Indigo Button**: `px-4 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs shadow-md shadow-violet-600/20 transition flex items-center gap-1.5`
+- **Secondary Ghost Button**: `px-4 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition`
+- **Success Outline Button**: `px-3.5 py-2 rounded-[10px] bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-bold text-xs border border-emerald-200/80 dark:border-emerald-800/60 transition flex items-center gap-1`
+- **Danger Action Button**: `px-3.5 py-2 rounded-[10px] bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-bold text-xs border border-rose-200/80 dark:border-rose-800/60 transition flex items-center gap-1`
 
 #### Badges & Live Status Indicators
 

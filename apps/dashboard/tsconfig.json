@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@cuti/db": ["../../packages/db/src/index.ts"]
     }
   },
   "include": [

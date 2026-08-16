@@ -180,7 +180,7 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
       >
         {/* COMPACT CARD STATE (Default or Hover Expanded) */}
         {showCompactCard ? (
-          <div className="relative w-[200px] md:w-[220px] p-3.5 rounded-2xl bg-slate-900/95 dark:bg-slate-900/95 text-white border border-slate-800 shadow-xl shadow-slate-950/25 backdrop-blur-md transition-all duration-200 ease-out animate-in fade-in zoom-in-95">
+          <div className="relative w-[200px] md:w-[220px] p-3.5 rounded-[10px] bg-slate-900/95 dark:bg-slate-900/95 text-white border border-slate-800 shadow-xl shadow-slate-950/25 backdrop-blur-md transition-all duration-200 ease-out animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between gap-1 mb-1">
               <div className="flex items-center gap-1.5 text-amber-300 font-extrabold text-xs">
                 <Sparkles className="w-3.5 h-3.5 fill-amber-300 shrink-0" />
@@ -216,7 +216,7 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
             <button
               type="button"
               onClick={handleOpenModal}
-              className="w-full py-1.5 px-3 rounded-lg bg-orange-500 hover:bg-orange-600 active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer"
+              className="w-full py-1.5 px-3 rounded-[10px] bg-orange-500 hover:bg-orange-600 active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer"
             >
               <span>Buatkan CV</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -227,7 +227,7 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
           <button
             type="button"
             onClick={handleOpenModal}
-            className="group relative flex items-center gap-2 pl-1.5 pr-4 py-1.5 rounded-full bg-slate-900/95 dark:bg-slate-900/95 text-white border border-slate-800 hover:border-orange-500/50 shadow-lg shadow-slate-950/20 backdrop-blur-md text-xs font-bold transition-all duration-200 ease-out cursor-pointer active:scale-95"
+            className="group relative flex items-center gap-2 pl-1.5 pr-4 py-1.5 rounded-[10px] bg-slate-900/95 dark:bg-slate-900/95 text-white border border-slate-800 hover:border-orange-500/50 shadow-lg shadow-slate-950/20 backdrop-blur-md text-xs font-bold transition-all duration-200 ease-out cursor-pointer active:scale-95"
             title="Klik untuk info layanan CV by HRD"
           >
             {/* Gambar Lingkaran Avatar HRD */}

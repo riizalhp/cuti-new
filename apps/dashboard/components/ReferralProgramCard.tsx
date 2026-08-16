@@ -37,11 +37,11 @@ export const ReferralProgramCard: React.FC = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex flex-col justify-between h-full space-y-4">
+    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex flex-col justify-between h-full space-y-4">
       <div className="space-y-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400">
+            <div className="p-2 rounded-[10px] bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400">
               <Users className="w-5 h-5" />
             </div>
             <div>
@@ -53,24 +53,24 @@ export const ReferralProgramCard: React.FC = () => {
               </p>
             </div>
           </div>
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60">
+          <span className="px-2.5 py-0.5 rounded-[10px] text-[11px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60">
             {invitedCount} Teman Bergabung
           </span>
         </div>
 
         {/* Code Box */}
-        <div className="bg-purple-50/50 dark:bg-purple-950/20 p-3 rounded-lg border border-purple-100 dark:border-purple-900/40">
+        <div className="bg-purple-50/50 dark:bg-purple-950/20 p-3 rounded-[10px] border border-purple-100 dark:border-purple-900/40">
           <p className="text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
             <span>Kode Referral Unik Anda:</span>
             <span className="text-purple-500 font-medium">Bonus Rp 50rb / teman</span>
           </p>
-          <div className="flex items-center justify-between gap-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-purple-200 dark:border-purple-800">
+          <div className="flex items-center justify-between gap-2 bg-white dark:bg-slate-800 p-2 rounded-[10px] border border-purple-200 dark:border-purple-800">
             <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white tracking-wider">
               {referralCode}
             </span>
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1 px-3 py-1 rounded-md bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold transition cursor-pointer shrink-0"
+              className="flex items-center gap-1 px-3 py-1 rounded-[10px] bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold transition cursor-pointer shrink-0"
             >
               {copied ? (
                 <>
@@ -88,7 +88,7 @@ export const ReferralProgramCard: React.FC = () => {
         </div>
 
         {/* Commission stats */}
-        <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40">
+        <div className="flex items-center justify-between p-3 rounded-[10px] bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40">
           <div>
             <p className="text-xs text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1">
               <span>Total Komisi Terkumpul</span>
@@ -98,13 +98,13 @@ export const ReferralProgramCard: React.FC = () => {
               {commission}
             </p>
           </div>
-          <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shrink-0">
+          <div className="w-10 h-10 rounded-[10px] bg-emerald-100 dark:bg-emerald-950/80 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shrink-0">
             <Coins className="w-5 h-5" />
           </div>
         </div>
 
         {/* Tier Gold Ambassador Progress */}
-        <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-1.5">
+        <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-1.5">
           <div className="flex items-center justify-between text-xs font-bold">
             <span className="text-slate-800 dark:text-slate-200 flex items-center gap-1">
               <span>Target Ambassador Tier:</span>
@@ -126,7 +126,7 @@ export const ReferralProgramCard: React.FC = () => {
             {recentInvitedFriends.map((friend, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-xs"
+                className="flex items-center justify-between p-2 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-xs"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <UserCheck className="w-3.5 h-3.5 text-purple-500 shrink-0" />
@@ -148,7 +148,7 @@ export const ReferralProgramCard: React.FC = () => {
       <button
         onClick={handleClaim}
         disabled={claimed}
-        className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-bold text-xs transition shadow-sm cursor-pointer ${
+        className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-[10px] font-bold text-xs transition shadow-sm cursor-pointer ${
           claimed
             ? 'bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'
             : 'bg-purple-600 hover:bg-purple-700 text-white'

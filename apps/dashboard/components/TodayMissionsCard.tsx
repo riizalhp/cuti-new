@@ -51,12 +51,12 @@ export const TodayMissionsCard: React.FC = () => {
   const completedCount = missions.filter((m) => m.completed).length;
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex flex-col justify-between">
+    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex flex-col justify-between">
       <div>
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
+            <div className="p-2 rounded-[10px] bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
               <Target className="w-5 h-5" />
             </div>
             <div>
@@ -68,7 +68,7 @@ export const TodayMissionsCard: React.FC = () => {
               </p>
             </div>
           </div>
-          <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 flex items-center gap-1">
+          <span className="px-2 py-0.5 rounded-[10px] text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 flex items-center gap-1">
             <Coins className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
             {completedCount}/{missions.length} Selesai
           </span>
@@ -81,7 +81,7 @@ export const TodayMissionsCard: React.FC = () => {
             return (
               <div
                 key={m.id}
-                className={`p-3 rounded-lg border text-xs transition ${
+                className={`p-3 rounded-[10px] border text-xs transition ${
                   m.completed
                     ? 'bg-slate-50/80 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800'
                     : 'bg-white dark:bg-slate-900 border-amber-200 dark:border-amber-900/50'
@@ -114,7 +114,7 @@ export const TodayMissionsCard: React.FC = () => {
                   ) : (
                     <button
                       onClick={() => handleClaim(m.id)}
-                      className="px-2.5 py-0.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold transition"
+                      className="px-2.5 py-0.5 rounded-[10px] bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold transition"
                     >
                       Klaim
                     </button>

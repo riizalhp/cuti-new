@@ -45,7 +45,7 @@ export const ReferralView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-[#0D3BD9] rounded-xl p-6 text-white border border-blue-500/50 shadow-md">
+      <div className="bg-[#0D3BD9] rounded-[10px] p-6 text-white border border-blue-500/50 shadow-md">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs mb-1">
@@ -60,8 +60,8 @@ export const ReferralView: React.FC = () => {
             </p>
           </div>
 
-          <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/15 flex items-center gap-3 shrink-0">
-            <div className="p-2.5 rounded-lg bg-amber-400 text-slate-950 font-black">
+          <div className="p-3 bg-white/10 backdrop-blur-md rounded-[10px] border border-white/15 flex items-center gap-3 shrink-0">
+            <div className="p-2.5 rounded-[10px] bg-amber-400 text-slate-950 font-black">
               <Award className="w-5 h-5" />
             </div>
             <div>
@@ -75,17 +75,17 @@ export const ReferralView: React.FC = () => {
       {/* Referral Code & Share Link Box */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Kode Referral */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-3">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-xs space-y-3">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
             Kode Referral Unik Kamu
           </span>
           <div className="flex items-center gap-2">
-            <div className="flex-1 p-3 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center font-mono font-black text-lg text-violet-600 dark:text-violet-400 tracking-wider">
+            <div className="flex-1 p-3 rounded-[10px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center font-mono font-black text-lg text-violet-600 dark:text-violet-400 tracking-wider">
               {referralCode}
             </div>
             <button
               onClick={handleCopyCode}
-              className="px-4 py-3 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-xs"
+              className="px-4 py-3 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-xs"
             >
               {isCodeCopied ? <CheckCircle2 className="w-4 h-4 text-amber-300" /> : <Copy className="w-4 h-4" />}
               <span>{isCodeCopied ? 'Tersalin' : 'Salin Kode'}</span>
@@ -97,7 +97,7 @@ export const ReferralView: React.FC = () => {
         </div>
 
         {/* Link Undangan */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-3">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-xs space-y-3">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
             Link Bagikan Langsung
           </span>
@@ -106,11 +106,11 @@ export const ReferralView: React.FC = () => {
               type="text"
               readOnly
               value={referralLink}
-              className="flex-1 p-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 truncate"
+              className="flex-1 p-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 truncate"
             />
             <button
               onClick={handleCopyLink}
-              className="px-4 py-2.5 rounded-lg bg-slate-800 dark:bg-slate-700 hover:bg-slate-700 dark:hover:bg-slate-600 text-white font-bold text-xs transition flex items-center gap-1.5 shrink-0"
+              className="px-4 py-2.5 rounded-[10px] bg-slate-800 dark:bg-slate-700 hover:bg-slate-700 dark:hover:bg-slate-600 text-white font-bold text-xs transition flex items-center gap-1.5 shrink-0"
             >
               {isLinkCopied ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
               <span>{isLinkCopied ? 'Tersalin' : 'Salin Link'}</span>
@@ -123,15 +123,15 @@ export const ReferralView: React.FC = () => {
       </div>
 
       {/* How It Works - 3 Step Guide */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-xs space-y-4">
         <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-amber-500" />
           Cara Kerja Program Referral (3 Langkah)
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
-            <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 font-black text-sm flex items-center justify-center">
+          <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
+            <div className="w-8 h-8 rounded-[10px] bg-violet-100 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 font-black text-sm flex items-center justify-center">
               1
             </div>
             <h4 className="font-bold text-xs text-slate-900 dark:text-white">Bagikan Kode Unik</h4>
@@ -140,8 +140,8 @@ export const ReferralView: React.FC = () => {
             </p>
           </div>
 
-          <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
-            <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 font-black text-sm flex items-center justify-center">
+          <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
+            <div className="w-8 h-8 rounded-[10px] bg-violet-100 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 font-black text-sm flex items-center justify-center">
               2
             </div>
             <h4 className="font-bold text-xs text-slate-900 dark:text-white">Teman Daftar & Pakai</h4>
@@ -150,8 +150,8 @@ export const ReferralView: React.FC = () => {
             </p>
           </div>
 
-          <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
-            <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 font-black text-sm flex items-center justify-center">
+          <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
+            <div className="w-8 h-8 rounded-[10px] bg-violet-100 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 font-black text-sm flex items-center justify-center">
               3
             </div>
             <h4 className="font-bold text-xs text-slate-900 dark:text-white">Dapatkan Hadiah</h4>
@@ -163,13 +163,13 @@ export const ReferralView: React.FC = () => {
       </div>
 
       {/* Invited Friends List */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
             <Users className="w-4 h-4 text-violet-600" />
             Daftar Teman yang Bergabung ({invitedFriends.length})
           </h3>
-          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800/40">
+          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/80 px-2.5 py-1 rounded-[10px] border border-emerald-200 dark:border-emerald-800/40">
             Status Rewards Aktif
           </span>
         </div>
@@ -191,7 +191,7 @@ export const ReferralView: React.FC = () => {
                 <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                   {friend.status}
                 </span>
-                <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40">
+                <span className="px-2.5 py-1 rounded-[10px] text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40">
                   {friend.reward}
                 </span>
               </div>

@@ -736,9 +736,9 @@ export const AiCvScreenerView: React.FC = () => {
       {activePhase === 'setup' && (
         <div className="space-y-6 w-full animate-in fade-in duration-300">
           {/* Header Banner */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-[#0D3BD9] border border-blue-500/50 text-white shadow-xl relative overflow-hidden">
+          <div className="p-5 sm:p-6 rounded-[10px] bg-[#0D3BD9] border border-blue-500/50 text-white shadow-xl relative overflow-hidden">
             <div className="relative z-10 space-y-2 max-w-3xl">
-              <span className="inline-block px-3 py-1 rounded-full text-xs font-black bg-amber-400 text-slate-950 shadow-xs">
+              <span className="inline-block px-3 py-1 rounded-[10px] text-xs font-black bg-amber-400 text-slate-950 shadow-xs">
                 Langkah 1: Konfigurasi CV &amp; Target Perusahaan
               </span>
               <h2 className="text-xl sm:text-2xl font-black text-white">Pilih CV &amp; Kriteria Recruiter Target Anda</h2>
@@ -749,16 +749,16 @@ export const AiCvScreenerView: React.FC = () => {
           </div>
 
           {/* Configuration Card: Position, Seniority & CV File Source */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+          <div className="p-5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
               {/* KIRI: Pilih Berkas CV / CV Aktif (Gaya match-cv) */}
               <div className="md:col-span-6 space-y-1.5">
                 <label className="text-xs font-extrabold text-slate-900 dark:text-white block mb-1">
                   Pilih Berkas CV
                 </label>
-                <div className="bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 p-3.5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="bg-slate-50 dark:bg-slate-800/80 rounded-[10px] border border-slate-200 dark:border-slate-700 p-3.5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-[#1F3578]/10 dark:bg-blue-950 text-[#1F3578] dark:text-blue-400 flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-[10px] bg-[#1F3578]/10 dark:bg-blue-950 text-[#1F3578] dark:text-blue-400 flex items-center justify-center shrink-0">
                       <FileCheck2 className="w-5 h-5" />
                     </div>
                     <div className="min-w-0">
@@ -787,7 +787,7 @@ export const AiCvScreenerView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsChangeCvModalOpen(true)}
-                    className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-[#1F3578] dark:text-blue-300 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-2xs"
+                    className="px-3 py-1.5 rounded-[10px] bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-[#1F3578] dark:text-blue-300 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-2xs"
                   >
                     <SlidersHorizontal className="w-3.5 h-3.5" />
                     <span>Ganti CV</span>
@@ -807,7 +807,7 @@ export const AiCvScreenerView: React.FC = () => {
                       value={targetRole}
                       onChange={(e) => setTargetRole(e.target.value)}
                       placeholder="Contoh: Senior Fullstack Engineer"
-                      className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-orange-500 focus:outline-none transition"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-orange-500 focus:outline-none transition"
                     />
                   </div>
 
@@ -819,7 +819,7 @@ export const AiCvScreenerView: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setIsSeniorityDropdownOpen((prev) => !prev)}
-                        className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium flex items-center justify-between focus:ring-2 focus:ring-orange-500 focus:outline-none transition cursor-pointer shadow-2xs"
+                        className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium flex items-center justify-between focus:ring-2 focus:ring-orange-500 focus:outline-none transition cursor-pointer shadow-2xs"
                       >
                         <span>
                           {SENIORITY_OPTIONS.find((o) => o.value === targetLevel)?.label || targetLevel}
@@ -832,7 +832,7 @@ export const AiCvScreenerView: React.FC = () => {
                       </button>
 
                       {isSeniorityDropdownOpen && (
-                        <div className="absolute z-50 left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl text-xs py-1 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+                        <div className="absolute z-50 left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] shadow-xl text-xs py-1 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
                           {SENIORITY_OPTIONS.map((opt) => {
                             const isSelected = targetLevel === opt.value;
                             return (
@@ -870,7 +870,7 @@ export const AiCvScreenerView: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
             {/* COLUMN 1: Recruiter List (Pilih Tipe Recruiter - Left Column) */}
             <div className="lg:col-span-3 space-y-4">
-              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+              <div className="p-4 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
                 {/* Search Bar */}
                 <div className="relative">
                   <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
@@ -879,7 +879,7 @@ export const AiCvScreenerView: React.FC = () => {
                     value={personaSearchQuery}
                     onChange={(e) => setPersonaSearchQuery(e.target.value)}
                     placeholder="Cari recruiter atau perusahaan..."
-                    className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none transition"
+                    className="w-full pl-8 pr-7 py-1.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none transition"
                   />
                   {personaSearchQuery && (
                     <button
@@ -916,7 +916,7 @@ export const AiCvScreenerView: React.FC = () => {
                           setSelectedPersonaId(persona.id);
                           setExpandedPersonaId(persona.id);
                         }}
-                        className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 group ${
+                        className={`p-3 rounded-[10px] border transition-all cursor-pointer flex items-center justify-between gap-2.5 group ${
                           isSelected
                             ? 'border-orange-500 bg-orange-50/90 dark:bg-orange-950/40 ring-1 ring-orange-500/20 shadow-xs'
                             : 'border-slate-200 dark:border-slate-800 hover:border-orange-400 dark:hover:border-orange-500/60 hover:bg-slate-50 dark:hover:bg-slate-800/50'
@@ -925,7 +925,7 @@ export const AiCvScreenerView: React.FC = () => {
                         <div className="flex items-center gap-2.5 min-w-0">
                           {/* Avatar Icon */}
                           <div
-                            className={`p-2 rounded-xl shrink-0 transition ${
+                            className={`p-2 rounded-[10px] shrink-0 transition ${
                               isSelected
                                 ? 'bg-orange-500 text-white shadow-xs'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-orange-100 dark:group-hover:bg-orange-950 group-hover:text-orange-600'
@@ -975,7 +975,7 @@ export const AiCvScreenerView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowAllPersonas(!showAllPersonas)}
-                    className="w-full py-2 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 text-slate-600 dark:text-slate-300 text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer border border-slate-200 dark:border-slate-700"
+                    className="w-full py-2 rounded-[10px] bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 text-slate-600 dark:text-slate-300 text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer border border-slate-200 dark:border-slate-700"
                   >
                     <span>{showAllPersonas ? 'Ringkaskan List' : `Lihat ${filteredPersonas.length - 7} lainnya`}</span>
                     {showAllPersonas ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -984,7 +984,7 @@ export const AiCvScreenerView: React.FC = () => {
               </div>
 
               {/* Tips Footer Card */}
-              <div className="p-3.5 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 flex items-start gap-2.5 text-[11px] text-blue-900 dark:text-blue-200">
+              <div className="p-3.5 rounded-[10px] bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 flex items-start gap-2.5 text-[11px] text-blue-900 dark:text-blue-200">
                 <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                 <p className="leading-snug">
                   <strong className="font-bold">Tips:</strong> Pilih recruiter yang paling relevan dengan posisi &amp; perusahaan impianmu. Kamu bisa ubah kapan saja untuk melihat perbedaan hasil evaluasi.
@@ -994,7 +994,7 @@ export const AiCvScreenerView: React.FC = () => {
 
             {/* COLUMN 2: Preview Recruiter (Middle Column ~250-350px Card) */}
             <div className="lg:col-span-5 space-y-4">
-              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <div className="p-5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                 <span className="text-xs font-black text-slate-400 uppercase tracking-wider block">
                   Preview Recruiter
                 </span>
@@ -1003,7 +1003,7 @@ export const AiCvScreenerView: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="p-3 rounded-2xl bg-orange-500 text-white shadow-md">
+                      <div className="p-3 rounded-[10px] bg-orange-500 text-white shadow-md">
                         {currentPersona.category === 'company' && <Building2 className="w-6 h-6" />}
                         {currentPersona.category === 'region' && <Globe className="w-6 h-6" />}
                         {currentPersona.category === 'special' && <GraduationCap className="w-6 h-6" />}
@@ -1014,7 +1014,7 @@ export const AiCvScreenerView: React.FC = () => {
                           <h3 className="text-xl font-black text-slate-900 dark:text-white">
                             {currentPersona.name}
                           </h3>
-                          <span className="text-[10px] font-extrabold text-amber-700 bg-amber-100 dark:bg-amber-950 dark:text-amber-300 px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-800">
+                          <span className="text-[10px] font-extrabold text-amber-700 bg-amber-100 dark:bg-amber-950 dark:text-amber-300 px-2 py-0.5 rounded-[10px] border border-amber-300 dark:border-amber-800">
                             Best Match
                           </span>
                         </div>
@@ -1041,7 +1041,7 @@ export const AiCvScreenerView: React.FC = () => {
                       {currentPersona.highlights.map((item, idx) => (
                         <div
                           key={idx}
-                          className="px-2.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 flex items-start gap-1.5 text-[11px] font-bold text-slate-800 dark:text-slate-200 leading-snug"
+                          className="px-2.5 py-2 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 flex items-start gap-1.5 text-[11px] font-bold text-slate-800 dark:text-slate-200 leading-snug"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
                           <span className="break-words">{item}</span>
@@ -1059,19 +1059,19 @@ export const AiCvScreenerView: React.FC = () => {
                       {currentPersona.companies.map((comp, idx) => (
                         <span
                           key={idx}
-                          className="px-3 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold"
+                          className="px-3 py-1 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold"
                         >
                           {comp}
                         </span>
                       ))}
-                      <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs font-bold">
+                      <span className="px-2 py-1 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs font-bold">
                         +2
                       </span>
                     </div>
                   </div>
 
                   {/* Yang Paling Dinilai */}
-                  <div className="p-3.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 flex items-start gap-2.5 text-xs">
+                  <div className="p-3.5 rounded-[10px] bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 flex items-start gap-2.5 text-xs">
                     <Lightbulb className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                     <div>
                       <span className="font-extrabold text-amber-900 dark:text-amber-200 block text-xs">
@@ -1104,7 +1104,7 @@ export const AiCvScreenerView: React.FC = () => {
                           <div
                             key={item.id}
                             onClick={() => toggleModule(item.id)}
-                            className={`p-2.5 rounded-xl border transition-all flex items-center justify-between cursor-pointer select-none ${
+                            className={`p-2.5 rounded-[10px] border transition-all flex items-center justify-between cursor-pointer select-none ${
                               isChecked
                                 ? 'bg-orange-50/70 dark:bg-orange-950/30 border-orange-300 dark:border-orange-800 text-slate-900 dark:text-white font-bold shadow-2xs'
                                 : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 font-medium opacity-60 hover:opacity-100'
@@ -1139,7 +1139,7 @@ export const AiCvScreenerView: React.FC = () => {
                     type="button"
                     onClick={handleStartRvePipeline}
                     disabled={isProcessing}
-                    className="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-sm shadow-md shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 hover:-translate-y-0.5 mt-2"
+                    className="w-full py-3.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-sm shadow-md shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 hover:-translate-y-0.5 mt-2"
                   >
                     <Play className="w-4 h-4 fill-white" />
                     <span>Mulai Screening</span>
@@ -1151,7 +1151,7 @@ export const AiCvScreenerView: React.FC = () => {
             {/* COLUMN 3: Riwayat Screening CV Saya (Right Column) */}
             <div className="lg:col-span-4 space-y-4">
               {/* Riwayat & Hasil Screening Card (Merged into 1 Card) */}
-              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <div className="p-4 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
                   <div className="flex items-center gap-1.5">
                     <History className="w-4 h-4 text-orange-500" />
@@ -1175,7 +1175,7 @@ export const AiCvScreenerView: React.FC = () => {
                         <div
                           key={hist.id}
                           onClick={() => handleLoadHistoryReport(hist)}
-                          className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-orange-500/50 hover:bg-orange-50/40 dark:hover:bg-orange-950/30 transition-all cursor-pointer space-y-1.5 group shadow-2xs"
+                          className="p-3 rounded-[10px] border border-slate-200 dark:border-slate-800 hover:border-orange-500/50 hover:bg-orange-50/40 dark:hover:bg-orange-950/30 transition-all cursor-pointer space-y-1.5 group shadow-2xs"
                         >
                           <div className="flex items-center justify-between">
                             <span className="font-black text-xs text-rose-600 dark:text-rose-400 group-hover:text-orange-600 transition">
@@ -1214,7 +1214,7 @@ export const AiCvScreenerView: React.FC = () => {
                       <div
                         key={cv.id}
                         onClick={() => handleStartRvePipeline()}
-                        className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
+                        className="p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
                       >
                         <div>
                           <h5 className="font-bold text-xs text-slate-900 dark:text-white">{cv.candidateName}</h5>
@@ -1233,9 +1233,9 @@ export const AiCvScreenerView: React.FC = () => {
               </div>
 
               {/* Butuh Insight Lebih Dalam? Card */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-50/80 to-purple-50/80 dark:from-indigo-950/40 dark:to-purple-950/40 border border-indigo-200/80 dark:border-indigo-900/60 space-y-3">
+              <div className="p-4 rounded-[10px] bg-gradient-to-br from-indigo-50/80 to-purple-50/80 dark:from-indigo-950/40 dark:to-purple-950/40 border border-indigo-200/80 dark:border-indigo-900/60 space-y-3">
                 <div className="flex items-start gap-2.5">
-                  <div className="p-2 rounded-xl bg-indigo-500 text-white shrink-0">
+                  <div className="p-2 rounded-[10px] bg-indigo-500 text-white shrink-0">
                     <Sparkles className="w-4 h-4 fill-white" />
                   </div>
                   <div>
@@ -1251,7 +1251,7 @@ export const AiCvScreenerView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setActivePhase('report')}
-                  className="w-full py-2 rounded-xl bg-white dark:bg-slate-900 hover:bg-indigo-50 text-indigo-600 dark:text-indigo-400 text-xs font-bold transition flex items-center justify-center gap-1 border border-indigo-200 dark:border-indigo-800 cursor-pointer shadow-2xs"
+                  className="w-full py-2 rounded-[10px] bg-white dark:bg-slate-900 hover:bg-indigo-50 text-indigo-600 dark:text-indigo-400 text-xs font-bold transition flex items-center justify-center gap-1 border border-indigo-200 dark:border-indigo-800 cursor-pointer shadow-2xs"
                 >
                   <span>Lihat Laporan</span>
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -1266,12 +1266,12 @@ export const AiCvScreenerView: React.FC = () => {
       {activePhase === 'report' && (
         <div className="space-y-6 w-full animate-in fade-in duration-300">
           {/* Top Bar Navigation for Report View */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="p-4 sm:p-5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setActivePhase('setup')}
-                className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                className="px-3.5 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <ArrowLeft className="w-4 h-4 text-orange-500" />
                 <span>Ubah Recruiter &amp; CV</span>
@@ -1284,10 +1284,10 @@ export const AiCvScreenerView: React.FC = () => {
                   <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
                     Hasil Evaluasi Screening CV
                   </h2>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
+                  <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
                     Recruiter: {currentPersona.name}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                  <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
                     Posisi: {targetRole}
                   </span>
                 </div>
@@ -1298,7 +1298,7 @@ export const AiCvScreenerView: React.FC = () => {
               <button
                 type="button"
                 onClick={handleFillDemoData}
-                className="px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 text-xs font-bold border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                className="px-3.5 py-2 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 text-xs font-bold border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                 <span>Isi Data Demo</span>
@@ -1308,7 +1308,7 @@ export const AiCvScreenerView: React.FC = () => {
 
           {/* Processing Animation */}
           {isProcessing && (
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center space-y-6 shadow-sm">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-8 text-center space-y-6 shadow-sm">
               <div className="relative w-16 h-16 mx-auto">
                 <div className="absolute inset-0 rounded-full border-4 border-orange-200 animate-ping" />
                 <div className="relative w-16 h-16 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-md">
@@ -1356,7 +1356,7 @@ export const AiCvScreenerView: React.FC = () => {
           {!isProcessing && hasRunPipeline && (
             <div className="space-y-6 w-full">
               {/* Top AI Summary Banner */}
-              <div className="p-6 rounded-2xl bg-orange-500 text-white shadow-md space-y-3 relative overflow-hidden">
+              <div className="p-6 rounded-[10px] bg-orange-500 text-white shadow-md space-y-3 relative overflow-hidden">
                 <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
 
                 <div className="flex items-center justify-between border-b border-white/20 pb-2">
@@ -1392,7 +1392,7 @@ export const AiCvScreenerView: React.FC = () => {
               {/* Overall Verdict & Confidence Banner + Before vs After Comparison */}
               <div
                 id="verdict-summary-top"
-                className="p-6 md:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6"
+                className="p-6 md:p-8 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
                   <div className="space-y-1">
@@ -1412,7 +1412,7 @@ export const AiCvScreenerView: React.FC = () => {
                   </div>
 
                   {/* Verdict Status Indicator */}
-                  <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
+                  <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-[10px] border border-slate-200/80 dark:border-slate-700/80">
                     {rveReport.verdictStatus === 'interview' && (
                       <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm">
                         <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-xs" />
@@ -1438,7 +1438,7 @@ export const AiCvScreenerView: React.FC = () => {
                 </div>
 
                 {/* Perbandingan Sebelum & Sesudah Card */}
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+                <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
                   <div className="flex items-center gap-4">
                     <div>
                       <span className="text-[10px] font-bold text-slate-400 block uppercase">Sebelum Optimasi</span>
@@ -1457,7 +1457,7 @@ export const AiCvScreenerView: React.FC = () => {
                     </div>
                   </div>
 
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 self-start sm:self-auto">
+                  <span className="px-3 py-1 rounded-[10px] text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 self-start sm:self-auto">
                     +{rveReport.beforeAfterComparison.diff}% Peningkatan
                   </span>
                 </div>
@@ -1483,7 +1483,7 @@ export const AiCvScreenerView: React.FC = () => {
                     {rveReport.gamification.checklist.map((item) => (
                       <span
                         key={item.id}
-                        className={`px-2.5 py-1 rounded-md border flex items-center gap-1.5 font-semibold ${
+                        className={`px-2.5 py-1 rounded-[10px] border flex items-center gap-1.5 font-semibold ${
                           item.isDone
                             ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                             : 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800'
@@ -1502,7 +1502,7 @@ export const AiCvScreenerView: React.FC = () => {
                 </div>
 
                 {/* Actionable Improvement Section High Priority Right After Verdict */}
-                <div className="p-5 rounded-2xl bg-orange-50/70 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-900/60 space-y-4">
+                <div className="p-5 rounded-[10px] bg-orange-50/70 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-900/60 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-orange-500" />
@@ -1535,7 +1535,7 @@ export const AiCvScreenerView: React.FC = () => {
                     type="button"
                     onClick={handleAutoOptimizeCv}
                     disabled={isAutoOptimizing}
-                    className="w-full py-4 rounded-xl bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-sm shadow-md shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer hover:-translate-y-0.5 mt-2"
+                    className="w-full py-4 rounded-[10px] bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-sm shadow-md shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer hover:-translate-y-0.5 mt-2"
                   >
                     {isAutoOptimizing ? (
                       <>
@@ -1553,7 +1553,7 @@ export const AiCvScreenerView: React.FC = () => {
               </div>
 
               {/* Timeline Stepper Navigation Bar */}
-              <div className="sticky -top-2.5 sm:-top-5 z-30 -mt-2 sm:-mt-3 bg-white dark:bg-slate-900 p-2.5 sm:p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-lg transition-all">
+              <div className="sticky -top-2.5 sm:-top-5 z-30 -mt-2 sm:-mt-3 bg-white dark:bg-slate-900 p-2.5 sm:p-3 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-lg transition-all">
                 <div className="flex items-center justify-start gap-2 overflow-x-auto no-scrollbar text-[11px] font-bold">
                   {MODULE_CONFIGS.filter((mod) => selectedModules[mod.id]).map((mod) => {
                     const stepNum = activeStepMap[mod.id];
@@ -1562,7 +1562,7 @@ export const AiCvScreenerView: React.FC = () => {
                       <a
                         key={mod.id}
                         href={`#${mod.anchorId}`}
-                        className="px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/60 text-slate-700 dark:text-slate-300 hover:text-orange-600 transition shrink-0 flex items-center gap-1.5"
+                        className="px-3.5 py-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/60 text-slate-700 dark:text-slate-300 hover:text-orange-600 transition shrink-0 flex items-center gap-1.5"
                       >
                         <ModIcon className={`w-3.5 h-3.5 ${mod.color}`} />
                         <span>STEP {stepNum}: {mod.shortLabel}</span>
@@ -1578,11 +1578,11 @@ export const AiCvScreenerView: React.FC = () => {
                 {selectedModules.vision && (
                 <div
                   id="step-vision"
-                  className="p-6 md:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 scroll-mt-20"
+                  className="p-6 md:p-8 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 scroll-mt-20"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
                     <div className="space-y-1">
-                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/60 inline-flex items-center gap-1">
+                      <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/60 inline-flex items-center gap-1">
                         <Eye className="w-3 h-3 text-rose-600" />
                         <span>STEP {activeStepMap.vision} — Human Simulation</span>
                       </span>
@@ -1597,7 +1597,7 @@ export const AiCvScreenerView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setShowHeatmapOverlay(!showHeatmapOverlay)}
-                      className={`px-4 py-2 rounded-lg font-bold text-xs flex items-center gap-1.5 transition cursor-pointer shrink-0 ${
+                      className={`px-4 py-2 rounded-[10px] font-bold text-xs flex items-center gap-1.5 transition cursor-pointer shrink-0 ${
                         showHeatmapOverlay
                           ? 'bg-orange-500 text-white shadow-xs'
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
@@ -1610,7 +1610,7 @@ export const AiCvScreenerView: React.FC = () => {
 
                   {/* Eye-Tracking Key Metrics Bar */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-1">
+                    <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-1">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                         Durasi Scan HRD
                       </span>
@@ -1621,7 +1621,7 @@ export const AiCvScreenerView: React.FC = () => {
                       <p className="text-[10px] text-slate-500 dark:text-slate-400">Durasi awal HR memindai halaman.</p>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-1">
+                    <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-1">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                         Kesesuaian Pola-F (F-Pattern)
                       </span>
@@ -1632,7 +1632,7 @@ export const AiCvScreenerView: React.FC = () => {
                       <p className="text-[10px] text-slate-500 dark:text-slate-400">Lintasan mata sangat optimal.</p>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-1">
+                    <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-1">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                         Hotspot Utama Eye-Tracking
                       </span>
@@ -1657,7 +1657,7 @@ export const AiCvScreenerView: React.FC = () => {
                         key={mode.id}
                         type="button"
                         onClick={() => setHeatmapViewMode(mode.id as any)}
-                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                        className={`px-3.5 py-1.5 rounded-[10px] text-xs font-bold transition cursor-pointer ${
                           heatmapViewMode === mode.id
                             ? 'bg-navy-700 text-white shadow-xs'
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
@@ -1687,11 +1687,11 @@ export const AiCvScreenerView: React.FC = () => {
                 {selectedModules.ats && (
                 <div
                   id="step-ats"
-                  className="p-6 md:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 scroll-mt-20"
+                  className="p-6 md:p-8 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 scroll-mt-20"
                 >
                   <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                     <div className="space-y-1">
-                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60 inline-flex items-center gap-1">
+                      <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60 inline-flex items-center gap-1">
                         <BarChart3 className="w-3 h-3 text-blue-600" />
                         <span>STEP {activeStepMap.ats} — Machine Filter</span>
                       </span>
@@ -1713,7 +1713,7 @@ export const AiCvScreenerView: React.FC = () => {
                     {rveReport.atsCorrelations.map((item) => (
                       <div
                         key={item.id}
-                        className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 space-y-2 text-xs"
+                        className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 space-y-2 text-xs"
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-slate-800 dark:text-slate-200">{item.keyword}</span>
@@ -1742,11 +1742,11 @@ export const AiCvScreenerView: React.FC = () => {
                 {selectedModules.aiScreener && (
                 <div
                   id="step-ai-screener"
-                  className="p-6 md:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 scroll-mt-20"
+                  className="p-6 md:p-8 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 scroll-mt-20"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
                     <div className="space-y-1">
-                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/60 inline-flex items-center gap-1">
+                      <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/60 inline-flex items-center gap-1">
                         <Bot className="w-3 h-3 text-emerald-600" />
                         <span>STEP {activeStepMap.aiScreener} — Primary Selling Point</span>
                       </span>
@@ -1758,7 +1758,7 @@ export const AiCvScreenerView: React.FC = () => {
                       </p>
                     </div>
 
-                    <div className="bg-emerald-50 dark:bg-emerald-950/80 p-4 rounded-xl border border-emerald-200 dark:border-emerald-800 text-center shrink-0">
+                    <div className="bg-emerald-50 dark:bg-emerald-950/80 p-4 rounded-[10px] border border-emerald-200 dark:border-emerald-800 text-center shrink-0">
                       <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block uppercase">Consensus Score</span>
                       <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{rveReport.consensusScore}%</span>
                     </div>
@@ -1768,7 +1768,7 @@ export const AiCvScreenerView: React.FC = () => {
                     {rveReport.aiEvaluations.map((ai) => (
                       <div
                         key={ai.modelName}
-                        className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-4 flex flex-col justify-between"
+                        className="p-5 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-4 flex flex-col justify-between"
                       >
                         <div className="space-y-3">
                           <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-700/60 pb-2">
@@ -1814,10 +1814,10 @@ export const AiCvScreenerView: React.FC = () => {
                   className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start scroll-mt-20"
                 >
                   {/* Left: Predicted Questions */}
-                  <div className="lg:col-span-7 p-6 md:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+                  <div className="lg:col-span-7 p-6 md:p-8 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
                     <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                       <div className="space-y-1">
-                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-900/60 inline-flex items-center gap-1">
+                        <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-900/60 inline-flex items-center gap-1">
                           <TrendingUp className="w-3 h-3 text-purple-600" />
                           <span>STEP {activeStepMap.forecast} — Interview Forecast</span>
                         </span>
@@ -1831,7 +1831,7 @@ export const AiCvScreenerView: React.FC = () => {
                       {rveReport.predictedInterviewQuestions.map((q, idx) => (
                         <div
                           key={idx}
-                          className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 flex items-start gap-3 text-slate-800 dark:text-slate-200 hover:border-slate-300 transition-all"
+                          className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 flex items-start gap-3 text-slate-800 dark:text-slate-200 hover:border-slate-300 transition-all"
                         >
                           <span className="w-5 h-5 rounded-full bg-orange-500 text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                             {idx + 1}
@@ -1843,7 +1843,7 @@ export const AiCvScreenerView: React.FC = () => {
                   </div>
 
                   {/* Right: Tanya Recruiter AI Interactive Panel */}
-                  <div className="lg:col-span-5 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                  <div className="lg:col-span-5 p-6 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                     <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                       <div className="flex items-center gap-2">
                         <Bot className="w-5 h-5 text-orange-500" />
@@ -1863,7 +1863,7 @@ export const AiCvScreenerView: React.FC = () => {
                           className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                           <div
-                            className={`max-w-[85%] p-3.5 rounded-xl leading-relaxed text-xs ${
+                            className={`max-w-[85%] p-3.5 rounded-[10px] leading-relaxed text-xs ${
                               msg.sender === 'user'
                                 ? 'bg-orange-500 text-white font-medium rounded-tr-none'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none border border-slate-200/70 dark:border-slate-700/70'
@@ -1887,7 +1887,7 @@ export const AiCvScreenerView: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleSendChatMessage('Mengapa CV saya belum 100%?')}
-                        className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950 hover:text-orange-600 dark:hover:text-orange-400 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition cursor-pointer font-medium flex items-center gap-1"
+                        className="px-2.5 py-1 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950 hover:text-orange-600 dark:hover:text-orange-400 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition cursor-pointer font-medium flex items-center gap-1"
                       >
                         <Lightbulb className="w-3 h-3 text-amber-500" />
                         <span>Mengapa CV belum 100%?</span>
@@ -1895,7 +1895,7 @@ export const AiCvScreenerView: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleSendChatMessage('Bagaimana kalau saya ganti summary?')}
-                        className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950 hover:text-orange-600 dark:hover:text-orange-400 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition cursor-pointer font-medium flex items-center gap-1"
+                        className="px-2.5 py-1 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950 hover:text-orange-600 dark:hover:text-orange-400 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition cursor-pointer font-medium flex items-center gap-1"
                       >
                         <FileText className="w-3 h-3 text-blue-500" />
                         <span>Ganti summary?</span>
@@ -1910,12 +1910,12 @@ export const AiCvScreenerView: React.FC = () => {
                         onChange={(e) => setInputChatText(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSendChatMessage()}
                         placeholder="Tanyakan ke Tim Recruiter..."
-                        className="flex-1 px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none transition"
+                        className="flex-1 px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none transition"
                       />
                       <button
                         type="button"
                         onClick={() => handleSendChatMessage()}
-                        className="p-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white transition cursor-pointer"
+                        className="p-2 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white transition cursor-pointer"
                       >
                         <Send className="w-3.5 h-3.5" />
                       </button>
@@ -1928,11 +1928,11 @@ export const AiCvScreenerView: React.FC = () => {
                 {selectedModules.improvement && (
                 <div
                   id="step-improvement"
-                  className="p-6 md:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 scroll-mt-20"
+                  className="p-6 md:p-8 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 scroll-mt-20"
                 >
                   <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                     <div className="space-y-1">
-                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60 inline-flex items-center gap-1">
+                      <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60 inline-flex items-center gap-1">
                         <Sparkles className="w-3 h-3 text-amber-600" />
                         <span>STEP {activeStepMap.improvement} — Auto Improvement</span>
                       </span>
@@ -1951,7 +1951,7 @@ export const AiCvScreenerView: React.FC = () => {
                       return (
                         <div
                           key={fix.id}
-                          className={`p-5 rounded-2xl border transition-all space-y-3 text-xs ${
+                          className={`p-5 rounded-[10px] border transition-all space-y-3 text-xs ${
                             isApplied
                               ? 'bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800'
                               : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700/80'
@@ -1963,7 +1963,7 @@ export const AiCvScreenerView: React.FC = () => {
                               type="button"
                               onClick={() => handleApplyFix(fix.id)}
                               disabled={isApplied}
-                              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                              className={`px-4 py-2 rounded-[10px] text-xs font-bold transition-all cursor-pointer ${
                                 isApplied
                                   ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 cursor-default'
                                   : 'bg-orange-500 hover:bg-orange-600 text-white shadow-xs'
@@ -1981,14 +1981,14 @@ export const AiCvScreenerView: React.FC = () => {
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/60 text-rose-900 dark:text-rose-200">
+                            <div className="p-3 rounded-[10px] bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/60 text-rose-900 dark:text-rose-200">
                               <span className="font-bold text-[10px] uppercase text-rose-600 dark:text-rose-400 block">
                                 Sebelum (Kurang Optimal):
                               </span>
                               <p className="mt-1 leading-snug">{fix.before}</p>
                             </div>
 
-                            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-900/60 text-emerald-900 dark:text-emerald-200">
+                            <div className="p-3 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-900/60 text-emerald-900 dark:text-emerald-200">
                               <span className="font-bold text-[10px] uppercase text-emerald-600 dark:text-emerald-400 block">
                                 Sesudah Dioptimalkan:
                               </span>
@@ -2014,7 +2014,7 @@ export const AiCvScreenerView: React.FC = () => {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative border border-slate-200 dark:border-slate-800 cursor-default"
+            className="bg-white dark:bg-slate-900 rounded-[10px] max-w-lg w-full p-6 space-y-4 shadow-2xl relative border border-slate-200 dark:border-slate-800 cursor-default"
           >
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
@@ -2031,11 +2031,11 @@ export const AiCvScreenerView: React.FC = () => {
             </div>
 
             {/* Mode Switcher */}
-            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
+            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-[10px] text-xs font-bold">
               <button
                 type="button"
                 onClick={() => setCvSourceMode('saved')}
-                className={`flex-1 py-1.5 rounded-lg transition text-center cursor-pointer ${
+                className={`flex-1 py-1.5 rounded-[10px] transition text-center cursor-pointer ${
                   cvSourceMode === 'saved'
                     ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
@@ -2046,7 +2046,7 @@ export const AiCvScreenerView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setCvSourceMode('upload')}
-                className={`flex-1 py-1.5 rounded-lg transition text-center cursor-pointer ${
+                className={`flex-1 py-1.5 rounded-[10px] transition text-center cursor-pointer ${
                   cvSourceMode === 'upload'
                     ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
@@ -2069,7 +2069,7 @@ export const AiCvScreenerView: React.FC = () => {
                         setCvSourceMode('saved');
                         setIsChangeCvModalOpen(false);
                       }}
-                      className={`p-3.5 rounded-xl border transition cursor-pointer flex items-start justify-between gap-3 ${
+                      className={`p-3.5 rounded-[10px] border transition cursor-pointer flex items-start justify-between gap-3 ${
                         isSelected
                           ? 'border-[#3B5CC4] bg-blue-50/60 dark:bg-blue-950/40 ring-2 ring-[#3B5CC4]/20'
                           : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'
@@ -2099,7 +2099,7 @@ export const AiCvScreenerView: React.FC = () => {
                 })}
               </div>
             ) : (
-              <div className="space-y-3 p-4 bg-orange-50/40 dark:bg-orange-950/20 rounded-xl border border-dashed border-orange-300 dark:border-orange-800 text-center">
+              <div className="space-y-3 p-4 bg-orange-50/40 dark:bg-orange-950/20 rounded-[10px] border border-dashed border-orange-300 dark:border-orange-800 text-center">
                 <Upload className="w-8 h-8 text-orange-500 mx-auto" />
                 <div>
                   <p className="text-xs font-bold text-slate-900 dark:text-white">
@@ -2125,7 +2125,7 @@ export const AiCvScreenerView: React.FC = () => {
                 />
                 <label
                   htmlFor="modal-cv-upload"
-                  className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-[#F97316] hover:bg-orange-600 text-white font-bold text-xs cursor-pointer shadow-md transition gap-2"
+                  className="inline-flex items-center justify-center px-4 py-2 rounded-[10px] bg-[#F97316] hover:bg-orange-600 text-white font-bold text-xs cursor-pointer shadow-md transition gap-2"
                 >
                   <Upload className="w-3.5 h-3.5" />
                   <span>Pilih Berkas Komputer</span>

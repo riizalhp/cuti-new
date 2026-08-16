@@ -10,6 +10,7 @@ import { CitySearchInput } from '@/components/ui/CitySearchInput';
 import { MajorSearchInput } from '@/components/ui/MajorSearchInput';
 import { SchoolSearchInput } from '@/components/ui/SchoolSearchInput';
 import { PositionSearchInput } from '@/components/ui/PositionSearchInput';
+import { DotLottiePlayer } from '@/components/DotLottiePlayer';
 import {
   User,
   GraduationCap,
@@ -115,6 +116,24 @@ export default function AdaptiveOnboardingPage() {
 
   // Fetch real user profile on mount if available
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const sessionStr = localStorage.getItem('cuti_user_session');
+        if (sessionStr) {
+          const parsed = JSON.parse(sessionStr);
+          if (parsed.name || parsed.email) {
+            setFormData((prev) => ({
+              ...prev,
+              fullName: parsed.name || prev.fullName,
+              contactInfo: parsed.email || prev.contactInfo,
+            }));
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to parse session in Onboarding', e);
+      }
+    }
+
     userApi.getProfile().then((profile) => {
       if (profile) {
         setFormData((prev) => ({
@@ -380,7 +399,7 @@ export default function AdaptiveOnboardingPage() {
       {/* Top Header Bar */}
       <header className="max-w-2xl w-full mx-auto flex items-center justify-between py-2">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-orange-500 text-white font-extrabold flex items-center justify-center text-xs shadow-md shadow-orange-500/20">
+          <div className="w-8 h-8 rounded-[10px] bg-orange-500 text-white font-extrabold flex items-center justify-center text-xs shadow-md shadow-orange-500/20">
             CUTI
           </div>
           <span className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
@@ -388,7 +407,7 @@ export default function AdaptiveOnboardingPage() {
           </span>
         </div>
 
-        <div className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 shadow-2xs">
+        <div className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xs">
           {currentStepIndex === 0 && 'Tujuan Kamu'}
           {currentStepIndex > 0 && !showValueMoment && !showMarketingOffer && `Langkah ${currentStepIndex} dari ${totalJourneySteps}`}
           {showValueMoment && 'Pencapaian'}
@@ -401,7 +420,7 @@ export default function AdaptiveOnboardingPage() {
         
         {/* Horizontal Progress Stepper Bar (Only when in adaptive form steps 1..N) */}
         {currentStepIndex > 0 && !showValueMoment && !showMarketingOffer && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-4 shadow-2xs">
             <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
               {journeySteps.map((st) => {
                 const isActive = currentStepIndex === st.id;
@@ -413,7 +432,7 @@ export default function AdaptiveOnboardingPage() {
                     <button
                       type="button"
                       onClick={() => setCurrentStepIndex(st.id)}
-                      className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl transition cursor-pointer ${
+                      className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-[10px] transition cursor-pointer ${
                         isActive
                           ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
                           : isCompleted
@@ -441,7 +460,7 @@ export default function AdaptiveOnboardingPage() {
         )}
 
         {/* Main Card Box */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm space-y-6">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 sm:p-10 shadow-sm space-y-6">
           
           {/* ====================================================================== */}
           {/* STEP 0: SINGLE SELECT INTENT SCREEN */}
@@ -454,7 +473,7 @@ export default function AdaptiveOnboardingPage() {
               className="space-y-6"
             >
               <div className="space-y-1">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 inline-flex items-center gap-1">
+                <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-bold uppercase tracking-wider bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 inline-flex items-center gap-1">
                   <User size={12} />
                   Pengalaman Adaptif
                 </span>
@@ -502,9 +521,9 @@ export default function AdaptiveOnboardingPage() {
                       key={card.id}
                       type="button"
                       onClick={() => handleSelectIntent(card.id)}
-                      className="p-5 rounded-2xl border text-left transition flex items-start gap-3.5 cursor-pointer relative overflow-hidden bg-slate-50/80 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-orange-500 hover:bg-orange-50/50 dark:hover:bg-orange-950/30 group shadow-2xs"
+                      className="p-5 rounded-[10px] border text-left transition flex items-start gap-3.5 cursor-pointer relative overflow-hidden bg-slate-50/80 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-orange-500 hover:bg-orange-50/50 dark:hover:bg-orange-950/30 group shadow-2xs"
                     >
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-white dark:bg-slate-700 text-orange-500 border border-slate-200 dark:border-slate-600 group-hover:bg-orange-500 group-hover:text-white transition shadow-2xs">
+                      <div className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 bg-white dark:bg-slate-700 text-orange-500 border border-slate-200 dark:border-slate-600 group-hover:bg-orange-500 group-hover:text-white transition shadow-2xs">
                         <IconComp size={20} />
                       </div>
 
@@ -539,8 +558,18 @@ export default function AdaptiveOnboardingPage() {
               {/* VALUE MOMENT: JOURNEY 1 — CARI KERJA */}
               {selectedIntent === 'cari_kerja' && (
                 <div className="space-y-6 text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-orange-50 dark:bg-orange-950/80 text-orange-500 flex items-center justify-center border border-orange-200 dark:border-orange-800 mx-auto shadow-md">
-                    <Search size={28} />
+                  <div className="flex justify-center -mb-2">
+                    <DotLottiePlayer
+                      src="/animations/profile-ready.json"
+                      autoplay={true}
+                      loop={false}
+                      className="w-28 h-28 mx-auto"
+                      fallback={
+                        <div className="w-16 h-16 rounded-[10px] bg-orange-50 dark:bg-orange-950/80 text-orange-500 flex items-center justify-center border border-orange-200 dark:border-orange-800 mx-auto shadow-md">
+                          <Search size={32} />
+                        </div>
+                      }
+                    />
                   </div>
                   <div className="space-y-1">
                     <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-50 flex items-center justify-center gap-2">
@@ -559,9 +588,9 @@ export default function AdaptiveOnboardingPage() {
                       { match: '92% cocok', title: `Staff ${primaryTargetPos}`, location: primaryLocation, company: 'Mitra Industri AmbilCUTI' },
                       { match: '89% cocok', title: 'Operasional & Admin', location: primaryLocation, company: 'Perusahaan Mitra' },
                     ].map((job, idx) => (
-                      <div key={idx} className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-4 rounded-xl flex items-center justify-between">
+                      <div key={idx} className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-4 rounded-[10px] flex items-center justify-between">
                         <div>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-[10px] bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
                             {job.match}
                           </span>
                           <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 mt-1">{job.title}</h4>
@@ -577,7 +606,7 @@ export default function AdaptiveOnboardingPage() {
                   <button
                     type="button"
                     onClick={handleFinishAndNavigateToDashboard}
-                    className="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Lanjutkan</span>
                     <ArrowRight size={16} />
@@ -588,8 +617,18 @@ export default function AdaptiveOnboardingPage() {
               {/* VALUE MOMENT: JOURNEY 2 — BUAT CV */}
               {selectedIntent === 'buat_cv' && (
                 <div className="space-y-6 text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-orange-50 dark:bg-orange-950/80 text-orange-500 flex items-center justify-center border border-orange-200 dark:border-orange-800 mx-auto shadow-md">
-                    <FileText size={28} />
+                  <div className="flex justify-center -mb-2">
+                    <DotLottiePlayer
+                      src="/animations/cv-ready.json"
+                      autoplay={true}
+                      loop={false}
+                      className="w-28 h-28 mx-auto"
+                      fallback={
+                        <div className="w-16 h-16 rounded-[10px] bg-orange-50 dark:bg-orange-950/80 text-orange-500 flex items-center justify-center border border-orange-200 dark:border-orange-800 mx-auto shadow-md">
+                          <FileText size={32} />
+                        </div>
+                      }
+                    />
                   </div>
                   <div className="space-y-1">
                     <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-50 flex items-center justify-center gap-2">
@@ -602,7 +641,7 @@ export default function AdaptiveOnboardingPage() {
                   </div>
 
                   {/* Dynamic CV Preview Box */}
-                  <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-5 rounded-2xl text-left space-y-3 shadow-inner">
+                  <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-5 rounded-[10px] text-left space-y-3 shadow-inner">
                     <div className="border-b border-slate-200 dark:border-slate-700 pb-2">
                       <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 uppercase">{formData.fullName || 'Nama Lengkap'}</h3>
                       <p className="text-xs font-bold text-orange-600 dark:text-orange-400">{formData.targetPositions.join(', ') || 'Target Posisi'}</p>
@@ -640,7 +679,7 @@ export default function AdaptiveOnboardingPage() {
                   <button
                     type="button"
                     onClick={() => setShowMarketingOffer(true)}
-                    className="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Lanjutkan</span>
                     <ArrowRight size={16} />
@@ -652,8 +691,18 @@ export default function AdaptiveOnboardingPage() {
               {selectedIntent === 'perbaiki_cv' && (
                 <div className="space-y-6">
                   <div className="text-center space-y-1">
-                    <div className="w-14 h-14 rounded-2xl bg-orange-50 dark:bg-orange-950/80 text-orange-500 flex items-center justify-center border border-orange-200 dark:border-orange-800 mx-auto shadow-md">
-                      <Sparkles size={28} />
+                    <div className="flex justify-center -mb-2">
+                      <DotLottiePlayer
+                        src="/animations/ats-optimize.json"
+                        autoplay={true}
+                        loop={true}
+                        className="w-28 h-28 mx-auto"
+                        fallback={
+                          <div className="w-16 h-16 rounded-[10px] bg-orange-50 dark:bg-orange-950/80 text-orange-500 flex items-center justify-center border border-orange-200 dark:border-orange-800 mx-auto shadow-md">
+                            <Sparkles size={32} />
+                          </div>
+                        }
+                      />
                     </div>
                     <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-50 flex items-center justify-center gap-2">
                       <span>CV kamu sudah dianalisis</span>
@@ -665,7 +714,7 @@ export default function AdaptiveOnboardingPage() {
                   </div>
 
                   {/* ATS Score Meter Card */}
-                  <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-5 rounded-2xl space-y-4">
+                  <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-5 rounded-[10px] space-y-4">
                     <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
                       <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Skor Kesiapan ATS</span>
                       <span className="text-lg font-extrabold text-amber-500">72 / 100</span>
@@ -698,7 +747,7 @@ export default function AdaptiveOnboardingPage() {
                   <button
                     type="button"
                     onClick={() => setShowMarketingOffer(true)}
-                    className="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Lanjutkan</span>
                     <ArrowRight size={16} />
@@ -709,8 +758,18 @@ export default function AdaptiveOnboardingPage() {
               {/* VALUE MOMENT: JOURNEY 4 — MAU CEPAT DAPAT KERJA */}
               {selectedIntent === 'cepat_dapat_kerja' && (
                 <div className="space-y-6 text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-orange-50 dark:bg-orange-950/80 text-orange-500 flex items-center justify-center border border-orange-200 dark:border-orange-800 mx-auto shadow-md">
-                    <Rocket size={28} />
+                  <div className="flex justify-center -mb-2">
+                    <DotLottiePlayer
+                      src="/animations/fast-track.json"
+                      autoplay={true}
+                      loop={true}
+                      className="w-28 h-28 mx-auto"
+                      fallback={
+                        <div className="w-16 h-16 rounded-[10px] bg-orange-50 dark:bg-orange-950/80 text-orange-500 flex items-center justify-center border border-orange-200 dark:border-orange-800 mx-auto shadow-md">
+                          <Rocket size={32} />
+                        </div>
+                      }
+                    />
                   </div>
                   <div className="space-y-1">
                     <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-50 flex items-center justify-center gap-2">
@@ -722,21 +781,22 @@ export default function AdaptiveOnboardingPage() {
                     </p>
                   </div>
 
+
                   {/* Readiness Stats Grid */}
                   <div className="grid grid-cols-2 gap-3 text-left">
-                    <div className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-[10px] border border-slate-200 dark:border-slate-700">
                       <span className="text-[10px] font-bold text-slate-400 uppercase">Kelengkapan Profil</span>
                       <p className="text-lg font-extrabold text-orange-500 mt-0.5">85% Lengkap</p>
                     </div>
-                    <div className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-[10px] border border-slate-200 dark:border-slate-700">
                       <span className="text-[10px] font-bold text-slate-400 uppercase">Status CV</span>
                       <p className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">Siap digunakan</p>
                     </div>
-                    <div className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-[10px] border border-slate-200 dark:border-slate-700">
                       <span className="text-[10px] font-bold text-slate-400 uppercase">Job Match</span>
                       <p className="text-lg font-extrabold text-blue-600 dark:text-blue-400 mt-0.5">24 Lowongan</p>
                     </div>
-                    <div className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-[10px] border border-slate-200 dark:border-slate-700">
                       <span className="text-[10px] font-bold text-slate-400 uppercase">Lamaran Aktif</span>
                       <p className="text-lg font-extrabold text-slate-600 dark:text-slate-300 mt-0.5">Belum ada</p>
                     </div>
@@ -745,7 +805,7 @@ export default function AdaptiveOnboardingPage() {
                   <button
                     type="button"
                     onClick={handleFinishAndNavigateToDashboard}
-                    className="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Lanjutkan</span>
                     <ArrowRight size={16} />
@@ -797,10 +857,10 @@ export default function AdaptiveOnboardingPage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
                     
                     {/* Card 1: CV Siap Lamar (Rp 19.000) */}
-                    <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex flex-col justify-between space-y-4 hover:border-slate-400 transition relative">
+                    <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-[10px] p-4 flex flex-col justify-between space-y-4 hover:border-slate-400 transition relative">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 uppercase tracking-wider">
+                          <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 uppercase tracking-wider">
                             Starter
                           </span>
                         </div>
@@ -832,17 +892,17 @@ export default function AdaptiveOnboardingPage() {
                       <button
                         type="button"
                         onClick={() => router.push('/pembayaran?plan=siap_lamar')}
-                        className="w-full py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 font-bold text-xs transition cursor-pointer text-center"
+                        className="w-full py-2.5 rounded-[10px] bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 font-bold text-xs transition cursor-pointer text-center"
                       >
                         Pilih Rp 19rb
                       </button>
                     </div>
 
                     {/* Card 2: CV Profesional (Rp 59.000) — PALING POPULER */}
-                    <div className="bg-orange-50/80 dark:bg-orange-950/40 border-2 border-orange-500 rounded-2xl p-4 flex flex-col justify-between space-y-4 transition relative shadow-md shadow-orange-500/10">
+                    <div className="bg-orange-50/80 dark:bg-orange-950/40 border-2 border-orange-500 rounded-[10px] p-4 flex flex-col justify-between space-y-4 transition relative shadow-md shadow-orange-500/10">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-orange-500 text-white uppercase tracking-wider shadow-2xs">
+                          <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-[10px] bg-orange-500 text-white uppercase tracking-wider shadow-2xs">
                             🔥 Paling Populer
                           </span>
                         </div>
@@ -878,7 +938,7 @@ export default function AdaptiveOnboardingPage() {
                       <button
                         type="button"
                         onClick={() => router.push('/pembayaran?plan=profesional')}
-                        className="w-full py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition cursor-pointer text-center flex items-center justify-center gap-1"
+                        className="w-full py-2.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition cursor-pointer text-center flex items-center justify-center gap-1"
                       >
                         <span>Pilih Rp 59rb</span>
                         <ArrowRight size={14} />
@@ -886,10 +946,10 @@ export default function AdaptiveOnboardingPage() {
                     </div>
 
                     {/* Card 3: Paket Siap Kerja (Rp 99.000) */}
-                    <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex flex-col justify-between space-y-4 hover:border-slate-400 transition relative">
+                    <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-[10px] p-4 flex flex-col justify-between space-y-4 hover:border-slate-400 transition relative">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 uppercase tracking-wider">
+                          <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-[10px] bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 uppercase tracking-wider">
                             All-In-One
                           </span>
                         </div>
@@ -921,7 +981,7 @@ export default function AdaptiveOnboardingPage() {
                       <button
                         type="button"
                         onClick={() => router.push('/pembayaran?plan=siap_kerja')}
-                        className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-bold text-xs transition cursor-pointer text-center"
+                        className="w-full py-2.5 rounded-[10px] bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-bold text-xs transition cursor-pointer text-center"
                       >
                         Pilih Rp 99rb
                       </button>
@@ -981,7 +1041,7 @@ export default function AdaptiveOnboardingPage() {
                         placeholder="Ketik nama lengkapmu..."
                         value={formData.fullName}
                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition placeholder:text-slate-400"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[10px] text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition placeholder:text-slate-400"
                       />
                     </div>
 
@@ -995,7 +1055,7 @@ export default function AdaptiveOnboardingPage() {
                           placeholder="Nomor HP atau Email..."
                           value={formData.contactInfo}
                           onChange={(e) => setFormData({ ...formData, contactInfo: e.target.value })}
-                          className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition placeholder:text-slate-400"
+                          className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[10px] text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition placeholder:text-slate-400"
                         />
                       </div>
                     )}
@@ -1024,7 +1084,7 @@ export default function AdaptiveOnboardingPage() {
                                 key={lvl}
                                 type="button"
                                 onClick={() => setFormData({ ...formData, educationLevel: lvl })}
-                                className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                                className={`px-4 py-2 rounded-[10px] text-xs font-bold transition cursor-pointer ${
                                   formData.educationLevel === lvl
                                     ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
                                     : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
@@ -1112,7 +1172,7 @@ export default function AdaptiveOnboardingPage() {
                             key={lvl}
                             type="button"
                             onClick={() => setFormData({ ...formData, educationLevel: lvl })}
-                            className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                            className={`px-4 py-2 rounded-[10px] text-xs font-bold transition cursor-pointer ${
                               formData.educationLevel === lvl
                                 ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
@@ -1193,7 +1253,7 @@ export default function AdaptiveOnboardingPage() {
                       <button
                         type="button"
                         onClick={() => setFormData({ ...formData, hasWorkExperience: false })}
-                        className={`p-4 rounded-2xl border text-center font-bold text-sm transition cursor-pointer ${
+                        className={`p-4 rounded-[10px] border text-center font-bold text-sm transition cursor-pointer ${
                           formData.hasWorkExperience === false
                             ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500 text-orange-600 dark:text-orange-400 ring-2 ring-orange-500/20'
                             : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
@@ -1205,7 +1265,7 @@ export default function AdaptiveOnboardingPage() {
                       <button
                         type="button"
                         onClick={() => setFormData({ ...formData, hasWorkExperience: true })}
-                        className={`p-4 rounded-2xl border text-center font-bold text-sm transition cursor-pointer ${
+                        className={`p-4 rounded-[10px] border text-center font-bold text-sm transition cursor-pointer ${
                           formData.hasWorkExperience === true
                             ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500 text-orange-600 dark:text-orange-400 ring-2 ring-orange-500/20'
                             : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
@@ -1217,7 +1277,7 @@ export default function AdaptiveOnboardingPage() {
 
                     {formData.hasWorkExperience === false && (
                       <div className="space-y-3 pt-2">
-                        <div className="bg-orange-50/80 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/60 rounded-xl p-3.5 text-xs text-orange-700 dark:text-orange-300 font-semibold leading-relaxed">
+                        <div className="bg-orange-50/80 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/60 rounded-[10px] p-3.5 text-xs text-orange-700 dark:text-orange-300 font-semibold leading-relaxed">
                           Tidak masalah. Pengalaman seperti PKL, organisasi, freelance, atau proyek juga bisa membantu.
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -1226,7 +1286,7 @@ export default function AdaptiveOnboardingPage() {
                               key={exp}
                               type="button"
                               onClick={() => toggleArrayItem('nonWorkExperiences', exp)}
-                              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                              className={`px-3.5 py-2 rounded-[10px] text-xs font-bold transition cursor-pointer ${
                                 formData.nonWorkExperiences.includes(exp)
                                   ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20'
                                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
@@ -1249,7 +1309,7 @@ export default function AdaptiveOnboardingPage() {
                               placeholder="Ketik posisi kerja..."
                               value={formData.experienceTitle}
                               onChange={(e) => setFormData({ ...formData, experienceTitle: e.target.value })}
-                              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold"
+                              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[10px] text-xs font-semibold"
                             />
                           </div>
                           <div>
@@ -1259,7 +1319,7 @@ export default function AdaptiveOnboardingPage() {
                               placeholder="Nama perusahaan..."
                               value={formData.experienceCompany}
                               onChange={(e) => setFormData({ ...formData, experienceCompany: e.target.value })}
-                              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold"
+                              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[10px] text-xs font-semibold"
                             />
                           </div>
                         </div>
@@ -1343,7 +1403,7 @@ export default function AdaptiveOnboardingPage() {
                             key={sk}
                             type="button"
                             onClick={() => toggleSkill(sk)}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                            className={`px-3.5 py-2 rounded-[10px] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                               isSel
                                 ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
@@ -1368,12 +1428,12 @@ export default function AdaptiveOnboardingPage() {
                             handleAddCustomSkill();
                           }
                         }}
-                        className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold focus:outline-none focus:border-orange-500"
+                        className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[10px] text-xs font-semibold focus:outline-none focus:border-orange-500"
                       />
                       <button
                         type="button"
                         onClick={handleAddCustomSkill}
-                        className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition cursor-pointer"
+                        className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-[10px] transition cursor-pointer"
                       >
                         Tambah
                       </button>
@@ -1425,7 +1485,7 @@ export default function AdaptiveOnboardingPage() {
                             key={ind.id}
                             type="button"
                             onClick={() => toggleArrayItem('targetIndustries', ind.id)}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                            className={`px-3.5 py-2 rounded-[10px] text-xs font-bold transition flex items-center gap-1.5 ${
                               formData.targetIndustries.includes(ind.id)
                                 ? 'bg-orange-500 text-white shadow-sm'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
@@ -1481,7 +1541,7 @@ export default function AdaptiveOnboardingPage() {
                               key={opt}
                               type="button"
                               onClick={() => setFormData({ ...formData, willingToRelocate: opt })}
-                              className={`flex-1 py-2 rounded-xl text-xs font-bold border transition ${
+                              className={`flex-1 py-2 rounded-[10px] text-xs font-bold border transition ${
                                 formData.willingToRelocate === opt
                                   ? 'bg-orange-50 border-orange-500 text-orange-600'
                                   : 'bg-slate-50 border-slate-200 text-slate-700'
@@ -1528,15 +1588,15 @@ export default function AdaptiveOnboardingPage() {
                     </p>
                   </div>
 
-                  <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-8 bg-slate-50 dark:bg-slate-800/50 hover:bg-orange-50/50 transition cursor-pointer space-y-3">
-                    <div className="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-950 text-orange-500 flex items-center justify-center mx-auto">
+                  <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-[10px] p-8 bg-slate-50 dark:bg-slate-800/50 hover:bg-orange-50/50 transition cursor-pointer space-y-3">
+                    <div className="w-12 h-12 rounded-[10px] bg-orange-100 dark:bg-orange-950 text-orange-500 flex items-center justify-center mx-auto">
                       <Upload size={24} />
                     </div>
                     <div>
                       <p className="text-xs font-bold text-slate-700 dark:text-slate-200">Drag & drop file CV kamu di sini</p>
                       <p className="text-[11px] text-slate-400">Format PDF / DOCX (Maksimal 5MB)</p>
                     </div>
-                    <button type="button" className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md transition">
+                    <button type="button" className="px-5 py-2.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md transition">
                       Pilih File CV
                     </button>
                   </div>
@@ -1568,7 +1628,7 @@ export default function AdaptiveOnboardingPage() {
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, hasCvAlready: true })}
-                      className={`p-5 rounded-2xl border text-left transition cursor-pointer ${
+                      className={`p-5 rounded-[10px] border text-left transition cursor-pointer ${
                         formData.hasCvAlready === true
                           ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20'
                           : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
@@ -1582,7 +1642,7 @@ export default function AdaptiveOnboardingPage() {
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, hasCvAlready: false })}
-                      className={`p-5 rounded-2xl border text-left transition cursor-pointer ${
+                      className={`p-5 rounded-[10px] border text-left transition cursor-pointer ${
                         formData.hasCvAlready === false
                           ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20'
                           : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
@@ -1605,7 +1665,7 @@ export default function AdaptiveOnboardingPage() {
               <button
                 type="button"
                 onClick={handlePrevStep}
-                className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
               >
                 <ArrowLeft size={16} /> Kembali
               </button>
@@ -1613,7 +1673,7 @@ export default function AdaptiveOnboardingPage() {
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="px-7 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition flex items-center gap-2 cursor-pointer"
+                className="px-7 py-3 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition flex items-center gap-2 cursor-pointer"
               >
                 <span>Lanjutkan</span>
                 <ArrowRight size={16} />
