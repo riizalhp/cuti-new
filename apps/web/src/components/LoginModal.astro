@@ -13,9 +13,9 @@ const googleAuthUrl = getGoogleAuthUrl();
     
     <div class="login-modal-header">
       <div class="brand-mark-wrapper">
-        <span class="brand-mark">C</span>
+        <img src="/logo.webp" alt="Employr" width="150" height="41" class="modal-logo" />
       </div>
-      <h2 id="login-modal-title" class="login-modal-title">Masuk ke <em>CUTI</em></h2>
+      <h2 id="login-modal-title" class="login-modal-title">Masuk ke <em>Employr</em></h2>
       <p class="login-modal-subtitle">Akses cepat dan aman untuk mengelola CV, lamaran, serta misimu.</p>
     </div>
 
@@ -28,7 +28,7 @@ const googleAuthUrl = getGoogleAuthUrl();
           type="text" 
           id="login-username" 
           name="username" 
-          placeholder="contoh: user@ambilcuti.id" 
+          placeholder="contoh: user@employr.id" 
           class="modal-input" 
           required 
         />
@@ -154,6 +154,12 @@ const googleAuthUrl = getGoogleAuthUrl();
     display: flex;
     justify-content: center;
     margin-bottom: 12px;
+  }
+
+  .modal-logo {
+    width: auto;
+    height: 38px;
+    display: block;
   }
 
   .login-modal-title {
@@ -475,12 +481,14 @@ const googleAuthUrl = getGoogleAuthUrl();
                 return;
               }
 
-              localStorage.setItem('cuti_user_session', JSON.stringify({
+              const sessionData = {
                 id: result.data.id,
                 name: result.data.name,
                 email: result.data.email,
                 role: result.data.role,
-              }));
+              };
+              localStorage.setItem('cuti_user_session', JSON.stringify(sessionData));
+              document.cookie = `cuti_user_session=${encodeURIComponent(JSON.stringify(sessionData))}; max-age=${30 * 24 * 60 * 60}; path=/; SameSite=Lax`;
 
               window.location.href = 'http://localhost:3000/beranda';
             } catch (err) {
@@ -500,6 +508,14 @@ const googleAuthUrl = getGoogleAuthUrl();
             e.preventDefault();
             const textSpan = btn.querySelector('span');
             if (textSpan) textSpan.innerText = 'Memproses...';
+            const googleUser = {
+              name: 'Google User',
+              email: 'user@gmail.com',
+              role: 'USER',
+              provider: 'google',
+            };
+            localStorage.setItem('cuti_user_session', JSON.stringify(googleUser));
+            document.cookie = `cuti_user_session=${encodeURIComponent(JSON.stringify(googleUser))}; max-age=${30 * 24 * 60 * 60}; path=/; SameSite=Lax`;
             window.location.href = 'http://localhost:3000/beranda';
           });
         });
@@ -525,7 +541,7 @@ const googleAuthUrl = getGoogleAuthUrl();
 
             if (!name || !email || !pass) {
               if (regErr) {
-                regErr.innerText = 'Mohon lengkapi semua isian formulir.';
+                regErr.innerText = 'Semua field wajib diisi.';
                 regErr.style.display = 'block';
               }
               return;
@@ -560,13 +576,15 @@ const googleAuthUrl = getGoogleAuthUrl();
                 return;
               }
 
-              localStorage.setItem('cuti_user_session', JSON.stringify({
+              const newUserData = {
                 id: result.data.id,
                 name: result.data.name,
                 email: result.data.email,
                 role: result.data.role,
                 registeredAt: new Date().toISOString(),
-              }));
+              };
+              localStorage.setItem('cuti_user_session', JSON.stringify(newUserData));
+              document.cookie = `cuti_user_session=${encodeURIComponent(JSON.stringify(newUserData))}; max-age=${30 * 24 * 60 * 60}; path=/; SameSite=Lax`;
 
               if (submitBtn) submitBtn.innerText = 'Pendaftaran Berhasil! Menuju Onboarding...';
 
@@ -591,12 +609,14 @@ const googleAuthUrl = getGoogleAuthUrl();
             const textSpan = btn.querySelector('span');
             if (textSpan) textSpan.innerText = 'Memproses Pendaftaran...';
             try {
-              localStorage.setItem('cuti_user_session', JSON.stringify({
+              const googleUser = {
                 name: 'Google User',
                 email: 'user@gmail.com',
-                role: 'user',
+                role: 'USER',
                 provider: 'google',
-              }));
+              };
+              localStorage.setItem('cuti_user_session', JSON.stringify(googleUser));
+              document.cookie = `cuti_user_session=${encodeURIComponent(JSON.stringify(googleUser))}; max-age=${30 * 24 * 60 * 60}; path=/; SameSite=Lax`;
             } catch (err) {}
             window.location.href = 'http://localhost:3000/onboarding';
           });

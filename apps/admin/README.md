@@ -1,4 +1,4 @@
-# CUTI Admin Panel
+# Employr Admin Panel
 
 Admin dashboard for the CUTI platform built with Next.js 15.
 

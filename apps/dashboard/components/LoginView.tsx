@@ -1,24 +1,34 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTheme } from 'next-themes';
+import { setSessionCookie, getStoredSession } from '@/lib/auth';
 
 interface LoginViewProps {}
 
 export const LoginView: React.FC<LoginViewProps> = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTarget = searchParams?.get('redirect') || '/beranda';
+
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+  // Auto-login check on mount: If valid session exists in cookies or localStorage, redirect immediately
   useEffect(() => {
     setMounted(true);
-  }, []);
+    const existingSession = getStoredSession();
+    if (existingSession && existingSession.email) {
+      router.replace(redirectTarget);
+    }
+  }, [router, redirectTarget]);
 
   const isDarkMode = resolvedTheme === 'dark';
   const toggleDarkMode = () => setTheme(isDarkMode ? 'light' : 'dark');
@@ -45,19 +55,17 @@ export const LoginView: React.FC<LoginViewProps> = () => {
         return;
       }
 
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(
-          'cuti_user_session',
-          JSON.stringify({
-            id: result.data.id,
-            name: result.data.name,
-            email: result.data.email,
-            role: result.data.role,
-          })
-        );
-      }
+      const userData = {
+        id: result.data.id,
+        name: result.data.name,
+        email: result.data.email,
+        role: result.data.role,
+      };
 
-      router.push('/beranda');
+      // Set cookie for 30 days if rememberMe is true, otherwise 1 day
+      setSessionCookie(userData, rememberMe ? 30 : 1);
+
+      router.push(redirectTarget);
     } catch (err) {
       console.error('Login error:', err);
       setErrorMessage('Terjadi kendala saat menghubungkan ke database server.');
@@ -67,18 +75,15 @@ export const LoginView: React.FC<LoginViewProps> = () => {
 
   const handleGoogleLogin = () => {
     setIsGoogleLoading(true);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(
-        'cuti_user_session',
-        JSON.stringify({
-          name: 'Google User',
-          email: 'user@gmail.com',
-          role: 'USER',
-          provider: 'google',
-        })
-      );
-    }
-    router.push('/beranda');
+    const googleUser = {
+      name: 'Google User',
+      email: 'user@gmail.com',
+      role: 'USER',
+      provider: 'google',
+    };
+
+    setSessionCookie(googleUser, 30);
+    router.push(redirectTarget);
   };
 
   return (
@@ -86,7 +91,7 @@ export const LoginView: React.FC<LoginViewProps> = () => {
       {/* Top Bar / Theme Toggle */}
       <div className="absolute top-6 left-6 right-6 flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#1738D1] border-2 border-[#101114] dark:border-[#F5F6F2] flex items-center justify-center font-black text-[#F5F6F2] text-lg shadow-[2px_2px_0px_#101114] dark:shadow-[2px_2px_0px_#F5F6F2]">
+          <div className="w-10 h-10 rounded-full bg-navy-700 border-2 border-[#101114] dark:border-[#F5F6F2] flex items-center justify-center font-black text-[#F5F6F2] text-lg shadow-[2px_2px_0px_#101114] dark:shadow-[2px_2px_0px_#F5F6F2]">
             C
           </div>
           <span className="font-extrabold text-lg tracking-tight text-[#101114] dark:text-[#F5F6F2]">
@@ -110,12 +115,12 @@ export const LoginView: React.FC<LoginViewProps> = () => {
         {/* Header */}
         <div className="text-center mb-6">
           <div className="flex justify-center mb-3">
-            <div className="w-12 h-12 rounded-full bg-[#1738D1] border-2 border-[#101114] dark:border-[#F5F6F2] flex items-center justify-center font-black text-[#F5F6F2] text-xl shadow-[3px_3px_0px_#101114] dark:shadow-[3px_3px_0px_#F5F6F2]">
+            <div className="w-12 h-12 rounded-full bg-navy-700 border-2 border-[#101114] dark:border-[#F5F6F2] flex items-center justify-center font-black text-[#F5F6F2] text-xl shadow-[3px_3px_0px_#101114] dark:shadow-[3px_3px_0px_#F5F6F2]">
               C
             </div>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#101114] dark:text-[#F5F6F2] m-0 leading-none">
-            Masuk ke <em className="font-serif font-normal italic text-[#1738D1] dark:text-[#60A5FA]">CUTI</em>
+            Masuk ke <em className="font-serif font-normal italic text-navy-700 dark:text-[#60A5FA]">CUTI</em>
           </h1>
           <p className="mt-2.5 text-sm text-[#101114]/70 dark:text-[#F5F6F2]/70 leading-snug">
             Akses akun terdaftar untuk mengelola CV, lamaran, serta misimu.
@@ -140,16 +145,18 @@ export const LoginView: React.FC<LoginViewProps> = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="contoh: budi@gmail.com"
+              placeholder="contoh: email@contoh.com"
               required
-              className="w-full h-11 px-3.5 bg-white dark:bg-[#1E1E22] border-2 border-[#101114] dark:border-[#3F3F46] rounded-[10px] text-sm font-medium text-[#101114] dark:text-[#F5F6F2] outline-none focus:border-[#1738D1] focus:shadow-[2px_2px_0px_#101114] transition"
+              className="w-full h-11 px-3.5 bg-white dark:bg-[#1E1E22] border-2 border-[#101114] dark:border-[#3F3F46] rounded-[10px] text-sm font-medium text-[#101114] dark:text-[#F5F6F2] outline-none focus:border-navy-700 focus:shadow-[2px_2px_0px_#101114] transition"
             />
           </div>
 
           <div className="flex flex-col gap-1.5 text-left">
-            <label htmlFor="login-password-input" className="text-[11px] font-bold uppercase tracking-wider text-[#101114] dark:text-[#F5F6F2]/80">
-              Kata Sandi
-            </label>
+            <div className="flex items-center justify-between">
+              <label htmlFor="login-password-input" className="text-[11px] font-bold uppercase tracking-wider text-[#101114] dark:text-[#F5F6F2]/80">
+                Kata Sandi
+              </label>
+            </div>
             <input
               id="login-password-input"
               type="password"
@@ -157,14 +164,27 @@ export const LoginView: React.FC<LoginViewProps> = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full h-11 px-3.5 bg-white dark:bg-[#1E1E22] border-2 border-[#101114] dark:border-[#3F3F46] rounded-[10px] text-sm font-medium text-[#101114] dark:text-[#F5F6F2] outline-none focus:border-[#1738D1] focus:shadow-[2px_2px_0px_#101114] transition"
+              className="w-full h-11 px-3.5 bg-white dark:bg-[#1E1E22] border-2 border-[#101114] dark:border-[#3F3F46] rounded-[10px] text-sm font-medium text-[#101114] dark:text-[#F5F6F2] outline-none focus:border-navy-700 focus:shadow-[2px_2px_0px_#101114] transition"
             />
+          </div>
+
+          {/* Remember Me / Auto Login Checkbox */}
+          <div className="flex items-center justify-between py-1">
+            <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-[#101114]/80 dark:text-[#F5F6F2]/80 font-medium">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded text-navy-700 border-[#101114] dark:border-[#3F3F46] focus:ring-navy-700 cursor-pointer"
+              />
+              <span>Ingat saya (Auto Login 30 hari)</span>
+            </label>
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full h-12 mt-1 px-5 rounded-[10px] bg-[#101114] dark:bg-[#F5F6F2] text-[#F5F6F2] dark:text-[#101114] hover:bg-[#1738D1] dark:hover:bg-[#1738D1] dark:hover:text-white font-bold text-sm flex items-center justify-between transition-all duration-200 shadow-[3px_3px_0px_#101114] dark:shadow-[3px_3px_0px_#3F3F46] disabled:opacity-60 cursor-pointer"
+            className="w-full h-12 mt-1 px-5 rounded-[10px] bg-[#101114] dark:bg-[#F5F6F2] text-[#F5F6F2] dark:text-[#101114] hover:bg-navy-700 dark:hover:bg-navy-700 dark:hover:text-white font-bold text-sm flex items-center justify-between transition-all duration-200 shadow-[3px_3px_0px_#101114] dark:shadow-[3px_3px_0px_#3F3F46] disabled:opacity-60 cursor-pointer"
           >
             <span>{isLoading ? 'Memeriksa Data...' : 'Masuk ke Akun'}</span>
             <span className="text-lg leading-none">↗</span>
@@ -183,7 +203,7 @@ export const LoginView: React.FC<LoginViewProps> = () => {
             type="button"
             onClick={handleGoogleLogin}
             disabled={isGoogleLoading}
-            className="w-full min-h-[48px] px-5 py-2.5 rounded-[10px] border-2 border-[#1738D1] bg-[#1738D1] text-[#F5F6F2] hover:bg-[#F5F6F2] hover:text-[#1738D1] dark:hover:bg-[#101114] dark:hover:text-[#60A5FA] font-semibold text-sm flex items-center justify-between transition-all duration-250 hover:-translate-y-0.5 shadow-[3px_3px_0px_#101114] dark:shadow-[3px_3px_0px_#3F3F46] disabled:opacity-60 cursor-pointer"
+            className="w-full min-h-[48px] px-5 py-2.5 rounded-[10px] border-2 border-navy-700 bg-navy-700 text-[#F5F6F2] hover:bg-[#F5F6F2] hover:text-navy-700 dark:hover:bg-[#101114] dark:hover:text-[#60A5FA] font-semibold text-sm flex items-center justify-between transition-all duration-250 hover:-translate-y-0.5 shadow-[3px_3px_0px_#101114] dark:shadow-[3px_3px_0px_#3F3F46] disabled:opacity-60 cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
               {isGoogleLoading ? (
@@ -208,7 +228,7 @@ export const LoginView: React.FC<LoginViewProps> = () => {
             Belum punya akun?{' '}
             <a
               href="http://localhost:4321/register"
-              className="bg-transparent border-0 p-0 font-semibold text-[#1738D1] dark:text-[#60A5FA] cursor-pointer underline underline-offset-3 hover:text-[#101114] dark:hover:text-white"
+              className="bg-transparent border-0 p-0 font-semibold text-navy-700 dark:text-[#60A5FA] cursor-pointer underline underline-offset-3 hover:text-[#101114] dark:hover:text-white"
             >
               Daftar Akun Baru ↗
             </a>

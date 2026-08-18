@@ -47,7 +47,7 @@ export const TipsAndInsightCard: React.FC = () => {
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                  <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                     {t.tag}
                   </span>
                   <Icon className="w-4 h-4 text-amber-600 dark:text-amber-400" />

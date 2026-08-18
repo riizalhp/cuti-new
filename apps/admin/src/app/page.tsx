@@ -47,7 +47,7 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Beranda Dashboard</h1>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Ringkasan sistem dan aktivitas platform AmbilCUTI
+            Ringkasan sistem dan aktivitas platform Employr
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -140,7 +140,7 @@ export default function AdminDashboard() {
 
           <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl">
             <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 text-center">
-              AmbilCUTI Admin Panel v1.0 • Turborepo
+              Employr Admin Panel v1.0 • Turborepo
             </p>
           </div>
         </div>

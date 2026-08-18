@@ -129,7 +129,7 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
             data-heatmap="metric"
             data-heatmap-intensity="0.94"
             data-heatmap-label="Metrik & Angka Terukur"
-            className="font-black text-rose-600 bg-rose-50 px-1 rounded border border-rose-200 inline-block my-0.5"
+            className="font-black text-rose-600 bg-rose-50 px-1 rounded-[10px] border border-rose-200 inline-block my-0.5"
           >
             {part}
           </span>
@@ -315,7 +315,7 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
               </div>
             </div>
             {showOverlay && (
-              <span className="px-2 py-0.5 rounded text-[10px] font-black bg-rose-600 text-white shadow-xs z-30">
+              <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-black bg-rose-600 text-white shadow-xs z-30">
                 Hotspot #1 (96%)
               </span>
             )}
@@ -330,11 +330,11 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
         {/* 2. RINGKASAN PROFIL (SUMMARY) */}
         <div className="relative z-10 space-y-1.5 py-3 border-b border-slate-100">
           <div className="flex justify-between items-center">
-            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 border-l-3 border-orange-500 pl-2">
+            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 border-l-3 border-[#1738D1] pl-2">
               Ringkasan Profil (Executive Summary)
             </h2>
             {showOverlay && (
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500 text-slate-950 z-30">
+              <span className="px-1.5 py-0.5 rounded-[10px] text-[9px] font-bold bg-amber-500 text-slate-950 z-30">
                 Focus 82%
               </span>
             )}
@@ -352,19 +352,19 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
         {/* 3. PENGALAMAN KERJA (EXPERIENCE) - PER-POIN PER-BARIS */}
         <div className="relative z-10 space-y-3 py-3 border-b border-slate-100 flex-1">
           <div className="flex justify-between items-center">
-            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 border-l-3 border-orange-500 pl-2">
+            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 border-l-3 border-[#1738D1] pl-2">
               Pengalaman Kerja
             </h2>
             <div className="flex items-center gap-2 pointer-events-auto">
               {showOverlay && (
-                <span className="px-2 py-0.5 rounded text-[10px] font-black bg-rose-600 text-white shadow-xs z-30">
+                <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-black bg-rose-600 text-white shadow-xs z-30">
                   Hotspot #2 (94%)
                 </span>
               )}
               <button
                 type="button"
                 onClick={() => handleAddAchievement(cvExperience[0]?.id || 'exp-1')}
-                className="px-2 py-0.5 rounded bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-300 text-[10px] font-bold border border-orange-200 dark:border-orange-800 transition flex items-center gap-1 cursor-pointer z-40 shadow-2xs"
+                className="px-2 py-0.5 rounded-[10px] bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-300 text-[10px] font-bold border border-orange-200 dark:border-orange-800 transition flex items-center gap-1 cursor-pointer z-40 shadow-2xs"
                 title="Tambah Baris Poin Pencapaian Pengalaman Kerja"
               >
                 <Plus className="w-3 h-3 text-orange-500" />
@@ -403,19 +403,19 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
         {/* 4. SKILLS & TECH STACK - PER-POIN PER-BARIS */}
         <div className="relative z-10 space-y-1.5 py-3 border-b border-slate-100">
           <div className="flex justify-between items-center">
-            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 border-l-3 border-orange-500 pl-2">
+            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 border-l-3 border-[#1738D1] pl-2">
               Keterampilan &amp; Tech Stack
             </h2>
             <div className="flex items-center gap-2 pointer-events-auto">
               {showOverlay && (
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500 text-slate-950 z-30">
+                <span className="px-1.5 py-0.5 rounded-[10px] text-[9px] font-bold bg-amber-500 text-slate-950 z-30">
                   Scan 78%
                 </span>
               )}
               <button
                 type="button"
                 onClick={handleAddSkill}
-                className="px-2 py-0.5 rounded bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-300 text-[10px] font-bold border border-orange-200 dark:border-orange-800 transition flex items-center gap-1 cursor-pointer z-40 shadow-2xs"
+                className="px-2 py-0.5 rounded-[10px] bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-300 text-[10px] font-bold border border-orange-200 dark:border-orange-800 transition flex items-center gap-1 cursor-pointer z-40 shadow-2xs"
                 title="Tambah Baris Skill / Keterampilan Baru"
               >
                 <Plus className="w-3 h-3 text-orange-500" />
@@ -430,7 +430,7 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
                 data-heatmap="skill-badge"
                 data-heatmap-intensity="0.78"
                 data-heatmap-label={`Skill: ${sk}`}
-                className="px-2.5 py-0.5 rounded bg-slate-100 text-slate-800 text-[11px] font-bold border border-slate-200 inline-block"
+                className="px-2.5 py-0.5 rounded-[10px] bg-slate-100 text-slate-800 text-[11px] font-bold border border-slate-200 inline-block"
               >
                 {sk}
               </span>
@@ -441,19 +441,19 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
         {/* 5. PENDIDIKAN & INFORMASI TAMBAHAN - PER-POIN PER-BARIS */}
         <div className="relative z-10 space-y-2 pt-2">
           <div className="flex justify-between items-center">
-            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 border-l-3 border-orange-500 pl-2">
+            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 border-l-3 border-[#1738D1] pl-2">
               Pendidikan &amp; Kualifikasi
             </h2>
             <div className="flex items-center gap-2 pointer-events-auto">
               {showOverlay && (
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500 text-white z-30">
+                <span className="px-1.5 py-0.5 rounded-[10px] text-[9px] font-bold bg-sky-500 text-white z-30">
                   Cold Zone (22%)
                 </span>
               )}
               <button
                 type="button"
                 onClick={handleAddEducation}
-                className="px-2 py-0.5 rounded bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-300 text-[10px] font-bold border border-orange-200 dark:border-orange-800 transition flex items-center gap-1 cursor-pointer z-40 shadow-2xs"
+                className="px-2 py-0.5 rounded-[10px] bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-300 text-[10px] font-bold border border-orange-200 dark:border-orange-800 transition flex items-center gap-1 cursor-pointer z-40 shadow-2xs"
                 title="Tambah Baris Pendidikan / Kualifikasi Baru"
               >
                 <Plus className="w-3 h-3 text-orange-500" />
@@ -483,7 +483,7 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
               <button
                 type="button"
                 onClick={handleAddMiscPoint}
-                className="px-2 py-0.5 rounded bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-300 text-[10px] font-bold border border-orange-200 dark:border-orange-800 transition flex items-center gap-1 cursor-pointer z-40 pointer-events-auto shadow-2xs"
+                className="px-2 py-0.5 rounded-[10px] bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-300 text-[10px] font-bold border border-orange-200 dark:border-orange-800 transition flex items-center gap-1 cursor-pointer z-40 pointer-events-auto shadow-2xs"
                 title="Tambah Baris Informasi Tambahan Baru"
               >
                 <Plus className="w-3 h-3 text-orange-500" />
@@ -512,9 +512,9 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
                   width: `${box.width}%`,
                   height: `${box.height}%`,
                 }}
-                className="absolute border-2 border-dashed border-orange-500/80 bg-orange-500/10 rounded flex items-start justify-end p-1"
+                className="absolute border-2 border-dashed border-[#1738D1]/80 bg-[#1738D1]/10 rounded-[10px] flex items-start justify-end p-1"
               >
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-orange-600 text-white shadow-xs">
+                <span className="px-1.5 py-0.5 rounded-[10px] text-[9px] font-black bg-[#132EA8] text-white shadow-xs">
                   {box.title} ({Math.round(box.visualWeight * 100)}% Weight)
                 </span>
               </div>
@@ -534,10 +534,10 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
                 }}
                 className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center gap-1.5"
               >
-                <div className="w-5 h-5 rounded-full bg-rose-600 text-white font-black text-[10px] flex items-center justify-center shadow-lg ring-2 ring-rose-200 animate-bounce">
+                <div className="w-5 h-5 rounded-[10px]-full bg-rose-600 text-white font-black text-[10px] flex items-center justify-center shadow-lg ring-2 ring-rose-200 animate-bounce">
                   {fp.order}
                 </div>
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-900 text-white shadow-md">
+                <span className="px-1.5 py-0.5 rounded-[10px] text-[9px] font-bold bg-slate-900 text-white shadow-md">
                   {fp.label} ({Math.round(fp.intensity * 100)}%)
                 </span>
               </div>
@@ -557,11 +557,11 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
                 {atsCorrelations.slice(0, 4).map((item) => (
                   <div
                     key={item.id}
-                    className="p-1.5 rounded bg-slate-800 border border-slate-700 flex justify-between items-center"
+                    className="p-1.5 rounded-[10px] bg-slate-800 border border-slate-700 flex justify-between items-center"
                   >
                     <span className="font-semibold text-slate-200">{item.keyword}</span>
                     <span
-                      className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                      className={`px-1.5 py-0.5 rounded-[10px] text-[9px] font-bold ${
                         item.quadrant === 'gold' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-slate-950'
                       }`}
                     >

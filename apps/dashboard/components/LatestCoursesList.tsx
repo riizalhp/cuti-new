@@ -71,7 +71,7 @@ export const LatestCoursesList: React.FC = () => {
     <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-[10px] bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400">
+          <div className="p-2 rounded-[10px] bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
             <GraduationCap className="w-5 h-5" />
           </div>
           <div>
@@ -91,12 +91,12 @@ export const LatestCoursesList: React.FC = () => {
           return (
             <div
               key={c.id}
-              className="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-violet-300 dark:hover:border-violet-700 transition flex flex-col justify-between"
+              className="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-orange-300 dark:hover:border-orange-700 transition flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    className={`px-2 py-0.5 rounded-[10px] text-[10px] font-bold ${
                       c.type === 'Gratis'
                         ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                         : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
@@ -113,7 +113,7 @@ export const LatestCoursesList: React.FC = () => {
                 <h4 className="font-bold text-xs text-slate-900 dark:text-white mb-1">
                   {c.title}
                 </h4>
-                <p className="text-[11px] font-semibold text-violet-600 dark:text-violet-400 mb-2">
+                <p className="text-[11px] font-semibold text-orange-600 dark:text-orange-400 mb-2">
                   {c.provider} • {c.level}
                 </p>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
@@ -127,7 +127,7 @@ export const LatestCoursesList: React.FC = () => {
                 className={`mt-4 w-full flex items-center justify-center gap-1.5 py-2 rounded-[10px] font-bold text-xs transition ${
                   isEnrolled
                     ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                    : 'bg-violet-600 hover:bg-violet-700 text-white shadow-sm'
+                    : 'bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-sm'
                 }`}
               >
                 {isEnrolled ? (

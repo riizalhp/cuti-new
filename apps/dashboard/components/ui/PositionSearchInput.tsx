@@ -160,7 +160,7 @@ export const PositionSearchInput: React.FC<PositionSearchInputProps> = ({
               setIsOpen(true);
               setSelectedIndex(-1);
             }}
-            className="w-full pl-10 pr-24 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition shadow-2xs"
+            className="w-full pl-10 pr-24 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-2 focus:ring-[#1738D1]/20 transition shadow-2xs"
           />
 
           <div className="absolute right-2 flex items-center gap-1">
@@ -186,7 +186,7 @@ export const PositionSearchInput: React.FC<PositionSearchInputProps> = ({
                   setIsOpen(!isOpen);
                 }
               }}
-              className="px-3 py-1 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[11px] rounded-[10px] transition cursor-pointer shadow-2xs"
+              className="px-3 py-1 bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-[11px] rounded-[10px] transition cursor-pointer shadow-2xs"
             >
               Tambah
             </button>

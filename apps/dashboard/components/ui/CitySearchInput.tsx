@@ -139,7 +139,7 @@ export const CitySearchInput: React.FC<CitySearchInputProps> = ({
             setIsOpen(true);
             setSelectedIndex(-1);
           }}
-          className="w-full pl-10 pr-9 py-3 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition shadow-2xs"
+          className="w-full pl-10 pr-9 py-3 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-2 focus:ring-[#1738D1]/20 transition shadow-2xs"
         />
         {query ? (
           <button

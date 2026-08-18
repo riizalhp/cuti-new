@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Linkedin,
   Sparkles,
@@ -31,6 +31,7 @@ import {
   FolderGit2,
   ExternalLink,
   BadgeCheck,
+  Download,
 } from 'lucide-react';
 
 interface LinkedInAnalysisViewProps {
@@ -76,76 +77,33 @@ export const LinkedInAnalysisView: React.FC<LinkedInAnalysisViewProps> = ({
   onOpenUpgradeModal,
 }) => {
   // Input State (Primary: Profile Link URL)
-  const [profileUrl, setProfileUrl] = useState('https://linkedin.com/in/andipratama-dev');
-  const [targetRole, setTargetRole] = useState('Full Stack Developer');
+  const [profileUrl, setProfileUrl] = useState('');
+  const [targetRole, setTargetRole] = useState('');
 
   // UI Flow States
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState<number>(0);
-  const [hasAnalyzed, setHasAnalyzed] = useState(true);
+  const [hasAnalyzed, setHasAnalyzed] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
+
+  // LinkedIn Auth (semi-otomatis: sesi login pengguna sendiri)
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [scrapeError, setScrapeError] = useState<string | null>(null);
 
   // Extracted/Scraped Data State
   const [scrapedData, setScrapedData] = useState<ScrapedProfileData>({
-    name: 'Andi Pratama',
-    headline: 'Software Engineer at Tech Corp | React, TypeScript, Node.js enthusiast',
-    about:
-      'Software engineer berpengalaman 3 tahun dalam pengembangan aplikasi web berskala besar menggunakan React, Next.js, dan Node.js. Suka mempelajari teknologi baru dan berkolaborasi dalam tim agile.',
-    location: 'Jakarta, Indonesia',
-    connections: '500+ koneksi',
-    experience: [
-      {
-        role: 'Full Stack Engineer',
-        company: 'Tech Corp Indonesia',
-        duration: '2022 - Sekarang (2 thn 8 bln)',
-        description: 'Mengembangkan frontend Next.js dan backend microservices berbasis Node.js & PostgreSQL.',
-      },
-      {
-        role: 'Frontend Developer',
-        company: 'Digital Creative Studio',
-        duration: '2021 - 2022 (1 thn)',
-        description: 'Membangun UI responsive dengan React.js, Tailwind CSS, dan Redux Toolkit.',
-      },
-    ],
-    education: [
-      {
-        degree: 'S1 Teknik Informatika',
-        institution: 'Universitas Indonesia',
-        year: '2017 - 2021',
-      },
-    ],
-    certifications: [
-      {
-        name: 'AWS Certified Solutions Architect – Associate',
-        issuer: 'Amazon Web Services (AWS)',
-        issueDate: 'Diterbitkan 2023',
-        credentialId: 'AWS-893012938',
-      },
-      {
-        name: 'Meta Front-End Developer Professional Certificate',
-        issuer: 'Coursera / Meta',
-        issueDate: 'Diterbitkan 2022',
-        credentialId: 'META-FE-90123',
-      },
-    ],
-    projects: [
-      {
-        title: 'E-Commerce Microservices Platform',
-        role: 'Lead Full Stack Engineer',
-        duration: '2023 (6 bulan)',
-        description: 'Membangun arsitektur microservices untuk platform e-commerce dengan Next.js 14, Node.js, Redis, dan PostgreSQL yang menangani 100k+ transaksi per bulan.',
-        techStack: ['Next.js', 'Node.js', 'PostgreSQL', 'Redis', 'Docker'],
-        url: 'https://github.com/andipratama/ecommerce-microservices',
-      },
-      {
-        title: 'Real-Time Job Analytics Dashboard',
-        role: 'Frontend Specialist',
-        duration: '2022 (4 bulan)',
-        description: 'Pengembangan dashboard visualisasi data pasar kerja Indonesia secara real-time dengan Chart.js dan Tailwind CSS.',
-        techStack: ['React.js', 'TypeScript', 'Tailwind CSS', 'Chart.js'],
-      },
-    ],
-    skills: ['React.js', 'Next.js', 'TypeScript', 'Node.js', 'Express.js', 'PostgreSQL', 'Tailwind CSS', 'Git'],
+    name: '',
+    headline: '',
+    about: '',
+    location: '',
+    connections: '',
+    experience: [],
+    education: [],
+    certifications: [],
+    projects: [],
+    skills: [],
   });
 
   // Assessment & Recommendations Results State
@@ -168,123 +126,23 @@ export const LinkedInAnalysisView: React.FC<LinkedInAnalysisViewProps> = ({
     networkingMessages: Array<{ type: string; recipient: string; template: string }>;
     auditFindings: Array<{ category: string; status: 'good' | 'warning' | 'critical'; tip: string }>;
   }>({
-    overallScore: 84,
-    ssiScore: 78,
-    profileStatus: 'Sangat Baik (All-Star Level)',
+    overallScore: 0,
+    ssiScore: 0,
+    profileStatus: '',
     scoreBreakdown: {
-      headline: 80,
-      about: 85,
-      experience: 82,
-      keywords: 88,
-      engagement: 86,
+      headline: 0,
+      about: 0,
+      experience: 0,
+      keywords: 0,
+      engagement: 0,
     },
-    headlines: [
-      {
-        title: 'Format High-Converting HR (Disarankan)',
-        text: 'Full Stack Engineer | React.js, Next.js, Node.js & Cloud Architecture | Building Scalable Web Products | Ex-Tokopedia Tech',
-        keywords: 'Full Stack, React.js, Next.js, Node.js, Cloud',
-        impact: 'Meningkatkan tayangan pencarian HRD hingga +140%',
-      },
-      {
-        title: 'Format Result-Oriented & Impact Focused',
-        text: 'Software Engineer @Tech Corp | Scaled Microservices to 1M+ Users | Specialist in High-Performance Web Apps & Clean Code',
-        keywords: 'Microservices, Scaled, High-Performance, Web Apps',
-        impact: 'Sangat disukai oleh Tech Lead & Hiring Manager',
-      },
-      {
-        title: 'Format Growth & Specialization',
-        text: 'Senior Frontend & API Developer | Modern JavaScript Specialist | Open for Tech Lead & Senior Roles in Southeast Asia',
-        keywords: 'Frontend, API Developer, Tech Lead, Remote',
-        impact: 'Optimal untuk pencarian lowongan Remote & International',
-      },
-    ],
-    optimizedAbout: `Saya adalah Full Stack Software Engineer dengan pengalaman 3+ tahun membangun sistem aplikasi web performa tinggi yang digunakan oleh lebih dari 500.000 pengguna aktif bulanan.
-
-Spesialisasi Utama Saya:
-• Frontend: React.js, Next.js, TypeScript, Tailwind CSS, Redux Toolkit
-• Backend & Database: Node.js, Express, PostgreSQL, Redis, RESTful API & GraphQL
-• DevOps & Cloud: Docker, GCP (Google Cloud), CI/CD Pipelines
-
-Pencapaian Utama:
-- Memimpin refactoring sistem monolitik menjadi microservices, meningkatkan kecepatan response API sebesar 45%.
-- Membangun dashboard analitik real-time yang mengurangi latency pemrosesan data hingga 60%.
-- Mengembangkan 10+ modul aplikasi e-commerce dengan tingkat availability 99.9%.
-
-Tertarik berdiskusi seputar Software Architecture, Tech Innovation, atau Peluang Kolaborasi?
-Email: andi.pratama@email.com
-GitHub: github.com/andipratama`,
-    keySkills: [
-      'React.js',
-      'Next.js',
-      'TypeScript',
-      'Node.js',
-      'Express.js',
-      'PostgreSQL',
-      'REST API',
-      'System Architecture',
-      'Docker',
-      'Agile / Scrum',
-    ],
-    missingKeywords: [
-      'Microservices',
-      'Jest / Testing',
-      'CI/CD Pipeline',
-      'GraphQL',
-      'Tailwind CSS',
-      'Performance Optimization',
-    ],
-    experienceBulletPoints: [
-      'Memimpin tim beranggota 4 developer dalam mengembangkan fitur checkout baru, meningkatkan conversion rate transaksi sebesar +18% dalam 3 bulan.',
-      'Mengoptimalkan performa rendering halaman utama Next.js, berhasil menurunkan score Lighthouse LCP dari 4.2 detik menjadi 1.1 detik.',
-      'Mengintegrasikan payment gateway QRIS & Credit Card untuk lebih dari 50.000 transaksi bulanan dengan rasio sukses 99.8%.',
-    ],
-    networkingMessages: [
-      {
-        type: 'Outreach ke HR/Recruiter',
-        recipient: 'Tech Recruiter / Talent Acquisition',
-        template:
-          'Halo [Nama Recruiter], salam kenal! Saya memperhatikan [Nama Perusahaan] sedang membuka posisi [Nama Posisi]. Dengan pengalaman 3+ tahun memimpin pengembangan web berskala tinggi menggunakan React & Node.js, saya sangat tertarik untuk berkontribusi. Boleh saya mengirimkan CV lengkap untuk ditinjau? Terima kasih!',
-      },
-      {
-        type: 'Koneksi ke Engineering Manager',
-        recipient: 'Tech Lead / Engineering Manager',
-        template:
-          'Halo [Nama Manager], salam hangat! Saya pengagum arsitektur teknologi di [Nama Perusahaan]. Sebagai sesama Full Stack Engineer, saya senang melihat perkembangan produk kalian. Jika ada waktu, saya sangat ingin berjejaring dan bertukar pikiran seputar tech stack & engineering culture di tim Anda. Terima kasih!',
-      },
-      {
-        type: 'Follow Up Setelah Apply',
-        recipient: 'Recruiter / HR Manager',
-        template:
-          'Halo [Nama Recruiter], saya sudah mengajukan lamaran untuk posisi [Nama Posisi] melalui website CUTI / LinkedIn. Saya sangat antusias dengan kesempatan ini dan siap berdiskusi lebih lanjut mengenai portofolio proyek terlama saya. Selamat beraktivitas!',
-      },
-    ],
-    auditFindings: [
-      {
-        category: 'Headline Profil',
-        status: 'warning',
-        tip: 'Headline kamu saat ini belum mencantumkan kata kunci spesifik seperti Next.js, System Architecture, & lokasi kerja yang dicari recruiter.',
-      },
-      {
-        category: 'Bagian About / Bio',
-        status: 'warning',
-        tip: 'Tambahkan metrik kuantitatif (angka %, jumlah user) dan call-to-action kontak email agar recruiter bisa menghubungi secara langsung.',
-      },
-      {
-        category: 'Pengalaman Kerja (Experience)',
-        status: 'good',
-        tip: 'Struktur poin pengalaman kerja sudah baik, gunakan metode STAR (Situation, Task, Action, Result) pada setiap bullet point.',
-      },
-      {
-        category: 'Searchability & SEO Filter HR',
-        status: 'critical',
-        tip: 'Kamu kekurangan 6 kata kunci teknis utama yang sering disaring recruiter dalam alat LinkedIn Recruiter.',
-      },
-      {
-        category: 'Social Selling Index (SSI)',
-        status: 'good',
-        tip: 'SSI Score kamu berada di top 15% profesional di industri teknologi. Pertahankan postingan mingguan.',
-      },
-    ],
+    headlines: [],
+    optimizedAbout: '',
+    keySkills: [],
+    missingKeywords: [],
+    experienceBulletPoints: [],
+    networkingMessages: [],
+    auditFindings: [],
   });
 
   // Handle Fill Demo Link
@@ -300,45 +158,107 @@ GitHub: github.com/andipratama`,
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
-  // Handle Extraction & Assessment Call
+  // Handle Login LinkedIn (semi-otomatis: user login manual di browser)
+  const handleLoginLinkedIn = async () => {
+    setIsLoginLoading(true);
+    setAuthError(null);
+    try {
+      const res = await fetch('/api/linkedin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setAuthError(data.error || 'Login gagal.');
+      } else {
+        setIsLoggedIn(true);
+      }
+    } catch {
+      setAuthError('Gagal membuka browser login. Silakan coba lagi.');
+    } finally {
+      setIsLoginLoading(false);
+    }
+  };
+
+  // Handle Logout LinkedIn
+  const handleLogoutLinkedIn = async () => {
+    await fetch('/api/linkedin/logout', { method: 'POST' }).catch(() => null);
+    setIsLoggedIn(false);
+    setAuthError(null);
+  };
+
+  // Cek status sesi saat halaman dimuat
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/linkedin/auth-status');
+        const data = await res.json();
+        setIsLoggedIn(!!data.loggedIn);
+      } catch {
+        setIsLoggedIn(false);
+      }
+    })();
+  }, []);
+
+  // Handle Unduh Data Profil (JSON)
+  const handleDownloadProfile = () => {
+    const blob = new Blob([JSON.stringify(scrapedData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `linkedin-profile-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Handle Extraction (scraping ASLI via Playwright + sesi login pengguna)
   const handleScrapeAndAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profileUrl) return;
 
     setIsLoading(true);
     setHasAnalyzed(false);
+    setScrapeError(null);
     setLoadingStep(1);
 
-    // Simulate loading steps for real UI feel
-    const stepTimer1 = setTimeout(() => setLoadingStep(2), 1200);
-    const stepTimer2 = setTimeout(() => setLoadingStep(3), 2400);
+    try {
+      // Step 1: Pastikan sesi login LinkedIn tersedia
+      const authRes = await fetch('/api/linkedin/auth-status');
+      const authData = await authRes.json();
+      if (!authData.loggedIn) {
+        setScrapeError('Belum ada sesi login LinkedIn. Klik tombol "Login LinkedIn" untuk membuka browser login, lalu coba lagi.');
+        setIsLoading(false);
+        return;
+      }
+      setLoadingStep(2);
 
-    const promptText = `Lakukan ekstraksi SELURUH data profil LinkedIn (termasuk Headline, About, Pengalaman, Pendidikan, Lisensi & Sertifikasi, Proyek/Portofolio, serta Skill) dan analisis penilaian menyeluruh dari link berikut:
-- Link LinkedIn URL: ${profileUrl}
-- Target Posisi / Industri yang Dicari: ${targetRole || 'Sesuai Profil'}
+      // Step 2: Ekstraksi data profil ASLI dari link (pakai sesi login user)
+      const scrapeRes = await fetch('/api/linkedin/scrape', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: profileUrl }),
+      });
+      const scrapeData = await scrapeRes.json();
+      if (!scrapeData.success) {
+        setScrapeError(scrapeData.error || 'Gagal mengekstrak profil LinkedIn.');
+        setIsLoading(false);
+        return;
+      }
 
-Kembalikan data dalam format JSON persis seperti berikut:
+      // Data asli hasil scraping langsung ditampilkan (bukan tebakan AI)
+      setScrapedData(scrapeData.data);
+      setLoadingStep(3);
+      setHasAnalyzed(true);
+
+      // Step 3 (opsional): AI hanya menganalisis data yang SUDAH ter-scrape
+      const analysisPrompt = `Analisis data profil LinkedIn berikut yang telah berhasil diekstrak:
+${JSON.stringify(scrapeData.data)}
+
+Target posisi: ${targetRole || 'Sesuai Profil'}
+
+Kembalikan HANYA JSON valid:
 {
-  "scrapedData": {
-    "name": "Nama Lengkap Kandidat",
-    "headline": "Headline Profil Ter-ekstrak",
-    "about": "Ringkasan / Bio About Ter-ekstrak",
-    "location": "Kota, Indonesia",
-    "connections": "500+ koneksi",
-    "experience": [
-      { "role": "Nama Jabatan", "company": "Nama Perusahaan", "duration": "Tahun - Tahun", "description": "Deskripsi singkat pekerjaan" }
-    ],
-    "education": [
-      { "degree": "Gelar & Jurusan", "institution": "Nama Universitas / Sekolah", "year": "Tahun Masuk - Lulus" }
-    ],
-    "certifications": [
-      { "name": "Nama Sertifikat / Lisensi", "issuer": "Penerbit Sertifikat", "issueDate": "Tahun Terbit", "credentialId": "ID Kredensial" }
-    ],
-    "projects": [
-      { "title": "Judul Proyek", "role": "Peran Dalam Proyek", "duration": "Waktu Pengerjaan", "description": "Deskripsi proyek", "techStack": ["Tech 1", "Tech 2"], "url": "link-proyek" }
-    ],
-    "skills": ["Skill 1", "Skill 2", "Skill 3", "Skill 4", "Skill 5"]
-  },
   "analysisResult": {
     "overallScore": 85,
     "ssiScore": 79,
@@ -362,52 +282,52 @@ Kembalikan data dalam format JSON persis seperti berikut:
   }
 }`;
 
-    const systemInstruction = `Anda adalah Sistem Pengestrak Data & Konsultan Optimasi Profil LinkedIn Profesional di Indonesia.
-Tugas Anda adalah mengambil/menyusun data profil LinkedIn LENGKAP dari URL yang diberikan (nama, headline, bio, pengalaman, pendidikan, sertifikasi/lisensi, proyek/portofolio, skill) serta memberikan penilaian skor SEO Recruiter, kelemahan profil, dan draf perbaikan lengkap.
-Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
-
-    try {
-      const response = await fetch('/api/gemini', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: promptText, systemInstruction }),
-      });
-
-      const data = await response.json();
-      if (data.text) {
-        const cleanedText = data.text
-          .replace(/```json/g, '')
-          .replace(/```/g, '')
-          .trim();
-        const parsed = JSON.parse(cleanedText);
-        if (parsed.scrapedData) {
-          setScrapedData(parsed.scrapedData);
+      try {
+        const aiRes = await fetch('/api/ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: analysisPrompt,
+            systemInstruction: 'Anda adalah Konsultan Optimasi Profil LinkedIn Profesional di Indonesia. Kembalikan HANYA format JSON valid tanpa markdown.',
+          }),
+        });
+        const aiData = await aiRes.json();
+        if (aiData.text) {
+          const cleaned = aiData.text.replace(/```json/g, '').replace(/```/g, '').trim();
+          const parsed = JSON.parse(cleaned);
+          if (parsed.analysisResult) setAnalysisResult(parsed.analysisResult);
         }
-        if (parsed.analysisResult) {
-          setAnalysisResult(parsed.analysisResult);
-        }
+      } catch {
+        // Analisis AI gagal — data scraping tetap tampil
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('LinkedIn Extraction Error:', err);
+      const raw = err?.message || '';
+      if (/browser has been closed|target page|has been closed/i.test(raw)) {
+        setScrapeError('Jendela browser tertutup sebelum proses selesai. Biarkan jendela browser tetap terbuka saat ekstraksi berjalan, lalu coba lagi.');
+      } else if (/timeout|timed out/i.test(raw)) {
+        setScrapeError('Proses ekstraksi terlalu lama. Periksa koneksi internet lalu coba lagi.');
+      } else if (/failed to fetch|network|net::err/i.test(raw)) {
+        setScrapeError('Tidak dapat terhubung ke server. Periksa koneksi internet Anda, lalu coba lagi.');
+      } else {
+        setScrapeError('Gagal memproses profil LinkedIn. Silakan coba lagi.');
+      }
     } finally {
-      clearTimeout(stepTimer1);
-      clearTimeout(stepTimer2);
       setIsLoading(false);
-      setHasAnalyzed(true);
     }
   };
 
   return (
     <div className="space-y-8 pb-12 font-sans">
       {/* Header Banner */}
-      <div className="p-6 md:p-8 rounded-[10px] bg-[#0D3BD9] text-white border border-blue-500/50 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+      <div className="p-6 md:p-8 rounded-[10px] bg-navy-700 text-white border border-navy-800 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#1738D1]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-navy-500/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] text-xs font-bold bg-violet-500/20 text-violet-300 border border-violet-500/30">
-              <Linkedin className="w-3.5 h-3.5 text-violet-400" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] text-xs font-bold bg-[#1738D1]/20 text-orange-300 border border-[#1738D1]/30 uppercase tracking-wider">
+              <Linkedin className="w-3.5 h-3.5 text-orange-400" />
               <span>Ekstraktor &amp; Auditor LinkedIn</span>
             </div>
 
@@ -415,8 +335,8 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
               Ekstraksi Data &amp; Audit Profil LinkedIn
             </h1>
 
-            <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
-              Cukup tempelkan <strong className="text-amber-300">Link URL LinkedIn</strong> kamu. Sistem akan mengekstrak seluruh data profil (termasuk Sertifikasi &amp; Proyek Portofolio), menampilkan rincian data ter-ekstrak, serta memberikan penilaian skor SEO Recruiter &amp; draf rekomendasi optimasi.
+            <p className="text-xs md:text-sm text-slate-200 leading-relaxed">
+              Cukup tempelkan <strong className="text-orange-300">Link URL LinkedIn</strong> kamu. Sistem akan mengekstrak seluruh data profil (termasuk Sertifikasi &amp; Proyek Portofolio), menampilkan rincian data ter-ekstrak, serta memberikan penilaian skor SEO Recruiter &amp; draf rekomendasi optimasi.
             </p>
           </div>
 
@@ -424,9 +344,9 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
             <button
               type="button"
               onClick={onOpenUpgradeModal}
-              className="px-4 py-2.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white text-xs font-extrabold transition shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 cursor-pointer shrink-0"
+              className="px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-extrabold transition shadow-lg shadow-[#1738D1]/20 flex items-center justify-center gap-2 cursor-pointer shrink-0 border-0"
             >
-              <Zap className="w-4 h-4 text-amber-200" />
+              <Zap className="w-4 h-4 text-white" />
               <span>Pilih Paket Access</span>
             </button>
           )}
@@ -437,7 +357,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
       <div className="p-6 md:p-8 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-[10px] bg-violet-100 dark:bg-violet-950 flex items-center justify-center text-violet-600 dark:text-violet-400 shrink-0">
+            <div className="w-10 h-10 rounded-[10px] bg-blue-50 dark:bg-blue-950 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
               <Linkedin className="w-5 h-5" />
             </div>
             <div>
@@ -455,19 +375,82 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
             <button
               type="button"
               onClick={() => handleFillDemoLink('https://linkedin.com/in/andipratama-dev', 'Full Stack Engineer')}
-              className="px-2.5 py-1 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950 text-slate-700 dark:text-slate-300 font-bold text-[11px] border border-slate-200 dark:border-slate-700 transition cursor-pointer"
+              className="px-2.5 py-1 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950 text-slate-700 dark:text-slate-300 font-bold text-[11px] border border-slate-200 dark:border-slate-700 transition cursor-pointer"
             >
               Full Stack
             </button>
             <button
               type="button"
               onClick={() => handleFillDemoLink('https://linkedin.com/in/siti-rahma-uiux', 'UI/UX Designer')}
-              className="px-2.5 py-1 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950 text-slate-700 dark:text-slate-300 font-bold text-[11px] border border-slate-200 dark:border-slate-700 transition cursor-pointer"
+              className="px-2.5 py-1 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950 text-slate-700 dark:text-slate-300 font-bold text-[11px] border border-slate-200 dark:border-slate-700 transition cursor-pointer"
             >
               UI/UX Designer
             </button>
           </div>
         </div>
+
+        {/* STATUS LOGIN LINKEDIN (semi-otomatis) */}
+        <div className={`p-4 rounded-[10px] border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${isLoggedIn
+          ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60'
+          : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60'}`}>
+          <div className="flex items-center gap-3">
+            <div className={`w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0 ${isLoggedIn
+              ? 'bg-emerald-100 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400'
+              : 'bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-400'}`}>
+              {isLoggedIn ? <BadgeCheck className="w-5 h-5" /> : <ShieldCheck className="w-5 h-5" />}
+            </div>
+            <div className="space-y-0.5">
+              <p className={`font-extrabold text-xs ${isLoggedIn ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'}`}>
+                {isLoggedIn === null
+                  ? 'Memeriksa sesi LinkedIn...'
+                  : isLoggedIn
+                  ? 'Sesi LinkedIn Aktif'
+                  : 'Perlu Login LinkedIn'}
+              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                {isLoggedIn
+                  ? 'Sesi tersimpan lokal. Bot akan membuka profil dengan sesi login Anda.'
+                  : 'Login sekali di browser yang terbuka (password tidak disimpan). Bot memakai sesi ini untuk menarik data profil.'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {isLoggedIn ? (
+              <button
+                type="button"
+                onClick={handleLogoutLinkedIn}
+                className="px-3.5 py-2 rounded-[10px] border border-rose-200 dark:border-rose-800 bg-white dark:bg-slate-900 text-rose-600 dark:text-rose-400 font-bold text-xs transition hover:bg-rose-50 dark:hover:bg-rose-950 cursor-pointer"
+              >
+                Hapus Sesi
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleLoginLinkedIn}
+                disabled={isLoginLoading}
+                className="px-4 py-2 rounded-[10px] bg-[#0A66C2] hover:bg-[#004182] text-white font-extrabold text-xs transition shadow-md shadow-[#0A66C2]/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+              >
+                {isLoginLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Linkedin className="w-3.5 h-3.5" />}
+                <span>{isLoginLoading ? 'Menunggu Login...' : 'Login LinkedIn'}</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {authError && (
+          <div className="flex items-center gap-2 px-4 py-3 rounded-[10px] bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-400 text-xs font-bold">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{authError}</span>
+          </div>
+        )}
+
+        {scrapeError && (
+          <div className="flex items-center gap-2 px-4 py-3 rounded-[10px] bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-400 text-xs font-bold">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{scrapeError}</span>
+          </div>
+        )}
 
         <form onSubmit={handleScrapeAndAnalyze} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
@@ -476,14 +459,14 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                 Link URL LinkedIn Kamu *
               </label>
               <div className="relative">
-                <Linkedin className="w-4 h-4 absolute left-3.5 top-3.5 text-violet-500" />
+                <Linkedin className="w-4 h-4 absolute left-3.5 top-3.5 text-blue-500" />
                 <input
                   type="url"
                   required
                   placeholder="https://linkedin.com/in/username-kamu"
                   value={profileUrl}
                   onChange={(e) => setProfileUrl(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                  className="w-full pl-10 pr-4 py-3 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
                 />
               </div>
             </div>
@@ -499,7 +482,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                   placeholder="Contoh: Full Stack Developer"
                   value={targetRole}
                   onChange={(e) => setTargetRole(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                  className="w-full pl-10 pr-4 py-3 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
                 />
               </div>
             </div>
@@ -508,7 +491,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
           <button
             type="submit"
             disabled={isLoading || !profileUrl}
-            className="w-full py-3.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-black text-sm transition shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="w-full py-3.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-black text-sm transition shadow-lg shadow-[#1738D1]/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 border-0"
           >
             {isLoading ? (
               <>
@@ -517,7 +500,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
               </>
             ) : (
               <>
-                <Zap className="w-4 h-4 text-amber-200" />
+                <Zap className="w-4 h-4 text-white" />
                 <span>Ekstrak &amp; Analisis Seluruh Profil LinkedIn</span>
               </>
             )}
@@ -526,8 +509,8 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
 
         {/* LOADING STEP ANIMATION INDICATOR */}
         {isLoading && (
-          <div className="p-5 rounded-[10px] bg-violet-50/80 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-900/60 space-y-4 animate-in fade-in duration-300">
-            <div className="flex items-center gap-2 text-violet-700 dark:text-violet-300 font-extrabold text-xs">
+          <div className="p-5 rounded-[10px] bg-orange-50/80 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/60 space-y-4 animate-in fade-in duration-300">
+            <div className="flex items-center gap-2 text-orange-700 dark:text-orange-300 font-extrabold text-xs">
               <RefreshCw className="w-4 h-4 animate-spin text-orange-500" />
               <span>Proses Ekstraksi &amp; Penilaian Sedang Berjalan...</span>
             </div>
@@ -598,14 +581,14 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
             {/* Profile Info Header Badge */}
             <div className="p-5 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-violet-600 text-white font-black text-xl flex items-center justify-center shrink-0 shadow-md">
+                <div className="w-14 h-14 rounded-full bg-navy-700 text-white font-black text-xl flex items-center justify-center shrink-0 shadow-md">
                   {scrapedData.name.charAt(0)}
                 </div>
                 <div className="space-y-1">
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
                     {scrapedData.name}
                   </h3>
-                  <p className="text-xs font-semibold text-violet-600 dark:text-violet-400">
+                  <p className="text-xs font-semibold text-orange-600 dark:text-orange-400">
                     {scrapedData.headline}
                   </p>
                   <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400">
@@ -621,14 +604,22 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                 </div>
               </div>
 
-              <div className="shrink-0">
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleDownloadProfile}
+                  className="px-3.5 py-2 rounded-[10px] bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900 font-bold text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Unduh Data (JSON)</span>
+                </button>
                 <a
                   href={profileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3.5 py-2 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-violet-600 font-bold text-xs transition flex items-center gap-1.5 shadow-xs"
+                  className="px-3.5 py-2 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-orange-600 font-bold text-xs transition flex items-center gap-1.5 shadow-xs"
                 >
-                  <Linkedin className="w-3.5 h-3.5 text-violet-600" />
+                  <Linkedin className="w-3.5 h-3.5 text-blue-600" />
                   <span>Buka Link LinkedIn</span>
                 </a>
               </div>
@@ -639,7 +630,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
               {/* About / Summary Ter-ekstrak */}
               <div className="p-4 rounded-[10px] bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2">
                 <div className="flex items-center gap-2 text-slate-900 dark:text-white font-extrabold">
-                  <FileText className="w-4 h-4 text-violet-500" />
+                  <FileText className="w-4 h-4 text-orange-500" />
                   <span>Bio / About Ter-ekstrak</span>
                 </div>
                 <p className="text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
@@ -657,7 +648,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                   {scrapedData.skills.map((sk, idx) => (
                     <span
                       key={idx}
-                      className="px-2.5 py-1 rounded-[10px] bg-violet-50 dark:bg-violet-950/60 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800 font-semibold text-[11px]"
+                      className="px-2.5 py-1 rounded-[10px] bg-navy-50 dark:bg-navy-950/60 text-navy-700 dark:text-navy-300 border border-navy-200 dark:border-navy-800 font-semibold text-[11px]"
                     >
                       {sk}
                     </span>
@@ -685,7 +676,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                           {exp.duration}
                         </span>
                       </div>
-                      <span className="text-violet-600 dark:text-violet-400 font-bold block text-[11px]">
+                      <span className="text-orange-600 dark:text-orange-400 font-bold block text-[11px]">
                         {exp.company}
                       </span>
                       <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed pt-1">
@@ -700,7 +691,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
               {scrapedData.certifications && scrapedData.certifications.length > 0 && (
                 <div className="p-4 rounded-[10px] bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3 md:col-span-2">
                   <div className="flex items-center gap-2 text-slate-900 dark:text-white font-extrabold">
-                    <Award className="w-4 h-4 text-purple-500" />
+                    <Award className="w-4 h-4 text-orange-500" />
                     <span>Sertifikasi &amp; Lisensi Ter-ekstrak</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -711,7 +702,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                            <BadgeCheck className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                            <BadgeCheck className="w-3.5 h-3.5 text-orange-500 shrink-0" />
                             <span>{cert.name}</span>
                           </span>
                         </div>
@@ -768,7 +759,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                             {proj.techStack.map((tech, tIdx) => (
                               <span
                                 key={tIdx}
-                                className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                                className="px-2 py-0.5 rounded-[10px] text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
                               >
                                 {tech}
                               </span>
@@ -781,7 +772,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                             href={proj.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-[10px] font-bold text-violet-600 dark:text-violet-400 hover:underline pt-1"
+                            className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline pt-1"
                           >
                             <ExternalLink className="w-3 h-3" />
                             <span>Lihat Proyek</span>
@@ -797,7 +788,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
               {scrapedData.education && scrapedData.education.length > 0 && (
                 <div className="p-4 rounded-[10px] bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2 md:col-span-2">
                   <div className="flex items-center gap-2 text-slate-900 dark:text-white font-extrabold">
-                    <GraduationCap className="w-4 h-4 text-indigo-500" />
+                    <GraduationCap className="w-4 h-4 text-navy-500" />
                     <span>Pendidikan Ter-ekstrak</span>
                   </div>
                   <div className="flex flex-wrap gap-3">
@@ -829,7 +820,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                   <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
                     2. Hasil Penilaian &amp; Rekomendasi Optimasi
                   </h2>
-                  <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-bold bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300">
+                  <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-bold bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300 border border-orange-200 dark:border-orange-800">
                     {analysisResult.profileStatus}
                   </span>
                 </div>
@@ -840,7 +831,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
 
               <div className="flex items-center gap-4 shrink-0">
                 <div className="text-center">
-                  <div className="text-2xl font-black text-violet-600 dark:text-violet-400">
+                  <div className="text-2xl font-black text-orange-600 dark:text-orange-400">
                     {analysisResult.overallScore}<span className="text-xs text-slate-400 font-normal">/100</span>
                   </div>
                   <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold">Skor SEO Recruiter</span>
@@ -883,19 +874,19 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
 
             {/* Quick Navigation Links */}
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold text-slate-500">
-              <a href="#audit-findings" className="px-3 py-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950/60 hover:text-violet-600 dark:hover:text-violet-300 transition shrink-0 flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-violet-500" />
+              <a href="#audit-findings" className="px-3 py-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/60 hover:text-orange-600 dark:hover:text-orange-300 transition shrink-0 flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-orange-500" />
                 <span>Audit HR</span>
               </a>
-              <a href="#headline-recommendations" className="px-3 py-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950/60 hover:text-violet-600 dark:hover:text-violet-300 transition shrink-0 flex items-center gap-1.5">
+              <a href="#headline-recommendations" className="px-3 py-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/60 hover:text-orange-600 dark:hover:text-orange-300 transition shrink-0 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                 <span>Headline</span>
               </a>
-              <a href="#about-draft" className="px-3 py-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950/60 hover:text-violet-600 dark:hover:text-violet-300 transition shrink-0 flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-violet-500" />
+              <a href="#about-draft" className="px-3 py-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/60 hover:text-orange-600 dark:hover:text-orange-300 transition shrink-0 flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5 text-orange-500" />
                 <span>Draf Bio</span>
               </a>
-              <a href="#keywords-seo" className="px-3 py-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950/60 hover:text-violet-600 dark:hover:text-violet-300 transition shrink-0 flex items-center gap-1.5">
+              <a href="#keywords-seo" className="px-3 py-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/60 hover:text-orange-600 dark:hover:text-orange-300 transition shrink-0 flex items-center gap-1.5">
                 <Target className="w-3.5 h-3.5 text-emerald-500" />
                 <span>SEO Skill</span>
               </a>
@@ -907,7 +898,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
               <div id="audit-findings" className="space-y-4 text-xs scroll-mt-6">
                 <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
                   <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-violet-500" />
+                    <ShieldCheck className="w-4 h-4 text-orange-500" />
                     <span>Temuan Audit Utama Profil LinkedIn</span>
                   </h4>
                   <span className="text-[10px] text-slate-400 font-semibold">Evaluasi Kualitas</span>
@@ -935,7 +926,7 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                             {finding.category}
                           </span>
                           <span
-                            className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${
+                            className={`px-1.5 py-0.5 rounded-[10px] text-[9px] font-black uppercase ${
                               finding.status === 'good'
                                 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                                 : finding.status === 'warning'
@@ -976,13 +967,13 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
                       className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 space-y-3 relative group"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-bold text-violet-600 dark:text-violet-400 text-xs">
+                        <span className="font-bold text-orange-600 dark:text-orange-400 text-xs">
                           {item.title}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleCopy(item.text, `headline-${idx}`)}
-                          className="p-1.5 rounded-[10px] bg-violet-50 dark:bg-violet-950/80 hover:bg-violet-100 text-violet-600 dark:text-violet-300 transition flex items-center gap-1 font-bold text-[10px] cursor-pointer"
+                          className="p-1.5 rounded-[10px] bg-orange-50 dark:bg-orange-950/80 hover:bg-orange-100 text-orange-600 dark:text-orange-300 transition flex items-center gap-1 font-bold text-[10px] cursor-pointer"
                         >
                           {copiedIndex === `headline-${idx}` ? (
                             <>
@@ -1018,13 +1009,13 @@ Kembalikan HANYA format JSON valid tanpa markdown atau kata pembuka.`;
               <div id="about-draft" className="space-y-4 text-xs scroll-mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
                   <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-violet-500" />
+                    <FileText className="w-4 h-4 text-orange-500" />
                     <span>Draf Bio / About LinkedIn Terstruktur</span>
                   </h4>
                   <button
                     type="button"
                     onClick={() => handleCopy(analysisResult.optimizedAbout, 'about-text')}
-                    className="px-3 py-1.5 rounded-[10px] bg-violet-600 hover:bg-violet-500 text-white font-bold transition flex items-center gap-1.5 cursor-pointer text-[11px]"
+                    className="px-3 py-1.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold transition flex items-center gap-1.5 cursor-pointer text-[11px] border-0 shadow-xs"
                   >
                     {copiedIndex === 'about-text' ? (
                       <>

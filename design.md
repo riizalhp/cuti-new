@@ -1,10 +1,10 @@
-# CUTI — Design System & Art Direction
+# Employr — Design System & Art Direction
 
 ## I. Landing Page Design System & Art Direction
 
 ### 1. Ringkasan Produk
 
-CUTI adalah **Career Operating System** untuk siswa SMA/SMK, mahasiswa, dan fresh graduate Indonesia usia 16–24 tahun. Pengalaman visualnya harus terasa seperti perpaduan platform karier yang terpercaya, gamifikasi yang menyenangkan, dan produk fintech Indonesia yang rapi.
+Employr adalah **Career Operating System** untuk siswa SMA/SMK, mahasiswa, dan fresh graduate Indonesia usia 16–24 tahun. Pengalaman visualnya harus terasa seperti perpaduan platform karier yang terpercaya, gamifikasi yang menyenangkan, dan produk fintech Indonesia yang rapi.
 
 **Persona merek:** friendly, optimistis, youthful, career-focused, dan trustworthy.
 
@@ -20,7 +20,7 @@ Inspirasi dari tiga referensi diterjemahkan sebagai berikut:
 2. **Portfolio editorial cobalt:** tipografi display berskala ekstrem, grid tegas, garis tipis, dan komposisi asimetris.
 3. **Poster teknologi ultramarine:** warna biru dominan, energi visual tinggi, kartu seperti poster cetak, dan kontras putih–biru yang kuat.
 
-CUTI tidak menyalin identitas referensi secara literal. Sistem ini mengadaptasi ritme, skala, dan keberanian visualnya agar relevan dengan audiens muda Indonesia.
+Employr tidak menyalin identitas referensi secara literal. Sistem ini mengadaptasi ritme, skala, dan keberanian visualnya agar relevan dengan audiens muda Indonesia.
 
 ### 3. Prinsip Desain
 
@@ -254,64 +254,74 @@ Gunakan Bahasa Indonesia kasual, ringkas, dan membangun kepercayaan.
 
 ## II. Dashboard User Design System (`http://localhost:3000/design-system`)
 
-### 1. 4 Pilar Utama Design System Dashboard User
+### 1. 5 Pilar Utama Design System Dashboard User
 
 1. **Strict Lucide Icons Only**:
    - Dilarang keras memakai emoji/emoticon kasar pada UI antarmuka dashboard.
    - Seluruh visual indicator dan status menggunakan ikon SVG terukur dari `lucide-react`.
 
-2. **Bento Grid Architecture**:
+2. **Bento Grid Architecture & Rounded 10px**:
    - Pengelompokan informasi secara modular menggunakan Tailwind Grid (`grid-cols-12` atau `grid-cols-1 md:grid-cols-3`).
-   - Hirarki visual jelas dengan padding proporsional (`p-5`, `p-6`), batas border bersih (`border-slate-200 dark:border-slate-800`), dan sudut terukur (`rounded-[10px]`).
+   - Hirarki visual jelas dengan padding proporsional (`p-5`, `p-6`), batas border bersih (`border-slate-200 dark:border-slate-800`), dan sudut terstandarisasi (`rounded-[10px]`).
 
-3. **Right-Hand Slide-in Drawer**:
+3. **Standardisasi Skor (Kotak vs Radial Ring)**:
+   - **Format Kotak (`rounded-[10px]`) + Horizontal Bar**: Standar untuk 90% widget Bento Grid, kartu Beranda, list, dan tabel.
+   - **Radial SVG Progress Ring**: Khusus untuk 1 Master Hero Score di header halaman diagnostik mendalam (seperti Evaluasi CV & Career Readiness).
+
+4. **Right-Hand Slide-in Drawer**:
    - Seluruh formulir interaktif kompleks (misalnya: *Tambah Lamaran*, *Detail ATS*, *Edit Profil*) WAJIB menggunakan slide-in drawer yang meluncur dari kanan layar (`fixed inset-0 z-50 justify-end slide-in-from-right`), BUKAN modal pop-up di tengah.
    - Dilengkapi backdrop blur kustom (`bg-slate-950/60 backdrop-blur-xs`), header bertitel dengan tombol tutup, body dengan scroll independen (`overflow-y-auto`), serta sticky footer action.
 
-4. **Shadcn UI & Standard Accessibility**:
-   - Komponen berbasis standar shadcn/ui.
-   - Kontras warna memenuhi standar WCAG AA.
-   - Dukungan penuh Light & Dark mode secara mulus.
-   - Layout responsif seluler (Mobile Bottom Navigation di bawah 1024px, Desktop Sidebar 240px/256px di atas 1024px).
+5. **Mobile-First Bottom Navigation (5 Tab)**:
+   - Di layar mobile (< 1024px), gunakan fixed **Bottom Navigation (64px + safe area)**: *Beranda, CV, Tracker, Misi, Akun*.
+   - Tidak menggunakan menu hamburger yang memblokir layar di mobile dashboard.
+
+---
 
 ### 2. Palet Warna Dashboard User
 
 | Peran / Token | Light Mode | Dark Mode | Fungsi Utama |
 |---|---|---|---|
-| **Primary Indigo** | `#4F46E5` / `#6366F1` (`violet-600`/`violet-500`) | `violet-400` / `bg-violet-950` | Tombol utama, tab aktif, badge AI, brand highlight |
-| **Success Emerald** | `#059669` / `#10B981` (`emerald-600`/`emerald-500`) | `emerald-400` / `bg-emerald-950` | Status Offering, komisi referral, indikator pencapaian |
+| **CTA Utama (Orange)** | `#F97316` (`orange-500` / `orange-600`) | `orange-500` / `orange-400` | Tombol aksi utama (submit, upgrade, buat CV, lamar) |
+| **Brand Primary (Navy)** | `#1F3578` (`navy-700`) | `#3B5CC4` (`navy-500`) | Brand identity, sidebar header, badge brand |
+| **Success Emerald** | `#059669` / `#10B981` (`emerald-600`/`emerald-500`) | `emerald-400` / `bg-emerald-950` | Status Offering, reward referral, indikator pencapaian |
 | **Warning Amber** | `#D97706` / `#F59E0B` (`amber-600`/`amber-500`) | `amber-400` / `bg-amber-950` | Sesi interview mendatang, deadline pending, misi aktif |
 | **Danger Rose/Red** | `#E11D48` / `#EF4444` (`rose-600`/`rose-500`) | `rose-400` / `bg-rose-950` | Status Ditolak, konfirmasi hapus, error state |
 | **Info / Stage Blue** | `#2563EB` / `#3B82F6` (`blue-600`/`blue-500`) | `blue-400` / `bg-blue-950` | Status Lamaran Terkirim, pengumuman, info tracker |
 | **Background Canvas** | `#F8FAFC` (`slate-50`) / `#FFFFFF` | `#020617` (`slate-950`) / `#0F172A` | Canvas utama dan card background |
-| **Border & Divider** | `#E2E8F0` (`slate-200`) | `#1E293B` (`slate-800`) | Garis pemisah card and modul bento |
+| **Border & Divider** | `#E2E8F0` (`slate-200`) | `#1E293B` (`slate-800`) | Garis pemisah card dan modul bento |
 | **Text Hierarchy** | Primary: `#0F172A` (`slate-900`) / Muted: `#64748B` (`slate-500`) | Primary: `#F8FAFC` (`slate-50`) / Muted: `#94A3B8` (`slate-400`) | Teks judul, body, dan caption metadata |
+
+---
 
 ### 3. Skala Tipografi Dashboard User
 
-- **Font Family**: `Inter`, `Plus Jakarta Sans`, atau `Geist` (sans-serif) + `JetBrains Mono` / `font-mono` (kode/token).
+- **Font Family**: `Geist` (headings/display) + `Inter` (body/UI) + `JetBrains Mono` (kode/token).
 - **Hero / Page Title**: `text-2xl font-extrabold` (24px, line-height 1.25, tracking-tight).
 - **Section / Card Header**: `text-base font-bold` (16px, line-height 1.4).
 - **Body Text**: `text-sm font-medium` (14px, line-height 1.5).
 - **Metadata / Small**: `text-xs` (12px, line-height 1.5).
-- **Labels / Badges**: `text-[10px]` atau `text-[11px]` `font-bold uppercase tracking-wider`.
+- **Labels / Badges**: `text-[10px]` atau `text-[11px]` `font-bold uppercase tracking-wider rounded-[10px]`.
 - **Monospace Code / Referral Tokens**: `font-mono font-bold text-sm tracking-wider`.
+
+---
 
 ### 4. Komponen UI Dashboard User
 
 #### Button Styles
 
-- **Primary Indigo Button**: `px-4 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs shadow-md shadow-violet-600/20 transition flex items-center gap-1.5`
-- **Secondary Ghost Button**: `px-4 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition`
+- **Primary Orange CTA Button**: `px-4 py-2.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 active:scale-[0.98] transition flex items-center gap-1.5 cursor-pointer`
+- **Secondary Navy/Dark Button**: `px-4 py-2.5 rounded-[10px] bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer`
+- **Secondary Ghost Button**: `px-4 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer`
 - **Success Outline Button**: `px-3.5 py-2 rounded-[10px] bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-bold text-xs border border-emerald-200/80 dark:border-emerald-800/60 transition flex items-center gap-1`
 - **Danger Action Button**: `px-3.5 py-2 rounded-[10px] bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-bold text-xs border border-rose-200/80 dark:border-rose-800/60 transition flex items-center gap-1`
 
-#### Badges & Live Status Indicators
+#### Badges & Live Status Indicators (All `rounded-[10px]`)
 
-- **AI Recommendation Badge**: `px-2.5 py-1 rounded-full text-[10px] font-bold bg-violet-50 dark:bg-violet-950 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-800 flex items-center gap-1`
-- **Status Offering Badge**: `px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800`
-- **Status Interview Badge**: `px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800`
-- **ATS Score Badge**: `px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800`
+- **Recommendation Badge**: `px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-orange-50 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 flex items-center gap-1`
+- **Status Offering Badge**: `px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800`
+- **Status Interview Badge**: `px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800`
+- **ATS Score Badge (Kotak)**: `px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800`
 
 #### Right-Hand Slide-in Drawer Spec
 

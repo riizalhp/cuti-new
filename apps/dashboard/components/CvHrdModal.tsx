@@ -46,7 +46,7 @@ export const CvHrdModal: React.FC<CvHrdModalProps> = ({
       >
         {/* Top Decorative Header */}
         <div className="relative bg-[#1F3578] p-6 text-white overflow-hidden">
-          <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-orange-500/20 rounded-full blur-xl pointer-events-none" />
+          <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-[#1738D1]/20 rounded-full blur-xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 -ml-8 -mb-8 w-28 h-28 bg-blue-500/20 rounded-full blur-xl pointer-events-none" />
 
           {/* Close Button */}
@@ -61,7 +61,7 @@ export const CvHrdModal: React.FC<CvHrdModalProps> = ({
 
           {/* Badge & Title */}
           <div className="relative z-10 space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-[10px] font-extrabold uppercase tracking-wider bg-orange-500 text-white shadow-xs">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-[10px] font-extrabold uppercase tracking-wider bg-[#1738D1] text-white shadow-xs">
               <Sparkles className="w-3.5 h-3.5 fill-white" />
               <span>Layanan HR Professional</span>
             </div>
@@ -119,7 +119,7 @@ export const CvHrdModal: React.FC<CvHrdModalProps> = ({
           <div className="space-y-2.5 pt-1">
             <Button
               onClick={handlePrimaryClick}
-              className="w-full py-3.5 h-auto rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs md:text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3.5 h-auto rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs md:text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <span>Buatkan CV Saya</span>
               <ArrowRight className="w-4 h-4" />

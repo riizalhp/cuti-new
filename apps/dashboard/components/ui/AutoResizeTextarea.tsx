@@ -64,7 +64,7 @@ export const AutoResizeTextarea = React.forwardRef<
           adjustHeight();
           if (onInput) onInput(e);
         }}
-        className={`w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all leading-relaxed shadow-2xs resize-none overflow-hidden ${className || ''}`}
+        className={`w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1] transition-all leading-relaxed shadow-2xs resize-none overflow-hidden ${className || ''}`}
         style={{ ...style }}
         {...props}
       />

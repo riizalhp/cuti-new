@@ -1,5 +1,5 @@
 /**
- * Dynamic Environment Configuration for AmbilCUTI Web App
+ * Dynamic Environment Configuration for Employr Web App
  */
 export const getAppBaseUrl = (): string => {
   if (import.meta.env.PUBLIC_APP_URL) {
@@ -8,7 +8,7 @@ export const getAppBaseUrl = (): string => {
   if (import.meta.env.DEV) {
     return 'http://localhost:3000';
   }
-  return 'https://app.cuti.online';
+  return 'https://app.employr.id';
 };
 
 export const getGoogleAuthUrl = (): string => {

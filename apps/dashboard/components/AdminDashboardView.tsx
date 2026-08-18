@@ -150,92 +150,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
   };
 
   // CV Progress Orders State
-  const [cvOrdersList, setCvOrdersList] = useState<CvOrderProgressItem[]>([
-    {
-      id: 'CV-ORD-801',
-      clientName: 'Andi Pratama',
-      clientEmail: 'andi.pratama@email.com',
-      packageType: 'CV Pro & Cover Letter',
-      targetRole: 'Senior Product Manager - GoTo',
-      requestDate: '23 Jul 2026, 08:15 WIB',
-      targetCompletionDate: '24 Jul 2026, 17:00 WIB',
-      assignedTo: 'Siti Aminah, M.Psi',
-      assignedRole: 'Senior HR Specialist',
-      progressPercent: 65,
-      status: 'Dalam Pengerjaan',
-      notes: 'Draft CV 2 Halaman dioptimasi keyword ATS. Menunggu sinkronisasi Cover Letter.',
-    },
-    {
-      id: 'CV-ORD-802',
-      clientName: 'Budi Santoso',
-      clientEmail: 'budi.santoso@yahoo.com',
-      packageType: 'VIP Career & Coaching',
-      targetRole: 'Lead Data Analyst - Bank Mandiri',
-      requestDate: '23 Jul 2026, 09:30 WIB',
-      targetCompletionDate: '25 Jul 2026, 12:00 WIB',
-      assignedTo: 'Ahmad Fikri, S.Psi',
-      assignedRole: 'Lead Career Consultant',
-      progressPercent: 20,
-      status: 'Masuk Permintaan',
-      notes: 'Data berkas baru terverifikasi. Menunggu sesi coaching & audit CV awal.',
-    },
-    {
-      id: 'CV-ORD-803',
-      clientName: 'Dewi Lestari',
-      clientEmail: 'dewi.lestari@tech.id',
-      packageType: 'CV Pro & Cover Letter',
-      targetRole: 'Senior UX Researcher - Traveloka',
-      requestDate: '22 Jul 2026, 14:00 WIB',
-      targetCompletionDate: '23 Jul 2026, 16:00 WIB',
-      assignedTo: 'Rina Febriani, S.Kom',
-      assignedRole: 'Senior Tech Recruiter',
-      progressPercent: 90,
-      status: 'Review Quality Control',
-      notes: 'Pemeriksaan tata bahasa & verifikasi skor ATS (92/100). Siap dikirim ke klien.',
-    },
-    {
-      id: 'CV-ORD-804',
-      clientName: 'Siti Rahmawati',
-      clientEmail: 'siti.rahma@gmail.com',
-      packageType: 'CV ATS Starter',
-      targetRole: 'HR Generalist - Telkom Indonesia',
-      requestDate: '22 Jul 2026, 10:00 WIB',
-      targetCompletionDate: '23 Jul 2026, 10:00 WIB',
-      assignedTo: 'Rizky Kurniawan',
-      assignedRole: 'AI CV Specialist',
-      progressPercent: 100,
-      status: 'Selesai',
-      notes: 'File PDF & DOCX sudah dikirim via WhatsApp & Email. Klien puas.',
-    },
-    {
-      id: 'CV-ORD-805',
-      clientName: 'Fajar Nugraha',
-      clientEmail: 'fajar.nug@gmail.com',
-      packageType: 'CV Pro & Cover Letter',
-      targetRole: 'Full Stack Engineer - Shopee',
-      requestDate: '23 Jul 2026, 07:00 WIB',
-      targetCompletionDate: '24 Jul 2026, 12:00 WIB',
-      assignedTo: 'Siti Aminah, M.Psi',
-      assignedRole: 'Senior HR Specialist',
-      progressPercent: 45,
-      status: 'Dalam Pengerjaan',
-      notes: 'Penyusunan ringkasan eksekutif dan poin kuantitatif prestasi (STAR method).',
-    },
-    {
-      id: 'CV-ORD-806',
-      clientName: 'Rina Kusuma',
-      clientEmail: 'rina.kusuma@gmail.com',
-      packageType: 'VIP Career & Coaching',
-      targetRole: 'Digital Marketing Lead - Tokopedia',
-      requestDate: '21 Jul 2026, 16:30 WIB',
-      targetCompletionDate: '22 Jul 2026, 18:00 WIB',
-      assignedTo: 'Ahmad Fikri, S.Psi',
-      assignedRole: 'Lead Career Consultant',
-      progressPercent: 80,
-      status: 'Revisi',
-      notes: 'Klien meminta penambahan portofolio kampanye TikTok Ads tahun 2025. Revisi sedang diproses.',
-    },
-  ]);
+  const [cvOrdersList, setCvOrdersList] = useState<CvOrderProgressItem[]>([]);
 
   // Modals for CV Orders
   const [isAddCvOrderModalOpen, setIsAddCvOrderModalOpen] = useState(false);
@@ -246,41 +161,18 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
   const [newCvClientEmail, setNewCvClientEmail] = useState('');
   const [newCvPackageType, setNewCvPackageType] = useState<'CV ATS Starter' | 'CV Pro & Cover Letter' | 'VIP Career & Coaching'>('CV Pro & Cover Letter');
   const [newCvTargetRole, setNewCvTargetRole] = useState('');
-  const [newCvAssignedTo, setNewCvAssignedTo] = useState('Siti Aminah, M.Psi');
+  const [newCvAssignedTo, setNewCvAssignedTo] = useState('Reviewer ATS 1');
   const [newCvAssignedRole, setNewCvAssignedRole] = useState('Senior HR Specialist');
-  const [newCvTargetDate, setNewCvTargetDate] = useState('25 Jul 2026, 17:00 WIB');
+  const [newCvTargetDate, setNewCvTargetDate] = useState('');
 
   // Sample Mock Data
-  const [usersList, setUsersList] = useState<UserItem[]>([
-    { id: 'USR-001', name: 'Andi Pratama', email: 'andi.pratama@email.com', role: 'User', plan: 'Lifetime', status: 'Aktif', joinedDate: '12 Jan 2026', cvCreated: 8 },
-    { id: 'USR-002', name: 'Siti Rahmawati', email: 'siti.rahma@gmail.com', role: 'User', plan: 'Pro Member', status: 'Aktif', joinedDate: '05 Feb 2026', cvCreated: 14 },
-    { id: 'USR-003', name: 'Budi Santoso', email: 'budi.santoso@yahoo.com', role: 'User', plan: 'Free', status: 'Aktif', joinedDate: '20 Mar 2026', cvCreated: 2 },
-    { id: 'USR-004', name: 'Dewi Lestari', email: 'dewi.lestari@tech.id', role: 'User', plan: 'Pro Member', status: 'Aktif', joinedDate: '01 Apr 2026', cvCreated: 11 },
-    { id: 'USR-005', name: 'Rizky Febrian', email: 'rizky.f@outlook.com', role: 'User', plan: 'Free', status: 'Ditangguhkan', joinedDate: '18 Mei 2026', cvCreated: 0 },
-    { id: 'USR-006', name: 'Maya Indah', email: 'maya.indah@design.co', role: 'Admin', plan: 'Lifetime', status: 'Aktif', joinedDate: '01 Jan 2026', cvCreated: 25 },
-  ]);
+  const [usersList, setUsersList] = useState<UserItem[]>([]);
 
-  const [transactionsList, setTransactionsList] = useState<TransactionItem[]>([
-    { id: 'TRX-9821', user: 'Siti Rahmawati', email: 'siti.rahma@gmail.com', plan: 'Pro Member (1 Bulan)', amount: 'Rp 49.000', method: 'QRIS / GoPay', date: '22 Jul 2026 - 14:20', status: 'Berhasil' },
-    { id: 'TRX-9820', user: 'Dewi Lestari', email: 'dewi.lestari@tech.id', plan: 'Lifetime Pass Pro', amount: 'Rp 149.000', method: 'Transfer BCA', date: '22 Jul 2026 - 11:05', status: 'Berhasil' },
-    { id: 'TRX-9819', user: 'Fajar Nugraha', email: 'fajar.nug@gmail.com', plan: 'Pro Member (1 Bulan)', amount: 'Rp 49.000', method: 'Mandiri VA', date: '21 Jul 2026 - 19:40', status: 'Pending' },
-    { id: 'TRX-9818', user: 'Rina Kusuma', email: 'rina.kusuma@gmail.com', plan: 'Lifetime Pass Pro', amount: 'Rp 149.000', method: 'Credit Card', date: '21 Jul 2026 - 16:15', status: 'Gagal' },
-    { id: 'TRX-9817', user: 'Hendra Setiawan', email: 'hendra.s@gmail.com', plan: 'Pro Member (1 Bulan)', amount: 'Rp 49.000', method: 'ShopeePay', date: '20 Jul 2026 - 09:30', status: 'Berhasil' },
-  ]);
+  const [transactionsList, setTransactionsList] = useState<TransactionItem[]>([]);
 
-  const [missionsList, setMissionsList] = useState<MissionItem[]>([
-    { id: 'MIS-101', title: 'Lengkapi Data Profil Career Readiness', category: 'Harian', rewardPoints: 50, rewardCash: 5000, completedCount: 1420, status: 'Aktif' },
-    { id: 'MIS-102', title: 'Buat & Download CV ATS Pertama', category: 'Spesial', rewardPoints: 100, rewardCash: 10000, completedCount: 3890, status: 'Aktif' },
-    { id: 'MIS-103', title: 'Simulasi Interview AI (Minimal 3 Pertanyaan)', category: 'Mingguan', rewardPoints: 75, rewardCash: 7500, completedCount: 950, status: 'Aktif' },
-    { id: 'MIS-104', title: 'Undang 3 Teman Bergabung dengan Kode Referral', category: 'Referral', rewardPoints: 200, rewardCash: 25000, completedCount: 512, status: 'Aktif' },
-  ]);
+  const [missionsList, setMissionsList] = useState<MissionItem[]>([]);
 
-  const [jobsList, setJobsList] = useState<JobPosting[]>([
-    { id: 'JOB-301', title: 'Senior Frontend Developer (React/Next.js)', company: 'PT Bank Central Asia Tbk', location: 'Jakarta Selatan (Hybrid)', type: 'Full-time', salary: 'Rp 15.000.000 - Rp 22.000.000', applicants: 84, status: 'Aktif' },
-    { id: 'JOB-302', title: 'AI Prompt Engineer & Data Analyst', company: 'Tokopedia / GoTo', location: 'Jakarta Selatan (Full Remote)', type: 'Remote', salary: 'Rp 12.000.000 - Rp 18.000.000', applicants: 142, status: 'Aktif' },
-    { id: 'JOB-303', title: 'Digital Marketing & Content Specialist', company: 'Shopee Indonesia', location: 'Jakarta Barat (On-site)', type: 'Full-time', salary: 'Rp 8.000.000 - Rp 12.000.000', applicants: 65, status: 'Aktif' },
-    { id: 'JOB-304', title: 'HR Generalist & Talent Acquisition', company: 'PT Telkom Indonesia', location: 'Bandung (Hybrid)', type: 'Full-time', salary: 'Rp 9.000.000 - Rp 13.000.000', applicants: 98, status: 'Aktif' },
-  ]);
+  const [jobsList, setJobsList] = useState<JobPosting[]>([]);
 
   // Modal States
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
@@ -306,8 +198,6 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
   const [newJobSalary, setNewJobSalary] = useState('Rp 8.000.000 - Rp 12.000.000');
 
   // System Config State
-  const [aiProvider, setAiProvider] = useState<'gemini' | 'openai'>('openai');
-  const [aiModel, setAiModel] = useState('gemini-2.0-flash');
   const [openaiBaseUrl, setOpenaiBaseUrl] = useState('https://api.openai.com/v1');
   const [openaiApiKey, setOpenaiApiKey] = useState('sk-proj-7a8b9c1d2e3f4g5h6i7j8k9l0m');
   const [openaiModel, setOpenaiModel] = useState('gpt-4o-mini');
@@ -542,7 +432,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
     <div className="space-y-6 pb-12">
       {/* Toast Notification Floating */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-[10px] bg-slate-900 text-white shadow-2xl border border-violet-500/40 animate-in fade-in slide-in-from-bottom-3 duration-200">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-[10px] bg-slate-900 text-white shadow-2xl border border-[#1738D1]/40 animate-in fade-in slide-in-from-bottom-3 duration-200">
           <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
           <span className="text-xs font-semibold">{toastMessage}</span>
         </div>
@@ -550,12 +440,12 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
 
       {/* Top Banner & Control Header */}
       <div className="relative overflow-hidden rounded-[10px] bg-slate-900 p-6 sm:p-8 text-white shadow-xl border border-slate-800">
-        <div className="absolute top-0 right-0 -mr-12 -mt-12 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute top-0 right-0 -mr-12 -mt-12 w-64 h-64 bg-[#132EA8]/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-xs font-bold bg-violet-500/20 text-violet-300 border border-violet-500/30">
-                <ShieldAlert className="w-3.5 h-3.5 text-violet-400" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-xs font-bold bg-[#1738D1]/20 text-orange-300 border border-[#1738D1]/30">
+                <ShieldAlert className="w-3.5 h-3.5 text-orange-400" />
                 Portal Super Admin
               </span>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
@@ -564,10 +454,10 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Dashboard Administrator CUTI
+              Dashboard Administrator Employr
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Pusat kendali utama pengguna, transaksi keuangan, misi harian, database lowongan kerja, dan konfigurasi engine AI.
+              Pusat kendali utama pengguna, transaksi keuangan, misi harian, database lowongan kerja, dan konfigurasi engine sistem.
             </p>
           </div>
 
@@ -575,22 +465,22 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
             {onSwitchToUserPortal && (
               <button
                 onClick={onSwitchToUserPortal}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-lg shadow-amber-400/20 transition group"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-lg shadow-[#1738D1]/20 transition group cursor-pointer border-0"
               >
-                <ArrowLeft className="w-4 h-4 text-slate-950 group-hover:-translate-x-0.5 transition-transform" />
+                <ArrowLeft className="w-4 h-4 text-white group-hover:-translate-x-0.5 transition-transform" />
                 <span>Kembali ke Dashboard User</span>
               </button>
             )}
             <button
               onClick={() => showToast('Data dashboard berhasil diperbarui!')}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer"
             >
-              <RefreshCw className="w-4 h-4 text-violet-400" />
+              <RefreshCw className="w-4 h-4 text-slate-300" />
               <span>Refresh Data</span>
             </button>
             <button
               onClick={() => showToast('Laporan bulanan berhasil diunduh (PDF)')}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold bg-violet-600 hover:bg-violet-500 text-white shadow-md shadow-violet-600/20 transition"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold bg-navy-700 hover:bg-navy-600 text-white shadow-md shadow-navy-700/20 transition cursor-pointer border-0"
             >
               <Download className="w-4 h-4" />
               <span>Export Laporan</span>
@@ -603,9 +493,9 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
       <div className="flex items-center gap-2 p-1.5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-x-auto">
         <button
           onClick={() => setActiveAdminTab('overview')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold whitespace-nowrap transition ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold whitespace-nowrap transition cursor-pointer ${
             activeAdminTab === 'overview'
-              ? 'bg-violet-600 text-white shadow-sm dark:bg-violet-500'
+              ? 'bg-navy-700 text-white shadow-sm dark:bg-navy-600'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
         >
@@ -615,9 +505,9 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
 
         <button
           onClick={() => setActiveAdminTab('cv-orders')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold whitespace-nowrap transition ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold whitespace-nowrap transition cursor-pointer ${
             activeAdminTab === 'cv-orders'
-              ? 'bg-violet-600 text-white shadow-sm dark:bg-violet-500'
+              ? 'bg-navy-700 text-white shadow-sm dark:bg-navy-600'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
         >
@@ -630,24 +520,24 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
 
         <button
           onClick={() => setActiveAdminTab('users')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold whitespace-nowrap transition ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold whitespace-nowrap transition cursor-pointer ${
             activeAdminTab === 'users'
-              ? 'bg-violet-600 text-white shadow-sm dark:bg-violet-500'
+              ? 'bg-navy-700 text-white shadow-sm dark:bg-navy-600'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
         >
           <Users className="w-4 h-4" />
           <span>Pengguna</span>
-          <span className="ml-1 px-2 py-0.5 rounded-[10px] text-[10px] bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300">
+          <span className="ml-1 px-2 py-0.5 rounded-[10px] text-[10px] bg-navy-100 dark:bg-navy-950 text-navy-700 dark:text-navy-300">
             {usersList.length}
           </span>
         </button>
 
         <button
           onClick={() => setActiveAdminTab('transactions')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold whitespace-nowrap transition ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold whitespace-nowrap transition cursor-pointer ${
             activeAdminTab === 'transactions'
-              ? 'bg-violet-600 text-white shadow-sm dark:bg-violet-500'
+              ? 'bg-navy-700 text-white shadow-sm dark:bg-navy-600'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
         >
@@ -660,9 +550,9 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
 
         <button
           onClick={() => setActiveAdminTab('missions')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold whitespace-nowrap transition ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold whitespace-nowrap transition cursor-pointer ${
             activeAdminTab === 'missions'
-              ? 'bg-violet-600 text-white shadow-sm dark:bg-violet-500'
+              ? 'bg-navy-700 text-white shadow-sm dark:bg-navy-600'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
         >
@@ -672,9 +562,9 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
 
         <button
           onClick={() => setActiveAdminTab('jobs')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold whitespace-nowrap transition ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold whitespace-nowrap transition cursor-pointer ${
             activeAdminTab === 'jobs'
-              ? 'bg-violet-600 text-white shadow-sm dark:bg-violet-500'
+              ? 'bg-navy-700 text-white shadow-sm dark:bg-navy-600'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
         >
@@ -684,14 +574,14 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
 
         <button
           onClick={() => setActiveAdminTab('system')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold whitespace-nowrap transition ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold whitespace-nowrap transition cursor-pointer ${
             activeAdminTab === 'system'
-              ? 'bg-violet-600 text-white shadow-sm dark:bg-violet-500'
+              ? 'bg-navy-700 text-white shadow-sm dark:bg-navy-600'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
         >
           <Settings className="w-4 h-4" />
-          <span>Sistem & AI</span>
+          <span>Sistem & Master Data</span>
         </button>
       </div>
 
@@ -703,7 +593,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
             <div className="p-5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Total Pengguna</span>
-                <div className="p-2 rounded-[10px] bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400">
+                <div className="p-2 rounded-[10px] bg-navy-50 dark:bg-navy-950/60 text-orange-600 dark:text-orange-400">
                   <Users className="w-5 h-5" />
                 </div>
               </div>
@@ -741,7 +631,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
             <div className="p-5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400">CV ATS Dibuat</span>
-                <div className="p-2 rounded-[10px] bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400">
+                <div className="p-2 rounded-[10px] bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
                   <FileText className="w-5 h-5" />
                 </div>
               </div>
@@ -772,7 +662,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 </div>
               </div>
               <p className="text-[11px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
-                Respon Gemini API: 1,2s
+                Respon AI Engine: 1,2s
               </p>
             </div>
           </div>
@@ -785,7 +675,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
               <div className="p-6 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                    <Activity className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                       Status Infrastruktur & Engine AI
                     </h3>
@@ -798,16 +688,16 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-1">
                     <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
-                      <Cpu className="w-3.5 h-3.5 text-violet-500" />
-                      <span>Gemini AI Model</span>
+                      <Cpu className="w-3.5 h-3.5 text-orange-500" />
+                      <span>AI Engine</span>
                     </div>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">Gemini 2.0 Flash</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">OpenAI Compatible</p>
                     <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Latency 1.2s (Optimal)</p>
                   </div>
 
                   <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-1">
                     <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
-                      <Database className="w-3.5 h-3.5 text-violet-500" />
+                      <Database className="w-3.5 h-3.5 text-orange-500" />
                       <span>Database Firestore</span>
                     </div>
                     <p className="text-sm font-bold text-slate-900 dark:text-white">99,98% Uptime</p>
@@ -830,7 +720,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-violet-500" />
+                      <FileText className="w-4 h-4 text-orange-500" />
                       <span>Live Monitor Pengerjaan & Request CV</span>
                     </h3>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
@@ -839,7 +729,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                   </div>
                   <button
                     onClick={() => setActiveAdminTab('cv-orders')}
-                    className="text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline flex items-center gap-1"
+                    className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1"
                   >
                     <span>Kelola Semua ({cvOrdersList.length})</span>
                     <ChevronDown className="w-3.5 h-3.5 -rotate-90" />
@@ -856,10 +746,10 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-bold text-xs text-slate-900 dark:text-white">{order.clientName}</span>
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300">
+                            <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-mono font-bold bg-navy-100 dark:bg-navy-950 text-navy-700 dark:text-navy-300">
                               {order.id}
                             </span>
-                            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                            <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-medium bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
                               {order.packageType}
                             </span>
                           </div>
@@ -874,12 +764,12 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                               order.status === 'Selesai'
                                 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                                 : order.status === 'Review Quality Control'
-                                ? 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300'
+                                ? 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300'
                                 : order.status === 'Dalam Pengerjaan'
                                 ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
                                 : order.status === 'Revisi'
                                 ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
-                                : 'bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300'
+                                : 'bg-navy-100 text-navy-800 dark:bg-navy-950 dark:text-navy-300'
                             }`}
                           >
                             {order.status} ({order.progressPercent}%)
@@ -894,7 +784,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                             order.progressPercent === 100
                               ? 'bg-emerald-500'
                               : order.progressPercent >= 75
-                              ? 'bg-violet-500'
+                              ? 'bg-[#1738D1]'
                               : 'bg-amber-500'
                           }`}
                           style={{ width: `${order.progressPercent}%` }}
@@ -904,7 +794,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                       {/* Workers & Time Detail */}
                       <div className="flex flex-wrap items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200/50 dark:border-slate-800">
                         <div className="flex items-center gap-1.5">
-                          <UserCheck className="w-3.5 h-3.5 text-violet-500" />
+                          <UserCheck className="w-3.5 h-3.5 text-orange-500" />
                           <span>Pengerjaan oleh: <strong className="text-slate-800 dark:text-slate-200">{order.assignedTo}</strong></span>
                         </div>
                         <div className="flex items-center gap-3">
@@ -926,7 +816,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                   </h3>
                   <button
                     onClick={() => setActiveAdminTab('transactions')}
-                    className="text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline"
+                    className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline"
                   >
                     Lihat Semua
                   </button>
@@ -941,7 +831,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-slate-900 dark:text-white">{tx.user}</span>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                          <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
                             {tx.id}
                           </span>
                         </div>
@@ -971,7 +861,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
             <div className="space-y-6">
               <div className="p-6 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <Sliders className="w-4 h-4 text-violet-500" />
+                  <Sliders className="w-4 h-4 text-orange-500" />
                   <span>Aksi Cepat Admin</span>
                 </h3>
 
@@ -989,10 +879,10 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
 
                   <button
                     onClick={() => setIsAddUserModalOpen(true)}
-                    className="w-full flex items-center justify-between p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 hover:bg-violet-50 dark:hover:bg-violet-950/40 border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold text-slate-800 dark:text-slate-200 transition"
+                    className="w-full flex items-center justify-between p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 hover:bg-orange-50 dark:hover:bg-orange-950/40 border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold text-slate-800 dark:text-slate-200 transition"
                   >
                     <div className="flex items-center gap-2.5">
-                      <Plus className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                      <Plus className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                       <span>Tambah Pengguna Baru</span>
                     </div>
                     <ChevronDown className="w-3.5 h-3.5 text-slate-400 -rotate-90" />
@@ -1000,7 +890,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
 
                   <button
                     onClick={() => setIsAddMissionModalOpen(true)}
-                    className="w-full flex items-center justify-between p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 hover:bg-violet-50 dark:hover:bg-violet-950/40 border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold text-slate-800 dark:text-slate-200 transition"
+                    className="w-full flex items-center justify-between p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 hover:bg-orange-50 dark:hover:bg-orange-950/40 border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold text-slate-800 dark:text-slate-200 transition"
                   >
                     <div className="flex items-center gap-2.5">
                       <Target className="w-4 h-4 text-amber-500" />
@@ -1011,7 +901,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
 
                   <button
                     onClick={() => setIsAddJobModalOpen(true)}
-                    className="w-full flex items-center justify-between p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 hover:bg-violet-50 dark:hover:bg-violet-950/40 border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold text-slate-800 dark:text-slate-200 transition"
+                    className="w-full flex items-center justify-between p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 hover:bg-orange-50 dark:hover:bg-orange-950/40 border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold text-slate-800 dark:text-slate-200 transition"
                   >
                     <div className="flex items-center gap-2.5">
                       <Briefcase className="w-4 h-4 text-emerald-500" />
@@ -1032,21 +922,21 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 <div className="space-y-3 text-xs">
                   <div className="p-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
                     <p className="font-semibold text-slate-800 dark:text-slate-200">
-                      User <span className="text-violet-600 dark:text-violet-400 font-bold">Dewi Lestari</span> di-upgrade ke Pro.
+                      User <span className="text-orange-600 dark:text-orange-400 font-bold">Dewi Lestari</span> di-upgrade ke Pro.
                     </p>
                     <span className="text-[10px] text-slate-400">10 menit lalu oleh SuperAdmin</span>
                   </div>
 
                   <div className="p-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
                     <p className="font-semibold text-slate-800 dark:text-slate-200">
-                      Lowongan <span className="text-violet-600 dark:text-violet-400 font-bold">Senior Frontend Dev</span> ditambahkan.
+                      Lowongan <span className="text-orange-600 dark:text-orange-400 font-bold">Senior Frontend Dev</span> ditambahkan.
                     </p>
                     <span className="text-[10px] text-slate-400">1 jam lalu oleh Admin Maya</span>
                   </div>
 
                   <div className="p-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
                     <p className="font-semibold text-slate-800 dark:text-slate-200">
-                      Misi <span className="text-violet-600 dark:text-violet-400 font-bold">Lengkapi Data Readiness</span> diperbarui.
+                      Misi <span className="text-orange-600 dark:text-orange-400 font-bold">Lengkapi Data Readiness</span> diperbarui.
                     </p>
                     <span className="text-[10px] text-slate-400">3 jam lalu oleh System AI</span>
                   </div>
@@ -1065,7 +955,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
             <div className="p-5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
               <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
                 <span>Permintaan Masuk</span>
-                <Clock className="w-4 h-4 text-violet-500" />
+                <Clock className="w-4 h-4 text-orange-500" />
               </div>
               <p className="text-2xl font-black text-slate-900 dark:text-white">{cvOrdersList.length}</p>
               <p className="text-[10px] text-slate-400">Total order pengerjaan CV terdaftar</p>
@@ -1085,9 +975,9 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
             <div className="p-5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
               <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
                 <span>Review Quality Control</span>
-                <Sparkles className="w-4 h-4 text-purple-500" />
+                <Sparkles className="w-4 h-4 text-orange-500" />
               </div>
-              <p className="text-2xl font-black text-purple-600 dark:text-purple-400">
+              <p className="text-2xl font-black text-orange-600 dark:text-orange-400">
                 {cvOrdersList.filter((c) => c.status === 'Review Quality Control').length}
               </p>
               <p className="text-[10px] text-slate-400">Tahap audit skor & proofreading HR</p>
@@ -1116,7 +1006,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                   placeholder="Cari nama klien, email, penanggung jawab HR, atau ID order..."
                   value={cvOrderSearch}
                   onChange={(e) => setCvOrderSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                 />
               </div>
 
@@ -1145,10 +1035,10 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                   className="w-full sm:w-auto px-3 py-2.5 pr-8 text-xs font-bold rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none appearance-none cursor-pointer"
                 >
                   <option value="All">Semua Penanggung Jawab</option>
-                  <option value="Siti Aminah, M.Psi">Siti Aminah, M.Psi</option>
-                  <option value="Ahmad Fikri, S.Psi">Ahmad Fikri, S.Psi</option>
-                  <option value="Rina Febriani, S.Kom">Rina Febriani, S.Kom</option>
-                  <option value="Rizky Kurniawan">Rizky Kurniawan</option>
+                  <option value="Reviewer ATS 1">Reviewer ATS 1</option>
+                  <option value="Career Consultant A">Career Consultant A</option>
+                  <option value="Tech Recruiter B">Tech Recruiter B</option>
+                  <option value="AI CV Automator">AI CV Automator</option>
                 </select>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
@@ -1156,7 +1046,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
 
             <button
               onClick={() => setIsAddCvOrderModalOpen(true)}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold bg-violet-600 hover:bg-violet-500 text-white shadow-md shadow-violet-600/20 transition whitespace-nowrap"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-md shadow-[#1738D1]/20 transition whitespace-nowrap"
             >
               <Plus className="w-4 h-4" />
               <span>Input Request CV Baru</span>
@@ -1182,7 +1072,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 {filteredCvOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
                     <td className="p-4 font-mono font-bold text-slate-900 dark:text-white">
-                      <span className="block text-violet-600 dark:text-violet-400">{order.id}</span>
+                      <span className="block text-orange-600 dark:text-orange-400">{order.id}</span>
                       <span className="text-[10px] font-sans font-medium text-slate-500 dark:text-slate-400">
                         {order.packageType}
                       </span>
@@ -1192,7 +1082,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                       <div>
                         <span className="font-bold text-slate-900 dark:text-white block">{order.clientName}</span>
                         <span className="text-[10px] text-slate-400 block">{order.clientEmail}</span>
-                        <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                        <span className="inline-block mt-1 px-2 py-0.5 rounded-[10px] text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                           {order.targetRole}
                         </span>
                       </div>
@@ -1200,7 +1090,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
 
                     <td className="p-4">
                       <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-medium">
-                        <Calendar className="w-3.5 h-3.5 text-violet-500 flex-shrink-0" />
+                        <Calendar className="w-3.5 h-3.5 text-orange-500 flex-shrink-0" />
                         <span>{order.requestDate}</span>
                       </div>
                     </td>
@@ -1215,7 +1105,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                     <td className="p-4">
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <UserCheck className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 flex-shrink-0" />
+                          <UserCheck className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
                           <span className="font-bold text-slate-900 dark:text-white">{order.assignedTo}</span>
                         </div>
                         <span className="text-[10px] text-slate-400 block ml-5">{order.assignedRole}</span>
@@ -1229,12 +1119,12 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                             order.status === 'Selesai'
                               ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                               : order.status === 'Review Quality Control'
-                              ? 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300'
+                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300'
                               : order.status === 'Dalam Pengerjaan'
                               ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
                               : order.status === 'Revisi'
                               ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
-                              : 'bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300'
+                              : 'bg-navy-100 text-navy-800 dark:bg-navy-950 dark:text-navy-300'
                           }`}
                         >
                           {order.status}
@@ -1247,7 +1137,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                             order.progressPercent === 100
                               ? 'bg-emerald-500'
                               : order.progressPercent >= 75
-                              ? 'bg-violet-500'
+                              ? 'bg-[#1738D1]'
                               : 'bg-amber-500'
                           }`}
                           style={{ width: `${order.progressPercent}%` }}
@@ -1265,7 +1155,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                       <div className="flex items-center justify-center gap-1.5">
                         <button
                           onClick={() => setEditingCvOrder(order)}
-                          className="px-2.5 py-1.5 rounded-[10px] text-[11px] font-bold bg-violet-50 hover:bg-violet-100 text-violet-600 dark:bg-violet-950/60 dark:hover:bg-violet-900/60 dark:text-violet-300 transition flex items-center gap-1"
+                          className="px-2.5 py-1.5 rounded-[10px] text-[11px] font-bold bg-navy-50 hover:bg-navy-100 text-orange-600 dark:bg-navy-950/60 dark:hover:bg-orange-900/60 dark:text-navy-300 transition flex items-center gap-1"
                           title="Update Progress & Pekerja"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
@@ -1320,7 +1210,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 placeholder="Cari pengguna berdasarkan nama atau email..."
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full pl-10 pr-4 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
               />
             </div>
 
@@ -1346,7 +1236,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
 
               <button
                 onClick={() => setIsAddUserModalOpen(true)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-[10px] text-xs font-bold bg-violet-600 hover:bg-violet-500 text-white shadow-sm transition"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-[10px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-sm transition"
               >
                 <Plus className="w-4 h-4" />
                 <span>Tambah Pengguna</span>
@@ -1379,9 +1269,9 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                     </td>
                     <td className="p-4 text-slate-600 dark:text-slate-300 font-medium">{u.email}</td>
                     <td className="p-4">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      <span className={`px-2 py-0.5 rounded-[10px] text-[10px] font-bold ${
                         u.role === 'Admin'
-                          ? 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300'
+                          ? 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300'
                           : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                       }`}>
                         {u.role}
@@ -1450,7 +1340,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 placeholder="Cari transaksi berdasarkan ID, nama, atau email..."
                 value={txSearch}
                 onChange={(e) => setTxSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full pl-10 pr-4 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
               />
             </div>
 
@@ -1556,7 +1446,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300 mb-1 inline-block">
+                    <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-navy-100 text-navy-800 dark:bg-navy-950 dark:text-navy-300 mb-1 inline-block">
                       {m.category}
                     </span>
                     <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-snug">{m.title}</h4>
@@ -1576,7 +1466,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 <div className="flex items-center gap-4 text-xs pt-2 border-t border-slate-100 dark:border-slate-800">
                   <div>
                     <span className="text-[10px] text-slate-400 block">Reward Poin</span>
-                    <span className="font-bold text-violet-600 dark:text-violet-400">+{m.rewardPoints} Poin</span>
+                    <span className="font-bold text-orange-600 dark:text-orange-400">+{m.rewardPoints} Poin</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 block">Reward Cash</span>
@@ -1604,12 +1494,12 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 placeholder="Cari lowongan berdasarkan posisi atau perusahaan..."
                 value={jobSearch}
                 onChange={(e) => setJobSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full pl-10 pr-4 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
               />
             </div>
             <button
               onClick={() => setIsAddJobModalOpen(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-[10px] text-xs font-bold bg-violet-600 hover:bg-violet-500 text-white shadow-sm transition"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-[10px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-sm transition"
             >
               <Plus className="w-4 h-4" />
               <span>Tambah Lowongan Kerja</span>
@@ -1639,10 +1529,10 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                     </td>
                     <td className="p-4">
                       <span className="font-medium text-slate-800 dark:text-slate-200 block">{j.location}</span>
-                      <span className="text-[10px] text-violet-600 dark:text-violet-400 font-bold">{j.type}</span>
+                      <span className="text-[10px] text-orange-600 dark:text-orange-400 font-bold">{j.type}</span>
                     </td>
                     <td className="p-4 font-bold text-slate-900 dark:text-white">{j.salary}</td>
-                    <td className="p-4 text-center font-bold text-violet-600 dark:text-violet-400">{j.applicants} Pelamar</td>
+                    <td className="p-4 text-center font-bold text-orange-600 dark:text-orange-400">{j.applicants} Pelamar</td>
                     <td className="p-4">
                       <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
                         j.status === 'Aktif'
@@ -1676,15 +1566,15 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
       {activeAdminTab === 'system' && (
         <div className="space-y-6">
           {/* Provider Selection Header Banner */}
-          <div className="p-5 rounded-[10px] bg-[#0D3BD9] border border-blue-500/50 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="p-5 rounded-[10px] bg-navy-700 border border-navy-800 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-[10px] bg-violet-600/30 border border-violet-500/40 text-violet-400 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-[10px] bg-[#1738D1]/30 border border-[#1738D1]/40 text-orange-400 flex items-center justify-center shrink-0">
                 <Bot className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <span>Pusat Konfigurasi Engine AI System</span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-violet-500/20 text-violet-300 border border-violet-500/30">
+                  <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-[#1738D1]/20 text-navy-300 border border-[#1738D1]/30">
                     Multi-Provider
                   </span>
                 </h3>
@@ -1695,30 +1585,10 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
             </div>
 
             <div className="flex items-center gap-2 bg-slate-800/80 p-1.5 rounded-[10px] border border-slate-700/80 shrink-0">
-              <button
-                type="button"
-                onClick={() => setAiProvider('openai')}
-                className={`px-3 py-1.5 rounded-[10px] text-xs font-bold transition flex items-center gap-2 ${
-                  aiProvider === 'openai'
-                    ? 'bg-violet-600 text-white shadow-xs'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
+              <span className="px-3 py-1.5 rounded-[10px] text-xs font-bold flex items-center gap-2 bg-[#1738D1] text-white shadow-xs">
                 <Globe className="w-3.5 h-3.5" />
                 <span>OpenAI Compatible</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setAiProvider('gemini')}
-                className={`px-3 py-1.5 rounded-[10px] text-xs font-bold transition flex items-center gap-2 ${
-                  aiProvider === 'gemini'
-                    ? 'bg-violet-600 text-white shadow-xs'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <Cpu className="w-3.5 h-3.5" />
-                <span>Google Gemini</span>
-              </button>
+              </span>
             </div>
           </div>
 
@@ -1727,7 +1597,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
             <div className="p-6 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div className="flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                  <Globe className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                   <div>
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                       Konfigurasi OpenAI Compatible API
@@ -1737,12 +1607,8 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                     </p>
                   </div>
                 </div>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                  aiProvider === 'openai'
-                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                    : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                }`}>
-                  {aiProvider === 'openai' ? 'Engine Aktif' : 'Engine Standby'}
+                <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                  Engine Aktif
                 </span>
               </div>
 
@@ -1751,7 +1617,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                      <Link className="w-3.5 h-3.5 text-violet-500" />
+                      <Link className="w-3.5 h-3.5 text-orange-500" />
                       <span>Input Link Base URL / Endpoint API</span>
                     </label>
                     <span className="text-[10px] text-slate-400 font-mono">/v1/chat/completions</span>
@@ -1762,7 +1628,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                     placeholder="https://api.openai.com/v1"
                     value={openaiBaseUrl}
                     onChange={(e) => setOpenaiBaseUrl(e.target.value)}
-                    className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                    className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
                   />
                   
                   {/* Endpoint Presets Quick Buttons */}
@@ -1774,7 +1640,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                         setOpenaiBaseUrl('https://api.openai.com/v1');
                         setOpenaiModel('gpt-4o-mini');
                       }}
-                      className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-violet-100 dark:hover:bg-violet-950 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition"
+                      className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-navy-100 dark:hover:bg-navy-950 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition"
                     >
                       OpenAI Official
                     </button>
@@ -1784,7 +1650,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                         setOpenaiBaseUrl('https://api.groq.com/openai/v1');
                         setOpenaiModel('llama-3.3-70b-versatile');
                       }}
-                      className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-violet-100 dark:hover:bg-violet-950 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition"
+                      className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-navy-100 dark:hover:bg-navy-950 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition"
                     >
                       Groq Cloud
                     </button>
@@ -1794,7 +1660,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                         setOpenaiBaseUrl('https://openrouter.ai/api/v1');
                         setOpenaiModel('deepseek/deepseek-r1');
                       }}
-                      className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-violet-100 dark:hover:bg-violet-950 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition"
+                      className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-navy-100 dark:hover:bg-navy-950 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition"
                     >
                       OpenRouter
                     </button>
@@ -1804,7 +1670,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                         setOpenaiBaseUrl('http://localhost:11434/v1');
                         setOpenaiModel('llama3');
                       }}
-                      className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-violet-100 dark:hover:bg-violet-950 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition"
+                      className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-navy-100 dark:hover:bg-navy-950 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition"
                     >
                       Ollama Local
                     </button>
@@ -1827,7 +1693,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                       placeholder="sk-proj-..."
                       value={openaiApiKey}
                       onChange={(e) => setOpenaiApiKey(e.target.value)}
-                      className="w-full p-2.5 pr-10 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      className="w-full p-2.5 pr-10 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
                     />
                     <button
                       type="button"
@@ -1851,7 +1717,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                     placeholder="e.g. gpt-4o-mini, llama-3.3-70b-versatile, deepseek-r1"
                     value={openaiModel}
                     onChange={(e) => setOpenaiModel(e.target.value)}
-                    className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                    className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">
                     Pastikan nama model sesuai dengan yang didukung oleh provider endpoint yang digunakan.
@@ -1873,7 +1739,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                     className="flex-1 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold transition flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700"
                   >
                     {isTestingConnection ? (
-                      <RefreshCw className="w-4 h-4 text-violet-500 animate-spin" />
+                      <RefreshCw className="w-4 h-4 text-orange-500 animate-spin" />
                     ) : (
                       <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                     )}
@@ -1883,10 +1749,9 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      setAiProvider('openai');
                       showToast('Konfigurasi OpenAI Compatible berhasil disimpan & diaktifkan!');
                     }}
-                    className="flex-1 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-500 text-white font-bold transition shadow-sm flex items-center justify-center gap-2"
+                    className="flex-1 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold transition shadow-sm flex items-center justify-center gap-2"
                   >
                     <Check className="w-4 h-4" />
                     <span>Simpan &amp; Aktifkan OpenAI</span>
@@ -1895,48 +1760,23 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
               </div>
             </div>
 
-            {/* CARD 2: GOOGLE GEMINI AI CONFIGURATION */}
+            {/* CARD 2: PENGATURAN SISTEM & KUOTA AI */}
             <div className="p-6 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div className="flex items-center gap-2">
-                  <Cpu className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                  <Settings className="w-5 h-5 text-amber-500" />
                   <div>
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                      Konfigurasi Google Gemini AI Engine
+                      Pengaturan Sistem &amp; Kuota AI
                     </h3>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Engine bawaan Google GenAI SDK untuk kecepatan tinggi.
+                      Batas kuota AI, mode maintenance, dan pembersihan cache server.
                     </p>
                   </div>
                 </div>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                  aiProvider === 'gemini'
-                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                    : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                }`}>
-                  {aiProvider === 'gemini' ? 'Engine Aktif' : 'Engine Standby'}
-                </span>
               </div>
 
               <div className="space-y-4 text-xs">
-                <div>
-                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                    Pilihan AI Model Default Gemini
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={aiModel}
-                      onChange={(e) => setAiModel(e.target.value)}
-                      className="w-full p-2.5 pr-8 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500 appearance-none cursor-pointer"
-                    >
-                      <option value="gemini-2.0-flash">Gemini 2.0 Flash (Sangat Cepat & Disarankan)</option>
-                      <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep Reasoning & Complex CV)</option>
-                      <option value="gemini-1.5-flash">Gemini 1.5 Flash (Standar Balanced)</option>
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
-                </div>
-
                 <div>
                   <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
                     Batas Kuota AI Non-Pro (Free Member)
@@ -1945,22 +1785,8 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                     type="text"
                     value={aiRateLimit}
                     onChange={(e) => setAiRateLimit(e.target.value)}
-                    className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                   />
-                </div>
-
-                <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAiProvider('gemini');
-                      showToast('Konfigurasi Google Gemini AI berhasil disimpan & diaktifkan!');
-                    }}
-                    className="w-full py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-500 text-white font-bold transition shadow-sm flex items-center justify-center gap-2"
-                  >
-                    <Check className="w-4 h-4" />
-                    <span>Simpan &amp; Aktifkan Gemini</span>
-                  </button>
                 </div>
               </div>
 
@@ -2025,7 +1851,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                   placeholder="e.g. Budi Gunawan"
                   value={newUserName}
                   onChange={(e) => setNewUserName(e.target.value)}
-                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                 />
               </div>
 
@@ -2037,7 +1863,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                   placeholder="e.g. budi@email.com"
                   value={newUserEmail}
                   onChange={(e) => setNewUserEmail(e.target.value)}
-                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                 />
               </div>
 
@@ -2067,7 +1893,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-500 text-white font-bold shadow-sm"
+                  className="flex-1 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold shadow-sm"
                 >
                   Simpan Pengguna
                 </button>
@@ -2097,7 +1923,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                   placeholder="e.g. Bagikan CV ATS ke LinkedIn"
                   value={newMissionTitle}
                   onChange={(e) => setNewMissionTitle(e.target.value)}
-                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                 />
               </div>
 
@@ -2179,7 +2005,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                   placeholder="e.g. Backend Engineer (Go/Node.js)"
                   value={newJobTitle}
                   onChange={(e) => setNewJobTitle(e.target.value)}
-                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                 />
               </div>
 
@@ -2191,7 +2017,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                   placeholder="e.g. PT Goto Gojek Tokopedia"
                   value={newJobCompany}
                   onChange={(e) => setNewJobCompany(e.target.value)}
-                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                 />
               </div>
 
@@ -2202,7 +2028,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                   placeholder="e.g. Jakarta Selatan (Hybrid)"
                   value={newJobLocation}
                   onChange={(e) => setNewJobLocation(e.target.value)}
-                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                 />
               </div>
 
@@ -2245,7 +2071,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-500 text-white font-bold shadow-sm"
+                  className="flex-1 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold shadow-sm"
                 >
                   Publish Lowongan
                 </button>
@@ -2261,7 +2087,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
           <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-[10px] p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-violet-500" />
+                <FileText className="w-4 h-4 text-orange-500" />
                 <h3 className="font-bold text-sm text-slate-900 dark:text-white">Input Request CV Baru</h3>
               </div>
               <button onClick={() => setIsAddCvOrderModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600">
@@ -2278,7 +2104,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                   placeholder="e.g. Andi Pratama"
                   value={newCvClientName}
                   onChange={(e) => setNewCvClientName(e.target.value)}
-                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                 />
               </div>
 
@@ -2290,7 +2116,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                   placeholder="e.g. andi.pratama@email.com"
                   value={newCvClientEmail}
                   onChange={(e) => setNewCvClientEmail(e.target.value)}
-                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                 />
               </div>
 
@@ -2339,10 +2165,10 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                       }}
                       className="w-full p-2.5 pr-8 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none appearance-none cursor-pointer"
                     >
-                      <option value="Siti Aminah, M.Psi">Siti Aminah, M.Psi</option>
-                      <option value="Ahmad Fikri, S.Psi">Ahmad Fikri, S.Psi</option>
-                      <option value="Rina Febriani, S.Kom">Rina Febriani, S.Kom</option>
-                      <option value="Rizky Kurniawan">Rizky Kurniawan</option>
+                      <option value="Reviewer ATS 1">Reviewer ATS 1</option>
+                      <option value="Career Consultant A">Career Consultant A</option>
+                      <option value="Tech Recruiter B">Tech Recruiter B</option>
+                      <option value="AI CV Automator">AI CV Automator</option>
                     </select>
                     <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
@@ -2369,7 +2195,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-500 text-white font-bold shadow-sm"
+                  className="flex-1 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold shadow-sm"
                 >
                   Simpan & Assign
                 </button>
@@ -2397,7 +2223,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <label className="font-bold text-slate-700 dark:text-slate-300">Persentase Progress CV</label>
-                  <span className="font-bold text-violet-600 dark:text-violet-400 text-sm">{editingCvOrder.progressPercent}%</span>
+                  <span className="font-bold text-orange-600 dark:text-orange-400 text-sm">{editingCvOrder.progressPercent}%</span>
                 </div>
                 <input
                   type="range"
@@ -2413,7 +2239,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                       status: val === 100 ? 'Selesai' : val >= 85 ? 'Review Quality Control' : val > 0 ? 'Dalam Pengerjaan' : 'Masuk Permintaan',
                     });
                   }}
-                  className="w-full accent-violet-600 h-2 bg-slate-200 dark:bg-slate-700 rounded-[10px] cursor-pointer"
+                  className="w-full accent-[#1738D1] h-2 bg-slate-200 dark:bg-slate-700 rounded-[10px] cursor-pointer"
                 />
                 <div className="flex justify-between text-[10px] text-slate-400 mt-1">
                   <span>0% (Masuk)</span>
@@ -2449,17 +2275,17 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                     onChange={(e) => {
                       const worker = e.target.value;
                       let role = 'Senior HR Specialist';
-                      if (worker.includes('Ahmad')) role = 'Lead Career Consultant';
-                      else if (worker.includes('Rina')) role = 'Senior Tech Recruiter';
-                      else if (worker.includes('Rizky')) role = 'AI CV Specialist';
+                      if (worker.includes('Consultant')) role = 'Lead Career Consultant';
+                      else if (worker.includes('Recruiter')) role = 'Senior Tech Recruiter';
+                      else if (worker.includes('Automator')) role = 'AI CV Specialist';
                       setEditingCvOrder({ ...editingCvOrder, assignedTo: worker, assignedRole: role });
                     }}
                     className="w-full p-2.5 pr-8 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none appearance-none cursor-pointer"
                   >
-                    <option value="Siti Aminah, M.Psi">Siti Aminah, M.Psi (Senior HR Specialist)</option>
-                    <option value="Ahmad Fikri, S.Psi">Ahmad Fikri, S.Psi (Lead Career Consultant)</option>
-                    <option value="Rina Febriani, S.Kom">Rina Febriani, S.Kom (Senior Tech Recruiter)</option>
-                    <option value="Rizky Kurniawan">Rizky Kurniawan (AI CV Specialist)</option>
+                    <option value="Reviewer ATS 1">Reviewer ATS 1 (Senior HR Specialist)</option>
+                    <option value="Career Consultant A">Career Consultant A (Lead Career Consultant)</option>
+                    <option value="Tech Recruiter B">Tech Recruiter B (Senior Tech Recruiter)</option>
+                    <option value="AI CV Automator">AI CV Automator (AI CV Specialist)</option>
                   </select>
                   <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
@@ -2496,7 +2322,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                     handleAssignCvWorker(editingCvOrder.id, editingCvOrder.assignedTo, editingCvOrder.assignedRole);
                     setEditingCvOrder(null);
                   }}
-                  className="flex-1 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-500 text-white font-bold shadow-sm"
+                  className="flex-1 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold shadow-sm"
                 >
                   Simpan Perubahan
                 </button>

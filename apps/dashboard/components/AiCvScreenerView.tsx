@@ -61,83 +61,8 @@ import {
   RveReportResult,
 } from './rve/RveEnginePipeline';
 import { A4HeatmapCanvas } from './rve/A4HeatmapCanvas';
-
-const mockSavedCVs = [
-  {
-    id: 'cv-1',
-    title: 'CV Fullstack Engineer (Utama)',
-    candidateName: 'Rizky Ramadhan, S.Kom',
-    roleTitle: 'Fullstack Developer',
-    email: 'rizky.dev@email.com',
-    phone: '+62 812-3456-7890',
-    location: 'Jakarta, Indonesia',
-    summary:
-      'Software Engineer dengan 3+ tahun pengalaman membangun aplikasi web performa tinggi menggunakan React.js, Next.js, & Node.js. Berhasil meningkatkan kecepatan load hingga 35%.',
-    experience: [
-      {
-        id: 'exp-1',
-        role: 'Senior Fullstack Developer',
-        company: 'PT Tech Innovation Indonesia',
-        period: '2023 - Sekarang',
-        achievements: [
-          'Mengembangkan 12+ modul web berbasis React.js & TypeScript, berhasil mempercepat render 35%.',
-          'Memimpin tim 5 engineer dan memangkas bug produk hingga 40% dalam 6 bulan.',
-        ],
-        metricsCount: 2,
-      },
-    ],
-    education: [
-      {
-        id: 'edu-1',
-        degree: 'S1 Teknik Informatika',
-        institution: 'Universitas Indonesia',
-        period: '2017 - 2021',
-        gpa: 'IPK 3.82 / 4.00 (Cumlaude)',
-      },
-    ],
-    skills: ['React.js', 'Next.js', 'TypeScript', 'Node.js', 'PostgreSQL', 'Tailwind CSS'],
-    hobbiesAndMisc: 'Bahasa Indonesia (Native), Bahasa Inggris (Professional). Hobi: Catur & Futsal.',
-    updatedAt: '5 menit lalu',
-    atsScore: 88,
-  },
-  {
-    id: 'cv-2',
-    title: 'CV Data Analyst Specialist',
-    candidateName: 'Amanda Putri, S.Stat',
-    roleTitle: 'Data Analyst Specialist',
-    email: 'amanda.data@email.com',
-    phone: '+62 813-8888-7777',
-    location: 'Bandung, Indonesia',
-    summary:
-      'Data Analyst berdedikasi dengan keahlian Python, SQL, Tableau, & Power BI. Berhasil mengolah 2 juta+ baris data transaksi untuk menghemat biaya operasional 25%.',
-    experience: [
-      {
-        id: 'exp-2',
-        role: 'Data Analyst',
-        company: 'PT Fintek Analytics Nusantara',
-        period: '2022 - Sekarang',
-        achievements: [
-          'Membangun 15+ Interactive Dashboard Tableau & Power BI untuk jajaran Direksi.',
-          'Mengoptimalkan query SQL database PostgreSQL, menghemat waktu eksekusi laporan mingguan sebesar 50%.',
-        ],
-        metricsCount: 2,
-      },
-    ],
-    education: [
-      {
-        id: 'edu-2',
-        degree: 'S1 Statistika',
-        institution: 'Institut Teknologi Bandung',
-        period: '2018 - 2022',
-        gpa: 'IPK 3.75 / 4.00',
-      },
-    ],
-    skills: ['Python', 'SQL', 'Tableau', 'Power BI', 'Data Modeling', 'Excel Advanced'],
-    hobbiesAndMisc: 'Bahasa Indonesia (Native), Bahasa Inggris (Fluent). Hobi: Reading & Data Viz.',
-    updatedAt: '18 Juli 2026',
-    atsScore: 82,
-  },
-];
+import { cvApi } from '@/lib/api';
+import { getStoredSession } from '@/lib/auth';
 
 // 11 Recruiter Personas dengan kategori, star ratings, contoh perusahaan, & match score
 const recruiterPersonas: RecruiterPersona[] = [
@@ -330,6 +255,65 @@ const recruiterPersonas: RecruiterPersona[] = [
   },
 ];
 
+// ── Dynamic persona match scoring ────────────────────────────────────────────
+// Menghitung skor kecocokan (0-100) antara isi CV dan bobot tiap persona recruiter.
+// Sinyal diekstrak dari CV: bukti proyek/portofolio, metrik dampak, jumlah skill, & pendidikan.
+// Hasil di-blend dengan skor kualitas CV keseluruhan (RVE consensusScore).
+// Jika CV kosong (belum ada data), fallback ke matchScore bawaan persona sebagai baseline.
+function computePersonaMatchScore(persona: RecruiterPersona, cv: any, cvQualityScore: number): number {
+  const skills = Array.isArray(cv?.skills) ? cv.skills : [];
+  const experience = Array.isArray(cv?.experience) ? cv.experience : [];
+  const education = Array.isArray(cv?.education) ? cv.education : [];
+  const summary = cv?.summary || '';
+
+  // Fallback baseline jika CV tidak punya sinyal terhitung (tanpa skills/experience/education).
+  // Summary saja tidak cukup — tanpa data terstruktur kita tidak bisa menilai kecocokan persona.
+  const hasContent = skills.length > 0 || experience.length > 0 || education.length > 0;
+  if (!hasContent) return persona.matchScore;
+
+  const allText = [
+    summary,
+    ...experience.map((e: any) => `${e?.role || ''} ${e?.company || ''} ${e?.description || ''}`),
+    ...education.map((e: any) => `${e?.degree || ''} ${e?.institution || ''}`),
+  ]
+    .join(' ')
+    .toLowerCase();
+
+  // portfolio: bukti proyek nyata / link repo / portofolio
+  const linkMatches = (allText.match(/https?:\/\/|github\.com|gitlab\.com|bitbucket\.org|\.vercel\.app|\.netlify\.app|\.github\.io/g) || []).length;
+  const portfolioSignal = Math.min(1, experience.length * 0.3 + linkMatches * 0.35);
+
+  // impact: metrik angka & kata kerja dampak
+  const impactMatches = (allText.match(/\d+%|persen|\bjt\b|\bjuta\b|\bribu\b|meningkatkan|menurunkan|menghemat|mempercepat|mencapai|mengurangi|\bhemat\b|growth|increase|improve|revenue|omzet/g) || []).length;
+  const impactSignal = Math.min(1, impactMatches / 3);
+
+  // techStack: cakupan skill
+  const techStackSignal = Math.min(1, skills.length / 8);
+
+  // education: riwayat pendidikan + gelar
+  const degreeBoost = education.some((e: any) => /s1|s2|sarjana|magister|master|bachelor|diploma|smk|d3/i.test(e?.degree || '')) ? 0.25 : 0;
+  const educationSignal = Math.min(1, education.length * 0.4 + degreeBoost);
+
+  const r = persona.ratings;
+  const dims = {
+    portfolio: portfolioSignal,
+    impact: impactSignal,
+    techStack: techStackSignal,
+    education: educationSignal,
+  };
+  const totalWeight = r.portfolio + r.impact + r.techStack + r.education;
+  const weightedFit =
+    r.portfolio * dims.portfolio +
+    r.impact * dims.impact +
+    r.techStack * dims.techStack +
+    r.education * dims.education;
+  const fit = totalWeight > 0 ? (weightedFit / totalWeight) * 100 : 50;
+
+  // Blend dengan kualitas CV keseluruhan agar skor realistis (CV lemah = skor turun di semua persona)
+  const quality = typeof cvQualityScore === 'number' && cvQualityScore > 0 ? cvQualityScore : 70;
+  return Math.round(fit * 0.75 + quality * 0.25);
+}
+
 interface ChatMessage {
   id: string;
   sender: 'user' | 'ai';
@@ -371,7 +355,7 @@ const MODULE_CONFIGS = [
     anchorId: 'step-ats',
     icon: BarChart3,
     color: 'text-blue-500',
-    badgeBg: 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900/60',
+    badgeBg: 'bg-blue-50 dark:bg-blue-950/60 text-navy-700 dark:text-blue-300 border-blue-200 dark:border-navy-900/60',
     pipelineText: 'ATS Compatibility — Menguji Kata Kunci & Format Mesin ATS...',
   },
   {
@@ -392,8 +376,8 @@ const MODULE_CONFIGS = [
     badgeTitle: 'Interview Forecast',
     anchorId: 'step-prediction',
     icon: TrendingUp,
-    color: 'text-purple-500',
-    badgeBg: 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-900/60',
+    color: 'text-orange-500',
+    badgeBg: 'bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-900/60',
     pipelineText: 'Hiring Forecast — Menghitung Peluang & Prediksi Wawancara...',
   },
   {
@@ -413,45 +397,79 @@ export const AiCvScreenerView: React.FC = () => {
   // Phase / View State: 'setup' (Form Input & Recruiter Selection) vs 'report' (Full Width Immersive Pipeline)
   const [activePhase, setActivePhase] = useState<'setup' | 'report'>('setup');
 
-  // Saved History State
-  const [reportHistory, setReportHistory] = useState<SavedReportHistoryItem[]>([
-    {
-      id: 'hist-1',
-      candidateName: 'Rizky Ramadhan, S.Kom',
-      targetRole: 'Senior Fullstack Engineer',
-      personaName: 'Startup',
-      consensusScore: 91,
-      verdictStatus: 'interview',
-      timestamp: '6 Ags 2026, 20:30',
-      appliedFixes: [],
-      cvSourceMode: 'saved',
-      selectedCvId: 'cv-1',
-      selectedPersonaId: 'startup',
-    },
-    {
-      id: 'hist-2',
-      candidateName: 'Amanda Putri, S.Stat',
-      targetRole: 'Data Analyst Specialist',
-      personaName: 'Corporate',
-      consensusScore: 82,
-      verdictStatus: 'maybe',
-      timestamp: '5 Ags 2026, 14:15',
-      appliedFixes: [],
-      cvSourceMode: 'saved',
-      selectedCvId: 'cv-2',
-      selectedPersonaId: 'corporate',
-    },
-  ]);
+  // Dynamic Saved CVs from database / localStorage / defaults
+  const [savedCvs, setSavedCvs] = useState<any[]>([]);
+  const [userSession, setUserSession] = useState<any>(null);
+
+  // Saved History State (Per-account / LocalStorage)
+  const [reportHistory, setReportHistory] = useState<SavedReportHistoryItem[]>([]);
+
+  // Load user session & dynamic CVs from API and localStorage on mount
+  useEffect(() => {
+    const session = getStoredSession();
+    if (session) {
+      setUserSession(session);
+      const userHistoryKey = `cuti_screener_history_${session.email || session.id || 'default'}`;
+      const savedHist = localStorage.getItem(userHistoryKey);
+      if (savedHist) {
+        try {
+          const parsed = JSON.parse(savedHist);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setReportHistory(parsed);
+          }
+        } catch (e) {
+          console.error('Failed to parse user screener history:', e);
+        }
+      }
+    } else {
+      const globalHist = localStorage.getItem('cuti_screener_history');
+      if (globalHist) {
+        try {
+          const parsed = JSON.parse(globalHist);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setReportHistory(parsed);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
+    // Fetch CVs murni dari database API (bukan localStorage — biar sesuai akun).
+    cvApi.getAll().then((remoteCvs) => {
+      const allDynamic = Array.isArray(remoteCvs) ? remoteCvs : [];
+      if (allDynamic.length > 0) {
+        const normalized = allDynamic.map((item) => ({
+          id: item.id || `cv-${Math.random()}`,
+          title: item.title || item.roleTitle || 'CV Saya',
+          candidateName: item.candidateName || item.name || userSession?.name || '',
+          roleTitle: item.roleTitle || item.targetRole || item.role || '',
+          email: item.email || userSession?.email || '',
+          phone: item.phone || '',
+          location: item.location || '',
+          summary: item.summary || 'Professional dengan keahlian teknis handal.',
+          experience: item.experience || [],
+          education: item.education || [],
+          skills: item.skills || [],
+          hobbiesAndMisc: item.hobbiesAndMisc || '',
+          updatedAt: item.updatedAt || 'Baru saja',
+          atsScore: item.atsScore || 0,
+        }));
+
+        setSavedCvs(normalized);
+      }
+    }).catch(() => {});
+  }, []);
 
   // Source Mode Selection
   const [cvSourceMode, setCvSourceMode] = useState<'saved' | 'upload'>('saved');
-  const [selectedCvId, setSelectedCvId] = useState<string>('cv-1');
+  const [selectedCvId, setSelectedCvId] = useState<string>('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [rawCvText, setRawCvText] = useState('');
   const [isChangeCvModalOpen, setIsChangeCvModalOpen] = useState<boolean>(false);
 
   // Target Job Role & Recruiter Persona
-  const [targetRole, setTargetRole] = useState('Senior Fullstack Engineer');
+  const [targetRole, setTargetRole] = useState('');
   const [targetLevel, setTargetLevel] = useState<'Entry' | 'Junior' | 'Mid' | 'Senior'>('Mid');
   const [selectedPersonaId, setSelectedPersonaId] = useState<string>('startup');
 
@@ -561,10 +579,17 @@ export const AiCvScreenerView: React.FC = () => {
     );
   };
 
-  const selectedSavedCv = mockSavedCVs.find((c) => c.id === selectedCvId) || mockSavedCVs[0];
+  const selectedSavedCv = savedCvs.find((c) => c.id === selectedCvId) || savedCvs[0] || undefined;
   const currentPersona = recruiterPersonas.find((p) => p.id === selectedPersonaId) || recruiterPersonas[0];
 
-  // Execute RVE Pipeline based on user selections
+  // CV benar-benar tersedia (dari DB/localStorage) atau berkas terunggah?
+  // Kalau tidak ada, UI menampilkan state kosong, bukan CV mock / skor palsu.
+  const hasSavedCvs = savedCvs.length > 0;
+  const hasUsableCv = cvSourceMode === 'upload' ? Boolean(uploadedFile) : hasSavedCvs;
+
+  // Execute RVE Pipeline based on user selections.
+  // Pipeline sudah aman terhadap selectedSavedCv undefined & struktur CV asli
+  // (experience pakai description/string, bukan achievements array).
   const rveReport = useMemo(() => {
     return runFullRvePipeline(
       cvSourceMode,
@@ -574,7 +599,32 @@ export const AiCvScreenerView: React.FC = () => {
       targetRole,
       appliedFixes
     );
-  }, [cvSourceMode, selectedCvId, uploadedFile, rawCvText, targetRole, appliedFixes]);
+  }, [cvSourceMode, selectedSavedCv, uploadedFile, rawCvText, targetRole, appliedFixes]);
+
+  // Skor match dinamis per persona berdasarkan isi CV (bukan angka hardcoded)
+  const personaMatchScores = useMemo(() => {
+    const map: Record<string, number> = {};
+    const quality = rveReport?.consensusScore ?? 70;
+    for (const p of recruiterPersonas) {
+      map[p.id] = computePersonaMatchScore(p, selectedSavedCv, quality);
+    }
+    return map;
+  }, [selectedSavedCv, rveReport]);
+
+  const bestMatchPersonaId = useMemo(() => {
+    let bestId = recruiterPersonas[0]?.id || '';
+    let best = -1;
+    for (const p of recruiterPersonas) {
+      const s = personaMatchScores[p.id] ?? 0;
+      if (s > best) {
+        best = s;
+        bestId = p.id;
+      }
+    }
+    return bestId;
+  }, [personaMatchScores]);
+
+  const currentPersonaMatchScore = personaMatchScores[currentPersona.id] ?? currentPersona.matchScore;
 
   const activeStepMap = useMemo(() => {
     const map: Record<string, number> = {};
@@ -598,17 +648,13 @@ export const AiCvScreenerView: React.FC = () => {
     });
   }, [selectedModules, activeStepMap]);
 
-  const handleFillDemoData = () => {
-    setCvSourceMode('saved');
-    setSelectedCvId('cv-1');
-    setTargetRole('Senior Fullstack Engineer');
-    setTargetLevel('Senior');
-    setSelectedPersonaId('startup');
-  };
-
   const handleStartRvePipeline = () => {
     if (cvSourceMode === 'upload' && !uploadedFile) {
       alert('Silakan pilih atau upload file CV Anda terlebih dahulu.');
+      return;
+    }
+    if (cvSourceMode === 'saved' && !hasSavedCvs) {
+      alert('Belum ada CV tersimpan di akun Anda. Buat CV terlebih dahulu atau pilih Unggah Berkas.');
       return;
     }
 
@@ -736,9 +782,9 @@ export const AiCvScreenerView: React.FC = () => {
       {activePhase === 'setup' && (
         <div className="space-y-6 w-full animate-in fade-in duration-300">
           {/* Header Banner */}
-          <div className="p-5 sm:p-6 rounded-[10px] bg-[#0D3BD9] border border-blue-500/50 text-white shadow-xl relative overflow-hidden">
+          <div className="p-5 sm:p-6 rounded-[10px] bg-navy-700 border border-navy-800 text-white shadow-xl relative overflow-hidden">
             <div className="relative z-10 space-y-2 max-w-3xl">
-              <span className="inline-block px-3 py-1 rounded-[10px] text-xs font-black bg-amber-400 text-slate-950 shadow-xs">
+              <span className="inline-block px-3 py-1 rounded-[10px] text-xs font-black bg-[#1738D1] text-white shadow-xs">
                 Langkah 1: Konfigurasi CV &amp; Target Perusahaan
               </span>
               <h2 className="text-xl sm:text-2xl font-black text-white">Pilih CV &amp; Kriteria Recruiter Target Anda</h2>
@@ -767,19 +813,25 @@ export const AiCvScreenerView: React.FC = () => {
                           CV Aktif:
                         </span>
                         <span className="text-xs font-black text-slate-900 dark:text-white truncate max-w-[200px]">
-                          {cvSourceMode === 'upload' && uploadedFile
-                            ? uploadedFile.name
-                            : (selectedSavedCv.title || selectedSavedCv.candidateName)}
+                          {cvSourceMode === 'upload'
+                            ? (uploadedFile ? uploadedFile.name : 'Belum ada berkas terunggah')
+                            : (hasSavedCvs
+                                ? (selectedSavedCv.title || selectedSavedCv.candidateName)
+                                : 'Belum ada CV tersimpan')}
                         </span>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1 shrink-0">
-                          <Star className="w-3 h-3 text-emerald-600 fill-emerald-600" />
-                          <span>{selectedSavedCv.atsScore}% ATS</span>
-                        </span>
+                        {hasUsableCv && (
+                          <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1 shrink-0">
+                            <Star className="w-3 h-3 text-emerald-600 fill-emerald-600" />
+                            <span>{selectedSavedCv.atsScore}% ATS</span>
+                          </span>
+                        )}
                       </div>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                         {cvSourceMode === 'upload'
                           ? 'Berkas Unggahan Lokal'
-                          : `${selectedSavedCv.roleTitle} • Terakhir dianalisis ${selectedSavedCv.updatedAt}`}
+                          : (hasSavedCvs
+                              ? `${selectedSavedCv.roleTitle} • Terakhir dianalisis ${selectedSavedCv.updatedAt}`
+                              : 'Buat CV di menu CV Builder atau pilih Unggah Berkas')}
                       </p>
                     </div>
                   </div>
@@ -807,7 +859,7 @@ export const AiCvScreenerView: React.FC = () => {
                       value={targetRole}
                       onChange={(e) => setTargetRole(e.target.value)}
                       placeholder="Contoh: Senior Fullstack Engineer"
-                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-orange-500 focus:outline-none transition"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-[#1738D1] focus:outline-none transition"
                     />
                   </div>
 
@@ -819,7 +871,7 @@ export const AiCvScreenerView: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setIsSeniorityDropdownOpen((prev) => !prev)}
-                        className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium flex items-center justify-between focus:ring-2 focus:ring-orange-500 focus:outline-none transition cursor-pointer shadow-2xs"
+                        className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium flex items-center justify-between focus:ring-2 focus:ring-[#1738D1] focus:outline-none transition cursor-pointer shadow-2xs"
                       >
                         <span>
                           {SENIORITY_OPTIONS.find((o) => o.value === targetLevel)?.label || targetLevel}
@@ -850,7 +902,7 @@ export const AiCvScreenerView: React.FC = () => {
                                 }`}
                               >
                                 <div className="flex items-center gap-2">
-                                  <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-orange-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
+                                  <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-[#1738D1]' : 'bg-slate-300 dark:bg-slate-600'}`} />
                                   <span>{opt.label}</span>
                                 </div>
                                 {isSelected && <Check className="w-3.5 h-3.5 text-orange-500 shrink-0" />}
@@ -879,7 +931,7 @@ export const AiCvScreenerView: React.FC = () => {
                     value={personaSearchQuery}
                     onChange={(e) => setPersonaSearchQuery(e.target.value)}
                     placeholder="Cari recruiter atau perusahaan..."
-                    className="w-full pl-8 pr-7 py-1.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none transition"
+                    className="w-full pl-8 pr-7 py-1.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1] focus:outline-none transition"
                   />
                   {personaSearchQuery && (
                     <button
@@ -918,8 +970,8 @@ export const AiCvScreenerView: React.FC = () => {
                         }}
                         className={`p-3 rounded-[10px] border transition-all cursor-pointer flex items-center justify-between gap-2.5 group ${
                           isSelected
-                            ? 'border-orange-500 bg-orange-50/90 dark:bg-orange-950/40 ring-1 ring-orange-500/20 shadow-xs'
-                            : 'border-slate-200 dark:border-slate-800 hover:border-orange-400 dark:hover:border-orange-500/60 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                            ? 'border-[#1738D1] bg-orange-50/90 dark:bg-orange-950/40 ring-1 ring-[#1738D1]/20 shadow-xs'
+                            : 'border-slate-200 dark:border-slate-800 hover:border-orange-400 dark:hover:border-[#1738D1]/60 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                         }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
@@ -927,7 +979,7 @@ export const AiCvScreenerView: React.FC = () => {
                           <div
                             className={`p-2 rounded-[10px] shrink-0 transition ${
                               isSelected
-                                ? 'bg-orange-500 text-white shadow-xs'
+                                ? 'bg-[#1738D1] text-white shadow-xs'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-orange-100 dark:group-hover:bg-orange-950 group-hover:text-orange-600'
                             }`}
                           >
@@ -947,9 +999,9 @@ export const AiCvScreenerView: React.FC = () => {
                               >
                                 {persona.name}
                               </h4>
-                              {persona.isRecommended && (
-                                <span className="text-[8px] font-extrabold text-amber-700 bg-amber-100 dark:bg-amber-950 dark:text-amber-300 px-1 py-0.2 rounded border border-amber-300 dark:border-amber-800 shrink-0">
-                                  Recommended
+                              {hasUsableCv && persona.id === bestMatchPersonaId && (
+                                <span className="text-[8px] font-extrabold text-amber-700 bg-amber-100 dark:bg-amber-950 dark:text-amber-300 px-1 py-0.2 rounded-[10px] border border-amber-300 dark:border-amber-800 shrink-0">
+                                  Top Match
                                 </span>
                               )}
                             </div>
@@ -959,12 +1011,23 @@ export const AiCvScreenerView: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* Selected Indicator */}
-                        {isSelected && (
-                          <span className="p-0.5 rounded-full bg-orange-500 text-white shadow-xs shrink-0">
-                            <Check className="w-3 h-3 stroke-[3]" />
+                        {/* Dynamic Match Score + Selected Indicator */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span
+                            className={`text-[10px] font-black px-2 py-0.5 rounded-[10px] border ${
+                              persona.id === bestMatchPersonaId
+                                ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                                : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                            }`}
+                          >
+                            {hasUsableCv ? `${personaMatchScores[persona.id] ?? persona.matchScore}%` : '—'}
                           </span>
-                        )}
+                          {isSelected && (
+                            <span className="p-0.5 rounded-full bg-[#1738D1] text-white shadow-xs shrink-0">
+                              <Check className="w-3 h-3 stroke-[3]" />
+                            </span>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -984,7 +1047,7 @@ export const AiCvScreenerView: React.FC = () => {
               </div>
 
               {/* Tips Footer Card */}
-              <div className="p-3.5 rounded-[10px] bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 flex items-start gap-2.5 text-[11px] text-blue-900 dark:text-blue-200">
+              <div className="p-3.5 rounded-[10px] bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-navy-900/60 flex items-start gap-2.5 text-[11px] text-navy-900 dark:text-blue-200">
                 <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                 <p className="leading-snug">
                   <strong className="font-bold">Tips:</strong> Pilih recruiter yang paling relevan dengan posisi &amp; perusahaan impianmu. Kamu bisa ubah kapan saja untuk melihat perbedaan hasil evaluasi.
@@ -1003,7 +1066,7 @@ export const AiCvScreenerView: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="p-3 rounded-[10px] bg-orange-500 text-white shadow-md">
+                      <div className="p-3 rounded-[10px] bg-[#1738D1] text-white shadow-md">
                         {currentPersona.category === 'company' && <Building2 className="w-6 h-6" />}
                         {currentPersona.category === 'region' && <Globe className="w-6 h-6" />}
                         {currentPersona.category === 'special' && <GraduationCap className="w-6 h-6" />}
@@ -1014,9 +1077,11 @@ export const AiCvScreenerView: React.FC = () => {
                           <h3 className="text-xl font-black text-slate-900 dark:text-white">
                             {currentPersona.name}
                           </h3>
-                          <span className="text-[10px] font-extrabold text-amber-700 bg-amber-100 dark:bg-amber-950 dark:text-amber-300 px-2 py-0.5 rounded-[10px] border border-amber-300 dark:border-amber-800">
-                            Best Match
-                          </span>
+                          {hasUsableCv && currentPersona.id === bestMatchPersonaId && (
+                            <span className="text-[10px] font-extrabold text-amber-700 bg-amber-100 dark:bg-amber-950 dark:text-amber-300 px-2 py-0.5 rounded-[10px] border border-amber-300 dark:border-amber-800">
+                              Best Match
+                            </span>
+                          )}
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 pt-0.5">
                           {currentPersona.description}
@@ -1026,7 +1091,7 @@ export const AiCvScreenerView: React.FC = () => {
 
                     <div className="text-right shrink-0">
                       <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 block">
-                        {currentPersona.matchScore}%
+                        {hasUsableCv ? `${currentPersonaMatchScore}%` : '—'}
                       </span>
                       <span className="text-[9px] font-bold text-slate-400 block uppercase">Match</span>
                     </div>
@@ -1117,7 +1182,7 @@ export const AiCvScreenerView: React.FC = () => {
 
                             <div className="flex items-center gap-2 shrink-0">
                               {isChecked && (
-                                <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-orange-500 text-white shadow-2xs">
+                                <span className="px-1.5 py-0.5 rounded-[10px] text-[9px] font-black uppercase bg-[#1738D1] text-white shadow-2xs">
                                   STEP {stepNum}
                                 </span>
                               )}
@@ -1125,7 +1190,7 @@ export const AiCvScreenerView: React.FC = () => {
                                 type="checkbox"
                                 checked={isChecked}
                                 onChange={() => {}}
-                                className="w-4 h-4 accent-orange-500 rounded cursor-pointer pointer-events-none"
+                                className="w-4 h-4 accent-[#1738D1] rounded-[10px] cursor-pointer pointer-events-none"
                               />
                             </div>
                           </div>
@@ -1139,7 +1204,7 @@ export const AiCvScreenerView: React.FC = () => {
                     type="button"
                     onClick={handleStartRvePipeline}
                     disabled={isProcessing}
-                    className="w-full py-3.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-sm shadow-md shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 hover:-translate-y-0.5 mt-2"
+                    className="w-full py-3.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.99] text-white font-black text-sm shadow-md shadow-[#1738D1]/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 hover:-translate-y-0.5 mt-2"
                   >
                     <Play className="w-4 h-4 fill-white" />
                     <span>Mulai Screening</span>
@@ -1175,13 +1240,13 @@ export const AiCvScreenerView: React.FC = () => {
                         <div
                           key={hist.id}
                           onClick={() => handleLoadHistoryReport(hist)}
-                          className="p-3 rounded-[10px] border border-slate-200 dark:border-slate-800 hover:border-orange-500/50 hover:bg-orange-50/40 dark:hover:bg-orange-950/30 transition-all cursor-pointer space-y-1.5 group shadow-2xs"
+                          className="p-3 rounded-[10px] border border-slate-200 dark:border-slate-800 hover:border-[#1738D1]/50 hover:bg-orange-50/40 dark:hover:bg-orange-950/30 transition-all cursor-pointer space-y-1.5 group shadow-2xs"
                         >
                           <div className="flex items-center justify-between">
                             <span className="font-black text-xs text-rose-600 dark:text-rose-400 group-hover:text-orange-600 transition">
                               {hist.candidateName}
                             </span>
-                            <span className="text-[9px] font-extrabold bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-200 dark:border-indigo-800">
+                            <span className="text-[9px] font-extrabold bg-slate-50 text-navy-700 dark:bg-slate-900 dark:text-navy-300 px-1.5 py-0.5 rounded-[10px] border border-slate-200 dark:border-slate-800">
                               {hist.personaName}
                             </span>
                           </div>
@@ -1210,10 +1275,14 @@ export const AiCvScreenerView: React.FC = () => {
                   </span>
 
                   <div className="space-y-2 text-xs">
-                    {mockSavedCVs.map((cv) => (
+                    {savedCvs.slice(0, 3).map((cv) => (
                       <div
                         key={cv.id}
-                        onClick={() => handleStartRvePipeline()}
+                        onClick={() => {
+                          setSelectedCvId(cv.id);
+                          setCvSourceMode('saved');
+                          handleStartRvePipeline();
+                        }}
                         className="p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
                       >
                         <div>
@@ -1221,7 +1290,7 @@ export const AiCvScreenerView: React.FC = () => {
                           <p className="text-[10px] text-slate-400">{cv.roleTitle}</p>
                         </div>
                         <div className="flex items-center gap-1">
-                          <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-1.5 py-0.5 rounded-[10px]">
                             {cv.atsScore}% ATS
                           </span>
                           <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
@@ -1233,9 +1302,9 @@ export const AiCvScreenerView: React.FC = () => {
               </div>
 
               {/* Butuh Insight Lebih Dalam? Card */}
-              <div className="p-4 rounded-[10px] bg-gradient-to-br from-indigo-50/80 to-purple-50/80 dark:from-indigo-950/40 dark:to-purple-950/40 border border-indigo-200/80 dark:border-indigo-900/60 space-y-3">
+              <div className="p-4 rounded-[10px] bg-gradient-to-br from-slate-50/80 to-slate-50/80 dark:from-navy-950/40 dark:to-slate-900/40 border border-slate-200/80 dark:border-slate-900/60 space-y-3">
                 <div className="flex items-start gap-2.5">
-                  <div className="p-2 rounded-[10px] bg-indigo-500 text-white shrink-0">
+                  <div className="p-2 rounded-[10px] bg-navy-600 text-white shrink-0">
                     <Sparkles className="w-4 h-4 fill-white" />
                   </div>
                   <div>
@@ -1251,11 +1320,16 @@ export const AiCvScreenerView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setActivePhase('report')}
-                  className="w-full py-2 rounded-[10px] bg-white dark:bg-slate-900 hover:bg-indigo-50 text-indigo-600 dark:text-indigo-400 text-xs font-bold transition flex items-center justify-center gap-1 border border-indigo-200 dark:border-indigo-800 cursor-pointer shadow-2xs"
+                  className="w-full py-2.5 rounded-[10px] bg-white dark:bg-slate-900 hover:bg-navy-50 text-[#1738D1] dark:text-blue-400 text-xs font-bold transition flex items-center justify-center gap-1 border border-slate-200 dark:border-slate-800 cursor-pointer shadow-2xs"
                 >
                   <span>Lihat Laporan</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
+
+                <div className="flex items-center gap-1.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-400 pt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <span>Lihat Laporan dinamis terhubung dengan database dan per akun</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1287,7 +1361,7 @@ export const AiCvScreenerView: React.FC = () => {
                   <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
                     Recruiter: {currentPersona.name}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                  <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-navy-800">
                     Posisi: {targetRole}
                   </span>
                 </div>
@@ -1295,14 +1369,6 @@ export const AiCvScreenerView: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2 self-end sm:self-auto">
-              <button
-                type="button"
-                onClick={handleFillDemoData}
-                className="px-3.5 py-2 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 text-xs font-bold border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>Isi Data Demo</span>
-              </button>
             </div>
           </div>
 
@@ -1311,7 +1377,7 @@ export const AiCvScreenerView: React.FC = () => {
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-8 text-center space-y-6 shadow-sm">
               <div className="relative w-16 h-16 mx-auto">
                 <div className="absolute inset-0 rounded-full border-4 border-orange-200 animate-ping" />
-                <div className="relative w-16 h-16 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-md">
+                <div className="relative w-16 h-16 rounded-full bg-[#1738D1] text-white flex items-center justify-center shadow-md">
                   <Sparkles className="w-8 h-8 animate-pulse text-white fill-white" />
                 </div>
               </div>
@@ -1356,7 +1422,7 @@ export const AiCvScreenerView: React.FC = () => {
           {!isProcessing && hasRunPipeline && (
             <div className="space-y-6 w-full">
               {/* Top AI Summary Banner */}
-              <div className="p-6 rounded-[10px] bg-orange-500 text-white shadow-md space-y-3 relative overflow-hidden">
+              <div className="p-6 rounded-[10px] bg-[#1738D1] text-white shadow-md space-y-3 relative overflow-hidden">
                 <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
 
                 <div className="flex items-center justify-between border-b border-white/20 pb-2">
@@ -1364,7 +1430,7 @@ export const AiCvScreenerView: React.FC = () => {
                     <Sparkles className="w-4 h-4 fill-white text-white" />
                     <h3 className="font-extrabold text-xs uppercase tracking-wider">Ringkasan Evaluasi Sistem</h3>
                   </div>
-                  <span className="text-[10px] font-black bg-white/20 px-2 py-0.5 rounded border border-white/20">
+                  <span className="text-[10px] font-black bg-white/20 px-2 py-0.5 rounded-[10px] border border-white/20">
                     Estimasi Peluang: {rveReport.topAiSummary.estimatedProbability}%
                   </span>
                 </div>
@@ -1400,7 +1466,7 @@ export const AiCvScreenerView: React.FC = () => {
                       <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
                         Hasil Konsensus Akhir
                       </span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-navy-50 dark:bg-navy-950 text-navy-700 dark:text-navy-300 border border-navy-200 dark:border-navy-800">
+                      <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-navy-50 dark:bg-navy-950 text-navy-700 dark:text-navy-300 border border-navy-200 dark:border-navy-800">
                         Target: {currentPersona.name}
                       </span>
                     </div>
@@ -1535,7 +1601,7 @@ export const AiCvScreenerView: React.FC = () => {
                     type="button"
                     onClick={handleAutoOptimizeCv}
                     disabled={isAutoOptimizing}
-                    className="w-full py-4 rounded-[10px] bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-sm shadow-md shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer hover:-translate-y-0.5 mt-2"
+                    className="w-full py-4 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.99] text-white font-black text-sm shadow-md shadow-[#1738D1]/25 transition-all flex items-center justify-center gap-2 cursor-pointer hover:-translate-y-0.5 mt-2"
                   >
                     {isAutoOptimizing ? (
                       <>
@@ -1599,7 +1665,7 @@ export const AiCvScreenerView: React.FC = () => {
                       onClick={() => setShowHeatmapOverlay(!showHeatmapOverlay)}
                       className={`px-4 py-2 rounded-[10px] font-bold text-xs flex items-center gap-1.5 transition cursor-pointer shrink-0 ${
                         showHeatmapOverlay
-                          ? 'bg-orange-500 text-white shadow-xs'
+                          ? 'bg-[#1738D1] text-white shadow-xs'
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                       }`}
                     >
@@ -1691,7 +1757,7 @@ export const AiCvScreenerView: React.FC = () => {
                 >
                   <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                     <div className="space-y-1">
-                      <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60 inline-flex items-center gap-1">
+                      <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase bg-blue-50 dark:bg-blue-950/60 text-navy-700 dark:text-blue-300 border border-blue-200 dark:border-navy-900/60 inline-flex items-center gap-1">
                         <BarChart3 className="w-3 h-3 text-blue-600" />
                         <span>STEP {activeStepMap.ats} — Machine Filter</span>
                       </span>
@@ -1718,7 +1784,7 @@ export const AiCvScreenerView: React.FC = () => {
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-slate-800 dark:text-slate-200">{item.keyword}</span>
                           <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+                            className={`px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase ${
                               item.quadrant === 'gold'
                                 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                                 : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
@@ -1776,7 +1842,7 @@ export const AiCvScreenerView: React.FC = () => {
                               <Cpu className="w-4 h-4 text-orange-500" />
                               {ai.modelName}
                             </span>
-                            <span className="text-sm font-black text-orange-500 bg-orange-50 dark:bg-orange-950 px-2.5 py-0.5 rounded border border-orange-200 dark:border-orange-900">
+                            <span className="text-sm font-black text-orange-500 bg-orange-50 dark:bg-orange-950 px-2.5 py-0.5 rounded-[10px] border border-orange-200 dark:border-orange-900">
                               {ai.score}%
                             </span>
                           </div>
@@ -1817,8 +1883,8 @@ export const AiCvScreenerView: React.FC = () => {
                   <div className="lg:col-span-7 p-6 md:p-8 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
                     <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                       <div className="space-y-1">
-                        <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-900/60 inline-flex items-center gap-1">
-                          <TrendingUp className="w-3 h-3 text-purple-600" />
+                        <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-900/60 inline-flex items-center gap-1">
+                          <TrendingUp className="w-3 h-3 text-orange-600" />
                           <span>STEP {activeStepMap.forecast} — Interview Forecast</span>
                         </span>
                         <h3 className="font-black text-lg text-slate-900 dark:text-white">
@@ -1833,7 +1899,7 @@ export const AiCvScreenerView: React.FC = () => {
                           key={idx}
                           className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 flex items-start gap-3 text-slate-800 dark:text-slate-200 hover:border-slate-300 transition-all"
                         >
-                          <span className="w-5 h-5 rounded-full bg-orange-500 text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                          <span className="w-5 h-5 rounded-full bg-[#1738D1] text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                             {idx + 1}
                           </span>
                           <p className="font-medium leading-relaxed">{q}</p>
@@ -1865,7 +1931,7 @@ export const AiCvScreenerView: React.FC = () => {
                           <div
                             className={`max-w-[85%] p-3.5 rounded-[10px] leading-relaxed text-xs ${
                               msg.sender === 'user'
-                                ? 'bg-orange-500 text-white font-medium rounded-tr-none'
+                                ? 'bg-[#1738D1] text-white font-medium rounded-tr-none'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none border border-slate-200/70 dark:border-slate-700/70'
                             }`}
                           >
@@ -1910,12 +1976,12 @@ export const AiCvScreenerView: React.FC = () => {
                         onChange={(e) => setInputChatText(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSendChatMessage()}
                         placeholder="Tanyakan ke Tim Recruiter..."
-                        className="flex-1 px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none transition"
+                        className="flex-1 px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1] focus:outline-none transition"
                       />
                       <button
                         type="button"
                         onClick={() => handleSendChatMessage()}
-                        className="p-2 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white transition cursor-pointer"
+                        className="p-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white transition cursor-pointer"
                       >
                         <Send className="w-3.5 h-3.5" />
                       </button>
@@ -1966,7 +2032,7 @@ export const AiCvScreenerView: React.FC = () => {
                               className={`px-4 py-2 rounded-[10px] text-xs font-bold transition-all cursor-pointer ${
                                 isApplied
                                   ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 cursor-default'
-                                  : 'bg-orange-500 hover:bg-orange-600 text-white shadow-xs'
+                                  : 'bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-xs'
                               }`}
                             >
                               {isApplied ? (
@@ -2041,7 +2107,7 @@ export const AiCvScreenerView: React.FC = () => {
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
               >
-                CV Tersimpan ({mockSavedCVs.length})
+                CV Tersimpan ({savedCvs.length})
               </button>
               <button
                 type="button"
@@ -2059,7 +2125,7 @@ export const AiCvScreenerView: React.FC = () => {
             {/* Content based on Mode */}
             {cvSourceMode === 'saved' ? (
               <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                {mockSavedCVs.map((cv) => {
+                {savedCvs.map((cv) => {
                   const isSelected = selectedCvId === cv.id && cvSourceMode === 'saved';
                   return (
                     <div
@@ -2084,12 +2150,12 @@ export const AiCvScreenerView: React.FC = () => {
                         </p>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-0.5">
+                        <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-0.5">
                           <Star className="w-2.5 h-2.5 text-emerald-600 fill-emerald-600" />
                           <span>{cv.atsScore}% ATS</span>
                         </span>
                         {isSelected && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#3B5CC4] text-white shrink-0">
+                          <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-[#3B5CC4] text-white shrink-0">
                             Aktif
                           </span>
                         )}
@@ -2125,7 +2191,7 @@ export const AiCvScreenerView: React.FC = () => {
                 />
                 <label
                   htmlFor="modal-cv-upload"
-                  className="inline-flex items-center justify-center px-4 py-2 rounded-[10px] bg-[#F97316] hover:bg-orange-600 text-white font-bold text-xs cursor-pointer shadow-md transition gap-2"
+                  className="inline-flex items-center justify-center px-4 py-2 rounded-[10px] bg-[#F97316] hover:bg-[#132EA8] text-white font-bold text-xs cursor-pointer shadow-md transition gap-2"
                 >
                   <Upload className="w-3.5 h-3.5" />
                   <span>Pilih Berkas Komputer</span>

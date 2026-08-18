@@ -1,8 +1,8 @@
-# AmbilCUTI Full MVP Implementation Plan
+# Employr Full MVP Implementation Plan
 
 > **For Hermes:** Use this plan to implement the complete MVP from current state (~40%) to production-ready.
 
-**Goal:** Take AmbilCUTI from mock data to fully functional production app with real backend, payment, email, and AI processing.
+**Goal:** Take Employr from mock data to fully functional production app with real backend, payment, email, and AI processing.
 
 **Architecture:** Next.js monorepo (Turborepo) + Prisma + PostgreSQL (Docker) + Redis + BullMQ + SeaweedFS + OpenAI-compatible API + Midtrans + Resend.
 
@@ -49,7 +49,7 @@
 2. Create `.env.local` template:
 ```env
 # Database
-DATABASE_URL="postgresql://postgres:postgres@localhost:5434/ambilcuti"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5434/employr"
 
 # Redis
 REDIS_URL="redis://localhost:6379"
@@ -70,7 +70,7 @@ MIDTRANS_IS_PRODUCTION=false
 
 # Resend
 RESEND_API_KEY="your-resend-key"
-RESEND_FROM_EMAIL="noreply@cuti.online"
+RESEND_FROM_EMAIL="noreply@employr.id"
 
 # Auth
 AUTH_SECRET="generate-a-secret-here"
@@ -550,7 +550,7 @@ npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
 
 ### Task 7.3: Landing Page
 
-**Objective:** Build landing page for cuti.online.
+**Objective:** Build landing page for employr.id.
 
 **Files:**
 - Create: `apps/web/src/app/page.tsx`

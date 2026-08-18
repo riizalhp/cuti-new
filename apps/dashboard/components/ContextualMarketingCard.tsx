@@ -3,12 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FileText, Target, Rocket, ArrowRight, X } from 'lucide-react';
+import { cvApi, jobsApi } from '@/lib/api';
 
 export const ContextualMarketingCard: React.FC = () => {
   const router = useRouter();
   const [userIntent, setUserIntent] = useState<string | null>(null);
   const [hasCv, setHasCv] = useState<boolean>(true);
   const [isVisible, setIsVisible] = useState<boolean>(true);
+  const [matchingJobsCount, setMatchingJobsCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -25,7 +28,32 @@ export const ContextualMarketingCard: React.FC = () => {
         console.warn('Failed to parse cuti_user_session', e);
       }
     }
+
+    // Fetch dynamic data
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      const [cvs, jobs] = await Promise.all([
+        cvApi.getAll(),
+        jobsApi.getRecommended(50),
+      ]);
+
+      if (Array.isArray(cvs) && cvs.length > 0) {
+        setHasCv(true);
+      } else {
+        setHasCv(false);
+      }
+
+      setMatchingJobsCount(Array.isArray(jobs) ? jobs.length : 0);
+    } catch (error) {
+      console.error('[ContextualMarketingCard] Failed to load data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (!isVisible) return null;
 
@@ -82,7 +110,9 @@ export const ContextualMarketingCard: React.FC = () => {
                 <span>CV sudah siap. Sekarang cari lowongan yang cocok</span>
               </h4>
               <p className="text-xs text-slate-300 mt-0.5 max-w-lg leading-relaxed">
-                Ada 18 lowongan aktif yang memiliki tingkat kesesuaian di atas 85% dengan profilmu.
+                {matchingJobsCount > 0
+                  ? `Ada ${matchingJobsCount} lowongan aktif yang sesuai dengan profilmu.`
+                  : 'Jelajahi lowongan terbaru yang sesuai dengan profilmu.'}
               </p>
             </div>
           </div>
@@ -90,7 +120,7 @@ export const ContextualMarketingCard: React.FC = () => {
           <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
             <button
               onClick={() => router.push('/scrape-jobs')}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>Cari Lowongan</span>
               <ArrowRight className="w-4 h-4" />
@@ -109,10 +139,10 @@ export const ContextualMarketingCard: React.FC = () => {
 
   // Default Case: Premium Pass Nudge
   return (
-    <div className="relative overflow-hidden rounded-[10px] bg-gradient-to-r from-slate-900 via-navy-900 to-slate-900 text-white p-5 shadow-lg border border-orange-500/20">
+    <div className="relative overflow-hidden rounded-[10px] bg-gradient-to-r from-slate-900 via-navy-900 to-slate-900 text-white p-5 shadow-lg border border-[#1738D1]/20">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
         <div className="flex items-start gap-3.5">
-          <div className="w-10 h-10 rounded-[10px] bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-[10px] bg-[#1738D1]/20 text-orange-400 border border-[#1738D1]/30 flex items-center justify-center shrink-0">
             <Rocket className="w-5 h-5" />
           </div>
           <div>
@@ -120,7 +150,7 @@ export const ContextualMarketingCard: React.FC = () => {
               <span>Kamu aktif mencari kerja minggu ini</span>
             </h4>
             <p className="text-xs text-slate-300 mt-0.5 max-w-lg leading-relaxed">
-              Premium Pass membantu melacak lamaran & memberikan kata kunci analisis lowongan secara otomatis.
+              Premium Pass membantu melacak lamaran &amp; memberikan kata kunci analisis lowongan secara otomatis.
             </p>
           </div>
         </div>
@@ -128,7 +158,7 @@ export const ContextualMarketingCard: React.FC = () => {
         <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
           <button
             onClick={() => router.push('/pembayaran')}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs shadow-md shadow-orange-500/25 transition flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-md shadow-[#1738D1]/25 transition flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <span>Coba Premium Pass</span>
             <ArrowRight className="w-4 h-4" />

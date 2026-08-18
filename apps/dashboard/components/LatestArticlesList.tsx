@@ -70,7 +70,7 @@ export const LatestArticlesList: React.FC = () => {
     <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-[10px] bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400">
+          <div className="p-2 rounded-[10px] bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
             <BookOpen className="w-5 h-5" />
           </div>
           <div>
@@ -89,11 +89,11 @@ export const LatestArticlesList: React.FC = () => {
           <div
             key={art.id}
             onClick={() => setActiveArticle(art)}
-            className="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-purple-300 dark:hover:border-purple-700 transition cursor-pointer flex flex-col justify-between group"
+            className="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-orange-300 dark:hover:border-orange-700 transition cursor-pointer flex flex-col justify-between group"
           >
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300">
+                <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300">
                   {art.category}
                 </span>
                 <span className="text-[10px] text-slate-400 flex items-center gap-1">
@@ -101,7 +101,7 @@ export const LatestArticlesList: React.FC = () => {
                   {art.readTime}
                 </span>
               </div>
-              <h4 className="font-bold text-xs text-slate-900 dark:text-white mb-1.5 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition">
+              <h4 className="font-bold text-xs text-slate-900 dark:text-white mb-1.5 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition">
                 {art.title}
               </h4>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
@@ -109,7 +109,7 @@ export const LatestArticlesList: React.FC = () => {
               </p>
             </div>
 
-            <div className="mt-3 pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-[11px] font-bold text-purple-600 dark:text-purple-400">
+            <div className="mt-3 pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-[11px] font-bold text-orange-600 dark:text-orange-400">
               <span>Baca Selengkapnya</span>
               <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition" />
             </div>
@@ -128,7 +128,7 @@ export const LatestArticlesList: React.FC = () => {
               <X className="w-5 h-5" />
             </button>
 
-            <span className="px-2.5 py-0.5 rounded-[10px] text-xs font-bold bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300">
+            <span className="px-2.5 py-0.5 rounded-[10px] text-xs font-bold bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300">
               {activeArticle.category}
             </span>
 
@@ -148,7 +148,7 @@ export const LatestArticlesList: React.FC = () => {
 
             <button
               onClick={() => setActiveArticle(null)}
-              className="w-full py-2.5 rounded-[10px] bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition"
+              className="w-full py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition"
             >
               Tutup Artikel
             </button>

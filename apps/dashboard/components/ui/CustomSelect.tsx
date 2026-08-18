@@ -52,7 +52,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between gap-2 ${pyClass} rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-medium shadow-2xs hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
+        className={`w-full flex items-center justify-between gap-2 ${pyClass} rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-medium shadow-2xs hover:border-[#1738D1] focus:outline-none focus:ring-2 focus:ring-[#1738D1]/20 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         <span className="truncate">
           {selectedOption && selectedOption.value !== '' ? (

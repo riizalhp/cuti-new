@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CustomSelect } from '@/components/ui/CustomSelect';
+import { userApi } from '@/lib/api';
 import {
   Mail,
   Sparkles,
@@ -25,24 +26,7 @@ interface SavedCoverLetter {
   content: string;
 }
 
-const initialSavedLetters: SavedCoverLetter[] = [
-  {
-    id: 'cl-1',
-    company: 'PT GoTo Gojek Tokopedia',
-    position: 'Senior Frontend Engineer',
-    date: '20 Juli 2026',
-    content: `Yth. Tim Rekrutmen PT GoTo Gojek Tokopedia,
-
-Melalui surat ini, saya bermaksud untuk mengajukan diri sebagai Senior Frontend Engineer di PT GoTo Gojek Tokopedia. Dengan pengalaman lebih dari 4 tahun dalam pengembangan aplikasi web modern menggunakan React, TypeScript, dan Next.js, saya yakin dapat memberikan kontribusi signifikan terhadap ekosistem produk digital GoTo.
-
-Di posisi sebelumnya, saya berhasil memimpin pengoptimalan sistem web yang meningkatkan kecepatan muat halaman hingga 40% serta memperkuat retensi pengguna harian. Pengalaman dalam merancang arsitektur koding yang scalable dan berkolaborasi erat dengan tim lintas fungsi membuat saya siap menghadapi tantangan teknis di GoTo.
-
-Terima kasih atas waktu dan pertimbangan Bapak/Ibu. Saya sangat berharap dapat berdiskusi lebih lanjut mengenai kontribusi yang dapat saya berikan.
-
-Hormat saya,
-Budi Santoso`,
-  },
-];
+const initialSavedLetters: SavedCoverLetter[] = [];
 
 export const CoverLetterView: React.FC = () => {
   const [savedLetters, setSavedLetters] = useState<SavedCoverLetter[]>(initialSavedLetters);
@@ -55,6 +39,19 @@ export const CoverLetterView: React.FC = () => {
   const [generatedLetter, setGeneratedLetter] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+
+  // Dynamic user name
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+
+  useEffect(() => {
+    userApi.getProfile().then((profile: any) => {
+      if (profile) {
+        setUserName(profile.fullName || profile.name || '');
+        setUserEmail(profile.email || '');
+      }
+    }).catch(() => {});
+  }, []);
 
   const handleGenerate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,8 +71,8 @@ In my previous roles, I successfully ${experienceHighlights || 'led frontend opt
 Thank you for your time and consideration. I welcome the opportunity to discuss my application further in an interview.
 
 Sincerely,
-Budi Santoso
-budi.santoso@email.com | +62 812-3456-7890`;
+${userName || 'Kandidat'}
+${userEmail || 'email@email.com'}`;
       } else if (tone === 'Persuasif & Antusias') {
         resultText = `Halo ${recruiterName || 'Tim Rekrutmen'} ${targetCompany},
 
@@ -86,7 +83,7 @@ Keahlian utama saya mencakup ${experienceHighlights || 'pengembangan aplikasi sk
 Terima kasih atas perhatian Anda. Saya sangat senang jika diberi kesempatan untuk berdiskusi lebih lanjut.
 
 Salam hangat,
-Budi Santoso`;
+${userName || 'Kandidat'}`;
       } else {
         resultText = `Yth. ${recruiterName || 'Tim Rekrutmen'} ${targetCompany},
 
@@ -97,8 +94,8 @@ Secara khusus, pengalaman saya meliputi ${experienceHighlights || 'pengembangan 
 Terima kasih atas kesempatan dan waktu yang Bapak/Ibu berikan. Saya berharap dapat berdiskusi dalam sesi wawancara.
 
 Hormat saya,
-Budi Santoso
-budi.santoso@email.com | +62 812-3456-7890`;
+${userName || 'Kandidat'}
+${userEmail || 'email@email.com'}`;
       }
 
       setGeneratedLetter(resultText);
@@ -132,18 +129,18 @@ budi.santoso@email.com | +62 812-3456-7890`;
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Header Banner */}
-      <div className="bg-[#0D3BD9] rounded-[10px] p-6 text-white border border-blue-500/50 shadow-md">
-        <div className="flex items-center gap-2 text-violet-400 font-semibold text-xs mb-1">
+      <div className="bg-navy-700 rounded-[10px] p-6 text-white border border-navy-800 shadow-md">
+        <div className="flex items-center gap-2 text-orange-400 font-bold text-xs mb-1 uppercase tracking-wider">
           <Mail className="w-4 h-4" />
-          <span>AI Cover Letter Generator</span>
+          <span>Cover Letter Builder</span>
         </div>
-        <h2 className="text-xl md:text-2xl font-bold tracking-tight">
-          Pembuat Surat Lamaran AI
+        <h2 className="text-xl md:text-2xl font-extrabold tracking-tight">
+          Pembuat Surat Lamaran Otomatis
         </h2>
-        <p className="text-xs text-slate-300 mt-1 max-w-xl">
-          Hasilkan surat lamaran kerja yang persuasif, disesuaikan dengan posisi target dan standar perusahaan multinasional secara instan.
+        <p className="text-xs text-slate-200 mt-1 max-w-xl leading-relaxed">
+          Susun surat lamaran kerja yang persuasif, disesuaikan dengan posisi target dan standar perusahaan multinasional secara instan.
         </p>
       </div>
 
@@ -151,9 +148,9 @@ budi.santoso@email.com | +62 812-3456-7890`;
         {/* Form Generator Left */}
         <div className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-xs space-y-4">
           <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-            <Sparkles className="w-4 h-4 text-amber-500" />
+            <Sparkles className="w-4 h-4 text-orange-500" />
             <h3 className="font-bold text-sm text-slate-900 dark:text-white">
-              Form Parameter AI
+              Parameter Surat Lamaran
             </h3>
           </div>
 
@@ -168,7 +165,7 @@ budi.santoso@email.com | +62 812-3456-7890`;
                 placeholder="Contoh: PT Shopee Indonesia"
                 value={targetCompany}
                 onChange={(e) => setTargetCompany(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
               />
             </div>
 
@@ -182,7 +179,7 @@ budi.santoso@email.com | +62 812-3456-7890`;
                 placeholder="Contoh: Senior Frontend Developer"
                 value={targetPosition}
                 onChange={(e) => setTargetPosition(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
               />
             </div>
 
@@ -195,7 +192,7 @@ budi.santoso@email.com | +62 812-3456-7890`;
                 placeholder="Contoh: Ibu Rina Hartati"
                 value={recruiterName}
                 onChange={(e) => setRecruiterName(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
               />
             </div>
 
@@ -223,24 +220,24 @@ budi.santoso@email.com | +62 812-3456-7890`;
                 placeholder="Sebutkan prestasi utama kamu (e.g., Memimpin migrasi React, meningkatkan performa web 40%)..."
                 value={experienceHighlights}
                 onChange={(e) => setExperienceHighlights(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white resize-none"
+                className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
               />
             </div>
 
             <button
               type="submit"
               disabled={isGenerating}
-              className="w-full py-2.5 rounded-[10px] bg-[#0D3BD9] hover:bg-[#0B33BD] text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center justify-center gap-2 cursor-pointer border-0"
             >
               {isGenerating ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Memproses AI...</span>
+                  <span>Sedang Menyusun Surat...</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 text-amber-300" />
-                  <span>Generate Surat Lamaran AI</span>
+                  <Sparkles className="w-4 h-4 text-white" />
+                  <span>Susun Surat Lamaran Otomatis</span>
                 </>
               )}
             </button>
@@ -252,23 +249,23 @@ budi.santoso@email.com | +62 812-3456-7890`;
           <div>
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                <FileText className="w-4 h-4 text-orange-500" />
                 <h3 className="font-bold text-sm text-slate-900 dark:text-white">
-                  Hasil Generasi Surat
+                  Hasil Susunan Surat
                 </h3>
               </div>
               {generatedLetter && (
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleCopy}
-                    className="px-3 py-1.5 rounded-[10px] text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-[10px] text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center gap-1.5 cursor-pointer"
                   >
                     {isCopied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{isCopied ? 'Tersalin' : 'Salin Text'}</span>
                   </button>
                   <button
                     onClick={handleSaveToLibrary}
-                    className="px-3 py-1.5 rounded-[10px] text-xs font-bold bg-violet-600 text-white hover:bg-violet-700 transition flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-[10px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] text-white transition flex items-center gap-1.5 cursor-pointer border-0 shadow-xs shadow-[#1738D1]/20"
                   >
                     <span>Simpan Dokumen</span>
                   </button>
@@ -282,7 +279,7 @@ budi.santoso@email.com | +62 812-3456-7890`;
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-slate-400 py-16 space-y-2">
                   <Mail className="w-8 h-8 text-slate-300 dark:text-slate-700" />
-                  <p className="text-xs">Isi form di samping lalu klik &quot;Generate Surat Lamaran AI&quot;.</p>
+                  <p className="text-xs">Isi formulir di samping lalu klik &quot;Susun Surat Lamaran Otomatis&quot;.</p>
                 </div>
               )}
             </div>
@@ -293,7 +290,7 @@ budi.santoso@email.com | +62 812-3456-7890`;
       {/* Saved Cover Letters List */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-xs space-y-4">
         <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-          <FileText className="w-4 h-4 text-violet-600" />
+          <FileText className="w-4 h-4 text-orange-500" />
           Daftar Surat Lamaran Tersimpan
         </h3>
 
@@ -308,13 +305,13 @@ budi.santoso@email.com | +62 812-3456-7890`;
                   <h4 className="font-bold text-xs text-slate-900 dark:text-white">
                     {letter.position}
                   </h4>
-                  <p className="text-xs font-semibold text-violet-600 dark:text-violet-400">
+                  <p className="text-xs font-semibold text-orange-600 dark:text-orange-400">
                     {letter.company}
                   </p>
                 </div>
                 <button
                   onClick={() => handleDeleteSaved(letter.id)}
-                  className="text-slate-400 hover:text-rose-600"
+                  className="text-slate-400 hover:text-rose-600 cursor-pointer"
                   title="Hapus"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -332,9 +329,9 @@ budi.santoso@email.com | +62 812-3456-7890`;
                     navigator.clipboard.writeText(letter.content);
                     alert('Surat lamaran berhasil disalin!');
                   }}
-                  className="font-semibold text-violet-600 dark:text-violet-400 hover:underline"
+                  className="font-semibold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
                 >
-                  Salin Teks Complete
+                  Salin Teks Lengkap
                 </button>
               </div>
             </div>

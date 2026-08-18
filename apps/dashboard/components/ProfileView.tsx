@@ -58,7 +58,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const themeMode = (theme || 'system') as 'light' | 'dark' | 'system';
   const setSpecificThemeMode = (mode: 'light' | 'dark' | 'system') => setTheme(mode);
   const onOpenUpgradeModal = openUpgrade;
-  const onLogout = handleLogout;
+  const onLogout = () => handleLogout();
 
   const [activeSubTab, setActiveSubTab] = useState<'profil' | 'karir' | 'keamanan' | 'langganan' | 'pengaturan'>(initialSubTab);
   const [prevInitialSubTab, setPrevInitialSubTab] = useState(initialSubTab);
@@ -70,12 +70,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
   // Form States for Profile
   const [profileData, setProfileData] = useState({
-    fullName: 'Pengguna AmbilCUTI',
+    fullName: 'Pengguna Employr',
     headline: 'Pencari Kerja & Professional',
-    email: 'user@ambilcuti.id',
+    email: 'user@employr.id',
     phone: '+62 812 0000 0000',
     location: 'Jakarta, Indonesia',
-    bio: 'Pengguna aktif AmbilCUTI yang sedang mempersiapkan karir profesional.',
+    bio: 'Pengguna aktif Employr yang sedang mempersiapkan karir profesional.',
     linkedin: '',
     github: '',
     website: '',
@@ -106,9 +106,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     userApi.getProfile().then((remoteProfile) => {
       if (remoteProfile) {
         setProfileData((prev) => ({ ...prev, ...remoteProfile }));
+        if (remoteProfile.avatarUrl || remoteProfile.photoUrl || remoteProfile.photo) {
+          setAvatarUrl(remoteProfile.avatarUrl || remoteProfile.photoUrl || remoteProfile.photo);
+        }
       }
     });
   }, []);
+
+  const [avatarUrl, setAvatarUrl] = useState('');
 
   // Notification Preferences
   const [notifications, setNotifications] = useState({
@@ -139,13 +144,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await userApi.updateProfile(profileData);
-    } catch {
-      // ignore
+    const updated = await userApi.updateProfile(profileData);
+    if (updated) {
+      setIsSavedToast(true);
+      setTimeout(() => setIsSavedToast(false), 3000);
     }
-    setIsSavedToast(true);
-    setTimeout(() => setIsSavedToast(false), 3000);
   };
 
   return (
@@ -162,25 +165,31 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       )}
 
       {/* Main Profile Header Card */}
-      <div className="bg-[#0D3BD9] rounded-[10px] p-6 md:p-8 text-white border border-blue-500/50 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="bg-navy-700 rounded-[10px] p-6 md:p-8 text-white border border-navy-800 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#1738D1]/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           {/* Avatar & User Info */}
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
             <div className="relative group">
-              <Image
-                src="https://picsum.photos/seed/andi_avatar/200/200"
-                alt="Andi Pratama"
-                width={96}
-                height={96}
-                referrerPolicy="no-referrer"
-                className="w-24 h-24 rounded-[10px] object-cover border-4 border-amber-400 shadow-md transition group-hover:opacity-90"
-              />
+              {avatarUrl ? (
+                <Image
+                  src={avatarUrl}
+                  alt={profileData.fullName}
+                  width={96}
+                  height={96}
+                  referrerPolicy="no-referrer"
+                  className="w-24 h-24 rounded-[10px] object-cover border-4 border-orange-400 shadow-md transition group-hover:opacity-90"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-[10px] border-4 border-orange-400 shadow-md flex items-center justify-center bg-[#1738D1] text-white font-black text-3xl">
+                  {profileData.fullName?.charAt(0)?.toUpperCase() || 'U'}
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() => alert('Fitur unggah foto profil baru dapat diakses.')}
-                className="absolute -bottom-2 -right-2 p-2 rounded-[10px] bg-violet-600 hover:bg-violet-500 text-white shadow-md border-2 border-slate-900 transition"
+                className="absolute -bottom-2 -right-2 p-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-md border-2 border-slate-900 transition cursor-pointer"
                 title="Ubah Foto Profil"
               >
                 <Camera className="w-4 h-4" />
@@ -190,25 +199,25 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 <h2 className="text-2xl font-black text-white">{profileData.fullName}</h2>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[10px] text-xs font-bold bg-amber-400 text-slate-950 shadow-xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[10px] text-xs font-bold bg-[#1738D1] text-white shadow-xs">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   Member Lifetime
                 </span>
               </div>
 
-              <p className="text-xs text-amber-200 font-medium">{profileData.headline}</p>
+              <p className="text-xs text-slate-200 font-medium">{profileData.headline}</p>
 
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-slate-300 pt-1">
                 <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-violet-400" />
+                  <MapPin className="w-3.5 h-3.5 text-orange-400" />
                   {profileData.location}
                 </span>
                 <span className="flex items-center gap-1">
-                  <Mail className="w-3.5 h-3.5 text-violet-400" />
+                  <Mail className="w-3.5 h-3.5 text-orange-400" />
                   {profileData.email}
                 </span>
                 <span className="flex items-center gap-1">
-                  <Briefcase className="w-3.5 h-3.5 text-violet-400" />
+                  <Briefcase className="w-3.5 h-3.5 text-orange-400" />
                   {profileData.experienceYears} Exp
                 </span>
               </div>
@@ -304,11 +313,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
               <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                <User className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                <User className="w-5 h-5 text-orange-500" />
                 <span>Informasi Diri & Kontak</span>
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Perbarui data kontak agar recruiter dan sistem AI dapat mengenali profil kamu dengan akurat.
+                Perbarui data kontak agar recruiter dan sistem dapat mengenali profil kamu dengan akurat.
               </p>
             </div>
           </div>
@@ -321,7 +330,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 required
                 value={profileData.fullName}
                 onChange={(e) => setProfileData({ ...profileData, fullName: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1] focus:outline-none"
               />
             </div>
 
@@ -332,7 +341,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 required
                 value={profileData.headline}
                 onChange={(e) => setProfileData({ ...profileData, headline: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1] focus:outline-none"
               />
             </div>
 
@@ -343,7 +352,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 required
                 value={profileData.email}
                 onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1] focus:outline-none"
               />
             </div>
 
@@ -353,7 +362,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 type="text"
                 value={profileData.phone}
                 onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1] focus:outline-none"
               />
             </div>
 
@@ -363,7 +372,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 type="text"
                 value={profileData.location}
                 onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1] focus:outline-none"
               />
             </div>
 
@@ -373,7 +382,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 rows={4}
                 value={profileData.bio}
                 onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none resize-none"
+                className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1] focus:outline-none resize-none"
               />
             </div>
           </div>
@@ -419,7 +428,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           <div className="flex justify-end pt-2">
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition shadow-md shadow-violet-600/20 flex items-center gap-2"
+              className="px-6 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs transition shadow-md shadow-[#1738D1]/20 flex items-center gap-2 cursor-pointer border-0"
             >
               <Save className="w-4 h-4" />
               <span>Simpan Perubahan Profil</span>
@@ -434,11 +443,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
               <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                <Briefcase className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                <Briefcase className="w-5 h-5 text-orange-500" />
                 <span>Preferensi & Ekspektasi Karir</span>
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Pengaturan ini membantu AI merekomendasikan lowongan pekerjaan dan saran nego gaji yang relevan.
+                Pengaturan ini membantu sistem merekomendasikan lowongan pekerjaan dan saran nego gaji yang relevan.
               </p>
             </div>
           </div>
@@ -473,7 +482,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 <select
                   value={profileData.workPreference}
                   onChange={(e) => setProfileData({ ...profileData, workPreference: e.target.value })}
-                  className="w-full px-3.5 py-2.5 pr-10 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:outline-none appearance-none cursor-pointer"
+                  className="w-full px-3.5 py-2.5 pr-10 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1] focus:outline-none appearance-none cursor-pointer"
                 >
                   <option value="Hybrid / Remote">Hybrid / Remote (Fleksibel)</option>
                   <option value="Full Remote">Full Remote</option>
@@ -487,7 +496,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           <div className="flex justify-end pt-2">
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition shadow-md shadow-violet-600/20 flex items-center gap-2"
+              className="px-6 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs transition shadow-md shadow-[#1738D1]/20 flex items-center gap-2 cursor-pointer border-0"
             >
               <Save className="w-4 h-4" />
               <span>Simpan Preferensi Karir</span>
@@ -503,7 +512,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
                 <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                  <KeyRound className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                  <KeyRound className="w-5 h-5 text-orange-500" />
                   <span>Ubah Kata Sandi</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -555,7 +564,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
               <button
                 type="submit"
-                className="px-6 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition shadow-md shadow-violet-600/20 flex items-center gap-2"
+                className="px-6 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs transition shadow-md shadow-[#1738D1]/20 flex items-center gap-2 cursor-pointer border-0"
               >
                 <Lock className="w-4 h-4" />
                 <span>Perbarui Kata Sandi</span>
@@ -588,7 +597,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   <span>Keluar Sesi Akun</span>
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                  Keluar dari akun CUTI AI di perangkat ini. Kamu bisa masuk kembali kapan saja.
+                  Keluar dari akun Employr AI di perangkat ini. Kamu bisa masuk kembali kapan saja.
                 </p>
               </div>
 
@@ -617,22 +626,22 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 <span>Status Keanggotaan & Akses Premium</span>
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Detail paket langganan dan akses fitur eksklusif CUTI AI kamu.
+                Detail paket langganan dan akses fitur eksklusif Employr AI kamu.
               </p>
             </div>
           </div>
 
-          <div className="p-6 rounded-[10px] bg-gradient-to-r from-amber-500/10 via-violet-500/10 to-amber-500/10 border-2 border-amber-400/50 space-y-4">
+          <div className="p-6 rounded-[10px] bg-gradient-to-r from-orange-500/10 via-navy-500/10 to-orange-500/10 border-2 border-orange-400/50 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-950">
+                <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-[#1738D1] text-white">
                   AKSES AKTIF LIFETIME
                 </span>
                 <h4 className="text-xl font-black text-slate-900 dark:text-white mt-1">
-                  CUTI Member Lifetime Pro
+                  Employr Member Lifetime Pro
                 </h4>
                 <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-                  Akses tak terbatas ke AI CV Optimizer, Evaluator Interview Voice, Cover Letter Generator, dan Program Referral Cuan.
+                  Akses tak terbatas ke Pengoptimal CV ATS, Evaluator Interview Voice, Cover Letter Generator, dan Program Referral Cuan.
                 </p>
               </div>
 
@@ -645,12 +654,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 text-xs">
               <div className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span className="font-bold block text-slate-900 dark:text-white">AI CV ATS Checker</span>
+                <span className="font-bold block text-slate-900 dark:text-white">CV ATS Checker</span>
                 <span className="text-[10px] text-slate-400">Unlimited Generation</span>
               </div>
               <div className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span className="font-bold block text-slate-900 dark:text-white">Simulasi AI Interview</span>
+                <span className="font-bold block text-slate-900 dark:text-white">Simulasi Interview</span>
                 <span className="text-[10px] text-slate-400">Unlimited Sesi Latihan</span>
               </div>
               <div className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
@@ -676,7 +685,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
                 <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                  <Sun className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                  <Sun className="w-5 h-5 text-orange-500" />
                   <span>Pengaturan Tema Tampilan</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -689,17 +698,17 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <button
                 type="button"
                 onClick={() => setSpecificThemeMode && setSpecificThemeMode('light')}
-                className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 ${
+                className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 cursor-pointer ${
                   themeMode === 'light'
-                    ? 'border-violet-600 bg-violet-50/50 dark:bg-violet-950/40 ring-2 ring-violet-500/20'
-                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-violet-300'
+                    ? 'border-[#1738D1] bg-orange-50/50 dark:bg-orange-950/40 ring-2 ring-[#1738D1]/20'
+                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-orange-300'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="p-2 rounded-[10px] bg-amber-100 text-amber-700">
                     <Sun className="w-5 h-5" />
                   </div>
-                  {themeMode === 'light' && <CheckCircle2 className="w-5 h-5 text-violet-600" />}
+                  {themeMode === 'light' && <CheckCircle2 className="w-5 h-5 text-orange-500" />}
                 </div>
                 <div>
                   <h4 className="font-bold text-xs text-slate-900 dark:text-white">Mode Terang</h4>
@@ -710,17 +719,17 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <button
                 type="button"
                 onClick={() => setSpecificThemeMode && setSpecificThemeMode('dark')}
-                className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 ${
+                className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 cursor-pointer ${
                   themeMode === 'dark'
-                    ? 'border-violet-600 bg-violet-50/50 dark:bg-violet-950/40 ring-2 ring-violet-500/20'
-                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-violet-300'
+                    ? 'border-[#1738D1] bg-orange-50/50 dark:bg-orange-950/40 ring-2 ring-[#1738D1]/20'
+                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-orange-300'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-[10px] bg-violet-950 text-violet-400">
+                  <div className="p-2 rounded-[10px] bg-slate-900 text-slate-100">
                     <Moon className="w-5 h-5" />
                   </div>
-                  {themeMode === 'dark' && <CheckCircle2 className="w-5 h-5 text-violet-600" />}
+                  {themeMode === 'dark' && <CheckCircle2 className="w-5 h-5 text-orange-500" />}
                 </div>
                 <div>
                   <h4 className="font-bold text-xs text-slate-900 dark:text-white">Mode Gelap</h4>
@@ -731,17 +740,17 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <button
                 type="button"
                 onClick={() => setSpecificThemeMode && setSpecificThemeMode('system')}
-                className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 ${
+                className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 cursor-pointer ${
                   themeMode === 'system'
-                    ? 'border-violet-600 bg-violet-50/50 dark:bg-violet-950/40 ring-2 ring-violet-500/20'
-                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-violet-300'
+                    ? 'border-[#1738D1] bg-orange-50/50 dark:bg-orange-950/40 ring-2 ring-[#1738D1]/20'
+                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-orange-300'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="p-2 rounded-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
                     <Laptop className="w-5 h-5" />
                   </div>
-                  {themeMode === 'system' && <CheckCircle2 className="w-5 h-5 text-violet-600" />}
+                  {themeMode === 'system' && <CheckCircle2 className="w-5 h-5 text-orange-500" />}
                 </div>
                 <div>
                   <h4 className="font-bold text-xs text-slate-900 dark:text-white">Otomatis</h4>
@@ -756,7 +765,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
                 <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                  <Bell className="w-5 h-5 text-orange-500" />
                   <span>Pengaturan Notifikasi</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -775,7 +784,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   type="checkbox"
                   checked={notifications.emailJobAlerts}
                   onChange={(e) => setNotifications({ ...notifications, emailJobAlerts: e.target.checked })}
-                  className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                  className="w-4 h-4 text-orange-500 rounded-[10px] border-slate-300 focus:ring-[#1738D1]"
                 />
               </label>
 
@@ -788,7 +797,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   type="checkbox"
                   checked={notifications.emailInterviewReminders}
                   onChange={(e) => setNotifications({ ...notifications, emailInterviewReminders: e.target.checked })}
-                  className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                  className="w-4 h-4 text-orange-500 rounded-[10px] border-slate-300 focus:ring-[#1738D1]"
                 />
               </label>
 
@@ -801,7 +810,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   type="checkbox"
                   checked={notifications.whatsappAlerts}
                   onChange={(e) => setNotifications({ ...notifications, whatsappAlerts: e.target.checked })}
-                  className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                  className="w-4 h-4 text-orange-500 rounded-[10px] border-slate-300 focus:ring-[#1738D1]"
                 />
               </label>
             </div>
@@ -812,7 +821,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
                 <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                  <Globe2 className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                  <Globe2 className="w-5 h-5 text-navy-600 dark:text-navy-400" />
                   <span>Pengaturan Bahasa &amp; Regional</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -832,7 +841,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                       setIsSavedToast(true);
                       setTimeout(() => setIsSavedToast(false), 3000);
                     }}
-                    className="w-full p-2.5 pr-8 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500 appearance-none cursor-pointer"
+                    className="w-full p-2.5 pr-8 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-[#1738D1] appearance-none cursor-pointer"
                   >
                     <option value="id">Bahasa Indonesia (ID)</option>
                     <option value="en">English (US)</option>
@@ -847,7 +856,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   <select
                     value={timezone}
                     onChange={(e) => setTimezone(e.target.value)}
-                    className="w-full p-2.5 pr-8 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500 appearance-none cursor-pointer"
+                    className="w-full p-2.5 pr-8 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-[#1738D1] appearance-none cursor-pointer"
                   >
                     <option value="Asia/Jakarta (WIB - GMT+7)">Asia/Jakarta (WIB - GMT+7)</option>
                     <option value="Asia/Makassar (WITA - GMT+8)">Asia/Makassar (WITA - GMT+8)</option>
@@ -863,7 +872,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   <select
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
-                    className="w-full p-2.5 pr-8 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500 appearance-none cursor-pointer"
+                    className="w-full p-2.5 pr-8 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-[#1738D1] appearance-none cursor-pointer"
                   >
                     <option value="IDR (Rp)">IDR - Rupiah Indonesia (Rp)</option>
                     <option value="USD ($)">USD - US Dollar ($)</option>
@@ -880,7 +889,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
                 <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                  <Download className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                  <Download className="w-5 h-5 text-orange-500" />
                   <span>Unduh &amp; Ekspor Data Akun Saya</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -901,10 +910,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   setIsExportingData(true);
                   setTimeout(() => {
                     setIsExportingData(false);
-                    alert('File backup data akun berhasil diunduh (karierkita-data-backup.json)');
+                    alert('File backup data akun berhasil diunduh (employr-data-backup.json)');
                   }, 1200);
                 }}
-                className="px-4 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs transition shadow-sm flex items-center gap-2 shrink-0"
+                className="px-4 py-2.5 rounded-[10px] bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition shadow-sm flex items-center gap-2 shrink-0 cursor-pointer"
               >
                 <Download className={`w-4 h-4 ${isExportingData ? 'animate-bounce' : ''}`} />
                 <span>{isExportingData ? 'Menyiapkan File...' : 'Unduh Data Saya (.JSON)'}</span>

@@ -55,9 +55,9 @@ export const CvPromoModal: React.FC<CvPromoModalProps> = ({
         className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg relative overflow-hidden flex flex-col cursor-default"
       >
         {/* Decorative Top Header */}
-        <div className="relative bg-[#0D3BD9] p-6 text-white overflow-hidden">
+        <div className="relative bg-navy-700 p-6 text-white overflow-hidden">
           {/* Subtle Background Lighting Glow */}
-          <div className="absolute top-0 right-0 -mr-10 -mt-10 w-36 h-36 bg-orange-500/20 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute top-0 right-0 -mr-10 -mt-10 w-36 h-36 bg-[#1738D1]/20 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl pointer-events-none" />
 
           {/* Close Button */}
@@ -72,7 +72,7 @@ export const CvPromoModal: React.FC<CvPromoModalProps> = ({
 
           {/* Title & Badge */}
           <div className="relative z-10 space-y-2.5">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-[11px] font-extrabold uppercase tracking-wider bg-orange-500 text-white shadow-xs">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-[11px] font-extrabold uppercase tracking-wider bg-[#1738D1] text-white shadow-xs">
               <Sparkles className="w-3.5 h-3.5 fill-white" />
               <span>Layanan Otomasi CV &amp; Garansi HR Review</span>
             </div>
@@ -127,7 +127,7 @@ export const CvPromoModal: React.FC<CvPromoModalProps> = ({
           <div className="space-y-3 pt-1">
             <Button
               onClick={handleStart}
-              className="w-full py-3.5 h-auto rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs md:text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3.5 h-auto rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs md:text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <Sparkles className="w-4 h-4 text-white" />
               <span>Mulai Buatkan CV Otomatis (Rp 29rb)</span>
@@ -140,7 +140,7 @@ export const CvPromoModal: React.FC<CvPromoModalProps> = ({
                   type="checkbox"
                   checked={dontShowAgain}
                   onChange={(e) => setDontShowAgain(e.target.checked)}
-                  className="rounded border-slate-300 dark:border-slate-700 text-orange-500 focus:ring-orange-500 w-4 h-4 cursor-pointer"
+                  className="rounded-[10px] border-slate-300 dark:border-slate-700 text-orange-500 focus:ring-[#1738D1] w-4 h-4 cursor-pointer"
                 />
                 <span>Jangan tampilkan lagi</span>
               </label>

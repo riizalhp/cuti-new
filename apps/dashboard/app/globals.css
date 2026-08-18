@@ -1,48 +1,70 @@
-@import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap');
-
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-sans: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
   --color-navy-50: #EEF2FF;
   --color-navy-100: #E0E7FF;
   --color-navy-200: #C7D2FE;
   --color-navy-300: #93C5FD;
   --color-navy-400: #60A5FA;
-  --color-navy-500: #0D3BD9;
-  --color-navy-600: #0B33BD;
-  --color-navy-700: #0D3BD9;
-  --color-navy-800: #0A2C9F;
-  --color-navy-900: #071E6C;
-  --color-navy-950: #041142;
+  --color-navy-500: #3B5CC4;
+  --color-navy-600: #2946A8;
+  --color-navy-700: #1F3578;
+  --color-navy-800: #152658;
+  --color-navy-900: #0C1738;
+  --color-navy-950: #060C1E;
+
+  --color-orange-50: #FFF7ED;
+  --color-orange-100: #FFEDD5;
+  --color-orange-200: #FED7AA;
+  --color-orange-300: #FDBA74;
+  --color-orange-400: #FB923C;
+  --color-orange-500: #F97316;
+  --color-orange-600: #EA580C;
+  --color-orange-700: #C2410C;
+
+  --color-cobalt-50: #EEF2FF;
+  --color-cobalt-100: #E0E7FF;
+  --color-cobalt-200: #C7D2FE;
+  --color-cobalt-300: #93C5FD;
+  --color-cobalt-400: #3B82F6;
+  --color-cobalt-500: #1738D1;
+  --color-cobalt-600: #132EA8;
+  --color-cobalt-700: #0F2380;
+  --color-cobalt-800: #0B195C;
+  --color-cobalt-900: #070F38;
+  --color-cobalt: #1738D1;
 }
 
-
-/* CUTI Design System Variables */
+/* Employr Design System Variables */
 :root {
-  --background: #D7D6D5;
-  --foreground: #121316;
+  --background: #F8FAFC;
+  --foreground: #0F172A;
 
   /* Background Colors */
-  --bg-primary: #D7D6D5;
-  --glass-light: rgba(255, 255, 255, 0.1);
-  --glass-medium: rgba(255, 255, 255, 0.15);
-  --glass-heavy: rgba(255, 255, 255, 0.25);
-  --glass-border: rgba(255, 255, 255, 0.18);
-  --glass-border-emphasized: rgba(255, 255, 255, 0.2);
+  --bg-primary: #F8FAFC;
+  --glass-light: rgba(255, 255, 255, 0.7);
+  --glass-medium: rgba(255, 255, 255, 0.85);
+  --glass-heavy: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(226, 232, 240, 0.8);
+  --glass-border-emphasized: rgba(203, 213, 225, 0.9);
 
-  /* Accent Colors - Electric Cobalt Blue */
-  --accent-indigo: #0D3BD9;
-  --accent-violet: #0D3BD9;
-  --accent-hover: #0B33BD;
-  --accent-active: #092794;
+  /* Brand & CTA Colors */
+  --brand-navy: #1F3578;
+  --brand-navy-light: #3B5CC4;
+  --brand-cobalt: #1738D1;
+  --cta-cobalt: #1738D1;
+  --cta-cobalt-hover: #132EA8;
+  --cta-orange: #1738D1;
+  --cta-orange-hover: #132EA8;
 
   /* Text Colors */
-  --text-primary: #1F2937;
-  --text-secondary: #6B7280;
-  --text-tertiary: #9CA3AF;
+  --text-primary: #0F172A;
+  --text-secondary: #64748B;
+  --text-tertiary: #94A3B8;
   --text-on-accent: #FFFFFF;
 
   /* Status Colors */
@@ -202,64 +224,42 @@ body {
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
 }
 
-/* Neo Skeuomorphism (Soft Skeuomorphic Pill Buttons) */
-.btn-neo-skeuo {
+/* Button Styles (Consistent Employr Standards) */
+.btn-neo-skeuo,
+.btn-neo-skeuo-accent {
   border-radius: 10px;
-  background: #0D3BD9;
+  background: #1738D1;
   color: #ffffff;
   box-shadow:
-    0 3px 8px rgba(13, 59, 217, 0.35),
-    0 10px 25px rgba(13, 59, 217, 0.18),
-    inset 0 1px rgba(255, 255, 255, 0.3);
+    0 3px 8px rgba(23, 56, 209, 0.35),
+    0 10px 25px rgba(23, 56, 209, 0.18);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.btn-neo-skeuo:hover {
-  transform: translateY(-2px);
-  background: #0B33BD;
+.btn-neo-skeuo:hover,
+.btn-neo-skeuo-accent:hover {
+  transform: translateY(-1px);
+  background: #132EA8;
   box-shadow:
-    0 6px 16px rgba(13, 59, 217, 0.45),
-    0 15px 30px rgba(13, 59, 217, 0.25),
-    inset 0 1px rgba(255, 255, 255, 0.45);
+    0 6px 16px rgba(23, 56, 209, 0.45),
+    0 15px 30px rgba(23, 56, 209, 0.25);
 }
 
 .btn-neo-skeuo-light {
   border-radius: 10px;
   background: #ffffff;
-  color: #0D3BD9;
+  color: #1738D1;
   box-shadow:
-    0 3px 8px rgba(0, 0, 0, 0.12),
-    0 10px 25px rgba(0, 0, 0, 0.08),
-    inset 0 1px rgba(255, 255, 255, 0.95);
+    0 3px 8px rgba(0, 0, 0, 0.08),
+    0 10px 25px rgba(0, 0, 0, 0.04);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-neo-skeuo-light:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.16),
-    0 15px 30px rgba(0, 0, 0, 0.12),
-    inset 0 1px rgba(255, 255, 255, 1);
-}
-
-.btn-neo-skeuo-accent {
-  border-radius: 10px;
-  background: #0D3BD9;
-  color: #ffffff;
-  box-shadow:
-    0 3px 8px rgba(13, 59, 217, 0.4),
-    0 10px 25px rgba(13, 59, 217, 0.25),
-    inset 0 1px rgba(255, 255, 255, 0.4);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.btn-neo-skeuo-accent:hover {
-  transform: translateY(-2px);
-  background: #0B33BD;
-  box-shadow:
-    0 6px 18px rgba(13, 59, 217, 0.5),
-    0 15px 30px rgba(13, 59, 217, 0.35),
-    inset 0 1px rgba(255, 255, 255, 0.5);
+    0 6px 18px rgba(0, 0, 0, 0.12),
+    0 15px 30px rgba(0, 0, 0, 0.08);
 }
 
 /* Editorial Typography */

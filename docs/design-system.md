@@ -1,4 +1,4 @@
-# CUTI — Design System Specification
+# Employr — Design System Specification
 
 **Version:** 1.0  
 **Last Updated:** 2026-07-30  

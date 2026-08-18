@@ -1,134 +1,43 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BookOpen, GraduationCap, Award, Calendar, ChevronRight, Clock, ExternalLink, X } from 'lucide-react';
 
 export const CareerDevelopmentTabs: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'artikel' | 'kursus' | 'sertifikasi' | 'event'>('artikel');
   const [activeModalItem, setActiveModalItem] = useState<any | null>(null);
 
-  const articles = [
-    {
-      id: 'a1',
-      title: 'Cara Membuat CV ATS Friendly yang Lolos Screening HR',
-      category: 'Optimasi CV',
-      readTime: '4 min baca',
-      desc: 'Pelajari struktur penulisan, kata kunci penting, dan format file terbaik agar CV kamu dibaca sempurna oleh software rekrutmen ATS.',
-      content: 'Sistem ATS memfilter ribuan CV berdasarkan kata kunci. Gunakan font standar, hindari grafik kompleks, serta cantumkan kata kunci yang tertera di syarat pekerjaan.',
-    },
-    {
-      id: 'a2',
-      title: '20 Pertanyaan Interview Tersering & Cara Menjawabnya',
-      category: 'Persiapan Interview',
-      readTime: '6 min baca',
-      desc: 'Panduan menjawab pertanyaan "Ceritakan tentang diri Anda" hingga strategi menjawab pertanyaan tentang kelemahan dengan metode STAR.',
-      content: 'Gunakan teknik STAR (Situation, Task, Action, Result). Jelaskan situasi yang pernah dialami, tugas yang diemban, serta hasil terukur.',
-    },
-    {
-      id: 'a3',
-      title: 'Panduan Lengkap Cara Melamar Kerja via Email & WA',
-      category: 'Strategi Melamar',
-      readTime: '3 min baca',
-      desc: 'Etika, penulisan subject email, serta draf kalimat pengantar yang sopan untuk menarik perhatian recruiter.',
-      content: 'Selalu gunakan email profesional. Gunakan subject yang jelas seperti "Lamaran Pekerjaan - [Posisi] - [Nama]".',
-    },
-  ];
+  // Data murni dari database via /api/career — tanpa fallback hardcoded.
+  const [articles, setArticles] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [certifications, setCertifications] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const courses = [
-    {
-      id: 'c1',
-      title: 'Masterclass Excel & Data Analysis untuk HR/Admin',
-      provider: 'RuangKerja Academy',
-      level: 'Pemula s/d Menengah',
-      price: 'Gratis',
-      rating: 'Rating 4.9',
-      desc: 'Kuasai VLOOKUP, Pivot Table, dan visualisasi data dasar untuk meningkatkan efisiensi kerja admin & HR.',
-      url: 'https://loker.cuti.online',
-    },
-    {
-      id: 'c2',
-      title: 'Dasar Pemrograman Web Frontend dengan React & Next.js',
-      provider: 'Dibimbing.id',
-      level: 'Pemula',
-      price: 'Bersertifikat',
-      rating: 'Rating 4.8',
-      desc: 'Belajar HTML, CSS, JavaScript Modern, dan React dari nol hingga siap membangun portfolio web.',
-      url: 'https://loker.cuti.online',
-    },
-    {
-      id: 'c3',
-      title: 'Digital Marketing Essentials & Social Media Campaign',
-      provider: 'RevoU Mini Course',
-      level: 'Semua Tingkat',
-      price: 'Gratis',
-      rating: 'Rating 4.9',
-      desc: 'Pahami dasar Copywriting, Meta Ads, Google Analytics, dan strategi campaign sosial media.',
-      url: 'https://loker.cuti.online',
-    },
-  ];
+  useEffect(() => {
+    fetch('/api/career')
+      .then((r) => r.json())
+      .then((res) => {
+        if (res?.success && res.data) {
+          if (Array.isArray(res.data.articles)) setArticles(res.data.articles);
+          if (Array.isArray(res.data.courses)) setCourses(res.data.courses);
+          if (Array.isArray(res.data.certifications)) setCertifications(res.data.certifications);
+          if (Array.isArray(res.data.events)) setEvents(res.data.events);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, []);
 
-  const certifications = [
-    {
-      id: 's1',
-      title: 'Sertifikasi Nasional BNSP - Administrative Assistant',
-      issuer: 'LSP Administrasi Perkantoran',
-      validity: '3 Tahun',
-      badge: 'Resmi BNSP',
-      desc: 'Pengakuan kompetensi nasional di bidang administrasi dan pengelolaan dokumen kantor.',
-      url: 'https://loker.cuti.online',
-    },
-    {
-      id: 's2',
-      title: 'Google Digital Marketing & E-Commerce Certificate',
-      issuer: 'Google via Coursera',
-      validity: 'Selamanya',
-      badge: 'Global Credential',
-      desc: 'Sertifikasi resmi Google untuk profesi digital marketer & e-commerce specialist.',
-      url: 'https://loker.cuti.online',
-    },
-    {
-      id: 's3',
-      title: 'TOEIC Official English Proficiency Certificate',
-      issuer: 'ETS Global',
-      validity: '2 Tahun',
-      badge: 'Internasional',
-      desc: 'Standar pengujian kemahiran bahasa Inggris internasional untuk kebutuhan dunia kerja modern.',
-      url: 'https://loker.cuti.online',
-    },
-  ];
-
-  const events = [
-    {
-      id: 'e1',
-      title: 'National Virtual Job Fair 2026 - 500+ Lowongan',
-      organizer: 'Kemenaker x CUTI',
-      date: '15-18 Agustus 2026',
-      location: 'Online via Zoom & Portal',
-      badge: 'Job Fair',
-      desc: 'Pertemuan langsung fresh graduate dan profesional muda dengan 50+ BUMN & perusahaan multinasional.',
-      url: 'https://loker.cuti.online',
-    },
-    {
-      id: 'e2',
-      title: 'Webinar: Rahasia Menembus Management Trainee BUMN',
-      organizer: 'AmbilCUTI Career Club',
-      date: 'Sabtu, 12 Agustus 2026 (19:00 WIB)',
-      location: 'Live Google Meet',
-      badge: 'Webinar',
-      desc: 'Bedah tuntas tahapan seleksi berkas, online test, FGD, hingga interview user bersama praktisi MT.',
-      url: 'https://loker.cuti.online',
-    },
-    {
-      id: 'e3',
-      title: 'Workshop Interactive CV Clinic & Mock Interview Direct Review',
-      organizer: 'HR Community Indonesia',
-      date: 'Minggu, 20 Agustus 2026',
-      location: 'Jakarta Selatan & Online',
-      badge: 'Workshop',
-      desc: 'Sesi konsultasi 1-on-1 bersama HR Manager untuk memperbaiki CV dan simulasi wawancara kerja.',
-      url: 'https://loker.cuti.online',
-    },
-  ];
+  const EmptyState = ({ icon: Icon, title, desc }: { icon: any; title: string; desc: string }) => (
+    <div className="col-span-full flex flex-col items-center justify-center text-center py-12 px-6 rounded-[10px] border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/30">
+      <div className="w-12 h-12 rounded-[10px] bg-[#1F3578]/10 dark:bg-blue-950 text-[#1F3578] dark:text-blue-400 flex items-center justify-center mb-3">
+        <Icon className="w-6 h-6" />
+      </div>
+      <h4 className="text-sm font-bold text-slate-900 dark:text-white">{title}</h4>
+      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs leading-relaxed">{desc}</p>
+    </div>
+  );
 
   const tabs = [
     { id: 'artikel', label: 'Artikel Karier', icon: BookOpen, count: articles.length },
@@ -161,7 +70,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`px-3 py-1.5 rounded-[10px] text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                   isActive
-                    ? 'bg-white dark:bg-slate-900 text-violet-600 dark:text-violet-400 shadow-xs'
+                    ? 'bg-[#1738D1] text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
@@ -176,6 +85,13 @@ export const CareerDevelopmentTabs: React.FC = () => {
       {/* Tab Content Display */}
       {activeTab === 'artikel' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          {articles.length === 0 && !isLoading && (
+            <EmptyState
+              icon={BookOpen}
+              title="Belum Ada Artikel Karier"
+              desc="Artikel panduan karier akan muncul di sini setelah tim Employr mempublikasikannya."
+            />
+          )}
           {articles.map((art) => (
             <div
               key={art.id}
@@ -184,7 +100,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300">
+                  <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-orange-50 text-orange-700 dark:bg-orange-950/80 dark:text-orange-300 border border-orange-200 dark:border-orange-800/60">
                     {art.category}
                   </span>
                   <span className="text-[10px] text-slate-400 flex items-center gap-1">
@@ -192,7 +108,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
                     {art.readTime}
                   </span>
                 </div>
-                <h4 className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition line-clamp-2">
+                <h4 className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400 transition line-clamp-2">
                   {art.title}
                 </h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 mt-1">
@@ -200,7 +116,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
                 </p>
               </div>
 
-              <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-[11px] font-bold text-violet-600 dark:text-violet-400">
+              <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-[11px] font-bold text-orange-600 dark:text-orange-400">
                 <span>Baca Panduan</span>
                 <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -211,6 +127,13 @@ export const CareerDevelopmentTabs: React.FC = () => {
 
       {activeTab === 'kursus' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          {courses.length === 0 && !isLoading && (
+            <EmptyState
+              icon={GraduationCap}
+              title="Belum Ada Kursus & Skills"
+              desc="Rekomendasi kursus dan pelatihan akan muncul di sini setelah tim Employr menambahkannya."
+            />
+          )}
           {courses.map((crs) => (
             <a
               key={crs.id}
@@ -221,7 +144,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                  <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
                     {crs.price}
                   </span>
                   <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
@@ -247,6 +170,13 @@ export const CareerDevelopmentTabs: React.FC = () => {
 
       {activeTab === 'sertifikasi' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          {certifications.length === 0 && !isLoading && (
+            <EmptyState
+              icon={Award}
+              title="Belum Ada Sertifikasi"
+              desc="Daftar sertifikasi resmi dan internasional akan muncul di sini setelah tim Employr menambahkannya."
+            />
+          )}
           {certifications.map((cert) => (
             <a
               key={cert.id}
@@ -257,7 +187,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                  <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                     {cert.badge}
                   </span>
                   <span className="text-[10px] text-slate-400">
@@ -283,6 +213,13 @@ export const CareerDevelopmentTabs: React.FC = () => {
 
       {activeTab === 'event' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          {events.length === 0 && !isLoading && (
+            <EmptyState
+              icon={Calendar}
+              title="Belum Ada Event & Job Fair"
+              desc="Event job fair, webinar, dan workshop akan muncul di sini setelah tim Employr menjadwalkannya."
+            />
+          )}
           {events.map((ev) => (
             <a
               key={ev.id}
@@ -293,14 +230,14 @@ export const CareerDevelopmentTabs: React.FC = () => {
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+                  <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-blue-100 text-navy-800 dark:bg-blue-950 dark:text-blue-300">
                     {ev.badge}
                   </span>
                   <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
                     {ev.location}
                   </span>
                 </div>
-                <h4 className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition line-clamp-2">
+                <h4 className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-blue-400 transition line-clamp-2">
                   {ev.title}
                 </h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
@@ -328,7 +265,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
               <X className="w-5 h-5" />
             </button>
 
-            <span className="px-2.5 py-0.5 rounded-[10px] text-xs font-bold bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300">
+            <span className="px-2.5 py-0.5 rounded-[10px] text-xs font-bold bg-orange-50 text-orange-700 dark:bg-orange-950/80 dark:text-orange-300 border border-orange-200 dark:border-orange-800/60">
               {activeModalItem.category}
             </span>
 
@@ -343,7 +280,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
 
             <button
               onClick={() => setActiveModalItem(null)}
-              className="w-full py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition cursor-pointer border-0"
+              className="w-full py-2.5 rounded-[10px] bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition cursor-pointer border-0"
             >
               Tutup Panduan
             </button>

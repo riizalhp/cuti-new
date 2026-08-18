@@ -1,4 +1,4 @@
-# CUTI Dashboard
+# Employr Dashboard
 
 Next.js 15 dashboard application with CUTI design system.
 

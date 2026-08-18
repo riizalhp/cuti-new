@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { cvApi } from '@/lib/api';
+import { cvApi, orderApi } from '@/lib/api';
+import { calculateAtsScore } from '@/lib/ats-score';
+import { getStoredSession } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { CvPromoModal } from '@/components/CvPromoModal';
 import { CvHrdFloatingCta } from '@/components/CvHrdFloatingCta';
@@ -205,12 +207,12 @@ const RenderContactHeaderLinks: React.FC<{
   const getLinkClass = () => {
     switch (activeStyle) {
       case 'underline':
-        return 'text-slate-700 underline hover:text-blue-600 font-normal transition-colors';
+        return 'text-slate-700 underline hover:text-orange-600 font-normal transition-colors';
       case 'plain':
         return 'text-slate-700 hover:underline font-normal transition-colors';
       case 'blue':
       default:
-        return 'text-blue-700 underline hover:text-blue-800 font-medium transition-colors';
+        return 'text-navy-700 underline hover:text-navy-800 font-medium transition-colors';
     }
   };
 
@@ -422,7 +424,7 @@ const CVSectionCard = ({
       }}
       className={`border rounded-[10px] bg-white dark:bg-slate-900 transition-all duration-200 relative touch-none ${
         isPointerDragging
-          ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 bg-white dark:bg-slate-900 cursor-grabbing'
+          ? 'shadow-2xl border-2 border-[#1738D1] ring-4 ring-[#1738D1]/25 opacity-100 bg-white dark:bg-slate-900 cursor-grabbing'
           : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs'
       }`}
     >
@@ -447,7 +449,7 @@ const CVSectionCard = ({
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
-          <div className="p-1 text-slate-500 dark:text-slate-400 group-hover:text-orange-500 rounded transition">
+          <div className="p-1 text-slate-500 dark:text-slate-400 group-hover:text-orange-500 rounded-[10px] transition">
             {isOpen ? <ChevronUp className="w-4 h-4 text-orange-500" /> : <ChevronDown className="w-4 h-4" />}
           </div>
         </div>
@@ -559,7 +561,7 @@ const SkillsEditorSection: React.FC<{
           <button
             type="button"
             onClick={() => handleAddSkill()}
-            className="px-4 py-2.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition flex items-center gap-1 shrink-0 cursor-pointer shadow-2xs"
+            className="px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition flex items-center gap-1 shrink-0 cursor-pointer shadow-2xs"
           >
             <Plus className="w-4 h-4" />
             <span>Tambah</span>
@@ -903,77 +905,7 @@ interface OrderInfo {
   hrRole: string;
 }
 
-const initialCVs: CVData[] = [
-  {
-    id: 'cv-1',
-    title: 'CV Software Engineer (ATS Optimized)',
-    updatedAt: '22 Juli 2026',
-    atsScore: 92,
-    fullName: 'Budi Santoso',
-    headline: 'Senior Full Stack Developer | React & Node.js',
-    email: 'budi.santoso@email.com',
-    phone: '+62 812-3456-7890',
-    location: 'Jakarta, Indonesia',
-    summary:
-      'Full Stack Software Engineer berpengalaman 4+ tahun dalam membangun aplikasi web skala besar menggunakan React, TypeScript, dan Next.js dengan fokus pada performa dan UI/UX yang responsif.',
-    skills: ['React.js', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Node.js', 'PostgreSQL', 'Docker', 'Git'],
-    experience: [
-      {
-        id: 'exp-1',
-        company: 'PT Tech Inovasi Indonesia',
-        role: 'Senior Frontend Developer',
-        period: '2023 - Sekarang',
-        description: 'Memimpin tim frontend dalam migrasi aplikasi monolith ke arsitektur micro-frontend, meningkatkan kecepatan render halaman hingga 40%.',
-      },
-      {
-        id: 'exp-2',
-        company: 'Solusi Digital Nusantara',
-        role: 'Full Stack Developer',
-        period: '2021 - 2023',
-        description: 'Mengembangkan sistem pembayaran internal dan mengintegrasikan payment gateway pihak ketiga untuk 50.000+ pengguna harian.',
-      },
-    ],
-    education: [
-      {
-        id: 'edu-1',
-        institution: 'Universitas Indonesia',
-        degree: 'S1 Ilmu Komputer (GPA 3.82/4.00)',
-        year: '2017 - 2021',
-      },
-    ],
-  },
-  {
-    id: 'cv-2',
-    title: 'CV UI/UX Designer & Product Strategy',
-    updatedAt: '15 Juli 2026',
-    atsScore: 88,
-    fullName: 'Budi Santoso',
-    headline: 'Product Designer | UI/UX Specialist',
-    email: 'budi.santoso@email.com',
-    phone: '+62 812-3456-7890',
-    location: 'Jakarta, Indonesia',
-    summary:
-      'Product Designer dengan keahlian dalam User Research, Wireframing, Prototyping, dan Design Systems.',
-    skills: ['Figma', 'User Research', 'Design System', 'Prototyping', 'Design Thinking', 'Usability Testing'],
-    experience: [
-      {
-        id: 'exp-1',
-        company: 'PT Digital Creative House',
-        role: 'UI/UX Designer',
-        period: '2022 - 2024',
-        description: 'Merancang design system lengkap untuk aplikasi fintech seluler dan meningkatkan angka konversi checkout hingga 25%.',
-      },
-    ],
-    education: [
-      {
-        id: 'edu-1',
-        institution: 'Universitas Indonesia',
-        degree: 'S1 Ilmu Komputer',
-        year: '2017 - 2021',
-      },
-    ],
-  },
-];
+const initialCVs: CVData[] = [];
 
 const packages: PackageOption[] = [
   {
@@ -1118,108 +1050,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const [selectedCV, setSelectedCV] = useState<CVData | null>(() => {
     if (!cvId || cvId === 'create') return null;
     const found = initialCVs.find((c) => c.id === cvId);
-    if (found) return found;
-    return {
-      id: cvId,
-      title: `CV Senior Frontend Engineer - John Doe`,
-      updatedAt: 'Hari ini',
-      atsScore: 95,
-      fullName: 'John Doe',
-      headline: 'Senior Frontend Engineer',
-      email: 'john.doe@example.com',
-      phone: '+1 555 010 1234',
-      location: 'San Francisco, California, United States',
-      summary:
-        'Senior frontend engineer with 8+ years building accessible, high-performance web applications for fintech and SaaS. Deep experience with React, Next.js, and design systems, with a focus on developer experience and shipping measurable outcomes. Comfortable leading projects end to end and mentoring teams.',
-      skills: [
-        'TypeScript (Expert)',
-        'JavaScript (ES2023) (Expert)',
-        'React & Next.js (Expert)',
-        'Node.js (Advanced)',
-        'GraphQL & REST APIs (Advanced)',
-        'Tailwind CSS (Advanced)',
-        'Testing (Playwright, Vitest) (Advanced)',
-        'State (Zustand, React Query) (Advanced)',
-        'Web Accessibility (WCAG) (Advanced)',
-        'CI/CD & Docker (Intermediate)',
-      ],
-      experience: [
-        {
-          id: 'exp-1',
-          company: 'Acme Corp',
-          role: 'Senior Frontend Engineer',
-          period: 'San Francisco, CA • acme.example.com',
-          description:
-            '• Led migration of a 200k-line codebase to a typed component library, cutting UI defects by 40%.\n• Architected the design-system accessibility program, reaching WCAG 2.1 AA across every shipped component.\n• Cut initial bundle size 55% with code-splitting and dependency audits, improving LCP from 3.1s to 1.4s.\n• Built a real-time analytics dashboard over WebSockets, adopted by 12k weekly active users.\n• Maintain react-a11y-kit, an open-source accessibility toolkit with 2k+ stars.\n• Mentored four engineers and set the team\'s code-review, testing, and release standards.',
-        },
-        {
-          id: 'exp-2',
-          company: 'Globex',
-          role: 'Frontend Engineer',
-          period: 'Remote • globex.example.com',
-          description:
-            '• Delivered the customer-facing analytics dashboard used by 12k weekly active users.\n• Introduced a shared component library and Storybook, cutting feature delivery time by ~30%.\n• Integrated analytics and A/B testing (Mixpanel, GrowthBook) to drive data-informed UI decisions.\n• Moved all marketing sites to Good Core Web Vitals through image, font, and caching optimizations.',
-        },
-        {
-          id: 'exp-3',
-          company: 'Initech',
-          role: 'Junior Frontend Developer',
-          period: 'Austin, TX • initech.example.com',
-          description:
-            '• Built responsive, cross-browser interfaces from Figma designs for enterprise clients.\n• Automated form-heavy QA workflows, reducing manual testing time by 20%.\n• Shipped a reusable form-validation library still used across three internal apps.',
-        },
-        {
-          id: 'exp-4',
-          company: 'Hooli (Magang)',
-          role: 'Frontend Engineering Intern',
-          period: 'Palo Alto, CA • hooli.example.com',
-          description:
-            '• Shipped a customer-facing settings page in React, used by the full beta cohort by the end of the summer.\n• Wrote the team\'s first component unit tests, lifting coverage on the shared UI package to 70%.',
-        },
-        {
-          id: 'exp-5',
-          company: 'react-a11y-kit (Proyek)',
-          role: 'Creator & Maintainer',
-          period: 'github.com/johndoe/react-a11y-kit',
-          description:
-            'Open-source accessibility toolkit for React with 2k+ stars and 40+ contributors. Ships audited, WCAG-compliant primitives adopted across several production design systems.',
-        },
-        {
-          id: 'exp-6',
-          company: 'React SF Meetup & Web Dev Club (Organisasi)',
-          role: 'Organizer & President',
-          period: 'Community & University',
-          description:
-            '• Curate monthly talks for a 1,800-member community and coordinate speakers, venues, and sponsors.\n• Launched a lightning-talk track that has given 30+ first-time speakers a stage.\n• Grew the campus Web Dev Club from 30 to 120 members and ran weekly hands-on workshops.',
-        },
-      ],
-      education: [
-        {
-          id: 'edu-1',
-          institution: 'Recurse Center',
-          degree: 'Software Residency (New York, NY)',
-          year: 'Residency',
-        },
-        {
-          id: 'edu-2',
-          institution: 'State University',
-          degree: 'B.Sc. Computer Science (Boston, MA - Honors GPA 3.8)',
-          year: '2012 - 2016',
-        },
-        {
-          id: 'edu-3',
-          institution: 'Sertifikat Profesional',
-          degree: 'AWS Solutions Architect | Meta Front-End Developer | CPACC Web Accessibility',
-          year: '2021 - 2024',
-        },
-        {
-          id: 'edu-4',
-          institution: 'Bahasa',
-          degree: 'English (Native) • Spanish (Professional) • French (Conversational)',
-          year: 'Bahasa',
-        },
-      ],
-    };
+    return found || null;
   });
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -1268,8 +1099,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     }, 4000);
 
     if (selectedCV) {
-      const currentScore = selectedCV.atsScore ?? 85;
-      const newScore = Math.min(98, currentScore + 3);
+      const contentScore = calculateAtsScore(selectedCV).totalScore;
+      const newScore = Math.min(98, contentScore + 3);
       setSelectedCV({ ...selectedCV, atsScore: newScore });
     }
   };
@@ -1282,21 +1113,19 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     setIsMounted(true);
   }, []);
 
-  // Load cvList from API on mount
+  // Load cvList and activeOrder from API on mount
+  // Sumber utama: database. Draf localStorage lama tidak dipakai agar tidak ada
+  // "CV hantu" dari sesi/browser sebelumnya.
   useEffect(() => {
     cvApi.getAll<CVData>().then((remoteCvs) => {
-      if (Array.isArray(remoteCvs) && remoteCvs.length > 0) {
+      if (Array.isArray(remoteCvs)) {
         setCvList(remoteCvs);
-      } else if (typeof window !== 'undefined') {
-        const stored = localStorage.getItem('cuti_cv_list');
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            setCvList(parsed);
-          } catch (e) {
-            console.error(e);
-          }
-        }
+      }
+    });
+
+    orderApi.getActiveOrder<OrderInfo>().then((order) => {
+      if (order) {
+        setActiveOrder(order);
       }
     });
   }, []);
@@ -1336,7 +1165,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       }
     }
 
-    // Try finding in list or individual key
+    // Try finding in list or individual key or fetch from API
     let cv = activeCvList.find((c) => c.id === cvId);
     if (!cv && typeof window !== 'undefined') {
       const storedSingle = localStorage.getItem(`cuti_cv_data_${cvId}`);
@@ -1347,6 +1176,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           console.error(e);
         }
       }
+    }
+
+    if (!cv) {
+      cvApi.getById<CVData>(cvId).then((fetched) => {
+        if (fetched) {
+          handleOpenCvDetail(fetched);
+        }
+      });
     }
 
     if (cv) {
@@ -1403,156 +1240,37 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     } else {
       const fallbackCv: CVData = {
         id: cvId,
-        title: `CV Senior Software Engineer - John Doe`,
-        updatedAt: 'Hari ini',
-        atsScore: 95,
-        firstName: 'John',
-        lastName: 'Doe',
-        fullName: 'John Doe',
-        headline: 'Senior Software Engineer / Project Manager',
-        photoUrl: 'https://example.com/foto-profil.jpg',
-        email: 'john.doe@example.com',
-        phone: '+62 812-3456-7890',
-        website: 'johndoe.dev',
-        linkedin: 'linkedin.com/in/johndoe',
-        github: 'github.com/johndoe',
-        city: 'Jakarta',
-        province: 'DKI Jakarta',
-        country: 'Indonesia',
-        location: 'Jakarta, Indonesia',
-        summary:
-          'Senior Software Engineer berpengalaman dalam membangun aplikasi web berkinerja tinggi, scalable, dan ATS friendly.',
-        skills: ['TypeScript', 'React', 'Next.js', 'Node.js', 'Tailwind CSS', 'PostgreSQL', 'Git', 'REST API'],
-        skillsList: [
-          { id: 'sk-1', name: 'TypeScript', level: 'Expert' },
-          { id: 'sk-2', name: 'React', level: 'Expert' },
-          { id: 'sk-3', name: 'Next.js', level: 'Expert' },
-          { id: 'sk-4', name: 'Node.js', level: 'Advanced' },
-          { id: 'sk-5', name: 'Tailwind CSS', level: 'Advanced' },
-          { id: 'sk-6', name: 'PostgreSQL', level: 'Advanced' },
-          { id: 'sk-7', name: 'Git', level: 'Advanced' },
-          { id: 'sk-8', name: 'REST API', level: 'Advanced' },
-        ],
-        experience: [
-          {
-            id: 'exp-1',
-            company: 'PT Inovasi Teknologi',
-            role: 'Senior Software Engineer',
-            location: 'Jakarta, Indonesia',
-            website: 'acmecorp.com',
-            startDate: 'Jan 2021',
-            endDate: 'Sekarang',
-            isCurrent: true,
-            period: 'Jan 2021 - Sekarang',
-            description:
-              'Memimpin pengembangan fitur frontend & backend, mengoptimalkan kecepatan load hingga 45%, dan mengimplementasikan CI/CD.',
-          },
-        ],
-        internships: [
-          {
-            id: 'int-1',
-            company: 'Tech Startup Indonesia',
-            role: 'UI/UX & Frontend Intern',
-            location: 'Jakarta, Indonesia',
-            startDate: 'Jan 2023',
-            endDate: 'Jun 2023',
-            period: 'Jan 2023 - Jun 2023',
-            description:
-              'Membantu tim merancang wireframe dan mendesain 10+ komponen UI serta mengimplementasikannya dengan TailwindCSS.',
-          },
-        ],
-        projects: [
-          {
-            id: 'proj-1',
-            name: 'E-Commerce Platform',
-            role: 'Lead Developer',
-            link: 'https://project.com',
-            tech: 'React, Node.js, TailwindCSS • https://project.com',
-            date: '2023 - 2024',
-            description:
-              'Membangun aplikasi toko online dengan fitur payment gateway dan real-time analytics.',
-          },
-        ],
-        organizations: [
-          {
-            id: 'org-1',
-            name: 'Himpunan Mahasiswa Informatika',
-            role: 'Ketua Divisi Acara',
-            startDate: '2022',
-            endDate: '2023',
-            period: '2022 - 2023',
-            description:
-              'Mengkoordinasikan seminar teknologi nasional dengan 500+ peserta dan mengelola pendaftaran peserta.',
-          },
-        ],
-        education: [
-          {
-            id: 'edu-1',
-            institution: 'Universitas Indonesia',
-            degree: 'S1 Teknik Informatika / Ilmu Komputer (IPK 3.75)',
-            location: 'Depok, Jawa Barat',
-            gpa: '3.75 / 4.00',
-            startDate: '2017',
-            endDate: '2021',
-            year: '2017 - 2021',
-          },
-        ],
-        certifications: [
-          {
-            id: 'cert-1',
-            name: 'AWS Certified Solutions Architect',
-            issuer: 'Amazon Web Services',
-            issueDate: 'Nov 2023',
-            link: 'aws.amazon.com/verification',
-          },
-        ],
-        languages: [
-          { id: 'lang-1', language: 'Bahasa Indonesia', level: 'Professional' },
-          { id: 'lang-2', language: 'Bahasa Inggris', level: 'Professional' },
-        ],
-        courses: [
-          {
-            id: 'crs-1',
-            courseName: 'Digital Marketing Mastery',
-            institution: 'RevoU / Google Academy',
-            month: 'Desember',
-            year: '2023',
-            description: 'Strategi pemasaran digital dan analisis data.',
-          },
-        ],
-        scholarships: [
-          {
-            id: 'sch-1',
-            name: 'Beasiswa Djarum Beasiswa Plus',
-            provider: 'Djarum Foundation',
-            month: 'September',
-            year: '2020',
-            description: 'Program pelatihan kepemimpinan dan beasiswa prestasi.',
-          },
-        ],
-        volunteers: [
-          {
-            id: 'vol-1',
-            organization: 'Palang Merah Indonesia',
-            role: 'Tim Tanggap Bencana',
-            location: 'Jakarta',
-            startMonth: 'Januari',
-            startYear: '2022',
-            isCurrent: true,
-            description: 'Mengkoordinasikan logistik darurat dan posko bantuan bencana.',
-          },
-        ],
-        references: [
-          {
-            id: 'ref-1',
-            fullName: 'John Smith',
-            title: 'Engineering Director',
-            company: 'PT Inovasi Teknologi',
-            email: 'john.smith@example.com',
-            phone: '+62 812-3456-7890',
-            note: 'Referensi tersedia atas permintaan',
-          },
-        ],
+        title: 'CV Baru',
+        updatedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+        atsScore: 0,
+        firstName: '',
+        lastName: '',
+        fullName: '',
+        headline: '',
+        photoUrl: '',
+        email: '',
+        phone: '',
+        website: '',
+        linkedin: '',
+        github: '',
+        city: '',
+        province: '',
+        country: '',
+        location: '',
+        summary: '',
+        skills: [],
+        skillsList: [],
+        experience: [],
+        internships: [],
+        projects: [],
+        organizations: [],
+        education: [],
+        certifications: [],
+        languages: [],
+        courses: [],
+        scholarships: [],
+        volunteers: [],
+        references: [],
       };
 
       setSelectedCV(fallbackCv);
@@ -1588,11 +1306,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         references: fallbackCv.references ? [...fallbackCv.references] : [],
       });
 
+      // Fallback hanya untuk sesi editor saat ini — JANGAN dipersist ke localStorage,
+      // supaya CV mock kosong tidak mengotori daftar CV asli (dan screener).
       if (typeof window !== 'undefined') {
-        const updatedList = [fallbackCv, ...activeCvList.filter((c) => c.id !== cvId)];
-        setCvList(updatedList);
-        localStorage.setItem('cuti_cv_list', JSON.stringify(updatedList));
-        localStorage.setItem(`cuti_cv_data_${cvId}`, JSON.stringify(fallbackCv));
+        setCvList([fallbackCv, ...activeCvList.filter((c) => c.id !== cvId)]);
       }
     }
     setViewMode('preview');
@@ -1722,24 +1439,24 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     let initialData: Partial<CVData> = {};
     if (newCvStartMode === 'example') {
       initialData = {
-        fullName: 'John Doe',
+        fullName: '',
         headline: newCvJobTitle || 'Software Engineer',
-        email: 'john.doe@example.com',
-        phone: '+62 812-3456-7890',
-        location: 'Jakarta, Indonesia',
-        summary: 'Senior Software Engineer berpengalaman dalam membangun aplikasi web berkinerja tinggi, scalable, dan ATS friendly.',
+        email: '',
+        phone: '',
+        location: '',
+        summary: 'Software Engineer berpengalaman dalam membangun aplikasi web berkinerja tinggi, scalable, dan ATS friendly.',
         skills: ['TypeScript', 'React', 'Next.js', 'Node.js', 'Tailwind CSS', 'PostgreSQL', 'Git', 'REST API'],
         experience: [
           {
             id: 'exp-1',
-            company: 'PT Inovasi Teknologi',
+            company: 'Nama Perusahaan',
             role: newCvJobTitle || 'Senior Software Engineer',
             period: '2023 - Sekarang',
             description: 'Memimpin pengembangan fitur frontend & backend, mengoptimalkan kecepatan load hingga 45%, dan mengimplementasikan CI/CD.',
           },
           {
             id: 'exp-2',
-            company: 'Solusi Digital Indonesia',
+            company: 'Nama Perusahaan Sebelumnya',
             role: 'Software Engineer',
             period: '2021 - 2023',
             description: 'Mengembangkan API mikroservis dan sistem otentikasi aman untuk 100.000+ pengguna aktif bulanan.',
@@ -1748,8 +1465,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         education: [
           {
             id: 'edu-1',
-            institution: 'Universitas Indonesia',
-            degree: 'S1 Teknik Informatika / Ilmu Komputer (IPK 3.75)',
+            institution: 'Nama Universitas',
+            degree: 'S1 Teknik Informatika / Ilmu Komputer',
             year: '2017 - 2021',
           },
         ],
@@ -1780,16 +1497,22 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       };
     }
 
+    const currentSession = getStoredSession();
+    const atsScoreFromContent = calculateAtsScore({
+      fullName: currentSession?.name || '',
+      email: currentSession?.email || '',
+      ...initialData,
+    }).totalScore;
     const newCV: CVData = {
       id: newId,
       title: newCvTitle || `CV ATS - ${templateName}`,
       updatedAt: 'Hari ini',
-      atsScore: 85,
-      fullName: '',
+      atsScore: atsScoreFromContent,
+      fullName: currentSession?.name || '',
       headline: newCvJobTitle || '',
-      email: '',
+      email: currentSession?.email || '',
       phone: '',
-      location: '',
+      location: 'Jakarta, Indonesia',
       summary: '',
       skills: [],
       experience: [],
@@ -1800,6 +1523,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
     const updatedList = [newCV, ...cvList];
     setCvList(updatedList);
+    cvApi.create(newCV).catch(console.error);
     if (typeof window !== 'undefined') {
       localStorage.setItem('cuti_cv_list', JSON.stringify(updatedList));
     }
@@ -1869,21 +1593,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const [dataSelectionOption, setDataSelectionOption] = useState<'existing' | 'new' | null>(null);
   const [wizardFormStep, setWizardFormStep] = useState<number>(1);
 
-  // Active Order State
-  const [activeOrder, setActiveOrder] = useState<OrderInfo | null>({
-    orderId: 'ORD-AICV-2026-8819',
-    packageId: 'pro',
-    packageName: 'Paket Pro & Expert HR',
-    price: 59000,
-    paymentMethod: 'QRIS Instant',
-    status: 'hr_review',
-    progress: 75,
-    createdAt: '23 Juli 2026, 14:20 WIB',
-    estimatedTime: '15-20 Menit Lagi',
-    dataOption: 'existing',
-    hrName: 'Sarah Melati, S.Psi',
-    hrRole: 'Senior Tech Recruiter CUTI',
-  });
+  // Active Order State - dynamically loaded from database per user
+  const [activeOrder, setActiveOrder] = useState<OrderInfo | null>(null);
 
   // Promo Modal State & Auto-Open check
   const [showCvPromoModal, setShowCvPromoModal] = useState<boolean>(false);
@@ -1904,7 +1615,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const [chatMessages, setChatMessages] = useState<{ sender: 'hr' | 'user'; text: string; time: string }[]>([
     {
       sender: 'hr',
-      text: 'Halo Budi! Saya Sarah Melati yang sedang merevisi CV kamu. Tata letak ATS dan kata kunci React/TypeScript sudah disesuaikan. Apakah ada pencapaian spesifik yang ingin kamu tambahkan?',
+      text: 'Halo! Tim HRD kami sedang merevisi CV kamu. Tata letak ATS dan kata kunci sudah disesuaikan. Apakah ada pencapaian spesifik yang ingin kamu tambahkan?',
       time: '14:22 WIB',
     },
   ]);
@@ -2166,167 +1877,35 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   // Form State for Manual CV & Wizard
   const [formData, setFormData] = useState<Omit<CVData, 'id' | 'updatedAt' | 'atsScore' | 'title'>>({
     sectionOrder: DEFAULT_SECTION_ORDER,
-    firstName: 'John',
-    lastName: 'Doe',
-    fullName: 'John Doe',
-    headline: 'Senior Software Engineer / Project Manager',
-    photoUrl: 'https://example.com/foto-profil.jpg',
-    email: 'john.doe@example.com',
-    phone: '+62 812-3456-7890',
-    website: 'johndoe.dev',
-    linkedin: 'linkedin.com/in/johndoe',
-    github: 'github.com/johndoe',
+    firstName: '',
+    lastName: '',
+    fullName: '',
+    headline: '',
+    photoUrl: '',
+    email: '',
+    phone: '',
+    website: '',
+    linkedin: '',
+    github: '',
     instagram: '',
-    city: 'Jakarta',
-    province: 'DKI Jakarta',
-    country: 'Indonesia',
-    location: 'Jakarta, Indonesia',
-    summary:
-      'Senior Software Engineer berpengalaman dalam membangun aplikasi web berkinerja tinggi, scalable, dan ATS friendly.',
-    experience: [
-      {
-        id: 'exp-1',
-        company: 'PT Inovasi Teknologi',
-        role: 'Senior Software Engineer',
-        location: 'Jakarta, Indonesia',
-        website: 'acmecorp.com',
-        startDate: 'Jan 2021',
-        endDate: 'Sekarang',
-        isCurrent: true,
-        period: 'Jan 2021 - Sekarang',
-        description:
-          'Memimpin pengembangan fitur frontend & backend, mengoptimalkan kecepatan load hingga 45%, dan mengimplementasikan CI/CD.',
-        achievements: 'Mengoptimalkan kecepatan load hingga 45% dan otomasi CI/CD.',
-      },
-    ],
-    internships: [
-      {
-        id: 'int-1',
-        company: 'Tech Startup Indonesia',
-        role: 'UI/UX & Frontend Intern',
-        location: 'Jakarta, Indonesia',
-        website: 'techstartup.id',
-        startDate: 'Jan 2023',
-        endDate: 'Jun 2023',
-        period: 'Jan 2023 - Jun 2023',
-        description:
-          'Membantu tim merancang wireframe dan mendesain 10+ komponen UI serta mengimplementasikannya dengan TailwindCSS.',
-      },
-    ],
-    projects: [
-      {
-        id: 'proj-1',
-        name: 'E-Commerce Platform',
-        role: 'Lead Developer',
-        link: 'https://project.com',
-        tech: 'React, Node.js, TailwindCSS • https://project.com',
-        date: '2023 - 2024',
-        description:
-          'Membangun aplikasi toko online dengan fitur payment gateway dan real-time analytics.',
-      },
-    ],
-    organizations: [
-      {
-        id: 'org-1',
-        name: 'Himpunan Mahasiswa Informatika',
-        role: 'Ketua Divisi Acara',
-        startDate: '2022',
-        endDate: '2023',
-        period: '2022 - 2023',
-        description:
-          'Mengkoordinasikan seminar teknologi nasional dengan 500+ peserta dan mengelola pendaftaran peserta.',
-      },
-    ],
-    education: [
-      {
-        id: 'edu-1',
-        institution: 'Universitas Indonesia',
-        degree: 'S1 Teknik Informatika / Ilmu Komputer (IPK 3.75)',
-        location: 'Depok, Jawa Barat',
-        gpa: '3.75 / 4.00',
-        startDate: '2017',
-        endDate: '2021',
-        year: '2017 - 2021',
-      },
-    ],
-    certifications: [
-      {
-        id: 'cert-1',
-        name: 'AWS Certified Solutions Architect',
-        issuer: 'Amazon Web Services',
-        issueDate: 'Nov 2023',
-        link: 'aws.amazon.com/verification',
-      },
-    ],
-    skillsList: [
-      { id: 'sk-1', name: 'TypeScript', level: 'Expert' },
-      { id: 'sk-2', name: 'React', level: 'Expert' },
-      { id: 'sk-3', name: 'Next.js', level: 'Expert' },
-      { id: 'sk-4', name: 'Node.js', level: 'Advanced' },
-      { id: 'sk-5', name: 'Tailwind CSS', level: 'Advanced' },
-      { id: 'sk-6', name: 'PostgreSQL', level: 'Advanced' },
-      { id: 'sk-7', name: 'Git', level: 'Advanced' },
-      { id: 'sk-8', name: 'REST API', level: 'Advanced' },
-    ],
-    skills: [
-      'TypeScript',
-      'React',
-      'Next.js',
-      'Node.js',
-      'Tailwind CSS',
-      'PostgreSQL',
-      'Git',
-      'REST API',
-    ],
-    languages: [
-      { id: 'lang-1', language: 'Bahasa Indonesia', level: 'Professional' },
-      { id: 'lang-2', language: 'Bahasa Inggris', level: 'Professional' },
-    ],
-    courses: [
-      {
-        id: 'crs-1',
-        courseName: 'Digital Marketing Mastery',
-        institution: 'RevoU / Google Academy',
-        month: 'Desember',
-        year: '2023',
-        description: 'Strategi pemasaran digital dan analisis data.',
-      },
-    ],
-    scholarships: [
-      {
-        id: 'sch-1',
-        name: 'Beasiswa Djarum Beasiswa Plus',
-        provider: 'Djarum Foundation',
-        month: 'September',
-        year: '2020',
-        description: 'Program pelatihan kepemimpinan dan beasiswa prestasi.',
-      },
-    ],
-    volunteers: [
-      {
-        id: 'vol-1',
-        organization: 'Palang Merah Indonesia',
-        role: 'Tim Tanggap Bencana',
-        location: 'Jakarta',
-        startMonth: 'Januari',
-        startYear: '2022',
-        endMonth: '',
-        endYear: '',
-        isCurrent: true,
-        description: 'Mengkoordinasikan logistik darurat dan posko bantuan bencana.',
-      },
-    ],
-    references: [
-      {
-        id: 'ref-1',
-        fullName: 'John Smith',
-        title: 'Engineering Director',
-        company: 'PT Inovasi Teknologi',
-        email: 'john.smith@example.com',
-        phone: '+62 812-3456-7890',
-        note: 'Referensi tersedia atas permintaan',
-      },
-    ],
+    city: '',
+    province: '',
+    country: '',
+    location: '',
+    summary: '',
+    experience: [],
+    internships: [],
+    projects: [],
+    organizations: [],
+    education: [],
+    certifications: [],
+    skillsList: [],
+    skills: [],
+    languages: [],
+    courses: [],
+    scholarships: [],
+    volunteers: [],
+    references: [],
   });
 
   const [aiNote, setAiNote] = useState<string>('');
@@ -2942,6 +2521,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         return updatedList;
       });
 
+      if (targetId && targetId !== 'create') {
+        cvApi.update(targetId, updatedCV).catch(console.error);
+      }
+
       lastSavedSnapshotRef.current = currentSnapshot;
     }, 400);
 
@@ -3064,7 +2647,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     e.preventDefault();
     let updatedList = [...cvList];
     const targetId = cvId && cvId !== 'create' ? cvId : `cv-${Date.now()}`;
-    const calculatedScore = selectedCV ? selectedCV.atsScore : 85 + (cvList.length % 8);
+    const calculatedScore = calculateAtsScore({
+      ...(selectedCV || {}),
+      ...formData,
+    }).totalScore;
 
     const updatedCV: CVData = {
       ...(selectedCV || {}),
@@ -3100,6 +2686,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     }
 
     setCvList(updatedList);
+    cvApi.update(targetId, updatedCV).catch(console.error);
     if (typeof window !== 'undefined') {
       localStorage.setItem('cuti_cv_list', JSON.stringify(updatedList));
       localStorage.setItem('cuti_cv_active_draft', JSON.stringify(updatedCV));
@@ -3207,6 +2794,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     const targetId = deletingCvTarget.id;
     const updated = cvList.filter((c) => c.id !== targetId);
     setCvList(updated);
+    cvApi.delete(targetId).catch(console.error);
     if (typeof window !== 'undefined') {
       localStorage.setItem('cuti_cv_list', JSON.stringify(updated));
       localStorage.removeItem(`cuti_cv_data_${targetId}`);
@@ -3215,10 +2803,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   };
 
   const handleApplyPromo = () => {
-    if (promoCode.trim().toUpperCase() === 'CUTIAI10') {
+    if (promoCode.trim().toUpperCase() === 'EMPLOYR10') {
       setAppliedDiscount(10000);
     } else {
-      alert('Kode voucher tidak valid. Coba gunakan CUTIAI10');
+      alert('Kode voucher tidak valid. Coba gunakan EMPLOYR10');
     }
   };
 
@@ -3231,6 +2819,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   };
 
   const handleCompleteOrder = (dataOption: 'existing' | 'new') => {
+    const currentSession = getStoredSession();
     const newOrder: OrderInfo = {
       orderId: `ORD-AICV-2026-${Math.floor(1000 + Math.random() * 9000)}`,
       packageId: selectedPackage.id,
@@ -3247,28 +2836,45 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       createdAt: 'Baru saja',
       estimatedTime: '15-30 Menit',
       dataOption,
-      hrName: 'Sarah Melati, S.Psi',
+      hrName: 'Tim HR CUTI',
       hrRole: 'Senior Tech Recruiter CUTI',
     };
     setActiveOrder(newOrder);
 
-    // Also inject a new generated CV entry into cvList
+    orderApi.createOrder({
+      packageId: selectedPackage.id,
+      price: selectedPackage.price,
+      discount: appliedDiscount,
+      paymentMethod:
+        selectedPaymentMethod === 'qris'
+          ? 'QRIS Instant'
+          : selectedPaymentMethod === 'bca'
+          ? 'Transfer BCA'
+          : 'Transfer Mandiri',
+      dataOption,
+    }).then((res) => {
+      if (res) setActiveOrder(res);
+    }).catch(console.error);
+
+    // Also inject a new generated CV entry into cvList and database
+    const generatedAtsScore = calculateAtsScore(formData).totalScore;
     const newGeneratedCV: CVData = {
-      id: `cv-${cvList.length + 1}`,
+      id: `cv-${Date.now()}`,
       title: `CV AI Revamp - ${selectedPackage.name}`,
-      updatedAt: 'Sedang Diproses Tim',
-      atsScore: 96,
-      fullName: formData.fullName || 'Budi Santoso',
-      headline: formData.headline || 'Senior Full Stack Developer',
-      email: formData.email || 'budi.santoso@email.com',
-      phone: formData.phone || '+62 812-3456-7890',
-      location: formData.location || 'Jakarta, Indonesia',
-      summary: formData.summary || 'Profil profesional yang dioptimasi AI & HR Specialist.',
-      skills: formData.skills.length > 0 ? formData.skills : ['React.js', 'Next.js', 'TypeScript', 'Node.js'],
+      updatedAt: 'Hari ini',
+      atsScore: generatedAtsScore,
+      fullName: formData.fullName || currentSession?.name || '',
+      headline: formData.headline || '',
+      email: formData.email || currentSession?.email || '',
+      phone: formData.phone || '',
+      location: formData.location || '',
+      summary: formData.summary || '',
+      skills: formData.skills.length > 0 ? formData.skills : [],
       experience: formData.experience,
       education: formData.education,
     };
     setCvList([newGeneratedCV, ...cvList]);
+    cvApi.create(newGeneratedCV).catch(console.error);
 
     setViewMode('ai-progress');
   };
@@ -3289,7 +2895,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         ...prev,
         {
           sender: 'hr',
-          text: 'Terima kasih informasinya, Budi! Tim kami sudah mencatat masukan ini dan langsung memperbarui draf CV kamu.',
+          text: 'Terima kasih informasinya! Tim kami sudah mencatat masukan ini dan langsung memperbarui draf CV kamu.',
           time: 'Baru Saja',
         },
       ]);
@@ -3306,7 +2912,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     <div className="space-y-6 print:space-y-0 print:m-0 print:p-0" suppressHydrationWarning>
       {/* Header Banner - hanya tampil saat di Daftar CV (list view) */}
       {viewMode === 'list' && (
-        <div className="bg-[#0D3BD9] rounded-[10px] p-6 text-white border border-blue-500/50 shadow-md flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="bg-navy-700 rounded-[10px] p-6 text-white border border-navy-800 shadow-md flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-blue-200 font-semibold text-xs mb-1">
               <FileText className="w-4 h-4" />
@@ -3328,17 +2934,17 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 setAiWizardStep(1);
                 setViewMode('ai-wizard');
               }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow-md transition-all cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition-all cursor-pointer border-0"
             >
-              <Sparkles className="w-4 h-4 text-slate-950" />
-              <span>Buatkan CV oleh AI &amp; Tim</span>
+              <Sparkles className="w-4 h-4 text-white" />
+              <span>Layanan Pembuatan CV</span>
             </button>
 
             <button
               onClick={() => {
                 setShowTemplateModal(true);
               }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs border border-slate-700 transition cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Buat CV Mandiri</span>
@@ -3350,10 +2956,6 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       {/* VIEW MODE 1: DAFTAR CV */}
       {viewMode === 'list' && (
         <div className="space-y-6">
-
-
-
-
           {/* Search & Actions Bar */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-[10px] border border-slate-200 dark:border-slate-800">
             <div className="relative w-full sm:w-80">
@@ -3363,7 +2965,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 placeholder="Cari CV berdasarkan judul atau kata kunci..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full pl-9 pr-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
               />
             </div>
             <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
@@ -3424,10 +3026,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                   <button
                     onClick={() => setViewMode('ai-progress')}
-                    className="px-4 py-2 rounded-[10px] text-xs font-extrabold text-white bg-orange-500 hover:bg-orange-600 shadow-md transition flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-2 rounded-[10px] text-xs font-bold text-white bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] shadow-md shadow-[#1738D1]/20 transition flex items-center gap-1.5 cursor-pointer border-0"
                   >
+                    <Clock className="w-3.5 h-3.5" />
                     <span>Lihat Progress</span>
-                    <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -3436,14 +3038,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             {filteredCVs.map((cv) => (
               <div
                 key={cv.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-sm hover:border-violet-300 dark:hover:border-violet-700/60 transition-all flex flex-col justify-between"
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-sm hover:border-orange-300 dark:hover:border-orange-700/60 transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2.5">
                       <div
                         onClick={() => handleOpenCvDetail(cv)}
-                        className="p-2.5 rounded-[10px] bg-violet-50 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 border border-violet-100 dark:border-violet-900/40 cursor-pointer hover:bg-violet-100 dark:hover:bg-violet-900/60 transition"
+                        className="p-2.5 rounded-[10px] bg-orange-50 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/50 cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-900/60 transition"
                       >
                         <FileText className="w-5 h-5" />
                       </div>
@@ -3467,7 +3069,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                   <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-2 mb-4">
                     <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                      {cv.fullName} - <span className="text-violet-600 dark:text-violet-400">{cv.headline}</span>
+                      {cv.fullName} - <span className="text-orange-600 dark:text-orange-400">{cv.headline}</span>
                     </div>
                     <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
                       {cv.summary}
@@ -3476,13 +3078,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       {cv.skills.slice(0, 4).map((skill, idx) => (
                         <span
                           key={idx}
-                          className="px-2 py-0.5 rounded text-[10px] font-medium bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                          className="px-2 py-0.5 rounded-[10px] text-[10px] font-medium bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
                         >
                           {skill}
                         </span>
                       ))}
                       {cv.skills.length > 4 && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                        <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-medium bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                           +{cv.skills.length - 4} lainnya
                         </span>
                       )}
@@ -3495,17 +3097,17 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => handleOpenCvDetail(cv)}
-                      className="px-3 py-1.5 rounded-[10px] text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center gap-1.5 cursor-pointer"
+                      className="px-3.5 py-2 rounded-[10px] text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/60 dark:border-slate-700/60 transition flex items-center gap-1.5 cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       <span>Lihat / Edit</span>
                     </button>
                     <button
                       onClick={() => handleDeleteCV(cv)}
-                      className="p-1.5 rounded-[10px] text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition cursor-pointer"
+                      className="p-2 rounded-[10px] bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/60 transition flex items-center justify-center cursor-pointer"
                       title="Hapus CV"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
 
@@ -3513,7 +3115,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     onClick={() => {
                       alert(`Mengunduh versi PDF dari ${cv.title}...`);
                     }}
-                    className="px-3 py-1.5 rounded-[10px] text-xs font-bold text-white bg-violet-600 hover:bg-violet-700 transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                    className="px-3.5 py-2 rounded-[10px] text-xs font-bold text-white bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] shadow-md shadow-[#1738D1]/20 transition flex items-center gap-1.5 cursor-pointer border-0"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Download PDF</span>
@@ -3522,6 +3124,66 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               </div>
             ))}
           </div>
+
+          {/* Empty State: Belum Ada CV Tersimpan */}
+          {cvList.length === 0 && (
+            <div className="rounded-[10px] border-2 border-dashed border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-10 md:p-14 text-center flex flex-col items-center justify-center gap-4 animate-in fade-in duration-300">
+              <div className="w-16 h-16 rounded-[10px] bg-[#1738D1]/10 dark:bg-navy-950 text-[#1738D1] dark:text-blue-400 border border-[#1738D1]/20 dark:border-navy-800 flex items-center justify-center">
+                <FileText className="w-8 h-8" />
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                  Belum Ada CV Tersimpan
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                  Buat CV pertamamu sekarang — pilih template dan isi datamu, atau gunakan Layanan Pembuatan CV oleh AI &amp; Tim HR untuk hasil 100% lolos screening ATS.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center gap-2.5">
+                <button
+                  onClick={() => setShowTemplateModal(true)}
+                  className="px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center gap-1.5 cursor-pointer border-0"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Buat CV Mandiri</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setAiWizardStep(1);
+                    setViewMode('ai-wizard');
+                  }}
+                  className="px-4 py-2.5 rounded-[10px] bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-xs border border-slate-700 dark:border-transparent transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Layanan Pembuatan CV</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Empty State: Hasil Pencarian Tidak Ditemukan */}
+          {cvList.length > 0 && filteredCVs.length === 0 && (
+            <div className="rounded-[10px] border-2 border-dashed border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-10 text-center flex flex-col items-center justify-center gap-3 animate-in fade-in duration-300">
+              <div className="w-14 h-14 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center">
+                <Search className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                  CV Tidak Ditemukan
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Tidak ada CV yang cocok dengan kata kunci "{searchTerm}".
+                </p>
+              </div>
+              <button
+                onClick={() => setSearchTerm('')}
+                className="px-4 py-2 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer border-0"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Reset Pencarian</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -3533,7 +3195,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="font-extrabold text-base md:text-lg text-slate-900 dark:text-white flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-violet-500" />
+                  <Sparkles className="w-5 h-5 text-orange-500" />
                   <span>Wizard Layanan Pembuatan CV AI &amp; Tim</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -3553,7 +3215,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <div
                 className={`p-2.5 rounded-[10px] border text-center transition ${
                   aiWizardStep === 1
-                    ? 'bg-violet-50 dark:bg-violet-950/80 border-violet-500 text-violet-700 dark:text-violet-300 font-bold'
+                    ? 'bg-orange-50 dark:bg-orange-950/80 border-[#1738D1] text-orange-700 dark:text-orange-300 font-bold'
                     : aiWizardStep > 1
                     ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 text-emerald-700 dark:text-emerald-400 font-semibold'
                     : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 font-medium'
@@ -3566,7 +3228,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <div
                 className={`p-2.5 rounded-[10px] border text-center transition ${
                   aiWizardStep === 2
-                    ? 'bg-violet-50 dark:bg-violet-950/80 border-violet-500 text-violet-700 dark:text-violet-300 font-bold'
+                    ? 'bg-orange-50 dark:bg-orange-950/80 border-[#1738D1] text-orange-700 dark:text-orange-300 font-bold'
                     : aiWizardStep > 2
                     ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 text-emerald-700 dark:text-emerald-400 font-semibold'
                     : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 font-medium'
@@ -3579,7 +3241,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <div
                 className={`p-2.5 rounded-[10px] border text-center transition ${
                   aiWizardStep === 3
-                    ? 'bg-violet-50 dark:bg-violet-950/80 border-violet-500 text-violet-700 dark:text-violet-300 font-bold'
+                    ? 'bg-orange-50 dark:bg-orange-950/80 border-[#1738D1] text-orange-700 dark:text-orange-300 font-bold'
                     : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 font-medium'
                 }`}
               >
@@ -3610,8 +3272,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       onClick={() => setSelectedPackage(pkg)}
                       className={`relative p-5 rounded-[10px] border transition-all cursor-pointer flex flex-col justify-between ${
                         isSelected
-                          ? 'bg-violet-50/50 dark:bg-violet-950/40 border-violet-500 ring-2 ring-violet-500/20 shadow-md'
-                          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-violet-300'
+                          ? 'bg-orange-50/50 dark:bg-orange-950/40 border-[#1738D1] ring-2 ring-[#1738D1]/20 shadow-md'
+                          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-orange-300'
                       }`}
                     >
                       {pkg.popular && (
@@ -3662,7 +3324,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           }}
                           className={`w-full py-2.5 rounded-[10px] font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
                             isSelected
-                              ? 'bg-violet-600 hover:bg-violet-700 text-white shadow-xs'
+                              ? 'bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-xs'
                               : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200'
                           }`}
                         >
@@ -3684,7 +3346,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 space-y-5 shadow-sm">
                 <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
                   <h4 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-violet-500" />
+                    <CreditCard className="w-4 h-4 text-orange-500" />
                     <span>Pilih Metode Pembayaran</span>
                   </h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -3698,18 +3360,18 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     onClick={() => setSelectedPaymentMethod('qris')}
                     className={`p-4 rounded-[10px] border flex items-center justify-between cursor-pointer transition ${
                       selectedPaymentMethod === 'qris'
-                        ? 'bg-violet-50/60 dark:bg-violet-950/50 border-violet-500 ring-2 ring-violet-500/20'
-                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-violet-200'
+                        ? 'bg-orange-50/60 dark:bg-orange-950/50 border-[#1738D1] ring-2 ring-[#1738D1]/20'
+                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-orange-200'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-violet-600 dark:text-violet-400">
+                      <div className="p-2.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-orange-600 dark:text-orange-400">
                         <QrCode className="w-5 h-5" />
                       </div>
                       <div>
                         <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-2">
                           <span>QRIS Instant (Rekomendasi)</span>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                          <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
                             Auto Verifikasi
                           </span>
                         </div>
@@ -3723,7 +3385,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       name="payment"
                       checked={selectedPaymentMethod === 'qris'}
                       onChange={() => setSelectedPaymentMethod('qris')}
-                      className="text-violet-600 focus:ring-violet-500"
+                      className="text-orange-600 focus:ring-[#1738D1]"
                     />
                   </label>
 
@@ -3732,12 +3394,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     onClick={() => setSelectedPaymentMethod('bca')}
                     className={`p-4 rounded-[10px] border flex items-center justify-between cursor-pointer transition ${
                       selectedPaymentMethod === 'bca'
-                        ? 'bg-violet-50/60 dark:bg-violet-950/50 border-violet-500 ring-2 ring-violet-500/20'
-                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-violet-200'
+                        ? 'bg-orange-50/60 dark:bg-orange-950/50 border-[#1738D1] ring-2 ring-[#1738D1]/20'
+                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-orange-200'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-violet-600 dark:text-violet-400">
+                      <div className="p-2.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-orange-600 dark:text-orange-400">
                         <Building className="w-5 h-5" />
                       </div>
                       <div>
@@ -3754,7 +3416,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       name="payment"
                       checked={selectedPaymentMethod === 'bca'}
                       onChange={() => setSelectedPaymentMethod('bca')}
-                      className="text-violet-600 focus:ring-violet-500"
+                      className="text-orange-600 focus:ring-[#1738D1]"
                     />
                   </label>
 
@@ -3763,12 +3425,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     onClick={() => setSelectedPaymentMethod('mandiri')}
                     className={`p-4 rounded-[10px] border flex items-center justify-between cursor-pointer transition ${
                       selectedPaymentMethod === 'mandiri'
-                        ? 'bg-violet-50/60 dark:bg-violet-950/50 border-violet-500 ring-2 ring-violet-500/20'
-                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-violet-200'
+                        ? 'bg-orange-50/60 dark:bg-orange-950/50 border-[#1738D1] ring-2 ring-[#1738D1]/20'
+                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-orange-200'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-violet-600 dark:text-violet-400">
+                      <div className="p-2.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-orange-600 dark:text-orange-400">
                         <Wallet className="w-5 h-5" />
                       </div>
                       <div>
@@ -3785,7 +3447,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       name="payment"
                       checked={selectedPaymentMethod === 'mandiri'}
                       onChange={() => setSelectedPaymentMethod('mandiri')}
-                      className="text-violet-600 focus:ring-violet-500"
+                      className="text-orange-600 focus:ring-[#1738D1]"
                     />
                   </label>
                 </div>
@@ -3798,7 +3460,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="Masukkan kode (Coba: CUTIAI10)"
+                      placeholder="Masukkan kode (Coba: EMPLOYR10)"
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value)}
                       className="flex-1 px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white uppercase font-mono"
@@ -3814,7 +3476,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   {appliedDiscount > 0 && (
                     <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Voucher CUTIAI10 berhasil dipasang! Potongan Rp 10.000</span>
+                      <span>Voucher EMPLOYR10 berhasil dipasang! Potongan Rp 10.000</span>
                     </p>
                   )}
                 </div>
@@ -3834,7 +3496,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 <div className="space-y-3 text-xs">
                   <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
                     <span className="font-bold text-slate-800 dark:text-slate-200">Paket Layanan:</span>
-                    <span className="font-bold text-violet-600 dark:text-violet-400">{selectedPackage.name}</span>
+                    <span className="font-bold text-orange-600 dark:text-orange-400">{selectedPackage.name}</span>
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -3853,15 +3515,15 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                   <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800 font-black text-sm text-slate-900 dark:text-white">
                     <span>Total Pembayaran:</span>
-                    <span className="text-violet-600 dark:text-violet-400 text-base">
+                    <span className="text-orange-600 dark:text-orange-400 text-base">
                       Rp {Math.max(0, selectedPackage.price - appliedDiscount).toLocaleString('id-ID')}
                     </span>
                   </div>
                 </div>
 
-                <div className="p-3 rounded-[10px] bg-violet-50/50 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/40 text-[11px] text-slate-600 dark:text-slate-300 space-y-1">
+                <div className="p-3 rounded-[10px] bg-orange-50/50 dark:bg-orange-950/40 border border-orange-100 dark:border-orange-900/50 text-[11px] text-slate-600 dark:text-slate-300 space-y-1">
                   <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-violet-500" />
+                    <ShieldCheck className="w-4 h-4 text-orange-500" />
                     <span>Garansi Keamanan &amp; Kualitas CUTI</span>
                   </div>
                   <p>
@@ -3874,7 +3536,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     type="button"
                     onClick={handleSimulatePayment}
                     disabled={isProcessingPayment}
-                    className="w-full py-3 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full py-3 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {isProcessingPayment ? (
                       <>
@@ -3908,14 +3570,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 /* CHOICE SCREEN: EXISTING DATA VS NEW FORM */
                 <div className="bg-white dark:bg-slate-900 rounded-[10px] p-6 border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm max-w-3xl mx-auto">
                   <div className="text-center space-y-1 border-b border-slate-100 dark:border-slate-800 pb-4">
-                    <span className="px-3 py-1 rounded-[10px] text-[11px] font-bold bg-violet-50 dark:bg-violet-950 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-800 inline-block">
+                    <span className="px-3 py-1 rounded-[10px] text-[11px] font-bold bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 inline-block">
                       Langkah 3: Pengisian &amp; Sumber Data CV
                     </span>
                     <h4 className="font-extrabold text-lg text-slate-900 dark:text-white">
                       Bagaimana Anda Ingin Mengisi Data Diri &amp; Pengalaman?
                     </h4>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Sistem kami mendeteksi Anda sudah memiliki profil dan CV tersimpan di akun CUTI.
+                      Sistem kami mendeteksi Anda sudah memiliki profil dan CV tersimpan di akun Employr.
                     </p>
                   </div>
 
@@ -3926,16 +3588,16 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         setDataSelectionOption('existing');
                         handleCompleteOrder('existing');
                       }}
-                      className="p-5 rounded-[10px] border-2 border-violet-500 bg-violet-50/40 dark:bg-violet-950/30 hover:bg-violet-50 dark:hover:bg-violet-950/60 transition cursor-pointer flex flex-col justify-between space-y-4 shadow-sm"
+                      className="p-5 rounded-[10px] border-2 border-[#1738D1] bg-orange-50/40 dark:bg-orange-950/30 hover:bg-orange-50 dark:hover:bg-orange-950/60 transition cursor-pointer flex flex-col justify-between space-y-4 shadow-sm"
                     >
                       <div className="space-y-3">
-                        <div className="p-3 rounded-[10px] bg-violet-600 text-white w-fit">
+                        <div className="p-3 rounded-[10px] bg-[#1738D1] text-white w-fit">
                           <UserCheck className="w-6 h-6" />
                         </div>
                         <div>
                           <div className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
                             <span>Gunakan Data Lama Saya</span>
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200">
+                            <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
                               Praktis &amp; Cepat
                             </span>
                           </div>
@@ -3945,15 +3607,15 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         </div>
 
                         {/* Existing Data Summary Preview */}
-                        <div className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-violet-200 dark:border-violet-800/60 text-xs space-y-1.5">
+                        <div className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-orange-200 dark:border-orange-800/50 text-xs space-y-1.5">
                           <div className="font-bold text-slate-800 dark:text-slate-200">
-                            {formData.fullName || 'Budi Santoso'}
+                            {formData.fullName || 'Nama Lengkap Anda'}
                           </div>
-                          <div className="text-violet-600 dark:text-violet-400 text-[11px]">
+                          <div className="text-orange-600 dark:text-orange-400 text-[11px]">
                             {formData.headline || 'Senior Full Stack Developer'}
                           </div>
                           <div className="text-slate-500 text-[10px]">
-                            Email: {formData.email || 'budi.santoso@email.com'}
+                            Email: {formData.email || 'email@contoh.com'}
                           </div>
                           <div className="text-slate-500 text-[10px]">
                             {formData.experience.length} Pengalaman Kerja &bull; {formData.skills.length} Skills Tersimpan
@@ -3963,7 +3625,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                       <button
                         type="button"
-                        className="w-full py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="w-full py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <Check className="w-4 h-4" />
                         <span>Pakai Data Ini &amp; Kirim ke Tim AI</span>
@@ -4020,7 +3682,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     <button
                       type="button"
                       onClick={() => setDataSelectionOption(null)}
-                      className="text-xs font-bold text-violet-600 hover:underline"
+                      className="text-xs font-bold text-orange-600 hover:underline"
                     >
                       Pilih Opsi Lain
                     </button>
@@ -4051,7 +3713,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           <label className="font-semibold block mb-1">Nama Lengkap *</label>
                           <input
                             type="text"
-                            placeholder="Contoh: Budi Santoso"
+                            placeholder="Contoh: Nama Lengkap"
                             value={formData.fullName}
                             onChange={(e) => setFormData((prev) => ({ ...prev, fullName: e.target.value }))}
                             className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
@@ -4071,7 +3733,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           <label className="font-semibold block mb-1">Email Aktif *</label>
                           <input
                             type="email"
-                            placeholder="budi@email.com"
+                            placeholder="email@contoh.com"
                             value={formData.email}
                             onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
                             className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
@@ -4123,7 +3785,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         <button
                           type="button"
                           onClick={() => setWizardFormStep(2)}
-                          className="px-5 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer"
+                          className="px-5 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer"
                         >
                           <span>Lanjut ke Pengalaman</span>
                           <ArrowRight className="w-4 h-4" />
@@ -4174,7 +3836,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         <button
                           type="button"
                           onClick={handleAddExperience}
-                          className="w-full py-2 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold transition cursor-pointer"
+                          className="w-full py-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold transition cursor-pointer"
                         >
                           + Simpan Item Pengalaman
                         </button>
@@ -4182,7 +3844,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                       {/* Display added experience items */}
                       {formData.experience.map((exp, idx) => (
-                        <div key={idx} className="p-2.5 rounded-[10px] bg-violet-50 dark:bg-violet-950/60 border border-violet-200 dark:border-violet-800 flex justify-between items-center">
+                        <div key={idx} className="p-2.5 rounded-[10px] bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800 flex justify-between items-center">
                           <div>
                             <div className="font-bold text-slate-900 dark:text-white">{exp.role} @ {exp.company}</div>
                             <div className="text-[10px] text-slate-500">{exp.period}</div>
@@ -4202,7 +3864,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         <button
                           type="button"
                           onClick={() => setWizardFormStep(3)}
-                          className="px-5 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer"
+                          className="px-5 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer"
                         >
                           <span>Lanjut ke Skill &amp; Catatan</span>
                           <ArrowRight className="w-4 h-4" />
@@ -4244,7 +3906,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         </div>
                         <div className="flex flex-wrap gap-1.5 pt-1">
                           {formData.skills.map((sk, idx) => (
-                            <span key={idx} className="px-2.5 py-1 rounded-[10px] bg-violet-50 dark:bg-violet-950 text-violet-700 dark:text-violet-300 font-bold border border-violet-200 dark:border-violet-800">
+                            <span key={idx} className="px-2.5 py-1 rounded-[10px] bg-orange-50 dark:bg-orange-950 text-orange-700 dark:text-orange-300 font-bold border border-orange-200 dark:border-orange-800">
                               {sk}
                             </span>
                           ))}
@@ -4273,7 +3935,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         <button
                           type="button"
                           onClick={() => handleCompleteOrder('new')}
-                          className="px-6 py-3 rounded-[10px] bg-[#0D3BD9] hover:bg-[#0B33BD] text-white font-extrabold text-xs shadow-md flex items-center gap-2 cursor-pointer"
+                          className="px-6 py-3 rounded-[10px] bg-navy-700 hover:bg-navy-800 text-white font-extrabold text-xs shadow-md flex items-center gap-2 cursor-pointer"
                         >
                           <Send className="w-4 h-4" />
                           <span>Kirim Data &amp; Mulai Pengerjaan AI</span>
@@ -4313,14 +3975,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowDraftModal(true)}
-                  className="px-4 py-2.5 rounded-[10px] bg-blue-50 dark:bg-blue-950/80 text-[#0D3BD9] dark:text-blue-300 hover:bg-blue-100 font-bold text-xs border border-blue-200 dark:border-blue-800/60 transition flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2.5 rounded-[10px] bg-blue-50 dark:bg-blue-950/80 text-navy-700 dark:text-blue-300 hover:bg-blue-100 font-bold text-xs border border-blue-200 dark:border-navy-800/60 transition flex items-center gap-1.5 cursor-pointer"
                 >
                   <Eye className="w-4 h-4" />
                   <span>Pratinjau Draf CV</span>
                 </button>
                 <button
                   onClick={() => setShowChatModal(true)}
-                  className="px-4 py-2.5 rounded-[10px] bg-[#0D3BD9] hover:bg-[#0B33BD] text-white font-bold text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  className="px-4 py-2.5 rounded-[10px] bg-navy-700 hover:bg-navy-800 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer"
                 >
                   <MessageSquare className="w-4 h-4" />
                   <span>Chat Tim HR</span>
@@ -4332,14 +3994,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
               <div className="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white">
                 <span>Progress Pengerjaan Kualitas CV: {activeOrder.progress}%</span>
-                <span className="text-[#0D3BD9] dark:text-blue-400 flex items-center gap-1">
+                <span className="text-navy-700 dark:text-blue-400 flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5" />
                   <span>Estimasi Selesai: {activeOrder.estimatedTime}</span>
                 </span>
               </div>
               <div className="w-full bg-slate-200 dark:bg-slate-700 h-3 rounded-full overflow-hidden">
                 <div
-                  className="bg-[#0D3BD9] h-full transition-all duration-700"
+                  className="bg-navy-700 h-full transition-all duration-700"
                   style={{ width: `${activeOrder.progress}%` }}
                 ></div>
               </div>
@@ -4348,7 +4010,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             {/* Stepper Timeline */}
             <div className="space-y-4 pt-2">
               <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-violet-500" />
+                <ShieldCheck className="w-4 h-4 text-orange-500" />
                 <span>Tahapan Kerja Tim HR &amp; Sistem AI CUTI</span>
               </h4>
 
@@ -4361,7 +4023,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   <div>
                     <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-2">
                       <span>1. Pembayaran Dikonfirmasi</span>
-                      <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded">Selesai</span>
+                      <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-[10px]">Selesai</span>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       Sistem verifikasi otomatis menerima pembayaran Rp {activeOrder.price.toLocaleString('id-ID')} via {activeOrder.paymentMethod}.
@@ -4377,7 +4039,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   <div>
                     <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-2">
                       <span>2. Analisis &amp; Penataan Format ATS oleh Engine AI</span>
-                      <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded">Selesai</span>
+                      <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-[10px]">Selesai</span>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       Sistem AI mengekstrak data diri, menyusun bullet point STAR method, dan memilih kata kunci SEO industri target.
@@ -4387,16 +4049,16 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                 {/* Step 3 */}
                 <div className="flex items-start gap-3 relative z-10">
-                  <div className="p-2 rounded-full bg-violet-600 text-white shrink-0 shadow-md ring-4 ring-violet-100 dark:ring-violet-950">
+                  <div className="p-2 rounded-full bg-[#1738D1] text-white shrink-0 shadow-md ring-4 ring-orange-100 dark:ring-orange-950">
                     <RefreshCw className="w-4 h-4 animate-spin" />
                   </div>
                   <div className="space-y-1">
                     <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-2">
                       <span>3. Review &amp; Penyempurnaan Kualitas oleh Tim HR</span>
-                      <span className="text-[10px] text-violet-600 font-bold bg-violet-50 dark:bg-violet-950 px-2 py-0.5 rounded">Sedang Berlangsung</span>
+                      <span className="text-[10px] text-orange-600 font-bold bg-orange-50 dark:bg-orange-950 px-2 py-0.5 rounded-[10px]">Sedang Berlangsung</span>
                     </div>
                     <p className="text-xs text-slate-600 dark:text-slate-300">
-                      Ditinjau oleh <strong className="text-violet-600 dark:text-violet-400">{activeOrder.hrName}</strong> ({activeOrder.hrRole}) untuk memastikan standar multinasional.
+                      Ditinjau oleh <strong className="text-orange-600 dark:text-orange-400">{activeOrder.hrName}</strong> ({activeOrder.hrRole}) untuk memastikan standar multinasional.
                     </p>
                   </div>
                 </div>
@@ -4419,9 +4081,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             </div>
 
             {/* HR Specialist Info Card */}
-            <div className="p-4 rounded-[10px] bg-violet-50/60 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="p-4 rounded-[10px] bg-orange-50/60 dark:bg-orange-950/40 border border-orange-100 dark:border-orange-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-violet-600 text-white font-bold flex items-center justify-center text-sm shadow-xs shrink-0">
+                <div className="w-10 h-10 rounded-full bg-[#1738D1] text-white font-bold flex items-center justify-center text-sm shadow-xs shrink-0">
                   SM
                 </div>
                 <div>
@@ -4437,7 +4099,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <button
                 type="button"
                 onClick={() => setShowChatModal(true)}
-                className="px-3.5 py-2 rounded-[10px] bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-violet-600 dark:text-violet-300 font-bold text-xs border border-violet-200 dark:border-violet-800 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2 rounded-[10px] bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-orange-600 dark:text-orange-300 font-bold text-xs border border-orange-200 dark:border-orange-800 transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
                 <span>Kirim Pesan ke HR</span>
@@ -4531,7 +4193,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   onClick={() => setRightPanelTab('editor')}
                   className={`flex-1 py-2 px-3 rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
                     rightPanelTab === 'editor'
-                      ? 'bg-orange-500 text-white shadow-md'
+                      ? 'bg-[#1738D1] text-white shadow-md'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'
                   }`}
                 >
@@ -4544,7 +4206,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   onClick={() => setRightPanelTab('templates')}
                   className={`flex-1 py-2 px-3 rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
                     rightPanelTab === 'templates'
-                      ? 'bg-orange-500 text-white shadow-md'
+                      ? 'bg-[#1738D1] text-white shadow-md'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'
                   }`}
                 >
@@ -4557,7 +4219,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   onClick={() => setRightPanelTab('pengaturan')}
                   className={`flex-1 py-2 px-3 rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
                     rightPanelTab === 'pengaturan'
-                      ? 'bg-orange-500 text-white shadow-md'
+                      ? 'bg-[#1738D1] text-white shadow-md'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'
                   }`}
                 >
@@ -4789,7 +4451,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 <img
                                   src={formData.photoUrl}
                                   alt="Profil"
-                                  className={`w-14 h-14 ${formData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border-2 border-orange-500 shadow-2xs shrink-0 bg-white`}
+                                  className={`w-14 h-14 ${formData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border-2 border-[#1738D1] shadow-2xs shrink-0 bg-white`}
                                 />
                                 <div className="flex-1 min-w-0">
                                   <p className="text-xs font-bold text-slate-800 dark:text-white truncate">Foto Profil Terpasang</p>
@@ -4799,9 +4461,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       <button
                                         type="button"
                                         onClick={() => setFormData((prev) => ({ ...prev, photoShape: 'circle' }))}
-                                        className={`px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer ${
+                                        className={`px-2 py-0.5 rounded-[10px] text-[10px] font-bold transition cursor-pointer ${
                                           (formData.photoShape || 'circle') === 'circle'
-                                            ? 'bg-orange-500 text-white shadow-2xs'
+                                            ? 'bg-[#1738D1] text-white shadow-2xs'
                                             : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300'
                                         }`}
                                       >
@@ -4810,9 +4472,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       <button
                                         type="button"
                                         onClick={() => setFormData((prev) => ({ ...prev, photoShape: 'square' }))}
-                                        className={`px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer ${
+                                        className={`px-2 py-0.5 rounded-[10px] text-[10px] font-bold transition cursor-pointer ${
                                           formData.photoShape === 'square'
-                                            ? 'bg-orange-500 text-white shadow-2xs'
+                                            ? 'bg-[#1738D1] text-white shadow-2xs'
                                             : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300'
                                         }`}
                                       >
@@ -4828,9 +4490,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           setFormData((prev) => ({ ...prev, photoPosition: 'left' }));
                                           setDocPhotoPosition('left');
                                         }}
-                                        className={`px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer ${
+                                        className={`px-2 py-0.5 rounded-[10px] text-[10px] font-bold transition cursor-pointer ${
                                           (formData.photoPosition || docPhotoPosition || 'right') === 'left'
-                                            ? 'bg-orange-500 text-white shadow-2xs'
+                                            ? 'bg-[#1738D1] text-white shadow-2xs'
                                             : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300'
                                         }`}
                                       >
@@ -4842,9 +4504,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           setFormData((prev) => ({ ...prev, photoPosition: 'right' }));
                                           setDocPhotoPosition('right');
                                         }}
-                                        className={`px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer ${
+                                        className={`px-2 py-0.5 rounded-[10px] text-[10px] font-bold transition cursor-pointer ${
                                           (formData.photoPosition || docPhotoPosition || 'right') === 'right'
-                                            ? 'bg-orange-500 text-white shadow-2xs'
+                                            ? 'bg-[#1738D1] text-white shadow-2xs'
                                             : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300'
                                         }`}
                                       >
@@ -4920,9 +4582,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 setFormData((prev) => ({ ...prev, summary: newVal }));
                                 handleAiSuccessFeedback(feedback);
                               })}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-extrabold text-[11px] border border-purple-200 dark:border-purple-800 transition cursor-pointer shadow-2xs"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 font-extrabold text-[11px] border border-orange-200 dark:border-orange-800 transition cursor-pointer shadow-2xs"
                             >
-                              <Sparkles className="w-3.5 h-3.5 fill-purple-600 text-purple-600" />
+                              <Sparkles className="w-3.5 h-3.5 fill-orange-500 text-orange-600" />
                               <span>Bantu tulis dengan AI</span>
                             </button>
                           </div>
@@ -4956,7 +4618,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 }}
                                 className={`border rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
                                   isDraggingThis
-                                    ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
+                                    ? 'shadow-2xl border-2 border-[#1738D1] ring-4 ring-[#1738D1]/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
                                 }`}
                               >
@@ -4995,7 +4657,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                     <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Perusahaan *</label>
                                     <input
                                       type="text"
-                                      placeholder="e.g., Acme Corp"
+                                      placeholder="e.g., Nama Perusahaan"
                                       value={exp.company}
                                       onChange={(e) => {
                                         const val = e.target.value;
@@ -5096,7 +4758,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, experience: arr };
                                       });
                                     }}
-                                    className="rounded border-slate-300 text-teal-600 focus:ring-teal-500 cursor-pointer"
+                                    className="rounded-[10px] border-slate-300 text-teal-600 focus:ring-teal-500 cursor-pointer"
                                   />
                                   <label htmlFor={`exp-current-${expIdx}`} className="text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none">
                                     Saya masih bekerja di sini saat ini
@@ -5118,9 +4780,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         });
                                         handleAiSuccessFeedback(feedback);
                                       })}
-                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-extrabold text-[11px] border border-purple-200 dark:border-purple-800 transition cursor-pointer shadow-2xs"
+                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 font-extrabold text-[11px] border border-orange-200 dark:border-orange-800 transition cursor-pointer shadow-2xs"
                                     >
-                                      <Sparkles className="w-3.5 h-3.5 fill-purple-600 text-purple-600" />
+                                      <Sparkles className="w-3.5 h-3.5 fill-orange-500 text-orange-600" />
                                       <span>Bantu tulis dengan AI</span>
                                     </button>
                                   </div>
@@ -5176,7 +4838,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Pengalaman Kerja</span>
@@ -5201,7 +4863,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 }}
                                 className={`border rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
                                   isDraggingThis
-                                    ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
+                                    ? 'shadow-2xl border-2 border-[#1738D1] ring-4 ring-[#1738D1]/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
                                 }`}
                               >
@@ -5354,7 +5016,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Pengalaman Magang</span>
@@ -5379,7 +5041,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 }}
                                 className={`border rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
                                   isDraggingThis
-                                    ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
+                                    ? 'shadow-2xl border-2 border-[#1738D1] ring-4 ring-[#1738D1]/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
                                 }`}
                               >
@@ -5557,7 +5219,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Proyek</span>
@@ -5582,7 +5244,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 }}
                                 className={`border rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
                                   isDraggingThis
-                                    ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
+                                    ? 'shadow-2xl border-2 border-[#1738D1] ring-4 ring-[#1738D1]/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
                                 }`}
                               >
@@ -5720,7 +5382,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Pengalaman Organisasi</span>
@@ -5745,7 +5407,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 }}
                                 className={`border rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3.5 transition-all duration-200 relative ${
                                   isDraggingThis
-                                    ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
+                                    ? 'shadow-2xl border-2 border-[#1738D1] ring-4 ring-[#1738D1]/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
                                 }`}
                               >
@@ -5902,7 +5564,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Pendidikan</span>
@@ -6044,7 +5706,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Sertifikat</span>
@@ -6125,7 +5787,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Bahasa</span>
@@ -6247,7 +5909,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Pelatihan</span>
@@ -6369,7 +6031,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Beasiswa</span>
@@ -6492,7 +6154,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Volunteer</span>
@@ -6521,7 +6183,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 }}
                                 className={`border rounded-[10px] p-4 bg-white dark:bg-slate-900 space-y-3 transition-all duration-200 relative ${
                                   isDraggingThis
-                                    ? 'shadow-2xl border-2 border-orange-500 ring-4 ring-orange-500/25 opacity-100 z-50 cursor-grabbing'
+                                    ? 'shadow-2xl border-2 border-[#1738D1] ring-4 ring-[#1738D1]/25 opacity-100 z-50 cursor-grabbing'
                                     : 'border-slate-200 dark:border-slate-800 shadow-2xs'
                                 }`}
                               >
@@ -6567,7 +6229,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, references: arr };
                                         });
                                       }}
-                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1]"
                                     />
                                   </div>
                                   <div className="space-y-1">
@@ -6584,7 +6246,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, references: arr };
                                         });
                                       }}
-                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1]"
                                     />
                                   </div>
                                 </div>
@@ -6603,7 +6265,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, references: arr };
                                         });
                                       }}
-                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1]"
                                     />
                                   </div>
                                   <div className="space-y-1">
@@ -6620,7 +6282,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, references: arr };
                                         });
                                       }}
-                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1]"
                                     />
                                   </div>
                                   <div className="space-y-1">
@@ -6637,7 +6299,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, references: arr };
                                         });
                                       }}
-                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1]"
                                     />
                                   </div>
                                 </div>
@@ -6656,7 +6318,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Referensi</span>
@@ -6716,21 +6378,21 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             onClick={() => setSelectedTemplateId(tpl.id)}
                             className={`p-2.5 rounded-[10px] border transition-all cursor-pointer group text-left ${
                               isSelected
-                                ? 'bg-orange-50/80 dark:bg-orange-950/40 border-orange-500 ring-2 ring-orange-500/20 shadow-sm'
+                                ? 'bg-orange-50/80 dark:bg-orange-950/40 border-[#1738D1] ring-2 ring-[#1738D1]/20 shadow-sm'
                                 : 'bg-slate-50/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/80 hover:border-orange-300 dark:hover:border-orange-600'
                             }`}
                           >
                             <div className="w-full aspect-[210/297] rounded-[10px] bg-white border border-slate-200 dark:border-slate-700 p-1 overflow-hidden shadow-2xs relative flex flex-col justify-between mb-2 group-hover:shadow-md transition">
                               <TemplateThumbnailVisual templateId={tpl.id} customData={formData} />
                               {isSelected && (
-                                <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-xs">
+                                <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-[#1738D1] text-white flex items-center justify-center shadow-xs">
                                   <Check className="w-3 h-3 stroke-[3]" />
                                 </div>
                               )}
                             </div>
 
                             <div className="space-y-0.5">
-                              <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase bg-slate-200/80 text-slate-700 dark:bg-slate-800 dark:text-slate-300 block truncate">
+                              <span className="px-1.5 py-0.5 rounded-[10px] text-[8px] font-extrabold uppercase bg-slate-200/80 text-slate-700 dark:bg-slate-800 dark:text-slate-300 block truncate">
                                 {tpl.badge}
                               </span>
                               <h5 className="font-extrabold text-xs text-slate-900 dark:text-white truncate">
@@ -6786,7 +6448,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               onClick={() => handleSelectMarginPreset(key)}
                               className={`p-3 rounded-[10px] border text-left transition cursor-pointer flex flex-col justify-between gap-1.5 ${
                                 isSelected
-                                  ? 'bg-orange-50/90 dark:bg-orange-950/60 border-orange-500 text-orange-700 dark:text-orange-300 ring-2 ring-orange-500/20 shadow-2xs'
+                                  ? 'bg-orange-50/90 dark:bg-orange-950/60 border-[#1738D1] text-orange-700 dark:text-orange-300 ring-2 ring-[#1738D1]/20 shadow-2xs'
                                   : 'bg-slate-50/80 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300'
                               }`}
                             >
@@ -6795,7 +6457,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   {item.name}
                                 </span>
                                 {isSelected && (
-                                  <span className="w-4 h-4 rounded-full bg-orange-500 text-white flex items-center justify-center">
+                                  <span className="w-4 h-4 rounded-full bg-[#1738D1] text-white flex items-center justify-center">
                                     <Check className="w-2.5 h-2.5 stroke-[3]" />
                                   </span>
                                 )}
@@ -6827,7 +6489,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max="6"
                             value={docMarginTop}
                             onChange={(e) => handleCustomMarginChange('top', Number(e.target.value))}
-                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-[#1738D1]"
                           />
                         </div>
                         <div>
@@ -6839,7 +6501,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max="6"
                             value={docMarginBottom}
                             onChange={(e) => handleCustomMarginChange('bottom', Number(e.target.value))}
-                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-[#1738D1]"
                           />
                         </div>
                         <div>
@@ -6851,7 +6513,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max="6"
                             value={docMarginLeft}
                             onChange={(e) => handleCustomMarginChange('left', Number(e.target.value))}
-                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-[#1738D1]"
                           />
                         </div>
                         <div>
@@ -6863,7 +6525,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max="6"
                             value={docMarginRight}
                             onChange={(e) => handleCustomMarginChange('right', Number(e.target.value))}
-                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-[#1738D1]"
                           />
                         </div>
                       </div>
@@ -6900,7 +6562,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             onClick={() => setDocFontSize(fSize.id as any)}
                             className={`py-2 px-2 rounded-[10px] border text-xs font-bold transition cursor-pointer text-center flex flex-col items-center justify-center gap-0.5 ${
                               docFontSize === fSize.id
-                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500 text-orange-700 dark:text-orange-300 shadow-2xs ring-1 ring-orange-500'
+                                ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-700 dark:text-orange-300 shadow-2xs ring-1 ring-[#1738D1]'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/80'
                             }`}
                           >
@@ -6930,7 +6592,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             <UserCheck className="w-4 h-4 text-orange-500" />
                             <span>{docShowIcons ? 'Ikon Tampil' : 'Teks Saja'}</span>
                           </div>
-                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${docShowIcons ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-600'}`}>
+                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${docShowIcons ? 'bg-[#1738D1] border-[#1738D1] text-white' : 'border-slate-300 dark:border-slate-600'}`}>
                             {docShowIcons && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                           </div>
                         </button>
@@ -6985,7 +6647,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         <select
                           value={docFontFamily}
                           onChange={(e) => setDocFontFamily(e.target.value as any)}
-                          className="w-full px-3 py-2 rounded-[10px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                          className="w-full px-3 py-2 rounded-[10px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] cursor-pointer"
                         >
                           <option value="inter">Inter (Modern &amp; Clean)</option>
                           <option value="roboto">Roboto (Clean Sans)</option>
@@ -7061,7 +6723,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             }`}
                           >
                             <span>Email (mailto:)</span>
-                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${docRefEmailHyperlink ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-600'}`}>
+                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${docRefEmailHyperlink ? 'bg-[#1738D1] border-[#1738D1] text-white' : 'border-slate-300 dark:border-slate-600'}`}>
                               {docRefEmailHyperlink && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                             </div>
                           </button>
@@ -7075,7 +6737,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             }`}
                           >
                             <span>HP (wa.me)</span>
-                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${docRefPhoneHyperlink ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-600'}`}>
+                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${docRefPhoneHyperlink ? 'bg-[#1738D1] border-[#1738D1] text-white' : 'border-slate-300 dark:border-slate-600'}`}>
                               {docRefPhoneHyperlink && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                             </div>
                           </button>
@@ -7143,7 +6805,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={1}
                             value={docNameSize}
                             onChange={(e) => setDocNameSize(Number(e.target.value))}
-                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
+                            className="flex-1 accent-[#1738D1] cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
                           />
                           <input
                             type="number"
@@ -7151,7 +6813,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max={44}
                             value={docNameSize}
                             onChange={(e) => setDocNameSize(Number(e.target.value))}
-                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1]"
                           />
                         </div>
                       </div>
@@ -7170,7 +6832,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={1}
                             value={docHeaderSize}
                             onChange={(e) => setDocHeaderSize(Number(e.target.value))}
-                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
+                            className="flex-1 accent-[#1738D1] cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
                           />
                           <input
                             type="number"
@@ -7178,7 +6840,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max={24}
                             value={docHeaderSize}
                             onChange={(e) => setDocHeaderSize(Number(e.target.value))}
-                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1]"
                           />
                         </div>
                       </div>
@@ -7197,7 +6859,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={1}
                             value={docBodySize}
                             onChange={(e) => setDocBodySize(Number(e.target.value))}
-                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
+                            className="flex-1 accent-[#1738D1] cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
                           />
                           <input
                             type="number"
@@ -7205,7 +6867,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max={18}
                             value={docBodySize}
                             onChange={(e) => setDocBodySize(Number(e.target.value))}
-                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1]"
                           />
                         </div>
                       </div>
@@ -7224,7 +6886,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={1}
                             value={docSectionSpacing}
                             onChange={(e) => setDocSectionSpacing(Number(e.target.value))}
-                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
+                            className="flex-1 accent-[#1738D1] cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
                           />
                           <input
                             type="number"
@@ -7232,7 +6894,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max={40}
                             value={docSectionSpacing}
                             onChange={(e) => setDocSectionSpacing(Number(e.target.value))}
-                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1]"
                           />
                         </div>
                       </div>
@@ -7251,7 +6913,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={0.1}
                             value={docLineHeight}
                             onChange={(e) => setDocLineHeight(Number(e.target.value))}
-                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
+                            className="flex-1 accent-[#1738D1] cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
                           />
                           <input
                             type="number"
@@ -7260,7 +6922,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={0.1}
                             value={docLineHeight}
                             onChange={(e) => setDocLineHeight(Number(e.target.value))}
-                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1]"
                           />
                         </div>
                       </div>
@@ -7279,7 +6941,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={0.1}
                             value={docLetterSpacing}
                             onChange={(e) => setDocLetterSpacing(Number(e.target.value))}
-                            className="flex-1 accent-orange-500 cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
+                            className="flex-1 accent-[#1738D1] cursor-pointer h-2 bg-slate-100 dark:bg-slate-700 rounded-[10px]"
                           />
                           <input
                             type="number"
@@ -7288,7 +6950,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             step={0.1}
                             value={docLetterSpacing}
                             onChange={(e) => setDocLetterSpacing(Number(e.target.value))}
-                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                            className="w-16 px-2 py-1 text-xs font-extrabold text-center border border-slate-200 dark:border-slate-700 rounded-[10px] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1]"
                           />
                         </div>
                       </div>
@@ -7312,7 +6974,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         value={titleInput}
                         onChange={(e) => setTitleInput(e.target.value)}
                         placeholder="e.g. CV_Andi_Pratama_ATS"
-                        className="w-full px-3.5 py-2 rounded-[10px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3.5 py-2 rounded-[10px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                       />
                     </div>
 
@@ -7327,7 +6989,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           onClick={() => setDownloadFormat('pdf')}
                           className={`py-2 px-3 rounded-[10px] border text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
                             downloadFormat === 'pdf'
-                              ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500 text-orange-600 dark:text-orange-400 ring-2 ring-orange-500/20'
+                              ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-600 dark:text-orange-400 ring-2 ring-[#1738D1]/20'
                               : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'
                           }`}
                         >
@@ -7340,7 +7002,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           onClick={() => setDownloadFormat('docx')}
                           className={`py-2 px-3 rounded-[10px] border text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
                             downloadFormat === 'docx'
-                              ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500 text-orange-600 dark:text-orange-400 ring-2 ring-orange-500/20'
+                              ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-600 dark:text-orange-400 ring-2 ring-[#1738D1]/20'
                               : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'
                           }`}
                         >
@@ -7399,7 +7061,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     <button
                       type="button"
                       onClick={handleDownloadCV}
-                      className="w-full py-3 px-4 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer mt-2"
+                      className="w-full py-3 px-4 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center justify-center gap-2 cursor-pointer mt-2"
                     >
                       <Download className="w-4 h-4" />
                       <span>Unduh CV Saya ({downloadFormat.toUpperCase()})</span>
@@ -7416,7 +7078,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       Unggah file resume kamu (.JSON, .PDF, atau .DOCX) untuk mengimpor data langsung ke dalam editor.
                     </p>
 
-                    <label className="w-full p-4 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 dark:hover:border-orange-500 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 transition flex flex-col items-center justify-center gap-2 cursor-pointer group">
+                    <label className="w-full p-4 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] dark:hover:border-[#1738D1] rounded-[10px] bg-slate-50 dark:bg-slate-800/60 transition flex flex-col items-center justify-center gap-2 cursor-pointer group">
                       <Upload className="w-5 h-5 text-slate-400 group-hover:text-orange-500 transition" />
                       <span className="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:text-orange-600 transition">
                         Pilih File Resume (JSON / PDF / DOCX)
@@ -7460,8 +7122,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             <div className="p-6 overflow-y-auto no-scrollbar space-y-4 bg-slate-100 dark:bg-slate-950">
               <div className="p-6 bg-white text-slate-900 border border-slate-300 rounded-[10px] space-y-4 shadow-sm text-xs">
                 <div className="border-b border-slate-900 pb-2">
-                  <h2 className="text-xl font-black uppercase text-slate-900">{formData.fullName || 'BUDI SANTOSO'}</h2>
-                  <p className="font-bold text-violet-700 uppercase mt-0.5">{formData.headline || 'Senior Full Stack Engineer'}</p>
+                  <h2 className="text-xl font-black uppercase text-slate-900">{formData.fullName || 'NAMA LENGKAP ANDA'}</h2>
+                  <p className="font-bold text-orange-700 uppercase mt-0.5">{formData.headline || 'Senior Full Stack Engineer'}</p>
                 </div>
                 <div>
                   <h3 className="font-bold uppercase text-[10px] text-slate-500 tracking-wider">Ringkasan Profil</h3>
@@ -7471,7 +7133,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   <h3 className="font-bold uppercase text-[10px] text-slate-500 tracking-wider">Keahlian Utama ATS</h3>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {formData.skills.map((s, idx) => (
-                      <span key={idx} className="px-2 py-0.5 rounded bg-slate-100 border text-[10px] font-bold text-slate-800">
+                      <span key={idx} className="px-2 py-0.5 rounded-[10px] bg-slate-100 border text-[10px] font-bold text-slate-800">
                         {s}
                       </span>
                     ))}
@@ -7496,14 +7158,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       {showChatModal && activeOrder && (
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 w-full max-w-md h-[500px] flex flex-col shadow-2xl overflow-hidden">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-violet-900 text-white">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-orange-900 text-white">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-violet-600 font-bold flex items-center justify-center text-xs">
+                <div className="w-8 h-8 rounded-full bg-[#1738D1] font-bold flex items-center justify-center text-xs">
                   SM
                 </div>
                 <div>
                   <div className="font-bold text-xs">{activeOrder.hrName}</div>
-                  <div className="text-[10px] text-violet-300">Live Chat HR Specialist</div>
+                  <div className="text-[10px] text-orange-300">Live Chat HR Specialist</div>
                 </div>
               </div>
               <button onClick={() => setShowChatModal(false)} className="p-1 hover:text-slate-300 cursor-pointer">
@@ -7522,7 +7184,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   <div
                     className={`p-3 rounded-[10px] text-xs leading-relaxed ${
                       msg.sender === 'user'
-                        ? 'bg-violet-600 text-white rounded-br-none'
+                        ? 'bg-[#1738D1] text-white rounded-br-none'
                         : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none shadow-2xs'
                     }`}
                   >
@@ -7549,7 +7211,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               />
               <button
                 onClick={handleSendChatMessage}
-                className="p-2.5 rounded-[10px] bg-violet-600 text-white hover:bg-violet-700 transition cursor-pointer"
+                className="p-2.5 rounded-[10px] bg-[#1738D1] text-white hover:bg-[#132EA8] transition cursor-pointer"
               >
                 <Send className="w-4 h-4" />
               </button>
@@ -7679,16 +7341,16 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             onClick={() => setSelectedTemplateId(tpl.id)}
                             className={`p-4 rounded-[10px] border transition-all cursor-pointer ${
                               isSelected
-                                ? 'bg-blue-50 dark:bg-blue-950/70 border-blue-600 ring-2 ring-blue-600/30 shadow-md'
-                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700'
+                                ? 'bg-blue-50 dark:bg-blue-950/70 border-navy-600 ring-2 ring-blue-600/30 shadow-md'
+                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-navy-700'
                             }`}
                           >
                             <div className="flex items-center gap-3">
-                              <div className="w-12 h-16 rounded border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 shadow-2xs bg-white">
+                              <div className="w-12 h-16 rounded-[10px] border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 shadow-2xs bg-white">
                                 <TemplateThumbnailVisual templateId={tpl.id} customData={formData} />
                               </div>
                               <div className="space-y-1 min-w-0">
-                                <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-800 inline-block truncate">
+                                <span className="px-2 py-0.5 rounded-[10px] text-[9px] font-extrabold uppercase bg-blue-100 text-navy-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-navy-800 inline-block truncate">
                                   {tpl.badge}
                                 </span>
                                 <h4 className="font-extrabold text-sm text-slate-900 dark:text-white leading-tight">
@@ -7731,7 +7393,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     </button>
                     <button
                       onClick={handleSelectTemplateAndNext}
-                      className="px-6 py-2 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+                      className="px-6 py-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
                     >
                       <span>Gunakan Template Ini</span>
                       <ArrowRight className="w-4 h-4" />
@@ -7751,7 +7413,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         {(() => {
                           const tpl = cvTemplates.find((t) => t.id === selectedTemplateId) || cvTemplates[0];
                           return (
-                            <div className="p-4 rounded-[10px] bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 flex items-center justify-between">
+                            <div className="p-4 rounded-[10px] bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-navy-800/60 flex items-center justify-between">
                               <div className="space-y-1">
                                 <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">
                                   Template Terpilih
@@ -7763,7 +7425,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               <button
                                 type="button"
                                 onClick={() => setTemplateModalStep(1)}
-                                className="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline cursor-pointer"
+                                className="text-xs font-bold text-blue-600 hover:text-orange-600 dark:text-blue-400 hover:underline cursor-pointer"
                               >
                                 Ubah
                               </button>
@@ -7851,7 +7513,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             onClick={() => setNewCvStartMode('example')}
                             className={`p-4 rounded-[10px] border transition-all cursor-pointer flex items-center justify-between gap-4 ${
                               newCvStartMode === 'example'
-                                ? 'bg-blue-50 dark:bg-blue-950/70 border-blue-600 ring-2 ring-blue-600/30 shadow-xs'
+                                ? 'bg-blue-50 dark:bg-blue-950/70 border-navy-600 ring-2 ring-blue-600/30 shadow-xs'
                                 : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300'
                             }`}
                           >
@@ -7876,7 +7538,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             onClick={() => setNewCvStartMode('empty')}
                             className={`p-4 rounded-[10px] border transition-all cursor-pointer flex items-center justify-between gap-4 ${
                               newCvStartMode === 'empty'
-                                ? 'bg-blue-50 dark:bg-blue-950/70 border-blue-600 ring-2 ring-blue-600/30 shadow-xs'
+                                ? 'bg-blue-50 dark:bg-blue-950/70 border-navy-600 ring-2 ring-blue-600/30 shadow-xs'
                                 : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300'
                             }`}
                           >
@@ -7901,7 +7563,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             onClick={() => setNewCvStartMode('import')}
                             className={`p-4 rounded-[10px] border transition-all cursor-pointer flex flex-col gap-3 ${
                               newCvStartMode === 'import'
-                                ? 'bg-blue-50 dark:bg-blue-950/70 border-blue-600 ring-2 ring-blue-600/30 shadow-xs'
+                                ? 'bg-blue-50 dark:bg-blue-950/70 border-navy-600 ring-2 ring-blue-600/30 shadow-xs'
                                 : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300'
                             }`}
                           >
@@ -7988,7 +7650,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     <button
                       type="button"
                       onClick={handleCreateCvFromTemplate}
-                      className="px-6 py-2.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md"
+                      className="px-6 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md"
                     >
                       <span>Buat &amp; Edit CV</span>
                       <ArrowRight className="w-4 h-4" />
@@ -8147,7 +7809,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     step="0.05"
                     value={photoScale}
                     onChange={(e) => setPhotoScale(parseFloat(e.target.value))}
-                    className="w-full accent-orange-500 cursor-pointer h-2 bg-slate-200 dark:bg-slate-700 rounded-[10px] appearance-none"
+                    className="w-full accent-[#1738D1] cursor-pointer h-2 bg-slate-200 dark:bg-slate-700 rounded-[10px] appearance-none"
                   />
                   <button
                     type="button"
@@ -8166,7 +7828,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   type="button"
                   onClick={() => setPhotoShape('circle')}
                   className={`px-3.5 py-1.5 rounded-[10px] text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                    photoShape === 'circle' ? 'bg-orange-500 text-white shadow-2xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                    photoShape === 'circle' ? 'bg-[#1738D1] text-white shadow-2xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
                   }`}
                 >
                   <div className="w-3.5 h-3.5 rounded-full border-2 border-current" />
@@ -8176,7 +7838,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   type="button"
                   onClick={() => setPhotoShape('square')}
                   className={`px-3.5 py-1.5 rounded-[10px] text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                    photoShape === 'square' ? 'bg-orange-500 text-white shadow-2xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                    photoShape === 'square' ? 'bg-[#1738D1] text-white shadow-2xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
                   }`}
                 >
                   <div className="w-3.5 h-3.5 rounded-[10px] border-2 border-current" />
@@ -8197,7 +7859,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <button
                 type="button"
                 onClick={handleApplyCroppedPhoto}
-                className="px-5 py-2 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md"
+                className="px-5 py-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md"
               >
                 <Check className="w-4 h-4" />
                 <span>Gunakan Foto Ini</span>
@@ -8422,7 +8084,7 @@ const A4PaperlikeCanvas: React.FC<{
             <div key={pageNum} className="flex flex-col items-center w-full max-w-[210mm] print:w-[210mm] print:m-0 print:block print:p-0">
               {/* A4 Paperlike Sheet Card */}
               <div
-                className="a4-paper-sheet relative bg-white text-slate-900 shadow-2xl shadow-slate-900/15 border border-slate-300/80 dark:border-slate-700/80 rounded-[2px] overflow-hidden transition-all duration-300 hover:shadow-slate-900/25 shrink-0 print:shadow-none print:border-none print:rounded-none print:m-0"
+                className="a4-paper-sheet relative bg-white text-slate-900 shadow-2xl shadow-slate-900/15 border border-slate-300/80 dark:border-slate-700/80 rounded-[10px] overflow-hidden transition-all duration-300 hover:shadow-slate-900/25 shrink-0 print:shadow-none print:border-none print:rounded-none print:m-0"
                 style={{
                   width: '210mm',
                   height: '297mm',
@@ -8556,14 +8218,14 @@ const CVTemplatePreview: React.FC<{
   // Data (merges customData with fallback dummy data)
   const dummyData = {
     showIcons: (customData as any)?.showIcons !== undefined ? (customData as any).showIcons : docShowIcons,
-    fullName: customData?.fullName?.trim() || 'John Doe',
-    jobTitle: customData?.headline?.trim() || 'Senior Software Engineer / Project Manager',
-    email: customData?.email?.trim() || 'john.doe@example.com',
-    phone: customData?.phone?.trim() || '+62 812-3456-7890',
-    location: customData?.location?.trim() || 'Jakarta, Indonesia',
-    website: customData?.website?.trim() || 'johndoe.dev',
-    linkedin: customData?.linkedin?.trim() || 'linkedin.com/in/johndoe',
-    github: customData?.github?.trim() || customData?.socialHandle?.trim() || 'github.com/johndoe',
+    fullName: customData?.fullName?.trim() || 'Nama Lengkap Anda',
+    jobTitle: customData?.headline?.trim() || 'Posisi / Jabatan Anda',
+    email: customData?.email?.trim() || 'email@contoh.com',
+    phone: customData?.phone?.trim() || '+62 8xx-xxxx-xxxx',
+    location: customData?.location?.trim() || 'Kota, Indonesia',
+    website: customData?.website?.trim() || '',
+    linkedin: customData?.linkedin?.trim() || '',
+    github: customData?.github?.trim() || customData?.socialHandle?.trim() || '',
     socialPlatform: customData?.socialPlatform || 'github',
     photoUrl: customData?.photoUrl !== undefined ? customData.photoUrl : '',
     summary:
@@ -8644,7 +8306,7 @@ const CVTemplatePreview: React.FC<{
             name: 'E-Commerce Platform',
             role: 'Lead Developer',
             tech: 'React, Node.js, TailwindCSS',
-            url: 'https://github.com/johndoe/ecommerce',
+            url: 'https://github.com/username/ecommerce',
             startDate: 'Jan 2023',
             endDate: 'Mar 2024',
             description:
@@ -8880,7 +8542,7 @@ const CVTemplatePreview: React.FC<{
               <div key={idx} className="mb-3">
                 <div className="flex items-baseline justify-between mb-0.5">
                   {docProjectLinkStyle === 'name' && projUrl ? (
-                    <a href={projUrl} target="_blank" rel="noreferrer" className="text-sm font-bold text-blue-700 hover:underline">{proj.name}</a>
+                    <a href={projUrl} target="_blank" rel="noreferrer" className="text-sm font-bold text-navy-700 hover:underline">{proj.name}</a>
                   ) : (
                     <p className="text-sm font-bold text-slate-900">{proj.name}</p>
                   )}
@@ -9919,26 +9581,26 @@ const CVTemplatePreview: React.FC<{
     const sectionBlocks: Record<string, React.ReactNode> = {
       summary: (
         <div key="summary" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">PROFESSIONAL SUMMARY</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">PROFESSIONAL SUMMARY</h2>
           <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
         </div>
       ),
       skills: (
         <div key="skills" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">SKILLS</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">SKILLS</h2>
           <p className="text-xs text-slate-700">{dummyData.skills.join(' • ')}</p>
         </div>
       ),
       experience: (
         <div key="experience" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">WORK EXPERIENCE</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">WORK EXPERIENCE</h2>
           {dummyData.experience.map((exp, idx) => (
             <div key={idx} className="mb-4">
               <div className="flex justify-between items-baseline mb-1">
                 <p className="text-sm font-bold text-slate-900">{exp.role}</p>
                 <p className="text-xs text-slate-600">{exp.period}</p>
               </div>
-              <p className="text-xs italic text-blue-700 mb-2">{exp.company}</p>
+              <p className="text-xs italic text-navy-700 mb-2">{exp.company}</p>
               <RenderBulletDescription text={exp.description} />
             </div>
           ))}
@@ -9946,14 +9608,14 @@ const CVTemplatePreview: React.FC<{
       ),
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">INTERNSHIPS</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">INTERNSHIPS</h2>
           {dummyData.internships.map((item, idx) => (
             <div key={idx} className="mb-3">
               <div className="flex justify-between items-baseline mb-1">
                 <p className="text-sm font-bold text-slate-900">{item.role}</p>
                 <p className="text-xs text-slate-600">{item.period}</p>
               </div>
-              <p className="text-xs italic text-blue-700 mb-1">{item.company}</p>
+              <p className="text-xs italic text-navy-700 mb-1">{item.company}</p>
               <RenderBulletDescription text={item.description} />
             </div>
           ))}
@@ -9961,11 +9623,11 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">PROJECTS</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">PROJECTS</h2>
           {dummyData.projects.map((proj, idx) => (
             <div key={idx} className="mb-3">
               <p className="text-sm font-bold text-slate-900">{proj.name}</p>
-              <p className="text-xs italic text-blue-700 mb-1">{proj.tech}</p>
+              <p className="text-xs italic text-navy-700 mb-1">{proj.tech}</p>
               <RenderBulletDescription text={proj.description} />
             </div>
           ))}
@@ -9973,14 +9635,14 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">ORGANIZATIONS</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">ORGANIZATIONS</h2>
           {dummyData.organizations.map((org, idx) => (
             <div key={idx} className="mb-3">
               <div className="flex justify-between items-baseline mb-1">
                 <p className="text-sm font-bold text-slate-900">{org.name}</p>
                 <p className="text-xs text-slate-600">{org.period}</p>
               </div>
-              <p className="text-xs italic text-blue-700 mb-1">{org.role}</p>
+              <p className="text-xs italic text-navy-700 mb-1">{org.role}</p>
               <RenderBulletDescription text={org.description} />
             </div>
           ))}
@@ -9988,7 +9650,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       education: (
         <div key="education" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">EDUCATION</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">EDUCATION</h2>
           {dummyData.education.map((edu, idx) => (
             <div key={idx} className="mb-2">
               <div className="flex justify-between items-baseline mb-1">
@@ -10002,10 +9664,10 @@ const CVTemplatePreview: React.FC<{
       ),
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">CERTIFICATIONS</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">CERTIFICATIONS</h2>
           {dummyData.certifications.map((cert, idx) => (
             <div key={idx} className="flex justify-between text-xs mb-1">
-              <span className="font-bold text-slate-900">{cert.name} — <em className="text-blue-700">{cert.issuer}</em></span>
+              <span className="font-bold text-slate-900">{cert.name} — <em className="text-navy-700">{cert.issuer}</em></span>
               <span className="text-slate-600">{cert.issueDate}</span>
             </div>
           ))}
@@ -10013,13 +9675,13 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">LANGUAGES</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">LANGUAGES</h2>
           <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
       ) : null,
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">COURSES</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">COURSES</h2>
           {dummyData.courses.map((crs, idx) => (
             <div key={idx} className="mb-2 text-xs">
               <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
@@ -10029,7 +9691,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">SCHOLARSHIPS</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">SCHOLARSHIPS</h2>
           {dummyData.scholarships.map((sch, idx) => (
             <div key={idx} className="mb-2 text-xs">
               <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
@@ -10039,7 +9701,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">VOLUNTEER</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">VOLUNTEER</h2>
           {dummyData.volunteers.map((vol, idx) => (
             <div key={idx} className="mb-2 text-xs">
               <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
@@ -10049,7 +9711,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-800 border-b-2 border-blue-600 pb-1 mb-3">REFERENCES</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">REFERENCES</h2>
           {dummyData.references.map((ref, idx) => (
             <div key={idx} className="text-xs text-slate-700">
               <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
@@ -10061,8 +9723,8 @@ const CVTemplatePreview: React.FC<{
 
     return (
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
-        <div className="border-b-3 border-blue-600 pb-4 mb-6">
-          <h1 className="text-3xl font-black uppercase text-blue-900">{dummyData.fullName}</h1>
+        <div className="border-b-3 border-navy-600 pb-4 mb-6">
+          <h1 className="text-3xl font-black uppercase text-navy-900">{dummyData.fullName}</h1>
           <p className="text-base font-semibold text-blue-600 mt-1">{dummyData.jobTitle}</p>
           <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap gap-x-3 gap-y-1 items-center mt-2" />
         </div>
@@ -10077,19 +9739,19 @@ const CVTemplatePreview: React.FC<{
     const sectionBlocks: Record<string, React.ReactNode> = {
       summary: (
         <div key="summary" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">SUMMARY</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">SUMMARY</h2>
           <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
         </div>
       ),
       skills: (
         <div key="skills" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">SKILLS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">SKILLS</h2>
           <p className="text-xs text-slate-700 leading-relaxed">{dummyData.skills.join(' • ')}</p>
         </div>
       ),
       experience: (
         <div key="experience" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">EXPERIENCE</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">EXPERIENCE</h2>
           {dummyData.experience.map((exp, idx) => (
             <div key={idx} className="mb-4">
               <div className="flex justify-between items-baseline">
@@ -10104,7 +9766,7 @@ const CVTemplatePreview: React.FC<{
       ),
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">INTERNSHIPS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">INTERNSHIPS</h2>
           {dummyData.internships.map((item, idx) => (
             <div key={idx} className="mb-3">
               <div className="flex justify-between items-baseline">
@@ -10119,11 +9781,11 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">PROJECTS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">PROJECTS</h2>
           {dummyData.projects.map((proj, idx) => (
             <div key={idx} className="mb-3">
               <p className="text-sm font-bold text-slate-900">{proj.name}</p>
-              <p className="text-xs italic text-purple-600 mb-1">{proj.tech}</p>
+              <p className="text-xs italic text-orange-600 mb-1">{proj.tech}</p>
               <RenderBulletDescription text={proj.description} />
             </div>
           ))}
@@ -10131,7 +9793,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">ORGANIZATIONS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">ORGANIZATIONS</h2>
           {dummyData.organizations.map((org, idx) => (
             <div key={idx} className="mb-3">
               <div className="flex justify-between items-baseline">
@@ -10146,7 +9808,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       education: (
         <div key="education" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">EDUCATION</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">EDUCATION</h2>
           {dummyData.education.map((edu, idx) => (
             <div key={idx} className="mb-2">
               <div className="flex justify-between items-baseline">
@@ -10160,10 +9822,10 @@ const CVTemplatePreview: React.FC<{
       ),
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">CERTIFICATIONS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">CERTIFICATIONS</h2>
           {dummyData.certifications.map((cert, idx) => (
             <div key={idx} className="flex justify-between text-xs mb-1">
-              <span className="font-bold text-slate-900">{cert.name} — <em className="text-purple-600">{cert.issuer}</em></span>
+              <span className="font-bold text-slate-900">{cert.name} — <em className="text-orange-600">{cert.issuer}</em></span>
               <span className="text-slate-600">{cert.issueDate}</span>
             </div>
           ))}
@@ -10171,13 +9833,13 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">LANGUAGES</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">LANGUAGES</h2>
           <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
       ) : null,
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">COURSES</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">COURSES</h2>
           {dummyData.courses.map((crs, idx) => (
             <div key={idx} className="mb-2 text-xs">
               <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
@@ -10187,7 +9849,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">SCHOLARSHIPS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">SCHOLARSHIPS</h2>
           {dummyData.scholarships.map((sch, idx) => (
             <div key={idx} className="mb-2 text-xs">
               <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
@@ -10197,7 +9859,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">VOLUNTEER</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">VOLUNTEER</h2>
           {dummyData.volunteers.map((vol, idx) => (
             <div key={idx} className="mb-2 text-xs">
               <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
@@ -10207,7 +9869,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-purple-400 pb-1 mb-3">REFERENCES</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">REFERENCES</h2>
           {dummyData.references.map((ref, idx) => (
             <div key={idx} className="text-xs text-slate-700">
               <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
@@ -10219,20 +9881,20 @@ const CVTemplatePreview: React.FC<{
 
     return (
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
-        <div className={`flex items-start gap-6 border-b-2 border-purple-600 pb-4 mb-6 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex items-start gap-6 border-b-2 border-[#1738D1] pb-4 mb-6 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
           <div className="flex-1">
             <h1 className="text-3xl font-black uppercase text-slate-900">{dummyData.fullName}</h1>
-            <p className="text-base font-semibold text-purple-600 mt-1">{dummyData.jobTitle}</p>
+            <p className="text-base font-semibold text-orange-600 mt-1">{dummyData.jobTitle}</p>
             <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap gap-x-3 gap-y-1 items-center mt-2" />
           </div>
           {dummyData.photoUrl ? (
             <img
               src={dummyData.photoUrl}
               alt={dummyData.fullName}
-              className={`w-24 h-24 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border-2 border-purple-600 shrink-0`}
+              className={`w-24 h-24 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border-2 border-[#1738D1] shrink-0`}
             />
           ) : (
-            <div className={`w-24 h-24 border-2 border-purple-600 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} bg-slate-100 flex items-center justify-center text-xs text-slate-400 shrink-0`}>
+            <div className={`w-24 h-24 border-2 border-[#1738D1] ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} bg-slate-100 flex items-center justify-center text-xs text-slate-400 shrink-0`}>
               Photo
             </div>
           )}
@@ -10405,7 +10067,7 @@ const CVTemplatePreview: React.FC<{
     const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
     const sectionBlocks: Record<string, React.ReactNode> = {
       summary: (
-        <div key="summary" className="mb-6 bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-[10px]">
+        <div key="summary" className="mb-6 bg-orange-50 border-l-4 border-[#1738D1] p-4 rounded-r-[10px]">
           <h2 className="text-sm font-black uppercase text-orange-800 mb-2">ABOUT ME</h2>
           <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
         </div>
@@ -10413,7 +10075,7 @@ const CVTemplatePreview: React.FC<{
       skills: (
         <div key="skills" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
             CORE COMPETENCIES
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -10428,7 +10090,7 @@ const CVTemplatePreview: React.FC<{
       experience: (
         <div key="experience" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
             PROFESSIONAL EXPERIENCE
           </h2>
           {dummyData.experience.map((exp, idx) => (
@@ -10446,7 +10108,7 @@ const CVTemplatePreview: React.FC<{
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
             INTERNSHIPS
           </h2>
           {dummyData.internships.map((item, idx) => (
@@ -10464,7 +10126,7 @@ const CVTemplatePreview: React.FC<{
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
             PROJECTS
           </h2>
           {dummyData.projects.map((proj, idx) => (
@@ -10479,7 +10141,7 @@ const CVTemplatePreview: React.FC<{
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
             ORGANIZATIONS
           </h2>
           {dummyData.organizations.map((org, idx) => (
@@ -10497,7 +10159,7 @@ const CVTemplatePreview: React.FC<{
       education: (
         <div key="education" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
             EDUCATION
           </h2>
           {dummyData.education.map((edu, idx) => (
@@ -10512,7 +10174,7 @@ const CVTemplatePreview: React.FC<{
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
             CERTIFICATIONS
           </h2>
           {dummyData.certifications.map((cert, idx) => (
@@ -10525,7 +10187,7 @@ const CVTemplatePreview: React.FC<{
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
             LANGUAGES
           </h2>
           <p className="text-xs text-slate-700 pl-4">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
@@ -10534,7 +10196,7 @@ const CVTemplatePreview: React.FC<{
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
             COURSES
           </h2>
           {dummyData.courses.map((crs, idx) => (
@@ -10547,7 +10209,7 @@ const CVTemplatePreview: React.FC<{
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
             SCHOLARSHIPS
           </h2>
           {dummyData.scholarships.map((sch, idx) => (
@@ -10560,7 +10222,7 @@ const CVTemplatePreview: React.FC<{
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
             VOLUNTEER
           </h2>
           {dummyData.volunteers.map((vol, idx) => (
@@ -10573,7 +10235,7 @@ const CVTemplatePreview: React.FC<{
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
             REFERENCES
           </h2>
           {dummyData.references.map((ref, idx) => (
@@ -10588,7 +10250,7 @@ const CVTemplatePreview: React.FC<{
     return (
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
         {/* Header with Orange Accent */}
-        <div className="border-l-8 border-orange-500 pl-6 mb-6">
+        <div className="border-l-8 border-[#1738D1] pl-6 mb-6">
           <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-1">
             {dummyData.fullName}
           </h1>
@@ -10606,7 +10268,7 @@ const CVTemplatePreview: React.FC<{
     const sectionBlocks: Record<string, React.ReactNode> = {
       summary: (
         <div key="summary" className="mb-6 mt-6">
-          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
             EXECUTIVE PROFILE
           </h2>
           <p className="text-xs leading-relaxed text-slate-700 font-medium">{dummyData.summary}</p>
@@ -10614,7 +10276,7 @@ const CVTemplatePreview: React.FC<{
       ),
       skills: (
         <div key="skills" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
             CORE COMPETENCIES
           </h2>
           <div className="grid grid-cols-3 gap-2">
@@ -10629,13 +10291,13 @@ const CVTemplatePreview: React.FC<{
       ),
       experience: (
         <div key="experience" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
             LEADERSHIP EXPERIENCE
           </h2>
           {dummyData.experience.map((exp, idx) => (
             <div key={idx} className="mb-4">
               <div className="flex justify-between items-baseline mb-1">
-                <p className="text-sm font-bold text-blue-900">{exp.role}</p>
+                <p className="text-sm font-bold text-navy-900">{exp.role}</p>
                 <p className="text-xs text-slate-600 font-semibold">{exp.period}</p>
               </div>
               <p className="text-xs font-bold text-slate-800 mb-2">{exp.company}</p>
@@ -10646,13 +10308,13 @@ const CVTemplatePreview: React.FC<{
       ),
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
             INTERNSHIPS
           </h2>
           {dummyData.internships.map((item, idx) => (
             <div key={idx} className="mb-3">
               <div className="flex justify-between items-baseline mb-1">
-                <p className="text-sm font-bold text-blue-900">{item.role}</p>
+                <p className="text-sm font-bold text-navy-900">{item.role}</p>
                 <p className="text-xs text-slate-600 font-semibold">{item.period}</p>
               </div>
               <p className="text-xs font-bold text-slate-800 mb-1">{item.company}</p>
@@ -10663,12 +10325,12 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
             PROJECTS
           </h2>
           {dummyData.projects.map((proj, idx) => (
             <div key={idx} className="mb-3">
-              <p className="text-sm font-bold text-blue-900">{proj.name}</p>
+              <p className="text-sm font-bold text-navy-900">{proj.name}</p>
               <p className="text-xs font-semibold text-slate-600 mb-1">{proj.tech}</p>
               <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
             </div>
@@ -10677,13 +10339,13 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
             ORGANIZATIONS
           </h2>
           {dummyData.organizations.map((org, idx) => (
             <div key={idx} className="mb-3">
               <div className="flex justify-between items-baseline mb-1">
-                <p className="text-sm font-bold text-blue-900">{org.name}</p>
+                <p className="text-sm font-bold text-navy-900">{org.name}</p>
                 <p className="text-xs text-slate-600 font-semibold">{org.period}</p>
               </div>
               <p className="text-xs font-semibold text-slate-700 mb-1">{org.role}</p>
@@ -10694,7 +10356,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       education: (
         <div key="education" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
             EDUCATION
           </h2>
           {dummyData.education.map((edu, idx) => (
@@ -10710,12 +10372,12 @@ const CVTemplatePreview: React.FC<{
       ),
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
             CERTIFICATIONS
           </h2>
           {dummyData.certifications.map((cert, idx) => (
             <div key={idx} className="flex justify-between text-xs mb-1">
-              <span className="font-bold text-slate-900">{cert.name} — <em className="text-blue-900">{cert.issuer}</em></span>
+              <span className="font-bold text-slate-900">{cert.name} — <em className="text-navy-900">{cert.issuer}</em></span>
               <span className="text-slate-600">{cert.issueDate}</span>
             </div>
           ))}
@@ -10723,7 +10385,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
             LANGUAGES
           </h2>
           <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
@@ -10731,7 +10393,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
             COURSES
           </h2>
           {dummyData.courses.map((crs, idx) => (
@@ -10743,7 +10405,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
             SCHOLARSHIPS
           </h2>
           {dummyData.scholarships.map((sch, idx) => (
@@ -10755,7 +10417,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
             VOLUNTEER
           </h2>
           {dummyData.volunteers.map((vol, idx) => (
@@ -10767,7 +10429,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-blue-900 border-b-3 border-blue-900 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
             REFERENCES
           </h2>
           {dummyData.references.map((ref, idx) => (
@@ -11419,7 +11081,7 @@ const CVTemplatePreview: React.FC<{
     const sectionBlocks: Record<string, React.ReactNode> = {
       summary: (
         <div key="summary" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-indigo-900 mb-2 text-center">
+          <h2 className="text-sm font-black uppercase text-navy-900 mb-2 text-center">
             Research Interests &amp; Summary
           </h2>
           <p className="text-xs leading-relaxed text-slate-700 text-center">{dummyData.summary}</p>
@@ -11427,16 +11089,16 @@ const CVTemplatePreview: React.FC<{
       ),
       education: (
         <div key="education" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
             EDUCATION
           </h2>
           {dummyData.education.map((edu, idx) => (
-            <div key={idx} className="bg-indigo-50 p-4 rounded-[10px] border border-indigo-200 mb-2">
+            <div key={idx} className="bg-slate-50 p-4 rounded-[10px] border border-slate-200 mb-2">
               <div className="flex justify-between items-baseline mb-1">
                 <p className="text-base font-bold text-slate-900">{edu.institution}</p>
                 <p className="text-xs text-slate-600">{edu.year}</p>
               </div>
-              <p className="text-sm font-semibold text-indigo-700 mb-1">{edu.degree}</p>
+              <p className="text-sm font-semibold text-navy-700 mb-1">{edu.degree}</p>
               <p className="text-xs text-slate-700">{edu.gpa}</p>
             </div>
           ))}
@@ -11444,7 +11106,7 @@ const CVTemplatePreview: React.FC<{
       ),
       experience: (
         <div key="experience" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
             RESEARCH &amp; PROFESSIONAL EXPERIENCE
           </h2>
           {dummyData.experience.map((exp, idx) => (
@@ -11453,7 +11115,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-sm font-bold text-slate-900">{exp.role}</p>
                 <p className="text-xs text-slate-600">{exp.period}</p>
               </div>
-              <p className="text-xs font-semibold text-indigo-700 mb-2">{exp.company}</p>
+              <p className="text-xs font-semibold text-navy-700 mb-2">{exp.company}</p>
               <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
             </div>
           ))}
@@ -11461,7 +11123,7 @@ const CVTemplatePreview: React.FC<{
       ),
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
             INTERNSHIP EXPERIENCE
           </h2>
           {dummyData.internships.map((item, idx) => (
@@ -11470,7 +11132,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-sm font-bold text-slate-900">{item.role}</p>
                 <p className="text-xs text-slate-600">{item.period}</p>
               </div>
-              <p className="text-xs font-semibold text-indigo-700 mb-1">{item.company}</p>
+              <p className="text-xs font-semibold text-navy-700 mb-1">{item.company}</p>
               <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
             </div>
           ))}
@@ -11478,13 +11140,13 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
             PUBLICATIONS &amp; PROJECTS
           </h2>
           {dummyData.projects.map((proj, idx) => (
             <div key={idx} className="mb-3">
               <p className="text-sm font-bold text-slate-900">{proj.name}</p>
-              <p className="text-xs text-indigo-700 mb-1">{proj.tech}</p>
+              <p className="text-xs text-navy-700 mb-1">{proj.tech}</p>
               <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
             </div>
           ))}
@@ -11492,7 +11154,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
             ACADEMIC ORGANIZATIONS
           </h2>
           {dummyData.organizations.map((org, idx) => (
@@ -11501,7 +11163,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-sm font-bold text-slate-900">{org.name}</p>
                 <p className="text-xs text-slate-600">{org.period}</p>
               </div>
-              <p className="text-xs font-semibold text-indigo-700 mb-1">{org.role}</p>
+              <p className="text-xs font-semibold text-navy-700 mb-1">{org.role}</p>
               <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
             </div>
           ))}
@@ -11509,13 +11171,13 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       skills: (
         <div key="skills" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
             TECHNICAL SKILLS
           </h2>
           <div className="grid grid-cols-3 gap-2">
             {dummyData.skills.map((skill, idx) => (
               <div key={idx} className="text-xs text-slate-700 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 bg-indigo-700 rounded-full"></span>
+                <span className="w-1.5 h-1.5 bg-navy-700 rounded-full"></span>
                 {skill}
               </div>
             ))}
@@ -11524,13 +11186,13 @@ const CVTemplatePreview: React.FC<{
       ),
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
             HONORS &amp; CERTIFICATIONS
           </h2>
           <div className="space-y-1 text-xs">
             {dummyData.certifications.map((cert, idx) => (
               <div key={idx} className="flex justify-between">
-                <span className="font-bold text-slate-900">{cert.name} — <em className="text-indigo-700">{cert.issuer}</em></span>
+                <span className="font-bold text-slate-900">{cert.name} — <em className="text-navy-700">{cert.issuer}</em></span>
                 <span className="text-slate-600">{cert.issueDate}</span>
               </div>
             ))}
@@ -11539,7 +11201,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
             LANGUAGES
           </h2>
           <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
@@ -11547,7 +11209,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
             COURSES &amp; SYMPOSIUMS
           </h2>
           {dummyData.courses.map((crs, idx) => (
@@ -11559,7 +11221,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
             FELLOWSHIPS &amp; SCHOLARSHIPS
           </h2>
           {dummyData.scholarships.map((sch, idx) => (
@@ -11571,7 +11233,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
             COMMUNITY SERVICE
           </h2>
           {dummyData.volunteers.map((vol, idx) => (
@@ -11583,7 +11245,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-indigo-900 border-b border-indigo-700 pb-1 mb-3">
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
             ACADEMIC REFERENCES
           </h2>
           {dummyData.references.map((ref, idx) => (
@@ -11598,11 +11260,11 @@ const CVTemplatePreview: React.FC<{
     return (
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
         {/* Academic Header */}
-        <div className="text-center mb-6 pb-4 border-b-2 border-indigo-700">
+        <div className="text-center mb-6 pb-4 border-b-2 border-navy-700">
           <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-2">
             {dummyData.fullName}
           </h1>
-          <p className="text-sm font-semibold text-indigo-700 mb-2 uppercase tracking-wide">
+          <p className="text-sm font-semibold text-navy-700 mb-2 uppercase tracking-wide">
             {dummyData.jobTitle}
           </p>
           <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center" />
@@ -11631,7 +11293,7 @@ const CVTemplatePreview: React.FC<{
           </h2>
           <div className="flex flex-wrap gap-1.5 text-xs">
             {dummyData.skills.map((skill, idx) => (
-              <span key={idx} className="bg-slate-100 border border-slate-300 px-2 py-0.5 rounded text-[11px]">
+              <span key={idx} className="bg-slate-100 border border-slate-300 px-2 py-0.5 rounded-[10px] text-[11px]">
                 [{skill}]
               </span>
             ))}

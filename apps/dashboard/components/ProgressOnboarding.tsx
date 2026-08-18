@@ -49,7 +49,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
       subtitle: 'Kirim lamaran kerja instan menggunakan CV ATS AI kamu',
       status: 'pending',
       icon: Briefcase,
-      color: 'text-violet-500 bg-violet-100 dark:bg-violet-950/60 dark:text-violet-400',
+      color: 'text-orange-500 bg-orange-100 dark:bg-orange-950/60 dark:text-orange-400',
       badge: null,
     },
   ]);
@@ -76,18 +76,18 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
   const progressPercent = Math.round((completedCount / steps.length) * 100);
 
   return (
-    <div className="bg-[#0D3BD9] rounded-[10px] p-5 md:p-6 text-white shadow-lg border border-blue-500/30">
+    <div className="bg-navy-700 rounded-[10px] p-5 md:p-6 text-white shadow-lg border border-navy-800">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
         {/* Left Info & Steps */}
         <div className="lg:col-span-8 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-[10px] text-[11px] font-bold bg-violet-500/30 text-violet-200 border border-violet-400/30 flex items-center gap-1">
+                <span className="px-2.5 py-0.5 rounded-[10px] text-[11px] font-bold bg-[#1738D1]/30 text-orange-200 border border-orange-400/30 flex items-center gap-1">
                   <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                   Panduan Pengguna Baru
                 </span>
-                <span className="text-xs text-violet-300 font-semibold">
+                <span className="text-xs text-orange-300 font-semibold">
                   {completedCount} dari {steps.length} Selesai ({progressPercent}%)
                 </span>
               </div>
@@ -100,7 +100,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
           {/* Progress Bar */}
           <div className="w-full bg-slate-900/80 rounded-full h-2.5 overflow-hidden border border-white/10 p-0.5">
             <div
-              className="bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400 h-full rounded-full transition-all duration-500 shadow-sm shadow-orange-500/40"
+              className="bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400 h-full rounded-full transition-all duration-500 shadow-sm shadow-[#1738D1]/40"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -118,7 +118,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
                       ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-100 hover:bg-emerald-900/50'
                       : step.status === 'in_progress'
                       ? 'bg-amber-950/40 border-amber-500/40 text-amber-100 hover:bg-amber-900/50 ring-1 ring-amber-400/30'
-                      : 'bg-violet-950/30 border-violet-800/50 text-slate-300 hover:bg-violet-900/40'
+                      : 'bg-orange-950/30 border-orange-800/40 text-slate-300 hover:bg-orange-900/40'
                   }`}
                 >
                   <div
@@ -130,7 +130,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
                     <div className="flex items-center justify-between gap-1">
                       <span className="text-xs font-bold truncate">{step.title}</span>
                       {step.badge && (
-                        <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-400 text-slate-950 uppercase shrink-0">
+                        <span className="px-1.5 py-0.5 rounded-[10px] text-[9px] font-black bg-amber-400 text-slate-950 uppercase shrink-0">
                           {step.badge}
                         </span>
                       )}
@@ -146,7 +146,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
         </div>
 
         {/* Right Motivation Banner for Premium Pass Trial */}
-        <div className="lg:col-span-4 bg-gradient-to-b from-violet-800/60 to-slate-900/80 rounded-[10px] p-4 border border-amber-400/30 flex flex-col justify-between h-full space-y-3 relative overflow-hidden shadow-md">
+        <div className="lg:col-span-4 bg-gradient-to-b from-navy-900/80 to-slate-900/80 rounded-[10px] p-4 border border-amber-400/30 flex flex-col justify-between h-full space-y-3 relative overflow-hidden shadow-md">
           <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
 
           <div>
@@ -159,7 +159,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
                   <h3 className="text-xs font-black text-amber-300 uppercase tracking-wider">
                     Eksklusif Member Baru
                   </h3>
-                  <p className="text-[10px] text-violet-200">
+                  <p className="text-[10px] text-orange-200">
                     Peluang Lolos HRD Naik +85%
                   </p>
                 </div>

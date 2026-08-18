@@ -487,10 +487,20 @@ export function analyzeAtsCorrelation(
     { kw: 'Pengujian Automated (Jest/Cypress)', category: 'Quality Assurance' },
   ];
 
+  // CV asli (dari DB/CVView) bisa menyimpan achievements sebagai array ATAU
+  // string (field description). Normalisasi dulu supaya aman di semua bentuk.
+  const getExpText = (e: any): string => {
+    const ach = e?.achievements;
+    if (Array.isArray(ach)) return ach.join(' ');
+    if (typeof ach === 'string') return ach;
+    return e?.description || '';
+  };
+
   return targetKeywords.map((item, idx) => {
-    const isFound = parsed.skills.some((s) => s.toLowerCase().includes(item.kw.split(' ')[0].toLowerCase())) ||
-      parsed.summary.toLowerCase().includes(item.kw.split(' ')[0].toLowerCase()) ||
-      parsed.experience.some((e) => e.achievements.some((a) => a.toLowerCase().includes(item.kw.split(' ')[0].toLowerCase())));
+    const kw = item.kw.split(' ')[0].toLowerCase();
+    const isFound = parsed.skills.some((s) => s.toLowerCase().includes(kw)) ||
+      parsed.summary.toLowerCase().includes(kw) ||
+      parsed.experience.some((e) => getExpText(e).toLowerCase().includes(kw));
 
     let visibilityScore = 75;
     let atsScore = isFound ? 90 : 25;

@@ -18,14 +18,17 @@ CUTI is an AI-powered career platform that helps users create ATS-optimized CVs,
 cuti/
 ├── apps/
 │   ├── api/          # NestJS REST API
-│   ├── user/         # Next.js user dashboard
+│   ├── dashboard/    # Next.js user dashboard (port 3000)
 │   ├── admin/        # Admin dashboard
-│   └── landing/      # Marketing landing page
+│   ├── web/          # Astro landing page (employr.id)
+│   ├── learning/     # Kursus & sertifikasi (learning.employr.id)
+│   └── faq/          # Pusat Bantuan (faq.employr.id, port 3005)
 ├── packages/
 │   ├── db/           # Prisma schema & client
 │   ├── types/        # Shared TypeScript types
 │   ├── ui/           # Shared UI components
-│   └── config/       # Shared configs
+│   ├── config/       # Shared configs
+│   └── faq/          # Knowledge base FAQ + retrieval search (TF-IDF, tanpa AI)
 └── docs/             # Documentation
 ```
 
@@ -57,6 +60,8 @@ pnpm dev
 - API: http://localhost:3001
 - User Dashboard: http://localhost:3000
 - Admin Dashboard: http://localhost:3002
+- Learning Academy: http://localhost:3004
+- FAQ / Pusat Bantuan: http://localhost:3005
 
 ## Features
 
@@ -67,6 +72,7 @@ pnpm dev
 - 💳 Premium membership with Midtrans integration
 - 🎮 Gamification (XP, levels, coins)
 - 🔗 Referral system
+- 📚 Pusat Bantuan (faq.employr.id) + Chat CS Herdi berbasis retrieval (TF-IDF, tanpa LLM)
 
 ## License
 

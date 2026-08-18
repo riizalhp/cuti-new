@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ["@cuti/ui", "@cuti/auth", "@cuti/config", "@cuti/db"],
+  transpilePackages: ["@cuti/ui", "@cuti/auth", "@cuti/config", "@cuti/db", "@cuti/faq"],
 
   // Enable optimizations
   compiler: {

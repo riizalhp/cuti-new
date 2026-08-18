@@ -82,10 +82,10 @@ export const PromoModal: React.FC<PromoModalProps> = ({
     <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg relative overflow-hidden flex flex-col">
         {/* Top Decorative Header Banner */}
-        <div className="relative bg-[#0D3BD9] p-6 text-white overflow-hidden">
+        <div className="relative bg-navy-700 p-6 text-white overflow-hidden">
           {/* Background Lighting/Glow Circles */}
           <div className="absolute top-0 right-0 -mr-10 -mt-10 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-32 h-32 bg-violet-400/20 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-32 h-32 bg-orange-400/20 rounded-full blur-2xl pointer-events-none" />
 
           {/* Close Button */}
           <button
@@ -107,7 +107,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
               Diskon 70% Paket Pro AI Career Assistant!
             </h3>
 
-            <p className="text-xs text-violet-100 font-medium leading-relaxed">
+            <p className="text-xs text-slate-100 font-medium leading-relaxed">
               Tingkatkan peluang panggilan interview kerja hingga 3x lipat dengan AI Resume & Auto ATS Matcher.
             </p>
           </div>
@@ -137,9 +137,9 @@ export const PromoModal: React.FC<PromoModalProps> = ({
           </div>
 
           {/* Coupon Code Banner */}
-          <div className="p-4 rounded-[10px] bg-violet-50/70 dark:bg-violet-950/50 border border-violet-200 dark:border-violet-800/60 flex items-center justify-between gap-3">
+          <div className="p-4 rounded-[10px] bg-orange-50/70 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-800/50 flex items-center justify-between gap-3">
             <div className="space-y-0.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400 flex items-center gap-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 flex items-center gap-1">
                 <Tag className="w-3 h-3" />
                 <span>Kode Promo Eksklusif</span>
               </span>
@@ -153,7 +153,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
               className={`rounded-[10px] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                 copied
                   ? 'bg-emerald-600 text-white'
-                  : 'bg-violet-600 hover:bg-violet-700 text-white'
+                  : 'bg-[#1738D1] hover:bg-[#132EA8] text-white'
               }`}
             >
               {copied ? (
@@ -218,7 +218,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
           <div className="space-y-2.5 pt-2">
             <Button
               onClick={handleClaim}
-              className="w-full py-3 h-auto rounded-[10px] bg-[#0D3BD9] hover:bg-[#0B33BD] text-white font-extrabold text-sm shadow-lg shadow-blue-500/25 transition cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3 h-auto rounded-[10px] bg-navy-700 hover:bg-navy-800 text-white font-extrabold text-sm shadow-lg shadow-blue-500/25 transition cursor-pointer flex items-center justify-center gap-2"
             >
               <Sparkles className="w-4 h-4 text-amber-300" />
               <span>Klaim Diskon 70% Sekarang</span>
@@ -231,7 +231,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                   type="checkbox"
                   checked={dontShowToday}
                   onChange={(e) => setDontShowToday(e.target.checked)}
-                  className="rounded border-slate-300 dark:border-slate-700 text-violet-600 focus:ring-violet-500 w-3.5 h-3.5"
+                  className="rounded-[10px] border-slate-300 dark:border-slate-700 text-orange-600 focus:ring-[#1738D1] w-3.5 h-3.5"
                 />
                 <span>Jangan tampilkan hari ini lagi</span>
               </label>

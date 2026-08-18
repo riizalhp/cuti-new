@@ -20,6 +20,14 @@ interface ChatMessage {
   timestamp: string;
 }
 
+/**
+ * Render teks balasan bot: ubah penanda **bold** menjadi <strong> sungguhan
+ * (tanpa tanda bintang), sehingga judul artikel tampil tebal secara natural.
+ */
+const renderBotText = (text: string): string => {
+  return text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+};
+
 export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
@@ -30,11 +38,12 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
 
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [suggestionChips, setSuggestionChips] = useState<string[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'init-1',
       sender: 'bot',
-      text: 'Halo, saya Herdi dari Customer Service AmbilCUTI. Ada yang bisa saya bantu terkait penggunaan sistem, panduan fitur, atau kendala yang sedang kamu alami?',
+      text: 'Halo, saya Herdi dari Customer Service Employr. Ada yang bisa saya bantu terkait penggunaan sistem, panduan fitur, atau kendala yang sedang kamu alami? Jawaban saya ambil otomatis dari Pusat Bantuan Employr (faq.employr.id).',
       timestamp: 'Baru saja',
     },
   ]);
@@ -44,6 +53,11 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
     'Kendala pembayaran',
     'Panduan Misi dan Referral',
   ];
+
+  // Base URL situs FAQ (faq.employr.id). Bisa di-override lewat env untuk staging/dev.
+  const faqBaseUrl =
+    process.env.NEXT_PUBLIC_FAQ_URL ||
+    (process.env.NODE_ENV === 'production' ? 'https://faq.employr.id' : 'http://localhost:3005');
 
   // Click outside listener to auto-close chat room when clicking outside area
   useEffect(() => {
@@ -118,27 +132,41 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
     setMessages((prev) => [...prev, userMsg]);
     if (!customPrompt) setInputText('');
     setIsTyping(true);
+    setSuggestionChips([]);
+    const startedAt = Date.now();
 
     try {
-      const res = await fetch('/api/gemini', {
+      // Retrieval-based (RAG tanpa LLM): jawaban diambil dari Pusat Bantuan via /api/faq-chat
+      const res = await fetch('/api/faq-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: query,
-          systemInstruction:
-            'Nama Anda adalah Herdi, Customer Service AmbilCUTI yang sangat ramah, sopan, hangat, dan solutif. Tugas Anda adalah membantu pengguna memahami cara menggunakan fitur platform (CV Builder, Tracker, Misi Cuan, Referral, Pembayaran), memberikan panduan pencetakan PDF via Ctrl+P, serta memberikan solusi jika terjadi error atau kendala teknis. Jawablah dalam Bahasa Indonesia yang santun, jelas, dan sangat ramah. DILARANG EMOJI: Jangan pernah menggunakan emoji atau emoticon dalam bentuk apapun.',
-        }),
+        body: JSON.stringify({ query }),
       });
 
       const data = await res.json();
+
+      // Pastikan animasi mengetik terlihat sebentar sebelum jawaban muncul
+      const minTypingMs = 900;
+      const elapsed = Date.now() - startedAt;
+      if (elapsed < minTypingMs) {
+        await new Promise((resolve) => setTimeout(resolve, minTypingMs - elapsed));
+      }
+
       const botMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
-        text: data.text || 'Maaf, terjadi masalah saat memproses pertanyaan kamu. Silakan periksa koneksi internet atau coba beberapa saat lagi.',
+        text:
+          data.text ||
+          'Maaf, terjadi masalah saat mencari jawaban. Silakan periksa koneksi internet atau coba beberapa saat lagi.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
       setMessages((prev) => [...prev, botMsg]);
+
+      // Tampilkan artikel terkait sebagai chip saran lanjutan
+      if (Array.isArray(data.suggestions) && data.suggestions.length > 0) {
+        setSuggestionChips(data.suggestions.slice(0, 3));
+      }
     } catch {
       const errorMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -157,38 +185,46 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
   const isBubbleVisible = !isScrolling && !isExpanded;
 
   return (
-    <div ref={containerRef} className="fixed z-40 right-2 bottom-3 md:right-4 md:bottom-5 pointer-events-auto select-none">
+    <div ref={containerRef} className="fixed z-40 right-2 bottom-18 md:right-4 md:bottom-5 pointer-events-auto select-none">
       {isExpanded ? (
         /* MINI CHAT ROOM POPUP WIDGET */
         <div className="w-[310px] sm:w-[350px] h-[430px] sm:h-[470px] rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
           {/* Mini Chat Room Header */}
-          <div className="p-3.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
+          <div className="p-3.5 bg-navy-700 text-white flex items-center justify-between border-b border-navy-800 shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="relative w-8 h-8 rounded-full border border-purple-400 overflow-hidden shrink-0 shadow-xs">
+              <div className="relative w-8 h-8 rounded-full border border-orange-400 overflow-hidden shrink-0 shadow-xs">
                 <img
-                  src="/images/tokoh-1.png"
+                  src="/images/mascot-1.webp"
                   alt="Herdi CS"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover scale-[2.1] origin-top translate-y-1"
                 />
                 <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900" />
               </div>
               <div>
                 <h4 className="font-extrabold text-xs text-white flex items-center gap-1.5 leading-tight">
                   <span>Herdi</span>
-                  <span className="px-1.5 py-0.2 rounded-[10px] bg-emerald-500/20 text-emerald-400 text-[9px] font-bold border border-emerald-500/30">
+                  <span className="px-1.5 py-0.2 rounded-[10px] bg-emerald-500/20 text-emerald-300 text-[9px] font-bold border border-emerald-500/30">
                     Online
                   </span>
                 </h4>
-                <p className="text-[10px] text-slate-300 font-medium">
-                  Customer Service AmbilCUTI
+                <p className="text-[10px] text-slate-200 font-medium">
+                  Customer Service Employr
                 </p>
               </div>
+              <a
+                href={`${faqBaseUrl}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] font-bold text-blue-200 hover:text-white underline underline-offset-2 transition shrink-0"
+              >
+                Pusat Bantuan
+              </a>
             </div>
 
             <button
               type="button"
               onClick={() => setIsExpanded(false)}
-              className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0"
+              className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0"
               title="Tutup Chat Room"
             >
               <X className="w-3.5 h-3.5" />
@@ -208,7 +244,7 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
                   className={`flex gap-2 ${isBot ? 'justify-start' : 'justify-end'}`}
                 >
                   {isBot && (
-                    <div className="w-6 h-6 rounded-full bg-purple-600/20 text-purple-600 dark:text-purple-400 border border-purple-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="w-6 h-6 rounded-full bg-navy-100 text-navy-700 dark:bg-navy-950 dark:text-navy-300 border border-navy-200 dark:border-navy-800 flex items-center justify-center shrink-0 mt-0.5">
                       <Bot className="w-3.5 h-3.5" />
                     </div>
                   )}
@@ -217,13 +253,20 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
                     className={`max-w-[82%] p-2.5 rounded-[10px] space-y-1 shadow-xs ${
                       isBot
                         ? 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none'
-                        : 'bg-purple-600 text-white rounded-tr-none font-medium'
+                        : 'bg-[#1738D1] text-white rounded-tr-none font-medium'
                     }`}
                   >
-                    <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                    {isBot ? (
+                      <p
+                        className="whitespace-pre-wrap leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: renderBotText(msg.text) }}
+                      />
+                    ) : (
+                      <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                    )}
                     <span
                       className={`block text-[9px] ${
-                        isBot ? 'text-slate-400 dark:text-slate-500' : 'text-purple-200'
+                        isBot ? 'text-slate-400 dark:text-slate-500' : 'text-orange-100'
                       } text-right`}
                     >
                       {msg.timestamp}
@@ -235,28 +278,37 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
 
             {isTyping && (
               <div className="flex gap-2 items-center text-slate-400">
-                <div className="w-6 h-6 rounded-full bg-purple-600/20 text-purple-400 border border-purple-500/30 flex items-center justify-center shrink-0">
+                <div className="w-6 h-6 rounded-full bg-navy-100 text-navy-700 dark:bg-navy-950 dark:text-navy-300 border border-navy-200 dark:border-navy-800 flex items-center justify-center shrink-0">
                   <Bot className="w-3.5 h-3.5" />
                 </div>
-                <div className="px-3 py-2 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-1">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-500" />
+                <div className="px-3 py-2.5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
+                  {/* Animasi mengetik: 3 titik memantul bergantian */}
+                  <div className="flex items-center gap-1">
+                    {[0, 1, 2].map((i) => (
+                      <span
+                        key={i}
+                        className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce"
+                        style={{ animationDelay: `${-i * 150}ms` }}
+                      />
+                    ))}
+                  </div>
                   <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                    Herdi sedang mengetik balasan...
+                    Herdi sedang mengetik...
                   </span>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Quick Suggestion Chips */}
+          {/* Quick Suggestion Chips (statis + dinamis dari jawaban bot) */}
           <div className="px-3 py-1.5 bg-slate-100/70 dark:bg-slate-900/70 border-t border-slate-200/80 dark:border-slate-800 flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
-            {quickChips.map((chip, idx) => (
+            {(suggestionChips.length > 0 ? suggestionChips : quickChips).map((chip, idx) => (
               <button
-                key={idx}
+                key={`${chip}-${idx}`}
                 type="button"
                 onClick={() => handleSendMessage(chip)}
                 disabled={isTyping}
-                className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-800 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-slate-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-300 text-[10px] font-bold border border-slate-200 dark:border-slate-700 shrink-0 transition cursor-pointer"
+                className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/40 text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-300 text-[10px] font-bold border border-slate-200 dark:border-slate-700 shrink-0 transition cursor-pointer"
               >
                 {chip}
               </button>
@@ -272,14 +324,14 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               disabled={isTyping}
               placeholder="Tuliskan pertanyaan atau kendala kamu..."
-              className="flex-1 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-[10px] px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-purple-500 transition"
+              className="flex-1 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-[10px] px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[#1738D1] transition"
             />
 
             <button
               type="button"
               onClick={() => handleSendMessage()}
               disabled={!inputText.trim() || isTyping}
-              className="w-8 h-8 rounded-[10px] bg-purple-600 hover:bg-purple-700 disabled:opacity-40 text-white flex items-center justify-center shadow-sm transition cursor-pointer shrink-0"
+              className="w-8 h-8 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] disabled:opacity-40 text-white flex items-center justify-center shadow-sm transition cursor-pointer shrink-0 border-0"
               title="Kirim Pesan"
             >
               {isTyping ? (
@@ -303,7 +355,7 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
             }`}
           >
             <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0 animate-pulse" />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#1738D1] shrink-0 animate-pulse" />
               <p className="text-xs font-bold leading-tight text-slate-800 dark:text-slate-100">
                 Ada kendala atau pertanyaan?
               </p>
@@ -322,18 +374,21 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
             className="group relative focus:outline-none transition-transform duration-200 cursor-pointer hover:scale-105 active:scale-95 flex items-center justify-center shrink-0"
             title="Herdi Customer Service"
           >
-            <img
-              src="/images/tokoh-1.png"
-              alt="Herdi Customer Service"
-              className="w-16 sm:w-20 md:w-24 h-auto drop-shadow-2xl object-contain"
-            />
-            {/* Online Status Indicator */}
-            <span className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900 shadow-md" />
-            <span className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-emerald-400 rounded-full animate-ping opacity-75" />
-          </button>
+            <div className="relative">
+              <img
+                src="/images/mascot-cs.webp"
+                alt="Herdi Customer Service"
+                className="w-16 sm:w-20 md:w-24 h-auto drop-shadow-2xl object-contain relative z-10"
+              />
 
-          {/* BASE PEDESTAL ACCENT LINE IN FRONT OF IMAGE (Z-20 OVERLAY, PERFECT SWEET SPOT) */}
-          <div className="relative z-20 w-12 sm:w-16 h-1 sm:h-1.5 mr-2 sm:mr-3 ml-auto -mt-0.5 rounded-full bg-gradient-to-r from-transparent via-purple-500 to-transparent shadow-md shadow-purple-500/80 pointer-events-none" />
+              {/* Online Status Indicator */}
+              <span className="absolute bottom-1 right-1 z-30 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900 shadow-md" />
+              <span className="absolute bottom-1 right-1 z-30 w-3.5 h-3.5 bg-emerald-400 rounded-full animate-ping opacity-75" />
+
+              {/* BASE PEDESTAL ACCENT LINE IN FRONT OF IMAGE (Z-20 FOREGROUND OVERLAY) */}
+              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 z-20 w-12 sm:w-16 md:w-18 h-1.5 sm:h-2 rounded-full bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400 shadow-md shadow-[#1738D1]/90 pointer-events-none ring-1 ring-orange-300/60" />
+            </div>
+          </button>
         </div>
       )}
     </div>

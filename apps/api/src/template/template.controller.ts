@@ -1,7 +1,7 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { TemplateService } from './template.service';
 
-@Controller('v1/template')
+@Controller('template')
 export class TemplateController {
   constructor(private templateService: TemplateService) {}
 

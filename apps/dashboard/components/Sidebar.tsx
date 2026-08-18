@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   Home,
@@ -30,6 +31,7 @@ import {
   Globe,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { cvApi, trackerApi } from '@/lib/api';
 
 interface SidebarProps {
   onOpenUpgradeModal: () => void;
@@ -46,7 +48,6 @@ interface SidebarMenuItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   badge?: string | null;
-  isReadiness?: boolean;
 }
 
 interface SidebarCategory {
@@ -64,6 +65,48 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
 }) => {
   const pathname = usePathname();
+  const [readinessScore, setReadinessScore] = React.useState(0);
+  const [trackerCount, setTrackerCount] = React.useState(0);
+
+  React.useEffect(() => {
+    cvApi.getAll().then((cvs) => {
+      if (Array.isArray(cvs) && cvs.length > 0) {
+        const primary = cvs.find((c: any) => c.isPrimary) || cvs[0];
+        const hasContact = Boolean(primary.fullName && primary.email && primary.phone);
+        const hasSummary = Boolean(primary.summary && primary.summary.trim().length >= 20);
+        const hasEdu =
+          Array.isArray(primary.education) &&
+          primary.education.length > 0 &&
+          Boolean(primary.education[0]?.institution || primary.education[0]?.degree);
+        const hasExperience =
+          (primary.experience?.length || 0) > 0 ||
+          (primary.projects?.length || 0) > 0 ||
+          (primary.internships?.length || 0) > 0;
+        const hasSkills = Array.isArray(primary.skills) && primary.skills.length >= 4;
+        const atsScore = primary.atsScore ?? 0;
+        const isAtsOptimal = atsScore >= 80;
+
+        let completed = 0;
+        if (hasContact && hasSummary) completed++;
+        if (hasEdu) completed++;
+        if (hasExperience) completed++;
+        if (hasSkills) completed++;
+        if (isAtsOptimal) completed++;
+
+        const dynamicScore = Math.round((completed / 5) * 60 + (atsScore / 100) * 40);
+        setReadinessScore(dynamicScore);
+      }
+    });
+
+    trackerApi.getAll().then((apps) => {
+      if (Array.isArray(apps)) {
+        const activeCount = apps.filter((a: any) =>
+          ['Terkirim', 'Screening', 'Interview'].includes(a.status)
+        ).length;
+        setTrackerCount(activeCount);
+      }
+    });
+  }, []);
 
   const categories: SidebarCategory[] = [
     {
@@ -78,19 +121,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: User,
       items: [
         { id: 'cv', label: 'CV Saya', href: '/cv', icon: FileText },
-        { id: 'cv-screener', label: 'CV Screener', href: '/cv-screener', icon: Eye },
-        { id: 'linkedin', label: 'Analisis LinkedIn', href: '/linkedin', icon: Linkedin },
-        { id: 'readiness', label: 'Career Readiness', href: '/readiness', icon: TrendingUp, isReadiness: true },
+        { id: 'cv-screener', label: 'Evaluasi CV', href: '/cv-screener', icon: Eye },
+        { id: 'linkedin', label: 'Optimasi LinkedIn', href: '/linkedin', icon: Linkedin },
       ],
     },
     {
       category: 'Lamaran',
       icon: Briefcase,
       items: [
-        { id: 'tracker', label: 'Tracker Lamaran', href: '/tracker', icon: Briefcase, badge: '4' },
+        { id: 'tracker', label: 'Tracker Lamaran', href: '/tracker', icon: Briefcase, badge: trackerCount > 0 ? String(trackerCount) : null },
         { id: 'scrape-jobs', label: 'Scraper Lowongan', href: '/scrape-jobs', icon: Globe, badge: 'Baru' },
-        { id: 'cari-lowongan', label: 'Cari Lowongan', href: 'https://loker.cuti.online', icon: Compass },
-        { id: 'match-cv', label: 'Match CV & Job', href: '/match-cv', icon: Sparkles },
+        { id: 'cari-lowongan', label: 'Cari Lowongan', href: 'https://loker.employr.id', icon: Compass },
+        { id: 'match-cv', label: 'Kecocokan Lowongan', href: '/match-cv', icon: Sparkles },
         { id: 'surat-lamaran', label: 'Surat Lamaran', href: '/surat-lamaran', icon: Mail },
       ],
     },
@@ -99,7 +141,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Target,
       items: [
         { id: 'interview', label: 'Panduan Interview', href: '/interview', icon: Mic },
-        { id: 'latihan-soal', label: 'Latihan Interview', href: '/latihan-soal', icon: Flame },
+        { id: 'kursus', label: 'Kursus & Sertifikasi', href: 'http://localhost:3004', icon: BookOpen, badge: 'Baru' },
       ],
     },
     {
@@ -139,45 +181,55 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Brand Logo Header (Sticky Top) */}
         <div
           className={cn(
-            'p-4 flex items-center border-b border-slate-100 dark:border-slate-800 transition-all duration-300 ease-in-out shrink-0 h-16',
-            isCollapsed && !isMobileOpen ? 'justify-center' : 'justify-between gap-3'
+            'relative px-4 pt-4 pb-3.5 flex items-center justify-center border-b border-slate-100 dark:border-slate-800 transition-all duration-300 ease-in-out shrink-0 min-h-[64px]',
+            isCollapsed && !isMobileOpen ? 'px-2' : 'px-4'
           )}
         >
-          <Link href="/beranda" className="flex items-center gap-3 overflow-hidden group">
-            {isCollapsed && !isMobileOpen ? (
-              <span
-                className="font-black text-2xl tracking-widest text-[#0D3BD9] dark:text-slate-100 uppercase select-none"
-                style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}
-              >
-                C
-              </span>
-            ) : (
-              <div
-                className={cn(
-                  'min-w-0 transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap',
-                  isCollapsed && !isMobileOpen
-                    ? 'max-w-0 opacity-0 transform -translate-x-2 pointer-events-none'
-                    : 'max-w-[180px] opacity-100 transform translate-x-0'
-                )}
-              >
-                <span
-                  className="font-black text-2xl tracking-wider text-[#0D3BD9] dark:text-slate-100 truncate block uppercase leading-none"
-                  style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}
-                >
-                  CUTI
-                </span>
-                <span className="block text-[9px] text-slate-400 uppercase tracking-widest font-bold truncate mt-1">
-                  Career Portal AI
-                </span>
-              </div>
-            )}
+          <Link href="/beranda" className="relative flex items-center justify-center group w-full h-8 overflow-hidden">
+            {/* Full Expanded Logo */}
+            <div
+              className={cn(
+                'transition-all duration-300 ease-in-out flex items-center justify-center',
+                isCollapsed && !isMobileOpen
+                  ? 'opacity-0 scale-90 pointer-events-none absolute'
+                  : 'opacity-100 scale-100 relative'
+              )}
+            >
+              <Image
+                src="/logo.webp"
+                alt="Employr"
+                width={140}
+                height={32}
+                unoptimized
+                className="h-7 w-auto max-w-[120px] object-contain dark:brightness-0 dark:invert"
+              />
+            </div>
+
+            {/* Minimized Icon Logo */}
+            <div
+              className={cn(
+                'transition-all duration-300 ease-in-out flex items-center justify-center',
+                isCollapsed && !isMobileOpen
+                  ? 'opacity-100 scale-100 relative'
+                  : 'opacity-0 scale-75 pointer-events-none absolute'
+              )}
+            >
+              <Image
+                src="/logo-minimize.webp"
+                alt="Employr"
+                width={32}
+                height={32}
+                unoptimized
+                className="h-7 w-7 object-contain dark:brightness-0 dark:invert"
+              />
+            </div>
           </Link>
 
           {/* Mobile Close Button */}
           {onCloseMobile && (
             <button
               onClick={onCloseMobile}
-              className="md:hidden p-1.5 rounded-[10px] text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              className="md:hidden absolute right-3.5 top-1/2 -translate-y-1/2 p-1.5 rounded-[10px] text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
               aria-label="Tutup Menu"
             >
               <X className="w-5 h-5" />
@@ -186,7 +238,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Navigation Section (Scrollable Middle Area) */}
-        <div className={cn('flex-1 overflow-y-auto no-scrollbar py-4 transition-all duration-300 ease-in-out', isCollapsed && !isMobileOpen ? 'px-2' : 'px-3')}>
+        <div className={cn('flex-1 overflow-y-auto no-scrollbar pt-4 pb-5 transition-all duration-300 ease-in-out', isCollapsed && !isMobileOpen ? 'px-2' : 'px-3')}>
           <nav className="space-y-4">
             {categories.map((categoryGroup) => {
               const isSingleItemCategory =
@@ -211,9 +263,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {categoryGroup.items.map((item) => {
                       const Icon = item.icon;
                       const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-                      const titleAttr = !isExpanded
-                        ? (item.isReadiness ? `${item.label} (78%)` : item.label)
-                        : undefined;
+                      const titleAttr = !isExpanded ? item.label : undefined;
 
                       return (
                         <Link
@@ -229,85 +279,47 @@ export const Sidebar: React.FC<SidebarProps> = ({
                               ? 'justify-center p-3'
                               : 'justify-between px-3.5 py-2.5',
                             isActive
-                              ? 'btn-neo-skeuo-accent text-white shadow-md'
-                              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100/60 dark:hover:bg-slate-900/50'
+                              ? 'bg-[#1738D1] text-white shadow-md shadow-[#1738D1]/20'
+                              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
                           )}
                         >
-                          {item.isReadiness && isExpanded ? (
-                            /* Career Readiness Progress Bar (Expanded) */
-                            <div className="flex flex-col w-full gap-1.5 py-0.5">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2.5">
-                                  <Icon
-                                    className={cn(
-                                      'w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-105',
-                                      isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'
-                                    )}
-                                  />
-                                  <span className="truncate">{item.label}</span>
-                                </div>
-                                <span className={cn(
-                                  'text-[10px] font-black',
-                                  isActive ? 'text-white' : 'text-violet-600 dark:text-violet-400'
-                                )}>
-                                  78%
-                                </span>
-                              </div>
-                              <div className={cn(
-                                'w-full h-1.5 rounded-full overflow-hidden',
-                                isActive ? 'bg-white/20' : 'bg-slate-200 dark:bg-slate-800'
-                              )}>
-                                <div
-                                  className={cn(
-                                    'h-full rounded-full transition-all duration-500',
-                                    isActive ? 'bg-white' : 'bg-gradient-to-r from-violet-500 to-indigo-500'
-                                  )}
-                                  style={{ width: '78%' }}
-                                />
-                              </div>
-                            </div>
-                          ) : (
-                            /* Standard Menu Item */
-                            <>
-                              <div className="flex items-center gap-2.5 overflow-hidden">
-                                <Icon
-                                  className={cn(
-                                    'w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-105',
-                                    isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'
-                                  )}
-                                />
-                                <span
-                                  className={cn(
-                                    'truncate transition-all duration-200 ease-in-out whitespace-nowrap',
-                                    !isExpanded
-                                      ? 'max-w-0 opacity-0 transform -translate-x-2 pointer-events-none'
-                                      : 'max-w-[160px] opacity-100 transform translate-x-0'
-                                  )}
-                                >
-                                  {item.label}
-                                </span>
-                              </div>
-
-                              {item.badge && (
-                                <span
-                                  className={cn(
-                                    'font-bold rounded-full transition-all duration-200 ease-in-out whitespace-nowrap',
-                                    !isExpanded
-                                      ? 'absolute -top-1 -right-1 w-2 h-2 bg-orange-500 border border-white dark:border-slate-900 p-0 text-[0px]'
-                                      : 'px-2 py-0.5 text-[9px]',
-                                    isExpanded && item.badge === 'Baru'
-                                      ? 'bg-orange-500 text-white font-extrabold shadow-sm'
-                                      : isExpanded && isActive
-                                      ? 'bg-white/20 text-white backdrop-blur-md'
-                                      : isExpanded
-                                      ? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                                      : ''
-                                  )}
-                                >
-                                  {isExpanded && item.badge}
-                                </span>
+                          <div className="flex items-center gap-2.5 overflow-hidden">
+                            <Icon
+                              className={cn(
+                                'w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-105',
+                                isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'
                               )}
-                            </>
+                            />
+                            <span
+                              className={cn(
+                                'truncate transition-all duration-200 ease-in-out whitespace-nowrap',
+                                !isExpanded
+                                  ? 'max-w-0 opacity-0 transform -translate-x-2 pointer-events-none'
+                                  : 'max-w-[160px] opacity-100 transform translate-x-0'
+                              )}
+                            >
+                              {item.label}
+                            </span>
+                          </div>
+
+                          {item.badge && (
+                            <span
+                              className={cn(
+                                'font-bold rounded-full transition-all duration-200 ease-in-out whitespace-nowrap',
+                                !isExpanded
+                                  ? 'absolute -top-1 -right-1 w-2 h-2 bg-[#1738D1] border border-white dark:border-slate-900 p-0 text-[0px]'
+                                  : 'px-2 py-0.5 text-[9px]',
+                                isExpanded && item.badge === 'Baru'
+                                  ? 'bg-[#1738D1] text-white font-extrabold shadow-sm'
+                                  : isExpanded && isActive
+                                  ? 'bg-white/20 text-white backdrop-blur-md'
+                                  : isExpanded
+                                  ? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                                  : ''
+                              )}
+                            >
+                              {isExpanded && item.badge}
+                            </span>
                           )}
                         </Link>
                       );
@@ -319,60 +331,80 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </nav>
         </div>
 
-        {/* Bottom Section: Premium Pass (Sticky Bottom) */}
-        <div className={cn('shrink-0 border-t border-white/20 dark:border-white/10 transition-all duration-300 ease-in-out overflow-hidden', isCollapsed && !isMobileOpen ? 'p-2' : 'p-3.5')}>
-          {/* Expanded Premium Pass Card */}
+        {/* Bottom Section: Career Readiness (Sticky Bottom) */}
+        <div className={cn('shrink-0 border-t border-slate-100 dark:border-slate-800 transition-all duration-300 ease-in-out overflow-hidden', isCollapsed && !isMobileOpen ? 'p-2' : 'p-3')}>
+          {/* Expanded Career Readiness Card */}
           <div
             className={cn(
-              'relative overflow-hidden rounded-[24px] bg-gradient-to-br from-slate-900/80 via-slate-950/90 to-violet-950/80 backdrop-blur-xl text-white shadow-xl border border-white/20 transition-all duration-300 ease-in-out',
+              'transition-all duration-300 ease-in-out',
               isCollapsed && !isMobileOpen
                 ? 'max-h-0 opacity-0 p-0 border-0 pointer-events-none transform scale-95'
-                : 'max-h-60 opacity-100 p-4 transform scale-100'
+                : 'max-h-60 opacity-100 transform scale-100'
             )}
           >
-            <div className="absolute top-0 right-0 -mr-6 -mt-6 w-20 h-20 bg-amber-400/20 rounded-full blur-xl pointer-events-none"></div>
-            <div className="flex items-center gap-2 text-amber-300 mb-1.5">
-              <Sparkles className="w-4 h-4 shrink-0" />
-              <span className="text-[11px] font-black uppercase tracking-wider truncate">
-                Premium Pass
-              </span>
-            </div>
-            <h4 className="text-xs font-bold text-white mb-1">
-              Akses Fitur Pro &amp; Auto ATS
-            </h4>
-            <p className="text-[11px] text-slate-300 leading-snug mb-3">
-              Tingkatkan peluang interview hingga 3x lipat.
-            </p>
-            <button
+            <Link
+              href="/readiness"
               onClick={() => {
-                onOpenUpgradeModal();
                 if (onCloseMobile) onCloseMobile();
               }}
-              className="w-full group bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-between py-2 px-3.5 rounded-[10px] text-xs font-bold transition shadow-md shadow-orange-500/20 cursor-pointer border-0"
+              className={cn(
+                'group block p-3.5 rounded-[10px] border transition-all duration-200 cursor-pointer',
+                pathname === '/readiness' || pathname.startsWith('/readiness/')
+                  ? 'bg-orange-50/80 dark:bg-orange-950/30 border-orange-300 dark:border-orange-900/50 shadow-sm'
+                  : 'bg-slate-50/90 dark:bg-slate-900/80 border-slate-200/80 dark:border-slate-800 hover:border-orange-300 dark:hover:border-orange-700/60 hover:bg-white dark:hover:bg-slate-900 shadow-xs'
+              )}
             >
-              <span>Upgrade Sekarang</span>
-              <span className="w-6 h-6 rounded-full bg-white/20 text-white flex items-center justify-center shadow-inner group-hover:translate-x-0.5 transition-transform duration-200">
-                <ChevronRight className="w-3.5 h-3.5" />
-              </span>
-            </button>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-[8px] bg-orange-100 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 flex items-center justify-center border border-orange-200/60 dark:border-orange-900/40 shrink-0">
+                    <TrendingUp className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                    Career Readiness
+                  </span>
+                </div>
+                <span className="text-[11px] font-black text-orange-600 dark:text-orange-400 bg-orange-100/80 dark:bg-orange-950/60 px-2 py-0.5 rounded-[6px] border border-orange-200/50 dark:border-orange-900/30 font-mono">
+                  {readinessScore}%
+                </span>
+              </div>
+
+              {/* Horizontal Progress Bar */}
+              <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden mb-2">
+                <div
+                  className="h-full bg-[#1738D1] rounded-full transition-all duration-500"
+                  style={{ width: `${readinessScore}%` }}
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                <span>Tingkatkan Kesiapan</span>
+                <ChevronRight className="w-3.5 h-3.5 text-orange-500 group-hover:translate-x-0.5 transition-transform duration-200" />
+              </div>
+            </Link>
           </div>
 
-          {/* Collapsed Premium Pass Icon Button */}
-          <button
+          {/* Collapsed Career Readiness Icon Button */}
+          <Link
+            href="/readiness"
             onClick={() => {
-              onOpenUpgradeModal();
               if (onCloseMobile) onCloseMobile();
             }}
-            title="Upgrade Premium Pass"
+            title={`Career Readiness (${readinessScore}%)`}
             className={cn(
-              'w-full p-2.5 btn-neo-skeuo flex items-center justify-center shadow-lg cursor-pointer transition-all duration-300 ease-in-out',
+              'w-full p-2.5 rounded-[10px] flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 ease-in-out border',
+              pathname === '/readiness' || pathname.startsWith('/readiness/')
+                ? 'bg-[#1738D1] text-white border-orange-600 shadow-md shadow-[#1738D1]/20'
+                : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800',
               isCollapsed && !isMobileOpen
-                ? 'max-h-12 opacity-100 scale-100'
+                ? 'max-h-16 opacity-100 scale-100'
                 : 'max-h-0 opacity-0 scale-75 p-0 overflow-hidden pointer-events-none border-0'
             )}
           >
-            <Sparkles className="w-5 h-5 text-amber-300" />
-          </button>
+            <TrendingUp className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+            <span className="text-[10px] font-black text-orange-600 dark:text-orange-400 leading-none font-mono">
+              {readinessScore}%
+            </span>
+          </Link>
         </div>
       </aside>
     </>

@@ -30,7 +30,9 @@ import {
   Tag,
   ShieldCheck,
   Code,
-  Info
+  Info,
+  LogIn,
+  LogOut
 } from 'lucide-react';
 
 export interface ExtractedJob {
@@ -39,7 +41,7 @@ export interface ExtractedJob {
   company: string;
   location: string;
   salary: string;
-  portal: 'LinkedIn' | 'Jobstreet' | 'Glints' | 'Kalibrr' | 'KitaLulus' | 'Karir.com';
+  portal: 'LinkedIn' | 'Jobstreet' | 'Glints' | 'Dealls' | 'Talent' | 'Kalibrr' | 'Jobindo' | 'Jora' | 'Jobinaja' | 'Lokernas' | 'OfficialKarir' | 'LogKerja' | 'Indeed' | 'Loker.id' | 'Jooble' | 'CakeResume' | 'Karir.com' | 'KitaLulus' | 'LokerHeadOffice' | 'SejakKemarin' | 'LamarLangsung' | 'InfoLokerKerja' | 'SolusiKerja' | 'BursaKerjaDepnaker' | 'LokerAnakMedan' | 'InfoLokerJabar' | 'InfoLokerBanten' | 'InfoLokerKarawang' | 'LokerMuslim' | 'LowkerJogja';
   portalUrl: string;
   jobType: 'Full-time' | 'Contract' | 'Internship' | 'Remote';
   experience: 'Entry-level' | 'Junior' | 'Mid-Senior' | 'Senior';
@@ -52,162 +54,84 @@ export interface ExtractedJob {
   isSaved?: boolean;
 }
 
-const mockExtractedJobs: ExtractedJob[] = [
-  {
-    id: 'job-scrape-1',
-    title: 'Frontend Web Developer (React / Next.js)',
-    company: 'PT Global Digital Niaga (Blibli.com)',
-    location: 'Jakarta Barat (Hybrid)',
-    salary: 'Rp 9.000.000 - Rp 14.000.000',
-    portal: 'Jobstreet',
-    portalUrl: 'https://www.jobstreet.co.id',
-    jobType: 'Full-time',
-    experience: 'Junior',
-    postedTime: '2 jam yang lalu',
-    extractedTime: 'Baru saja',
-    matchScore: 92,
-    description: 'Kami mencari Frontend Web Developer yang berpengalaman dalam membangun antarmuka web modern, responsif, dan berperforma tinggi menggunakan React.js dan Next.js. Anda akan bekerja langsung dengan tim UI/UX dan backend developer.',
-    requirements: [
-      'Pendidikan Minimal SMA/SMK atau D3/S1 Teknik Informatika/Ilmu Komputer',
-      'Pengalaman 1-2 tahun memproduksi aplikasi web dengan React.js atau Next.js',
-      'Menguasai HTML5, CSS3, Tailwind CSS, TypeScript, dan Git',
-      'Memahami arsitektur REST API & tRPC',
-      'Memiliki portofolio proyek web yang aktif dan dapat diakses'
-    ],
-    skills: ['React.js', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Git', 'REST API'],
-    isSaved: false,
-  },
-  {
-    id: 'job-scrape-2',
-    title: 'Junior Data & Business Analyst',
-    company: 'DANA Indonesia (PT Espay Debit Indonesia)',
-    location: 'Jakarta Selatan (Hybrid)',
-    salary: 'Rp 8.500.000 - Rp 12.000.000',
-    portal: 'LinkedIn',
-    portalUrl: 'https://www.linkedin.com',
-    jobType: 'Full-time',
-    experience: 'Junior',
-    postedTime: '4 jam yang lalu',
-    extractedTime: '1 menit yang lalu',
-    matchScore: 86,
-    description: 'Bertanggung jawab menganalisis tren transaksi pengguna, membuat dasbor visualisasi data metrik bisnis, dan menyusun rekomendasi keputusan operasional berbasis data riil.',
-    requirements: [
-      'Gelar Sarjana atau D3 di bidang Statistik, Matematika, Teknik, atau Ekonomi',
-      'Mahir mengolah data menggunakan SQL, Python (Pandas/NumPy), dan Excel',
-      'Terbiasa membuat laporan analisis menggunakan Tableau atau PowerBI',
-      'Memiliki pemikiran analitis yang tajam dan orientasi pada detail'
-    ],
-    skills: ['SQL', 'Python', 'Excel Advanced', 'Tableau', 'Data Visualization'],
-    isSaved: true,
-  },
-  {
-    id: 'job-scrape-3',
-    title: 'UI/UX Designer & Product Specialist',
-    company: 'Ruangguru (PT Ruang Raya Indonesia)',
-    location: 'Jakarta Selatan (Remote)',
-    salary: 'Rp 7.500.000 - Rp 11.000.000',
-    portal: 'Glints',
-    portalUrl: 'https://glints.com',
-    jobType: 'Full-time',
-    experience: 'Entry-level',
-    postedTime: '5 jam yang lalu',
-    extractedTime: '2 menit yang lalu',
-    matchScore: 88,
-    description: 'Merancang wireframe, mockup interaktif, dan Design System komponen antarmuka aplikasi seluler & web Ruangguru untuk pengalaman belajar siswa yang intuitif.',
-    requirements: [
-      'Terbuka untuk Fresh Graduate SMA/SMK atau Lulusan Perguruan Tinggi dengan portofolio UI/UX yang kuat',
-      'Mahir menggunakan Figma, FigJam, dan tools prototyping',
-      'Memahami tata letak visual, hirarki tipografi, serta prinsip keterbacaan (HIG/WCAG)',
-      'Mampu melakukan testing usability singkat ke pengguna'
-    ],
-    skills: ['Figma', 'Prototyping', 'User Research', 'Design System', 'Wireframing'],
-    isSaved: false,
-  },
-  {
-    id: 'job-scrape-4',
-    title: 'Digital Marketing & Social Media Executive',
-    company: 'Astra Digital (PT Astra International Tbk)',
-    location: 'Jakarta Pusat (WFO)',
-    salary: 'Rp 6.500.000 - Rp 9.000.000',
-    portal: 'Kalibrr',
-    portalUrl: 'https://www.kalibrr.com',
-    jobType: 'Full-time',
-    experience: 'Entry-level',
-    postedTime: '6 jam yang lalu',
-    extractedTime: '3 menit yang lalu',
-    matchScore: 78,
-    description: 'Mengelola kampanye konten media sosial, menganalisis performa iklan digital (Meta Ads & TikTok Ads), serta menyusun strategi keterikatan audiens muda.',
-    requirements: [
-      'Pendidikan Minimal SMA/SMK Sederajat / D3 / S1 Komunikasi/Marketing',
-      'Memahami tren media sosial (TikTok, Instagram Reels, LinkedIn)',
-      'Mampu mengoperasikan tools analitik dasar dan Meta Ads Manager',
-      'Kreatif, percaya diri, dan memiliki kemampuan copywrite yang komunikatif'
-    ],
-    skills: ['Social Media', 'Copywriting', 'Meta Ads', 'Content Strategy', 'Analytics'],
-    isSaved: false,
-  },
-  {
-    id: 'job-scrape-5',
-    title: 'Customer Success & Operation Associate',
-    company: 'Kopi Kenangan (PT Bumi Berkah Boga)',
-    location: 'Jakarta Barat (Onsite)',
-    salary: 'Rp 5.500.000 - Rp 7.500.000',
-    portal: 'KitaLulus',
-    portalUrl: 'https://kitalulus.com',
-    jobType: 'Full-time',
-    experience: 'Entry-level',
-    postedTime: '8 jam yang lalu',
-    extractedTime: '5 menit yang lalu',
-    matchScore: 82,
-    description: 'Melayani dan menangani keluhan serta masukan pelanggan melalui kanal digital, memastikan kepuasan konsumen terjaga, serta berkoordinasi dengan tim operasional toko.',
-    requirements: [
-      'Pendidikan Minimal SMA / SMK / D3 Semua Jurusan',
-      'Memiliki kemampuan komunikasi yang ramah, sopan, dan berempati tinggi',
-      'Terbiasa mengetik cepat dan menggunakan perangkat lunak CRM dasar',
-      'Bersedia bekerja fleksibel'
-    ],
-    skills: ['Customer Service', 'CRM', 'Communication', 'Problem Solving'],
-    isSaved: false,
-  },
-  {
-    id: 'job-scrape-6',
-    title: 'Junior Admin & Operations Staff',
-    company: 'PT Tiki Jalur Nugraha Ekakurir (JNE)',
-    location: 'Tangerang (Onsite)',
-    salary: 'Rp 4.800.000 - Rp 6.200.000',
-    portal: 'Karir.com',
-    portalUrl: 'https://karir.com',
-    jobType: 'Full-time',
-    experience: 'Entry-level',
-    postedTime: '12 jam yang lalu',
-    extractedTime: '8 menit yang lalu',
-    matchScore: 80,
-    description: 'Melakukan entri data pengiriman, rekapitulasi dokumen operasional harian, dan pengarsipan surat masuk/keluar cabang distribusi.',
-    requirements: [
-      'Lulusan SMA/SMK Administrasi Perkantoran / Akuntansi / Umum',
-      'Mahir mengoperasikan Microsoft Excel (VLOOKUP, Pivot Table) & Microsoft Word',
-      'Teliti, jujur, berdedikasi, dan terbiasa dengan tenggat waktu'
-    ],
-    skills: ['Ms Excel', 'Administration', 'Data Entry', 'Archiving'],
-    isSaved: false,
-  },
-];
+// Hasil lowongan ditampilkan dari scraping asli (lihat lib/job-scraper.ts).
+// LinkedIn butuh sesi login pengguna sendiri (lihat fitur /linkedin); portal
+// lain yang berstatus "Perlu Login" (atau diblokir anti-bot seperti Cloudflare)
+// memerlukan sesi/JS dan sengaja tidak di-bypass sesuai batasan platform.
 
 interface PortalOption {
-  id: 'LinkedIn' | 'Jobstreet' | 'Glints' | 'Kalibrr' | 'KitaLulus' | 'Karir.com';
+  id: 'LinkedIn' | 'Jobstreet' | 'Glints' | 'Dealls' | 'Talent' | 'Kalibrr' | 'Jobindo' | 'Jora' | 'Jobinaja' | 'Lokernas' | 'OfficialKarir' | 'LogKerja' | 'Indeed' | 'Loker.id' | 'Jooble' | 'CakeResume' | 'Karir.com' | 'KitaLulus' | 'LokerHeadOffice' | 'SejakKemarin' | 'LamarLangsung' | 'InfoLokerKerja' | 'SolusiKerja' | 'BursaKerjaDepnaker' | 'LokerAnakMedan' | 'InfoLokerJabar' | 'InfoLokerBanten' | 'InfoLokerKarawang' | 'LokerMuslim' | 'LowkerJogja' | 'KarirHub';
   name: string;
   activeCount: number;
-  status: 'Aktif' | 'Tersedia';
+  status: 'Aktif' | 'Sesi' | 'Perlu Login';
 }
 
 const portalsList: PortalOption[] = [
   { id: 'Jobstreet', name: 'JobStreet', activeCount: 1420, status: 'Aktif' },
-  { id: 'LinkedIn', name: 'LinkedIn', activeCount: 980, status: 'Aktif' },
   { id: 'Glints', name: 'Glints', activeCount: 750, status: 'Aktif' },
-  { id: 'Kalibrr', name: 'Kalibrr', activeCount: 430, status: 'Aktif' },
-  { id: 'KitaLulus', name: 'KitaLulus', activeCount: 620, status: 'Aktif' },
-  { id: 'Karir.com', name: 'Karir.com', activeCount: 310, status: 'Aktif' },
+  { id: 'Dealls', name: 'Dealls', activeCount: 350, status: 'Aktif' },
+  { id: 'Talent', name: 'Talent.com', activeCount: 480, status: 'Aktif' },
+  { id: 'LinkedIn', name: 'LinkedIn', activeCount: 980, status: 'Aktif' },
+  { id: 'Kalibrr', name: 'Kalibrr', activeCount: 1130, status: 'Aktif' },
+  { id: 'Jobindo', name: 'Jobindo.com', activeCount: 960, status: 'Aktif' },
+  { id: 'Jora', name: 'Jora', activeCount: 700, status: 'Aktif' },
+  { id: 'Jobinaja', name: 'Jobinaja', activeCount: 750, status: 'Aktif' },
+  { id: 'Lokernas', name: 'Lokernas', activeCount: 420, status: 'Aktif' },
+  { id: 'OfficialKarir', name: 'OfficialKarir', activeCount: 390, status: 'Aktif' },
+  { id: 'LogKerja', name: 'LogKerja', activeCount: 180, status: 'Aktif' },
+  { id: 'LokerHeadOffice', name: 'Loker HeadOffice', activeCount: 260, status: 'Aktif' },
+  { id: 'SejakKemarin', name: 'SejakKemarin', activeCount: 320, status: 'Aktif' },
+  { id: 'LamarLangsung', name: 'LamarLangsung', activeCount: 400, status: 'Aktif' },
+  { id: 'InfoLokerKerja', name: 'InfoLokerKerja', activeCount: 280, status: 'Aktif' },
+  { id: 'SolusiKerja', name: 'SolusiKerja', activeCount: 150, status: 'Aktif' },
+  { id: 'BursaKerjaDepnaker', name: 'BursaKerjaDepnaker', activeCount: 230, status: 'Aktif' },
+  { id: 'LokerAnakMedan', name: 'Loker Anak Medan', activeCount: 190, status: 'Aktif' },
+  { id: 'InfoLokerJabar', name: 'Info Loker Jabar', activeCount: 210, status: 'Aktif' },
+  { id: 'InfoLokerBanten', name: 'Info Loker Banten', activeCount: 180, status: 'Aktif' },
+  { id: 'InfoLokerKarawang', name: 'Info Loker Karawang', activeCount: 170, status: 'Aktif' },
+  { id: 'LokerMuslim', name: 'LokerMuslim', activeCount: 140, status: 'Aktif' },
+  { id: 'LowkerJogja', name: 'Lowker Jogja', activeCount: 120, status: 'Aktif' },
+  { id: 'KitaLulus', name: 'KitaLulus', activeCount: 620, status: 'Sesi' },
+  { id: 'Karir.com', name: 'Karir.com', activeCount: 310, status: 'Sesi' },
+  { id: 'Indeed', name: 'Indeed', activeCount: 1250, status: 'Sesi' },
+  { id: 'CakeResume', name: 'Cake (CakeResume)', activeCount: 540, status: 'Sesi' },
+  { id: 'Jooble', name: 'Jooble', activeCount: 870, status: 'Sesi' },
+  { id: 'Loker.id', name: 'Loker.id', activeCount: 420, status: 'Sesi' },
+  { id: 'KarirHub', name: 'KarirHub', activeCount: 380, status: 'Perlu Login' },
 ];
+
+// Warna badge per portal (lihat kartu hasil scraping)
+const PORTAL_BADGE_CLASS: Record<string, string> = {
+  LinkedIn: 'bg-blue-100 dark:bg-blue-950 text-navy-700 dark:text-blue-300 border border-blue-200 dark:border-navy-800',
+  Jobstreet: 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800',
+  Glints: 'bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800',
+  Dealls: 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800',
+  Kalibrr: 'bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800',
+  Jobindo: 'bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800',
+  LokerHeadOffice: 'bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800',
+  SejakKemarin: 'bg-cyan-100 dark:bg-cyan-950 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800',
+  LamarLangsung: 'bg-fuchsia-100 dark:bg-fuchsia-950 text-fuchsia-700 dark:text-fuchsia-300 border border-fuchsia-200 dark:border-fuchsia-800',
+  InfoLokerKerja: 'bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800',
+  SolusiKerja: 'bg-lime-100 dark:bg-lime-950 text-lime-700 dark:text-lime-300 border border-lime-200 dark:border-lime-800',
+  BursaKerjaDepnaker: 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800',
+  LokerAnakMedan: 'bg-pink-100 dark:bg-pink-950 text-pink-700 dark:text-pink-300 border border-pink-200 dark:border-pink-800',
+  InfoLokerJabar: 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800',
+  InfoLokerBanten: 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700',
+  InfoLokerKarawang: 'bg-yellow-100 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800',
+  LokerMuslim: 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800',
+  LowkerJogja: 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800',
+  Jora: 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800',
+  Jobinaja: 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800',
+  Lokernas: 'bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800',
+  OfficialKarir: 'bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800',
+  LogKerja: 'bg-cyan-100 dark:bg-cyan-950 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800',
+  Indeed: 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800',
+  'Loker.id': 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700',
+  Jooble: 'bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800',
+  CakeResume: 'bg-fuchsia-100 dark:bg-fuchsia-950 text-fuchsia-700 dark:text-fuchsia-300 border border-fuchsia-200 dark:border-fuchsia-800',
+  'Karir.com': 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800',
+  KitaLulus: 'bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800',
+};
 
 const presetSearchKeywords = [
   'Frontend React',
@@ -224,12 +148,18 @@ export const JobScraperView: React.FC = () => {
   const [location, setLocation] = useState('Jakarta (Hybrid/Remote)');
   const [experience, setExperience] = useState('all');
   const [postedDate, setPostedDate] = useState('24h');
-  const [selectedPortals, setSelectedPortals] = useState<string[]>(['Jobstreet', 'LinkedIn', 'Glints']);
+  const [selectedPortals, setSelectedPortals] = useState<string[]>([
+    'Jobstreet', 'Glints', 'Dealls', 'Talent', 'Kalibrr', 'Jobindo',
+    'Jora', 'Jobinaja', 'Lokernas', 'OfficialKarir', 'LogKerja',
+    'LokerHeadOffice', 'SejakKemarin', 'LamarLangsung', 'InfoLokerKerja', 'SolusiKerja',
+    'BursaKerjaDepnaker', 'LokerAnakMedan', 'InfoLokerJabar', 'InfoLokerBanten',
+    'InfoLokerKarawang', 'LokerMuslim', 'LowkerJogja',
+  ]);
   
   // Extraction State & Log Simulation
   const [isScanning, setIsScanning] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
-  const [jobs, setJobs] = useState<ExtractedJob[]>(mockExtractedJobs);
+  const [jobs, setJobs] = useState<ExtractedJob[]>([]);
   const [activeTab, setActiveTab] = useState<'all' | 'saved'>('all');
   const [searchFilter, setSearchFilter] = useState('');
   
@@ -247,72 +177,61 @@ export const JobScraperView: React.FC = () => {
     }
   }, [logs]);
 
-  // Simulation Log Effect
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
+  const handleToggleScan = async () => {
     if (isScanning) {
-      const now = new Date().toLocaleTimeString();
-      setLogs((prev) => [
-        `[${now}] 🌐 Menginisialisasi sistem ekstraksi data lowongan...`,
-        `[${now}] 🔍 Menghubungkan ke ${selectedPortals.length} portal penyedia loker (${selectedPortals.join(', ')})...`,
-        ...prev,
-      ]);
-
-      let step = 0;
-      interval = setInterval(() => {
-        const timestamp = new Date().toLocaleTimeString();
-        if (step === 0) {
-          setLogs((prev) => [
-            `[${timestamp}] 📡 Mengirim permintaan pemindaian posisi "${keyword}" wilayah "${location}"...`,
-            `[${timestamp}] ⚡ Menerima payload data dari JobStreet & LinkedIn (HTTP Status 200 OK)...`,
-            ...prev,
-          ]);
-          step++;
-        } else if (step === 1) {
-          setLogs((prev) => [
-            `[${timestamp}] 🛠️ Mengekstraksi struktur kualifikasi, deskripsi, dan estimasi rentang gaji...`,
-            `[${timestamp}] 🛡️ Menjalankan deduplikasi data otomatis (2 loker duplikat berhasil disaring)...`,
-            ...prev,
-          ]);
-          step++;
-        } else if (step === 2) {
-          // Generate new mock job entry
-          const newScrapedJob: ExtractedJob = {
-            id: `job-scrape-${Date.now()}`,
-            title: `${keyword} (${['React', 'Web', 'Fullstack', 'Frontend'].sort(() => 0.5 - Math.random())[0]})`,
-            company: ['Tokopedia', 'Gojek', 'Traveloka', 'Bukalapak', 'Bank Mandiri'].sort(() => 0.5 - Math.random())[0],
-            location: location,
-            salary: 'Rp 8.000.000 - Rp 13.000.000',
-            portal: (selectedPortals[Math.floor(Math.random() * selectedPortals.length)] as any) || 'Jobstreet',
-            portalUrl: 'https://jobstreet.co.id',
-            jobType: 'Full-time',
-            experience: 'Junior',
-            postedTime: 'Baru saja',
-            extractedTime: 'Baru saja',
-            matchScore: Math.floor(Math.random() * 18) + 80,
-            description: `Lowongan ${keyword} baru ditemukan via pemindaian real-time. Membutuhkan kualifikasi relevan dan keahlian koding modern.`,
-            requirements: [
-              'Pendidikan Minimal SMA/SMK atau S1',
-              'Memahami dasar pengembangan antarmuka web modern',
-              'Memiliki komunikasi yang baik dan mampu bekerja dalam tim'
-            ],
-            skills: ['HTML5', 'CSS3', 'JavaScript', 'React', 'Problem Solving'],
-            isSaved: false,
-          };
-
-          setJobs((prev) => [newScrapedJob, ...prev]);
-          setLogs((prev) => [
-            `[${timestamp}] ✅ EKSTRAKSI SUKSES: Lowongan "${newScrapedJob.title}" di ${newScrapedJob.company} terdaftar (Match Score: ${newScrapedJob.matchScore}%).`,
-            `[${timestamp}] 📊 Memperbarui daftar hasil pemindaian di dasbor...`,
-            ...prev,
-          ]);
-          step = 0;
-        }
-      }, 4000);
+      setIsScanning(false);
+      const timestamp = new Date().toLocaleTimeString();
+      setLogs((prev) => [`[${timestamp}] ⏹️ Sesi pemindaian lowongan dihentikan.`, ...prev]);
+      showToast('Sesi pemindaian dihentikan.');
+      return;
     }
 
-    return () => clearInterval(interval);
-  }, [isScanning, keyword, location, selectedPortals]);
+    if (!keyword.trim()) {
+      showToast('Masukkan posisi atau kata kunci pekerjaan.');
+      return;
+    }
+
+    setIsScanning(true);
+    const now = new Date().toLocaleTimeString();
+    setLogs((prev) => [
+      `[${now}] 🌐 Menginisialisasi bot scraper lowongan kerja...`,
+      `[${now}] 🔍 Menghubungkan ke halaman publik ${selectedPortals.join(', ')}...`,
+      ...prev,
+    ]);
+    showToast('Pemindaian lowongan kerja dimulai secara real-time.');
+
+    try {
+      const res = await fetch('/api/scrape-jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keyword, location, portals: selectedPortals }),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        throw new Error(data.message || 'Bot scraping gagal.');
+      }
+
+      // Tampilkan log asli dari server (terbaru di paling atas)
+      setLogs((prev) => [...(data.logs || []).reverse(), ...prev]);
+
+      // Merge hasil scraping asli + deduplikasi dengan job yang sudah ada
+      const scrapedJobs: ExtractedJob[] = data.jobs || [];
+      setJobs((prev) => {
+        const seenIds = new Set(prev.map((j) => j.id));
+        const fresh = scrapedJobs.filter((j) => !seenIds.has(j.id));
+        return [...fresh, ...prev];
+      });
+
+      showToast(`Bot scraping selesai: ${scrapedJobs.length} lowongan baru berhasil diekstrak.`);
+    } catch (error: any) {
+      const ts = new Date().toLocaleTimeString();
+      setLogs((prev) => [`[${ts}] 🚨 Gagal scraping: ${error.message || 'Terjadi kesalahan.'}`, ...prev]);
+      showToast('Gagal melakukan scraping. Periksa koneksi internet.');
+    } finally {
+      setIsScanning(false);
+    }
+  };
 
   const handleTogglePortal = (portalId: string) => {
     if (selectedPortals.includes(portalId)) {
@@ -326,21 +245,61 @@ export const JobScraperView: React.FC = () => {
     }
   };
 
-  const handleToggleScan = () => {
-    if (!isScanning) {
-      if (!keyword.trim()) {
-        showToast('Masukkan posisi atau kata kunci pekerjaan.');
-        return;
+  // --- Sesi login portal browser (pola LinkedIn: user login manual di Chrome) ---
+  const [sessionStatus, setSessionStatus] = useState<Record<string, boolean>>({});
+  const [loggingInPortal, setLoggingInPortal] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/portal-session')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.success && Array.isArray(d.portals)) {
+          setSessionStatus(Object.fromEntries(d.portals.map((p: any) => [p.portal, !!p.hasSession])));
+        }
+      })
+      .catch(() => null);
+  }, []);
+
+  const handleLoginPortal = async (portalId: string) => {
+    if (loggingInPortal) return;
+    setLoggingInPortal(portalId);
+    showToast('Browser login dibuka. Silakan login secara manual — sesi akan tersimpan otomatis setelah selesai.');
+    try {
+      const res = await fetch('/api/portal-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'login', portal: portalId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSessionStatus((prev) => ({ ...prev, [portalId]: true }));
+        setSelectedPortals((prev) => (prev.includes(portalId) ? prev : [...prev, portalId]));
+        showToast(`Login ${portalId} berhasil. Sesi tersimpan — portal siap dipindai.`);
+      } else {
+        showToast(data.error || `Login ${portalId} gagal.`);
       }
-      setIsScanning(true);
-      showToast('Pemindaian lowongan kerja dimulai secara real-time.');
-    } else {
-      setIsScanning(false);
-      const timestamp = new Date().toLocaleTimeString();
-      setLogs((prev) => [`[${timestamp}] ⏹️ Sesi pemindaian lowongan dihentikan.`, ...prev]);
-      showToast('Sesi pemindaian dihentikan.');
+    } catch {
+      showToast(`Gagal menghubungi server untuk login ${portalId}.`);
+    } finally {
+      setLoggingInPortal(null);
     }
   };
+
+  const handleClearPortalSession = async (portalId: string) => {
+    try {
+      await fetch('/api/portal-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'clear', portal: portalId }),
+      });
+      setSessionStatus((prev) => ({ ...prev, [portalId]: false }));
+      showToast(`Sesi ${portalId} dihapus.`);
+    } catch {
+      showToast(`Gagal menghapus sesi ${portalId}.`);
+    }
+  };
+
+
 
   const handleToggleSaveJob = (jobId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -358,6 +317,32 @@ export const JobScraperView: React.FC = () => {
     if (selectedJobForDetail && selectedJobForDetail.id === jobId) {
       setSelectedJobForDetail((prev) => (prev ? { ...prev, isSaved: !prev.isSaved } : null));
     }
+  };
+
+  const handleDownload = () => {
+    if (filteredJobs.length === 0) {
+      showToast('Belum ada hasil scraping untuk diunduh.');
+      return;
+    }
+    const payload = {
+      meta: {
+        keyword,
+        location,
+        portals: selectedPortals,
+        scrapedAt: new Date().toISOString(),
+        total: filteredJobs.length,
+        note: 'Data diambil dari halaman publik portal (tanpa bypass login/CAPTCHA).',
+      },
+      jobs: filteredJobs,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `hasil-scraping-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`Berhasil mengunduh ${filteredJobs.length} lowongan hasil scraping (JSON).`);
   };
 
   const showToast = (msg: string) => {
@@ -392,7 +377,7 @@ export const JobScraperView: React.FC = () => {
       )}
 
       {/* Top Banner / Header */}
-      <div className="relative overflow-hidden rounded-[10px] bg-[#0D3BD9] text-white p-6 sm:p-8 shadow-xl">
+      <div className="relative overflow-hidden rounded-[10px] bg-navy-700 text-white p-6 sm:p-8 shadow-xl">
         <div className="relative z-10 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-3 py-1 rounded-[10px] text-[11px] font-extrabold bg-amber-400 text-slate-950 flex items-center gap-1.5 shadow-sm">
@@ -403,7 +388,7 @@ export const JobScraperView: React.FC = () => {
               {isScanning ? 'Memindai Real-time' : 'Siaga'}
             </span>
             <span className="px-3 py-1 rounded-[10px] text-[11px] font-semibold bg-white/10 text-white backdrop-blur-xs border border-white/15 hidden sm:flex items-center gap-1">
-              <Layers className="w-3 h-3 text-amber-300" /> 6 Portal Loker Terkonek
+              <Layers className="w-3 h-3 text-amber-300" /> {portalsList.filter((p) => p.status === 'Aktif').length} Portal Terkonek
             </span>
           </div>
 
@@ -539,33 +524,85 @@ export const JobScraperView: React.FC = () => {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 {portalsList.map((portal) => {
                   const isSelected = selectedPortals.includes(portal.id);
+                  const isLocked = portal.status === 'Perlu Login';
+                  const isSessionPortal = portal.status === 'Sesi';
+                  const hasSession = !!sessionStatus[portal.id];
+                  const isLoggingIn = loggingInPortal === portal.id;
                   return (
-                    <button
+                    <div
                       key={portal.id}
-                      type="button"
-                      disabled={isScanning}
-                      onClick={() => handleTogglePortal(portal.id)}
-                      className={`p-3 rounded-[10px] border text-left transition flex flex-col justify-between cursor-pointer ${
+                      role="button"
+                      tabIndex={isScanning || isLocked ? -1 : 0}
+                      onClick={() => !isScanning && !isLocked && handleTogglePortal(portal.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !isScanning && !isLocked) handleTogglePortal(portal.id);
+                      }}
+                      title={
+                        isLocked
+                          ? 'Perlu sesi login pengguna — bot tidak mem-bypass autentikasi'
+                          : isSessionPortal && !hasSession
+                          ? 'Portal butuh browser + sesi login Anda (pola LinkedIn). Klik tombol Login dulu, atau pilih untuk dicoba tanpa sesi.'
+                          : undefined
+                      }
+                      className={`p-3 rounded-[10px] border text-left transition flex flex-col justify-between ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${
                         isSelected
-                          ? 'border-blue-600 bg-blue-500/10 text-slate-900 dark:text-white ring-1 ring-blue-500/30'
+                          ? 'border-navy-600 bg-blue-500/10 text-slate-900 dark:text-white ring-1 ring-blue-500/30'
                           : 'border-slate-200 dark:border-slate-800 bg-white/40 dark:bg-slate-900/40 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
                       }`}
                     >
-                      <div className="flex items-center justify-between w-full">
-                        <span className="text-xs font-black">{portal.name}</span>
-                        {isSelected && (
-                          <div className="w-3.5 h-3.5 rounded-full bg-blue-600 text-white flex items-center justify-center">
-                            <Check className="w-2.5 h-2.5" />
-                          </div>
-                        )}
+                      <div className="flex items-center justify-between w-full gap-1.5">
+                        <span className="text-xs font-black truncate">{portal.name}</span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {isSessionPortal && hasSession && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleClearPortalSession(portal.id);
+                              }}
+                              title="Hapus sesi login portal ini"
+                              className="p-1 rounded-[10px] text-emerald-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition"
+                            >
+                              <LogOut className="w-3 h-3" />
+                            </button>
+                          )}
+                          {isSelected && (
+                            <div className="w-3.5 h-3.5 rounded-full bg-blue-600 text-white flex items-center justify-center">
+                              <Check className="w-2.5 h-2.5" />
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center justify-between w-full mt-2 text-[9px]">
-                        <span className="text-slate-400 font-medium">{portal.activeCount}+ loker</span>
-                        <span className="text-emerald-600 dark:text-emerald-400 font-extrabold uppercase">
-                          {portal.status}
+                        <span className="text-slate-400 font-medium truncate">
+                          {isLocked ? 'Perlu sesi login' : isSessionPortal ? (hasSession ? 'Sesi login aktif' : `${portal.activeCount}+ loker`) : `${portal.activeCount}+ loker`}
+                        </span>
+                        <span className={`font-extrabold uppercase shrink-0 ${isLocked ? 'text-amber-500 dark:text-amber-400' : isSessionPortal ? (hasSession ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400') : 'text-emerald-600 dark:text-emerald-400'}`}>
+                          {isLocked ? 'Perlu Login' : isSessionPortal ? (hasSession ? 'Sesi Aktif' : 'Perlu Sesi') : 'Aktif'}
                         </span>
                       </div>
-                    </button>
+                      {isSessionPortal && !hasSession && (
+                        <button
+                          type="button"
+                          disabled={isScanning || isLoggingIn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLoginPortal(portal.id);
+                          }}
+                          className="mt-2 w-full px-2 py-1 rounded-[10px] text-[9px] font-extrabold bg-blue-600 hover:bg-blue-700 text-white transition flex items-center justify-center gap-1 disabled:opacity-60"
+                        >
+                          {isLoggingIn ? (
+                            <>
+                              <RefreshCw className="w-3 h-3 animate-spin" /> Menunggu Login...
+                            </>
+                          ) : (
+                            <>
+                              <LogIn className="w-3 h-3" /> Login {portal.name}
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
                   );
                 })}
               </div>
@@ -584,7 +621,7 @@ export const JobScraperView: React.FC = () => {
                 className={`px-6 py-3 rounded-[10px] font-extrabold text-xs transition duration-200 shadow-md flex items-center gap-2 cursor-pointer ${
                   isScanning
                     ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/20'
-                    : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20'
+                    : 'bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-[#1738D1]/20'
                 }`}
               >
                 {isScanning ? (
@@ -700,7 +737,7 @@ export const JobScraperView: React.FC = () => {
               <Database className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <span>Daftar Lowongan Hasil Pemindaian</span>
             </h3>
-            <span className="px-2.5 py-0.5 rounded-[10px] text-xs font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
+            <span className="px-2.5 py-0.5 rounded-[10px] text-xs font-bold bg-blue-100 dark:bg-blue-950 text-navy-700 dark:text-blue-300">
               {filteredJobs.length}
             </span>
           </div>
@@ -742,6 +779,17 @@ export const JobScraperView: React.FC = () => {
               />
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
             </div>
+
+            {/* Download JSON */}
+            <button
+              type="button"
+              onClick={handleDownload}
+              disabled={isScanning || filteredJobs.length === 0}
+              className="px-3.5 py-1.5 rounded-[10px] border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center gap-1.5 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Unduh JSON</span>
+            </button>
           </div>
         </div>
 
@@ -758,25 +806,17 @@ export const JobScraperView: React.FC = () => {
               <div
                 key={job.id}
                 onClick={() => setSelectedJobForDetail(job)}
-                className="glass-card p-5 rounded-[10px] border border-slate-200/80 dark:border-slate-800/80 hover:border-blue-500/50 dark:hover:border-blue-500/50 hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col justify-between group relative"
+                className="glass-card p-5 rounded-[10px] border border-slate-200/80 dark:border-slate-800/80 hover:border-navy-800 dark:hover:border-navy-800 hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col justify-between group relative"
               >
                 <div className="space-y-3">
                   {/* Top Badges (Portal & Match Score) */}
                   <div className="flex items-center justify-between">
-                    <span className={`px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase ${
-                      job.portal === 'LinkedIn'
-                        ? 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
-                        : job.portal === 'Jobstreet'
-                        ? 'bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800'
-                        : job.portal === 'Glints'
-                        ? 'bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
-                    }`}>
+                    <span className={`px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase ${PORTAL_BADGE_CLASS[job.portal] || 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}`}>
                       {job.portal}
                     </span>
 
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800 flex items-center gap-1">
+                      <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 flex items-center gap-1">
                         <Sparkles className="w-3 h-3" /> Match: {job.matchScore}%
                       </span>
                       <button
@@ -796,7 +836,7 @@ export const JobScraperView: React.FC = () => {
 
                   {/* Job Title & Company */}
                   <div>
-                    <h4 className="font-extrabold text-sm text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition line-clamp-1">
+                    <h4 className="font-extrabold text-sm text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-blue-400 transition line-clamp-1">
                       {job.title}
                     </h4>
                     <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
@@ -845,7 +885,7 @@ export const JobScraperView: React.FC = () => {
                       e.stopPropagation();
                       setSelectedJobForDetail(job);
                     }}
-                    className="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 flex items-center gap-1 text-[11px] group-hover:translate-x-0.5 transition-transform"
+                    className="font-bold text-blue-600 dark:text-blue-400 hover:text-orange-600 flex items-center gap-1 text-[11px] group-hover:translate-x-0.5 transition-transform"
                   >
                     <span>Detail Loker</span>
                     <ArrowUpRight className="w-3.5 h-3.5" />
@@ -869,10 +909,10 @@ export const JobScraperView: React.FC = () => {
             <div className="p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 uppercase">
+                  <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-blue-100 dark:bg-blue-950 text-navy-700 dark:text-blue-300 uppercase">
                     {selectedJobForDetail.portal}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-bold bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800 flex items-center gap-1">
+                  <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-bold bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 flex items-center gap-1">
                     <Sparkles className="w-3 h-3" /> Match: {selectedJobForDetail.matchScore}%
                   </span>
                 </div>
@@ -941,13 +981,13 @@ export const JobScraperView: React.FC = () => {
               {/* Skills Tags */}
               <div className="space-y-2">
                 <h4 className="font-extrabold text-slate-900 dark:text-white text-xs uppercase tracking-wider flex items-center gap-1.5">
-                  <Tag className="w-4 h-4 text-purple-500" /> Keahlian &amp; Keyword Kunci
+                  <Tag className="w-4 h-4 text-orange-500" /> Keahlian &amp; Keyword Kunci
                 </h4>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedJobForDetail.skills.map((skill) => (
                     <span
                       key={skill}
-                      className="px-3 py-1 rounded-[10px] text-xs font-bold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
+                      className="px-3 py-1 rounded-[10px] text-xs font-bold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-navy-800"
                     >
                       {skill}
                     </span>
@@ -975,7 +1015,7 @@ export const JobScraperView: React.FC = () => {
                 href={selectedJobForDetail.portalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-5 py-2.5 rounded-[10px] font-extrabold text-xs bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/20 transition flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-[10px] font-extrabold text-xs bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-md shadow-[#1738D1]/20 transition flex items-center gap-1.5"
               >
                 <span>Buka Lowongan Asli</span>
                 <ExternalLink className="w-4 h-4" />
@@ -1012,7 +1052,7 @@ export const JobScraperView: React.FC = () => {
                 <div className="grid grid-cols-2 gap-2">
                   {['Full-time', 'Contract', 'Internship', 'Remote'].map((type) => (
                     <label key={type} className="flex items-center gap-2 p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-800 font-medium cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800">
-                      <input type="checkbox" defaultChecked className="rounded text-blue-600 focus:ring-blue-500" />
+                      <input type="checkbox" defaultChecked className="rounded-[10px] text-blue-600 focus:ring-blue-500" />
                       <span>{type}</span>
                     </label>
                   ))}

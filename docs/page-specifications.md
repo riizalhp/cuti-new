@@ -14,7 +14,7 @@ This document provides detailed specifications for all pages in the CUTI platfor
 
 ## 1. Landing Page (Astro)
 
-**URL:** `https://cuti.online`  
+**URL:** `https://employr.id`  
 **Goal:** Convert visitors to registered users  
 **Key Metric:** Sign-up conversion rate
 
@@ -725,7 +725,7 @@ This document provides detailed specifications for all pages in the CUTI platfor
 - Testimonial quote (rotates)
 
 **Right Panel:**
-- Headline: "Masuk ke CUTI" (H2)
+- Headline: "Masuk ke Employr" (H2)
 - Google OAuth button: "Lanjutkan dengan Google" (white button, Google logo)
 - Divider: "atau"
 - Email input

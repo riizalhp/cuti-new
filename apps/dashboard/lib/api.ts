@@ -1,11 +1,10 @@
 /**
- * API Client for CUTI Dashboard
+ * API Client for Employr Dashboard
  *
- * Base configuration for making API calls to the CUTI backend.
+ * Base configuration for making API calls to the CUTI backend & database.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-const AI_GATEWAY_URL = process.env.NEXT_PUBLIC_AI_GATEWAY_URL || "http://localhost:3002";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export interface ApiResponse<T> {
   data: T;
@@ -25,7 +24,17 @@ export async function apiFetch<T>(
   endpoint: string,
   options?: RequestInit
 ): Promise<ApiResponse<T>> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  // If endpoint is relative (starts with /api or /v1), format correctly
+  let url = endpoint;
+  if (!endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
+    if (endpoint.startsWith("/api")) {
+      url = endpoint;
+    } else if (API_BASE_URL) {
+      url = `${API_BASE_URL}${endpoint}`;
+    } else {
+      url = endpoint.startsWith("/v1") ? `/api${endpoint.replace("/v1", "")}` : endpoint;
+    }
+  }
 
   try {
     const response = await fetch(url, {
@@ -46,7 +55,6 @@ export async function apiFetch<T>(
 
     return await response.json();
   } catch (err: any) {
-    // If backend endpoint is unreachable or network error occurs, handle gracefully
     console.warn(`[apiFetch] API call to ${url} failed:`, err.message || err);
     throw err;
   }
@@ -93,47 +101,47 @@ export async function apiDelete<T>(endpoint: string): Promise<ApiResponse<T>> {
 }
 
 /**
- * CV API Client
+ * CV API Client - Connected directly to Database & User Session
  */
 export const cvApi = {
   async getAll<T = any>(): Promise<T[]> {
     try {
-      const res = await apiGet<T[]>("/v1/cv");
-      return res.data;
+      const res = await apiGet<T[]>("/api/cv");
+      return res.data || [];
     } catch {
       return [];
     }
   },
   async getById<T = any>(id: string): Promise<T | null> {
     try {
-      const res = await apiGet<T>(`/v1/cv/${id}`);
-      return res.data;
+      const res = await apiGet<T>(`/api/cv/${id}`);
+      return res.data || null;
     } catch {
       return null;
     }
   },
   async create<T = any>(cvData: unknown): Promise<T | null> {
     try {
-      const res = await apiPost<T>("/v1/cv", cvData);
-      return res.data;
+      const res = await apiPost<T>("/api/cv", cvData);
+      return res.data || null;
     } catch {
       return null;
     }
   },
   async update<T = any>(id: string, cvData: unknown): Promise<T | null> {
     try {
-      const res = await apiFetch<T>(`/v1/cv/${id}`, {
+      const res = await apiFetch<T>(`/api/cv/${id}`, {
         method: "PATCH",
         body: JSON.stringify(cvData),
       });
-      return res.data;
+      return res.data || null;
     } catch {
       return null;
     }
   },
   async delete(id: string): Promise<boolean> {
     try {
-      await apiDelete(`/v1/cv/${id}`);
+      await apiDelete(`/api/cv/${id}`);
       return true;
     } catch {
       return false;
@@ -142,39 +150,97 @@ export const cvApi = {
 };
 
 /**
- * Job Tracker API Client
+ * Orders API Client - CV Service & Processing
+ */
+export const orderApi = {
+  async getActiveOrder<T = any>(): Promise<T | null> {
+    try {
+      const res = await apiGet<T>("/api/orders/active");
+      return res.data || null;
+    } catch {
+      return null;
+    }
+  },
+  async createOrder<T = any>(orderData: unknown): Promise<T | null> {
+    try {
+      const res = await apiPost<T>("/api/orders", orderData);
+      return res.data || null;
+    } catch {
+      return null;
+    }
+  },
+};
+
+/**
+ * Job Tracker API Client - Connected directly to Database & User Session
  */
 export const trackerApi = {
   async getAll<T = any>(): Promise<T[]> {
     try {
-      const res = await apiGet<T[]>("/v1/job-applications");
-      return res.data;
+      const res = await apiGet<T[]>("/api/applications");
+      return res.data || [];
     } catch {
       return [];
     }
   },
+  async getById<T = any>(id: string): Promise<T | null> {
+    try {
+      const res = await apiGet<T>(`/api/applications/${id}`);
+      return res.data || null;
+    } catch {
+      return null;
+    }
+  },
   async create<T = any>(appData: unknown): Promise<T | null> {
     try {
-      const res = await apiPost<T>("/v1/job-applications", appData);
-      return res.data;
+      const res = await apiPost<T>("/api/applications", appData);
+      return res.data || null;
+    } catch {
+      return null;
+    }
+  },
+  async update<T = any>(id: string, appData: unknown): Promise<T | null> {
+    try {
+      const res = await apiFetch<T>(`/api/applications/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(appData),
+      });
+      return res.data || null;
     } catch {
       return null;
     }
   },
   async updateStatus<T = any>(id: string, status: string): Promise<T | null> {
     try {
-      const res = await apiPut<T>(`/v1/job-applications/${id}`, { status });
-      return res.data;
+      const res = await apiFetch<T>(`/api/applications/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      });
+      return res.data || null;
     } catch {
       return null;
     }
   },
   async delete(id: string): Promise<boolean> {
     try {
-      await apiDelete(`/v1/job-applications/${id}`);
+      await apiDelete(`/api/applications/${id}`);
       return true;
     } catch {
       return false;
+    }
+  },
+};
+
+/**
+ * Schedules & Reminders API Client
+ */
+export const scheduleApi = {
+  async getAll<T = any>(): Promise<T[]> {
+    try {
+      const res = await apiGet<T[]>("/api/schedules");
+      return res.data || [];
+    } catch {
+      return [];
     }
   },
 };
@@ -202,12 +268,48 @@ export const userApi = {
 };
 
 /**
+ * Jobs API Client - Job scraping and matching
+ */
+export const jobsApi = {
+  async getAll<T = any>(): Promise<T[]> {
+    try {
+      const res = await apiGet<T[]>("/api/jobs");
+      return res.data || [];
+    } catch {
+      return [];
+    }
+  },
+  async getRecommended<T = any>(limit: number = 10): Promise<T[]> {
+    try {
+      const res = await apiGet<T[]>(`/api/jobs/recommended?limit=${limit}`);
+      return res.data || [];
+    } catch {
+      return [];
+    }
+  },
+};
+
+/**
+ * Activities API Client - Track user activities and timeline
+ */
+export const activitiesApi = {
+  async getAll<T = any>(limit: number = 10): Promise<T[]> {
+    try {
+      const res = await apiGet<T[]>(`/api/activities?limit=${limit}`);
+      return res.data || [];
+    } catch {
+      return [];
+    }
+  },
+};
+
+/**
  * AI Gateway API Client (Routes through Admin AI Gateway on port 3002 or API Proxy)
  */
 export const aiGatewayApi = {
   async generateCompletion(prompt: string, options?: { systemInstruction?: string; model?: string }) {
     try {
-      const res = await fetch("/api/gemini", {
+      const res = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -224,4 +326,3 @@ export const aiGatewayApi = {
     }
   },
 };
-

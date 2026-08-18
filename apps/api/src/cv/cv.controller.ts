@@ -20,7 +20,7 @@ import { CvOwnerGuard } from './guards/cv-owner.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 
-@Controller('v1/cv')
+@Controller('cv')
 @UseGuards(AuthGuard)
 export class CvController {
   constructor(private cvService: CvService) {}

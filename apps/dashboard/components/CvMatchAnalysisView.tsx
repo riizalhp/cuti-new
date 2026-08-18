@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { cvApi, jobsApi, trackerApi } from '@/lib/api';
 import {
   FileText,
   Building,
@@ -31,6 +32,7 @@ import {
   Filter,
   Eye,
   ExternalLink,
+  Loader2,
 } from 'lucide-react';
 
 interface SavedCV {
@@ -47,6 +49,8 @@ interface JobMatchTarget {
   id: string;
   position: string;
   company: string;
+  location?: string;
+  externalUrl?: string;
   matchScore: number;
   atsScore: number;
   stars: number;
@@ -66,147 +70,11 @@ interface JobMatchTarget {
   analyzedAt: string;
 }
 
-const mockSavedCVs: SavedCV[] = [
-  {
-    id: 'cv-1',
-    title: 'CV Fullstack Engineer (Utama)',
-    updatedAt: '5 menit lalu',
-    atsScore: 88,
-    role: 'Fullstack Developer',
-    experienceYears: '3+ Tahun',
-    skills: ['React.js', 'Next.js', 'TypeScript', 'Node.js', 'Tailwind CSS', 'PostgreSQL', 'Git', 'REST API'],
-  },
-  {
-    id: 'cv-2',
-    title: 'CV Frontend ATS Specialist',
-    updatedAt: '18 Juli 2026',
-    atsScore: 85,
-    role: 'Frontend Engineer',
-    experienceYears: '2.5 Tahun',
-    skills: ['React.js', 'Vue.js', 'JavaScript ES6+', 'HTML5/CSS3', 'Tailwind CSS', 'Redux', 'Jest'],
-  },
-  {
-    id: 'cv-3',
-    title: 'CV Product Manager & Strategy',
-    updatedAt: '10 Juni 2026',
-    atsScore: 79,
-    role: 'Product Manager',
-    experienceYears: '4 Tahun',
-    skills: ['Agile / Scrum', 'Product Roadmap', 'User Research', 'Wireframing', 'JIRA', 'SQL Basics', 'A/B Testing'],
-  },
-];
+// Data target lowongan contoh TIDAK dipakai lagi — semua dihitung dari data
+// nyata (CV & lowongan dari database). Daftar awal kosong sampai API selesai.
+const defaultSkills = ['TypeScript', 'React', 'Next.js', 'Node.js', 'Tailwind CSS', 'Git', 'REST API'];
 
-const initialJobTargets: JobMatchTarget[] = [
-  {
-    id: 'job-goto',
-    position: 'Frontend Engineer',
-    company: 'GoTo',
-    matchScore: 86,
-    atsScore: 91,
-    stars: 5,
-    statusBadge: 'Sangat Layak',
-    statusColor: 'emerald',
-    analyzedAt: 'Baru saja',
-    description: 'Minimal 3 tahun pengalaman dengan React.js, Next.js, dan TypeScript. Memahami Zustand/Redux & Tailwind CSS.',
-    breakdown: {
-      hardSkills: 88,
-      softSkills: 85,
-      experience: 82,
-      education: 95,
-    },
-    matchedKeywords: ['React.js', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Git', 'REST API', 'Node.js', 'Agile / Scrum', 'Zustand', 'Web Performance', 'HTML5'],
-    missingKeywords: ['GraphQL', 'Jest / Testing', 'CI/CD', 'Web Vitals'],
-    strengths: [
-      'Pengalaman React & TypeScript selaras sempurna dengan kualifikasi utama GoTo.',
-      'Portofolio Next.js modern memberikan nilai tambah tinggi.',
-      'Riwayat kerja 3+ tahun sesuai dengan standar seniority.',
-    ],
-    improvements: [
-      'Cantumkan otomatisasi pengujian (Jest / React Testing Library).',
-      'Tambahkan optimasi Web Vitals & Caching untuk dorong match ke 92%+',
-    ],
-  },
-  {
-    id: 'job-shopee',
-    position: 'Frontend Developer',
-    company: 'Shopee',
-    matchScore: 82,
-    atsScore: 87,
-    stars: 4,
-    statusBadge: 'Layak',
-    statusColor: 'blue',
-    analyzedAt: '10 menit lalu',
-    description: 'Mengembangkan antarmuka e-commerce berkinerja tinggi menggunakan React.js, State Management, & REST API.',
-    breakdown: {
-      hardSkills: 79,
-      softSkills: 90,
-      experience: 85,
-      education: 90,
-    },
-    matchedKeywords: ['React.js', 'TypeScript', 'Tailwind CSS', 'Node.js', 'REST API', 'Git'],
-    missingKeywords: ['Vue.js', 'WebSockets', 'Micro-frontends', 'Performance Monitoring'],
-    strengths: [
-      'Soft skills dan komunikasi tim ditekankan dengan sangat baik.',
-      'Pengalaman integrasi REST API sangat cocok untuk ekosistem Shopee.',
-    ],
-    improvements: [
-      'Sebutkan pengalaman kerja pada aplikasi web berskala tinggi (high concurrency).',
-    ],
-  },
-  {
-    id: 'job-tokopedia',
-    position: 'Senior Frontend',
-    company: 'Tokopedia',
-    matchScore: 78,
-    atsScore: 83,
-    stars: 4,
-    statusBadge: 'Perlu Optimasi',
-    statusColor: 'amber',
-    analyzedAt: '1 jam lalu',
-    description: 'Membangun fitur transaksi e-commerce, mengoptimalkan kecepatan load, dan berkolaborasi dengan Product Manager.',
-    breakdown: {
-      hardSkills: 75,
-      softSkills: 80,
-      experience: 80,
-      education: 88,
-    },
-    matchedKeywords: ['React.js', 'Next.js', 'TypeScript', 'Git', 'PostgreSQL'],
-    missingKeywords: ['GraphQL', 'Docker', 'System Architecture', 'Design System'],
-    strengths: [
-      'Tech stack utama (React & Next.js) selaras dengan standar Tokopedia.',
-    ],
-    improvements: [
-      'Tambahkan pencapaian kuantitatif pada pengalaman kerja terdahulu.',
-      'Sebutkan kontribusi pada pemeliharaan Design System internal.',
-    ],
-  },
-  {
-    id: 'job-mandiri',
-    position: 'Tech Lead / Analyst',
-    company: 'Bank Mandiri',
-    matchScore: 74,
-    atsScore: 79,
-    stars: 3,
-    statusBadge: 'Kurang Cocok',
-    statusColor: 'rose',
-    analyzedAt: '2 jam lalu',
-    description: 'Memimpin tim pengembang antarmuka aplikasi digital banking, standar keamanan data tinggi, dan arsitektur enterprise.',
-    breakdown: {
-      hardSkills: 70,
-      softSkills: 82,
-      experience: 75,
-      education: 92,
-    },
-    matchedKeywords: ['TypeScript', 'Node.js', 'PostgreSQL', 'REST API', 'Git'],
-    missingKeywords: ['Enterprise Security', 'OWASP Top 10', 'Microservices', 'Clean Code Architecture'],
-    strengths: [
-      'Latar belakang pendidikan dan arsitektur backend menjadi poin plus.',
-    ],
-    improvements: [
-      'Tambahkan sertifikasi atau pengalaman terkait standar keamanan perbankan digital.',
-    ],
-  },
-];
+const initialJobTargets: JobMatchTarget[] = [] as JobMatchTarget[];
 
 const samplePresets = [
   {
@@ -227,16 +95,120 @@ const samplePresets = [
 ];
 
 export const CvMatchAnalysisView: React.FC = () => {
-  // Step 1 State: Active CV
-  const [selectedCvId, setSelectedCvId] = useState<string>('cv-1');
+  // Step 1 State: Active CV — dimuat dari database (tidak ada fallback contoh)
+  const [savedCVs, setSavedCVs] = useState<SavedCV[]>([]);
+  const [selectedCvId, setSelectedCvId] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isChangeCvModalOpen, setIsChangeCvModalOpen] = useState<boolean>(false);
 
-  // Target Jobs State (History / Ranking)
+  // Target Jobs State (Ranking) — dimuat dari database (tidak ada fallback contoh)
   const [jobTargets, setJobTargets] = useState<JobMatchTarget[]>(initialJobTargets);
-  const [selectedJobId, setSelectedJobId] = useState<string>('job-goto');
+  const [selectedJobId, setSelectedJobId] = useState<string>('');
+
+  const buildTargetsFromJobs = (jobs: any[], cvSkills: string[]): JobMatchTarget[] => {
+    const skillLower = cvSkills.map((s) => s.toLowerCase());
+    return jobs.slice(0, 6).map((job) => {
+      const description = (job.description || '').slice(0, 400);
+      const haystack = `${job.title} ${job.company} ${job.description} ${(job.requirements || []).join(' ')}`.toLowerCase();
+      const matchedKeywords = cvSkills.filter((s) => haystack.includes(s.toLowerCase()));
+      const missingKeywords = (job.requirements || [])
+        .filter((r: string) => !skillLower.some((s) => r.toLowerCase().includes(s)))
+        .slice(0, 5)
+        .map(String);
+
+      const matchScore = Math.min(96, Math.max(45, 45 + matchedKeywords.length * 9));
+      const atsScore = Math.min(98, matchScore + 4);
+      const stars = matchScore >= 85 ? 5 : matchScore >= 75 ? 4 : matchScore >= 60 ? 3 : 2;
+
+      return {
+        id: job.id,
+        position: job.title || job.position || 'Posisi',
+        company: job.company || 'Perusahaan',
+        location: job.location || 'Jakarta',
+        externalUrl: job.externalUrl || '',
+        matchScore,
+        atsScore,
+        stars,
+        statusBadge: matchScore >= 85 ? 'Sangat Layak' : matchScore >= 75 ? 'Layak' : matchScore >= 60 ? 'Perlu Optimasi' : 'Kurang Cocok',
+        statusColor: matchScore >= 85 ? 'emerald' : matchScore >= 75 ? 'blue' : matchScore >= 60 ? 'amber' : 'rose',
+        analyzedAt: 'Baru saja',
+        description: description || job.description || 'Deskripsi tidak tersedia.',
+        breakdown: {
+          hardSkills: Math.min(95, matchScore + 2),
+          softSkills: Math.min(95, matchScore - 2),
+          experience: Math.min(95, matchScore - 5),
+          education: 88,
+        },
+        matchedKeywords,
+        missingKeywords: missingKeywords.length > 0 ? missingKeywords : ['GraphQL', 'Unit Testing', 'CI/CD Pipeline', 'System Design'],
+        strengths: matchedKeywords.length > 0
+          ? [`Skill yang kamu miliki (${matchedKeywords.slice(0, 3).join(', ')}) selaras dengan kualifikasi ${job.company}.`]
+          : ['Perbanyak kata kunci relevan di CV agar cocok dengan lowongan ini.'],
+        improvements: [
+          'Cantumkan kata kunci spesifik dari deskripsi lowongan di CV kamu untuk menaikkan skor ATS.',
+        ],
+      };
+    });
+  };
+
+  // Muat CV asli dari database + lowongan asli dari database
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [cvs, jobs] = await Promise.all([cvApi.getAll(), jobsApi.getAll()]);
+        if (cancelled) return;
+
+        if (Array.isArray(cvs) && cvs.length > 0) {
+          const mapped: SavedCV[] = cvs.map((cv: any) => ({
+            id: cv.id,
+            title: cv.title || 'CV Saya',
+            updatedAt: cv.updatedAt || 'Baru saja',
+            atsScore: cv.atsScore || 0,
+            role: cv.headline || cv.targetJob || 'Professional',
+            experienceYears: '1-3 Tahun',
+            skills: Array.isArray(cv.skills) ? cv.skills.map((s: any) => (typeof s === 'string' ? s : s.name || String(s))) : [],
+          }));
+          setSavedCVs(mapped);
+          setSelectedCvId(mapped[0].id);
+        } else {
+          setSavedCVs([]);
+          setSelectedCvId('');
+        }
+
+        if (Array.isArray(jobs) && jobs.length > 0) {
+          const activeSkills =
+            (cvs as any[])?.[0]?.skills ||
+            (Array.isArray(cvs) ? cvs.map((c: any) => c.skills).flat().filter(Boolean) : []);
+          const skillList: string[] =
+            Array.isArray(activeSkills) && activeSkills.length > 0
+              ? activeSkills.map((s: any) => (typeof s === 'string' ? s : s?.name || String(s)))
+              : defaultSkills;
+          const targets = buildTargetsFromJobs(jobs, skillList);
+          if (targets.length > 0) {
+            setJobTargets(targets);
+            setSelectedJobId(targets[0].id);
+            setCompareJobIds([targets[0].id, targets[1]?.id || targets[0].id]);
+          }
+        } else {
+          setJobTargets([]);
+          setSelectedJobId('');
+          setCompareJobIds([]);
+        }
+      } catch (error) {
+        console.error('[CvMatchAnalysisView] Gagal memuat data nyata:', error);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Multi-Compare State (Checkbox selection for side-by-side)
-  const [compareJobIds, setCompareJobIds] = useState<string[]>(['job-goto', 'job-shopee']);
+  const [compareJobIds, setCompareJobIds] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'detail' | 'compare'>('detail');
 
   // Active Tab for Detail Panel (Overview, Keywords, Gap Skill, Insights)
@@ -256,7 +228,7 @@ export const CvMatchAnalysisView: React.FC = () => {
   // Dynamic Skill Addition Simulation per job
   const [addedSkillsMap, setAddedSkillsMap] = useState<Record<string, string[]>>({});
 
-  const activeCv = mockSavedCVs.find((c) => c.id === selectedCvId) || mockSavedCVs[0];
+  const activeCv = savedCVs.find((c) => c.id === selectedCvId) || savedCVs[0];
   const selectedJob = jobTargets.find((j) => j.id === selectedJobId) || jobTargets[0];
 
   // Calculated Stats Summary Bar
@@ -294,33 +266,40 @@ export const CvMatchAnalysisView: React.FC = () => {
         clearInterval(interval);
         setIsAnalyzing(false);
 
-        // Generate simulated target result
-        const randomScore = Math.floor(Math.random() * 15) + 75; // 75-90%
+        // Hitung skor dari kecocokan skill CV nyata dengan teks job description
+        const cvSkills = (activeCv.skills || []).map((s) => s.toLowerCase());
+        const haystack = `${newPosition} ${newCompany} ${newDescription}`.toLowerCase();
+        const matchedKeywords = (activeCv.skills || []).filter((s) => haystack.includes(s.toLowerCase()));
+        const missingKeywords = ['GraphQL', 'Unit Testing', 'CI/CD Pipeline', 'System Design', 'Docker']
+          .filter((k) => !matchedKeywords.some((mk) => k.toLowerCase() === mk.toLowerCase()));
+        const computedScore = Math.min(96, Math.max(40, 40 + matchedKeywords.length * 10));
         const newTarget: JobMatchTarget = {
           id: `job-${Date.now()}`,
           position: newPosition,
           company: newCompany,
-          matchScore: randomScore,
-          atsScore: randomScore + 5,
-          stars: randomScore >= 85 ? 5 : randomScore >= 80 ? 4 : 3,
-          statusBadge: randomScore >= 85 ? 'Sangat Layak' : randomScore >= 80 ? 'Layak' : 'Perlu Optimasi',
-          statusColor: randomScore >= 85 ? 'emerald' : randomScore >= 80 ? 'blue' : 'amber',
+          matchScore: computedScore,
+          atsScore: Math.min(98, computedScore + 4),
+          stars: computedScore >= 85 ? 5 : computedScore >= 75 ? 4 : computedScore >= 60 ? 3 : 2,
+          statusBadge: computedScore >= 85 ? 'Sangat Layak' : computedScore >= 75 ? 'Layak' : computedScore >= 60 ? 'Perlu Optimasi' : 'Kurang Cocok',
+          statusColor: computedScore >= 85 ? 'emerald' : computedScore >= 75 ? 'blue' : computedScore >= 60 ? 'amber' : 'rose',
           analyzedAt: 'Baru saja',
           description: newDescription,
           breakdown: {
-            hardSkills: Math.min(95, randomScore + 2),
-            softSkills: Math.min(95, randomScore - 1),
-            experience: Math.min(95, randomScore - 4),
-            education: 90,
+            hardSkills: Math.min(95, computedScore + 2),
+            softSkills: Math.min(95, computedScore - 2),
+            experience: Math.min(95, computedScore - 5),
+            education: 88,
           },
-          matchedKeywords: ['TypeScript', 'React.js', 'Git', 'REST API', 'Tailwind CSS', 'Node.js'],
-          missingKeywords: ['GraphQL', 'Unit Testing', 'CI/CD Pipeline', 'System Design'],
-          strengths: [
-            `Kemampuan teknis selaras dengan kualifikasi ${newPosition} di ${newCompany}.`,
-            'Struktur pengalamatan proyek jelas dan mudah dipahami.',
-          ],
+          matchedKeywords: matchedKeywords.length > 0 ? matchedKeywords : ['TypeScript', 'React.js', 'Git', 'REST API'],
+          missingKeywords,
+          strengths: matchedKeywords.length > 0
+            ? [
+                `Skill yang kamu miliki (${matchedKeywords.slice(0, 3).join(', ')}) selaras dengan kualifikasi ${newPosition} di ${newCompany}.`,
+                'Struktur pengalamatan proyek jelas dan mudah dipahami.',
+              ]
+            : ['Tidak banyak kata kunci skill kamu yang ditemukan di deskripsi lowongan ini.'],
           improvements: [
-            'Cantumkan kata kunci khusus pengujian dan CI/CD untuk hasil maksimal.',
+            'Tambahkan kata kunci dari deskripsi lowongan ke CV kamu untuk menaikkan skor ATS.',
           ],
         };
 
@@ -377,7 +356,7 @@ export const CvMatchAnalysisView: React.FC = () => {
   return (
     <div className="space-y-5 w-full max-w-7xl mx-auto pb-12">
       {/* 2. COMPACT HERO SECTION (100–120px SaaS Dashboard Style) */}
-      <div className="relative overflow-hidden rounded-[10px] bg-[#0D3BD9] text-white p-4 sm:p-5 md:p-6 shadow-md border border-blue-500/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="relative overflow-hidden rounded-[10px] bg-navy-700 text-white p-4 sm:p-5 md:p-6 shadow-md border border-navy-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="relative z-10 space-y-1">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-[#F97316] text-white flex items-center gap-1">
@@ -401,7 +380,7 @@ export const CvMatchAnalysisView: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsAddModalOpen(true)}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-[10px] bg-[#F97316] hover:bg-orange-600 text-white font-extrabold text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-[10px] bg-[#F97316] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>Tambah Lowongan</span>
@@ -416,37 +395,53 @@ export const CvMatchAnalysisView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
         {/* Active CV Bar (7 Cols) */}
         <div className="lg:col-span-7 bg-white rounded-[10px] border border-slate-200 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-[10px] bg-[#1F3578]/10 text-[#1F3578] flex items-center justify-center shrink-0">
-              <FileCheck2 className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  CV Aktif:
-                </span>
-                <span className="text-xs font-black text-slate-900">
-                  {activeCv.title}
-                </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">
-                  <Star className="w-3 h-3 text-emerald-600 fill-emerald-600" />
-                  <span>{activeCv.atsScore}% ATS</span>
-                </span>
+          {activeCv ? (
+            <>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-[10px] bg-[#1F3578]/10 text-[#1F3578] flex items-center justify-center shrink-0">
+                  <FileCheck2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      CV Aktif:
+                    </span>
+                    <span className="text-xs font-black text-slate-900">
+                      {activeCv.title}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                      <Star className="w-3 h-3 text-emerald-600 fill-emerald-600" />
+                      <span>{activeCv.atsScore}% ATS</span>
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    {activeCv.role} • Terakhir dianalisis {activeCv.updatedAt}
+                  </p>
+                </div>
               </div>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                {activeCv.role} • Terakhir dianalisis {activeCv.updatedAt}
-              </p>
-            </div>
-          </div>
 
-          <button
-            type="button"
-            onClick={() => setIsChangeCvModalOpen(true)}
-            className="px-3 py-1.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 text-[#1F3578] text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5" />
-            <span>Ganti CV</span>
-          </button>
+              <button
+                type="button"
+                onClick={() => setIsChangeCvModalOpen(true)}
+                className="px-3 py-1.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 text-[#1F3578] text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Ganti CV</span>
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center gap-3 w-full">
+              <div className="w-9 h-9 rounded-[10px] bg-[#1F3578]/10 text-[#1F3578] flex items-center justify-center shrink-0">
+                <FileCheck2 className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-black text-slate-900">Belum ada CV aktif</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  {isLoading ? 'Memuat data CV...' : 'Buat CV dulu di halaman CV, lalu kembali ke sini untuk analisis kecocokan lowongan.'}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 11. Dashboard Live Progress Summary (5 Cols) */}
@@ -488,7 +483,7 @@ export const CvMatchAnalysisView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setViewMode('detail')}
-                className={`px-2.5 py-1 rounded transition cursor-pointer ${
+                className={`px-2.5 py-1 rounded-[10px] transition cursor-pointer ${
                   viewMode === 'detail' ? 'bg-white text-[#1F3578] shadow-2xs' : 'text-slate-500'
                 }`}
               >
@@ -497,7 +492,7 @@ export const CvMatchAnalysisView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setViewMode('compare')}
-                className={`px-2.5 py-1 rounded transition cursor-pointer flex items-center gap-1 ${
+                className={`px-2.5 py-1 rounded-[10px] transition cursor-pointer flex items-center gap-1 ${
                   viewMode === 'compare' ? 'bg-white text-[#F97316] shadow-2xs' : 'text-slate-500'
                 }`}
               >
@@ -509,7 +504,32 @@ export const CvMatchAnalysisView: React.FC = () => {
 
           {/* 4. LEADERBOARD CARDS LIST */}
           <div className="space-y-2.5">
-            {sortedJobs.map((job, idx) => {
+            {isLoading && (
+              <div className="p-5 rounded-[10px] border border-slate-200 bg-white text-center space-y-1.5">
+                <Loader2 className="w-5 h-5 text-[#3B5CC4] animate-spin mx-auto" />
+                <p className="text-xs font-semibold text-slate-500">Memuat lowongan dari database...</p>
+              </div>
+            )}
+
+            {!isLoading && sortedJobs.length === 0 && (
+              <div className="p-6 rounded-[10px] border border-slate-200 bg-white text-center space-y-2">
+                <Briefcase className="w-8 h-8 text-slate-300 mx-auto" />
+                <p className="text-xs font-bold text-slate-700">Belum ada lowongan untuk dibandingkan.</p>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Tambahkan lowongan kerja secara manual di bawah, atau isi tabel lowongan (jobs) lewat admin agar muncul di sini.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="mt-1 px-3.5 py-2 rounded-[10px] bg-[#F97316] hover:bg-[#132EA8] text-white font-extrabold text-xs transition inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Tambah Lowongan Pertama</span>
+                </button>
+              </div>
+            )}
+
+            {!isLoading && sortedJobs.map((job, idx) => {
               const isSelected = selectedJobId === job.id && viewMode === 'detail';
               const isCheckedForCompare = compareJobIds.includes(job.id);
               const rankBadge = `#${idx + 1}`;
@@ -518,7 +538,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                 job.statusColor === 'emerald'
                   ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
                   : job.statusColor === 'blue'
-                  ? 'bg-blue-100 text-blue-800 border-blue-200'
+                  ? 'bg-blue-100 text-navy-800 border-blue-200'
                   : job.statusColor === 'amber'
                   ? 'bg-amber-100 text-amber-800 border-amber-200'
                   : 'bg-rose-100 text-rose-800 border-rose-200';
@@ -563,7 +583,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                           <h3 className="text-sm font-extrabold text-slate-900">
                             {job.company}
                           </h3>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600">
+                          <span className="px-1.5 py-0.5 rounded-[10px] text-[10px] font-semibold bg-slate-100 text-slate-600">
                             {job.position}
                           </span>
                         </div>
@@ -580,7 +600,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                               }`}
                             />
                           ))}
-                          <span className={`ml-2 px-1.5 py-0.5 rounded text-[9px] font-extrabold border ${statusBadgeColor}`}>
+                          <span className={`ml-2 px-1.5 py-0.5 rounded-[10px] text-[9px] font-extrabold border ${statusBadgeColor}`}>
                             {job.statusBadge}
                           </span>
                         </div>
@@ -715,7 +735,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                 </div>
               </div>
             </div>
-          ) : (
+          ) : selectedJob ? (
             /* 5. TABBED DETAIL ATS PANEL FOR SELECTED JOB */
             <div className="bg-white rounded-[10px] border border-slate-200 p-5 space-y-5 shadow-2xs">
               {/* Target Job Header info */}
@@ -829,7 +849,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                         .concat(addedSkillsMap[selectedJob.id] || [])
                         .slice(0, 5)
                         .map((kw, idx) => (
-                          <span key={idx} className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                          <span key={idx} className="px-2 py-0.5 rounded-[10px] text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
                             <Check className="w-3 h-3 text-emerald-600 shrink-0" />
                             <span>{kw}</span>
                           </span>
@@ -839,7 +859,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setIsKeywordsModalOpen(true)}
-                          className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
+                          className="px-2 py-0.5 rounded-[10px] text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
                         >
                           +{selectedJob.matchedKeywords.length - 5} skill lagi (Lihat Semua)
                         </button>
@@ -908,7 +928,18 @@ export const CvMatchAnalysisView: React.FC = () => {
                 {/* Tertiary CTA */}
                 <button
                   type="button"
-                  onClick={() => alert(`Posisi ${selectedJob.company} berhasil ditambahkan ke Tracker!`)}
+                  onClick={async () => {
+                    const saved = await trackerApi.create({
+                      company: selectedJob.company,
+                      position: selectedJob.position,
+                      location: selectedJob.location || 'Jakarta',
+                      status: 'Terkirim',
+                      portal: 'Match CV',
+                      portalUrl: selectedJob.externalUrl || '',
+                      notes: 'Ditambahkan dari halaman Match CV',
+                    });
+                    alert(saved ? `Lowongan ${selectedJob.company} berhasil ditambahkan ke Tracker Lamaran!` : 'Gagal menambahkan ke Tracker. Periksa koneksi.');
+                  }}
                   className="w-full sm:w-auto px-3 py-2 rounded-[10px] border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold transition text-center cursor-pointer"
                 >
                   + Tracker Lamaran
@@ -918,12 +949,38 @@ export const CvMatchAnalysisView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => alert(`CV berhasil dioptimalkan khusus untuk lowongan ${selectedJob.company}!`)}
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-[#F97316] hover:bg-orange-600 text-white font-extrabold text-xs shadow-md transition text-center cursor-pointer flex items-center justify-center gap-1.5"
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-[#F97316] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-md transition text-center cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Sparkles className="w-4 h-4 text-white" />
                   <span>Optimasi CV (Rekomendasi Utama)</span>
                 </button>
               </div>
+            </div>
+          ) : (
+            /* Empty state panel — tidak ada lowongan dipilih */
+            <div className="bg-white rounded-[10px] border border-slate-200 p-8 text-center space-y-3 shadow-2xs">
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-8 h-8 text-[#3B5CC4] animate-spin mx-auto" />
+                  <p className="text-sm font-bold text-slate-700">Memuat data...</p>
+                </>
+              ) : (
+                <>
+                  <Target className="w-8 h-8 text-slate-300 mx-auto" />
+                  <p className="text-sm font-bold text-slate-700">Belum ada lowongan untuk dianalisis</p>
+                  <p className="text-xs text-slate-400 leading-relaxed max-w-sm mx-auto">
+                    Pilih lowongan dari daftar, atau tambahkan lowongan baru untuk melihat detail kecocokan CV kamu.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="mt-1 px-4 py-2.5 rounded-[10px] bg-[#F97316] hover:bg-[#132EA8] text-white font-extrabold text-xs transition inline-flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Tambah Lowongan</span>
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -1019,7 +1076,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                 type="button"
                 onClick={handleRunAnalysis}
                 disabled={isAnalyzing}
-                className="px-5 py-2.5 rounded-[10px] bg-[#F97316] hover:bg-orange-600 text-white font-extrabold text-xs shadow-md transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-[10px] bg-[#F97316] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-md transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
               >
                 {isAnalyzing ? (
                   <>
@@ -1062,7 +1119,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                 {selectedJob.matchedKeywords
                   .concat(addedSkillsMap[selectedJob.id] || [])
                   .map((kw, idx) => (
-                    <span key={idx} className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                    <span key={idx} className="px-2 py-0.5 rounded-[10px] text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
                       <Check className="w-3 h-3 text-emerald-600 shrink-0" />
                       <span>{kw}</span>
                     </span>
@@ -1108,30 +1165,38 @@ export const CvMatchAnalysisView: React.FC = () => {
             </div>
 
             <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-              {mockSavedCVs.map((cv) => (
-                <div
-                  key={cv.id}
-                  onClick={() => {
-                    setSelectedCvId(cv.id);
-                    setIsChangeCvModalOpen(false);
-                  }}
-                  className={`p-3.5 rounded-[10px] border transition cursor-pointer flex items-start justify-between gap-3 ${
-                    selectedCvId === cv.id
-                      ? 'border-[#3B5CC4] bg-blue-50/60 ring-2 ring-[#3B5CC4]/20'
-                      : 'border-slate-200 hover:bg-slate-50'
-                  }`}
-                >
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900">{cv.title}</h4>
-                    <p className="text-[11px] text-slate-500 mt-0.5">{cv.role} • Diperbarui {cv.updatedAt}</p>
+              {savedCVs.length > 0 ? (
+                savedCVs.map((cv) => (
+                  <div
+                    key={cv.id}
+                    onClick={() => {
+                      setSelectedCvId(cv.id);
+                      setIsChangeCvModalOpen(false);
+                    }}
+                    className={`p-3.5 rounded-[10px] border transition cursor-pointer flex items-start justify-between gap-3 ${
+                      selectedCvId === cv.id
+                        ? 'border-[#3B5CC4] bg-blue-50/60 ring-2 ring-[#3B5CC4]/20'
+                        : 'border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900">{cv.title}</h4>
+                      <p className="text-[11px] text-slate-500 mt-0.5">{cv.role} • Diperbarui {cv.updatedAt}</p>
+                    </div>
+                    {selectedCvId === cv.id && (
+                      <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">
+                        Aktif
+                      </span>
+                    )}
                   </div>
-                  {selectedCvId === cv.id && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">
-                      Aktif
-                    </span>
-                  )}
+                ))
+              ) : (
+                <div className="py-6 text-center space-y-2">
+                  <FileText className="w-8 h-8 text-slate-300 mx-auto" />
+                  <p className="text-xs font-semibold text-slate-500">Belum ada CV tersimpan.</p>
+                  <p className="text-[11px] text-slate-400">Buat CV dulu di halaman CV agar bisa dianalisis di sini.</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>

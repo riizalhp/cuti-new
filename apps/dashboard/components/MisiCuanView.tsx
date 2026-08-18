@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Target,
   Gift,
@@ -39,6 +39,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { DotLottiePlayer } from '@/components/DotLottiePlayer';
+import { userApi } from '@/lib/api';
 
 export type MissionStatus = 'Tersedia' | 'Sedang Ditinjau' | 'Selesai';
 
@@ -84,232 +85,94 @@ export const MisiCuanView: React.FC = () => {
   const [proofScreenshotName, setProofScreenshotName] = useState<string | null>(null);
   const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
 
+  // Dynamic user name for leaderboard
+  const [userName, setUserName] = useState('Anda');
+
   // Gamification Balance State
-  const [userCoins, setUserCoins] = useState(48500);
-  const [userXp, setUserXp] = useState(2400);
-  const userLevel = 5;
-  const xpNextLevel = 3000;
+  const [userCoins, setUserCoins] = useState(0);
+  const [userXp, setUserXp] = useState(0);
+  const [userLevel, setUserLevel] = useState(1);
+  const xpNextLevel = userLevel * 600;
   const [isCheckedInToday, setIsCheckedInToday] = useState(false);
 
   // History Log State
-  const [historyLogs] = useState([
-    {
-      id: 'h1',
-      title: 'Ajak 2 Teman Pencari Kerja (Program Referral)',
-      organizer: 'AmbilCUTI Growth Team',
-      date: '10 Agustus 2026',
-      category: 'Misi Selesai',
-      rewardText: '+Rp 25.000 (Saldo)',
-      status: 'Disetujui & Cair',
-    },
-    {
-      id: 'h2',
-      title: 'Penukaran Saldo E-Wallet GoPay Rp 25.000',
-      organizer: 'Transfer Admin Direct',
-      date: '08 Agustus 2026',
-      category: 'Penukaran Reward',
-      rewardText: '-Rp 25.000 (GoPay)',
-      status: 'Berhasil Transfer (081234567890)',
-    },
-    {
-      id: 'h3',
-      title: 'Optimasi Skor ATS CV hingga >80%',
-      organizer: 'HR Expert Advisory',
-      date: '05 Agustus 2026',
-      category: 'Misi Selesai',
-      rewardText: '+5.000 Koin',
-      status: 'Disetujui & Cair',
-    },
-    {
-      id: 'h4',
-      title: 'Check-In Harian Hari ke-7',
-      organizer: 'AmbilCUTI Platform',
-      date: '01 Agustus 2026',
-      category: 'Misi Selesai',
-      rewardText: '+1.000 Koin',
-      status: 'Otomatis Masuk',
-    },
-  ]);
+  const [historyLogs, setHistoryLogs] = useState<Array<{
+    id: string;
+    title: string;
+    organizer: string;
+    date: string;
+    category: string;
+    rewardText: string;
+    status: string;
+  }>>([]);
 
   // Missions List
-  const [missions, setMissions] = useState<MissionItem[]>([
-    {
-      id: 'm1',
-      title: 'Check-In Harian CUTI',
-      desc: 'Buka aplikasi dan dapatkan koin harian gratis.',
-      organizer: 'AmbilCUTI Platform',
-      estimatedTime: '2-5 Menit',
-      participantsCount: 184,
-      quotaTotal: 250,
-      category: 'Harian',
-      status: 'Tersedia',
-      rewardCoins: 500,
-      rewardXp: 50,
-      progressCurrent: 1,
-      progressTarget: 1,
-      claimed: false,
-      detailedSteps: [
-        'Login ke aplikasi CUTI setiap hari.',
-        'Buka tab Misi & Cuan pada menu navigasi.',
-        'Lakukan verifikasi profil karier harian.',
-      ],
-      tips: 'Lakukan check-in setiap hari untuk menjaga produktivitas berburu kerja!',
-      terms: 'Misi ini direset setiap hari pukul 00:00 WIB.',
-    },
-    {
-      id: 'm2',
-      title: 'Update Status Tracker Lamaran',
-      desc: 'Perbarui status minimal 1 lamaran kerja aktif di Tracker.',
-      organizer: 'AmbilCUTI Career Ops',
-      estimatedTime: '3-5 Menit',
-      participantsCount: 142,
-      quotaTotal: 200,
-      category: 'Harian',
-      status: 'Sedang Ditinjau',
-      rewardCoins: 1500,
-      rewardXp: 100,
-      progressCurrent: 1,
-      progressTarget: 1,
-      claimed: false,
-      detailedSteps: [
-        'Masuk ke menu "Tracker Lamaran" di sidebar.',
-        'Pilih salah satu posisi lamaran yang pernah kamu kirimkan.',
-        'Ubah statusnya (misal: "Interview Scheduled", "HR Screening", atau "Assessment").',
-        'Ambil tangkapan layar (screenshot) sebagai bukti pengerjaan.',
-      ],
-      tips: 'Mengisi status secara akurat membantu AI memberikan rekomendasi langkah karir selanjutnya.',
-      terms: 'Misi ini dihitung 1x per hari.',
-      submissionProof: {
-        proofLink: 'https://app.ambilcuti.id/tracker/1294',
-        notes: 'Sudah mengubah status lamaran PT Tech Prima ke HR Screening',
-        screenshotUrl: 'bukti_tracker_lamaran.jpg',
-        submittedAt: '15 Menit yang lalu',
-      },
-    },
-    {
-      id: 'm3',
-      title: 'Lamar 3 Pekerjaan Baru',
-      desc: 'Kirimkan lamaran kerja melalui fitur Lowongan CUTI.',
-      organizer: 'KitaLulus Partner Network',
-      estimatedTime: '10-15 Menit',
-      participantsCount: 95,
-      quotaTotal: 150,
-      category: 'Harian',
-      status: 'Tersedia',
-      rewardCoins: 3000,
-      rewardXp: 200,
-      progressCurrent: 0,
-      progressTarget: 3,
-      claimed: false,
-      detailedSteps: [
-        'Buka menu "Portal Lowongan Kerja".',
-        'Gunakan filter lokasi, gaji, atau kata kunci untuk menemukan pekerjaan impian.',
-        'Lamar 3 posisi lowongan yang sesuai dengan kualifikasi kamu.',
-        'Lampirkan link atau screenshot bukti lamaran yang telah terikirim.',
-      ],
-      tips: 'Pastikan skor Match Rating CV kamu di atas 70% untuk memperbesar peluang dipanggil interview.',
-      terms: 'Misi berlaku untuk lowongan yang aktif dan valid.',
-    },
-    {
-      id: 'm4',
-      title: 'Ikuti Survey Kesiapan Kerja',
-      desc: 'Isi kuesioner singkat tentang ekspektasi gaji dan bidang kerja impian.',
-      organizer: 'Kemnaker Talent Research',
-      estimatedTime: '5-7 Menit',
-      participantsCount: 310,
-      quotaTotal: 500,
-      category: 'Harian',
-      status: 'Tersedia',
-      rewardCoins: 2500,
-      rewardXp: 150,
-      progressCurrent: 0,
-      progressTarget: 1,
-      claimed: false,
-      detailedSteps: [
-        'Buka link survey kesiapan kerja resmi Kemnaker.',
-        'Isi pertanyaan kuesioner hingga halaman konfirmasi selesai.',
-        'Upload screenshot halaman konfirmasi survey selesai.',
-      ],
-      tips: 'Jawab dengan jujur sesuai pengalaman kamu.',
-      terms: 'Setiap pengguna hanya dapat mengisi 1x survey per periode.',
-    },
-    {
-      id: 'm5',
-      title: 'Ajak 2 Teman Pencari Kerja (Referral)',
-      desc: 'Bagikan kode referral unik kamu ke teman yang sedang mencari kerja.',
-      organizer: 'AmbilCUTI Growth Team',
-      estimatedTime: '5 Menit',
-      participantsCount: 78,
-      quotaTotal: 100,
-      category: 'Mingguan',
-      status: 'Selesai',
-      rewardCoins: 10000,
-      rewardXp: 500,
-      progressCurrent: 2,
-      progressTarget: 2,
-      claimed: true,
-      detailedSteps: [
-        'Salin kode referral unik kamu: "CUTI-CUAN2026".',
-        'Bagikan kode tersebut ke teman atau grup alumni kamu.',
-        'Pastikan 2 teman bergabung dan membuat akun CUTI.',
-      ],
-      tips: 'Teman yang bergabung juga akan langsung mendapatkan bonus awal 1.000 Koin gratis!',
-      terms: 'Reward diberikan otomatis saat teman pertama kali berhasil mendaftar.',
-      submissionProof: {
-        proofLink: 'https://app.ambilcuti.id/referral',
-        notes: '2 Teman (Budi & Rian) sudah mendaftar via link referral.',
-        submittedAt: 'Kemarin',
-      },
-    },
-    {
-      id: 'm6',
-      title: 'Optimasi Skor ATS CV hingga >80%',
-      desc: 'Perbaiki CV menggunakan AI CV Optimizer untuk skor ATS di atas 80%.',
-      organizer: 'HR Expert Advisory',
-      estimatedTime: '15-20 Menit',
-      participantsCount: 420,
-      quotaTotal: 500,
-      category: 'Spesial',
-      status: 'Selesai',
-      rewardCoins: 5000,
-      rewardXp: 300,
-      progressCurrent: 1,
-      progressTarget: 1,
-      claimed: true,
-      detailedSteps: [
-        'Masuk ke menu "CV AI Generator".',
-        'Upload atau buat CV baru, lalu jalankan analisis ATS Checker.',
-        'Ikuti rekomendasi AI untuk memperbaiki kata kunci hingga skor mencapai >80%.',
-      ],
-      tips: 'Gunakan kata kerja aksi (action verbs) dan kuantifikasi pencapaian kerja kamu dengan angka.',
-      terms: 'Misi spesial ini dapat diklaim 1x setelah target terpenuhi.',
-      submissionProof: {
-        proofLink: 'https://app.ambilcuti.id/cv-builder',
-        notes: 'Skor ATS CV telah mencapai 88%.',
-        submittedAt: '2 Hari lalu',
-      },
-    },
-  ]);
+  const [missions, setMissions] = useState<MissionItem[]>([]);
 
   // History Log State
-  const [coinHistory, setCoinHistory] = useState([
-    { id: 'h1', date: '22 Juli 2026', desc: 'Klaim Misi: Optimasi Skor ATS CV', amount: '+5.000', type: 'in' },
-    { id: 'h2', date: '21 Juli 2026', desc: 'Penukaran Voucher GoPay Rp 25.000', amount: '-25.000', type: 'out' },
-    { id: 'h3', date: '21 Juli 2026', desc: 'Bonus Referral: Rian Pratama', amount: '+10.000', type: 'in' },
-    { id: 'h4', date: '20 Juli 2026', desc: 'Check-In Harian Hari ke-5', amount: '+1.000', type: 'in' },
-  ]);
+  const [coinHistory, setCoinHistory] = useState<Array<{
+    id: string;
+    date: string;
+    desc: string;
+    amount: string;
+    type: string;
+  }>>([]);
 
   // Leaderboard Data
-  const leaderboardList = [
-    { rank: 1, name: 'Aditya Pratama', title: 'Senior Data Analyst', coins: 142000, level: 9, badge: 'Sultan Karir' },
-    { rank: 2, name: 'Siti Rahma', title: 'UI/UX Designer', coins: 118500, level: 8, badge: 'Top Referral' },
-    { rank: 3, name: 'Budi Santoso', title: 'Frontend Developer', coins: 95000, level: 7, badge: 'Pejuang ATS' },
-    { rank: 4, name: 'Maya Indah', title: 'Product Manager', coins: 78000, level: 6, badge: 'Interview Pro' },
-    { rank: 5, name: 'Rizky Febrian (Anda)', title: 'Fullstack Engineer', coins: 48500, level: 5, badge: 'Job Seeker' },
-  ];
+  const [leaderboardList, setLeaderboardList] = useState<Array<{
+    rank: number;
+    name: string;
+    title: string;
+    coins: number;
+    level: number;
+    badge: string;
+  }>>([]);
 
-  // Handle Claim Mission
-  const handleClaimReward = (id: string) => {
+  // Load mission & gamification data
+  useEffect(() => {
+    userApi.getProfile().then((profile: any) => {
+      if (profile) {
+        const name = profile.fullName || profile.name || 'Anda';
+        setUserName(name);
+
+        // Load gamification stats
+        if (profile.gamification) {
+          setUserCoins(profile.gamification.coins ?? 0);
+          setUserXp(profile.gamification.xp ?? 0);
+          setUserLevel(profile.gamification.level ?? 1);
+          setIsCheckedInToday(profile.gamification.checkedInToday ?? false);
+        }
+
+        // Load missions
+        if (profile.missions) {
+          setMissions(profile.missions);
+        }
+
+        // Load history logs
+        if (profile.missionHistory) {
+          setHistoryLogs(profile.missionHistory);
+        }
+
+        // Load coin history
+        if (profile.coinHistory) {
+          setCoinHistory(profile.coinHistory);
+        }
+
+        // Load leaderboard with user injected
+        if (profile.leaderboard) {
+          setLeaderboardList(profile.leaderboard);
+        } else {
+          // Default: user only
+          setLeaderboardList([
+            { rank: 1, name: `${name} (Anda)`, title: 'Job Seeker', coins: profile.gamification?.coins ?? 0, level: profile.gamification?.level ?? 1, badge: 'Pencari Kerja' },
+          ]);
+        }
+      }
+    }).catch(() => {});
+  }, []);
+
+  // Handle Claim Mission (disimpan ke database)
+  const handleClaimReward = async (id: string) => {
     const targetMission = missions.find((m) => m.id === id);
     if (!targetMission || targetMission.claimed) return;
 
@@ -319,15 +182,30 @@ export const MisiCuanView: React.FC = () => {
       return;
     }
 
+    try {
+      const res = await fetch(`/api/user/missions/${id}/claim`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setSelectedMissionDetail(targetMission);
+        return;
+      }
+    } catch {
+      setSelectedMissionDetail(targetMission);
+      return;
+    }
+
     setUserCoins((prev) => prev + targetMission.rewardCoins);
     setUserXp((prev) => prev + targetMission.rewardXp);
 
     setMissions((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, claimed: true } : m))
+      prev.map((m) => (m.id === id ? { ...m, claimed: true, status: 'Selesai' } : m))
     );
 
     if (selectedMissionDetail && selectedMissionDetail.id === id) {
-      setSelectedMissionDetail((prev) => (prev ? { ...prev, claimed: true } : null));
+      setSelectedMissionDetail((prev) => (prev ? { ...prev, claimed: true, status: 'Selesai' } : null));
     }
 
     setCoinHistory((prev) => [
@@ -359,12 +237,23 @@ export const MisiCuanView: React.FC = () => {
     );
   };
 
-  // Handle Daily Checkin
-  const handleDailyCheckin = () => {
+  // Handle Daily Checkin (disimpan ke database)
+  const handleDailyCheckin = async () => {
     if (isCheckedInToday) return;
-    setIsCheckedInToday(true);
-    setUserCoins((prev) => prev + 1000);
-    setUserXp((prev) => prev + 100);
+    try {
+      const res = await fetch('/api/user/checkin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsCheckedInToday(true);
+        setUserCoins((prev) => prev + 1000);
+        setUserXp((prev) => prev + 100);
+      }
+    } catch {
+      // Tetap dalam keadaan belum check-in jika gagal
+    }
   };
 
   const filteredMissions = missions.filter((m) => {
@@ -374,20 +263,20 @@ export const MisiCuanView: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Gamification Header Banner */}
-      <div className="bg-[#0D3BD9] rounded-[10px] p-6 text-white border border-blue-500/50 shadow-md">
+      <div className="bg-navy-700 rounded-[10px] p-6 text-white border border-navy-800 shadow-md">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs">
-              <Flame className="w-4 h-4 text-amber-400" />
-              <span>Program Misi & Cuan CUTI</span>
+            <div className="flex items-center gap-2 text-orange-400 font-bold text-xs uppercase tracking-wider">
+              <Flame className="w-4 h-4 text-orange-400" />
+              <span>Program Misi &amp; Cuan Employr</span>
             </div>
-            <h2 className="text-2xl font-black tracking-tight">
-              Kerjakan Misi Karir, Kumpulkan Cuan & Reward!
+            <h2 className="text-2xl font-extrabold tracking-tight">
+              Kerjakan Misi Karier, Kumpulkan Saldo &amp; Reward!
             </h2>
-            <p className="text-xs text-slate-300 max-w-xl">
-              Setiap aktivitas produktif mencari kerja memberikan Koin Karier & XP yang dapat ditukarkan dengan Saldo E-Wallet, Pulsa, atau Akses Premium Pass.
+            <p className="text-xs text-slate-200 max-w-xl leading-relaxed">
+              Setiap aktivitas produktif mencari kerja memberikan Koin Karier &amp; XP yang dapat ditukarkan dengan Saldo E-Wallet, Pulsa, atau Akses Membership Lifetime.
             </p>
           </div>
 
@@ -408,14 +297,14 @@ export const MisiCuanView: React.FC = () => {
             <div className="p-4 rounded-[10px] bg-white/10 backdrop-blur-md border border-white/15 min-w-[170px] space-y-1">
               <div className="flex items-center justify-between text-slate-300 text-[10px] font-bold uppercase tracking-wider">
                 <span>Level Karier</span>
-                <Award className="w-4 h-4 text-violet-400" />
+                <Award className="w-4 h-4 text-orange-400" />
               </div>
               <div className="text-xl font-black text-white">
                 Level {userLevel} <span className="text-xs font-normal text-slate-300">(Pro)</span>
               </div>
-              <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden mt-1">
+              <div className="w-full h-1.5 rounded-full bg-white/20 overflow-hidden mt-1">
                 <div
-                  className="h-full bg-amber-400 transition-all duration-300"
+                  className="h-full bg-orange-400 transition-all duration-300"
                   style={{ width: `${Math.round((userXp / xpNextLevel) * 100)}%` }}
                 />
               </div>
@@ -425,18 +314,18 @@ export const MisiCuanView: React.FC = () => {
 
         {/* Quick Fast Action Daily Check-in */}
         <div className="mt-6 pt-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 text-slate-300">
-            <Clock className="w-4 h-4 text-amber-400 shrink-0" />
+          <div className="flex items-center gap-2 text-slate-200">
+            <Clock className="w-4 h-4 text-orange-400 shrink-0" />
             <span>Bonus Check-in Harian (+1.000 Koin + 100 XP)</span>
           </div>
 
           <button
             onClick={handleDailyCheckin}
             disabled={isCheckedInToday}
-            className={`px-4 py-2 rounded-[10px] font-bold transition flex items-center justify-center gap-1.5 ${
+            className={`px-4 py-2 rounded-[10px] font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
               isCheckedInToday
                 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default'
-                : 'bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-md'
+                : 'bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-md'
             }`}
           >
             <CheckCircle2 className="w-4 h-4" />
@@ -450,7 +339,7 @@ export const MisiCuanView: React.FC = () => {
             onClick={() => setActiveSubTab('misi')}
             className={`px-4 py-2 rounded-[10px] transition flex items-center gap-1.5 cursor-pointer ${
               activeSubTab === 'misi'
-                ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
+                ? 'bg-[#1738D1] text-white font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
             }`}
           >
@@ -462,7 +351,7 @@ export const MisiCuanView: React.FC = () => {
             onClick={() => setActiveSubTab('riwayat')}
             className={`px-4 py-2 rounded-[10px] transition flex items-center gap-1.5 cursor-pointer ${
               activeSubTab === 'riwayat'
-                ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
+                ? 'bg-[#1738D1] text-white font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
             }`}
           >
@@ -494,7 +383,7 @@ export const MisiCuanView: React.FC = () => {
                     onClick={() => setStatusFilter(st)}
                     className={`px-3 py-1 rounded-[10px] text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
                       statusFilter === st
-                        ? 'bg-orange-500 text-white shadow-xs'
+                        ? 'bg-[#1738D1] text-white shadow-xs'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
@@ -548,7 +437,7 @@ export const MisiCuanView: React.FC = () => {
                   <div
                     key={m.id}
                     onClick={() => setSelectedMissionDetail(m)}
-                    className="p-5 rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-3.5 cursor-pointer hover:border-orange-500/70 hover:shadow-md transition group"
+                    className="p-5 rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-3.5 cursor-pointer hover:border-[#1738D1]/70 hover:shadow-md transition group"
                   >
                     {/* Top Bar: Category + Status Badge + Estimasi Waktu */}
                     <div className="flex items-center justify-between gap-2">
@@ -563,7 +452,7 @@ export const MisiCuanView: React.FC = () => {
                             ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                             : m.status === 'Sedang Ditinjau'
                             ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
-                            : 'bg-blue-50 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+                            : 'bg-blue-50 text-navy-700 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-navy-800'
                         }`}>
                           {m.status === 'Selesai' && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
                           {m.status === 'Sedang Ditinjau' && <Hourglass className="w-3 h-3 text-amber-500" />}
@@ -606,7 +495,7 @@ export const MisiCuanView: React.FC = () => {
 
                       <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                         <div
-                          className="h-full bg-orange-500 transition-all duration-300"
+                          className="h-full bg-[#1738D1] transition-all duration-300"
                           style={{ width: `${percentage}%` }}
                         />
                       </div>
@@ -641,7 +530,7 @@ export const MisiCuanView: React.FC = () => {
                   onClick={() => setHistoryFilter(filterCat)}
                   className={`px-3 py-1 rounded-[10px] text-xs font-bold transition cursor-pointer ${
                     historyFilter === filterCat
-                      ? 'bg-orange-500 text-white shadow-xs'
+                      ? 'bg-[#1738D1] text-white shadow-xs'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
@@ -664,7 +553,7 @@ export const MisiCuanView: React.FC = () => {
                     <div className="flex items-start gap-3">
                       <div className={`w-9 h-9 rounded-[10px] flex items-center justify-center font-bold shrink-0 mt-0.5 ${
                         log.category === 'Penukaran Reward'
-                          ? 'bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400 border border-purple-200 dark:border-purple-800'
+                          ? 'bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-400 border border-orange-200 dark:border-orange-800'
                           : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
                       }`}>
                         {log.category === 'Penukaran Reward' ? <CreditCard className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
@@ -672,9 +561,9 @@ export const MisiCuanView: React.FC = () => {
 
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${
+                          <span className={`px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase tracking-wider ${
                             log.category === 'Penukaran Reward'
-                              ? 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300'
+                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300'
                               : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                           }`}>
                             {log.category}
@@ -717,7 +606,7 @@ export const MisiCuanView: React.FC = () => {
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                       {selectedMissionDetail.category}
                     </span>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
@@ -725,7 +614,7 @@ export const MisiCuanView: React.FC = () => {
                         ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                         : selectedMissionDetail.status === 'Sedang Ditinjau'
                         ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                        : 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                        : 'bg-blue-100 text-navy-800 dark:bg-blue-950 dark:text-blue-300'
                     }`}>
                       {selectedMissionDetail.status === 'Tersedia' ? 'Sedang Berjalan' : selectedMissionDetail.status}
                     </span>
@@ -815,13 +704,13 @@ export const MisiCuanView: React.FC = () => {
 
               {/* Submitted Proof Info (If already submitted) */}
               {selectedMissionDetail.submissionProof && (
-                <div className="p-4 rounded-[10px] bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 space-y-2">
-                  <div className="flex items-center justify-between text-xs font-bold text-blue-900 dark:text-blue-300">
+                <div className="p-4 rounded-[10px] bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-navy-900/50 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-navy-900 dark:text-blue-300">
                     <span className="flex items-center gap-1.5">
                       <FileText className="w-4 h-4 text-blue-500" />
                       Bukti Pengerjaan yang Telah Terkirim
                     </span>
-                    <span className="text-[10px] font-normal text-blue-700 dark:text-blue-400">
+                    <span className="text-[10px] font-normal text-navy-700 dark:text-blue-400">
                       {selectedMissionDetail.submissionProof.submittedAt}
                     </span>
                   </div>
@@ -875,7 +764,7 @@ export const MisiCuanView: React.FC = () => {
                     setProofScreenshotName(null);
                     setIsSubmissionSuccess(false);
                   }}
-                  className="px-6 py-2.5 rounded-[10px] text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-md transition cursor-pointer flex items-center gap-1.5"
+                  className="px-6 py-2.5 rounded-[10px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-md transition cursor-pointer flex items-center gap-1.5"
                 >
                   <Zap className="w-4 h-4" />
                   <span>Kerjakan Misi</span>
@@ -895,7 +784,7 @@ export const MisiCuanView: React.FC = () => {
             {/* Header */}
             <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-[10px] bg-orange-500 text-white flex items-center justify-center shadow-md shrink-0">
+                <div className="w-10 h-10 rounded-[10px] bg-[#1738D1] text-white flex items-center justify-center shadow-md shrink-0">
                   <Upload className="w-5 h-5" />
                 </div>
                 <div>
@@ -936,7 +825,7 @@ export const MisiCuanView: React.FC = () => {
                     Bukti Pengerjaan Berhasil Dikirim!
                   </h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
-                    Status misi kamu sekarang <strong className="text-amber-600 dark:text-amber-400">Sedang Ditinjau</strong>. Tim reviewer AmbilCUTI akan mengecek bukti pengerjaan kamu.
+                    Status misi kamu sekarang <strong className="text-amber-600 dark:text-amber-400">Sedang Ditinjau</strong>. Tim reviewer Employr akan mengecek bukti pengerjaan kamu.
                   </p>
                 </div>
 
@@ -964,9 +853,24 @@ export const MisiCuanView: React.FC = () => {
               </div>
             ) : (
               <form
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
                   if (!submittingMissionProof) return;
+                  try {
+                    const res = await fetch(`/api/user/missions/${submittingMissionProof.id}/submit`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        proofLink: proofLink || '',
+                        proofNotes: proofNotes || '',
+                        screenshotName: proofScreenshotName || '',
+                      }),
+                    });
+                    const data = await res.json();
+                    if (!data.success) return; // tetap di form jika gagal
+                  } catch {
+                    return;
+                  }
                   setMissions((prev) =>
                     prev.map((m) =>
                       m.id === submittingMissionProof.id
@@ -974,7 +878,7 @@ export const MisiCuanView: React.FC = () => {
                             ...m,
                             status: 'Sedang Ditinjau',
                             submissionProof: {
-                              proofLink: proofLink || 'https://app.ambilcuti.id/bukti-pengerjaan',
+                              proofLink: proofLink || 'https://app.employr.id/bukti-pengerjaan',
                               notes: proofNotes || 'Bukti pengerjaan telah dikirimkan.',
                               screenshotUrl: proofScreenshotName || 'screenshot_bukti.png',
                               submittedAt: 'Baru Saja',
@@ -1008,7 +912,7 @@ export const MisiCuanView: React.FC = () => {
                     className={`p-4 rounded-[10px] border-2 border-dashed transition cursor-pointer text-center space-y-2 ${
                       proofScreenshotName
                         ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30'
-                        : 'border-slate-300 dark:border-slate-700 hover:border-orange-500 bg-slate-50 dark:bg-slate-800/40'
+                        : 'border-slate-300 dark:border-slate-700 hover:border-[#1738D1] bg-slate-50 dark:bg-slate-800/40'
                     }`}
                   >
                     {proofScreenshotName ? (
@@ -1042,7 +946,7 @@ export const MisiCuanView: React.FC = () => {
                       value={proofLink}
                       onChange={(e) => setProofLink(e.target.value)}
                       placeholder="https://..."
-                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none pl-9"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1] focus:outline-none pl-9"
                     />
                     <LinkIcon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
@@ -1061,7 +965,7 @@ export const MisiCuanView: React.FC = () => {
                     value={proofNotes}
                     onChange={(e) => setProofNotes(e.target.value)}
                     placeholder="Tuliskan keterangan detail pengerjaan misi kamu..."
-                    className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1] focus:outline-none"
                   />
                 </div>
 
@@ -1082,7 +986,7 @@ export const MisiCuanView: React.FC = () => {
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 rounded-[10px] text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-md transition cursor-pointer flex items-center gap-1.5"
+                    className="px-6 py-2.5 rounded-[10px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-md transition cursor-pointer flex items-center gap-1.5"
                   >
                     <Upload className="w-4 h-4" />
                     <span>Kirim Bukti Misi</span>

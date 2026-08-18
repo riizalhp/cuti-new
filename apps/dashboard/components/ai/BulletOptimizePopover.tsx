@@ -72,15 +72,15 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-          <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-extrabold text-xs">
-            <Sparkles className="w-4 h-4 fill-purple-600" />
-            <span>Optimalkan Bullet</span>
+          <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 font-extrabold text-xs">
+            <Sparkles className="w-4 h-4 fill-orange-500" />
+            <span>Optimalkan Poin Kalimat</span>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="w-6 h-6 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center transition"
+            className="w-6 h-6 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center transition cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -88,7 +88,7 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
 
         {/* Selected Bullet Preview */}
         <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 italic truncate">
-          "{bulletText || 'Poin pengalaman yang dipilih'}"
+          &quot;{bulletText || 'Poin pengalaman yang dipilih'}&quot;
         </div>
 
         {/* Option Choices */}
@@ -103,15 +103,15 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
               onClick={() => setSelectedGoal('impact')}
               className={`p-2.5 rounded-[10px] border flex items-center justify-between transition cursor-pointer ${
                 selectedGoal === 'impact'
-                  ? 'bg-purple-50 dark:bg-purple-950/60 border-purple-500 text-purple-700 dark:text-purple-300'
+                  ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-700 dark:text-orange-300'
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
               }`}
             >
               <span className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-purple-500" />
+                <Target className="w-4 h-4 text-orange-500" />
                 <span>Lebih Berdampak (Impact)</span>
               </span>
-              {selectedGoal === 'impact' && <CheckCircle2 className="w-4 h-4 text-purple-600" />}
+              {selectedGoal === 'impact' && <CheckCircle2 className="w-4 h-4 text-orange-500" />}
             </button>
 
             <button
@@ -119,15 +119,15 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
               onClick={() => setSelectedGoal('ats')}
               className={`p-2.5 rounded-[10px] border flex items-center justify-between transition cursor-pointer ${
                 selectedGoal === 'ats'
-                  ? 'bg-purple-50 dark:bg-purple-950/60 border-purple-500 text-purple-700 dark:text-purple-300'
+                  ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-700 dark:text-orange-300'
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
               }`}
             >
               <span className="flex items-center gap-2">
-                <FileCheck className="w-4 h-4 text-purple-500" />
+                <FileCheck className="w-4 h-4 text-orange-500" />
                 <span>Lebih ATS-Friendly</span>
               </span>
-              {selectedGoal === 'ats' && <CheckCircle2 className="w-4 h-4 text-purple-600" />}
+              {selectedGoal === 'ats' && <CheckCircle2 className="w-4 h-4 text-orange-500" />}
             </button>
 
             <button
@@ -135,15 +135,15 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
               onClick={() => setSelectedGoal('metrics')}
               className={`p-2.5 rounded-[10px] border flex items-center justify-between transition cursor-pointer ${
                 selectedGoal === 'metrics'
-                  ? 'bg-purple-50 dark:bg-purple-950/60 border-purple-500 text-purple-700 dark:text-purple-300'
+                  ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-700 dark:text-orange-300'
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
               }`}
             >
               <span className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-purple-500" />
+                <Zap className="w-4 h-4 text-orange-500" />
                 <span>Tambahkan Metrik / Data</span>
               </span>
-              {selectedGoal === 'metrics' && <CheckCircle2 className="w-4 h-4 text-purple-600" />}
+              {selectedGoal === 'metrics' && <CheckCircle2 className="w-4 h-4 text-orange-500" />}
             </button>
 
             <button
@@ -151,15 +151,15 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
               onClick={() => setSelectedGoal('concise')}
               className={`p-2.5 rounded-[10px] border flex items-center justify-between transition cursor-pointer ${
                 selectedGoal === 'concise'
-                  ? 'bg-purple-50 dark:bg-purple-950/60 border-purple-500 text-purple-700 dark:text-purple-300'
+                  ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-700 dark:text-orange-300'
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
               }`}
             >
               <span className="flex items-center gap-2">
-                <AlignLeft className="w-4 h-4 text-purple-500" />
+                <AlignLeft className="w-4 h-4 text-orange-500" />
                 <span>Ringkas &amp; Padat</span>
               </span>
-              {selectedGoal === 'concise' && <CheckCircle2 className="w-4 h-4 text-purple-600" />}
+              {selectedGoal === 'concise' && <CheckCircle2 className="w-4 h-4 text-orange-500" />}
             </button>
           </div>
         </div>
@@ -169,14 +169,14 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
           type="button"
           disabled={isLoading}
           onClick={handleRewrite}
-          className="w-full py-2.5 px-4 rounded-[10px] bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-md shadow-purple-600/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          className="w-full py-2.5 px-4 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 border-0"
         >
           {isLoading ? (
-            <span>Processing AI...</span>
+            <span>Menyusun Kalimat...</span>
           ) : (
             <>
               <Sparkles className="w-4 h-4 fill-white" />
-              <span>Rewrite dengan AI</span>
+              <span>Optimalkan Kalimat</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </>
           )}

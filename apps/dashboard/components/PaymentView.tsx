@@ -143,7 +143,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Top Banner Header */}
-      <div className="bg-[#0D3BD9] rounded-[10px] p-6 md:p-8 text-white border border-blue-500/50 shadow-xl relative overflow-hidden">
+      <div className="bg-navy-700 rounded-[10px] p-6 md:p-8 text-white border border-navy-800 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2">
@@ -218,14 +218,14 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
               onClick={() => {
                 if (onBackToDashboard) onBackToDashboard();
               }}
-              className="w-full sm:w-auto px-6 py-3 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-xs transition shadow-md flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-6 py-3 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs transition shadow-md flex items-center justify-center gap-2 cursor-pointer border-0"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Gunakan Fitur Premium Sekarang</span>
+              <span>Gunakan Fitur Member Sekarang</span>
             </button>
             <button
               onClick={() => alert('Faktur PDF berhasil diunduh.')}
-              className="w-full sm:w-auto px-5 py-3 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-5 py-3 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <Download className="w-4 h-4" />
               <span>Unduh Bukti Bayar (PDF)</span>
@@ -238,8 +238,8 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
       {stepStatus === 'processing' && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-12 text-center space-y-6 shadow-xl max-w-xl mx-auto my-12">
           <div className="relative w-16 h-16 mx-auto">
-            <div className="w-16 h-16 rounded-full border-4 border-violet-200 dark:border-violet-900 border-t-violet-600 animate-spin" />
-            <RefreshCw className="w-6 h-6 text-violet-600 absolute inset-0 m-auto" />
+            <div className="w-16 h-16 rounded-full border-4 border-orange-200 dark:border-orange-900 border-t-orange-500 animate-spin" />
+            <RefreshCw className="w-6 h-6 text-orange-500 absolute inset-0 m-auto" />
           </div>
           <div>
             <h3 className="text-lg font-black text-slate-900 dark:text-white">
@@ -261,7 +261,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 space-y-4 shadow-xs">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <h3 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-[10px] bg-violet-600 text-white font-bold text-xs flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-[10px] bg-navy-700 text-white font-bold text-xs flex items-center justify-center">
                     1
                   </div>
                   <span>Pilih Paket Keanggotaan</span>
@@ -274,15 +274,15 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setSelectedPlan('monthly')}
-                  className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 relative ${
+                  className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 relative cursor-pointer ${
                     selectedPlan === 'monthly'
-                      ? 'border-violet-600 bg-violet-50/50 dark:bg-violet-950/40 ring-2 ring-violet-500/20'
-                      : 'border-slate-200 dark:border-slate-800 hover:border-violet-300'
+                      ? 'border-[#1738D1] bg-orange-50/50 dark:bg-orange-950/40 ring-2 ring-[#1738D1]/20'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-orange-300'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-xs text-slate-900 dark:text-white">Bulanan</span>
-                    {selectedPlan === 'monthly' && <CheckCircle2 className="w-4 h-4 text-violet-600" />}
+                    {selectedPlan === 'monthly' && <CheckCircle2 className="w-4 h-4 text-orange-500" />}
                   </div>
                   <div>
                     <span className="text-lg font-black text-slate-900 dark:text-white block">Rp 49.000</span>
@@ -294,7 +294,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setSelectedPlan('yearly')}
-                  className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 relative ${
+                  className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 relative cursor-pointer ${
                     selectedPlan === 'yearly'
                       ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/40 ring-2 ring-amber-500/30'
                       : 'border-slate-200 dark:border-slate-800 hover:border-amber-300'
@@ -317,15 +317,15 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setSelectedPlan('lifetime')}
-                  className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 relative ${
+                  className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 relative cursor-pointer ${
                     selectedPlan === 'lifetime'
-                      ? 'border-violet-600 bg-violet-50/50 dark:bg-violet-950/40 ring-2 ring-violet-500/20'
-                      : 'border-slate-200 dark:border-slate-800 hover:border-violet-300'
+                      ? 'border-[#1738D1] bg-orange-50/50 dark:bg-orange-950/40 ring-2 ring-[#1738D1]/20'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-orange-300'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-xs text-slate-900 dark:text-white">Lifetime VIP</span>
-                    {selectedPlan === 'lifetime' && <CheckCircle2 className="w-4 h-4 text-violet-600" />}
+                    {selectedPlan === 'lifetime' && <CheckCircle2 className="w-4 h-4 text-orange-500" />}
                   </div>
                   <div>
                     <span className="text-lg font-black text-slate-900 dark:text-white block">Rp 499.000</span>
@@ -339,7 +339,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 space-y-5 shadow-xs">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <h3 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-[10px] bg-violet-600 text-white font-bold text-xs flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-[10px] bg-navy-700 text-white font-bold text-xs flex items-center justify-center">
                     2
                   </div>
                   <span>Pilih Metode Pembayaran</span>
@@ -352,9 +352,9 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setPaymentCategory('qris')}
-                  className={`p-3 rounded-[10px] border text-xs font-bold transition flex items-center justify-center gap-2 ${
+                  className={`p-3 rounded-[10px] border text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
                     paymentCategory === 'qris'
-                      ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
+                      ? 'bg-[#1738D1] text-white border-[#1738D1] shadow-sm'
                       : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100'
                   }`}
                 >
@@ -365,9 +365,9 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setPaymentCategory('va')}
-                  className={`p-3 rounded-[10px] border text-xs font-bold transition flex items-center justify-center gap-2 ${
+                  className={`p-3 rounded-[10px] border text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
                     paymentCategory === 'va'
-                      ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
+                      ? 'bg-[#1738D1] text-white border-[#1738D1] shadow-sm'
                       : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100'
                   }`}
                 >
@@ -378,9 +378,9 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setPaymentCategory('card')}
-                  className={`p-3 rounded-[10px] border text-xs font-bold transition flex items-center justify-center gap-2 ${
+                  className={`p-3 rounded-[10px] border text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
                     paymentCategory === 'card'
-                      ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
+                      ? 'bg-[#1738D1] text-white border-[#1738D1] shadow-sm'
                       : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100'
                   }`}
                 >
@@ -391,9 +391,9 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setPaymentCategory('retail')}
-                  className={`p-3 rounded-[10px] border text-xs font-bold transition flex items-center justify-center gap-2 ${
+                  className={`p-3 rounded-[10px] border text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
                     paymentCategory === 'retail'
-                      ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
+                      ? 'bg-[#1738D1] text-white border-[#1738D1] shadow-sm'
                       : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100'
                   }`}
                 >
@@ -407,7 +407,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                 <div className="p-5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-4">
                   <div className="flex flex-col sm:flex-row items-center gap-5">
                     {/* Simulated QR Code Canvas */}
-                    <div className="p-3 bg-white rounded-[10px] border-2 border-violet-500 shadow-md shrink-0 text-center">
+                    <div className="p-3 bg-white rounded-[10px] border-2 border-[#1738D1] shadow-md shrink-0 text-center">
                       <div className="w-36 h-36 bg-slate-900 rounded-[10px] p-2 flex flex-col items-center justify-center text-white relative">
                         <QrCode className="w-24 h-24 text-amber-400" />
                         <span className="text-[8px] font-black tracking-widest text-slate-400 uppercase mt-1">
@@ -422,9 +422,9 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                         Scan menggunakan e-Wallet favorit kamu:
                       </h4>
                       <div className="flex flex-wrap gap-1.5 pt-1">
-                        <span className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-violet-600">GoPay</span>
+                        <span className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-blue-600">GoPay</span>
                         <span className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-orange-600">ShopeePay</span>
-                        <span className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-purple-600">OVO</span>
+                        <span className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-navy-700 dark:text-navy-300">OVO</span>
                         <span className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-sky-600">DANA</span>
                         <span className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-rose-600">LinkAja</span>
                       </div>
@@ -453,10 +453,10 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                           key={bank.id}
                           type="button"
                           onClick={() => setSelectedVaBank(bank.id as any)}
-                          className={`p-2.5 rounded-[10px] border text-xs font-bold transition text-center ${
+                          className={`p-2.5 rounded-[10px] border text-xs font-bold transition text-center cursor-pointer ${
                             selectedVaBank === bank.id
-                              ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
-                              : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-violet-300'
+                              ? 'bg-[#1738D1] text-white border-[#1738D1] shadow-sm'
+                              : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-orange-300'
                           }`}
                         >
                           {bank.name}
@@ -468,7 +468,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                   <div className="p-4 bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div>
                       <span className="text-[10px] text-slate-400 font-bold uppercase block">Nomor Virtual Account {selectedVaBank.toUpperCase()}</span>
-                      <span className="text-base sm:text-lg font-mono font-black text-violet-600 dark:text-violet-400">
+                      <span className="text-base sm:text-lg font-mono font-black text-orange-600 dark:text-orange-400">
                         88001 812 3456 7890
                       </span>
                     </div>
@@ -476,7 +476,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                     <button
                       type="button"
                       onClick={() => handleCopyCode('8800181234567890')}
-                      className="px-3.5 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 font-bold text-xs transition flex items-center gap-1.5 shrink-0"
+                      className="px-3.5 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 font-bold text-xs transition flex items-center gap-1.5 shrink-0 cursor-pointer"
                     >
                       {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                       <span>{copiedCode ? 'Tersalin' : 'Salin Nomor'}</span>
@@ -495,7 +495,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                       placeholder="4111 2222 3333 4444"
                       value={cardForm.cardNumber}
                       onChange={(e) => setCardForm({ ...cardForm, cardNumber: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                     />
                   </div>
 
@@ -507,7 +507,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                         placeholder="12/28"
                         value={cardForm.expDate}
                         onChange={(e) => setCardForm({ ...cardForm, expDate: e.target.value })}
-                        className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                        className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -518,7 +518,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                         maxLength={4}
                         value={cardForm.cvv}
                         onChange={(e) => setCardForm({ ...cardForm, cvv: e.target.value })}
-                        className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                        className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                       />
                     </div>
                   </div>
@@ -532,9 +532,9 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setSelectedRetail('indomaret')}
-                      className={`px-4 py-2 rounded-[10px] border text-xs font-bold transition ${
+                      className={`px-4 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer ${
                         selectedRetail === 'indomaret'
-                          ? 'bg-violet-600 text-white border-violet-600'
+                          ? 'bg-[#1738D1] text-white border-[#1738D1]'
                           : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200'
                       }`}
                     >
@@ -543,9 +543,9 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setSelectedRetail('alfamart')}
-                      className={`px-4 py-2 rounded-[10px] border text-xs font-bold transition ${
+                      className={`px-4 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer ${
                         selectedRetail === 'alfamart'
-                          ? 'bg-violet-600 text-white border-violet-600'
+                          ? 'bg-[#1738D1] text-white border-[#1738D1]'
                           : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200'
                       }`}
                     >
@@ -571,7 +571,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 space-y-5 shadow-xs sticky top-24">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <h3 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                  <Receipt className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                  <Receipt className="w-4 h-4 text-orange-500" />
                   <span>Ringkasan Pesanan</span>
                 </h3>
                 <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
@@ -584,10 +584,10 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                 <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                   <div>
                     <h4 className="font-bold text-slate-900 dark:text-white">
-                      CUTI Premium Pass ({selectedPlan === 'monthly' ? 'Bulanan' : selectedPlan === 'yearly' ? 'Tahunan Pro' : 'Lifetime VIP'})
+                      CUTI Member Pass ({selectedPlan === 'monthly' ? 'Bulanan' : selectedPlan === 'yearly' ? 'Tahunan Pro' : 'Lifetime VIP'})
                     </h4>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      Akses AI CV ATS, Interview Voice Simulator, &amp; Prioritas Lamaran BUMN
+                      Akses Pengoptimal CV ATS, Interview Voice Simulator, &amp; Prioritas Lamaran BUMN
                     </p>
                   </div>
                   <span className="font-extrabold text-slate-900 dark:text-white shrink-0">
@@ -608,7 +608,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setAppliedVoucher(null)}
-                      className="text-[10px] font-bold text-rose-600 hover:underline"
+                      className="text-[10px] font-bold text-rose-600 hover:underline cursor-pointer"
                     >
                       Hapus
                     </button>
@@ -625,11 +625,11 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                         placeholder="Contoh: PRO2026 atau LOKER50"
                         value={voucherCode}
                         onChange={(e) => setVoucherCode(e.target.value)}
-                        className="flex-1 px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                        className="flex-1 px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                       />
                       <button
                         type="submit"
-                        className="px-4 py-2 rounded-[10px] bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold text-xs transition shrink-0"
+                        className="px-4 py-2 rounded-[10px] bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold text-xs transition shrink-0 cursor-pointer"
                       >
                         Gunakan
                       </button>
@@ -662,7 +662,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                 <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
                   <div>
                     <span className="text-xs text-slate-500 dark:text-slate-400 block font-bold">Total Tagihan</span>
-                    <span className="text-xl font-black text-violet-600 dark:text-violet-400">{formatRupiah(totalPrice)}</span>
+                    <span className="text-xl font-black text-orange-600 dark:text-orange-400">{formatRupiah(totalPrice)}</span>
                   </div>
 
                   <span className="px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
@@ -675,9 +675,9 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
               <button
                 type="button"
                 onClick={handleProcessPayment}
-                className="w-full py-3.5 rounded-[10px] bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-xs transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-black text-xs transition shadow-lg shadow-[#1738D1]/20 flex items-center justify-center gap-2 cursor-pointer border-0"
               >
-                <Lock className="w-4 h-4 text-slate-950" />
+                <Lock className="w-4 h-4 text-white" />
                 <span>Bayar {formatRupiah(totalPrice)} Sekarang</span>
                 <ArrowRight className="w-4 h-4" />
               </button>

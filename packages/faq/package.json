@@ -1,0 +1,21 @@
+{
+  "name": "@cuti/faq",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Employr FAQ knowledge base — content, loader, markdown renderer & retrieval search (TF-IDF cosine, non-LLM RAG)",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "dev": "echo 'noop'"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

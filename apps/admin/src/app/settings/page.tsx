@@ -89,7 +89,7 @@ export default function SettingsPage() {
             </div>
             <div>
               <h2 className="text-base font-extrabold text-slate-900 dark:text-slate-50">Pengaturan Umum Platform</h2>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Identitas dan meta informasi AmbilCUTI</p>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Identitas dan meta informasi Employr</p>
             </div>
           </div>
           <div className="space-y-4">
@@ -97,7 +97,7 @@ export default function SettingsPage() {
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Nama Platform</label>
               <input
                 type="text"
-                defaultValue="AmbilCUTI"
+                defaultValue="Employr"
                 className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
               />
             </div>

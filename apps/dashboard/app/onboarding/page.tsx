@@ -359,7 +359,7 @@ export default function AdaptiveOnboardingPage() {
     setIsSubmitting(true);
     try {
       await userApi.updateProfile({
-        fullName: formData.fullName || 'Pengguna AmbilCUTI',
+        fullName: formData.fullName || 'Pengguna Employr',
         location: formData.location,
         headline: `${formData.targetPositions.join(', ') || 'Talenta'} | ${formData.educationLevel}`,
         targetPosition: formData.targetPositions.join(', ') || 'Talenta',
@@ -376,7 +376,7 @@ export default function AdaptiveOnboardingPage() {
         localStorage.setItem(
           'cuti_user_session',
           JSON.stringify({
-            name: formData.fullName || 'Pengguna AmbilCUTI',
+            name: formData.fullName || 'Pengguna Employr',
             intent: selectedIntent,
             targetPositions: formData.targetPositions,
             hasCv: formData.hasCvAlready || selectedIntent === 'buat_cv',
@@ -399,11 +399,11 @@ export default function AdaptiveOnboardingPage() {
       {/* Top Header Bar */}
       <header className="max-w-2xl w-full mx-auto flex items-center justify-between py-2">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-[10px] bg-orange-500 text-white font-extrabold flex items-center justify-center text-xs shadow-md shadow-orange-500/20">
+          <div className="w-8 h-8 rounded-[10px] bg-[#1738D1] text-white font-extrabold flex items-center justify-center text-xs shadow-md shadow-[#1738D1]/20">
             CUTI
           </div>
           <span className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-            AmbilCUTI
+            Employr
           </span>
         </div>
 
@@ -434,7 +434,7 @@ export default function AdaptiveOnboardingPage() {
                       onClick={() => setCurrentStepIndex(st.id)}
                       className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-[10px] transition cursor-pointer ${
                         isActive
-                          ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
+                          ? 'bg-[#1738D1] text-white shadow-md shadow-[#1738D1]/20'
                           : isCompleted
                           ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'
@@ -521,9 +521,9 @@ export default function AdaptiveOnboardingPage() {
                       key={card.id}
                       type="button"
                       onClick={() => handleSelectIntent(card.id)}
-                      className="p-5 rounded-[10px] border text-left transition flex items-start gap-3.5 cursor-pointer relative overflow-hidden bg-slate-50/80 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-orange-500 hover:bg-orange-50/50 dark:hover:bg-orange-950/30 group shadow-2xs"
+                      className="p-5 rounded-[10px] border text-left transition flex items-start gap-3.5 cursor-pointer relative overflow-hidden bg-slate-50/80 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-[#1738D1] hover:bg-orange-50/50 dark:hover:bg-orange-950/30 group shadow-2xs"
                     >
-                      <div className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 bg-white dark:bg-slate-700 text-orange-500 border border-slate-200 dark:border-slate-600 group-hover:bg-orange-500 group-hover:text-white transition shadow-2xs">
+                      <div className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 bg-white dark:bg-slate-700 text-orange-500 border border-slate-200 dark:border-slate-600 group-hover:bg-[#1738D1] group-hover:text-white transition shadow-2xs">
                         <IconComp size={20} />
                       </div>
 
@@ -585,7 +585,7 @@ export default function AdaptiveOnboardingPage() {
                   <div className="space-y-3 text-left pt-2">
                     {[
                       { match: '97% cocok', title: primaryTargetPos, location: primaryLocation, company: 'Perusahaan Terverifikasi' },
-                      { match: '92% cocok', title: `Staff ${primaryTargetPos}`, location: primaryLocation, company: 'Mitra Industri AmbilCUTI' },
+                      { match: '92% cocok', title: `Staff ${primaryTargetPos}`, location: primaryLocation, company: 'Mitra Industri Employr' },
                       { match: '89% cocok', title: 'Operasional & Admin', location: primaryLocation, company: 'Perusahaan Mitra' },
                     ].map((job, idx) => (
                       <div key={idx} className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-4 rounded-[10px] flex items-center justify-between">
@@ -606,7 +606,7 @@ export default function AdaptiveOnboardingPage() {
                   <button
                     type="button"
                     onClick={handleFinishAndNavigateToDashboard}
-                    className="w-full py-3.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Lanjutkan</span>
                     <ArrowRight size={16} />
@@ -666,7 +666,7 @@ export default function AdaptiveOnboardingPage() {
                           <strong className="text-slate-700 dark:text-slate-300 block text-[11px] font-bold uppercase">Skill</strong>
                           <div className="flex flex-wrap gap-1 mt-1">
                             {formData.skills.map((sk) => (
-                              <span key={sk} className="px-2 py-0.5 rounded bg-white dark:bg-slate-900 text-[10px] font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                              <span key={sk} className="px-2 py-0.5 rounded-[10px] bg-white dark:bg-slate-900 text-[10px] font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                                 {sk}
                               </span>
                             ))}
@@ -679,7 +679,7 @@ export default function AdaptiveOnboardingPage() {
                   <button
                     type="button"
                     onClick={() => setShowMarketingOffer(true)}
-                    className="w-full py-3.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Lanjutkan</span>
                     <ArrowRight size={16} />
@@ -747,7 +747,7 @@ export default function AdaptiveOnboardingPage() {
                   <button
                     type="button"
                     onClick={() => setShowMarketingOffer(true)}
-                    className="w-full py-3.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Lanjutkan</span>
                     <ArrowRight size={16} />
@@ -805,7 +805,7 @@ export default function AdaptiveOnboardingPage() {
                   <button
                     type="button"
                     onClick={handleFinishAndNavigateToDashboard}
-                    className="w-full py-3.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Lanjutkan</span>
                     <ArrowRight size={16} />
@@ -899,10 +899,10 @@ export default function AdaptiveOnboardingPage() {
                     </div>
 
                     {/* Card 2: CV Profesional (Rp 59.000) — PALING POPULER */}
-                    <div className="bg-orange-50/80 dark:bg-orange-950/40 border-2 border-orange-500 rounded-[10px] p-4 flex flex-col justify-between space-y-4 transition relative shadow-md shadow-orange-500/10">
+                    <div className="bg-orange-50/80 dark:bg-orange-950/40 border-2 border-[#1738D1] rounded-[10px] p-4 flex flex-col justify-between space-y-4 transition relative shadow-md shadow-[#1738D1]/10">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-[10px] bg-orange-500 text-white uppercase tracking-wider shadow-2xs">
+                          <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-[10px] bg-[#1738D1] text-white uppercase tracking-wider shadow-2xs">
                             🔥 Paling Populer
                           </span>
                         </div>
@@ -938,7 +938,7 @@ export default function AdaptiveOnboardingPage() {
                       <button
                         type="button"
                         onClick={() => router.push('/pembayaran?plan=profesional')}
-                        className="w-full py-2.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition cursor-pointer text-center flex items-center justify-center gap-1"
+                        className="w-full py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition cursor-pointer text-center flex items-center justify-center gap-1"
                       >
                         <span>Pilih Rp 59rb</span>
                         <ArrowRight size={14} />
@@ -1041,7 +1041,7 @@ export default function AdaptiveOnboardingPage() {
                         placeholder="Ketik nama lengkapmu..."
                         value={formData.fullName}
                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[10px] text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition placeholder:text-slate-400"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[10px] text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1] focus:ring-2 focus:ring-[#1738D1]/20 transition placeholder:text-slate-400"
                       />
                     </div>
 
@@ -1055,7 +1055,7 @@ export default function AdaptiveOnboardingPage() {
                           placeholder="Nomor HP atau Email..."
                           value={formData.contactInfo}
                           onChange={(e) => setFormData({ ...formData, contactInfo: e.target.value })}
-                          className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[10px] text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition placeholder:text-slate-400"
+                          className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[10px] text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1] focus:ring-2 focus:ring-[#1738D1]/20 transition placeholder:text-slate-400"
                         />
                       </div>
                     )}
@@ -1086,7 +1086,7 @@ export default function AdaptiveOnboardingPage() {
                                 onClick={() => setFormData({ ...formData, educationLevel: lvl })}
                                 className={`px-4 py-2 rounded-[10px] text-xs font-bold transition cursor-pointer ${
                                   formData.educationLevel === lvl
-                                    ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
+                                    ? 'bg-[#1738D1] text-white shadow-md shadow-[#1738D1]/20'
                                     : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
                                 }`}
                               >
@@ -1174,7 +1174,7 @@ export default function AdaptiveOnboardingPage() {
                             onClick={() => setFormData({ ...formData, educationLevel: lvl })}
                             className={`px-4 py-2 rounded-[10px] text-xs font-bold transition cursor-pointer ${
                               formData.educationLevel === lvl
-                                ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
+                                ? 'bg-[#1738D1] text-white shadow-md shadow-[#1738D1]/20'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
                             }`}
                           >
@@ -1255,7 +1255,7 @@ export default function AdaptiveOnboardingPage() {
                         onClick={() => setFormData({ ...formData, hasWorkExperience: false })}
                         className={`p-4 rounded-[10px] border text-center font-bold text-sm transition cursor-pointer ${
                           formData.hasWorkExperience === false
-                            ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500 text-orange-600 dark:text-orange-400 ring-2 ring-orange-500/20'
+                            ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-600 dark:text-orange-400 ring-2 ring-[#1738D1]/20'
                             : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
                         }`}
                       >
@@ -1267,7 +1267,7 @@ export default function AdaptiveOnboardingPage() {
                         onClick={() => setFormData({ ...formData, hasWorkExperience: true })}
                         className={`p-4 rounded-[10px] border text-center font-bold text-sm transition cursor-pointer ${
                           formData.hasWorkExperience === true
-                            ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-500 text-orange-600 dark:text-orange-400 ring-2 ring-orange-500/20'
+                            ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-600 dark:text-orange-400 ring-2 ring-[#1738D1]/20'
                             : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
                         }`}
                       >
@@ -1288,7 +1288,7 @@ export default function AdaptiveOnboardingPage() {
                               onClick={() => toggleArrayItem('nonWorkExperiences', exp)}
                               className={`px-3.5 py-2 rounded-[10px] text-xs font-bold transition cursor-pointer ${
                                 formData.nonWorkExperiences.includes(exp)
-                                  ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20'
+                                  ? 'bg-[#1738D1] text-white shadow-sm shadow-[#1738D1]/20'
                                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
                               }`}
                             >
@@ -1360,7 +1360,7 @@ export default function AdaptiveOnboardingPage() {
                                   experienceEndDate: checked ? 'Sekarang' : prev.experienceEndDate === 'Sekarang' ? '' : prev.experienceEndDate,
                                 }));
                               }}
-                              className="w-4 h-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500/20 cursor-pointer accent-orange-500"
+                              className="w-4 h-4 rounded border-slate-300 text-orange-500 focus:ring-[#1738D1]/20 cursor-pointer accent-[#1738D1]"
                             />
                             <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
                               Saya masih bekerja di sini
@@ -1405,7 +1405,7 @@ export default function AdaptiveOnboardingPage() {
                             onClick={() => toggleSkill(sk)}
                             className={`px-3.5 py-2 rounded-[10px] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                               isSel
-                                ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20'
+                                ? 'bg-[#1738D1] text-white shadow-sm shadow-[#1738D1]/20'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
                             }`}
                           >
@@ -1428,12 +1428,12 @@ export default function AdaptiveOnboardingPage() {
                             handleAddCustomSkill();
                           }
                         }}
-                        className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[10px] text-xs font-semibold focus:outline-none focus:border-orange-500"
+                        className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[10px] text-xs font-semibold focus:outline-none focus:border-[#1738D1]"
                       />
                       <button
                         type="button"
                         onClick={handleAddCustomSkill}
-                        className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-[10px] transition cursor-pointer"
+                        className="px-4 py-2.5 bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs rounded-[10px] transition cursor-pointer"
                       >
                         Tambah
                       </button>
@@ -1487,7 +1487,7 @@ export default function AdaptiveOnboardingPage() {
                             onClick={() => toggleArrayItem('targetIndustries', ind.id)}
                             className={`px-3.5 py-2 rounded-[10px] text-xs font-bold transition flex items-center gap-1.5 ${
                               formData.targetIndustries.includes(ind.id)
-                                ? 'bg-orange-500 text-white shadow-sm'
+                                ? 'bg-[#1738D1] text-white shadow-sm'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                             }`}
                           >
@@ -1543,7 +1543,7 @@ export default function AdaptiveOnboardingPage() {
                               onClick={() => setFormData({ ...formData, willingToRelocate: opt })}
                               className={`flex-1 py-2 rounded-[10px] text-xs font-bold border transition ${
                                 formData.willingToRelocate === opt
-                                  ? 'bg-orange-50 border-orange-500 text-orange-600'
+                                  ? 'bg-orange-50 border-[#1738D1] text-orange-600'
                                   : 'bg-slate-50 border-slate-200 text-slate-700'
                               }`}
                             >
@@ -1596,7 +1596,7 @@ export default function AdaptiveOnboardingPage() {
                       <p className="text-xs font-bold text-slate-700 dark:text-slate-200">Drag & drop file CV kamu di sini</p>
                       <p className="text-[11px] text-slate-400">Format PDF / DOCX (Maksimal 5MB)</p>
                     </div>
-                    <button type="button" className="px-5 py-2.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md transition">
+                    <button type="button" className="px-5 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md transition">
                       Pilih File CV
                     </button>
                   </div>
@@ -1630,7 +1630,7 @@ export default function AdaptiveOnboardingPage() {
                       onClick={() => setFormData({ ...formData, hasCvAlready: true })}
                       className={`p-5 rounded-[10px] border text-left transition cursor-pointer ${
                         formData.hasCvAlready === true
-                          ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20'
+                          ? 'bg-orange-50 border-[#1738D1] ring-2 ring-[#1738D1]/20'
                           : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
                       }`}
                     >
@@ -1644,7 +1644,7 @@ export default function AdaptiveOnboardingPage() {
                       onClick={() => setFormData({ ...formData, hasCvAlready: false })}
                       className={`p-5 rounded-[10px] border text-left transition cursor-pointer ${
                         formData.hasCvAlready === false
-                          ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20'
+                          ? 'bg-orange-50 border-[#1738D1] ring-2 ring-[#1738D1]/20'
                           : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
                       }`}
                     >
@@ -1673,7 +1673,7 @@ export default function AdaptiveOnboardingPage() {
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="px-7 py-3 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition flex items-center gap-2 cursor-pointer"
+                className="px-7 py-3 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center gap-2 cursor-pointer"
               >
                 <span>Lanjutkan</span>
                 <ArrowRight size={16} />
@@ -1688,7 +1688,7 @@ export default function AdaptiveOnboardingPage() {
       <footer className="max-w-2xl w-full mx-auto text-center py-2">
         <p className="text-xs font-medium text-slate-400 dark:text-slate-500 flex items-center justify-center gap-1.5">
           <Lock size={12} className="text-slate-400" />
-          <span>Data kamu aman bersama AmbilCUTI</span>
+          <span>Data kamu aman bersama Employr</span>
         </p>
       </footer>
 

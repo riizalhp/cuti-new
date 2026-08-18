@@ -159,14 +159,14 @@ model applications {
 }
 
 model article_categories {
-  id       String     @id @db.Uuid
+  id       String     @id @default(uuid()) @db.Uuid
   name     String
   slug     String     @unique
   articles articles[]
 }
 
 model articles {
-  id                 String              @id @db.Uuid
+  id                 String              @id @default(uuid()) @db.Uuid
   title              String
   slug               String              @unique
   content            String
@@ -191,7 +191,7 @@ model audit_logs {
 }
 
 model certifications {
-  id              String   @id @db.Uuid
+  id              String   @id @default(uuid()) @db.Uuid
   title           String
   slug            String   @unique
   description     String
@@ -205,7 +205,7 @@ model certifications {
 }
 
 model companies {
-  id       String  @id @db.Uuid
+  id       String  @id @default(uuid()) @db.Uuid
   name     String
   slug     String  @unique
   logo_url String?
@@ -216,7 +216,7 @@ model companies {
 }
 
 model courses {
-  id              String   @id @db.Uuid
+  id              String   @id @default(uuid()) @db.Uuid
   title           String
   slug            String   @unique
   description     String
@@ -273,7 +273,7 @@ model cv_templates {
 }
 
 model events {
-  id              String   @id @db.Uuid
+  id              String   @id @default(uuid()) @db.Uuid
   title           String
   slug            String   @unique
   description     String
@@ -508,7 +508,7 @@ enum ApplicationStatus {
 
 enum ApplicationSource {
   MANUAL
-  AMBILCUTI
+  EMPLOYR
 }
 
 enum CvSectionType {

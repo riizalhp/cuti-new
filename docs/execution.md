@@ -183,10 +183,10 @@ BETTER_AUTH_SECRET=
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 
-# AI
-OPENAI_API_KEY=
-GEMINI_API_KEY=
-AI_DEFAULT_PROVIDER=openai
+# AI (OpenAI-compatible: endpoint + API key)
+AI_ENDPOINT=https://api.openai.com/v1
+AI_API_KEY=
+AI_MODEL=gpt-4o-mini
 
 # Cloudflare R2
 R2_ACCOUNT_ID=

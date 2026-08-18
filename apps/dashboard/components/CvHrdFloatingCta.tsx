@@ -192,7 +192,7 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
                   e.stopPropagation();
                   setIsCollapsed(true);
                 }}
-                className="text-slate-400 hover:text-white p-0.5 rounded transition cursor-pointer"
+                className="text-slate-400 hover:text-white p-0.5 rounded-[10px] transition cursor-pointer"
                 title="Kecilkan"
               >
                 <X className="w-3.5 h-3.5" />
@@ -200,11 +200,11 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
             </div>
 
             <div className="flex items-center gap-2 mb-3">
-              <div className="relative w-7 h-7 rounded-full border border-orange-500 overflow-hidden shrink-0 shadow-xs">
+              <div className="relative w-7 h-7 rounded-full border border-[#1738D1] overflow-hidden shrink-0 shadow-xs">
                 <img
-                  src="/images/tokoh-2.png"
+                  src="/images/mascot-1.webp"
                   alt="HR Recruiter"
-                  className="w-full h-full object-cover scale-[1.7] origin-top translate-y-0.5"
+                  className="w-full h-full object-cover scale-[2.1] origin-top translate-y-1"
                 />
                 <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-emerald-500 rounded-full border border-slate-900" />
               </div>
@@ -216,7 +216,7 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
             <button
               type="button"
               onClick={handleOpenModal}
-              className="w-full py-1.5 px-3 rounded-[10px] bg-orange-500 hover:bg-orange-600 active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer"
+              className="w-full py-1.5 px-3 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer"
             >
               <span>Buatkan CV</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -227,15 +227,15 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
           <button
             type="button"
             onClick={handleOpenModal}
-            className="group relative flex items-center gap-2 pl-1.5 pr-4 py-1.5 rounded-[10px] bg-slate-900/95 dark:bg-slate-900/95 text-white border border-slate-800 hover:border-orange-500/50 shadow-lg shadow-slate-950/20 backdrop-blur-md text-xs font-bold transition-all duration-200 ease-out cursor-pointer active:scale-95"
+            className="group relative flex items-center gap-2 pl-1.5 pr-4 py-1.5 rounded-[10px] bg-slate-900/95 dark:bg-slate-900/95 text-white border border-slate-800 hover:border-[#1738D1]/50 shadow-lg shadow-slate-950/20 backdrop-blur-md text-xs font-bold transition-all duration-200 ease-out cursor-pointer active:scale-95"
             title="Klik untuk info layanan CV by HRD"
           >
             {/* Gambar Lingkaran Avatar HRD */}
-            <div className="relative w-8 h-8 rounded-full border-2 border-orange-500 overflow-hidden shrink-0 group-hover:scale-105 transition-transform shadow-xs">
+            <div className="relative w-8 h-8 rounded-full border-2 border-[#1738D1] overflow-hidden shrink-0 group-hover:scale-105 transition-transform shadow-xs">
               <img
-                src="/images/tokoh-2.png"
+                src="/images/mascot-1.webp"
                 alt="HR Specialist"
-                className="w-full h-full object-cover scale-[1.7] origin-top translate-y-0.5"
+                className="w-full h-full object-cover scale-[2.1] origin-top translate-y-1"
               />
               <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900" />
             </div>

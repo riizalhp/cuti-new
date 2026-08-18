@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useModals } from '@/context/ModalContext';
-import { userApi } from '@/lib/api';
+import { userApi, activitiesApi, trackerApi, scheduleApi } from '@/lib/api';
 import {
   Sun,
   Moon,
@@ -24,10 +24,11 @@ import {
   Menu,
   Flame,
   Gift,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-import { handleLogout } from '@/lib/auth';
+import { handleLogout, getStoredSession } from '@/lib/auth';
 
 interface HeaderProps {
   currentUser?: { name: string; email: string };
@@ -52,32 +53,23 @@ export const Header: React.FC<HeaderProps> = ({
   const onSwitchToAdminPortal = () => router.push('/admin');
 
   const [currentUser, setCurrentUser] = useState(
-    propUser || { name: 'Pengguna AmbilCUTI', email: 'user@ambilcuti.id' }
+    propUser || { name: 'Pengguna Employr', email: 'user@employr.id' }
   );
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const sessionStr = localStorage.getItem('cuti_user_session');
-        if (sessionStr) {
-          const parsed = JSON.parse(sessionStr);
-          if (parsed.name) {
-            setCurrentUser({
-              name: parsed.name,
-              email: parsed.email || 'user@ambilcuti.id',
-            });
-          }
-        }
-      } catch (e) {
-        console.warn('Failed to parse session in Header', e);
-      }
+    const session = getStoredSession();
+    if (session && session.name) {
+      setCurrentUser({
+        name: session.name,
+        email: session.email || 'user@employr.id',
+      });
     }
 
     userApi.getProfile().then((profile) => {
       if (profile && profile.fullName) {
         setCurrentUser({
           name: profile.fullName,
-          email: profile.email || 'user@ambilcuti.id',
+          email: profile.email || 'user@employr.id',
         });
       }
     });
@@ -85,41 +77,136 @@ export const Header: React.FC<HeaderProps> = ({
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(3);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState<Array<{
+    id: number;
+    title: string;
+    desc: string;
+    time: string;
+    unread: boolean;
+  }>>([]);
+  const [isLoadingNotifs, setIsLoadingNotifs] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-  const notifications = [
-    {
-      id: 1,
-      title: 'Undangan Interview Baru',
-      desc: 'PT Telkom Indonesia mengundang Anda untuk Interview Tahap 1 pada 24 Juli.',
-      time: '10 menit lalu',
-      unread: true,
-    },
-    {
-      id: 2,
-      title: 'CV Dilihat HR',
-      desc: 'HR dari Tokopedia baru saja melihat profil dan CV ATS Anda.',
-      time: '1 jam lalu',
-      unread: true,
-    },
-    {
-      id: 3,
-      title: 'Misi Harian Selesai',
-      desc: 'Anda mendapatkan +50 Poin dari misi Download CV Pertama.',
-      time: '3 jam lalu',
-      unread: true,
-    },
-    {
-      id: 4,
-      title: 'Tips Karir Mingguan',
-      desc: 'Cek 5 kata kunci ATS paling dicari untuk posisi Admin Penjualan minggu ini.',
-      time: '1 hari lalu',
-      unread: false,
-    },
-  ];
+  // Load notifications dynamically from activities, schedules, and tracker
+  useEffect(() => {
+    const loadNotifications = async () => {
+      setIsLoadingNotifs(true);
+      try {
+        const [activities, schedules, apps] = await Promise.all([
+          activitiesApi.getAll(10),
+          scheduleApi.getAll(),
+          trackerApi.getAll(),
+        ]);
+
+        const notifs: Array<{ id: number; title: string; desc: string; time: string; unread: boolean }> = [];
+        let idCounter = 1;
+
+        // Generate notifications from upcoming schedules (interviews)
+        if (Array.isArray(schedules) && schedules.length > 0) {
+          const now = new Date();
+          const upcomingInterviews = schedules
+            .filter((s: any) => {
+              const d = new Date(s.date || s.scheduledAt || s.startTime);
+              return d >= now && (s.type === 'interview' || s.type === 'Interview');
+            })
+            .sort((a: any, b: any) => {
+              return new Date(a.date || a.scheduledAt || a.startTime).getTime() -
+                     new Date(b.date || b.scheduledAt || b.startTime).getTime();
+            })
+            .slice(0, 2);
+
+          upcomingInterviews.forEach((s: any) => {
+            const d = new Date(s.date || s.scheduledAt || s.startTime);
+            const isToday = d.toDateString() === now.toDateString();
+            const timeStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) +
+              ' ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            notifs.push({
+              id: idCounter++,
+              title: 'Jadwal Interview Mendatang',
+              desc: `Interview ${s.company || s.title || 'Perusahaan'} pada ${timeStr} WIB.`,
+              time: isToday ? 'Hari ini' : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }),
+              unread: true,
+            });
+          });
+        }
+
+        // Generate notifications from recent application status changes
+        if (Array.isArray(apps) && apps.length > 0) {
+          const recentStatusApps = apps
+            .filter((a: any) => ['Interview', 'Offering', 'Screening'].includes(a.status))
+            .slice(0, 2);
+
+          recentStatusApps.forEach((a: any) => {
+            const statusMap: Record<string, string> = {
+              Interview: 'Lamaran kamu berlanjut ke tahap Interview',
+              Offering: 'Selamat! Kamu mendapat penawaran kerja',
+              Screening: 'Lamaran kamu sedang di-review HR',
+            };
+            notifs.push({
+              id: idCounter++,
+              title: statusMap[a.status] || 'Update Lamaran',
+              desc: `${a.company || a.position || 'Posisi'} - Status: ${a.status}`,
+              time: a.updatedAt
+                ? getRelativeTime(new Date(a.updatedAt))
+                : 'Baru-baru ini',
+              unread: true,
+            });
+          });
+        }
+
+        // Generate notifications from recent activities
+        if (Array.isArray(activities) && activities.length > 0) {
+          activities.slice(0, Math.max(0, 4 - notifs.length)).forEach((act: any) => {
+            notifs.push({
+              id: idCounter++,
+              title: act.title || act.type || 'Aktivitas Terbaru',
+              desc: act.description || act.message || 'Ada aktivitas baru di dashboard kamu.',
+              time: act.createdAt ? getRelativeTime(new Date(act.createdAt)) : 'Baru-baru ini',
+              unread: false,
+            });
+          });
+        }
+
+        // If no notifications, show empty state
+        setNotifications(notifs.slice(0, 5));
+        setUnreadCount(notifs.filter(n => n.unread).length);
+      } catch (error) {
+        console.error('[Header] Failed to load notifications:', error);
+        setNotifications([]);
+        setUnreadCount(0);
+      } finally {
+        setIsLoadingNotifs(false);
+      }
+    };
+
+    loadNotifications();
+
+    // Also load avatar
+    userApi.getProfile().then((profile: any) => {
+      if (profile && profile.photoUrl) {
+        setAvatarUrl(profile.photoUrl);
+      }
+    });
+  }, []);
+
+  // Helper: relative time label
+  function getRelativeTime(date: Date): string {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return 'Baru saja';
+    if (diffMins < 60) return `${diffMins} menit lalu`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours} jam lalu`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays} hari lalu`;
+    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+  }
 
   const handleClearUnread = () => {
     setUnreadCount(0);
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
   };
 
   return (
@@ -138,7 +225,7 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Menu className="w-4 h-4 md:hidden text-slate-800 dark:text-slate-200" />
               {isSidebarCollapsed ? (
-                <PanelLeftOpen className="w-4 h-4 text-violet-600 dark:text-violet-400 hidden md:block" />
+                <PanelLeftOpen className="w-4 h-4 text-orange-500 dark:text-orange-400 hidden md:block" />
               ) : (
                 <PanelLeftClose className="w-4 h-4 hidden md:block" />
               )}
@@ -198,7 +285,7 @@ export const Header: React.FC<HeaderProps> = ({
               </>
             ) : (
               <>
-                <Moon className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                <Moon className="w-4 h-4 text-navy-700 dark:text-orange-400" />
                 <span className="text-xs font-extrabold hidden sm:inline">Dark</span>
               </>
             )}
@@ -211,7 +298,7 @@ export const Header: React.FC<HeaderProps> = ({
               aria-label="Notifications"
               className={`relative p-2 rounded-full transition cursor-pointer border ${
                 showNotifications
-                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-navy-700 dark:border-white shadow-md ring-2 ring-navy-500/30'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-navy-700 dark:border-white shadow-md ring-2 ring-[#1738D1]/30'
                   : 'bg-white/30 dark:bg-slate-900/50 hover:bg-white/50 dark:hover:bg-slate-800/80 border-white/40 dark:border-white/10 text-slate-700 dark:text-slate-300'
               }`}
             >
@@ -225,14 +312,14 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Notifications Dropdown */}
             {showNotifications && (
-              <div className="absolute right-0 mt-3 w-[calc(100vw-2rem)] sm:w-96 max-w-sm glass-card bg-white/90 dark:bg-slate-900/90 rounded-[28px] shadow-2xl border border-white/30 dark:border-white/10 p-5 z-50 backdrop-blur-2xl">
+              <div className="absolute right-0 mt-3 w-[calc(100vw-2rem)] sm:w-96 max-w-sm glass-card bg-white/90 dark:bg-slate-900/90 rounded-[10px]-[28px] shadow-2xl border border-white/30 dark:border-white/10 p-5 z-50 backdrop-blur-2xl">
                 <div className="flex items-center justify-between pb-3 border-b border-white/20 dark:border-white/10">
                   <div className="flex items-center gap-2">
                     <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">
                       Notifikasi
                     </h3>
                     {unreadCount > 0 && (
-                      <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black bg-violet-500/20 text-violet-700 dark:text-violet-300 border border-violet-500/30">
+                      <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black bg-[#1738D1]/20 text-orange-700 dark:text-orange-300 border border-[#1738D1]/30">
                         {unreadCount} Baru
                       </span>
                     )}
@@ -241,7 +328,7 @@ export const Header: React.FC<HeaderProps> = ({
                     {unreadCount > 0 && (
                       <button
                         onClick={handleClearUnread}
-                        className="text-xs text-violet-600 dark:text-violet-400 font-bold hover:underline"
+                        className="text-xs text-orange-600 dark:text-orange-400 font-bold hover:underline"
                       >
                         Tandai dibaca
                       </button>
@@ -261,7 +348,7 @@ export const Header: React.FC<HeaderProps> = ({
                       key={n.id}
                       className={`p-3.5 rounded-[10px] border text-xs transition backdrop-blur-md ${
                         n.unread
-                          ? 'bg-violet-500/10 border-violet-500/30 text-slate-900 dark:text-slate-100'
+                          ? 'bg-[#1738D1]/10 border-[#1738D1]/30 text-slate-900 dark:text-slate-100'
                           : 'bg-white/30 dark:bg-slate-800/40 border-white/20 dark:border-white/10 text-slate-700 dark:text-slate-300'
                       }`}
                     >
@@ -290,28 +377,38 @@ export const Header: React.FC<HeaderProps> = ({
               title="Lihat & Pengaturan Profil Saya"
               className={`flex items-center gap-2.5 pl-1.5 py-1 pr-2.5 rounded-full transition group cursor-pointer text-left border ${
                 showProfileMenu
-                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-navy-700 dark:border-white shadow-lg ring-2 ring-orange-500/50'
+                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-navy-700 dark:border-white shadow-lg ring-2 ring-[#1738D1]/50'
                   : 'bg-white/30 dark:bg-slate-900/50 hover:bg-white/50 dark:hover:bg-slate-800/80 border-white/40 dark:border-white/10'
               }`}
             >
               <div className="relative">
-                <Image
-                  src="https://picsum.photos/seed/andi_avatar/100/100"
-                  alt={currentUser.name}
-                  width={36}
-                  height={36}
-                  referrerPolicy="no-referrer"
-                  className={`w-8 h-8 rounded-full object-cover transition ${
+                {avatarUrl ? (
+                  <Image
+                    src={avatarUrl}
+                    alt={currentUser.name}
+                    width={36}
+                    height={36}
+                    referrerPolicy="no-referrer"
+                    className={`w-8 h-8 rounded-full object-cover transition ${
+                      showProfileMenu
+                        ? 'border-2 border-[#1738D1] ring-2 ring-[#1738D1]/60 scale-105 shadow-md'
+                        : 'border-2 border-orange-400 group-hover:scale-105'
+                    }`}
+                  />
+                ) : (
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-[#1738D1] text-white font-bold text-sm transition ${
                     showProfileMenu
-                      ? 'border-2 border-orange-500 ring-2 ring-orange-500/60 scale-105 shadow-md'
-                      : 'border-2 border-violet-500 group-hover:scale-105'
-                  }`}
-                />
+                      ? 'border-2 border-[#1738D1] ring-2 ring-[#1738D1]/60 scale-105 shadow-md'
+                      : 'border-2 border-orange-400 group-hover:scale-105'
+                  }`}>
+                    {currentUser.name?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                )}
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
               </div>
               <div className="hidden xl:block text-left">
                 <p className={`text-xs font-black leading-tight flex items-center gap-1 transition ${
-                  showProfileMenu ? 'text-white dark:text-slate-900 font-extrabold' : 'text-slate-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400'
+                  showProfileMenu ? 'text-white dark:text-slate-900 font-extrabold' : 'text-slate-900 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400'
                 }`}>
                   <span>{currentUser.name}</span>
                   <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showProfileMenu ? 'rotate-180 text-orange-400 dark:text-orange-600 font-bold' : 'text-slate-400'}`} />
@@ -321,7 +418,7 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Profile Dropdown Menu */}
             {showProfileMenu && (
-              <div className="absolute right-0 mt-3 w-60 glass-card bg-white/90 dark:bg-slate-900/90 rounded-[24px] shadow-2xl border border-white/30 dark:border-white/10 p-2.5 z-50 backdrop-blur-2xl">
+              <div className="absolute right-0 mt-3 w-60 glass-card bg-white/90 dark:bg-slate-900/90 rounded-[10px]-[24px] shadow-2xl border border-white/30 dark:border-white/10 p-2.5 z-50 backdrop-blur-2xl">
                 <div className="px-3.5 py-2.5 border-b border-white/20 dark:border-white/10 mb-1.5">
                   <p className="text-xs font-black text-slate-900 dark:text-white truncate">
                     {currentUser.name}
@@ -341,7 +438,7 @@ export const Header: React.FC<HeaderProps> = ({
                   }}
                   className="w-full px-3 py-2 rounded-[10px] text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 transition"
                 >
-                  <User className="w-4 h-4 text-violet-500" />
+                  <User className="w-4 h-4 text-orange-500" />
                   <span>Profil Saya</span>
                 </button>
 
@@ -352,7 +449,7 @@ export const Header: React.FC<HeaderProps> = ({
                   }}
                   className="w-full px-3 py-2 rounded-[10px] text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 transition"
                 >
-                  <Settings className="w-4 h-4 text-violet-500" />
+                  <Settings className="w-4 h-4 text-orange-500" />
                   <span>Pengaturan Akun</span>
                 </button>
 
@@ -362,9 +459,9 @@ export const Header: React.FC<HeaderProps> = ({
                       setShowProfileMenu(false);
                       onSwitchToAdminPortal();
                     }}
-                    className="w-full px-3 py-2 rounded-[10px] text-xs font-bold text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/50 flex items-center gap-2.5 transition"
+                    className="w-full px-3 py-2 rounded-[10px] text-xs font-bold text-navy-700 dark:text-navy-300 hover:bg-navy-50 dark:hover:bg-navy-950/50 flex items-center gap-2.5 transition"
                   >
-                    <ShieldCheck className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                    <ShieldCheck className="w-4 h-4 text-navy-700 dark:text-navy-400" />
                     <span>Portal Super Admin</span>
                   </button>
                 )}

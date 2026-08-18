@@ -154,7 +154,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
           isValueInvalid
             ? 'border-rose-400 dark:border-rose-600 bg-rose-50/50 dark:bg-rose-950/30'
             : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900'
-        } text-slate-800 dark:text-white text-xs font-medium shadow-2xs hover:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/20 transition cursor-pointer ${
+        } text-slate-800 dark:text-white text-xs font-medium shadow-2xs hover:border-[#1738D1] focus-within:ring-2 focus-within:ring-[#1738D1]/20 transition cursor-pointer ${
           disabled ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       >
@@ -225,7 +225,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                     isBeforeMin
                       ? 'opacity-30 cursor-not-allowed bg-slate-100 dark:bg-slate-800/50 text-slate-400 dark:text-slate-600 line-through'
                       : isSelected
-                      ? 'bg-orange-500 text-white font-bold shadow-md cursor-pointer'
+                      ? 'bg-[#1738D1] text-white font-bold shadow-md cursor-pointer'
                       : 'text-slate-700 dark:text-slate-200 hover:bg-orange-50 dark:hover:bg-slate-800 cursor-pointer'
                   }`}
                 >

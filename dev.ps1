@@ -133,6 +133,8 @@ $ports = @{
     3002 = "Admin Panel"
     4321 = "Landing Page"
     3000 = "Dashboard"
+    3004 = "Learning Academy"
+    3005 = "FAQ / Pusat Bantuan"
 }
 
 function Kill-ProcessOnPort {
@@ -164,10 +166,12 @@ Write-Host "All ports cleaned up!" -ForegroundColor Green
 # Step 6: Start all services
 Write-Host "`nStep 6: Starting all services..." -ForegroundColor Cyan
 Write-Host ""
-Write-Host "   API Backend:    http://localhost:3001" -ForegroundColor Yellow
-Write-Host "   Landing Page:   http://localhost:4321" -ForegroundColor Yellow
-Write-Host "   Dashboard:      http://localhost:3000" -ForegroundColor Yellow
-Write-Host "   Admin Panel:    http://localhost:3002" -ForegroundColor Yellow
+Write-Host "   API Backend:        http://localhost:3001" -ForegroundColor Yellow
+Write-Host "   Landing Page:       http://localhost:4321" -ForegroundColor Yellow
+Write-Host "   Dashboard:          http://localhost:3000" -ForegroundColor Yellow
+Write-Host "   Learning Academy:   http://localhost:3004" -ForegroundColor Yellow
+Write-Host "   Admin Panel:        http://localhost:3002" -ForegroundColor Yellow
+Write-Host "   FAQ / Pusat Bantuan: http://localhost:3005" -ForegroundColor Yellow
 Write-Host ""
 
 # Start API (highest priority)
@@ -200,12 +204,32 @@ Start-Process powershell -ArgumentList @(
 
 Start-Sleep -Seconds 3
 
+# Start Learning Academy
+Write-Host "Starting Learning Academy..." -ForegroundColor Yellow
+Start-Process powershell -ArgumentList @(
+    "-NoExit",
+    "-Command",
+    "Write-Host '[Learning Academy - Port 3004]' -ForegroundColor Cyan; Write-Host ''; cd D:\cuti; pnpm --filter @cuti/learning dev"
+) -WindowStyle Normal
+
+Start-Sleep -Seconds 3
+
 # Start Admin Panel
 Write-Host "Starting Admin Panel..." -ForegroundColor Yellow
 Start-Process powershell -ArgumentList @(
     "-NoExit",
     "-Command",
     "Write-Host '[Admin Panel - Port 3002]' -ForegroundColor Magenta; Write-Host ''; cd D:\cuti; pnpm --filter @cuti/admin dev"
+) -WindowStyle Normal
+
+Start-Sleep -Seconds 3
+
+# Start FAQ / Pusat Bantuan
+Write-Host "Starting FAQ / Pusat Bantuan..." -ForegroundColor Yellow
+Start-Process powershell -ArgumentList @(
+    "-NoExit",
+    "-Command",
+    "Write-Host '[FAQ - Port 3005]' -ForegroundColor Green; Write-Host ''; cd D:\cuti; pnpm --filter @cuti/faq-site dev"
 ) -WindowStyle Normal
 
 # Step 7: Monitor startup
@@ -215,7 +239,9 @@ Start-Sleep -Seconds 10
 $apiReady = Wait-ForPort -Port 3001 -Service "API Backend" -TimeoutSeconds 30
 $landingReady = Wait-ForPort -Port 4321 -Service "Landing Page" -TimeoutSeconds 30
 $dashboardReady = Wait-ForPort -Port 3000 -Service "Dashboard" -TimeoutSeconds 30
+$learningReady = Wait-ForPort -Port 3004 -Service "Learning Academy" -TimeoutSeconds 30
 $adminReady = Wait-ForPort -Port 3002 -Service "Admin Panel" -TimeoutSeconds 30
+$faqReady = Wait-ForPort -Port 3005 -Service "FAQ / Pusat Bantuan" -TimeoutSeconds 30
 
 # Summary
 Write-Host "`n============================================================" -ForegroundColor Green
@@ -223,11 +249,13 @@ Write-Host "  CUTI Development Environment Ready!" -ForegroundColor Green
 Write-Host "============================================================" -ForegroundColor Green
 
 Write-Host "`nService Status:" -ForegroundColor Cyan
-Write-Host "   PostgreSQL:     Running (localhost:5432)" -ForegroundColor $(if ($true) { "Green" } else { "Red" })
-Write-Host "   API Backend:    $(if ($apiReady) { 'Ready' } else { 'Starting...' }) http://localhost:3001" -ForegroundColor $(if ($apiReady) { "Green" } else { "Yellow" })
-Write-Host "   Landing Page:   $(if ($landingReady) { 'Ready' } else { 'Starting...' }) http://localhost:4321" -ForegroundColor $(if ($landingReady) { "Green" } else { "Yellow" })
-Write-Host "   Dashboard:      $(if ($dashboardReady) { 'Ready' } else { 'Starting...' }) http://localhost:3000" -ForegroundColor $(if ($dashboardReady) { "Green" } else { "Yellow" })
-Write-Host "   Admin Panel:    $(if ($adminReady) { 'Ready' } else { 'Starting...' }) http://localhost:3002" -ForegroundColor $(if ($adminReady) { "Green" } else { "Yellow" })
+Write-Host "   PostgreSQL:         Running (localhost:5432)" -ForegroundColor $(if ($true) { "Green" } else { "Red" })
+Write-Host "   API Backend:        $(if ($apiReady) { 'Ready' } else { 'Starting...' }) http://localhost:3001" -ForegroundColor $(if ($apiReady) { "Green" } else { "Yellow" })
+Write-Host "   Landing Page:       $(if ($landingReady) { 'Ready' } else { 'Starting...' }) http://localhost:4321" -ForegroundColor $(if ($landingReady) { "Green" } else { "Yellow" })
+Write-Host "   Dashboard:          $(if ($dashboardReady) { 'Ready' } else { 'Starting...' }) http://localhost:3000" -ForegroundColor $(if ($dashboardReady) { "Green" } else { "Yellow" })
+Write-Host "   Learning Academy:   $(if ($learningReady) { 'Ready' } else { 'Starting...' }) http://localhost:3004" -ForegroundColor $(if ($learningReady) { "Green" } else { "Yellow" })
+Write-Host "   Admin Panel:        $(if ($adminReady) { 'Ready' } else { 'Starting...' }) http://localhost:3002" -ForegroundColor $(if ($adminReady) { "Green" } else { "Yellow" })
+Write-Host "   FAQ / Pusat Bantuan: $(if ($faqReady) { 'Ready' } else { 'Starting...' }) http://localhost:3005" -ForegroundColor $(if ($faqReady) { "Green" } else { "Yellow" })
 
 Write-Host "`nTips:" -ForegroundColor Cyan
 Write-Host "   - Each service runs in a separate PowerShell window" -ForegroundColor Gray

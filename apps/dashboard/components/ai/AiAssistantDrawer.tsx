@@ -165,15 +165,15 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
         className="relative w-full max-w-full sm:max-w-md md:max-w-lg h-full max-h-[92vh] sm:max-h-full bottom-0 rounded-t-[10px] sm:rounded-none bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-bottom sm:slide-in-from-right duration-300 cursor-default"
       >
         {/* Drawer Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-purple-50/50 dark:bg-purple-950/20">
+        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-orange-50/30 dark:bg-orange-950/10">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-[10px] bg-purple-600 text-white flex items-center justify-center shadow-sm shadow-purple-600/30">
+            <div className="w-9 h-9 rounded-[10px] bg-[#1738D1] text-white flex items-center justify-center shadow-sm shadow-[#1738D1]/30">
               <Sparkles className="w-5 h-5 fill-white" />
             </div>
             <div>
               <h3 className="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                <span>Bantu Tulis dengan AI</span>
-                <span className="px-2 py-0.5 rounded-[10px] bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 text-[10px] font-extrabold border border-purple-200 dark:border-purple-700">
+                <span>Bantu Tulis Rekomendasi</span>
+                <span className="px-2 py-0.5 rounded-[10px] bg-orange-50 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 text-[10px] font-extrabold border border-orange-200 dark:border-orange-800">
                   Contextual
                 </span>
               </h3>
@@ -187,7 +187,7 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
             type="button"
             onClick={onClose}
             className="w-8 h-8 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition cursor-pointer"
-            aria-label="Tutup AI Drawer"
+            aria-label="Tutup Drawer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -198,7 +198,7 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
           {/* STEP: EMPTY STATE */}
           {step === 'empty' && (
             <div className="space-y-4 text-center py-8 px-2">
-              <div className="w-14 h-14 rounded-[10px] bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400 flex items-center justify-center mx-auto shadow-sm">
+              <div className="w-14 h-14 rounded-[10px] bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800 text-orange-500 dark:text-orange-400 flex items-center justify-center mx-auto shadow-sm">
                 <Sparkles className="w-7 h-7" />
               </div>
               <div className="space-y-1.5">
@@ -215,16 +215,16 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
                 value={userRawInput}
                 onChange={(e) => setUserRawInput(e.target.value)}
                 placeholder="Contoh: Saya kemarin bikin program referral pelanggan di kampus terus yang ikut sekitar 100 orang dan jualan produk naik 30%..."
-                className="w-full p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 leading-relaxed"
+                className="w-full p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] leading-relaxed"
               />
 
               <button
                 type="button"
                 disabled={!userRawInput.trim()}
                 onClick={() => setStep('select')}
-                className="w-full py-3 px-4 rounded-[10px] bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-extrabold text-xs shadow-md shadow-purple-600/20 transition flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 px-4 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] disabled:opacity-50 text-white font-extrabold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center justify-center gap-2 cursor-pointer border-0"
               >
-                <span>Mulai dengan AI</span>
+                <span>Mulai Susun Kalimat</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -237,14 +237,14 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
                   <span>Teks yang Sedang Ditulis</span>
-                  <span className="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">Terkoneksi Editor</span>
+                  <span className="text-[10px] text-orange-600 dark:text-orange-400 font-semibold">Terkoneksi Editor</span>
                 </label>
                 <textarea
                   rows={3}
                   value={userRawInput}
                   onChange={(e) => setUserRawInput(e.target.value)}
                   placeholder="Ketik poin atau pengalaman sederhana kamu di sini..."
-                  className="w-full p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 leading-relaxed"
+                  className="w-full p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] leading-relaxed"
                 />
               </div>
 
@@ -254,30 +254,30 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
                   Pilih Tujuan Penulisan
                 </h4>
 
-                {/* Option: AI Recommendation (DEFAULT) */}
+                {/* Option: Recommendation (DEFAULT) */}
                 <div
                   onClick={() => setGoal('auto')}
                   className={`p-3.5 rounded-[10px] border transition cursor-pointer flex items-start gap-3 ${
                     goal === 'auto'
-                      ? 'bg-purple-50/90 dark:bg-purple-950/60 border-purple-500 dark:border-purple-600 ring-2 ring-purple-500/20'
-                      : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-purple-300'
+                      ? 'bg-orange-50/90 dark:bg-orange-950/60 border-[#1738D1] dark:border-orange-600 ring-2 ring-[#1738D1]/20'
+                      : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-orange-300'
                   }`}
                 >
-                  <div className="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded-full bg-[#1738D1] text-white flex items-center justify-center shrink-0 mt-0.5">
                     <Sparkles className="w-3 h-3 fill-white" />
                   </div>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="font-extrabold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-                        <span>Rekomendasi AI</span>
-                        <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-purple-600 text-white">
+                        <span>Rekomendasi Terbaik</span>
+                        <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-[10px] bg-[#1738D1] text-white">
                           Default
                         </span>
                       </span>
-                      {goal === 'auto' && <CheckCircle2 className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
+                      {goal === 'auto' && <CheckCircle2 className="w-4 h-4 text-orange-500 dark:text-orange-400" />}
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                      AI menganalisis posisi dan memilih kombinasi formula terbaik secara otomatis.
+                      Sistem menganalisis posisi dan memilih kombinasi formula terbaik secara otomatis.
                     </p>
                   </div>
                 </div>
@@ -289,15 +289,15 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
                     onClick={() => setGoal('impact')}
                     className={`flex items-center justify-between p-3 rounded-[10px] border text-xs font-bold transition cursor-pointer ${
                       goal === 'impact'
-                        ? 'bg-purple-50/60 dark:bg-purple-950/40 border-purple-500 text-purple-700 dark:text-purple-300'
+                        ? 'bg-orange-50/60 dark:bg-orange-950/40 border-[#1738D1] text-orange-700 dark:text-orange-300'
                         : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <Target className="w-4 h-4 text-purple-500" />
+                      <Target className="w-4 h-4 text-orange-500" />
                       <span>Fokus Pencapaian &amp; Dampak Terukur</span>
                     </div>
-                    <input type="radio" checked={goal === 'impact'} onChange={() => setGoal('impact')} className="accent-purple-600" />
+                    <input type="radio" checked={goal === 'impact'} onChange={() => setGoal('impact')} className="accent-[#1738D1]" />
                   </label>
 
                   {/* Goal 2: ATS */}
@@ -305,15 +305,15 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
                     onClick={() => setGoal('ats')}
                     className={`flex items-center justify-between p-3 rounded-[10px] border text-xs font-bold transition cursor-pointer ${
                       goal === 'ats'
-                        ? 'bg-purple-50/60 dark:bg-purple-950/40 border-purple-500 text-purple-700 dark:text-purple-300'
+                        ? 'bg-orange-50/60 dark:bg-orange-950/40 border-[#1738D1] text-orange-700 dark:text-orange-300'
                         : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <FileCheck className="w-4 h-4 text-purple-500" />
+                      <FileCheck className="w-4 h-4 text-orange-500" />
                       <span>Fokus Optimalisasi Keyword ATS</span>
                     </div>
-                    <input type="radio" checked={goal === 'ats'} onChange={() => setGoal('ats')} className="accent-purple-600" />
+                    <input type="radio" checked={goal === 'ats'} onChange={() => setGoal('ats')} className="accent-[#1738D1]" />
                   </label>
 
                   {/* Goal 3: Concise */}
@@ -321,15 +321,15 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
                     onClick={() => setGoal('concise')}
                     className={`flex items-center justify-between p-3 rounded-[10px] border text-xs font-bold transition cursor-pointer ${
                       goal === 'concise'
-                        ? 'bg-purple-50/60 dark:bg-purple-950/40 border-purple-500 text-purple-700 dark:text-purple-300'
+                        ? 'bg-orange-50/60 dark:bg-orange-950/40 border-[#1738D1] text-orange-700 dark:text-orange-300'
                         : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <AlignLeft className="w-4 h-4 text-purple-500" />
+                      <AlignLeft className="w-4 h-4 text-orange-500" />
                       <span>Ringkas, Tajam &amp; Profesional</span>
                     </div>
-                    <input type="radio" checked={goal === 'concise'} onChange={() => setGoal('concise')} className="accent-purple-600" />
+                    <input type="radio" checked={goal === 'concise'} onChange={() => setGoal('concise')} className="accent-[#1738D1]" />
                   </label>
                 </div>
               </div>
@@ -342,7 +342,7 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
                   className="w-full flex items-center justify-between py-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition cursor-pointer"
                 >
                   <span className="flex items-center gap-1.5">
-                    <Zap className="w-3.5 h-3.5 text-purple-500" />
+                    <Zap className="w-3.5 h-3.5 text-orange-500" />
                     <span>Advanced Formula Penulisan</span>
                   </span>
                   {isAdvancedOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -356,9 +356,9 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
                     <select
                       value={formula}
                       onChange={(e) => setFormula(e.target.value as AiFormula)}
-                      className="w-full p-2.5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-extrabold text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                      className="w-full p-2.5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-extrabold text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1738D1]"
                     >
-                      <option value="auto">Auto — Direkomendasikan AI (Kombinasi Terbaik)</option>
+                      <option value="auto">Auto — Direkomendasikan Sistem (Kombinasi Terbaik)</option>
                       <option value="star">STAR — Situation, Task, Action, Result</option>
                       <option value="car">CAR — Challenge, Action, Result</option>
                       <option value="par">PAR — Problem, Action, Result</option>
@@ -368,7 +368,7 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
                       <option value="ats-keywords">ATS Keywords — Fokus Terminologi Industri</option>
                     </select>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                      Formula teknis ini akan diprioritaskan oleh AI saat merestrukturisasi kalimat pengalaman kerja kamu.
+                      Formula teknis ini akan diprioritaskan saat merestrukturisasi kalimat pengalaman kerja kamu.
                     </p>
                   </div>
                 )}
@@ -376,13 +376,13 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
             </div>
           )}
 
-          {/* STEP: AI INTERVIEW (ASKING CLARIFYING QUESTIONS) */}
+          {/* STEP: INTERVIEW (ASKING CLARIFYING QUESTIONS) */}
           {step === 'interview' && (
             <div className="space-y-5 animate-in fade-in">
-              <div className="p-4 rounded-[10px] bg-purple-50 dark:bg-purple-950/50 border border-purple-200 dark:border-purple-800 space-y-2">
-                <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300 font-extrabold text-xs">
-                  <MessageSquare className="w-4 h-4 text-purple-600" />
-                  <span>AI Interview — Pertanyaan Singkat</span>
+              <div className="p-4 rounded-[10px] bg-orange-50 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-800 space-y-2">
+                <div className="flex items-center gap-2 text-orange-700 dark:text-orange-300 font-extrabold text-xs">
+                  <MessageSquare className="w-4 h-4 text-orange-600" />
+                  <span>Pertanyaan Konfirmasi Singkat</span>
                 </div>
                 <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                   {interviewQuestions[interviewQuestionIdx].question}
@@ -401,7 +401,7 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleAnswerInterviewNext();
                   }}
-                  className="w-full p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
                 />
               </div>
 
@@ -411,13 +411,13 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
                   onClick={() => handleStartAiProcess()}
                   className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 font-bold underline cursor-pointer"
                 >
-                  Lewati (Lanjut Generate)
+                  Lewati (Lanjut Proses)
                 </button>
 
                 <button
                   type="button"
                   onClick={handleAnswerInterviewNext}
-                  className="px-5 py-2.5 rounded-[10px] bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer border-0"
                 >
                   <span>Lanjutkan</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -430,9 +430,9 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
           {step === 'loading' && (
             <div className="py-12 space-y-6 text-center animate-in fade-in">
               <div className="relative w-16 h-16 mx-auto">
-                <div className="absolute inset-0 rounded-full border-4 border-purple-200 dark:border-purple-900 border-t-purple-600 animate-spin" />
-                <div className="absolute inset-0 flex items-center justify-center text-purple-600">
-                  <Sparkles className="w-6 h-6 fill-purple-600" />
+                <div className="absolute inset-0 rounded-full border-4 border-orange-200 dark:border-orange-900 border-t-orange-500 animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center text-orange-500">
+                  <Sparkles className="w-6 h-6 fill-orange-500" />
                 </div>
               </div>
 
@@ -455,7 +455,7 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Menyusun Struktur Dampak &amp; Metrik</span>
                 </div>
-                <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 animate-pulse">
+                <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 animate-pulse">
                   <Sparkles className="w-4 h-4" />
                   <span>Menyelaraskan Kata Kunci ATS</span>
                 </div>
@@ -463,14 +463,14 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
             </div>
           )}
 
-          {/* STEP: GENERATED RESULTS (3 OPTIONS) */}
+          {/* STEP: RESULTS (3 OPTIONS) */}
           {step === 'results' && (
             <div className="space-y-4 animate-in fade-in">
               <div className="flex items-center justify-between">
                 <h4 className="font-extrabold text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  Hasil Opsi Penulisan AI
+                  Hasil Rekomendasi Penulisan
                 </h4>
-                <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400">
+                <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">
                   3 Opsi Tersedia
                 </span>
               </div>
@@ -480,26 +480,26 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
                 {generatedOptions.map((opt) => (
                   <div
                     key={opt.id}
-                    className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 hover:border-purple-400 dark:hover:border-purple-600 transition space-y-3 shadow-xs"
+                    className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-600 transition space-y-3 shadow-xs"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-black text-slate-800 dark:text-slate-200">
                         {opt.label}
                       </span>
-                      <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[10px] font-bold border border-purple-200 dark:border-purple-800">
+                      <span className="px-2 py-0.5 rounded-[10px] bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 text-[10px] font-bold border border-orange-200 dark:border-orange-800">
                         {opt.formulaTag}
                       </span>
                     </div>
 
                     <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
-                      "{opt.text}"
+                      &quot;{opt.text}&quot;
                     </p>
 
                     <div className="flex items-center justify-end gap-2 pt-1">
                       <button
                         type="button"
                         onClick={() => handleSelectOption(opt.text)}
-                        className="px-4 py-2 rounded-[10px] bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+                        className="px-4 py-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer border-0"
                       >
                         <span>Gunakan</span>
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -527,10 +527,10 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
               <button
                 type="button"
                 onClick={handleStartAiProcess}
-                className="px-6 py-2.5 rounded-[10px] bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-md shadow-purple-600/20 transition flex items-center gap-2 cursor-pointer"
+                className="px-6 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center gap-2 cursor-pointer border-0"
               >
                 <Sparkles className="w-4 h-4 fill-white" />
-                <span>Buat dengan AI</span>
+                <span>Proses Sekarang</span>
               </button>
             </>
           )}
@@ -543,7 +543,7 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({
                 className="px-4 py-2.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                <span>Regenerate</span>
+                <span>Susun Ulang</span>
               </button>
 
               <button

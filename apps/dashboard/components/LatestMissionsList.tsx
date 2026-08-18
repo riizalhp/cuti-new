@@ -137,7 +137,7 @@ export const LatestMissionsList: React.FC = () => {
                 ) : (
                   <button
                     onClick={() => handleAction(m.id)}
-                    className="px-3 py-1 rounded-[10px] bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold transition shadow-sm"
+                    className="px-3 py-1 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold transition shadow-sm"
                   >
                     Kerjakan
                   </button>

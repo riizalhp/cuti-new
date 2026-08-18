@@ -89,7 +89,7 @@ export const BulletPointListInput: React.FC<BulletPointListInputProps> = ({
           >
             {/* Bullet dot */}
             <div className="pl-3.5 pr-2 py-2.5 flex items-center shrink-0">
-              <div className="w-[5px] h-[5px] rounded-full bg-slate-400 dark:bg-slate-500 group-focus-within:bg-orange-500 transition-colors" />
+              <div className="w-[5px] h-[5px] rounded-full bg-slate-400 dark:bg-slate-500 group-focus-within:bg-[#1738D1] transition-colors" />
             </div>
 
             {/* Input — full width, no border, mimics a paper line */}
@@ -108,11 +108,11 @@ export const BulletPointListInput: React.FC<BulletPointListInputProps> = ({
               <button
                 type="button"
                 onClick={() => onOptimizeBullet(line, idx)}
-                className="px-2 py-1 mr-1 text-[10px] font-extrabold text-purple-700 dark:text-purple-300 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/80 border border-purple-200 dark:border-purple-800 rounded-[10px] transition shrink-0 cursor-pointer opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 flex items-center gap-1"
+                className="px-2 py-1 mr-1 text-[10px] font-extrabold text-orange-700 dark:text-orange-300 bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/80 border border-orange-200 dark:border-orange-800 rounded-[10px] transition shrink-0 cursor-pointer opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 flex items-center gap-1"
                 title="Optimalkan bullet ini dengan AI"
                 tabIndex={-1}
               >
-                <Sparkles className="w-3 h-3 fill-purple-600 text-purple-600" />
+                <Sparkles className="w-3 h-3 fill-orange-500 text-orange-600" />
                 <span>Optimalkan</span>
               </button>
             )}

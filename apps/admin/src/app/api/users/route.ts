@@ -4,13 +4,13 @@ import { prisma } from "@cuti/db";
 export async function GET(req: NextRequest) {
   try {
     const users = await prisma.user.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: { created_at: "desc" },
       select: {
         id: true,
         name: true,
         email: true,
         role: true,
-        createdAt: true,
+        created_at: true,
       },
     });
 
@@ -19,8 +19,8 @@ export async function GET(req: NextRequest) {
       name: u.name,
       email: u.email,
       status: "Active",
-      plan: u.role === "admin" ? "Admin" : u.role === "premium" ? "Paket Siap Kerja" : "Free User",
-      joinedDate: u.createdAt.toISOString().split("T")[0],
+      plan: u.role === "ADMIN" ? "Admin" : u.role === "PREMIUM" ? "Paket Siap Kerja" : "Free User",
+      joinedDate: u.created_at.toISOString().split("T")[0],
     }));
 
     return NextResponse.json({ success: true, data: formatted });

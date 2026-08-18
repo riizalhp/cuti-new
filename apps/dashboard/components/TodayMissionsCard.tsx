@@ -1,44 +1,130 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Target,
   CheckCircle2,
   Clock,
   Download,
-  ClipboardList,
-  MessageSquare,
+  Send,
+  Sparkles,
   Gift,
   Coins,
 } from 'lucide-react';
+import { cvApi, trackerApi } from '@/lib/api';
+
+interface Mission {
+  id: string;
+  title: string;
+  points: string;
+  progress: number;
+  completed: boolean;
+  icon: React.ComponentType<{ className?: string }>;
+}
 
 export const TodayMissionsCard: React.FC = () => {
-  const [missions, setMissions] = useState([
+  const [missions, setMissions] = useState<Mission[]>([
     {
-      id: 'download_cv',
-      title: 'Download CV Pertama',
+      id: 'create_cv',
+      title: 'Buat CV Pertamamu',
       points: '+50 Cuan',
-      progress: 100,
-      completed: true,
+      progress: 0,
+      completed: false,
       icon: Download,
     },
     {
-      id: 'survey',
-      title: 'Isi Survey Pengalaman',
+      id: 'send_application',
+      title: 'Kirim Lamaran Pertama',
       points: '+30 Cuan',
-      progress: 50,
+      progress: 0,
       completed: false,
-      icon: ClipboardList,
+      icon: Send,
     },
     {
-      id: 'testimoni',
-      title: 'Tulis Testimoni Platform',
+      id: 'optimize_ats',
+      title: 'Raih ATS Score ≥ 80',
       points: '+40 Cuan',
       progress: 0,
       completed: false,
-      icon: MessageSquare,
+      icon: Sparkles,
     },
   ]);
+
+  const [resetTimer, setResetTimer] = useState('');
+
+  useEffect(() => {
+    const loadMissions = async () => {
+      try {
+        const [cvs, apps] = await Promise.all([
+          cvApi.getAll(),
+          trackerApi.getAll(),
+        ]);
+
+        const updated: Mission[] = [];
+
+        // Mission 1: Buat CV
+        const hasCv = Array.isArray(cvs) && cvs.length > 0;
+        updated.push({
+          id: 'create_cv',
+          title: 'Buat CV Pertamamu',
+          points: '+50 Cuan',
+          progress: hasCv ? 100 : 0,
+          completed: hasCv,
+          icon: Download,
+        });
+
+        // Mission 2: Kirim Lamaran
+        const hasApps = Array.isArray(apps) && apps.length > 0;
+        updated.push({
+          id: 'send_application',
+          title: 'Kirim Lamaran Pertama',
+          points: '+30 Cuan',
+          progress: hasApps ? 100 : 0,
+          completed: hasApps,
+          icon: Send,
+        });
+
+        // Mission 3: ATS Score ≥ 80
+        let atsScore = 0;
+        if (hasCv) {
+          const primary = cvs.find((c: any) => c.isPrimary) || cvs[0];
+          atsScore = primary.atsScore ?? 0;
+        }
+        const atsAchieved = atsScore >= 80;
+        updated.push({
+          id: 'optimize_ats',
+          title: 'Raih ATS Score ≥ 80',
+          points: '+40 Cuan',
+          progress: atsAchieved ? 100 : Math.min(99, Math.round((atsScore / 80) * 100)),
+          completed: atsAchieved,
+          icon: Sparkles,
+        });
+
+        setMissions(updated);
+      } catch (error) {
+        console.error('[TodayMissionsCard] Failed to load missions:', error);
+      }
+    };
+
+    loadMissions();
+  }, []);
+
+  // Dynamic countdown timer to midnight
+  useEffect(() => {
+    const updateTimer = () => {
+      const now = new Date();
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+      const diff = midnight.getTime() - now.getTime();
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      setResetTimer(`${hours} jam ${minutes} menit`);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 60000); // update every minute
+    return () => clearInterval(interval);
+  }, []);
 
   const handleClaim = (id: string) => {
     setMissions((prev) =>
@@ -128,7 +214,7 @@ export const TodayMissionsCard: React.FC = () => {
 
       <div className="text-center pt-2 border-t border-slate-100 dark:border-slate-800">
         <span className="text-[11px] text-slate-500 dark:text-slate-400">
-          Reset misi berikutnya dalam <span className="font-semibold text-slate-700 dark:text-slate-300">14 jam 20 menit</span>
+          Reset misi berikutnya dalam <span className="font-semibold text-slate-700 dark:text-slate-300">{resetTimer || '...'}</span>
         </span>
       </div>
     </div>

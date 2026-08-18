@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { trackerApi } from '../lib/api';
 import {
   Briefcase,
@@ -22,6 +23,9 @@ import {
   ChevronDown,
   Globe,
   ExternalLink,
+  RefreshCw,
+  Loader2,
+  Sparkles,
 } from 'lucide-react';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { DotLottiePlayer } from '@/components/DotLottiePlayer';
@@ -39,69 +43,6 @@ export interface ApplicationItem {
   portalUrl?: string;
 }
 
-const initialApplications: ApplicationItem[] = [
-  {
-    id: 'app-1',
-    company: 'PT Tokopedia',
-    position: 'Senior Frontend Engineer',
-    location: 'Jakarta (Hybrid)',
-    appliedDate: '18 Juli 2026',
-    status: 'Interview',
-    salary: 'Rp 18.000.000 - Rp 25.000.000',
-    notes: 'Interview User dijadwalkan tanggal 25 Juli 2026 jam 10:00 WIB',
-    portal: 'LinkedIn',
-    portalUrl: 'https://linkedin.com/jobs',
-  },
-  {
-    id: 'app-2',
-    company: 'Gojek (GoTo Group)',
-    position: 'React Native Developer',
-    location: 'Jakarta (Onsite)',
-    appliedDate: '15 Juli 2026',
-    status: 'Offering',
-    salary: 'Rp 22.000.000',
-    notes: 'Offering letter sudah diterima, batas konfirmasi hingga 28 Juli 2026',
-    portal: 'Glints',
-    portalUrl: 'https://glints.com/id',
-  },
-  {
-    id: 'app-3',
-    company: 'PT Astra International',
-    position: 'Full Stack Web Developer',
-    location: 'Jakarta Selatan',
-    appliedDate: '10 Juli 2026',
-    status: 'Screening',
-    salary: 'Rp 15.000.000 - Rp 20.000.000',
-    notes: 'Menunggu hasil kuis koding online ATS',
-    portal: 'JobStreet',
-    portalUrl: 'https://jobstreet.co.id',
-  },
-  {
-    id: 'app-4',
-    company: 'Bank Central Asia (BCA)',
-    position: 'IT Specialist Developer',
-    location: 'Tangerang',
-    appliedDate: '02 Juli 2026',
-    status: 'Terkirim',
-    salary: 'Rp 14.000.000',
-    notes: 'Lamaran via portal resmi BCA Careers',
-    portal: 'Website Perusahaan',
-    portalUrl: 'https://karir.bca.co.id',
-  },
-  {
-    id: 'app-5',
-    company: 'Shopee Indonesia',
-    position: 'UI/UX Specialist',
-    location: 'Jakarta',
-    appliedDate: '20 Juni 2026',
-    status: 'Ditolak',
-    salary: 'Rp 16.000.000',
-    notes: 'Posisi telah terisi oleh kandidat internal',
-    portal: 'KitaLulus',
-    portalUrl: 'https://kitalulus.com',
-  },
-];
-
 const KANBAN_COLUMNS: Array<{
   status: ApplicationItem['status'];
   label: string;
@@ -117,8 +58,8 @@ const KANBAN_COLUMNS: Array<{
   {
     status: 'Screening',
     label: 'Screening',
-    colorClass: 'border-violet-500/30 bg-violet-500/5',
-    badgeBg: 'bg-violet-100 dark:bg-violet-950/80 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-800',
+    colorClass: 'border-[#1738D1]/30 bg-[#1738D1]/5',
+    badgeBg: 'bg-orange-100 dark:bg-orange-950/80 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800',
   },
   {
     status: 'Interview',
@@ -201,29 +142,29 @@ const CARD_PALETTES: CardColorPalette[] = [
     iconColor: 'text-sky-500',
     dotBg: 'bg-sky-500',
   },
-  // 5. Electric Violet / Purple
+  // 5. Cyan / Teal
   {
-    bg: 'bg-violet-50/90 dark:bg-violet-950/40',
-    border: 'border-violet-200/90 dark:border-violet-800/60',
-    hoverBorder: 'hover:border-violet-400 dark:hover:border-violet-500',
-    accentBar: 'bg-gradient-to-r from-violet-400 to-purple-500',
-    companyText: 'text-violet-700 dark:text-violet-300 font-bold',
-    tagBg: 'bg-violet-100/90 dark:bg-violet-900/60',
-    tagText: 'text-violet-800 dark:text-violet-200',
-    iconColor: 'text-violet-500',
-    dotBg: 'bg-violet-500',
+    bg: 'bg-orange-50/90 dark:bg-orange-950/40',
+    border: 'border-orange-200/90 dark:border-orange-800/50',
+    hoverBorder: 'hover:border-orange-400 dark:hover:border-[#1738D1]',
+    accentBar: 'bg-gradient-to-r from-cyan-400 to-slate-500',
+    companyText: 'text-orange-700 dark:text-orange-300 font-bold',
+    tagBg: 'bg-orange-100/90 dark:bg-orange-900/60',
+    tagText: 'text-orange-800 dark:text-orange-200',
+    iconColor: 'text-orange-500',
+    dotBg: 'bg-[#1738D1]',
   },
-  // 6. Royal Indigo / Blue
+  // 6. Royal Navy / Blue
   {
-    bg: 'bg-indigo-50/90 dark:bg-indigo-950/40',
-    border: 'border-indigo-200/90 dark:border-indigo-800/60',
-    hoverBorder: 'hover:border-indigo-400 dark:hover:border-indigo-500',
-    accentBar: 'bg-gradient-to-r from-indigo-400 to-blue-600',
-    companyText: 'text-indigo-700 dark:text-indigo-300 font-bold',
-    tagBg: 'bg-indigo-100/90 dark:bg-indigo-900/60',
-    tagText: 'text-indigo-800 dark:text-indigo-200',
-    iconColor: 'text-indigo-500',
-    dotBg: 'bg-indigo-500',
+    bg: 'bg-slate-50/90 dark:bg-slate-900/40',
+    border: 'border-slate-200/90 dark:border-slate-800/60',
+    hoverBorder: 'hover:border-blue-400 dark:hover:border-navy-500',
+    accentBar: 'bg-gradient-to-r from-navy-400 to-blue-600',
+    companyText: 'text-navy-700 dark:text-navy-300 font-bold',
+    tagBg: 'bg-navy-100/90 dark:bg-navy-900/60',
+    tagText: 'text-navy-800 dark:text-navy-200',
+    iconColor: 'text-navy-500',
+    dotBg: 'bg-navy-600',
   },
   // 7. Bright Teal / Turquoise
   {
@@ -260,21 +201,102 @@ const getCardPalette = (id: string): CardColorPalette => {
   return CARD_PALETTES[index];
 };
 
+const MONTH_NAMES = [
+  'Januari',
+  'Februari',
+  'Maret',
+  'April',
+  'Mei',
+  'Juni',
+  'Juli',
+  'Agustus',
+  'September',
+  'Oktober',
+  'November',
+  'Desember',
+];
+
+// Konversi format "23 Juli 2026" <-> "2026-07-23" (untuk <input type="date"> native)
+const toISODate = (val: string): string => {
+  if (!val) return '';
+  const parts = val.trim().split(/\s+/);
+  if (parts.length === 3) {
+    const day = Number(parts[0]);
+    const year = Number(parts[2]);
+    const mIdx = MONTH_NAMES.findIndex((m) => m === parts[1]);
+    if (!isNaN(day) && !isNaN(year) && mIdx >= 0) {
+      return `${year}-${String(mIdx + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+  }
+  return '';
+};
+
+const fromISODate = (iso: string): string => {
+  if (!iso) return '';
+  const parts = iso.split('-');
+  if (parts.length === 3) {
+    const year = Number(parts[0]);
+    const month = Number(parts[1]);
+    const day = Number(parts[2]);
+    if (!isNaN(year) && !isNaN(month) && !isNaN(day) && month >= 1 && month <= 12) {
+      return `${day} ${MONTH_NAMES[month - 1]} ${year}`;
+    }
+  }
+  return '';
+};
+
+// Preset portal untuk <datalist> (input bebas + saran dropdown native)
+const PORTAL_PRESETS = [
+  'LinkedIn',
+  'JobStreet',
+  'KitaLulus',
+  'Glints',
+  'Kalibrr',
+  'Indeed',
+  'Karir.com',
+  'Tech in Asia',
+  'Urbanhire',
+  'TopKarir',
+  'Deel',
+  'Website Perusahaan',
+  'Email Recruiter',
+  'Referensi / Karyawan Internal',
+];
+
 export const TrackerView: React.FC = () => {
-  const [apps, setApps] = useState<ApplicationItem[]>(initialApplications);
+  const [apps, setApps] = useState<ApplicationItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
   const [filterStatus, setFilterStatus] = useState<string>('Semua');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
 
-  // Fetch real applications from API on mount
-  useEffect(() => {
-    trackerApi.getAll<ApplicationItem>().then((remoteApps) => {
-      if (Array.isArray(remoteApps) && remoteApps.length > 0) {
+
+  const fetchApplications = async (showRefreshIndicator = false) => {
+    if (showRefreshIndicator) setIsRefreshing(true);
+    try {
+      setErrorMessage(null);
+      const remoteApps = await trackerApi.getAll<ApplicationItem>();
+      if (Array.isArray(remoteApps)) {
         setApps(remoteApps);
       }
-    });
+    } catch (err: any) {
+      console.error('[TrackerView] Error fetching applications:', err);
+      setErrorMessage('Lamaran belum tersimpan. Periksa koneksi internet Anda.');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  // Fetch real applications from API on mount
+  useEffect(() => {
+    fetchApplications();
   }, []);
+
 
   // Pointer Drag and Drop State
   const [activeDragItem, setActiveDragItem] = useState<ApplicationItem | null>(null);
@@ -320,7 +342,9 @@ export const TrackerView: React.FC = () => {
       const colElem = elemBelow?.closest('[data-column-status]');
       if (colElem) {
         const targetStatus = colElem.getAttribute('data-column-status') as ApplicationItem['status'];
-        handleUpdateStatus(app.id, targetStatus);
+        if (targetStatus && targetStatus !== app.status) {
+          handleUpdateStatus(app.id, targetStatus);
+        }
       }
 
       setActiveDragItem(null);
@@ -340,18 +364,20 @@ export const TrackerView: React.FC = () => {
   const [newStatus, setNewStatus] = useState<ApplicationItem['status']>('Terkirim');
   const [newSalary, setNewSalary] = useState('');
   const [newNotes, setNewNotes] = useState('');
-  const [newPortal, setNewPortal] = useState('LinkedIn');
-  const [customPortal, setCustomPortal] = useState('');
+  const [newPortal, setNewPortal] = useState('');
   const [newPortalUrl, setNewPortalUrl] = useState('');
 
-  const handleAddApplication = (e: React.FormEvent) => {
+  const handleAddApplication = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCompany || !newPosition) return;
+    if (!newCompany || !newPosition || isSaving) return;
 
-    const finalPortal = newPortal === 'Lainnya' ? (customPortal.trim() || 'Custom Portal') : newPortal;
+    setIsSaving(true);
+    setErrorMessage(null);
+    const finalPortal = newPortal.trim() || 'Custom Portal';
 
+    const tempId = `app-temp-${Date.now()}`;
     const newApp: ApplicationItem = {
-      id: `app-${Date.now()}`,
+      id: tempId,
       company: newCompany,
       position: newPosition,
       location: newLocation || 'Jakarta',
@@ -363,10 +389,25 @@ export const TrackerView: React.FC = () => {
       portalUrl: newPortalUrl.trim(),
     };
 
-    setApps([newApp, ...apps]);
-    trackerApi.create(newApp);
+    // Optimistic UI update
+    setApps((prev) => [newApp, ...prev]);
     setIsAddModalOpen(false);
     resetForm();
+
+    try {
+      const created = await trackerApi.create(newApp);
+      if (created && (created as any).id) {
+        setApps((prev) =>
+          prev.map((item) => (item.id === tempId ? { ...item, id: (created as any).id } : item))
+        );
+      }
+    } catch (err) {
+      console.error('[TrackerView] Failed to save application:', err);
+      setErrorMessage('Lamaran belum tersimpan. Periksa koneksi internet Anda.');
+      fetchApplications();
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const resetForm = () => {
@@ -377,21 +418,34 @@ export const TrackerView: React.FC = () => {
     setNewStatus('Terkirim');
     setNewSalary('');
     setNewNotes('');
-    setNewPortal('LinkedIn');
-    setCustomPortal('');
+    setNewPortal('');
     setNewPortalUrl('');
   };
 
-  const handleDeleteApp = (id: string) => {
+  const handleDeleteApp = async (id: string) => {
+    const previous = [...apps];
     setApps((prev) => prev.filter((a) => a.id !== id));
-    trackerApi.delete(id);
+    try {
+      await trackerApi.delete(id);
+    } catch (err) {
+      console.error('[TrackerView] Failed to delete application:', err);
+      setErrorMessage('Lamaran belum tersimpan. Periksa koneksi internet Anda.');
+      setApps(previous);
+    }
   };
 
-  const handleUpdateStatus = (id: string, status: ApplicationItem['status']) => {
+  const handleUpdateStatus = async (id: string, status: ApplicationItem['status']) => {
+    const previous = [...apps];
     setApps((prev) =>
       prev.map((a) => (a.id === id ? { ...a, status } : a))
     );
-    trackerApi.updateStatus(id, status);
+    try {
+      await trackerApi.updateStatus(id, status);
+    } catch (err) {
+      console.error('[TrackerView] Failed to update application status:', err);
+      setErrorMessage('Lamaran belum tersimpan. Periksa koneksi internet Anda.');
+      setApps(previous);
+    }
   };
 
   const filteredApps = apps.filter((a) => {
@@ -467,7 +521,7 @@ export const TrackerView: React.FC = () => {
       case 'Interview':
         return 'bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-400 border-amber-200 dark:border-amber-800/50';
       case 'Screening':
-        return 'bg-violet-50 text-violet-700 dark:bg-violet-950/80 dark:text-violet-400 border-violet-200 dark:border-violet-800/50';
+        return 'bg-orange-50 text-orange-700 dark:bg-orange-950/80 dark:text-orange-400 border-orange-200 dark:border-orange-800/50';
       case 'Terkirim':
         return 'bg-sky-50 text-sky-700 dark:bg-sky-950/80 dark:text-sky-400 border-sky-200 dark:border-sky-800/50';
       case 'Ditolak':
@@ -485,79 +539,104 @@ export const TrackerView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Header Banner */}
-      <div className="bg-[#0D3BD9] rounded-[10px] p-6 text-white border border-blue-500/50 shadow-md">
+      <div className="bg-navy-700 rounded-[10px] p-6 text-white border border-navy-800 shadow-md">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-blue-200 font-semibold text-xs mb-1">
+            <div className="flex items-center gap-2 text-orange-400 font-bold text-xs mb-1 uppercase tracking-wider">
               <Briefcase className="w-4 h-4" />
               <span>Manajemen Lamaran Pekerjaan</span>
             </div>
-            <h2 className="text-xl md:text-2xl font-bold tracking-tight">
+            <h2 className="text-xl md:text-2xl font-extrabold tracking-tight">
               Tracker Lamaran Kerja
             </h2>
-            <p className="text-xs text-slate-300 mt-1 max-w-xl">
+            <p className="text-xs text-slate-200 mt-1 max-w-xl leading-relaxed">
               Pantau status semua lamaran kerja kamu dari interview hingga offering letter dalam satu dashboard terpusat.
             </p>
           </div>
 
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-[10px] bg-[#0D3BD9] hover:bg-[#0B33BD] text-white font-bold text-xs shadow-md transition-all shrink-0 border border-white/20"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Tambah Lamaran Baru</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => fetchApplications(true)}
+              disabled={isRefreshing || isLoading}
+              className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-[10px] bg-white/10 hover:bg-white/20 active:scale-[0.98] text-white font-bold text-xs border border-white/20 transition-all cursor-pointer disabled:opacity-50"
+              title="Sinkronkan dengan Database"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Sinkronisasi</span>
+            </button>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition-all shrink-0 cursor-pointer border-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Tambah Lamaran Baru</span>
+            </button>
+          </div>
         </div>
 
         {/* Mini Pipeline Stats Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-slate-800/80">
-          <div className="p-3 rounded-[10px] bg-slate-800/60 border border-slate-700/60">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Lamaran</span>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-white/10">
+          <div className="p-3 rounded-[10px] bg-white/10 border border-white/15">
+            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider block">Total Lamaran</span>
             <span className="text-xl font-black text-white">{counts.total}</span>
           </div>
-          <div className="p-3 rounded-[10px] bg-sky-950/40 border border-sky-800/40">
-            <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider block">Proses Screening</span>
-            <span className="text-xl font-black text-sky-300">{counts.terkirim}</span>
+          <div className="p-3 rounded-[10px] bg-white/10 border border-white/15">
+            <span className="text-[10px] font-bold text-blue-300 uppercase tracking-wider block">Terkirim / Screening</span>
+            <span className="text-xl font-black text-white">{counts.terkirim}</span>
           </div>
-          <div className="p-3 rounded-[10px] bg-amber-950/40 border border-amber-800/40">
-            <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">Tahap Interview</span>
-            <span className="text-xl font-black text-amber-300">{counts.interview}</span>
+          <div className="p-3 rounded-[10px] bg-white/10 border border-white/15">
+            <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider block">Interview</span>
+            <span className="text-xl font-black text-white">{counts.interview}</span>
           </div>
-          <div className="p-3 rounded-[10px] bg-emerald-950/40 border border-emerald-800/40">
-            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">Job Offering</span>
-            <span className="text-xl font-black text-emerald-300">{counts.offering}</span>
+          <div className="p-3 rounded-[10px] bg-white/10 border border-white/15">
+            <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider block">Offering Letter</span>
+            <span className="text-xl font-black text-white">{counts.offering}</span>
           </div>
         </div>
       </div>
 
-      {/* Control Bar: View Switcher (Kanban vs Table), Search, and Status Filter */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xs">
+      {/* Error Message Toast / Alert */}
+      {errorMessage && (
+        <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 px-4 py-3 rounded-[10px] text-xs flex items-center justify-between shadow-xs">
+          <span>{errorMessage}</span>
+          <button
+            onClick={() => setErrorMessage(null)}
+            className="text-rose-500 hover:text-rose-700 font-bold ml-3 cursor-pointer"
+          >
+            Tutup
+          </button>
+        </div>
+      )}
+
+      {/* Control Bar: View Switcher (Kanban vs Table), Search, and Status Filter — hanya tampil saat sudah ada lamaran */}
+      {!isLoading && apps.length > 0 && (
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xs">
         <div className="flex flex-wrap items-center gap-3">
           {/* Toggle View Mode Buttons */}
           <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-[10px] border border-slate-200 dark:border-slate-700 shrink-0">
             <button
               onClick={() => setViewMode('kanban')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-bold transition ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-bold transition cursor-pointer ${
                 viewMode === 'kanban'
-                  ? 'bg-violet-600 text-white shadow-2xs'
+                  ? 'bg-[#1738D1] text-white shadow-2xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <Kanban className="w-3.5 h-3.5" />
-              <span>Kanban Board</span>
+              <span>Kanban</span>
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-bold transition ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-bold transition cursor-pointer ${
                 viewMode === 'table'
-                  ? 'bg-violet-600 text-white shadow-2xs'
+                  ? 'bg-[#1738D1] text-white shadow-2xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <List className="w-3.5 h-3.5" />
-              <span>Tabel List</span>
+              <span>Tabel</span>
             </button>
           </div>
 
@@ -569,7 +648,7 @@ export const TrackerView: React.FC = () => {
               placeholder="Cari perusahaan atau posisi..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
             />
           </div>
         </div>
@@ -590,10 +669,94 @@ export const TrackerView: React.FC = () => {
             </button>
           ))}
         </div>
-      </div>
+        </div>
+      )}
+
+      {/* Loading Skeleton */}
+      {isLoading && (
+        <div className="flex lg:grid lg:grid-cols-5 gap-4 overflow-x-auto pb-4 pt-1 items-start min-h-[450px]">
+          {KANBAN_COLUMNS.map((col) => (
+            <div
+              key={col.status}
+              className="shrink-0 w-[85vw] sm:w-[320px] lg:w-auto rounded-[10px] border border-slate-200/80 dark:border-slate-800 p-3 space-y-3 bg-white/40 dark:bg-slate-900/40 animate-pulse"
+            >
+              <div className="h-6 bg-slate-200 dark:bg-slate-800 rounded-[10px] w-24 mb-3" />
+              <div className="h-28 bg-slate-100 dark:bg-slate-800/60 rounded-[10px] w-full" />
+              <div className="h-28 bg-slate-100 dark:bg-slate-800/60 rounded-[10px] w-full" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Empty State: Belum Ada Lamaran (Friendly & Modern) */}
+      {!isLoading && apps.length === 0 && (
+        <div className="relative overflow-hidden rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-10 md:p-14 text-center flex flex-col items-center gap-5 shadow-sm animate-in fade-in duration-300">
+          {/* Dekorasi background lembut */}
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#1738D1]/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-orange-400/10 rounded-full blur-3xl pointer-events-none" />
+
+          {/* Ilustrasi Animasi Lottie */}
+          <div className="relative z-10 w-28 h-28 rounded-[10px] bg-gradient-to-br from-[#1738D1]/10 via-white to-orange-50 dark:from-navy-950 dark:via-slate-900 dark:to-slate-900 border border-[#1738D1]/20 dark:border-navy-800 flex items-center justify-center shadow-2xs">
+            <DotLottiePlayer
+              src="/animations/empty-tracker.json"
+              autoplay={true}
+              loop={true}
+              className="w-24 h-24"
+              fallback={<Briefcase className="w-12 h-12 text-[#1738D1] dark:text-blue-400" />}
+            />
+          </div>
+
+          {/* Headline & Deskripsi */}
+          <div className="relative z-10 space-y-2 max-w-lg mx-auto">
+            <span className="inline-block px-3 py-1 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
+              Mulai dari Sini
+            </span>
+            <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              Belum Ada Lamaran, Yuk Mulai!
+            </h3>
+            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              Catat setiap lamaran kerja yang kamu kirim dan pantau progresnya — dari Terkirim, Screening, Interview, hingga Offering Letter — semua terpusat di satu dashboard.
+            </p>
+          </div>
+
+          {/* Keunggulan Tracker */}
+          <div className="relative z-10 flex flex-wrap items-center justify-center gap-2">
+            <span className="px-3 py-1.5 rounded-[10px] text-[11px] font-bold bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+              <Plus className="w-3.5 h-3.5 text-[#1738D1] dark:text-blue-400" />
+              Tambah &amp; Kelola
+            </span>
+            <span className="px-3 py-1.5 rounded-[10px] text-[11px] font-bold bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+              <Kanban className="w-3.5 h-3.5 text-orange-500" />
+              Drag &amp; Drop Kanban
+            </span>
+            <span className="px-3 py-1.5 rounded-[10px] text-[11px] font-bold bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-amber-500" />
+              Pantau Jadwal Interview
+            </span>
+          </div>
+
+          {/* CTA Actions */}
+          <div className="relative z-10 flex flex-col sm:flex-row items-center gap-2.5">
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="px-5 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition-all flex items-center gap-1.5 cursor-pointer border-0"
+            >
+              <Plus className="w-4 h-4" />
+              Tambah Lamaran Pertama
+            </button>
+            <Link
+              href="/match-cv"
+              className="px-5 py-2.5 rounded-[10px] bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-xs border border-slate-700 dark:border-transparent transition flex items-center gap-1.5"
+            >
+              <Sparkles className="w-4 h-4" />
+              Cari Lowongan
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* VIEW 1: KANBAN BOARD */}
-      {viewMode === 'kanban' && (
+      {!isLoading && apps.length > 0 && viewMode === 'kanban' && (
         <div className="space-y-3">
           <div className="flex lg:grid lg:grid-cols-5 gap-4 overflow-x-auto snap-x snap-mandatory pb-4 pt-1 items-start min-h-[450px]">
             {KANBAN_COLUMNS.map((col) => {
@@ -606,7 +769,7 @@ export const TrackerView: React.FC = () => {
                   data-column-status={col.status}
                   className={`snap-center shrink-0 w-[85vw] sm:w-[320px] lg:w-auto rounded-[10px] border transition-all duration-200 p-3 space-y-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xs ${
                     isOver
-                      ? 'border-violet-500 ring-2 ring-violet-500/40 bg-violet-50/50 dark:bg-violet-950/30 scale-[1.01]'
+                      ? 'border-[#1738D1] ring-2 ring-[#1738D1]/30 bg-orange-50/50 dark:bg-orange-950/30 scale-[1.01]'
                       : `${col.colorClass}`
                   }`}
                 >
@@ -634,7 +797,7 @@ export const TrackerView: React.FC = () => {
                   <div className="space-y-3 min-h-[220px] transition-all">
                     {columnApps.length === 0 ? (
                       <div className={`p-6 text-center text-slate-400 text-[11px] border border-dashed rounded-[10px] transition flex flex-col items-center justify-center gap-1.5 ${
-                        isOver ? 'border-violet-400 bg-violet-500/10 text-violet-600 dark:text-violet-300 font-bold' : 'border-slate-200 dark:border-slate-800'
+                        isOver ? 'border-orange-400 bg-[#1738D1]/10 text-orange-600 dark:text-orange-300 font-bold' : 'border-slate-200 dark:border-slate-800'
                       }`}>
                         {col.status === 'Offering' ? (
                           <>
@@ -658,7 +821,7 @@ export const TrackerView: React.FC = () => {
                           return (
                             <div
                               key={app.id}
-                              className="h-[95px] rounded-[10px] border-2 border-dashed border-violet-400/60 bg-violet-50/40 dark:bg-violet-950/20 transition-all flex items-center justify-center text-violet-500 dark:text-violet-400 text-xs font-semibold select-none"
+                              className="h-[95px] rounded-[10px] border-2 border-dashed border-orange-400/30 bg-orange-50/40 dark:bg-orange-950/20 transition-all flex items-center justify-center text-orange-500 dark:text-orange-400 text-xs font-semibold select-none"
                             >
                               Pindahkan ke kolom baru...
                             </div>
@@ -728,7 +891,7 @@ export const TrackerView: React.FC = () => {
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
                                     onPointerDown={(e) => e.stopPropagation()}
-                                    className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0 font-bold hover:underline flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 cursor-pointer"
+                                    className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0 font-bold hover:underline flex items-center gap-1 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 cursor-pointer"
                                     title={`Buka portal ${app.portal} (${app.portalUrl})`}
                                   >
                                     <span>{app.portal || 'Direct'}</span>
@@ -771,7 +934,7 @@ export const TrackerView: React.FC = () => {
                   pointerEvents: 'none',
                   zIndex: 9999,
                 }}
-                className={`${dragPalette.bg} rounded-[10px] p-3.5 border-2 border-violet-500 shadow-2xl scale-[1.03] rotate-1 space-y-2.5 opacity-100 ring-4 ring-violet-500/20 select-none overflow-hidden`}
+                className={`${dragPalette.bg} rounded-[10px] p-3.5 border-2 border-[#1738D1] shadow-2xl scale-[1.03] rotate-1 space-y-2.5 opacity-100 ring-4 ring-[#1738D1]/20 select-none overflow-hidden`}
               >
                 {/* Top Accent Strip */}
                 <div className={`absolute top-0 left-0 right-0 h-1 ${dragPalette.accentBar}`} />
@@ -815,7 +978,7 @@ export const TrackerView: React.FC = () => {
                   <div className="flex items-center gap-1.5 min-w-0">
                     <Globe className={`w-3.5 h-3.5 ${dragPalette.iconColor} shrink-0`} />
                     {activeDragItem.portalUrl ? (
-                      <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0 font-bold flex items-center gap-1 text-violet-600 dark:text-violet-400">
+                      <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis min-w-0 font-bold flex items-center gap-1 text-orange-600 dark:text-orange-400">
                         <span>{activeDragItem.portal || 'Direct'}</span>
                         <ExternalLink className="w-3 h-3 shrink-0 opacity-80" />
                       </span>
@@ -840,7 +1003,7 @@ export const TrackerView: React.FC = () => {
       )}
 
       {/* VIEW 2: LIST TABEL */}
-      {viewMode === 'table' && (
+      {!isLoading && apps.length > 0 && viewMode === 'table' && (
         <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
@@ -849,16 +1012,16 @@ export const TrackerView: React.FC = () => {
                   <th className="p-4">
                     <button
                       onClick={() => handleSort('position')}
-                      className={`flex items-center gap-1.5 hover:text-violet-600 dark:hover:text-violet-400 transition cursor-pointer select-none ${
-                        sortField === 'position' || sortField === 'company' ? 'text-violet-600 dark:text-violet-400 font-black' : ''
+                      className={`flex items-center gap-1.5 hover:text-orange-600 dark:hover:text-orange-400 transition cursor-pointer select-none ${
+                        sortField === 'position' || sortField === 'company' ? 'text-orange-600 dark:text-orange-400 font-black' : ''
                       }`}
                     >
                       <span>Perusahaan & Posisi</span>
                       {sortField === 'position' || sortField === 'company' ? (
                         sortDirection === 'asc' ? (
-                          <ArrowUp className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
+                          <ArrowUp className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
                         ) : (
-                          <ArrowDown className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
+                          <ArrowDown className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
                         )
                       ) : (
                         <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 opacity-50 shrink-0" />
@@ -868,16 +1031,16 @@ export const TrackerView: React.FC = () => {
                   <th className="p-4">
                     <button
                       onClick={() => handleSort('location')}
-                      className={`flex items-center gap-1.5 hover:text-violet-600 dark:hover:text-violet-400 transition cursor-pointer select-none ${
-                        sortField === 'location' ? 'text-violet-600 dark:text-violet-400 font-black' : ''
+                      className={`flex items-center gap-1.5 hover:text-orange-600 dark:hover:text-orange-400 transition cursor-pointer select-none ${
+                        sortField === 'location' ? 'text-orange-600 dark:text-orange-400 font-black' : ''
                       }`}
                     >
                       <span>Lokasi</span>
                       {sortField === 'location' ? (
                         sortDirection === 'asc' ? (
-                          <ArrowUp className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
+                          <ArrowUp className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
                         ) : (
-                          <ArrowDown className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
+                          <ArrowDown className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
                         )
                       ) : (
                         <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 opacity-50 shrink-0" />
@@ -887,16 +1050,16 @@ export const TrackerView: React.FC = () => {
                   <th className="p-4">
                     <button
                       onClick={() => handleSort('appliedDate')}
-                      className={`flex items-center gap-1.5 hover:text-violet-600 dark:hover:text-violet-400 transition cursor-pointer select-none ${
-                        sortField === 'appliedDate' ? 'text-violet-600 dark:text-violet-400 font-black' : ''
+                      className={`flex items-center gap-1.5 hover:text-orange-600 dark:hover:text-orange-400 transition cursor-pointer select-none ${
+                        sortField === 'appliedDate' ? 'text-orange-600 dark:text-orange-400 font-black' : ''
                       }`}
                     >
                       <span>Tanggal Melamar</span>
                       {sortField === 'appliedDate' ? (
                         sortDirection === 'asc' ? (
-                          <ArrowUp className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
+                          <ArrowUp className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
                         ) : (
-                          <ArrowDown className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
+                          <ArrowDown className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
                         )
                       ) : (
                         <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 opacity-50 shrink-0" />
@@ -906,16 +1069,16 @@ export const TrackerView: React.FC = () => {
                   <th className="p-4">
                     <button
                       onClick={() => handleSort('portal')}
-                      className={`flex items-center gap-1.5 hover:text-violet-600 dark:hover:text-violet-400 transition cursor-pointer select-none ${
-                        sortField === 'portal' ? 'text-violet-600 dark:text-violet-400 font-black' : ''
+                      className={`flex items-center gap-1.5 hover:text-orange-600 dark:hover:text-orange-400 transition cursor-pointer select-none ${
+                        sortField === 'portal' ? 'text-orange-600 dark:text-orange-400 font-black' : ''
                       }`}
                     >
                       <span>Portal Melamar</span>
                       {sortField === 'portal' ? (
                         sortDirection === 'asc' ? (
-                          <ArrowUp className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
+                          <ArrowUp className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
                         ) : (
-                          <ArrowDown className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
+                          <ArrowDown className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
                         )
                       ) : (
                         <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 opacity-50 shrink-0" />
@@ -925,16 +1088,16 @@ export const TrackerView: React.FC = () => {
                   <th className="p-4">
                     <button
                       onClick={() => handleSort('salary')}
-                      className={`flex items-center gap-1.5 hover:text-violet-600 dark:hover:text-violet-400 transition cursor-pointer select-none ${
-                        sortField === 'salary' ? 'text-violet-600 dark:text-violet-400 font-black' : ''
+                      className={`flex items-center gap-1.5 hover:text-orange-600 dark:hover:text-orange-400 transition cursor-pointer select-none ${
+                        sortField === 'salary' ? 'text-orange-600 dark:text-orange-400 font-black' : ''
                       }`}
                     >
                       <span>Ekspektasi Gaji</span>
                       {sortField === 'salary' ? (
                         sortDirection === 'asc' ? (
-                          <ArrowUp className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
+                          <ArrowUp className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
                         ) : (
-                          <ArrowDown className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
+                          <ArrowDown className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
                         )
                       ) : (
                         <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 opacity-50 shrink-0" />
@@ -944,16 +1107,16 @@ export const TrackerView: React.FC = () => {
                   <th className="p-4">
                     <button
                       onClick={() => handleSort('status')}
-                      className={`flex items-center gap-1.5 hover:text-violet-600 dark:hover:text-violet-400 transition cursor-pointer select-none ${
-                        sortField === 'status' ? 'text-violet-600 dark:text-violet-400 font-black' : ''
+                      className={`flex items-center gap-1.5 hover:text-orange-600 dark:hover:text-orange-400 transition cursor-pointer select-none ${
+                        sortField === 'status' ? 'text-orange-600 dark:text-orange-400 font-black' : ''
                       }`}
                     >
                       <span>Status Seleksi</span>
                       {sortField === 'status' ? (
                         sortDirection === 'asc' ? (
-                          <ArrowUp className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
+                          <ArrowUp className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
                         ) : (
-                          <ArrowDown className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
+                          <ArrowDown className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
                         )
                       ) : (
                         <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 opacity-50 shrink-0" />
@@ -989,7 +1152,7 @@ export const TrackerView: React.FC = () => {
                         <div className="font-bold text-slate-900 dark:text-white text-sm">
                           {app.position}
                         </div>
-                        <div className="text-xs font-semibold text-violet-600 dark:text-violet-400 flex items-center gap-1.5 mt-0.5">
+                        <div className="text-xs font-semibold text-orange-600 dark:text-orange-400 flex items-center gap-1.5 mt-0.5">
                           <Building2 className="w-3.5 h-3.5" />
                           <span>{app.company}</span>
                         </div>
@@ -1008,13 +1171,13 @@ export const TrackerView: React.FC = () => {
                       </td>
                       <td className="p-4 whitespace-nowrap text-slate-600 dark:text-slate-300">
                         <div className="flex items-center gap-1.5 font-medium">
-                          <Globe className="w-3.5 h-3.5 text-violet-500 shrink-0" />
+                          <Globe className="w-3.5 h-3.5 text-orange-500 shrink-0" />
                           {app.portalUrl ? (
                             <a
                               href={app.portalUrl.startsWith('http') ? app.portalUrl : `https://${app.portalUrl}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="hover:underline flex items-center gap-1 text-violet-600 dark:text-violet-400 font-bold"
+                              className="hover:underline flex items-center gap-1 text-orange-600 dark:text-orange-400 font-bold"
                               title={`Buka link ${app.portal}`}
                             >
                               <span>{app.portal || '-'}</span>
@@ -1075,7 +1238,7 @@ export const TrackerView: React.FC = () => {
             {/* Drawer Header */}
             <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-[10px] bg-violet-600 dark:bg-violet-500 text-white flex items-center justify-center shadow-md shadow-violet-600/20 shrink-0">
+                <div className="w-10 h-10 rounded-[10px] bg-[#1738D1] dark:bg-[#1738D1] text-white flex items-center justify-center shadow-md shadow-[#1738D1]/20 shrink-0">
                   <Briefcase className="w-5 h-5" />
                 </div>
                 <div>
@@ -1111,7 +1274,7 @@ export const TrackerView: React.FC = () => {
                       placeholder="Contoh: PT GoTo Gojek Tokopedia"
                       value={newCompany}
                       onChange={(e) => setNewCompany(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
                     />
                   </div>
                 </div>
@@ -1126,7 +1289,7 @@ export const TrackerView: React.FC = () => {
                     placeholder="Contoh: Senior Frontend Engineer"
                     value={newPosition}
                     onChange={(e) => setNewPosition(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
                   />
                 </div>
 
@@ -1140,7 +1303,7 @@ export const TrackerView: React.FC = () => {
                       placeholder="Jakarta (Hybrid)"
                       value={newLocation}
                       onChange={(e) => setNewLocation(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
                     />
                   </div>
                   <div>
@@ -1148,11 +1311,10 @@ export const TrackerView: React.FC = () => {
                       Tanggal Melamar
                     </label>
                     <input
-                      type="text"
-                      placeholder="23 Juli 2026"
-                      value={newAppliedDate}
-                      onChange={(e) => setNewAppliedDate(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      type="date"
+                      value={toISODate(newAppliedDate)}
+                      onChange={(e) => setNewAppliedDate(fromISODate(e.target.value))}
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
                     />
                   </div>
                 </div>
@@ -1162,38 +1324,20 @@ export const TrackerView: React.FC = () => {
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                       Lamar Melalui Portal
                     </label>
-                    <CustomSelect
+                    <input
+                      type="text"
+                      list="portal-presets"
                       value={newPortal}
-                      onChange={(val) => setNewPortal(val)}
-                      options={[
-                        'LinkedIn',
-                        'JobStreet',
-                        'KitaLulus',
-                        'Glints',
-                        'Kalibrr',
-                        'Website Perusahaan',
-                        'Email Recruiter',
-                        { value: 'Lainnya', label: 'Lainnya (Isi Sendiri / Custom)' },
-                      ]}
-                      placeholder="Pilih Portal Melamar"
+                      onChange={(e) => setNewPortal(e.target.value)}
+                      placeholder="Ketik nama portal, atau pilih dari daftar"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
                     />
+                    <datalist id="portal-presets">
+                      {PORTAL_PRESETS.map((p) => (
+                        <option key={p} value={p} />
+                      ))}
+                    </datalist>
                   </div>
-
-                  {newPortal === 'Lainnya' && (
-                    <div>
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                        Nama Portal Custom <span className="text-rose-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Contoh: Indeed / Deel / Karir.com / Telegram"
-                        value={customPortal}
-                        onChange={(e) => setCustomPortal(e.target.value)}
-                        className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
-                      />
-                    </div>
-                  )}
 
                   <div>
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
@@ -1204,7 +1348,7 @@ export const TrackerView: React.FC = () => {
                       placeholder="Contoh: https://linkedin.com/jobs/view/123456"
                       value={newPortalUrl}
                       onChange={(e) => setNewPortalUrl(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
                     />
                   </div>
                 </div>
@@ -1230,7 +1374,7 @@ export const TrackerView: React.FC = () => {
                       placeholder="Rp 15.000.000"
                       value={newSalary}
                       onChange={(e) => setNewSalary(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
                     />
                   </div>
                 </div>
@@ -1244,7 +1388,7 @@ export const TrackerView: React.FC = () => {
                     placeholder="Catatan interview, kontak HRD/Recruiter, link lowongan, dsb..."
                     value={newNotes}
                     onChange={(e) => setNewNotes(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition resize-none"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition resize-none"
                   />
                 </div>
               </div>
@@ -1260,10 +1404,20 @@ export const TrackerView: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-[10px] text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-600/20 transition cursor-pointer flex items-center gap-1.5"
+                  disabled={isSaving}
+                  className="px-6 py-2.5 rounded-[10px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-md shadow-[#1738D1]/20 transition cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
                 >
-                  <Plus className="w-4 h-4" />
-                  <span>Simpan Lamaran</span>
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Menyimpan...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      <span>Simpan Lamaran</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

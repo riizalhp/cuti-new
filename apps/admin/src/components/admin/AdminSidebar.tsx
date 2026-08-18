@@ -9,6 +9,7 @@ import {
   Megaphone,
   Settings,
   Cpu,
+  BookOpen,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -31,6 +32,7 @@ const navItems: NavItem[] = [
   { title: "Users", href: "/users", icon: Users },
   { title: "CV Management", href: "/cv", icon: FileText },
   { title: "Campaigns", href: "/campaigns", icon: Megaphone },
+  { title: "CMS Konten", href: "/cms", icon: BookOpen },
   { title: "AI Config", href: "/ai-config", icon: Cpu },
   { title: "Settings", href: "/settings", icon: Settings },
 ]
@@ -49,33 +51,44 @@ export function AdminSidebar() {
     >
       <div className="flex flex-col h-full p-4">
         {/* Logo */}
-        <div className="flex items-center justify-between mb-8 px-2">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#1F3578] flex items-center justify-center p-1.5 shrink-0 border border-slate-700 shadow-xs">
+        <div className="flex items-center justify-between mb-8 px-2 pt-2">
+          <Link href="/" className="relative flex items-center justify-center h-8 overflow-hidden">
+            {/* Full Expanded Logo */}
+            <div
+              className={`transition-all duration-300 ease-in-out flex items-center ${
+                collapsed
+                  ? "opacity-0 scale-90 pointer-events-none absolute"
+                  : "opacity-100 scale-100 relative"
+              }`}
+            >
               <Image
                 src="/logo.webp"
-                alt="AmbilCUTI Logo"
-                width={32}
+                alt="Employr Logo"
+                width={130}
                 height={32}
                 unoptimized
-                className="w-full h-full object-contain"
+                className="h-[26px] w-auto max-w-[115px] object-contain brightness-0 invert"
               />
             </div>
-            {!collapsed && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex flex-col"
-              >
-                <h1 className="text-base font-extrabold text-white tracking-wide flex items-center gap-1.5">
-                  Ambil<span className="text-orange-500">CUTI</span>
-                </h1>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                  Masterdata Admin
-                </span>
-              </motion.div>
-            )}
-          </div>
+
+            {/* Minimized Icon Logo */}
+            <div
+              className={`transition-all duration-300 ease-in-out flex items-center ${
+                collapsed
+                  ? "opacity-100 scale-100 relative"
+                  : "opacity-0 scale-75 pointer-events-none absolute"
+              }`}
+            >
+              <Image
+                src="/logo-minimize.webp"
+                alt="Employr Logo"
+                width={28}
+                height={28}
+                unoptimized
+                className="h-6 w-6 object-contain brightness-0 invert"
+              />
+            </div>
+          </Link>
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
@@ -141,7 +154,7 @@ export function AdminSidebar() {
                   process.env.NEXT_PUBLIC_LANDING_URL ||
                   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
                     ? 'http://localhost:4321'
-                    : 'https://ambilcuti.id');
+                    : 'https://employr.id');
                 window.location.href = landingUrl;
               }
             }}

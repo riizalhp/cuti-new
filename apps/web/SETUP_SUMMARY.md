@@ -1,4 +1,4 @@
-# CUTI Web Landing Page - Setup Summary
+# Employr Web Landing Page - Setup Summary
 
 ## Created: 2026-07-31
 

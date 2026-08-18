@@ -2,11 +2,11 @@
 
 ## Vision Statement
 
-CUTI adalah platform AI all-in-one yang membantu pencari kerja Indonesia mempersiapkan seluruh proses mendapatkan pekerjaan, mulai dari membuat CV ATS, mengoptimalkan profil profesional, mencari lowongan, melamar pekerjaan, berlatih interview, hingga memantau perkembangan karier dalam satu dashboard terpadu.
+Employr adalah platform AI all-in-one yang membantu pencari kerja Indonesia mempersiapkan seluruh proses mendapatkan pekerjaan, mulai dari membuat CV ATS, mengoptimalkan profil profesional, mencari lowongan, melamar pekerjaan, berlatih interview, hingga memantau perkembangan karier dalam satu dashboard terpadu.
 
 ## Positioning
 
-CUTI bukan sekadar portal lowongan kerja. CUTI adalah **AI Career Operating System** — sistem yang mendampingi pengguna di setiap tahapan perjalanan karier. Data yang dimasukkan pengguna pada CV Management menjadi pusat informasi yang digunakan oleh seluruh fitur AI, sehingga setiap rekomendasi saling terhubung, konsisten, dan semakin akurat seiring bertambahnya aktivitas pengguna.
+CUTI bukan sekadar portal lowongan kerja. Employr adalah **AI Career Operating System** — sistem yang mendampingi pengguna di setiap tahapan perjalanan karier. Data yang dimasukkan pengguna pada CV Management menjadi pusat informasi yang digunakan oleh seluruh fitur AI, sehingga setiap rekomendasi saling terhubung, konsisten, dan semakin akurat seiring bertambahnya aktivitas pengguna.
 
 ## Target Pengguna
 

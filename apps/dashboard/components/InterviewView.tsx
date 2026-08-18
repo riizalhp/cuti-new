@@ -53,6 +53,7 @@ export const InterviewView: React.FC = () => {
     feedback: string;
     strengths: string[];
     improvements: string[];
+    sampleAnswer?: string;
   } | null>(null);
 
   const mockSimQuestions = [
@@ -201,6 +202,8 @@ export const InterviewView: React.FC = () => {
           'Tambahkan matrik kuantitatif terukur (contoh: persentase penurunan error atau kecepatan pemulihan).',
           'Sebutkan alat bantu penanganan log/monitoring yang digunakan secara spesifik.',
         ],
+        sampleAnswer:
+          'Saat terjadi kendala di server produksi, saya mengisolasi modul database yang bermasalah, memulihkan cadangan dalam 15 menit, dan menerapkan unit test otomatis untuk mencegah kejadian serupa.',
       });
     }, 1200);
   };
@@ -208,28 +211,28 @@ export const InterviewView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-[#0D3BD9] rounded-[10px] p-6 text-white border border-blue-500/50 shadow-md">
+      <div className="bg-navy-700 rounded-[10px] p-6 text-white border border-navy-800 shadow-md font-sans">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs mb-1">
+            <div className="flex items-center gap-2 text-orange-400 font-bold text-xs mb-1 uppercase tracking-wider">
               <Mic className="w-4 h-4" />
-              <span>Panduan & Simulasi AI Interview</span>
+              <span>Panduan &amp; Simulasi Interview</span>
             </div>
-            <h2 className="text-xl md:text-2xl font-bold tracking-tight">
-              Pusat Persiapan Interview Karir
+            <h2 className="text-xl md:text-2xl font-extrabold tracking-tight">
+              Pusat Persiapan Interview Karier
             </h2>
-            <p className="text-xs text-slate-300 mt-1 max-w-xl">
-              Latih jawaban interview Anda dengan Evaluator AI, pelajari bank pertanyaan HR & User, serta ikuti panduan bebas dari pertanyaan jebakan.
+            <p className="text-xs text-slate-200 mt-1 max-w-xl leading-relaxed">
+              Latih jawaban interview Anda dengan Evaluator Sistem, pelajari bank pertanyaan HR &amp; User, serta ikuti panduan bebas dari pertanyaan jebakan.
             </p>
           </div>
 
           <div className="p-3 bg-white/10 backdrop-blur-md rounded-[10px] border border-white/15 flex items-center gap-3 shrink-0">
-            <div className="p-2.5 rounded-[10px] bg-amber-400 text-slate-950 font-black">
+            <div className="p-2.5 rounded-[10px] bg-[#1738D1] text-white font-black">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
               <span className="text-[10px] text-slate-300 uppercase tracking-wider block font-bold">Skor Kesiapan Interview</span>
-              <span className="text-lg font-black text-amber-300">85 / 100 (Siap Tempur)</span>
+              <span className="text-lg font-black text-white">85 / 100 (Siap Tempur)</span>
             </div>
           </div>
         </div>
@@ -238,33 +241,33 @@ export const InterviewView: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2 mt-6 pt-4 border-t border-white/10 text-xs font-semibold">
           <button
             onClick={() => setActiveSubTab('simulasi')}
-            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 cursor-pointer ${
               activeSubTab === 'simulasi'
-                ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
+                ? 'bg-[#1738D1] text-white font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Simulasi AI Mock Interview</span>
+            <span>Simulasi Mock Interview</span>
           </button>
 
           <button
             onClick={() => setActiveSubTab('bank')}
-            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 cursor-pointer ${
               activeSubTab === 'bank'
-                ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
+                ? 'bg-[#1738D1] text-white font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
             }`}
           >
             <BookOpen className="w-3.5 h-3.5" />
-            <span>Bank Pertanyaan & STAR Guide</span>
+            <span>Bank Pertanyaan &amp; STAR Guide</span>
           </button>
 
           <button
             onClick={() => setActiveSubTab('jebakan')}
-            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 cursor-pointer ${
               activeSubTab === 'jebakan'
-                ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
+                ? 'bg-[#1738D1] text-white font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
             }`}
           >
@@ -274,9 +277,9 @@ export const InterviewView: React.FC = () => {
 
           <button
             onClick={() => setActiveSubTab('checklist')}
-            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 cursor-pointer ${
               activeSubTab === 'checklist'
-                ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
+                ? 'bg-[#1738D1] text-white font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-white'
             }`}
           >
@@ -286,14 +289,14 @@ export const InterviewView: React.FC = () => {
         </div>
       </div>
 
-      {/* TAB 1: SIMULASI AI MOCK INTERVIEW */}
+      {/* TAB 1: SIMULASI MOCK INTERVIEW */}
       {activeSubTab === 'simulasi' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Sidebar Setup Simulasi */}
             <div className="lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 space-y-4 shadow-xs">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-violet-600" />
+                <Briefcase className="w-4 h-4 text-orange-500" />
                 <span>Pengaturan Sesi Simulasi</span>
               </h3>
 
@@ -310,11 +313,11 @@ export const InterviewView: React.FC = () => {
                         setEvaluationResult(null);
                         setUserAnswer('');
                       }}
-                      className="w-full p-2.5 pr-9 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500 appearance-none cursor-pointer text-xs"
+                      className="w-full p-2.5 pr-9 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none focus:ring-2 focus:ring-[#1738D1] appearance-none cursor-pointer text-xs"
                     >
                       <option value="Software Engineer">Software Engineer / Developer</option>
                       <option value="Marketing Specialist">Digital Marketing Specialist</option>
-                      <option value="Data Analyst">Data Analyst & BI</option>
+                      <option value="Data Analyst">Data Analyst &amp; BI</option>
                       <option value="HR Specialist">Human Resources Specialist</option>
                       <option value="Product Manager">Product Manager</option>
                     </select>
@@ -330,23 +333,23 @@ export const InterviewView: React.FC = () => {
                     <select
                       value={selectedLevel}
                       onChange={(e) => setSelectedLevel(e.target.value)}
-                      className="w-full p-2.5 pr-9 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500 appearance-none cursor-pointer text-xs"
+                      className="w-full p-2.5 pr-9 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none focus:ring-2 focus:ring-[#1738D1] appearance-none cursor-pointer text-xs"
                     >
-                      <option value="HR Screening">HR Screening & Behavioral</option>
-                      <option value="User & Technical">User / Managerial & Technical</option>
+                      <option value="HR Screening">HR Screening &amp; Behavioral</option>
+                      <option value="User & Technical">User / Managerial &amp; Technical</option>
                       <option value="Director / Final">Director / Final Board Interview</option>
                     </select>
                     <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
                 </div>
 
-                <div className="p-3 rounded-[10px] bg-violet-50 dark:bg-violet-950/60 border border-violet-200 dark:border-violet-800/60 space-y-1">
-                  <div className="flex items-center gap-1.5 text-violet-700 dark:text-violet-300 font-bold">
+                <div className="p-3 rounded-[10px] bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800/60 space-y-1">
+                  <div className="flex items-center gap-1.5 text-orange-700 dark:text-orange-300 font-bold">
                     <Lightbulb className="w-4 h-4 shrink-0" />
-                    <span>Petunjuk AI</span>
+                    <span>Petunjuk Simulasi</span>
                   </div>
                   <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                    Ketik jawaban seolah-olah Anda sedang di depan pewawancara asli. AI akan menganalisis poin kekuatan & area perbaikan.
+                    Ketik jawaban seolah-olah Anda sedang di depan pewawancara asli. Sistem akan menganalisis poin kekuatan &amp; area perbaikan.
                   </p>
                 </div>
               </div>
@@ -357,7 +360,7 @@ export const InterviewView: React.FC = () => {
               {/* Question Header Box */}
               <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-1 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                  <span className="px-2.5 py-1 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300 border border-orange-200 dark:border-orange-800">
                     Pertanyaan #{simQuestionIndex + 1} ({selectedRole})
                   </span>
                   <button
@@ -366,7 +369,7 @@ export const InterviewView: React.FC = () => {
                       setUserAnswer('');
                       setEvaluationResult(null);
                     }}
-                    className="text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline flex items-center gap-1"
+                    className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Ganti Pertanyaan</span>
@@ -394,7 +397,7 @@ export const InterviewView: React.FC = () => {
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
                   placeholder="Ketikkan jawaban Anda menggunakan metode STAR (Situation, Task, Action, Result)..."
-                  className="w-full p-3.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 leading-relaxed resize-none"
+                  className="w-full p-3.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#1738D1] leading-relaxed resize-none"
                 />
               </div>
 
@@ -404,7 +407,7 @@ export const InterviewView: React.FC = () => {
                     setUserAnswer('');
                     setEvaluationResult(null);
                   }}
-                  className="px-4 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  className="px-4 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   Bersihkan
                 </button>
@@ -412,7 +415,7 @@ export const InterviewView: React.FC = () => {
                 <button
                   onClick={handleSimulateSubmit}
                   disabled={!userAnswer.trim() || isEvaluating}
-                  className="px-6 py-2.5 rounded-[10px] bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-bold text-xs transition shadow-md shadow-violet-600/20 flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] disabled:opacity-50 text-white font-bold text-xs transition shadow-md shadow-[#1738D1]/20 flex items-center gap-2 cursor-pointer border-0"
                 >
                   {isEvaluating ? (
                     <>
@@ -422,21 +425,21 @@ export const InterviewView: React.FC = () => {
                   ) : (
                     <>
                       <Send className="w-4 h-4" />
-                      <span>Evaluasi Dengan AI</span>
+                      <span>Evaluasi Jawaban</span>
                     </>
                   )}
                 </button>
               </div>
 
-              {/* AI Evaluation Output Box */}
+              {/* Evaluation Output Box */}
               {evaluationResult && (
-                <div className="p-5 rounded-[10px] bg-violet-50/70 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800/80 space-y-4 animate-in fade-in duration-300">
-                  <div className="flex items-center justify-between border-b border-violet-100 dark:border-violet-900 pb-3">
+                <div className="p-5 rounded-[10px] bg-orange-50/70 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/80 space-y-4 animate-in fade-in duration-300">
+                  <div className="flex items-center justify-between border-b border-orange-100 dark:border-orange-900 pb-3">
                     <div className="flex items-center gap-2">
-                      <Award className="w-5 h-5 text-violet-600 dark:text-violet-400" />
-                      <span className="font-extrabold text-sm text-slate-900 dark:text-white">Hasil Analisis AI Evaluator</span>
+                      <Award className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                      <span className="font-extrabold text-sm text-slate-900 dark:text-white">Hasil Analisis Evaluator</span>
                     </div>
-                    <div className="px-3 py-1 rounded-[10px] bg-violet-600 text-white font-black text-xs">
+                    <div className="px-3 py-1 rounded-[10px] bg-[#1738D1] text-white font-black text-xs">
                       Skor: {evaluationResult.score} / 100
                     </div>
                   </div>
@@ -462,8 +465,8 @@ export const InterviewView: React.FC = () => {
                     {/* Improvements */}
                     <div className="p-3 rounded-[10px] bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/40 space-y-2">
                       <span className="font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
-                        <TrendingUp className="w-4 h-4" />
-                        <span>Saran Perbaikan:</span>
+                        <AlertTriangle className="w-4 h-4" />
+                        <span>Area Pengembangan:</span>
                       </span>
                       <ul className="space-y-1 text-[11px] text-slate-600 dark:text-slate-300 list-disc list-inside">
                         {evaluationResult.improvements.map((imp, idx) => (
@@ -471,6 +474,17 @@ export const InterviewView: React.FC = () => {
                         ))}
                       </ul>
                     </div>
+                  </div>
+
+                  {/* Ideal Sample Answer */}
+                  <div className="p-3.5 rounded-[10px] bg-white dark:bg-slate-900 border border-orange-200 dark:border-orange-800/50 space-y-1.5 text-xs">
+                    <span className="font-extrabold text-orange-950 dark:text-orange-200 flex items-center gap-1.5">
+                      <Lightbulb className="w-4 h-4 text-orange-500" />
+                      <span>Rekomendasi Contoh Jawaban STAR:</span>
+                    </span>
+                    <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed font-sans">
+                      &quot;{evaluationResult.sampleAnswer}&quot;
+                    </p>
                   </div>
                 </div>
               )}
@@ -492,9 +506,9 @@ export const InterviewView: React.FC = () => {
                 <button
                   key={cat}
                   onClick={() => setFilterCategory(cat)}
-                  className={`px-3 py-1.5 rounded-[10px] text-xs font-bold transition ${
+                  className={`px-3 py-1.5 rounded-[10px] text-xs font-bold transition cursor-pointer ${
                     filterCategory === cat
-                      ? 'bg-violet-600 text-white'
+                      ? 'bg-[#1738D1] text-white'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
                   }`}
                 >
@@ -517,7 +531,7 @@ export const InterviewView: React.FC = () => {
                   {/* Header Item */}
                   <button
                     onClick={() => setExpandedQId(isExpanded ? null : q.id)}
-                    className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 dark:hover:bg-slate-800/50 transition gap-3"
+                    className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 dark:hover:bg-slate-800/50 transition gap-3 cursor-pointer"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <span className="px-2.5 py-1 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">
@@ -539,8 +553,8 @@ export const InterviewView: React.FC = () => {
                   {isExpanded && (
                     <div className="p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30 space-y-4 text-xs">
                       {/* Purpose */}
-                      <div className="p-3 rounded-[10px] bg-violet-50 dark:bg-violet-950/60 border border-violet-100 dark:border-violet-900/60 text-slate-700 dark:text-slate-300">
-                        <strong className="text-violet-700 dark:text-violet-300 block mb-0.5">Tujuan Pewawancara Menanyakan Ini:</strong>
+                      <div className="p-3 rounded-[10px] bg-orange-50 dark:bg-orange-950/60 border border-orange-100 dark:border-orange-900/60 text-slate-700 dark:text-slate-300">
+                        <strong className="text-orange-700 dark:text-orange-300 block mb-0.5">Tujuan Pewawancara Menanyakan Ini:</strong>
                         <p>{q.purpose}</p>
                       </div>
 
@@ -553,19 +567,19 @@ export const InterviewView: React.FC = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px]">
                           <div className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                            <span className="font-black text-violet-600 dark:text-violet-400 block">S - Situation (Situasi):</span>
+                            <span className="font-black text-orange-600 dark:text-orange-400 block">S - Situation (Situasi):</span>
                             <p className="text-slate-600 dark:text-slate-400">{q.starGuide.situation}</p>
                           </div>
                           <div className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                            <span className="font-black text-violet-600 dark:text-violet-400 block">T - Task (Tugas):</span>
+                            <span className="font-black text-orange-600 dark:text-orange-400 block">T - Task (Tugas):</span>
                             <p className="text-slate-600 dark:text-slate-400">{q.starGuide.task}</p>
                           </div>
                           <div className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                            <span className="font-black text-violet-600 dark:text-violet-400 block">A - Action (Aksi):</span>
+                            <span className="font-black text-orange-600 dark:text-orange-400 block">A - Action (Aksi):</span>
                             <p className="text-slate-600 dark:text-slate-400">{q.starGuide.action}</p>
                           </div>
                           <div className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                            <span className="font-black text-violet-600 dark:text-violet-400 block">R - Result (Hasil):</span>
+                            <span className="font-black text-orange-600 dark:text-orange-400 block">R - Result (Hasil):</span>
                             <p className="text-slate-600 dark:text-slate-400">{q.starGuide.result}</p>
                           </div>
                         </div>
@@ -596,7 +610,7 @@ export const InterviewView: React.FC = () => {
       {activeSubTab === 'jebakan' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 space-y-3 shadow-xs">
-            <div className="w-10 h-10 rounded-[10px] bg-amber-100 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-[10px] bg-orange-100 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold">
               1
             </div>
             <h4 className="font-bold text-sm text-slate-900 dark:text-white">Taktik Nego Gaji tanpa Terjebak Murah</h4>
@@ -606,7 +620,7 @@ export const InterviewView: React.FC = () => {
           </div>
 
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 space-y-3 shadow-xs">
-            <div className="w-10 h-10 rounded-[10px] bg-violet-100 dark:bg-violet-950/80 text-violet-600 dark:text-violet-400 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-[10px] bg-orange-100 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold">
               2
             </div>
             <h4 className="font-bold text-sm text-slate-900 dark:text-white">Menjelaskan Resign tanpa Mengeluh</h4>
@@ -616,7 +630,7 @@ export const InterviewView: React.FC = () => {
           </div>
 
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 space-y-3 shadow-xs">
-            <div className="w-10 h-10 rounded-[10px] bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-[10px] bg-orange-100 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold">
               3
             </div>
             <h4 className="font-bold text-sm text-slate-900 dark:text-white">Pertanyaan &quot;Ada Pertanyaan untuk Kami?&quot;</h4>
@@ -626,7 +640,7 @@ export const InterviewView: React.FC = () => {
           </div>
 
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 space-y-3 shadow-xs">
-            <div className="w-10 h-10 rounded-[10px] bg-rose-100 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-[10px] bg-orange-100 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold">
               4
             </div>
             <h4 className="font-bold text-sm text-slate-900 dark:text-white">Menjawab Periode Kosong (Career Gap)</h4>
@@ -643,7 +657,7 @@ export const InterviewView: React.FC = () => {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
               <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-violet-600" />
+                <CheckCircle2 className="w-5 h-5 text-orange-500" />
                 <span>Checklist Persiapan Interview Terstruktur</span>
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -654,13 +668,13 @@ export const InterviewView: React.FC = () => {
             <div className="flex items-center gap-3 shrink-0">
               <div className="text-right">
                 <span className="text-[10px] font-bold text-slate-400 block uppercase">Kemajuan Checklist</span>
-                <span className="text-sm font-black text-violet-600 dark:text-violet-400">
+                <span className="text-sm font-black text-orange-600 dark:text-orange-400">
                   {completedCount} dari {checkListItems.length} Selesai ({progressPercent}%)
                 </span>
               </div>
               <div className="w-24 h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <div
-                  className="h-full bg-violet-600 dark:bg-violet-500 transition-all duration-300"
+                  className="h-full bg-[#1738D1] transition-all duration-300"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
@@ -675,11 +689,11 @@ export const InterviewView: React.FC = () => {
                 className={`p-3.5 rounded-[10px] border transition flex items-center justify-between gap-3 cursor-pointer ${
                   item.done
                     ? 'bg-slate-50/80 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 opacity-80'
-                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-violet-400'
+                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-orange-400'
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <button className="text-violet-600 dark:text-violet-400 shrink-0">
+                  <button className="text-orange-600 dark:text-orange-400 shrink-0">
                     {item.done ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5 text-slate-300 dark:text-slate-600" />}
                   </button>
                   <span

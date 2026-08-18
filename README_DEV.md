@@ -46,6 +46,8 @@ Gracefully stops all services and PostgreSQL container.
 | **Landing Page** | 4321 | http://localhost:4321 | Astro static site |
 | **Admin Panel** | 3002 | http://localhost:3002 | Next.js admin dashboard |
 | **Dashboard** | 3000 | http://localhost:3000 | Next.js user dashboard (WIP) |
+| **Learning Academy** | 3004 | http://localhost:3004 | Next.js kursus & sertifikasi |
+| **FAQ / Pusat Bantuan** | 3005 | http://localhost:3005 | Next.js situs dokumentasi (faq.employr.id) |
 | **PostgreSQL** | 5432 | localhost:5432 | Database |
 
 ---
@@ -71,6 +73,9 @@ pnpm --filter @cuti/web dev
 
 # Admin panel only
 pnpm --filter @cuti/admin dev
+
+# FAQ / Pusat Bantuan only
+pnpm --filter @cuti/faq-site dev
 
 # All at once (mixed logs)
 pnpm dev
