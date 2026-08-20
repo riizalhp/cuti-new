@@ -15,6 +15,7 @@ interface MajorSearchInputProps {
   onChange: (value: string) => void;
   educationLevel?: string;
   placeholder?: string;
+  autoFocus?: boolean;
 }
 
 export const MajorSearchInput: React.FC<MajorSearchInputProps> = ({
@@ -22,6 +23,7 @@ export const MajorSearchInput: React.FC<MajorSearchInputProps> = ({
   onChange,
   educationLevel = '',
   placeholder,
+  autoFocus = false,
 }) => {
   const [query, setQuery] = useState(value || '');
   const [isOpen, setIsOpen] = useState(false);
@@ -60,10 +62,10 @@ export const MajorSearchInput: React.FC<MajorSearchInputProps> = ({
   const dynamicPlaceholder = useMemo(() => {
     if (placeholder) return placeholder;
     const lvl = (educationLevel || '').toUpperCase().trim();
-    if (lvl === 'SMA') return 'Pilih / cari jurusan SMA (IPA, IPS, Bahasa)...';
-    if (lvl === 'SMK') return 'Pilih / cari jurusan SMK (TKJ, RPL, AKL, OTKP)...';
-    if (lvl === 'D3' || lvl === 'D4') return 'Cari prodi Diploma D3/D4 PDDikti (misal: D3 Akuntansi)...';
-    if (lvl === 'S1' || lvl === 'S2') return 'Cari prodi Sarjana PDDikti (misal: Teknik Informatika)...';
+    if (lvl === 'SMA') return 'Pilih / cari jurusan SMA...';
+    if (lvl === 'SMK') return 'Pilih / cari jurusan SMK...';
+    if (lvl === 'D3' || lvl === 'D4') return 'Cari prodi Diploma D3/D4 PDDikti...';
+    if (lvl === 'S1' || lvl === 'S2') return 'Cari prodi Sarjana PDDikti...';
     return 'Cari Jurusan / Program Studi...';
   }, [placeholder, educationLevel]);
 
@@ -214,6 +216,7 @@ export const MajorSearchInput: React.FC<MajorSearchInputProps> = ({
         <GraduationCap className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
         <input
           type="text"
+          autoFocus={autoFocus}
           placeholder={dynamicPlaceholder}
           value={query}
           onFocus={() => setIsOpen(true)}

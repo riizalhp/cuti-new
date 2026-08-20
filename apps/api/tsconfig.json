@@ -18,6 +18,8 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
     "paths": {
       "@cuti/db": ["../../packages/db/src"],
       "@cuti/types": ["../../packages/types/src"]

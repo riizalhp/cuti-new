@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@cuti/db';
+import { logSecurityEvent, logApp, extractRequestContext } from '@cuti/db/logger';
 import crypto from 'crypto';
 
 const corsHeaders = {
@@ -97,6 +98,10 @@ export async function POST(req: NextRequest) {
         email: newUser.email,
         role: newUser.role,
       };
+
+      const ctx = extractRequestContext(req);
+      logSecurityEvent({ eventType: 'LOGIN_SUCCESS', ip: ctx.ip, userAgent: ctx.userAgent, email: cleanEmail, userId: newUser.id, severity: 'INFO', details: { action: 'registration' } });
+      logApp({ source: 'AUTH', level: 'INFO', message: `New user registered: ${cleanEmail}`, ip: ctx.ip, endpoint: '/api/auth/register', method: 'POST', statusCode: 201, userId: newUser.id });
 
       const response = NextResponse.json(
         {

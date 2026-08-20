@@ -1498,25 +1498,68 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     }
 
     const currentSession = getStoredSession();
+    const onboardingProfileStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_onboarding_profile') : null;
+    const onboardingProfile = onboardingProfileStr ? JSON.parse(onboardingProfileStr) : null;
+
+    const defaultName = currentSession?.name || onboardingProfile?.fullName || '';
+    const defaultLocation = onboardingProfile?.location || 'Jakarta, Indonesia';
+    const defaultHeadline = newCvJobTitle || (onboardingProfile?.targetPositions?.[0]) || '';
+    const defaultSkills = onboardingProfile?.skills || [];
+    const defaultEdu = onboardingProfile?.institutionName
+      ? [
+          {
+            id: `edu-${Date.now()}`,
+            institution: onboardingProfile.institutionName,
+            degree: onboardingProfile.educationLevel,
+            fieldOfStudy: onboardingProfile.major,
+            location: onboardingProfile.location || '',
+            startMonth: '',
+            startYear: '',
+            endMonth: '',
+            endYear: '',
+            isCurrent: false,
+            gpa: '',
+            description: '',
+          },
+        ]
+      : [];
+    const defaultExp = onboardingProfile?.hasWorkExperience && onboardingProfile?.experienceCompany
+      ? [
+          {
+            id: `exp-${Date.now()}`,
+            company: onboardingProfile.experienceCompany,
+            position: onboardingProfile.experienceTitle,
+            location: onboardingProfile.location || '',
+            startMonth: '',
+            startYear: '',
+            endMonth: '',
+            endYear: '',
+            isCurrent: true,
+            description: '',
+          },
+        ]
+      : [];
+
     const atsScoreFromContent = calculateAtsScore({
-      fullName: currentSession?.name || '',
+      fullName: defaultName,
       email: currentSession?.email || '',
       ...initialData,
     }).totalScore;
+
     const newCV: CVData = {
       id: newId,
       title: newCvTitle || `CV ATS - ${templateName}`,
       updatedAt: 'Hari ini',
       atsScore: atsScoreFromContent,
-      fullName: currentSession?.name || '',
-      headline: newCvJobTitle || '',
+      fullName: defaultName,
+      headline: defaultHeadline,
       email: currentSession?.email || '',
       phone: '',
-      location: 'Jakarta, Indonesia',
+      location: defaultLocation,
       summary: '',
-      skills: [],
-      experience: [],
-      education: [],
+      skills: defaultSkills,
+      experience: defaultExp,
+      education: defaultEdu,
       templateId: selectedTemplateId,
       ...initialData,
     };
@@ -3609,7 +3652,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         {/* Existing Data Summary Preview */}
                         <div className="p-3 rounded-[10px] bg-white dark:bg-slate-900 border border-orange-200 dark:border-orange-800/50 text-xs space-y-1.5">
                           <div className="font-bold text-slate-800 dark:text-slate-200">
-                            {formData.fullName || 'Nama Lengkap Anda'}
+                            {formData.fullName || getStoredSession()?.name || 'Nama Lengkap Anda'}
                           </div>
                           <div className="text-orange-600 dark:text-orange-400 text-[11px]">
                             {formData.headline || 'Senior Full Stack Developer'}
@@ -7122,7 +7165,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             <div className="p-6 overflow-y-auto no-scrollbar space-y-4 bg-slate-100 dark:bg-slate-950">
               <div className="p-6 bg-white text-slate-900 border border-slate-300 rounded-[10px] space-y-4 shadow-sm text-xs">
                 <div className="border-b border-slate-900 pb-2">
-                  <h2 className="text-xl font-black uppercase text-slate-900">{formData.fullName || 'NAMA LENGKAP ANDA'}</h2>
+                  <h2 className="text-xl font-black uppercase text-slate-900">{formData.fullName || getStoredSession()?.name || 'NAMA LENGKAP ANDA'}</h2>
                   <p className="font-bold text-orange-700 uppercase mt-0.5">{formData.headline || 'Senior Full Stack Engineer'}</p>
                 </div>
                 <div>
@@ -8215,14 +8258,21 @@ const CVTemplatePreview: React.FC<{
   docMarginRight = 1.27,
 }) => {
 
+  const storedSession = typeof window !== 'undefined' ? getStoredSession() : null;
+  const storedProfileStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_onboarding_profile') : null;
+  const storedProfile = storedProfileStr ? JSON.parse(storedProfileStr) : null;
+  const defaultUserName = customData?.fullName?.trim() || storedProfile?.fullName || storedSession?.name || 'Nama Lengkap Anda';
+  const defaultUserLocation = customData?.location?.trim() || storedProfile?.location || 'Kota, Indonesia';
+  const defaultUserJobTitle = customData?.headline?.trim() || (storedProfile?.targetPositions?.[0]) || 'Posisi / Jabatan Anda';
+
   // Data (merges customData with fallback dummy data)
   const dummyData = {
     showIcons: (customData as any)?.showIcons !== undefined ? (customData as any).showIcons : docShowIcons,
-    fullName: customData?.fullName?.trim() || 'Nama Lengkap Anda',
-    jobTitle: customData?.headline?.trim() || 'Posisi / Jabatan Anda',
-    email: customData?.email?.trim() || 'email@contoh.com',
+    fullName: defaultUserName,
+    jobTitle: defaultUserJobTitle,
+    email: customData?.email?.trim() || storedSession?.email || 'email@contoh.com',
     phone: customData?.phone?.trim() || '+62 8xx-xxxx-xxxx',
-    location: customData?.location?.trim() || 'Kota, Indonesia',
+    location: defaultUserLocation,
     website: customData?.website?.trim() || '',
     linkedin: customData?.linkedin?.trim() || '',
     github: customData?.github?.trim() || customData?.socialHandle?.trim() || '',

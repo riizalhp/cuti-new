@@ -31,6 +31,7 @@ interface PositionSearchInputProps {
   onAddPosition: (pos: string) => void;
   onRemovePosition: (pos: string) => void;
   placeholder?: string;
+  autoFocus?: boolean;
 }
 
 export const PositionSearchInput: React.FC<PositionSearchInputProps> = ({
@@ -38,6 +39,7 @@ export const PositionSearchInput: React.FC<PositionSearchInputProps> = ({
   onAddPosition,
   onRemovePosition,
   placeholder = 'Cari atau ketik posisi target...',
+  autoFocus = false,
 }) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -151,6 +153,7 @@ export const PositionSearchInput: React.FC<PositionSearchInputProps> = ({
           <Search className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
           <input
             type="text"
+            autoFocus={autoFocus}
             placeholder={placeholder}
             value={query}
             onFocus={() => setIsOpen(true)}

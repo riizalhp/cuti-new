@@ -14,6 +14,7 @@ interface SchoolSearchInputProps {
   onChange: (value: string) => void;
   educationLevel?: string;
   placeholder?: string;
+  autoFocus?: boolean;
 }
 
 export const SchoolSearchInput: React.FC<SchoolSearchInputProps> = ({
@@ -21,6 +22,7 @@ export const SchoolSearchInput: React.FC<SchoolSearchInputProps> = ({
   onChange,
   educationLevel = '',
   placeholder,
+  autoFocus = false,
 }) => {
   const [query, setQuery] = useState(value || '');
   const [isOpen, setIsOpen] = useState(false);
@@ -59,10 +61,10 @@ export const SchoolSearchInput: React.FC<SchoolSearchInputProps> = ({
   const dynamicPlaceholder = useMemo(() => {
     if (placeholder) return placeholder;
     const lvl = (educationLevel || '').toUpperCase().trim();
-    if (lvl === 'SMA') return 'Cari nama SMA (misal: SMAN 1 Semarang, SMAN 8 Jakarta)...';
-    if (lvl === 'SMK') return 'Cari nama SMK (misal: SMKN 7 Semarang, SMKN 26 Jakarta)...';
+    if (lvl === 'SMA') return 'Cari nama SMA...';
+    if (lvl === 'SMK') return 'Cari nama SMK...';
     if (lvl === 'D3' || lvl === 'D4' || lvl === 'S1' || lvl === 'S2')
-      return 'Cari Kampus / Perguruan Tinggi PDDikti (misal: Universitas Diponegoro, UGM)...';
+      return 'Cari Kampus / Perguruan Tinggi PDDikti...';
     return 'Cari Nama Sekolah / Kampus...';
   }, [placeholder, educationLevel]);
 
@@ -213,6 +215,7 @@ export const SchoolSearchInput: React.FC<SchoolSearchInputProps> = ({
         <Building2 className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
         <input
           type="text"
+          autoFocus={autoFocus}
           placeholder={dynamicPlaceholder}
           value={query}
           onFocus={() => setIsOpen(true)}

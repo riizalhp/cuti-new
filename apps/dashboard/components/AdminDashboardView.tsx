@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -165,14 +165,76 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
   const [newCvAssignedRole, setNewCvAssignedRole] = useState('Senior HR Specialist');
   const [newCvTargetDate, setNewCvTargetDate] = useState('');
 
-  // Sample Mock Data
+  // Data from API
   const [usersList, setUsersList] = useState<UserItem[]>([]);
-
   const [transactionsList, setTransactionsList] = useState<TransactionItem[]>([]);
-
   const [missionsList, setMissionsList] = useState<MissionItem[]>([]);
-
   const [jobsList, setJobsList] = useState<JobPosting[]>([]);
+  const [apiStats, setApiStats] = useState<any>(null);
+  const [apiLoading, setApiLoading] = useState(true);
+
+  // Fetch all data from API on mount
+  const fetchAllData = useCallback(async () => {
+    setApiLoading(true);
+    try {
+      const [usersRes, ordersRes, misiRes, statsRes] = await Promise.all([
+        fetch('/api/users').then(r => r.json()).catch(() => ({ success: false, data: [] })),
+        fetch('/api/orders').then(r => r.json()).catch(() => ({ success: false, data: [] })),
+        fetch('/api/misi').then(r => r.json()).catch(() => ({ success: false, data: [] })),
+        fetch('/api/dashboard/stats').then(r => r.json()).catch(() => ({ success: false, data: null })),
+      ]);
+
+      if (usersRes.success) {
+        setUsersList(usersRes.data.map((u: any) => ({
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          role: u.plan === 'Admin' ? 'Admin' : 'User',
+          plan: u.plan === 'Free User' ? 'Free' : u.plan === 'Paket Siap Kerja' ? 'Lifetime' : 'Pro Member',
+          status: u.status === 'Active' ? 'Aktif' : 'Ditangguhkan',
+          joinedDate: u.joinedDate,
+          cvCreated: 0,
+        })));
+      }
+
+      if (ordersRes.success) {
+        setTransactionsList(ordersRes.data.map((o: any) => ({
+          id: o.orderNumber,
+          user: o.userName,
+          email: o.userEmail,
+          plan: o.package,
+          amount: `Rp ${o.totalPrice.toLocaleString('id-ID')}`,
+          method: o.paymentMethod || 'Manual',
+          date: new Date(o.createdAt).toLocaleDateString('id-ID'),
+          status: o.status === 'COMPLETED' ? 'Berhasil' : o.status === 'PAID' || o.status === 'PROCESSING' ? 'Pending' : 'Gagal',
+        })));
+      }
+
+      if (misiRes.success) {
+        setMissionsList(misiRes.data.map((m: any) => ({
+          id: m.id,
+          title: m.title,
+          category: m.type,
+          rewardPoints: m.rewardAmount,
+          rewardCash: m.rewardAmount,
+          completedCount: m.submissionCount,
+          status: m.isActive ? 'Aktif' : 'Nonaktif',
+        })));
+      }
+
+      if (statsRes.success) {
+        setApiStats(statsRes.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch admin data:', err);
+    } finally {
+      setApiLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAllData();
+  }, [fetchAllData]);
 
   // Modal States
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
@@ -470,14 +532,13 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 <ArrowLeft className="w-4 h-4 text-white group-hover:-translate-x-0.5 transition-transform" />
                 <span>Kembali ke Dashboard User</span>
               </button>
-            )}
-            <button
-              onClick={() => showToast('Data dashboard berhasil diperbarui!')}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer"
-            >
-              <RefreshCw className="w-4 h-4 text-slate-300" />
-              <span>Refresh Data</span>
-            </button>
+            )}                <button
+                  onClick={() => { fetchAllData(); showToast('Data dashboard berhasil diperbarui dari database!'); }}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer"
+                >
+                  <RefreshCw className={`w-4 h-4 text-slate-300 ${apiLoading ? 'animate-spin' : ''}`} />
+                  <span>Refresh Data</span>
+                </button>
             <button
               onClick={() => showToast('Laporan bulanan berhasil diunduh (PDF)')}
               className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold bg-navy-700 hover:bg-navy-600 text-white shadow-md shadow-navy-700/20 transition cursor-pointer border-0"
@@ -598,14 +659,14 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 </div>
               </div>
               <div>
-                <p className="text-2xl font-black text-slate-900 dark:text-white">24.850</p>
-                <div className="flex items-center gap-1.5 mt-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                  <span>+18.4% bulan ini</span>
+                <p className="text-2xl font-black text-slate-900 dark:text-white">{apiStats?.users?.total?.toLocaleString('id-ID') || '...'}</p>
+                <div className="flex items-center gap-1.5 mt-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Dari database</span>
                 </div>
               </div>
               <p className="text-[11px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
-                18.200 Gratis | 6.650 Pro Member
+                {apiStats?.users?.free || 0} Gratis | {apiStats?.users?.premium || 0} Pro Member
               </p>
             </div>
 
@@ -617,14 +678,14 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 </div>
               </div>
               <div>
-                <p className="text-2xl font-black text-slate-900 dark:text-white">Rp 184,25 Jt</p>
-                <div className="flex items-center gap-1.5 mt-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                  <span>+24.2% dibanding Juni</span>
+                <p className="text-2xl font-black text-slate-900 dark:text-white">Rp {((apiStats?.transactions?.totalRevenue || 0) / 1000).toLocaleString('id-ID')}rb</p>
+                <div className="flex items-center gap-1.5 mt-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  <DollarSign className="w-3.5 h-3.5" />
+                  <span>{apiStats?.transactions?.successful || 0} transaksi sukses</span>
                 </div>
               </div>
               <p className="text-[11px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
-                Rata-rata Rp 6,1 Jt / hari
+                Total {apiStats?.transactions?.total || 0} transaksi
               </p>
             </div>
 
@@ -636,14 +697,14 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 </div>
               </div>
               <div>
-                <p className="text-2xl font-black text-slate-900 dark:text-white">142.890</p>
-                <div className="flex items-center gap-1.5 mt-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                  <span>+32.1% aktif dikirim</span>
+                <p className="text-2xl font-black text-slate-900 dark:text-white">{apiStats?.cv?.total?.toLocaleString('id-ID') || '...'}</p>
+                <div className="flex items-center gap-1.5 mt-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>{apiStats?.cv?.ready || 0} siap, {apiStats?.cv?.processing || 0} diproses</span>
                 </div>
               </div>
               <p className="text-[11px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
-                Skor ATS rata-rata: 84 / 100
+                Total CV dari database
               </p>
             </div>
 
@@ -655,14 +716,14 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 </div>
               </div>
               <div>
-                <p className="text-2xl font-black text-slate-900 dark:text-white">48.210</p>
-                <div className="flex items-center gap-1.5 mt-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                  <span>+15.6% peningkatan</span>
+                <p className="text-2xl font-black text-slate-900 dark:text-white">{apiStats?.applications?.total?.toLocaleString('id-ID') || '...'}</p>
+                <div className="flex items-center gap-1.5 mt-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  <Activity className="w-3.5 h-3.5" />
+                  <span>{apiStats?.applications?.interview || 0} interview</span>
                 </div>
               </div>
               <p className="text-[11px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
-                Respon AI Engine: 1,2s
+                Lamaran dari database
               </p>
             </div>
           </div>
@@ -698,10 +759,10 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                   <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-1">
                     <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
                       <Database className="w-3.5 h-3.5 text-orange-500" />
-                      <span>Database Firestore</span>
+                      <span>Database PostgreSQL</span>
                     </div>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">99,98% Uptime</p>
-                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Koneksi Stabil</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">Prisma ORM</p>
+                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Koneksi via @cuti/db</p>
                   </div>
 
                   <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-1">
@@ -920,26 +981,17 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = () => {
                 </h3>
 
                 <div className="space-y-3 text-xs">
-                  <div className="p-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <p className="font-semibold text-slate-800 dark:text-slate-200">
-                      User <span className="text-orange-600 dark:text-orange-400 font-bold">Dewi Lestari</span> di-upgrade ke Pro.
-                    </p>
-                    <span className="text-[10px] text-slate-400">10 menit lalu oleh SuperAdmin</span>
-                  </div>
-
-                  <div className="p-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <p className="font-semibold text-slate-800 dark:text-slate-200">
-                      Lowongan <span className="text-orange-600 dark:text-orange-400 font-bold">Senior Frontend Dev</span> ditambahkan.
-                    </p>
-                    <span className="text-[10px] text-slate-400">1 jam lalu oleh Admin Maya</span>
-                  </div>
-
-                  <div className="p-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <p className="font-semibold text-slate-800 dark:text-slate-200">
-                      Misi <span className="text-orange-600 dark:text-orange-400 font-bold">Lengkapi Data Readiness</span> diperbarui.
-                    </p>
-                    <span className="text-[10px] text-slate-400">3 jam lalu oleh System AI</span>
-                  </div>
+                  {apiStats?.recentOrders?.slice(0, 3).map((order: any) => (
+                    <div key={order.id} className="p-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                      <p className="font-semibold text-slate-800 dark:text-slate-200">
+                        Order <span className="text-orange-600 dark:text-orange-400 font-bold">{order.orderNumber}</span> dari {order.userName}.
+                      </p>
+                      <span className="text-[10px] text-slate-400">{order.package} • Rp {order.totalPrice?.toLocaleString('id-ID')}</span>
+                    </div>
+                  ))}
+                  {(!apiStats?.recentOrders || apiStats.recentOrders.length === 0) && (
+                    <p className="text-xs text-slate-400 italic py-2">Belum ada aktivitas terbaru dari database.</p>
+                  )}
                 </div>
               </div>
             </div>

@@ -8,14 +8,14 @@ export function Footer() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-[10px] bg-navy-700 flex items-center justify-center overflow-hidden shrink-0">
+            <div className="flex items-center justify-center overflow-hidden shrink-0">
               <Image
                 src="/logo.webp"
                 alt="Employr"
-                width={28}
+                width={100}
                 height={28}
                 unoptimized
-                className="w-5.5 h-5.5 object-contain brightness-0 invert"
+                className="h-6 w-auto object-contain"
               />
             </div>
             <div>

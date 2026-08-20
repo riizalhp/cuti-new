@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@cuti/db';
+import { logSecurityEvent, logApp, extractRequestContext, detectBruteForce } from '@cuti/db/logger';
 import crypto from 'crypto';
 
 const corsHeaders = {
@@ -60,6 +61,24 @@ export async function POST(req: NextRequest) {
 
         const isValid = verifyPassword(password, account.password);
         if (!isValid) {
+          const ctx = extractRequestContext(req);
+          // Log failed login attempt
+          logSecurityEvent({
+            eventType: 'LOGIN_FAILED',
+            ip: ctx.ip,
+            userAgent: ctx.userAgent,
+            email: cleanEmail,
+            userId: user.id,
+            severity: 'WARNING',
+            details: { reason: 'invalid_password' },
+          });
+          logApp({ source: 'AUTH', level: 'WARNING', message: `Login failed: invalid password for ${cleanEmail}`, ip: ctx.ip, endpoint: '/api/auth/login', method: 'POST', statusCode: 401 });
+
+          // Check for brute force
+          if (ctx.ip) {
+            await detectBruteForce(ctx.ip, cleanEmail);
+          }
+
           return NextResponse.json(
             { success: false, message: 'Email atau kata sandi salah.' },
             { status: 401, headers: corsHeaders }
@@ -72,6 +91,18 @@ export async function POST(req: NextRequest) {
           email: user.email,
           role: user.role,
         };
+
+        const ctx = extractRequestContext(req);
+        // Log successful login
+        logSecurityEvent({
+          eventType: 'LOGIN_SUCCESS',
+          ip: ctx.ip,
+          userAgent: ctx.userAgent,
+          email: cleanEmail,
+          userId: user.id,
+          severity: 'INFO',
+        });
+        logApp({ source: 'AUTH', level: 'INFO', message: `Login success: ${cleanEmail} (${user.role})`, ip: ctx.ip, endpoint: '/api/auth/login', method: 'POST', statusCode: 200, userId: user.id });
 
         const response = NextResponse.json(
           {
@@ -99,8 +130,10 @@ export async function POST(req: NextRequest) {
       console.warn('Database connection warning during login, falling back to resilient local session:', dbError?.message || dbError);
     }
 
-    // Resilient Fallback (Dev / Local Offline Mode or standard mock user):
-    // Allows seamless access when database is temporarily offline in local development
+    // Dev/Resilient fallback — log the fallback as well
+    const ctx = extractRequestContext(req);
+    logApp({ source: 'AUTH', level: 'WARNING', message: `Login dev fallback: ${cleanEmail} (DB offline)`, ip: ctx.ip, endpoint: '/api/auth/login', method: 'POST', statusCode: 200 });
+
     const nameFromEmail = cleanEmail.split('@')[0];
     const formattedName = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1);
     

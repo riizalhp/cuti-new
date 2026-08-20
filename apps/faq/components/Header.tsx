@@ -15,14 +15,14 @@ export function Header() {
           {/* Brand */}
           <div className="flex items-center gap-3 min-w-0">
             <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-              <div className="w-9 h-9 rounded-[10px] bg-navy-700 flex items-center justify-center overflow-hidden shrink-0 transition group-hover:bg-navy-800">
+              <div className="flex items-center justify-center overflow-hidden shrink-0">
                 <Image
                   src="/logo.webp"
                   alt="Employr"
-                  width={36}
-                  height={36}
+                  width={120}
+                  height={32}
                   unoptimized
-                  className="w-7 h-7 object-contain brightness-0 invert"
+                  className="h-7 w-auto object-contain"
                 />
               </div>
               <div className="leading-tight min-w-0">

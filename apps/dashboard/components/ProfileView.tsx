@@ -98,6 +98,22 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             }));
           }
         }
+
+        // Load onboarding profile data as defaults
+        const onboardingStr = localStorage.getItem('cuti_onboarding_profile');
+        if (onboardingStr) {
+          const onboarding = JSON.parse(onboardingStr);
+          setProfileData((prev) => ({
+            ...prev,
+            fullName: onboarding.fullName || prev.fullName,
+            location: onboarding.location || prev.location,
+            headline: onboarding.targetPositions?.[0]
+              ? `${onboarding.targetPositions.join(', ')} | ${onboarding.educationLevel || ''}`
+              : prev.headline,
+            expectedSalary: onboarding.expectedSalary || prev.expectedSalary,
+            experienceYears: onboarding.hasWorkExperience ? 'Berpengalaman' : 'Fresh Graduate',
+          }));
+        }
       } catch (e) {
         console.warn('Failed to parse session in ProfileView', e);
       }

@@ -21,6 +21,15 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     if (!session || !session.email) {
       const redirectUrl = pathname ? `/login?redirect=${encodeURIComponent(pathname)}` : '/login';
       router.replace(redirectUrl);
+      return;
+    }
+
+    // Check if user has completed onboarding
+    if (typeof window !== 'undefined') {
+      const onboardingCompleted = localStorage.getItem('cuti_onboarding_completed');
+      if (!onboardingCompleted && pathname !== '/onboarding') {
+        router.replace('/onboarding');
+      }
     }
   }, [pathname, router]);
 

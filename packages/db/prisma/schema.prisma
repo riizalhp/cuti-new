@@ -179,15 +179,22 @@ model articles {
 }
 
 model audit_logs {
-  id         String   @id @db.Uuid
-  user_id    String   @db.Uuid
+  id         String      @id @db.Uuid
+  user_id    String      @db.Uuid
   action     String
   entity     String
   entity_id  String?
   old_value  Json?
   new_value  Json?
-  created_at DateTime @default(now())
-  users      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  ip_address String?     @db.VarChar(45)
+  user_agent String?     @db.VarChar(512)
+  severity   LogSeverity @default(INFO)
+  created_at DateTime    @default(now())
+  users      User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([entity, action])
+  @@index([created_at])
+  @@index([severity])
 }
 
 model certifications {
@@ -422,6 +429,44 @@ model sessions {
   users      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
+model security_events {
+  id          String              @id @db.Uuid
+  user_id     String?             @db.Uuid
+  event_type  SecurityEventType
+  ip_address  String?             @db.VarChar(45)
+  user_agent  String?             @db.VarChar(512)
+  email       String?             @db.VarChar(255)
+  details     Json?
+  severity    LogSeverity         @default(WARNING)
+  resolved    Boolean             @default(false)
+  resolved_at DateTime?
+  created_at  DateTime            @default(now())
+
+  @@index([event_type, created_at])
+  @@index([ip_address, created_at])
+  @@index([severity])
+}
+
+model app_logs {
+  id         String       @id @db.Uuid
+  source     AppLogSource
+  level      LogSeverity  @default(INFO)
+  message    String
+  details    Json?
+  user_id    String?      @db.Uuid
+  request_id String?      @db.VarChar(100)
+  ip_address String?      @db.VarChar(45)
+  endpoint   String?      @db.VarChar(512)
+  method     String?      @db.VarChar(10)
+  status_code Int?
+  duration_ms Int?
+  created_at DateTime     @default(now())
+
+  @@index([source, created_at])
+  @@index([level, created_at])
+  @@index([created_at])
+}
+
 model system_settings {
   id          String   @id @db.Uuid
   key         String   @unique
@@ -604,6 +649,40 @@ enum Role {
   USER
   PREMIUM
   ADMIN
+}
+
+enum LogSeverity {
+  DEBUG
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum SecurityEventType {
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGIN_BRUTE_FORCE
+  LOGOUT
+  PASSWORD_CHANGED
+  ROLE_CHANGED
+  UNAUTHORIZED_ACCESS
+  SESSION_HIJACK_SUSPECTED
+  API_KEY_LEAKED
+  SUSPICIOUS_IP
+  RATE_LIMIT_EXCEEDED
+  DATA_EXPORT
+  ADMIN_ACTION
+}
+
+enum AppLogSource {
+  AUTH
+  API
+  PAYMENT
+  CV_ENGINE
+  AI_GATEWAY
+  SYSTEM
+  ADMIN
+  CRON
 }
 
 enum SalaryPeriod {

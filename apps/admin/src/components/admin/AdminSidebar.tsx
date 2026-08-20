@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import {
   LayoutDashboard,
@@ -14,7 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Sun,
-  Moon
+  Moon,
+  Activity
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -34,13 +35,31 @@ const navItems: NavItem[] = [
   { title: "Campaigns", href: "/campaigns", icon: Megaphone },
   { title: "CMS Konten", href: "/cms", icon: BookOpen },
   { title: "AI Config", href: "/ai-config", icon: Cpu },
+  { title: "Logs & Security", href: "/logs", icon: Activity },
   { title: "Settings", href: "/settings", icon: Settings },
 ]
 
+function getAdminSession() {
+  if (typeof window === "undefined") return null
+  try {
+    const cookie = document.cookie.split(";").find((c) => c.trim().startsWith("cuti_admin_session="))
+    if (cookie) {
+      return JSON.parse(decodeURIComponent(cookie.split("=")[1]))
+    }
+  } catch {}
+  return null
+}
+
 export function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(false)
+  const [adminName, setAdminName] = useState("")
   const pathname = usePathname()
   const { theme, toggleTheme } = useTheme()
+
+  useEffect(() => {
+    const session = getAdminSession()
+    if (session?.name) setAdminName(session.name)
+  }, [])
 
   return (
     <motion.aside
@@ -52,7 +71,7 @@ export function AdminSidebar() {
       <div className="flex flex-col h-full p-4">
         {/* Logo */}
         <div className="flex items-center justify-between mb-8 px-2 pt-2">
-          <Link href="/" className="relative flex items-center justify-center h-8 overflow-hidden">
+          <Link href="/" className="relative flex items-center justify-center h-8 overflow-hidden bg-white rounded-lg px-2 py-1">
             {/* Full Expanded Logo */}
             <div
               className={`transition-all duration-300 ease-in-out flex items-center ${
@@ -67,7 +86,7 @@ export function AdminSidebar() {
                 width={130}
                 height={32}
                 unoptimized
-                className="h-[26px] w-auto max-w-[115px] object-contain brightness-0 invert"
+                className="h-[26px] w-auto max-w-[115px] object-contain"
               />
             </div>
 
@@ -85,7 +104,7 @@ export function AdminSidebar() {
                 width={28}
                 height={28}
                 unoptimized
-                className="h-6 w-6 object-contain brightness-0 invert"
+                className="h-6 w-6 object-contain"
               />
             </div>
           </Link>
@@ -142,30 +161,30 @@ export function AdminSidebar() {
                 {theme === "dark" ? "Mode Terang" : "Mode Gelap"}
               </motion.span>
             )}
-          </button>
+          </button>          {/* User Info */}
+          {adminName && !collapsed && (
+            <div className="px-3.5 py-2">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Masuk sebagai</p>
+              <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{adminName}</p>
+            </div>
+          )}
 
           {/* Logout */}
           <button
             onClick={() => {
               if (typeof window !== 'undefined') {
+                // Clear admin session cookie
+                document.cookie = 'cuti_admin_session=; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
                 localStorage.clear();
                 sessionStorage.clear();
-                const landingUrl =
-                  process.env.NEXT_PUBLIC_LANDING_URL ||
-                  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-                    ? 'http://localhost:4321'
-                    : 'https://employr.id');
-                window.location.href = landingUrl;
+                window.location.href = '/login';
               }
             }}
             className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors border border-transparent hover:border-rose-900/50 text-xs font-medium cursor-pointer"
           >
             <LogOut size={19} className="flex-shrink-0" />
             {!collapsed && (
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
+              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 Logout
               </motion.span>
             )}

@@ -25,35 +25,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: formatted });
   } catch (error: any) {
-    // If DB is not yet populated or unreachable, return fallback data gracefully
-    return NextResponse.json({
-      success: true,
-      data: [
-        {
-          id: "1",
-          name: "Ahmad Rizki",
-          email: "ahmad.rizki@gmail.com",
-          status: "Active",
-          plan: "Paket Siap Kerja",
-          joinedDate: "2026-08-01",
-        },
-        {
-          id: "2",
-          name: "Siti Nurhaliza",
-          email: "siti.nur@yahoo.com",
-          status: "Active",
-          plan: "Free User",
-          joinedDate: "2026-08-05",
-        },
-        {
-          id: "3",
-          name: "Budi Santoso",
-          email: "budi.santoso@outlook.com",
-          status: "Inactive",
-          plan: "CV Profesional",
-          joinedDate: "2026-08-08",
-        },
-      ],
-    });
+    console.error("[Users API] Error:", error);
+    return NextResponse.json(
+      { success: false, message: "Gagal mengambil data pengguna dari database." },
+      { status: 500 }
+    );
   }
 }

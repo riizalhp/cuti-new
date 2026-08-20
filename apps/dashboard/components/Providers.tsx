@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from 'next-themes';
 import { ModalProvider } from '@/context/ModalContext';
+import { ToastProvider } from '@/components/ui/Toast';
+import { ConfirmDialogProvider } from '@/components/ui/ConfirmDialog';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
@@ -19,7 +21,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       forcedTheme={!mounted ? 'light' : undefined}
       disableTransitionOnChange
     >
-      <ModalProvider>{children}</ModalProvider>
+      <ModalProvider>
+        <ToastProvider>
+          <ConfirmDialogProvider>{children}</ConfirmDialogProvider>
+        </ToastProvider>
+      </ModalProvider>
     </ThemeProvider>
   );
 }

@@ -1,12 +1,10 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Cpu,
-  Key,
   Globe,
-  Sliders,
   Play,
   Plus,
   Trash2,
@@ -16,30 +14,23 @@ import {
   Zap,
   Save,
   Check,
-  Clock,
-  Activity,
   Layers,
   Sparkles,
   Server,
-  Send,
   Eye,
   EyeOff,
-  Terminal,
-  ShieldCheck,
   Edit3,
-  ExternalLink,
-  PackageCheck,
-  MessageSquare,
   X,
   Bot,
-  User,
-  CornerDownLeft
+  Database,
+  ArrowRight,
+  FolderOpen,
 } from "lucide-react"
 
-export interface AiEndpointPackage {
+interface AiEndpointPackage {
   id: string
   name: string
-  provider: "openai" | "azure" | "custom_proxy" | "ollama"
+  provider: string
   endpointUrl: string
   apiKey: string
   model: string
@@ -51,144 +42,72 @@ export interface AiEndpointPackage {
   maxTokens: number
 }
 
-interface ChatMessage {
-  id: string
-  role: "user" | "assistant" | "system"
-  content: string
-  timestamp: string
-  metrics?: {
-    ok: boolean
-    status: number
-    statusText?: string
-    latencyMs: number
-    usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number }
-    error?: string
-    raw?: any
-  }
-}
-
 const DEFAULT_MODELS_BY_PROVIDER: Record<string, string[]> = {
-  openai: ["gpt-4o-mini", "gpt-4o", "gpt-4o-2024-08-06", "gpt-4-turbo", "gpt-3.5-turbo", "o1-mini"],
-  azure: ["gpt-4o-deployment", "gpt-4o-mini-deployment", "gpt-35-turbo-deployment"],
-  custom_proxy: ["deepseek-r1", "deepseek-v3", "qwen2.5-coder-32b", "claude-3-5-sonnet-proxy", "gpt-4o-mini"],
-  ollama: ["llama3.2:latest", "mistral:7b-instruct", "gemma2:9b", "deepseek-r1:8b", "codellama:7b"]
+  openai: ["gpt-4o-mini", "gpt-4o", "gpt-4o-2024-08-06", "gpt-4-turbo", "gpt-3.5-turbo"],
+  azure: ["gpt-4o-deployment", "gpt-4o-mini-deployment"],
+  custom_proxy: ["deepseek-r1", "deepseek-v3", "qwen2.5-coder-32b", "gpt-4o-mini"],
+  ollama: ["llama3.2:latest", "mistral:7b-instruct", "gemma2:9b"],
 }
 
 export default function AiConfigPage() {
-  // Multi-Endpoint Packages Pool State
-  const [packages, setPackages] = useState<AiEndpointPackage[]>([
-    {
-      id: "pkg-1",
-      name: "OpenAI Primary Node",
-      provider: "openai",
-      endpointUrl: "https://api.openai.com/v1",
-      apiKey: "",
-      model: "gpt-4o-mini",
-      status: "active",
-      latencyMs: 380,
-      requestsTotal: 14280,
-      isPrimary: true,
-      temperature: 0.3,
-      maxTokens: 512,
-    },
-    {
-      id: "pkg-2",
-      name: "DeepSeek Proxy Backup",
-      provider: "custom_proxy",
-      endpointUrl: "https://api.deepseek.com/v1",
-      apiKey: "",
-      model: "deepseek-r1",
-      status: "active",
-      latencyMs: 520,
-      requestsTotal: 3410,
-      isPrimary: false,
-      temperature: 0.3,
-      maxTokens: 1024,
-    },
-    {
-      id: "pkg-3",
-      name: "Ollama Local GPU Server",
-      provider: "ollama",
-      endpointUrl: "http://localhost:11434/v1",
-      apiKey: "",
-      model: "llama3.2:latest",
-      status: "offline",
-      latencyMs: 0,
-      requestsTotal: 120,
-      isPrimary: false,
-      temperature: 0.3,
-      maxTokens: 512,
-    },
-  ])
+  const [packages, setPackages] = useState<AiEndpointPackage[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
+  const [rotationStrategy, setRotationStrategy] = useState<"round_robin" | "least_used" | "failover">("failover")
 
-  // Active Primary Package
   const primaryPackage = packages.find((p) => p.isPrimary) || packages[0]
 
-  // Modal / Form States for Creating/Editing Package
+  // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingPackageId, setEditingPackageId] = useState<string | null>(null)
-
   const [formName, setFormName] = useState("")
   const [formProvider, setFormProvider] = useState<"openai" | "azure" | "custom_proxy" | "ollama">("openai")
   const [formEndpoint, setFormEndpoint] = useState("https://api.openai.com/v1")
   const [formApiKey, setFormApiKey] = useState("")
   const [formModel, setFormModel] = useState("gpt-4o-mini")
-  const [isCustomFormModel, setIsCustomFormModel] = useState(false)
-  const [customFormModelInput, setCustomFormModelInput] = useState("")
   const [formAvailableModels, setFormAvailableModels] = useState<string[]>(DEFAULT_MODELS_BY_PROVIDER.openai)
-  const [formTemperature, setFormTemperature] = useState(0.3)
-  const [formMaxTokens, setFormMaxTokens] = useState(512)
-
-  const [isFetchingFormModels, setIsFetchingFormModels] = useState(false)
+  const [isFetchingModels, setIsFetchingModels] = useState(false)
   const [modalMessage, setModalMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
-  // System Settings State
-  const [rotationStrategy, setRotationStrategy] = useState<"round_robin" | "least_used" | "failover">("failover")
-  const [saveSuccess, setSaveSuccess] = useState(false)
   const [showKeySecrets, setShowKeySecrets] = useState<Record<string, boolean>>({})
 
-  // RIGHT-HAND SLIDE-IN PLAYGROUND DRAWER STATE
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const [drawerPackage, setDrawerPackage] = useState<AiEndpointPackage | null>(null)
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
-  const [chatInput, setChatInput] = useState("")
-  const [isSendingChat, setIsSendingChat] = useState(false)
-  const chatScrollRef = useRef<HTMLDivElement>(null)
-
-  // Load saved packages & strategy from localStorage on mount
+  // Load from DB on mount
   useEffect(() => {
-    try {
-      const savedPkgs = localStorage.getItem("cuti_admin_ai_packages")
-      if (savedPkgs) {
-        const parsed = JSON.parse(savedPkgs)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setPackages(parsed)
-        }
-      }
-      const savedStrategy = localStorage.getItem("cuti_admin_ai_strategy")
-      if (savedStrategy) {
-        setRotationStrategy(savedStrategy as any)
-      }
-    } catch {
-      // fallback to initial default
-    }
+    loadProviders()
   }, [])
 
-  // Auto save packages to localStorage whenever updated
-  useEffect(() => {
+  const loadProviders = async () => {
+    setLoading(true)
     try {
-      localStorage.setItem("cuti_admin_ai_packages", JSON.stringify(packages))
-    } catch {}
-  }, [packages])
-
-  // Auto scroll chat to bottom
-  useEffect(() => {
-    if (chatScrollRef.current) {
-      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight
+      const res = await fetch("/api/ai-providers")
+      const data = await res.json()
+      if (data.success && Array.isArray(data.data)) {
+        const mapped: AiEndpointPackage[] = data.data.map((p: any, i: number) => ({
+          id: p.id,
+          name: p.name,
+          provider: p.provider || p.alias || "openai",
+          endpointUrl: p.endpointUrl || p.base_url || "https://api.openai.com/v1",
+          apiKey: p.apiKey || p.api_key || "",
+          model: p.model || "gpt-4o-mini",
+          status: p.isActive !== false ? "active" : "offline",
+          latencyMs: 0,
+          requestsTotal: 0,
+          isPrimary: p.priority >= 10 || i === 0,
+          temperature: 0.3,
+          maxTokens: 512,
+        }))
+        setPackages(mapped)
+      } else {
+        setPackages([])
+      }
+    } catch {
+      setPackages([])
+    } finally {
+      setLoading(false)
     }
-  }, [chatMessages, isSendingChat])
+  }
 
-  // Handlers for Package Management
   const handleOpenAddModal = () => {
     setEditingPackageId(null)
     setFormName("")
@@ -196,11 +115,7 @@ export default function AiConfigPage() {
     setFormEndpoint("https://api.openai.com/v1")
     setFormApiKey("")
     setFormModel("gpt-4o-mini")
-    setIsCustomFormModel(false)
-    setCustomFormModelInput("")
     setFormAvailableModels(DEFAULT_MODELS_BY_PROVIDER.openai)
-    setFormTemperature(0.3)
-    setFormMaxTokens(512)
     setModalMessage(null)
     setIsModalOpen(true)
   }
@@ -208,97 +123,27 @@ export default function AiConfigPage() {
   const handleOpenEditModal = (pkg: AiEndpointPackage) => {
     setEditingPackageId(pkg.id)
     setFormName(pkg.name)
-    setFormProvider(pkg.provider)
+    setFormProvider(pkg.provider as any)
     setFormEndpoint(pkg.endpointUrl)
     setFormApiKey(pkg.apiKey)
     setFormModel(pkg.model)
-    setIsCustomFormModel(false)
-    setCustomFormModelInput("")
     setFormAvailableModels(DEFAULT_MODELS_BY_PROVIDER[pkg.provider] || [pkg.model])
-    setFormTemperature(pkg.temperature)
-    setFormMaxTokens(pkg.maxTokens)
     setModalMessage(null)
     setIsModalOpen(true)
   }
 
-  const handleSavePackageModal = () => {
-    if (!formName.trim() || !formEndpoint.trim()) return
-
-    const selectedModelName = isCustomFormModel ? customFormModelInput || "custom-model" : formModel
-
-    if (editingPackageId) {
-      // Edit existing package
-      setPackages(
-        packages.map((p) => {
-          if (p.id === editingPackageId) {
-            return {
-              ...p,
-              name: formName.trim(),
-              provider: formProvider,
-              endpointUrl: formEndpoint.trim(),
-              apiKey: formApiKey.trim(),
-              model: selectedModelName,
-              temperature: formTemperature,
-              maxTokens: formMaxTokens,
-            }
-          }
-          return p
-        })
-      )
-    } else {
-      // Create new package
-      const newPkg: AiEndpointPackage = {
-        id: `pkg-${Date.now()}`,
-        name: formName.trim(),
-        provider: formProvider,
-        endpointUrl: formEndpoint.trim(),
-        apiKey: formApiKey.trim(),
-        model: selectedModelName,
-        status: "active",
-        latencyMs: 0,
-        requestsTotal: 0,
-        isPrimary: packages.length === 0,
-        temperature: formTemperature,
-        maxTokens: formMaxTokens,
-      }
-      setPackages([...packages, newPkg])
+  // Fitur Load Model dari API Endpoint
+  const handleFetchModelsFromEndpoint = async () => {
+    if (!formEndpoint.trim()) {
+      setModalMessage({ type: "error", text: "Masukkan Endpoint URL terlebih dahulu." })
+      return
     }
-    setIsModalOpen(false)
-  }
-
-  const handleDeletePackage = (id: string) => {
-    if (packages.length <= 1) return
-    const filtered = packages.filter((p) => p.id !== id)
-    if (filtered.length > 0 && !filtered.some((p) => p.isPrimary)) {
-      filtered[0].isPrimary = true
-    }
-    setPackages(filtered)
-  }
-
-  const handleSetPrimaryPackage = (id: string) => {
-    setPackages(
-      packages.map((p) => ({
-        ...p,
-        isPrimary: p.id === id,
-      }))
-    )
-  }
-
-  const toggleKeyVisibility = (id: string) => {
-    setShowKeySecrets((prev) => ({ ...prev, [id]: !prev[id] }))
-  }
-
-  // REAL HTTP FETCH MODELS inside Modal
-  const handleFetchModalModels = async () => {
-    if (!formApiKey && formProvider !== "ollama") {
-      setModalMessage({
-        type: "error",
-        text: "Masukkan API Key terlebih dahulu di atas untuk memuat daftar model dari server!",
-      })
+    if (!formApiKey.trim() && formProvider !== "ollama") {
+      setModalMessage({ type: "error", text: "Masukkan API Key terlebih dahulu untuk memuat daftar model." })
       return
     }
 
-    setIsFetchingFormModels(true)
+    setIsFetchingModels(true)
     setModalMessage(null)
 
     try {
@@ -307,8 +152,8 @@ export default function AiConfigPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "models",
-          endpointUrl: formEndpoint,
-          apiKey: formApiKey,
+          endpointUrl: formEndpoint.trim(),
+          apiKey: formApiKey.trim(),
         }),
       })
 
@@ -317,162 +162,166 @@ export default function AiConfigPage() {
       if (data.ok && Array.isArray(data.models) && data.models.length > 0) {
         setFormAvailableModels(data.models)
         setFormModel(data.models[0])
-        setIsCustomFormModel(false)
         setModalMessage({
           type: "success",
-          text: `Berhasil memuat ${data.count} model asli dari endpoint dalam ${data.latencyMs} ms!`,
+          text: `Berhasil memuat ${data.models.length} model dari API (${data.latencyMs}ms)`,
         })
       } else {
         setModalMessage({
           type: "error",
-          text: data.error || `HTTP ${data.status}: Gagal mengambil model dari endpoint.`,
+          text: data.error || "Tidak ada model yang dapat ditarik dari endpoint ini.",
         })
       }
     } catch (err: any) {
       setModalMessage({
         type: "error",
-        text: `Error koneksi: ${err.message || "Gagal menghubungi proxy"}`,
+        text: `Gagal terhubung ke API: ${err.message || "Network Error"}`,
       })
     } finally {
-      setIsFetchingFormModels(false)
+      setIsFetchingModels(false)
     }
   }
 
-  // OPEN RIGHT-HAND SLIDE-IN CHATBOT PLAYGROUND DRAWER
-  const handleOpenPlaygroundDrawer = (pkg: AiEndpointPackage) => {
-    setDrawerPackage(pkg)
-    setChatMessages([
-      {
-        id: `sys-${Date.now()}`,
-        role: "system",
-        content: `Playground terhubung ke paket '${pkg.name}' (${pkg.endpointUrl}) dengan model '${pkg.model}'.`,
-        timestamp: new Date().toLocaleTimeString("id-ID"),
-      },
-    ])
-    setIsDrawerOpen(true)
+  const handleSavePackageModal = () => {
+    if (!formName.trim() || !formEndpoint.trim()) return
+
+    if (editingPackageId) {
+      setPackages(
+        packages.map((p) =>
+          p.id === editingPackageId
+            ? {
+                ...p,
+                name: formName.trim(),
+                provider: formProvider,
+                endpointUrl: formEndpoint.trim(),
+                apiKey: formApiKey.trim(),
+                model: formModel,
+              }
+            : p
+        )
+      )
+    } else {
+      const newPkg: AiEndpointPackage = {
+        id: `pkg-${Date.now()}`,
+        name: formName.trim(),
+        provider: formProvider,
+        endpointUrl: formEndpoint.trim(),
+        apiKey: formApiKey.trim(),
+        model: formModel,
+        status: "active",
+        latencyMs: 0,
+        requestsTotal: 0,
+        isPrimary: packages.length === 0,
+        temperature: 0.3,
+        maxTokens: 512,
+      }
+      setPackages([...packages, newPkg])
+    }
+    setIsModalOpen(false)
   }
 
-  // SEND REAL CHAT MESSAGE IN DRAWER PLAYGROUND
-  const handleSendChatMessage = async (overridePrompt?: string) => {
-    const promptToSend = overridePrompt || chatInput
-    if (!promptToSend.trim() || !drawerPackage || isSendingChat) return
-
-    const userMsg: ChatMessage = {
-      id: `usr-${Date.now()}`,
-      role: "user",
-      content: promptToSend.trim(),
-      timestamp: new Date().toLocaleTimeString("id-ID"),
+  const handleDeletePackage = (id: string) => {
+    const filtered = packages.filter((p) => p.id !== id)
+    if (filtered.length > 0 && !filtered.some((p) => p.isPrimary)) {
+      filtered[0].isPrimary = true
     }
+    setPackages(filtered)
+  }
 
-    setChatMessages((prev) => [...prev, userMsg])
-    if (!overridePrompt) setChatInput("")
-    setIsSendingChat(true)
+  const handleSetPrimary = (id: string) => {
+    setPackages(packages.map((p) => ({ ...p, isPrimary: p.id === id })))
+  }
+
+  const handleSaveConfig = async () => {
+    setIsSaving(true)
+    try {
+      for (const pkg of packages) {
+        if (pkg.id.startsWith("default-") || pkg.id.startsWith("pkg-")) {
+          await fetch("/api/ai-providers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: pkg.name,
+              label: pkg.name,
+              endpointUrl: pkg.endpointUrl,
+              apiKey: pkg.apiKey,
+              model: pkg.model,
+              priority: pkg.isPrimary ? 10 : 0,
+              authType: "apikey",
+              alias: pkg.provider,
+            }),
+          })
+        }
+      }
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 3000)
+      await loadProviders()
+    } catch {
+      // ignore
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleTestConnection = async (pkg: AiEndpointPackage) => {
+    if (!pkg.apiKey && pkg.provider !== "ollama") {
+      alert("Masukkan API Key terlebih dahulu.")
+      return
+    }
 
     try {
       const res = await fetch("/api/test-ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "completion",
-          endpointUrl: drawerPackage.endpointUrl,
-          apiKey: drawerPackage.apiKey,
-          model: drawerPackage.model,
-          prompt: promptToSend.trim(),
-          temperature: drawerPackage.temperature,
-          maxTokens: drawerPackage.maxTokens,
-        }),
+        body: JSON.stringify({ action: "models", endpointUrl: pkg.endpointUrl, apiKey: pkg.apiKey }),
       })
-
       const data = await res.json()
-
-      // Update package stats
-      setPackages((prev) =>
-        prev.map((p) => {
-          if (p.id === drawerPackage.id) {
-            return {
-              ...p,
-              requestsTotal: p.requestsTotal + 1,
-              latencyMs: data.latencyMs || p.latencyMs,
-              status: data.ok ? "active" : data.status === 429 ? "rate_limited" : "offline",
-            }
-          }
-          return p
-        })
-      )
-
-      const assistantMsg: ChatMessage = {
-        id: `ast-${Date.now()}`,
-        role: "assistant",
-        content: data.ok ? data.content : data.error || "Gagal mendapatkan respon dari AI",
-        timestamp: new Date().toLocaleTimeString("id-ID"),
-        metrics: {
-          ok: data.ok,
-          status: data.status || (data.ok ? 200 : 500),
-          statusText: data.statusText,
-          latencyMs: data.latencyMs || 0,
-          usage: data.usage,
-          error: data.error,
-          raw: data.raw,
-        },
+      if (data.ok) {
+        setPackages(packages.map((p) => (p.id === pkg.id ? { ...p, status: "active" as const, latencyMs: data.latencyMs } : p)))
+      } else {
+        setPackages(packages.map((p) => (p.id === pkg.id ? { ...p, status: "offline" as const } : p)))
       }
-
-      setChatMessages((prev) => [...prev, assistantMsg])
-    } catch (err: any) {
-      const errorMsg: ChatMessage = {
-        id: `err-${Date.now()}`,
-        role: "assistant",
-        content: `Kesalahan koneksi jaringan: ${err.message}`,
-        timestamp: new Date().toLocaleTimeString("id-ID"),
-        metrics: {
-          ok: false,
-          status: 500,
-          latencyMs: 0,
-          error: err.message,
-        },
-      }
-      setChatMessages((prev) => [...prev, errorMsg])
-    } finally {
-      setIsSendingChat(false)
+    } catch {
+      setPackages(packages.map((p) => (p.id === pkg.id ? { ...p, status: "offline" as const } : p)))
     }
   }
 
-  const handleSaveConfig = () => {
-    setSaveSuccess(true)
-    setTimeout(() => setSaveSuccess(false), 3000)
-  }
+  const toggleKeyVisibility = (id: string) => setShowKeySecrets((prev) => ({ ...prev, [id]: !prev[id] }))
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-8 relative"
-    >
+    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="space-y-8 relative">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-5">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight flex items-center gap-2.5">
             <Cpu size={26} className="text-orange-500" />
-            Konfigurasi Multi-Endpoint & AI Playground
+            Konfigurasi Multi-Endpoint AI
           </h1>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Setiap Node Membungkus Endpoint URL + API Key + Provider + Model Rujukan dalam 1 Paket Gateway
+            Manajemen provider AI node & model tersimpan di database `ai_providers`
           </p>
         </div>
         <div className="flex items-center gap-3">
           <button
+            onClick={loadProviders}
+            disabled={loading}
+            className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
+          >
+            <RefreshCw size={14} className={loading ? "animate-spin text-orange-500" : ""} />
+            Muat
+          </button>
+          <button
             onClick={handleSaveConfig}
-            className="flex items-center gap-2 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-sm transition-all"
+            disabled={isSaving}
+            className="flex items-center gap-2 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
           >
             {saveSuccess ? (
               <>
-                <Check size={18} />
-                Konfigurasi Tersimpan!
+                <Check size={18} /> Tersimpan!
               </>
             ) : (
               <>
-                <Save size={18} />
-                Simpan Konfigurasi Pool
+                <Save size={18} /> {isSaving ? "Menyimpan..." : "Simpan ke Database"}
               </>
             )}
           </button>
@@ -487,15 +336,11 @@ export default function AiConfigPage() {
               <Server size={20} />
             </div>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-              Primary Node
+              Primary
             </span>
           </div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
-            Paket Utama Aktif
-          </h3>
-          <p className="text-lg font-extrabold text-slate-900 dark:text-slate-50 truncate">
-            {primaryPackage?.name || "Tanpa Paket"}
-          </p>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Paket Utama Aktif</h3>
+          <p className="text-lg font-extrabold text-slate-900 dark:text-slate-50 truncate">{primaryPackage?.name || "Tanpa Paket"}</p>
         </div>
 
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
@@ -503,16 +348,9 @@ export default function AiConfigPage() {
             <div className="p-2.5 rounded-xl bg-orange-50 dark:bg-orange-950/80 border border-orange-100 dark:border-orange-900/60 text-orange-600 dark:text-orange-400">
               <Globe size={20} />
             </div>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
-              {packages.filter((p) => p.status === "active").length} Active Nodes
-            </span>
           </div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
-            Total Endpoint Node
-          </h3>
-          <p className="text-xl font-extrabold text-slate-900 dark:text-slate-50">
-            {packages.length} Node Packages
-          </p>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Total Endpoint Node</h3>
+          <p className="text-xl font-extrabold text-slate-900 dark:text-slate-50">{packages.length} Node</p>
         </div>
 
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
@@ -520,16 +358,9 @@ export default function AiConfigPage() {
             <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400">
               <Zap size={20} />
             </div>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800">
-              Failover Strategy
-            </span>
           </div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
-            Strategi Rotasi
-          </h3>
-          <p className="text-sm font-extrabold text-slate-900 dark:text-slate-50 uppercase tracking-wide">
-            {rotationStrategy}
-          </p>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Strategi Rotasi</h3>
+          <p className="text-sm font-extrabold text-slate-900 dark:text-slate-50 uppercase tracking-wide">{rotationStrategy}</p>
         </div>
 
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
@@ -537,79 +368,82 @@ export default function AiConfigPage() {
             <div className="p-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/80 border border-purple-100 dark:border-purple-800 text-purple-600 dark:text-purple-400">
               <Sparkles size={20} />
             </div>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-              Primary Model
-            </span>
           </div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
-            Model Rujukan Utama
-          </h3>
-          <p className="text-lg font-extrabold text-slate-900 dark:text-slate-50 font-mono truncate">
-            {primaryPackage?.model || "gpt-4o-mini"}
-          </p>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Model Utama</h3>
+          <p className="text-lg font-extrabold text-slate-900 dark:text-slate-50 font-mono truncate">{primaryPackage?.model || "-"}</p>
         </div>
       </div>
 
-      {/* MULTI-ENDPOINT PACKAGE POOL CARDS */}
+      {/* Package Pool Cards / Empty State */}
       <div className="space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-slate-200/80 dark:border-slate-800">
-          <div>
-            <h2 className="text-base font-extrabold text-slate-900 dark:text-slate-50 flex items-center gap-2">
-              <Layers size={20} className="text-orange-500" />
-              Multi-Endpoint Node Packages Pool
-            </h2>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              Daftar paket AI Node terpisah yang terhubung dengan Endpoint & API Key masing-masing
-            </p>
-          </div>
+          <h2 className="text-base font-extrabold text-slate-900 dark:text-slate-50 flex items-center gap-2">
+            <Layers size={20} className="text-orange-500" />
+            Multi-Endpoint Node Pool
+          </h2>
           <button
             onClick={handleOpenAddModal}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-sm transition-all"
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
           >
             <Plus size={16} />
-            Tambah Paket Endpoint Baru
+            Tambah Node
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {packages.map((pkg) => {
-            const showKey = showKeySecrets[pkg.id] || false
-
-            return (
+        {loading ? (
+          <div className="p-8 text-center text-slate-400 text-sm">
+            <RefreshCw size={20} className="animate-spin mx-auto mb-2" />
+            Memuat dari database...
+          </div>
+        ) : packages.length === 0 ? (
+          /* EMPTY STATE */
+          <div className="bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl p-12 text-center space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800 text-orange-500 flex items-center justify-center mx-auto">
+              <Cpu size={32} />
+            </div>
+            <div className="space-y-1 max-w-sm mx-auto">
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Belum Ada Node Provider AI</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                Tambahkan konfigurasi endpoint OpenAI, Azure, Ollama, atau Custom Proxy API Key pertama Anda.
+              </p>
+            </div>
+            <button
+              onClick={handleOpenAddModal}
+              className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-sm transition-all inline-flex items-center gap-2 cursor-pointer"
+            >
+              <Plus size={16} />
+              <span>Tambah Node Provider Baru</span>
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {packages.map((pkg) => (
               <motion.div
                 key={pkg.id}
                 whileHover={{ y: -2 }}
                 className={`bg-white dark:bg-slate-900 border rounded-2xl p-5 shadow-sm transition-all flex flex-col justify-between space-y-4 ${
-                  pkg.isPrimary
-                    ? "border-orange-500 ring-2 ring-orange-500/20"
-                    : "border-slate-200 dark:border-slate-800"
+                  pkg.isPrimary ? "border-orange-500 ring-2 ring-orange-500/20" : "border-slate-200 dark:border-slate-800"
                 }`}
               >
                 <div>
-                  {/* Card Top Badges */}
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-50">
-                          {pkg.name}
-                        </h3>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                      <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-50">{pkg.name}</h3>
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                         {pkg.provider}
                       </span>
                     </div>
-
                     <div className="flex flex-col items-end gap-1">
                       {pkg.isPrimary && (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-orange-500 text-white uppercase tracking-wider shadow-xs">
-                          Primary Node
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-orange-500 text-white uppercase">
+                          Primary
                         </span>
                       )}
                       <span
                         className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                           pkg.status === "active"
-                            ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
-                            : "bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800"
+                            ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 border border-emerald-200"
+                            : "bg-rose-50 dark:bg-rose-950/60 text-rose-600 border border-rose-200"
                         }`}
                       >
                         {pkg.status === "active" ? "Aktif" : "Offline"}
@@ -617,35 +451,27 @@ export default function AiConfigPage() {
                     </div>
                   </div>
 
-                  {/* Bundled Properties */}
                   <div className="space-y-2 text-xs pt-2 border-t border-slate-100 dark:border-slate-800">
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
-                        Endpoint URL
-                      </span>
-                      <p className="font-mono text-slate-800 dark:text-slate-200 truncate bg-slate-50 dark:bg-slate-800/50 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-800">
+                      <span className="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">Endpoint</span>
+                      <p className="font-mono text-slate-800 dark:text-slate-200 truncate bg-slate-50 dark:bg-slate-800/50 px-2.5 py-1 rounded-lg">
                         {pkg.endpointUrl}
                       </p>
                     </div>
 
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
-                        Bundled API Key
-                      </span>
-                      <div className="flex items-center justify-between font-mono text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-800/50 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-800">
+                      <span className="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">API Key</span>
+                      <div className="flex items-center justify-between font-mono text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-800/50 px-2.5 py-1 rounded-lg">
                         <span className="truncate">
                           {pkg.apiKey
-                            ? showKey
+                            ? showKeySecrets[pkg.id]
                               ? pkg.apiKey
                               : `${pkg.apiKey.slice(0, 7)}...${pkg.apiKey.slice(-4)}`
-                            : "Tanpa Key (Ollama / Local)"}
+                            : "Tanpa Key"}
                         </span>
                         {pkg.apiKey && (
-                          <button
-                            onClick={() => toggleKeyVisibility(pkg.id)}
-                            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 ml-1"
-                          >
-                            {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
+                          <button onClick={() => toggleKeyVisibility(pkg.id)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+                            {showKeySecrets[pkg.id] ? <EyeOff size={14} /> : <Eye size={14} />}
                           </button>
                         )}
                       </div>
@@ -653,40 +479,30 @@ export default function AiConfigPage() {
 
                     <div className="grid grid-cols-2 gap-2 pt-1">
                       <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
-                          Bundled Model
-                        </span>
-                        <p className="font-mono font-bold text-slate-900 dark:text-slate-100 truncate">
-                          {pkg.model}
-                        </p>
+                        <span className="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">Model</span>
+                        <p className="font-mono font-bold text-slate-900 dark:text-slate-100 truncate">{pkg.model}</p>
                       </div>
                       <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
-                          Latensi Real
-                        </span>
-                        <p className="font-bold text-emerald-600 dark:text-emerald-400">
-                          {pkg.latencyMs ? `${pkg.latencyMs} ms` : "-"}
-                        </p>
+                        <span className="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">Latensi</span>
+                        <p className="font-bold text-emerald-600 dark:text-emerald-400">{pkg.latencyMs ? `${pkg.latencyMs}ms` : "-"}</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Card Action Buttons */}
                 <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
                   <div className="flex items-center gap-2">
-                    {/* BUTTON TO OPEN RIGHT-HAND SLIDE-IN CHATBOT PLAYGROUND DRAWER */}
                     <button
-                      onClick={() => handleOpenPlaygroundDrawer(pkg)}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-xs transition-all group"
+                      onClick={() => handleTestConnection(pkg)}
+                      className="flex-1 py-2 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-700 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      <MessageSquare size={15} className="group-hover:scale-110 transition-transform" />
-                      Uji Paket Ini (Playground)
+                      <Play size={14} />
+                      <span>Tes Koneksi Node</span>
                     </button>
                     {!pkg.isPrimary && (
                       <button
-                        onClick={() => handleSetPrimaryPackage(pkg.id)}
-                        className="py-2 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-700 transition-colors"
+                        onClick={() => handleSetPrimary(pkg.id)}
+                        className="py-2 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer"
                       >
                         Set Utama
                       </button>
@@ -698,28 +514,26 @@ export default function AiConfigPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleOpenEditModal(pkg)}
-                        className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-1 text-[11px] font-semibold"
+                        className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-1 text-[11px] font-semibold cursor-pointer"
                       >
                         <Edit3 size={13} /> Edit
                       </button>
-                      {packages.length > 1 && (
-                        <button
-                          onClick={() => handleDeletePackage(pkg.id)}
-                          className="text-slate-400 hover:text-rose-500 flex items-center gap-1 text-[11px] font-semibold"
-                        >
-                          <Trash2 size={13} /> Hapus
-                        </button>
-                      )}
+                      <button
+                        onClick={() => handleDeletePackage(pkg.id)}
+                        className="text-slate-400 hover:text-rose-500 flex items-center gap-1 text-[11px] font-semibold cursor-pointer"
+                      >
+                        <Trash2 size={13} /> Hapus
+                      </button>
                     </div>
                   </div>
                 </div>
               </motion.div>
-            )
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* CREATE / EDIT PACKAGE MODAL WITH DYNAMIC MODEL DROPDOWN SELECTOR */}
+      {/* Create/Edit Modal dengan Fitur Load Models dari API */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
@@ -727,17 +541,14 @@ export default function AiConfigPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-xl p-6 space-y-5 overflow-hidden"
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-xl p-6 space-y-5"
             >
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-50 flex items-center gap-2">
+                <h3 className="text-base font-extrabold flex items-center gap-2">
                   <Cpu size={20} className="text-orange-500" />
-                  {editingPackageId ? "Edit Paket AI Node" : "Tambah Paket AI Node Baru"}
+                  {editingPackageId ? "Edit Node Provider" : "Tambah Node Provider Baru"}
                 </h3>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold"
-                >
+                <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 font-bold cursor-pointer">
                   ✕
                 </button>
               </div>
@@ -745,9 +556,7 @@ export default function AiConfigPage() {
               {modalMessage && (
                 <div
                   className={`p-3 rounded-xl border text-xs font-semibold flex items-center gap-2 ${
-                    modalMessage.type === "success"
-                      ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400"
-                      : "bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-400"
+                    modalMessage.type === "success" ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-rose-50 border-rose-200 text-rose-700"
                   }`}
                 >
                   {modalMessage.type === "success" ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
@@ -757,336 +566,97 @@ export default function AiConfigPage() {
 
               <div className="space-y-4 text-xs">
                 <div>
-                  <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                    Nama Paket Node
-                  </label>
+                  <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Nama Node / Label</label>
                   <input
                     type="text"
-                    placeholder="misal: OpenAI Official Primary, DeepSeek Gateway, Azure Backup"
+                    placeholder="misal: OpenAI Primary Node"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-orange-500"
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold focus:outline-none focus:border-orange-500"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                      Provider
-                    </label>
+                    <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Provider</label>
                     <select
                       value={formProvider}
                       onChange={(e) => {
-                        const newProv = e.target.value as any
-                        setFormProvider(newProv)
-                        if (newProv === "openai") setFormEndpoint("https://api.openai.com/v1")
-                        if (newProv === "ollama") setFormEndpoint("http://localhost:11434/v1")
-                        const defs = DEFAULT_MODELS_BY_PROVIDER[newProv] || ["gpt-4o-mini"]
-                        setFormAvailableModels(defs)
-                        setFormModel(defs[0])
-                        setIsCustomFormModel(false)
+                        const v = e.target.value as any
+                        setFormProvider(v)
+                        setFormAvailableModels(DEFAULT_MODELS_BY_PROVIDER[v] || ["gpt-4o-mini"])
+                        setFormModel(DEFAULT_MODELS_BY_PROVIDER[v]?.[0] || "gpt-4o-mini")
                       }}
-                      className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100"
+                      className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold"
                     >
-                      <option value="openai">OpenAI Official</option>
+                      <option value="openai">OpenAI</option>
                       <option value="azure">Azure OpenAI</option>
-                      <option value="custom_proxy">Custom Proxy / DeepSeek</option>
-                      <option value="ollama">Ollama Local Server</option>
+                      <option value="custom_proxy">Custom Proxy / Router</option>
+                      <option value="ollama">Ollama Local</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                      Base Endpoint URL
-                    </label>
+                    <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Endpoint URL</label>
                     <input
                       type="text"
                       value={formEndpoint}
                       onChange={(e) => setFormEndpoint(e.target.value)}
-                      placeholder="https://api.openai.com/v1"
-                      className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-mono text-slate-900 dark:text-slate-100"
+                      className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-mono"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                    Bundled API Key
-                  </label>
+                  <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">API Key</label>
                   <input
                     type="password"
                     value={formApiKey}
                     onChange={(e) => setFormApiKey(e.target.value)}
-                    placeholder="Masukkan API Key paket ini (sk-proj-...)"
-                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-mono text-slate-900 dark:text-slate-100 focus:outline-none focus:border-orange-500"
+                    placeholder="sk-proj-..."
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-mono focus:outline-none focus:border-orange-500"
                   />
                 </div>
 
-                {/* BUNDLED MODEL DROPDOWN SELECTOR WITH REAL ENDPOINT FETCH */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                      Bundled Model
-                    </label>
+                {/* Model Selection & Auto Fetch Models Button */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Pilih Model AI</label>
                     <button
                       type="button"
-                      onClick={handleFetchModalModels}
-                      disabled={isFetchingFormModels}
-                      className="text-[11px] font-bold text-orange-600 hover:text-orange-700 dark:text-orange-400 flex items-center gap-1"
+                      onClick={handleFetchModelsFromEndpoint}
+                      disabled={isFetchingModels}
+                      className="text-orange-600 dark:text-orange-400 hover:underline text-[11px] font-bold flex items-center gap-1 cursor-pointer"
                     >
-                      <RefreshCw size={13} className={isFetchingFormModels ? "animate-spin text-orange-500" : ""} />
-                      {isFetchingFormModels ? "Memuat Model..." : "Muat Model dari Endpoint Ini"}
+                      <RefreshCw size={12} className={isFetchingModels ? "animate-spin" : ""} />
+                      <span>{isFetchingModels ? "Memuat Model..." : "Muat Model dari API Endpoint"}</span>
                     </button>
                   </div>
 
-                  {!isCustomFormModel ? (
-                    <select
-                      value={formModel}
-                      onChange={(e) => {
-                        if (e.target.value === "custom_manual") {
-                          setIsCustomFormModel(true)
-                        } else {
-                          setFormModel(e.target.value)
-                        }
-                      }}
-                      className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-orange-500"
-                    >
-                      <optgroup label={`Daftar Model Endpoint (${formAvailableModels.length})`}>
-                        {formAvailableModels.map((m) => (
-                          <option key={m} value={m}>
-                            {m}
-                          </option>
-                        ))}
-                      </optgroup>
-                      <option value="custom_manual">+ Input Custom Model ID Manual...</option>
-                    </select>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        placeholder="Ketik Model ID custom..."
-                        value={customFormModelInput}
-                        onChange={(e) => setCustomFormModelInput(e.target.value)}
-                        className="flex-1 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-mono text-slate-900 dark:text-slate-100"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setIsCustomFormModel(false)}
-                        className="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold rounded-xl text-slate-700 dark:text-slate-300"
-                      >
-                        Pilih dari List
-                      </button>
-                    </div>
-                  )}
+                  <select
+                    value={formModel}
+                    onChange={(e) => setFormModel(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:border-orange-500"
+                  >
+                    {formAvailableModels.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                >
+                <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 cursor-pointer">
                   Batal
                 </button>
                 <button
                   onClick={handleSavePackageModal}
-                  className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-sm transition-all"
+                  className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
                 >
-                  {editingPackageId ? "Simpan Perubahan Paket" : "Tambah Paket AI"}
+                  {editingPackageId ? "Simpan Perubahan" : "Tambah Node"}
                 </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* RIGHT-HAND SLIDE-IN AI CHATBOT PLAYGROUND DRAWER (GEMINI.md Rule) */}
-      <AnimatePresence>
-        {isDrawerOpen && drawerPackage && (
-          <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end transition-opacity">
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="relative z-10 w-full max-w-md sm:max-w-xl h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden"
-            >
-              {/* Drawer Header */}
-              <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-800/40">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white shadow-xs shrink-0">
-                    <Bot size={22} />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-50 flex items-center gap-2">
-                      {drawerPackage.name}
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
-                        {drawerPackage.model}
-                      </span>
-                    </h3>
-                    <p className="text-[11px] font-mono text-slate-400 truncate max-w-[260px]">
-                      {drawerPackage.endpointUrl}
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setIsDrawerOpen(false)}
-                  className="p-2 rounded-xl text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              {/* Drawer Body - Interactive Chat Window */}
-              <div
-                ref={chatScrollRef}
-                className="p-4 overflow-y-auto space-y-4 flex-1 bg-slate-50/40 dark:bg-slate-950/40"
-              >
-                {chatMessages.map((msg) => {
-                  if (msg.role === "system") {
-                    return (
-                      <div key={msg.id} className="text-center my-2">
-                        <span className="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300/50 dark:border-slate-700">
-                          {msg.content}
-                        </span>
-                      </div>
-                    )
-                  }
-
-                  const isUser = msg.role === "user"
-
-                  return (
-                    <div
-                      key={msg.id}
-                      className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}
-                    >
-                      {!isUser && (
-                        <div className="w-8 h-8 rounded-lg bg-navy-700 flex items-center justify-center text-white shrink-0 text-xs font-bold">
-                          <Bot size={16} />
-                        </div>
-                      )}
-
-                      <div className={`max-w-[82%] space-y-1.5 ${isUser ? "items-end" : "items-start"}`}>
-                        <div
-                          className={`p-3.5 rounded-2xl text-xs leading-relaxed ${
-                            isUser
-                              ? "bg-orange-500 text-white font-medium rounded-tr-none shadow-xs"
-                              : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-tl-none shadow-xs"
-                          }`}
-                        >
-                          <p className="whitespace-pre-wrap">{msg.content}</p>
-                        </div>
-
-                        {/* Real Response Metrics underneath Assistant Messages */}
-                        {!isUser && msg.metrics && (
-                          <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-[10px] space-y-1.5">
-                            <div className="flex items-center justify-between font-bold">
-                              <span
-                                className={`flex items-center gap-1 ${
-                                  msg.metrics.ok
-                                    ? "text-emerald-600 dark:text-emerald-400"
-                                    : "text-rose-600 dark:text-rose-400"
-                                }`}
-                              >
-                                {msg.metrics.ok ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />}
-                                HTTP {msg.metrics.status} {msg.metrics.statusText || ""}
-                              </span>
-                              <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                                <Clock size={12} /> {msg.metrics.latencyMs} ms
-                              </span>
-                              {msg.metrics.usage && (
-                                <span className="text-purple-600 dark:text-purple-400 flex items-center gap-1">
-                                  <Layers size={12} /> {msg.metrics.usage.total_tokens} Tokens
-                                </span>
-                              )}
-                            </div>
-
-                            {msg.metrics.raw && (
-                              <details className="text-[10px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700">
-                                <summary className="cursor-pointer font-bold hover:text-slate-800 dark:hover:text-slate-200">
-                                  Lihat Raw JSON Payload
-                                </summary>
-                                <pre className="mt-1 p-2 bg-[#0B132B] text-slate-200 rounded font-mono text-[9px] overflow-x-auto whitespace-pre-wrap">
-                                  {JSON.stringify(msg.metrics.raw, null, 2)}
-                                </pre>
-                              </details>
-                            )}
-                          </div>
-                        )}
-
-                        <span className="text-[9px] text-slate-400 block px-1">
-                          {msg.timestamp}
-                        </span>
-                      </div>
-
-                      {isUser && (
-                        <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center text-white shrink-0 text-xs font-bold">
-                          <User size={16} />
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-
-                {isSendingChat && (
-                  <div className="flex items-center gap-3 justify-start">
-                    <div className="w-8 h-8 rounded-lg bg-navy-700 flex items-center justify-center text-white shrink-0 text-xs font-bold">
-                      <Bot size={16} />
-                    </div>
-                    <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-400 flex items-center gap-2">
-                      <RefreshCw size={14} className="animate-spin text-orange-500" />
-                      Memproses request HTTP real ke {drawerPackage.endpointUrl}...
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Drawer Footer - Quick Chips & Chat Input */}
-              <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
-                {/* Quick Test Prompt Chips */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-                  {[
-                    "kamu model apa?",
-                    "Uji sintesis CV ATS",
-                    "Format output JSON",
-                    "Uji latensi jaringan",
-                  ].map((chip) => (
-                    <button
-                      key={chip}
-                      onClick={() => handleSendChatMessage(chip)}
-                      disabled={isSendingChat}
-                      className="px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/40 text-slate-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 border border-slate-200 dark:border-slate-700 transition-colors"
-                    >
-                      ⚡ {chip}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Chat Input Field */}
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    handleSendChatMessage()
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <input
-                    type="text"
-                    placeholder="Ketik pesan uji coba AI real..."
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    disabled={isSendingChat}
-                    className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:border-orange-500 transition-all"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!chatInput.trim() || isSendingChat}
-                    className="p-2.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white rounded-xl shadow-xs transition-all"
-                  >
-                    <Send size={16} />
-                  </button>
-                </form>
               </div>
             </motion.div>
           </div>

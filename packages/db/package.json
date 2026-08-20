@@ -9,6 +9,16 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./logger": {
+      "types": "./src/logger.ts",
+      "import": "./src/logger.ts",
+      "default": "./src/logger.ts"
+    },
+    "./api-logger": {
+      "types": "./src/api-logger.ts",
+      "import": "./src/api-logger.ts",
+      "default": "./src/api-logger.ts"
     }
   },
   "scripts": {

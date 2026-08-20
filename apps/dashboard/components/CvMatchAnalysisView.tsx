@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useToast } from '@/components/ui/Toast';
 import { cvApi, jobsApi, trackerApi } from '@/lib/api';
 import {
   FileText,
@@ -95,6 +96,7 @@ const samplePresets = [
 ];
 
 export const CvMatchAnalysisView: React.FC = () => {
+  const toast = useToast();
   // Step 1 State: Active CV — dimuat dari database (tidak ada fallback contoh)
   const [savedCVs, setSavedCVs] = useState<SavedCV[]>([]);
   const [selectedCvId, setSelectedCvId] = useState<string>('');
@@ -250,7 +252,7 @@ export const CvMatchAnalysisView: React.FC = () => {
   // Handle Add New Job Target (Modal submit)
   const handleRunAnalysis = () => {
     if (!newPosition.trim() || !newCompany.trim() || !newDescription.trim()) {
-      alert('Silakan isi Nama Posisi, Perusahaan, dan Teks Job Description terlebih dahulu.');
+      toast.warning('Silakan isi Nama Posisi, Perusahaan, dan Teks Job Description terlebih dahulu.');
       return;
     }
 
@@ -394,7 +396,7 @@ export const CvMatchAnalysisView: React.FC = () => {
       {/* 3. ACTIVE CV SUMMARY BAR & 11. PROGRESS METRICS */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
         {/* Active CV Bar (7 Cols) */}
-        <div className="lg:col-span-7 bg-white rounded-[10px] border border-slate-200 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="lg:col-span-7 bg-white dark:bg-slate-900/80 rounded-[10px] border border-slate-200 dark:border-slate-800 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           {activeCv ? (
             <>
               <div className="flex items-center gap-3">
@@ -406,7 +408,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                       CV Aktif:
                     </span>
-                    <span className="text-xs font-black text-slate-900">
+                    <span className="text-xs font-black text-slate-900 dark:text-white">
                       {activeCv.title}
                     </span>
                     <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">
@@ -435,7 +437,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                 <FileCheck2 className="w-5 h-5" />
               </div>
               <div className="flex-1">
-                <p className="text-xs font-black text-slate-900">Belum ada CV aktif</p>
+                <p className="text-xs font-black text-slate-900 dark:text-white">Belum ada CV aktif</p>
                 <p className="text-[11px] text-slate-500 mt-0.5">
                   {isLoading ? 'Memuat data CV...' : 'Buat CV dulu di halaman CV, lalu kembali ke sini untuk analisis kecocokan lowongan.'}
                 </p>
@@ -445,7 +447,7 @@ export const CvMatchAnalysisView: React.FC = () => {
         </div>
 
         {/* 11. Dashboard Live Progress Summary (5 Cols) */}
-        <div className="lg:col-span-5 bg-white rounded-[10px] border border-slate-200 p-3.5 shadow-2xs flex items-center justify-between gap-2 text-center text-xs">
+        <div className="lg:col-span-5 bg-white dark:bg-slate-900/80 rounded-[10px] border border-slate-200 dark:border-slate-800 p-3.5 shadow-2xs flex items-center justify-between gap-2 text-center text-xs">
           <div className="flex-1 border-r border-slate-100 pr-2">
             <span className="text-[10px] font-bold text-slate-400 block uppercase">Lowongan</span>
             <span className="font-extrabold text-slate-900 text-sm">{totalAnalyzed} Target</span>
@@ -505,14 +507,14 @@ export const CvMatchAnalysisView: React.FC = () => {
           {/* 4. LEADERBOARD CARDS LIST */}
           <div className="space-y-2.5">
             {isLoading && (
-              <div className="p-5 rounded-[10px] border border-slate-200 bg-white text-center space-y-1.5">
+              <div className="p-5 rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-center space-y-1.5">
                 <Loader2 className="w-5 h-5 text-[#3B5CC4] animate-spin mx-auto" />
                 <p className="text-xs font-semibold text-slate-500">Memuat lowongan dari database...</p>
               </div>
             )}
 
             {!isLoading && sortedJobs.length === 0 && (
-              <div className="p-6 rounded-[10px] border border-slate-200 bg-white text-center space-y-2">
+              <div className="p-6 rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-center space-y-2">
                 <Briefcase className="w-8 h-8 text-slate-300 mx-auto" />
                 <p className="text-xs font-bold text-slate-700">Belum ada lowongan untuk dibandingkan.</p>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
@@ -552,8 +554,8 @@ export const CvMatchAnalysisView: React.FC = () => {
                   }}
                   className={`p-3.5 rounded-[10px] border transition cursor-pointer space-y-2.5 relative ${
                     isSelected
-                      ? 'border-[#3B5CC4] bg-blue-50/60 ring-2 ring-[#3B5CC4]/20 shadow-xs'
-                      : 'border-slate-200 hover:bg-slate-50/80 bg-white'
+                      ? 'border-[#3B5CC4] bg-blue-50/60 dark:bg-blue-950/40 ring-2 ring-[#3B5CC4]/20 shadow-xs'
+                      : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 bg-white dark:bg-slate-900/80'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -635,7 +637,7 @@ export const CvMatchAnalysisView: React.FC = () => {
         <div className="lg:col-span-7 sticky top-6 space-y-4">
           {viewMode === 'compare' && compareJobsData.length >= 2 ? (
             /* 12. VISUAL BAR GRAPH COMPARISON MODE (GoTo vs Shopee) */
-            <div className="bg-white rounded-[10px] border border-slate-200 p-5 space-y-5 shadow-2xs">
+            <div className="bg-white dark:bg-slate-900/80 rounded-[10px] border border-slate-200 dark:border-slate-800 p-5 space-y-5 shadow-2xs">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
                   <span className="text-[10px] font-extrabold text-[#F97316] uppercase tracking-wider block">
@@ -737,7 +739,7 @@ export const CvMatchAnalysisView: React.FC = () => {
             </div>
           ) : selectedJob ? (
             /* 5. TABBED DETAIL ATS PANEL FOR SELECTED JOB */
-            <div className="bg-white rounded-[10px] border border-slate-200 p-5 space-y-5 shadow-2xs">
+            <div className="bg-white dark:bg-slate-900/80 rounded-[10px] border border-slate-200 dark:border-slate-800 p-5 space-y-5 shadow-2xs">
               {/* Target Job Header info */}
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
@@ -938,7 +940,11 @@ export const CvMatchAnalysisView: React.FC = () => {
                       portalUrl: selectedJob.externalUrl || '',
                       notes: 'Ditambahkan dari halaman Match CV',
                     });
-                    alert(saved ? `Lowongan ${selectedJob.company} berhasil ditambahkan ke Tracker Lamaran!` : 'Gagal menambahkan ke Tracker. Periksa koneksi.');
+                    if (saved) {
+                      toast.success(`Lowongan ${selectedJob.company} berhasil ditambahkan ke Tracker Lamaran!`);
+                    } else {
+                      toast.error('Gagal menambahkan ke Tracker. Periksa koneksi.');
+                    }
                   }}
                   className="w-full sm:w-auto px-3 py-2 rounded-[10px] border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold transition text-center cursor-pointer"
                 >
@@ -948,7 +954,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                 {/* Primary CTA (ORANGE-500) */}
                 <button
                   type="button"
-                  onClick={() => alert(`CV berhasil dioptimalkan khusus untuk lowongan ${selectedJob.company}!`)}
+                  onClick={() => toast.success(`CV berhasil dioptimalkan khusus untuk lowongan ${selectedJob.company}!`)}
                   className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-[#F97316] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-md transition text-center cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Sparkles className="w-4 h-4 text-white" />
@@ -958,7 +964,7 @@ export const CvMatchAnalysisView: React.FC = () => {
             </div>
           ) : (
             /* Empty state panel — tidak ada lowongan dipilih */
-            <div className="bg-white rounded-[10px] border border-slate-200 p-8 text-center space-y-3 shadow-2xs">
+            <div className="bg-white dark:bg-slate-900/80 rounded-[10px] border border-slate-200 dark:border-slate-800 p-8 text-center space-y-3 shadow-2xs">
               {isLoading ? (
                 <>
                   <Loader2 className="w-8 h-8 text-[#3B5CC4] animate-spin mx-auto" />
@@ -989,7 +995,7 @@ export const CvMatchAnalysisView: React.FC = () => {
       {/* 6. MODAL: TAMBAH LOWONGAN TARGET */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-[10px] max-w-lg w-full p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-[10px] max-w-lg w-full p-6 space-y-4 shadow-2xl relative border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
                 <PlusCircle className="w-5 h-5 text-[#F97316]" />
@@ -1033,7 +1039,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                   value={newPosition}
                   onChange={(e) => setNewPosition(e.target.value)}
                   placeholder="Contoh: Frontend Engineer"
-                  className="w-full px-3 py-2 rounded-[10px] border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-[#3B5CC4] focus:outline-none"
+                  className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#3B5CC4] focus:outline-none"
                 />
               </div>
 
@@ -1045,7 +1051,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                   value={newCompany}
                   onChange={(e) => setNewCompany(e.target.value)}
                   placeholder="Contoh: GoTo / Shopee / Tokopedia"
-                  className="w-full px-3 py-2 rounded-[10px] border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-[#3B5CC4] focus:outline-none"
+                  className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#3B5CC4] focus:outline-none"
                 />
               </div>
 
@@ -1057,7 +1063,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
                   placeholder="Tempelkan persyaratan pekerjaan dari portal karir di sini..."
-                  className="w-full p-3 rounded-[10px] border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-[#3B5CC4] focus:outline-none resize-none"
+                  className="w-full p-3 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#3B5CC4] focus:outline-none resize-none"
                 />
               </div>
             </div>
@@ -1098,7 +1104,7 @@ export const CvMatchAnalysisView: React.FC = () => {
       {/* 9. MODAL: LIHAT SEMUA KEYWORDS */}
       {isKeywordsModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-[10px] max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+          <div className="bg-white dark:bg-slate-900 rounded-[10px] max-w-md w-full p-6 space-y-4 shadow-2xl relative border border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
                 <Target className="w-4 h-4 text-[#3B5CC4]" />
@@ -1148,7 +1154,7 @@ export const CvMatchAnalysisView: React.FC = () => {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-[10px] max-w-lg w-full p-6 space-y-4 shadow-2xl relative cursor-default"
+            className="bg-white dark:bg-slate-900 rounded-[10px] max-w-lg w-full p-6 space-y-4 shadow-2xl relative border border-slate-200 dark:border-slate-800 cursor-default"
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2">

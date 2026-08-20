@@ -8,12 +8,14 @@ interface CitySearchInputProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  autoFocus?: boolean;
 }
 
 export const CitySearchInput: React.FC<CitySearchInputProps> = ({
   value,
   onChange,
-  placeholder = 'Cari Kota / Kabupaten di Indonesia (misal: Semarang, Jakarta, Bandung)...',
+  placeholder = 'Cari Kota / Kabupaten di Indonesia...',
+  autoFocus = false,
 }) => {
   const [query, setQuery] = useState(value || '');
   const [isOpen, setIsOpen] = useState(false);
@@ -129,6 +131,7 @@ export const CitySearchInput: React.FC<CitySearchInputProps> = ({
         <MapPin className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
         <input
           type="text"
+          autoFocus={autoFocus}
           placeholder={placeholder}
           value={query}
           onFocus={() => setIsOpen(true)}

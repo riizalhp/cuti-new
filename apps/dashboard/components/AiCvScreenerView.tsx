@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useToast } from '@/components/ui/Toast';
 import {
   Eye,
   Flame,
@@ -394,6 +395,7 @@ const MODULE_CONFIGS = [
 ];
 
 export const AiCvScreenerView: React.FC = () => {
+  const toast = useToast();
   // Phase / View State: 'setup' (Form Input & Recruiter Selection) vs 'report' (Full Width Immersive Pipeline)
   const [activePhase, setActivePhase] = useState<'setup' | 'report'>('setup');
 
@@ -650,11 +652,11 @@ export const AiCvScreenerView: React.FC = () => {
 
   const handleStartRvePipeline = () => {
     if (cvSourceMode === 'upload' && !uploadedFile) {
-      alert('Silakan pilih atau upload file CV Anda terlebih dahulu.');
+      toast.warning('Silakan pilih atau upload file CV Anda terlebih dahulu.');
       return;
     }
     if (cvSourceMode === 'saved' && !hasSavedCvs) {
-      alert('Belum ada CV tersimpan di akun Anda. Buat CV terlebih dahulu atau pilih Unggah Berkas.');
+      toast.warning('Belum ada CV tersimpan di akun Anda. Buat CV terlebih dahulu atau pilih Unggah Berkas.');
       return;
     }
 
