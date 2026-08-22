@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { cvApi } from '@/lib/api';
 import { FileText, Sliders, ChevronDown, ChevronUp, CheckCircle2, Sparkles, Plus } from 'lucide-react';
 import { calculateAtsScore, getAtsStatusLabel } from '@/lib/ats-score';
+import { calculateDynamicAtsScore } from '@/lib/ats-score-engine';
 
 interface CVATSScoreCardProps {
   onOptimizeClick?: () => void;
@@ -21,11 +22,14 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
   const [accuracyRate, setAccuracyRate] = useState<number>(0);
   const [recommendationsCount, setRecommendationsCount] = useState<number>(0);
   const [hasCv, setHasCv] = useState<boolean>(true);
+  const [isEmptyOrDefault, setIsEmptyOrDefault] = useState<boolean>(false);
+  const [penalties, setPenalties] = useState<string[]>([]);
+  const [bonuses, setBonuses] = useState<string[]>([]);
   const [breakdown, setBreakdown] = useState([
-    { name: 'Kata Kunci (Keywords)', score: 0, status: 'Memuat...' },
-    { name: 'Pengalaman Kerja', score: 0, status: 'Memuat...' },
-    { name: 'Format & Layout ATS', score: 95, status: 'Sempurna' },
-    { name: 'Kelengkapan Data', score: 0, status: 'Memuat...' },
+    { name: 'Content Quality (40%)', score: 0, status: 'Memuat...' },
+    { name: 'ATS Readability (25%)', score: 0, status: 'Memuat...' },
+    { name: 'Completeness (20%)', score: 0, status: 'Memuat...' },
+    { name: 'Content Integrity (15%)', score: 0, status: 'Memuat...' },
   ]);
 
   const applyCvData = (cv: any) => {
@@ -39,72 +43,76 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
     setHasCv(true);
     setCvTitle(cv.title || 'CV ATS - Modern Standard');
 
-    const metrics = calculateAtsScore(cv);
-    setAtsScore(metrics.totalScore);
-    setAccuracyRate(metrics.accuracyRate);
-    setRecommendationsCount(metrics.recommendationsCount);
+    const dyn = calculateDynamicAtsScore(cv);
+    setAtsScore(dyn.totalScore);
+    setAccuracyRate(Math.min(99, Math.max(70, Math.round(dyn.totalScore * 1.05))));
+    setRecommendationsCount(dyn.issues.length);
+    setIsEmptyOrDefault(dyn.isEmptyOrDefault);
+    setPenalties(dyn.issues.map((i) => i.message));
+    setBonuses([
+      `Content Quality: ${dyn.engines.contentQuality.score}%`,
+      `ATS Readability: ${dyn.engines.atsReadability.score}%`,
+      `Completeness: ${dyn.engines.completeness.score}%`,
+      `Content Integrity: ${dyn.engines.contentIntegrity.score}%`,
+    ]);
 
     const getStatusText = (val: number) => {
       if (val >= 90) return 'Sangat Baik';
-      if (val >= 80) return 'Baik';
-      if (val >= 70) return 'Cukup';
+      if (val >= 75) return 'Baik';
+      if (val >= 60) return 'Cukup';
       return 'Perlu Revisi';
     };
 
     setBreakdown([
-      { name: 'Kata Kunci (Keywords)', score: metrics.keywordScore, status: getStatusText(metrics.keywordScore) },
-      { name: 'Pengalaman Kerja', score: metrics.expScore, status: getStatusText(metrics.expScore) },
-      { name: 'Format & Layout ATS', score: metrics.formatScore, status: 'Sempurna' },
-      { name: 'Kelengkapan Data', score: metrics.completenessScore, status: getStatusText(metrics.completenessScore) },
+      { name: 'Content Quality (40%)', score: dyn.engines.contentQuality.score, status: getStatusText(dyn.engines.contentQuality.score) },
+      { name: 'ATS Readability (25%)', score: dyn.engines.atsReadability.score, status: getStatusText(dyn.engines.atsReadability.score) },
+      { name: 'Completeness (20%)', score: dyn.engines.completeness.score, status: getStatusText(dyn.engines.completeness.score) },
+      { name: 'Content Integrity (15%)', score: dyn.engines.contentIntegrity.score, status: getStatusText(dyn.engines.contentIntegrity.score) },
     ]);
   };
 
   useEffect(() => {
-    // Sumber utama: database. Draf localStorage lama sengaja TIDAK dipakai sebagai
-    // data CV, agar tidak muncul "CV hantu" dari sesi/browser sebelumnya.
     cvApi.getAll().then((cvs) => {
       if (Array.isArray(cvs) && cvs.length > 0) {
-        // Handle multiple CVs
         if (cvs.length === 1) {
-          // Single CV: show as-is
           const cv = cvs[0];
           applyCvData(cv);
         } else {
-          // Multiple CVs: calculate average
-          const totalScore = cvs.reduce((sum: number, cv: any) => {
-            const metrics = calculateAtsScore(cv);
-            return sum + metrics.totalScore;
-          }, 0);
+          const dynResults = cvs.map((cv: any) => calculateDynamicAtsScore(cv));
+          const totalScore = dynResults.reduce((sum, r) => sum + r.totalScore, 0);
           const avgScore = Math.round(totalScore / cvs.length);
 
           setHasCv(true);
           setCvTitle(`${cvs.length} CV - Rata-rata ATS Score`);
           setAtsScore(avgScore);
 
-          // Calculate average breakdown
-          const avgKeyword = Math.round(cvs.reduce((sum: number, cv: any) => sum + calculateAtsScore(cv).keywordScore, 0) / cvs.length);
-          const avgExp = Math.round(cvs.reduce((sum: number, cv: any) => sum + calculateAtsScore(cv).expScore, 0) / cvs.length);
-          const avgFormat = Math.round(cvs.reduce((sum: number, cv: any) => sum + calculateAtsScore(cv).formatScore, 0) / cvs.length);
-          const avgCompleteness = Math.round(cvs.reduce((sum: number, cv: any) => sum + calculateAtsScore(cv).completenessScore, 0) / cvs.length);
+          const avgCq = Math.round(dynResults.reduce((sum, r) => sum + r.engines.contentQuality.score, 0) / cvs.length);
+          const avgAr = Math.round(dynResults.reduce((sum, r) => sum + r.engines.atsReadability.score, 0) / cvs.length);
+          const avgComp = Math.round(dynResults.reduce((sum, r) => sum + r.engines.completeness.score, 0) / cvs.length);
+          const avgCi = Math.round(dynResults.reduce((sum, r) => sum + r.engines.contentIntegrity.score, 0) / cvs.length);
 
           const getStatusText = (val: number) => {
             if (val >= 90) return 'Sangat Baik';
-            if (val >= 80) return 'Baik';
-            if (val >= 70) return 'Cukup';
+            if (val >= 75) return 'Baik';
+            if (val >= 60) return 'Cukup';
             return 'Perlu Revisi';
           };
 
           setBreakdown([
-            { name: 'Kata Kunci (Keywords)', score: avgKeyword, status: getStatusText(avgKeyword) },
-            { name: 'Pengalaman Kerja', score: avgExp, status: getStatusText(avgExp) },
-            { name: 'Format & Layout ATS', score: avgFormat, status: 'Sempurna' },
-            { name: 'Kelengkapan Data', score: avgCompleteness, status: getStatusText(avgCompleteness) },
+            { name: 'Content Quality (40%)', score: avgCq, status: getStatusText(avgCq) },
+            { name: 'ATS Readability (25%)', score: avgAr, status: getStatusText(avgAr) },
+            { name: 'Completeness (20%)', score: avgComp, status: getStatusText(avgComp) },
+            { name: 'Content Integrity (15%)', score: avgCi, status: getStatusText(avgCi) },
           ]);
 
           const avgAccuracy = Math.min(99, Math.max(70, Math.round(avgScore * 1.05)));
-          const avgRecommendations = Math.max(1, 4 - Math.floor(avgScore / 25));
+          const allIssues = dynResults.flatMap((r) => r.issues);
           setAccuracyRate(avgAccuracy);
-          setRecommendationsCount(avgRecommendations);
+          setRecommendationsCount(allIssues.length);
+
+          setIsEmptyOrDefault(dynResults.every((r) => r.isEmptyOrDefault));
+          setPenalties([...new Set(allIssues.map((i) => i.message))]);
+          setBonuses(['Model Dynamic ATS Score (4 Engine) Active']);
         }
       } else {
         setHasCv(false);
@@ -112,18 +120,21 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
         setCvTitle('Belum ada dokumen CV');
         setAccuracyRate(0);
         setRecommendationsCount(0);
+        setIsEmptyOrDefault(true);
+        setPenalties([]);
+        setBonuses([]);
         setBreakdown([
-          { name: 'Kata Kunci (Keywords)', score: 0, status: 'Belum ada data' },
-          { name: 'Pengalaman Kerja', score: 0, status: 'Belum ada data' },
-          { name: 'Format & Layout ATS', score: 0, status: 'Belum ada data' },
-          { name: 'Kelengkapan Data', score: 0, status: 'Belum ada data' },
+          { name: 'Content Quality (40%)', score: 0, status: 'Belum ada data' },
+          { name: 'ATS Readability (25%)', score: 0, status: 'Belum ada data' },
+          { name: 'Completeness (20%)', score: 0, status: 'Belum ada data' },
+          { name: 'Content Integrity (15%)', score: 0, status: 'Belum ada data' },
         ]);
       }
     });
   }, []);
 
   const displayScore = atsScore !== null ? atsScore : 0;
-  const statusLabel = getAtsStatusLabel(displayScore);
+  const statusLabel = getAtsStatusLabel(displayScore, isEmptyOrDefault);
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-full transition-all space-y-4">
@@ -175,8 +186,10 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
           <span className="text-slate-600 dark:text-slate-400 font-medium">
             {!hasCv
               ? 'Buat CV untuk melihat skor ATS kamu'
+              : isEmptyOrDefault
+              ? 'CV masih kosong / template default — isi data asli dulu'
               : recommendationsCount > 0
-              ? `${recommendationsCount} rekomendasi optimasi tersedia`
+              ? `${recommendationsCount} penalti aktif, ${bonuses.length} bonus didapat`
               : 'Format CV optimal & siap screening HR'}
           </span>
           <button
@@ -190,7 +203,31 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
 
         {/* Expandable Breakdown Section */}
         {isExpanded && (
-          <div className="space-y-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 animate-in fade-in duration-200">
+          <div className="space-y-3 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 animate-in fade-in duration-200">
+            {/* Daftar Penalti / Pengurangan Skor */}
+            {penalties.length > 0 && (
+              <div className="space-y-1 bg-red-50/70 dark:bg-red-950/30 p-2.5 rounded-[8px] border border-red-100 dark:border-red-900/40">
+                <p className="text-[11px] font-bold text-red-700 dark:text-red-300">Pengurangan Skor (Penalti):</p>
+                <ul className="text-[10px] text-red-600 dark:text-red-400 space-y-0.5 pl-3 list-disc">
+                  {penalties.map((p, idx) => (
+                    <li key={idx}>{p}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Daftar Bonus / Penambahan Skor */}
+            {bonuses.length > 0 && (
+              <div className="space-y-1 bg-emerald-50/70 dark:bg-emerald-950/30 p-2.5 rounded-[8px] border border-emerald-100 dark:border-emerald-900/40">
+                <p className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">Penambahan Skor (Bonus):</p>
+                <ul className="text-[10px] text-emerald-600 dark:text-emerald-400 space-y-0.5 pl-3 list-disc">
+                  {bonuses.map((b, idx) => (
+                    <li key={idx}>{b}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {breakdown.map((c, i) => (
               <div key={i} className="space-y-1">
                 <div className="flex justify-between text-xs">

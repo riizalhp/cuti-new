@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import AdSlot from '../components/AdSlot.astro';
+import LowonganSection from '../components/LowonganSection.astro';
+import ArtikelSection from '../components/ArtikelSection.astro';
+import KursusSection from '../components/KursusSection.astro';
+import SertifikatSection from '../components/SertifikatSection.astro';
+import EventSection from '../components/EventSection.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout
+  title="PortalKerja — Portal Lowongan Kerja Terlengkap untuk Talenta Muda Indonesia"
+  description="Temukan lowongan kerja, event job fair, kursus, dan sertifikasi. Portal karier terlengkap untuk SMA/SMK, mahasiswa, dan fresh graduate."
+  canonicalUrl="http://localhost:3003/"
+>
+  <Header />
+  <main>
+    <div class="wrap">
+      <Hero />
+
+      <!-- SLOT ADS: LEADERBOARD 728×90 -->
+      <AdSlot type="leaderboard" />
+
+      <div class="layout">
+        <div>
+          <LowonganSection />
+
+          <!-- SLOT ADS: IN-FEED -->
+          <AdSlot type="infeed" style="margin-top:20px;" />
+
+          <ArtikelSection />
+          <KursusSection />
+
+          <!-- SLOT ADS: IN-FEED -->
+          <AdSlot type="infeed" style="margin-top:20px;" />
+
+          <SertifikatSection />
+          <EventSection />
+        </div>
+
+        <Sidebar />
+      </div>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

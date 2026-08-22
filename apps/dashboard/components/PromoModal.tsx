@@ -67,9 +67,11 @@ export const PromoModal: React.FC<PromoModalProps> = ({
   };
 
   const handleDismiss = () => {
-    if (dontShowToday) {
-      localStorage.setItem('promo_dismissed_until', String(Date.now() + 24 * 60 * 60 * 1000));
-    }
+    // Default simpan timestamp tutup saat ini agar tidak muncul berulang di sesi ini (selama 1 jam)
+    const expireTime = dontShowToday
+      ? Date.now() + 24 * 60 * 60 * 1000
+      : Date.now() + 60 * 60 * 1000;
+    localStorage.setItem('promo_dismissed_until', String(expireTime));
     onClose();
   };
 
@@ -90,10 +92,10 @@ export const PromoModal: React.FC<PromoModalProps> = ({
           {/* Close Button */}
           <button
             onClick={handleDismiss}
-            className="absolute top-4 right-4 p-1.5 rounded-[10px] bg-slate-950/30 text-white hover:bg-slate-950/50 transition cursor-pointer z-10"
+            className="absolute top-3.5 right-3.5 w-9 h-9 rounded-full bg-slate-950/40 text-white hover:bg-slate-950/70 hover:scale-105 active:scale-95 flex items-center justify-center transition cursor-pointer z-30 shrink-0"
             aria-label="Tutup Promo"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 stroke-[2.5]" />
           </button>
 
           {/* Badge & Title */}

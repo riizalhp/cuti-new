@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useModals } from '@/context/ModalContext';
 import { ActionCenterCard } from '@/components/ActionCenterCard';
@@ -17,7 +17,18 @@ import { CareerDevelopmentTabs } from '@/components/CareerDevelopmentTabs';
 
 export default function BerandaPage() {
   const router = useRouter();
-  const { openUpgrade } = useModals();
+  const { openUpgrade, openPromo } = useModals();
+
+  useEffect(() => {
+    // Check if promo dismissed today
+    const dismissedUntil = localStorage.getItem('promo_dismissed_until');
+    if (!dismissedUntil || Date.now() > Number(dismissedUntil)) {
+      const timer = setTimeout(() => {
+        openPromo();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, []); // Run ONCE on mount
 
   return (
     <div className="space-y-6 pb-8 max-w-7xl mx-auto">

@@ -1,0 +1,34 @@
+---
+import AdSlot from './AdSlot.astro';
+---
+
+<aside class="sidebar" data-od-id="beranda-sidebar">
+  <div class="side-box">
+    <h4>Jelajahi Portal</h4>
+    <div class="stack" style="gap:10px;">
+      <a href="#lowongan" class="small" style="border-bottom:1px solid var(--border); padding-bottom:8px;">Lowongan kerja — 1.240 aktif</a>
+      <a href="#artikel" class="small" style="border-bottom:1px solid var(--border); padding-bottom:8px;">Artikel karier & tips</a>
+      <a href="#kursus" class="small" style="border-bottom:1px solid var(--border); padding-bottom:8px;">Kursus lembaga pihak ketiga</a>
+      <a href="#sertifikat" class="small" style="border-bottom:1px solid var(--border); padding-bottom:8px;">Info program sertifikasi</a>
+      <a href="#event" class="small">Kalender job fair</a>
+    </div>
+  </div>
+
+  <!-- SLOT ADS: MREC 300×250 -->
+  <AdSlot type="mrec" />
+
+  <div class="side-box">
+    <h4>Kategori Lowongan</h4>
+    <div class="chips">
+      <a class="chip" href="#lowongan">IT & Software</a>
+      <a class="chip" href="#lowongan">Marketing</a>
+      <a class="chip" href="#lowongan">Keuangan</a>
+      <a class="chip" href="#lowongan">Admin</a>
+      <a class="chip" href="#lowongan">Desain</a>
+      <a class="chip" href="#lowongan">Magang</a>
+    </div>
+  </div>
+
+  <!-- SLOT ADS: SKYSCRAPER 300×600 -->
+  <AdSlot type="skyscraper" />
+</aside>

@@ -1,5 +1,6 @@
 'use client';
 
+import { PageHeader } from '@/components/ui/PageHeader';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Globe,
@@ -377,33 +378,31 @@ export const JobScraperView: React.FC = () => {
       )}
 
       {/* Top Banner / Header */}
-      <div className="relative overflow-hidden rounded-[10px] bg-navy-700 text-white p-6 sm:p-8 shadow-xl">
-        <div className="relative z-10 space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="px-3 py-1 rounded-[10px] text-[11px] font-extrabold bg-amber-400 text-slate-950 flex items-center gap-1.5 shadow-sm">
-              <Globe className="w-3.5 h-3.5" /> Scraper Lowongan Pekerjaan
-            </span>
-            <span className="px-3 py-1 rounded-[10px] text-[11px] font-semibold bg-white/10 text-white backdrop-blur-xs border border-white/15 flex items-center gap-1.5">
-              <div className={`w-2 h-2 rounded-full ${isScanning ? 'bg-emerald-400 animate-ping' : 'bg-slate-400'}`} />
-              {isScanning ? 'Memindai Real-time' : 'Siaga'}
-            </span>
-            <span className="px-3 py-1 rounded-[10px] text-[11px] font-semibold bg-white/10 text-white backdrop-blur-xs border border-white/15 hidden sm:flex items-center gap-1">
-              <Layers className="w-3 h-3 text-amber-300" /> {portalsList.filter((p) => p.status === 'Aktif').length} Portal Terkonek
-            </span>
-          </div>
-
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-snug">
-            Pemindai &amp; Ekstraktor Lowongan Kerja
-          </h1>
-          <p className="text-xs md:text-sm text-blue-100/90 max-w-3xl leading-relaxed">
-            Dapatkan informasi lowongan kerja aktif terpercaya dari berbagai portal karir Indonesia secara otomatis. Sistem mencocokkan kualifikasi dengan skor kepantasan CV-mu.
-          </p>
-        </div>
-
-        {/* Decorative Background Elements */}
-        <div className="absolute -right-12 -bottom-12 w-64 h-64 rounded-full bg-blue-400/20 blur-3xl pointer-events-none" />
-        <div className="absolute right-24 top-0 w-36 h-36 rounded-full bg-amber-400/15 blur-2xl pointer-events-none" />
-      </div>
+      <PageHeader
+        title="Pemindai Lowongan Kerja"
+        subtitle="Dapatkan informasi lowongan kerja aktif dari portal karir Indonesia terhubung secara otomatis dengan skor kepantasan CV."
+        icon={Globe}
+        badge="Job Scraper"
+        stats={[
+          {
+            label: 'Status System',
+            value: isScanning ? 'Memindai...' : 'Siaga',
+            icon: RefreshCw,
+            colorClass: isScanning ? 'text-amber-500 animate-pulse' : 'text-emerald-600 dark:text-emerald-400',
+          },
+          {
+            label: 'Portal Terkonek',
+            value: `${portalsList.filter((p) => p.status === 'Aktif').length} Portal`,
+            icon: Layers,
+            colorClass: 'text-indigo-600 dark:text-indigo-400',
+          },
+          {
+            label: 'Loker Ditemukan',
+            value: extractedJobs.length,
+            icon: Briefcase,
+          },
+        ]}
+      />
 
       {/* Main Control & Realtime Logs (Bento Grid 12 Columns) */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">

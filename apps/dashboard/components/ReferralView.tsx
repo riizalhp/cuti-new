@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { PageHeader } from '@/components/ui/PageHeader';
 import {
   Users,
   Copy,
@@ -62,32 +63,27 @@ export const ReferralView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="bg-navy-700 rounded-[10px] p-6 text-white border border-navy-800 shadow-md">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs mb-1">
-              <Gift className="w-4 h-4" />
-              <span>Program Undag Teman & Cuan</span>
-            </div>              <h2 className="text-xl md:text-2xl font-bold tracking-tight">
-                Program Referral Employr
-              </h2>
-            <p className="text-xs text-slate-300 mt-1 max-w-xl">
-              Ajak teman pencari kerja bergabung! Dapatkan akses Premium Gratis + Saldo Koin Karier untuk setiap teman yang berhasil mendaftar.
-            </p>
-          </div>
-
-          <div className="p-3 bg-white/10 backdrop-blur-md rounded-[10px] border border-white/15 flex items-center gap-3 shrink-0">
-            <div className="p-2.5 rounded-[10px] bg-amber-400 text-slate-950 font-black">
-              <Award className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-[10px] text-slate-300 uppercase tracking-wider block font-bold">Total Bonus Kamu</span>
-              <span className="text-lg font-black text-amber-300">{totalBonus}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Header Standardized */}
+      <PageHeader
+        title="Program Undag Teman & Referral"
+        subtitle="Ajak teman pencari kerja bergabung! Dapatkan akses Premium Gratis + Saldo Koin Karier untuk setiap teman yang mendaftar."
+        icon={Users}
+        badge="Referral"
+        stats={[
+          {
+            label: 'Total Bonus Kamu',
+            value: totalBonus,
+            icon: Award,
+            colorClass: 'text-amber-500',
+          },
+          {
+            label: 'Teman Diundang',
+            value: invitedFriends.length,
+            icon: Users,
+            colorClass: 'text-indigo-600 dark:text-indigo-400',
+          },
+        ]}
+      />
 
       {/* Referral Code & Share Link Box */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

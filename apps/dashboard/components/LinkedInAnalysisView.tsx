@@ -1,5 +1,6 @@
 'use client';
 
+import { PageHeader } from '@/components/ui/PageHeader';
 import React, { useState, useEffect } from 'react';
 import {
   Linkedin,
@@ -318,40 +319,34 @@ Kembalikan HANYA JSON valid:
   };
 
   return (
-    <div className="space-y-8 pb-12 font-sans">
-      {/* Header Banner */}
-      <div className="p-6 md:p-8 rounded-[10px] bg-navy-700 text-white border border-navy-800 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#1738D1]/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-navy-500/10 rounded-full blur-2xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] text-xs font-bold bg-[#1738D1]/20 text-orange-300 border border-[#1738D1]/30 uppercase tracking-wider">
-              <Linkedin className="w-3.5 h-3.5 text-orange-400" />
-              <span>Ekstraktor &amp; Auditor LinkedIn</span>
-            </div>
-
-            <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
-              Ekstraksi Data &amp; Audit Profil LinkedIn
-            </h1>
-
-            <p className="text-xs md:text-sm text-slate-200 leading-relaxed">
-              Cukup tempelkan <strong className="text-orange-300">Link URL LinkedIn</strong> kamu. Sistem akan mengekstrak seluruh data profil (termasuk Sertifikasi &amp; Proyek Portofolio), menampilkan rincian data ter-ekstrak, serta memberikan penilaian skor SEO Recruiter &amp; draf rekomendasi optimasi.
-            </p>
-          </div>
-
-          {onOpenUpgradeModal && (
+    <div className="space-y-6 pb-12 font-sans">
+      {/* Header Standardized */}
+      <PageHeader
+        title="Auditor & Ekstraktor LinkedIn"
+        subtitle="Audit profil LinkedIn kamu dan dapatkan rekomendasi optimasi skor SEO Recruiter."
+        icon={Linkedin}
+        badge="SEO Recruiter"
+        stats={
+          analysisResult
+            ? [
+                { label: 'Overall Score', value: `${analysisResult.overallScore}/100`, icon: Sparkles, colorClass: 'text-indigo-600 dark:text-indigo-400' },
+                { label: 'SSI Score', value: `${analysisResult.ssiScore}/100`, icon: TrendingUp, colorClass: 'text-emerald-600 dark:text-emerald-400' },
+              ]
+            : undefined
+        }
+        actions={
+          onOpenUpgradeModal ? (
             <button
               type="button"
               onClick={onOpenUpgradeModal}
-              className="px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-extrabold transition shadow-lg shadow-[#1738D1]/20 flex items-center justify-center gap-2 cursor-pointer shrink-0 border-0"
+              className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer shrink-0 border-0"
             >
               <Zap className="w-4 h-4 text-white" />
-              <span>Pilih Paket Access</span>
+              <span>Paket Access</span>
             </button>
-          )}
-        </div>
-      </div>
+          ) : undefined
+        }
+      />
 
       {/* SINGLE MAIN INPUT CARD: LINK URL LINKEDIN */}
       <div className="p-6 md:p-8 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md space-y-6">

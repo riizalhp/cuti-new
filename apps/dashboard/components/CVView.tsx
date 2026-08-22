@@ -1,8 +1,14 @@
 'use client';
 
+import { PageHeader } from '@/components/ui/PageHeader';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { cvApi, orderApi } from '@/lib/api';
 import { calculateAtsScore } from '@/lib/ats-score';
+import { useDynamicATSScore } from '@/hooks/useDynamicATSScore';
+import { ATSScoreBadge } from '@/components/ats/ATSScoreBadge';
+import { ATSAnalysisDrawer } from '@/components/ats/ATSAnalysisDrawer';
+import { ATSInlineFeedback } from '@/components/ats/ATSInlineFeedback';
+import { ATSIssue } from '@/lib/ats-score-types';
 import { getStoredSession } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { CvPromoModal } from '@/components/CvPromoModal';
@@ -1056,6 +1062,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isHrdModalOpen, setIsHrdModalOpen] = useState(false);
   const [isFormDrawerOpen, setIsFormDrawerOpen] = useState(true);
+  const [isAtsAnalysisOpen, setIsAtsAnalysisOpen] = useState(false);
 
   // Contextual AI Assistant State
   const [isAiDrawerOpen, setIsAiDrawerOpen] = useState(false);
@@ -1099,8 +1106,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     }, 4000);
 
     if (selectedCV) {
-      const contentScore = calculateAtsScore(selectedCV).totalScore;
-      const newScore = Math.min(98, contentScore + 3);
+      const metrics = calculateAtsScore(selectedCV);
+      // Bonus +3 poin hanya jika CV sudah berisi data riil (bukan template kosong)
+      const newScore = metrics.isEmptyOrDefault ? 0 : Math.min(98, metrics.totalScore + 3);
       setSelectedCV({ ...selectedCV, atsScore: newScore });
     }
   };
@@ -1505,35 +1513,27 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     const defaultLocation = onboardingProfile?.location || 'Jakarta, Indonesia';
     const defaultHeadline = newCvJobTitle || (onboardingProfile?.targetPositions?.[0]) || '';
     const defaultSkills = onboardingProfile?.skills || [];
-    const defaultEdu = onboardingProfile?.institutionName
+    const defaultEdu: EducationItem[] = onboardingProfile?.institutionName
       ? [
           {
             id: `edu-${Date.now()}`,
             institution: onboardingProfile.institutionName,
-            degree: onboardingProfile.educationLevel,
-            fieldOfStudy: onboardingProfile.major,
+            degree: `${onboardingProfile.educationLevel || ''} ${onboardingProfile.major || ''}`.trim() || 'Sarjana',
+            year: 'Lulus',
             location: onboardingProfile.location || '',
-            startMonth: '',
-            startYear: '',
-            endMonth: '',
-            endYear: '',
-            isCurrent: false,
             gpa: '',
             description: '',
           },
         ]
       : [];
-    const defaultExp = onboardingProfile?.hasWorkExperience && onboardingProfile?.experienceCompany
+    const defaultExp: ExperienceItem[] = onboardingProfile?.hasWorkExperience && onboardingProfile?.experienceCompany
       ? [
           {
             id: `exp-${Date.now()}`,
             company: onboardingProfile.experienceCompany,
-            position: onboardingProfile.experienceTitle,
+            role: onboardingProfile.experienceTitle || 'Software Engineer',
+            period: 'Sekarang',
             location: onboardingProfile.location || '',
-            startMonth: '',
-            startYear: '',
-            endMonth: '',
-            endYear: '',
             isCurrent: true,
             description: '',
           },
@@ -1950,6 +1950,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     volunteers: [],
     references: [],
   });
+
+  // Real-time Dynamic ATS Score hook
+  const { atsResult, getSectionIssues } = useDynamicATSScore(formData, 300);
 
   const [aiNote, setAiNote] = useState<string>('');
   const [titleInput, setTitleInput] = useState('');
@@ -2955,45 +2958,44 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     <div className="space-y-6 print:space-y-0 print:m-0 print:p-0" suppressHydrationWarning>
       {/* Header Banner - hanya tampil saat di Daftar CV (list view) */}
       {viewMode === 'list' && (
-        <div className="bg-navy-700 rounded-[10px] p-6 text-white border border-navy-800 shadow-md flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 text-blue-200 font-semibold text-xs mb-1">
-              <FileText className="w-4 h-4" />
-              <span>Manajemen &amp; Service CV ATS CUTI</span>
+        <PageHeader
+          title="Manajemen & Service CV"
+          subtitle="Kelola CV mandiri kamu atau gunakan Jasa Pembuatan CV oleh AI & Tim HR untuk kelolosan ATS."
+          icon={FileText}
+          badge="CV Builder"
+          stats={[
+            { label: 'Total CV', value: cvList.length, icon: FileText },
+            {
+              label: 'Avg ATS Score',
+              value: `${cvList.length > 0 ? Math.round(cvList.reduce((acc, c) => acc + (c.atsScore || 0), 0) / cvList.length) : 0}/100`,
+              icon: Sparkles,
+              colorClass: 'text-emerald-600 dark:text-emerald-400',
+            },
+          ]}
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => {
+                  setAiWizardStep(1);
+                  setViewMode('ai-wizard');
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm transition-all cursor-pointer border-0"
+              >
+                <Sparkles className="w-4 h-4 text-white" />
+                <span>Layanan AI & HR</span>
+              </button>
+              <button
+                onClick={() => {
+                  setShowTemplateModal(true);
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Buat CV Mandiri</span>
+              </button>
             </div>
-            <h2 className="text-xl md:text-2xl font-bold tracking-tight">
-              Daftar &amp; Pembuat CV Profesional
-            </h2>
-            <p className="text-xs text-slate-300 mt-1 max-w-2xl">
-              Kelola CV mandiri kamu atau gunakan <span className="text-amber-400 font-bold">Jasa Pembuatan CV oleh AI &amp; Tim HR</span> untuk hasil 100% lolos screening ATS perusahaan.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-
-
-            <button
-              onClick={() => {
-                setAiWizardStep(1);
-                setViewMode('ai-wizard');
-              }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition-all cursor-pointer border-0"
-            >
-              <Sparkles className="w-4 h-4 text-white" />
-              <span>Layanan Pembuatan CV</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setShowTemplateModal(true);
-              }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs border border-slate-700 transition cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Buat CV Mandiri</span>
-            </button>
-          </div>
-        </div>
+          }
+        />
       )}
 
       {/* VIEW MODE 1: DAFTAR CV */}
@@ -4191,10 +4193,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
             {/* Right: ATS Score Indicator Badge */}
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1.5 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold border border-emerald-200 dark:border-emerald-800/80 flex items-center gap-1.5 shadow-2xs">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>Skor ATS: {selectedCV?.atsScore ?? 95}%</span>
-              </span>
+              <ATSScoreBadge
+                atsResult={atsResult}
+                onClick={() => setIsAtsAnalysisOpen(true)}
+              />
             </div>
           </div>
 
@@ -4636,6 +4638,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             value={formData.summary}
                             onChange={(e) => setFormData((prev) => ({ ...prev, summary: e.target.value }))}
                           />
+                          <ATSInlineFeedback issues={getSectionIssues('summary')} />
                         </div>
                       );
                     } else if (secKey === 'experience') {
@@ -4853,6 +4856,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         handleAiSuccessFeedback(feedback);
                                       });
                                     }}
+                                  />
+                                  <ATSInlineFeedback
+                                    issues={getSectionIssues('experience')}
+                                    hasMetric={/(\d+%\b|\$\d+|\bRp\s*\d+|\b\d+\s*(users|clients|m|k|rb)\b)/i.test(exp.description || '')}
                                   />
                                 </div>
                               </div>
@@ -7964,6 +7971,35 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           if (aiApplyHandler) aiApplyHandler(newVal, feedback);
         }}
         targetJobTitle={selectedCV?.headline || 'Professional'}
+      />
+
+      {/* Dynamic ATS Score Analysis Drawer */}
+      <ATSAnalysisDrawer
+        isOpen={isAtsAnalysisOpen}
+        onClose={() => setIsAtsAnalysisOpen(false)}
+        atsResult={atsResult}
+        onFixIssue={(issue) => {
+          setIsAtsAnalysisOpen(false);
+          setRightPanelTab('editor');
+
+          const sectionKeyMap: Record<string, string> = {
+            basics: 'sec1',
+            summary: 'sec2',
+            experience: 'sec3',
+            skills: 'sec4',
+            projects: 'sec6',
+            education: 'sec7',
+            certifications: 'sec5',
+          };
+
+          const targetSection = issue.section || 'basics';
+          const accordionKey = sectionKeyMap[targetSection] || 'sec1';
+
+          setOpenAccordion((prev) => ({
+            ...prev,
+            [accordionKey]: true,
+          }));
+        }}
       />
 
       {/* Bullet Quick Action Rewrite Popover */}

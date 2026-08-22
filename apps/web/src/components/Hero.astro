@@ -1,32 +1,108 @@
-<section class="hero" id="top">
-  <div class="hero-copy">
-    <div class="eyebrow reveal" data-reveal>
-      <span class="status-dot"></span>
-      Career OS untuk generasi pertama kerja
-    </div>
-    <h1 class="reveal" data-reveal>
-      Semua urusan <em>kariermu,</em><br />di satu tempat.
-    </h1>
-    <p class="hero-lede reveal" data-reveal>
-      Bikin CV ATS, temukan loker, pantau lamaran, dan selesaikan misi berhadiah—tanpa pindah-pindah aplikasi.
-    </p>
-    <div class="hero-actions reveal" data-reveal>
-      <a class="button" href="#akses">Mulai perjalananmu <span>↗</span></a>
-      <a class="text-link" href="#fitur">Lihat semua fitur <span>↓</span></a>
-    </div>
-    <div class="social-proof reveal" data-reveal>
-      <div class="avatar-stack" aria-hidden="true"><span>RA</span><span>DI</span><span>NA</span></div>
-      <p><strong>Dibuat untuk kamu.</strong><br />SMA/SMK, mahasiswa, dan fresh graduate.</p>
-    </div>
-  </div>
+---
+---
 
-  <div class="hero-visual reveal" data-reveal>
-    <img src="/images/cuti-hero.png" alt="Tiga talenta muda Indonesia bersiap memulai karier bersama CUTI" width="1600" height="1000" loading="eager" fetchpriority="high" />
-    <div class="hero-sticker sticker-one">CV ATS<br /><strong>92%</strong></div>
-    <div class="hero-sticker sticker-two"><span>●</span> 4 lamaran<br />aktif dipantau</div>
-    <div class="hero-caption">Dari bingung<br />jadi <em>berani.</em></div>
+<div class="hero-wrapper" id="top">
+  <!-- Main Hero Card with Video Background -->
+  <div class="hero-card">
+    <!-- Background Video (Day / Night) -->
+    <div class="hero-video-bg">
+      <video
+        id="hero-video-day"
+        class="hero-video"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+        aria-hidden="true"
+      >
+        <source src="/video/day-hero-pingpong.webm" type="video/webm" />
+        <source src="/day-hero-pingpong.webm" type="video/webm" />
+      </video>
+      <video
+        id="hero-video-night"
+        class="hero-video"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+        style="display:none;"
+        aria-hidden="true"
+      >
+        <source src="/video/night-hero-pingpong.webm" type="video/webm" />
+        <source src="/night-hero-pingpong.webm" type="video/webm" />
+      </video>
+      <div class="hero-card-overlay"></div>
+    </div>
+
+    <!-- 3. Embedded Header inside Hero (Nav Left, Logo Center, CTA Right) -->
+    <header class="hero-header">
+      <nav class="hero-nav" aria-label="Navigasi utama">
+        <a href="#fitur">Features</a>
+        <a href="#sebaran-user">Community</a>
+        <a href="#cara-kerja">Workflow</a>
+        <a href="#testimoni">Stories</a>
+        <a href="#akses">Lifetime</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+
+      <a href="#top" class="hero-brand-center" aria-label="Employr, ke atas">
+        <img src="/logo.webp" alt="Employr" width="130" height="36" class="hero-logo-img" />
+      </a>
+
+      <div class="hero-header-actions">
+        <a href="http://localhost:3000/login" class="hero-login-link">Log in</a>
+        <a href="#akses" class="hero-header-cta">Mulai Sekarang</a>
+        <button class="hero-menu-toggle" type="button" aria-label="Buka menu" aria-expanded="false">
+          <span></span><span></span>
+        </button>
+      </div>
+
+      <!-- Mobile Dropdown Nav -->
+      <div class="hero-mobile-nav">
+        <a href="#fitur">Features</a>
+        <a href="#sebaran-user">Community</a>
+        <a href="#cara-kerja">Workflow</a>
+        <a href="#testimoni">Stories</a>
+        <a href="#akses">Lifetime</a>
+        <a href="#faq">FAQ</a>
+        <a href="http://localhost:3000/login" class="mobile-login">Log in ↗</a>
+      </div>
+    </header>
+
+    <!-- 4. Hero Content Layer (Bottom-Left Aligned) -->
+    <div class="hero-body">
+      <div class="hero-content-left reveal" data-reveal>
+        <h1 class="hero-title">
+          Your journey to<br /><em>career freedom</em><br />starts here
+        </h1>
+      </div>
+    </div>
+
+    <!-- 5. Floating Day/Night Toggle Switch (Monveo Style) -->
+    <div class="hero-theme-toggle" aria-label="Ubah mode waktu video">
+      <button type="button" id="toggle-day-btn" class="toggle-icon-btn active" title="Video Siang" aria-label="Mode Siang">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2"></path>
+          <path d="M12 20v2"></path>
+          <path d="m4.93 4.93 1.41 1.41"></path>
+          <path d="m17.66 17.66 1.41 1.41"></path>
+          <path d="M2 12h2"></path>
+          <path d="M20 12h2"></path>
+          <path d="m6.34 17.66-1.41 1.41"></path>
+          <path d="m19.07 4.93-1.41 1.41"></path>
+        </svg>
+      </button>
+      <button type="button" id="toggle-night-btn" class="toggle-icon-btn" title="Video Malam" aria-label="Mode Malam">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 0 1 1-9-9Z"></path>
+        </svg>
+      </button>
+    </div>
   </div>
-</section>
+</div>
 
 <div class="ticker" aria-label="Fitur unggulan CUTI">
   <div class="ticker-track">
@@ -34,3 +110,71 @@
     <span>CV ATS BUILDER</span><b>✦</b><span>JOB TRACKER</span><b>✦</b><span>LOKER TERKURASI</span><b>✦</b><span>MISI BERHADIAH</span><b>✦</b><span>LIFETIME ACCESS</span><b>✦</b>
   </div>
 </div>
+
+<script is:inline>
+  (function() {
+    var dayVideo = document.getElementById('hero-video-day');
+    var nightVideo = document.getElementById('hero-video-night');
+    var dayBtn = document.getElementById('toggle-day-btn');
+    var nightBtn = document.getElementById('toggle-night-btn');
+
+    function switchToDay() {
+      if (!dayVideo || !nightVideo) return;
+      nightVideo.style.display = 'none';
+      nightVideo.pause();
+      dayVideo.style.display = 'block';
+      dayVideo.play().catch(function() {});
+      if (dayBtn && nightBtn) {
+        dayBtn.classList.add('active');
+        nightBtn.classList.remove('active');
+      }
+    }
+
+    function switchToNight() {
+      if (!dayVideo || !nightVideo) return;
+      dayVideo.style.display = 'none';
+      dayVideo.pause();
+      nightVideo.style.display = 'block';
+      nightVideo.play().catch(function() {});
+      if (dayBtn && nightBtn) {
+        nightBtn.classList.add('active');
+        dayBtn.classList.remove('active');
+      }
+    }
+
+    if (dayBtn) dayBtn.addEventListener('click', switchToDay);
+    if (nightBtn) nightBtn.addEventListener('click', switchToNight);
+
+    function initAutoTime() {
+      var hour = new Date().getHours();
+      var isNight = hour < 6 || hour >= 18;
+      if (isNight) {
+        switchToNight();
+      } else {
+        switchToDay();
+      }
+    }
+
+    initAutoTime();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAutoTime);
+    }
+
+    // Mobile menu toggle
+    var menuBtn = document.querySelector('.hero-menu-toggle');
+    var mobileNav = document.querySelector('.hero-mobile-nav');
+    if (menuBtn && mobileNav) {
+      menuBtn.addEventListener('click', function() {
+        var isOpen = menuBtn.getAttribute('aria-expanded') === 'true';
+        menuBtn.setAttribute('aria-expanded', String(!isOpen));
+        mobileNav.classList.toggle('is-open');
+      });
+      mobileNav.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', function() {
+          menuBtn.setAttribute('aria-expanded', 'false');
+          mobileNav.classList.remove('is-open');
+        });
+      });
+    }
+  })();
+</script>

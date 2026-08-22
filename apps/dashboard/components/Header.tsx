@@ -43,7 +43,13 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
-  const isDarkMode = resolvedTheme === 'dark';
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDarkMode = mounted && resolvedTheme === 'dark';
   const toggleDarkMode = () => setTheme(isDarkMode ? 'light' : 'dark');
   const { openUpgrade, openPromo } = useModals();
   const onOpenUpgradeModal = openUpgrade;

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { UpgradeModal } from '@/components/UpgradeModal';
 import { PromoModal } from '@/components/PromoModal';
@@ -21,10 +21,10 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isPromoOpen, setIsPromoOpen] = useState(false);
   const router = useRouter();
 
-  const openUpgrade = () => setIsUpgradeOpen(true);
-  const closeUpgrade = () => setIsUpgradeOpen(false);
-  const openPromo = () => setIsPromoOpen(true);
-  const closePromo = () => setIsPromoOpen(false);
+  const openUpgrade = useCallback(() => setIsUpgradeOpen(true), []);
+  const closeUpgrade = useCallback(() => setIsUpgradeOpen(false), []);
+  const openPromo = useCallback(() => setIsPromoOpen(true), []);
+  const closePromo = useCallback(() => setIsPromoOpen(false), []);
 
   const handleOpenPayment = () => {
     setIsUpgradeOpen(false);

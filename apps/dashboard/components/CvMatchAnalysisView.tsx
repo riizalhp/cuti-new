@@ -1,5 +1,6 @@
 'use client';
 
+import { PageHeader } from '@/components/ui/PageHeader';
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/Toast';
 import { cvApi, jobsApi, trackerApi } from '@/lib/api';
@@ -357,41 +358,27 @@ export const CvMatchAnalysisView: React.FC = () => {
 
   return (
     <div className="space-y-5 w-full max-w-7xl mx-auto pb-12">
-      {/* 2. COMPACT HERO SECTION (100–120px SaaS Dashboard Style) */}
-      <div className="relative overflow-hidden rounded-[10px] bg-navy-700 text-white p-4 sm:p-5 md:p-6 shadow-md border border-navy-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="relative z-10 space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-[#F97316] text-white flex items-center gap-1">
-              <Trophy className="w-3 h-3 text-amber-200" /> Leaderboard Hub
-            </span>
-            <span className="text-[11px] text-blue-100 font-medium">
-              Multi-Job Comparison &amp; ATS Score Ranking
-            </span>
-          </div>
-
-          <h1 className="text-lg sm:text-xl font-black tracking-tight">
-            Perbandingan Lowongan Kerja
-          </h1>
-          <p className="text-xs text-blue-100/90 max-w-2xl leading-relaxed">
-            Bandingkan kecocokan CV kamu dengan beberapa lowongan kerja sekaligus untuk menentukan prioritas terbaik.
-          </p>
-        </div>
-
-        {/* Action Button "+ Tambah Lowongan" directly in Hero */}
-        <div className="relative z-10 shrink-0">
+      {/* 2. COMPACT HERO SECTION Standardized */}
+      <PageHeader
+        title="Perbandingan Lowongan Kerja"
+        subtitle="Bandingkan kecocokan CV kamu dengan beberapa lowongan kerja sekaligus untuk menentukan prioritas terbaik."
+        icon={BarChart2}
+        badge="Leaderboard Hub"
+        stats={[
+          { label: 'Lowongan Dibandingkan', value: `${jobTargets.length} Posisi`, icon: Layers },
+          { label: 'Target Utama', value: sortedJobs[0] ? sortedJobs[0].position : '-', icon: Trophy, colorClass: 'text-amber-500' },
+        ]}
+        actions={
           <button
             type="button"
             onClick={() => setIsAddModalOpen(true)}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-[10px] bg-[#F97316] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer border-0"
           >
-            <Plus className="w-4 h-4 stroke-[3]" />
+            <Plus className="w-4 h-4" />
             <span>Tambah Lowongan</span>
           </button>
-        </div>
-
-        {/* Subtle Decorative Background */}
-        <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-blue-400/20 to-transparent pointer-events-none" />
-      </div>
+        }
+      />
 
       {/* 3. ACTIVE CV SUMMARY BAR & 11. PROGRESS METRICS */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">

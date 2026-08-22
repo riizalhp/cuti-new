@@ -1,0 +1,34 @@
+---
+interface Props {
+  type: 'leaderboard' | 'mrec' | 'skyscraper' | 'infeed';
+  note?: string;
+  style?: string;
+}
+
+const { type, note, style = '' } = Astro.props;
+
+const config = {
+  leaderboard: {
+    class: 'ad-leaderboard',
+    size: 'Leaderboard — 728 × 90',
+  },
+  mrec: {
+    class: 'ad-mrec',
+    size: 'Medium Rectangle — 300 × 250',
+  },
+  skyscraper: {
+    class: 'ad-skyscraper',
+    size: 'Half-page / Skyscraper — 300 × 600',
+  },
+  infeed: {
+    class: 'ad-infeed',
+    size: 'In-feed — lebar penuh, selip di antara konten',
+  },
+}[type];
+---
+
+<div class={`ad ${config.class}`} style={style}>
+  <span class="ad-tag">Iklan · Google Ads</span>
+  <span class="ad-size">{config.size}</span>
+  {note && <span class="ad-note">{note}</span>}
+</div>

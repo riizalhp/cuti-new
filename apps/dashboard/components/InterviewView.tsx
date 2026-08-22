@@ -1,5 +1,6 @@
 'use client';
 
+import { PageHeader } from '@/components/ui/PageHeader';
 import React, { useState } from 'react';
 import {
   Mic,
@@ -210,41 +211,30 @@ export const InterviewView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="bg-navy-700 rounded-[10px] p-6 text-white border border-navy-800 shadow-md font-sans">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 text-orange-400 font-bold text-xs mb-1 uppercase tracking-wider">
-              <Mic className="w-4 h-4" />
-              <span>Panduan &amp; Simulasi Interview</span>
-            </div>
-            <h2 className="text-xl md:text-2xl font-extrabold tracking-tight">
-              Pusat Persiapan Interview Karier
-            </h2>
-            <p className="text-xs text-slate-200 mt-1 max-w-xl leading-relaxed">
-              Latih jawaban interview Anda dengan Evaluator Sistem, pelajari bank pertanyaan HR &amp; User, serta ikuti panduan bebas dari pertanyaan jebakan.
-            </p>
-          </div>
+      {/* Page Header Standardized */}
+      <PageHeader
+        title="Pusat Persiapan Interview"
+        subtitle="Latih jawaban interview Anda dengan Evaluator Sistem, pelajari bank pertanyaan HR & User, serta taktik pertanyaan jebakan."
+        icon={Mic}
+        badge="Interview Prep"
+        stats={[
+          {
+            label: 'Skor Kesiapan',
+            value: '85 / 100 (Siap)',
+            icon: Sparkles,
+            colorClass: 'text-indigo-600 dark:text-indigo-400',
+          },
+        ]}
+      />
 
-          <div className="p-3 bg-white/10 backdrop-blur-md rounded-[10px] border border-white/15 flex items-center gap-3 shrink-0">
-            <div className="p-2.5 rounded-[10px] bg-[#1738D1] text-white font-black">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-[10px] text-slate-300 uppercase tracking-wider block font-bold">Skor Kesiapan Interview</span>
-              <span className="text-lg font-black text-white">85 / 100 (Siap Tempur)</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Sub Navigation Bar */}
-        <div className="flex flex-wrap items-center gap-2 mt-6 pt-4 border-t border-white/10 text-xs font-semibold">
+      {/* Sub Navigation Bar */}
+      <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
           <button
             onClick={() => setActiveSubTab('simulasi')}
-            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer border ${
               activeSubTab === 'simulasi'
-                ? 'bg-[#1738D1] text-white font-bold shadow-xs'
-                : 'bg-white/10 hover:bg-white/20 text-white'
+                ? 'bg-indigo-600 text-white font-bold border-indigo-600 shadow-xs'
+                : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />

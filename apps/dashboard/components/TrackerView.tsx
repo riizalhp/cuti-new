@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { trackerApi } from '../lib/api';
+import { PageHeader } from '@/components/ui/PageHeader';
 import {
   Briefcase,
   Plus,
@@ -540,27 +541,24 @@ export const TrackerView: React.FC = () => {
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Header Banner */}
-      <div className="bg-navy-700 rounded-[10px] p-6 text-white border border-navy-800 shadow-md">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 text-orange-400 font-bold text-xs mb-1 uppercase tracking-wider">
-              <Briefcase className="w-4 h-4" />
-              <span>Manajemen Lamaran Pekerjaan</span>
-            </div>
-            <h2 className="text-xl md:text-2xl font-extrabold tracking-tight">
-              Tracker Lamaran Kerja
-            </h2>
-            <p className="text-xs text-slate-200 mt-1 max-w-xl leading-relaxed">
-              Pantau status semua lamaran kerja kamu dari interview hingga offering letter dalam satu dashboard terpusat.
-            </p>
-          </div>
-
+      {/* Page Header Standardized */}
+      <PageHeader
+        title="Tracker Lamaran Kerja"
+        subtitle="Pantau alur dan status semua lamaran kerja kamu dari interview hingga offering letter dalam satu tempat."
+        icon={Briefcase}
+        badge="Job Tracker"
+        stats={[
+          { label: 'Total', value: counts.total, icon: Briefcase },
+          { label: 'Screening', value: counts.terkirim, icon: FileText, colorClass: 'text-sky-600 dark:text-sky-400' },
+          { label: 'Interview', value: counts.interview, icon: Calendar, colorClass: 'text-indigo-600 dark:text-indigo-400' },
+          { label: 'Offering', value: counts.offering, icon: Sparkles, colorClass: 'text-emerald-600 dark:text-emerald-400' },
+        ]}
+        actions={
           <div className="flex items-center gap-2">
             <button
               onClick={() => fetchApplications(true)}
               disabled={isRefreshing || isLoading}
-              className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-[10px] bg-white/10 hover:bg-white/20 active:scale-[0.98] text-white font-bold text-xs border border-white/20 transition-all cursor-pointer disabled:opacity-50"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs transition-all cursor-pointer disabled:opacity-50"
               title="Sinkronkan dengan Database"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -568,34 +566,14 @@ export const TrackerView: React.FC = () => {
             </button>
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition-all shrink-0 cursor-pointer border-0"
+              className="flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm transition-all shrink-0 cursor-pointer border-0"
             >
               <Plus className="w-4 h-4" />
-              <span>Tambah Lamaran Baru</span>
+              <span>Tambah Lamaran</span>
             </button>
           </div>
-        </div>
-
-        {/* Mini Pipeline Stats Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-white/10">
-          <div className="p-3 rounded-[10px] bg-white/10 border border-white/15">
-            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider block">Total Lamaran</span>
-            <span className="text-xl font-black text-white">{counts.total}</span>
-          </div>
-          <div className="p-3 rounded-[10px] bg-white/10 border border-white/15">
-            <span className="text-[10px] font-bold text-blue-300 uppercase tracking-wider block">Terkirim / Screening</span>
-            <span className="text-xl font-black text-white">{counts.terkirim}</span>
-          </div>
-          <div className="p-3 rounded-[10px] bg-white/10 border border-white/15">
-            <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider block">Interview</span>
-            <span className="text-xl font-black text-white">{counts.interview}</span>
-          </div>
-          <div className="p-3 rounded-[10px] bg-white/10 border border-white/15">
-            <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider block">Offering Letter</span>
-            <span className="text-xl font-black text-white">{counts.offering}</span>
-          </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Error Message Toast / Alert */}
       {errorMessage && (

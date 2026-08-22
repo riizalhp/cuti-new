@@ -1,5 +1,6 @@
 'use client';
 
+import { PageHeader } from '@/components/ui/PageHeader';
 import React, { useState, useEffect } from 'react';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { userApi } from '@/lib/api';
@@ -130,19 +131,16 @@ ${userEmail || 'email@email.com'}`;
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Header Banner */}
-      <div className="bg-navy-700 rounded-[10px] p-6 text-white border border-navy-800 shadow-md">
-        <div className="flex items-center gap-2 text-orange-400 font-bold text-xs mb-1 uppercase tracking-wider">
-          <Mail className="w-4 h-4" />
-          <span>Cover Letter Builder</span>
-        </div>
-        <h2 className="text-xl md:text-2xl font-extrabold tracking-tight">
-          Pembuat Surat Lamaran Otomatis
-        </h2>
-        <p className="text-xs text-slate-200 mt-1 max-w-xl leading-relaxed">
-          Susun surat lamaran kerja yang persuasif, disesuaikan dengan posisi target dan standar perusahaan multinasional secara instan.
-        </p>
-      </div>
+      {/* Page Header Standardized */}
+      <PageHeader
+        title="Pembuat Surat Lamaran"
+        subtitle="Susun surat lamaran kerja yang persuasif, disesuaikan dengan posisi target dan standar perusahaan multinasional secara instan."
+        icon={Mail}
+        badge="Cover Letter AI"
+        stats={[
+          { label: 'Tersimpan', value: `${savedLetters.length} Draf`, icon: FileText },
+        ]}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Form Generator Left */}
