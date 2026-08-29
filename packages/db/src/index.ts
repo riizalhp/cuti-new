@@ -13,6 +13,6 @@ export const prisma =
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 // Named re-exports to avoid Turbopack CJS `export *` warning
-export { PrismaClient, Prisma, ApplicationStatus } from '@prisma/client';
+export { PrismaClient, Prisma, ApplicationStatus, ApplicationSource } from '@prisma/client';
 export type { User, Prisma as PrismaNamespace } from '@prisma/client';
-export * from './logger.ts';
+export * from './logger';

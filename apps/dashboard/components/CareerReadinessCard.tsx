@@ -1,18 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { cvApi } from '@/lib/api';
+import { useCareerReadiness } from '@/hooks/useCareerReadiness';
 import { TrendingUp, CheckCircle2, AlertCircle, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface CareerReadinessCardProps {
   onBoostClick?: () => void;
-}
-
-interface ChecklistItem {
-  label: string;
-  status: boolean;
-  detail: string;
 }
 
 export const CareerReadinessCard: React.FC<CareerReadinessCardProps> = ({
@@ -20,110 +14,9 @@ export const CareerReadinessCard: React.FC<CareerReadinessCardProps> = ({
 }) => {
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [score, setScore] = useState<number>(0);
-  const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const { score, checklist, isLoaded, completedCount, totalItems } = useCareerReadiness();
 
-  useEffect(() => {
-    cvApi.getAll().then((cvs) => {
-      if (Array.isArray(cvs) && cvs.length > 0) {
-        // Aggregate data from all CVs for comprehensive readiness score
-        let totalContacts = 0;
-        let totalSummaries = 0;
-        let totalEdu = 0;
-        let totalExp = 0;
-        let totalProjects = 0;
-        let totalInternships = 0;
-        let totalSkills = 0;
-        let totalAtsScore = 0;
-
-        cvs.forEach((cv: any) => {
-          if (cv.fullName && cv.email && cv.phone) totalContacts++;
-          if (cv.summary && cv.summary.trim().length >= 20) totalSummaries++;
-          if (Array.isArray(cv.education) && cv.education.length > 0) totalEdu += cv.education.length;
-          if (Array.isArray(cv.experience)) totalExp += cv.experience.length;
-          if (Array.isArray(cv.projects)) totalProjects += cv.projects.length;
-          if (Array.isArray(cv.internships)) totalInternships += cv.internships.length;
-          if (Array.isArray(cv.skills)) totalSkills += cv.skills.length;
-          totalAtsScore += cv.atsScore ?? 85;
-        });
-
-        const avgAtsScore = Math.round(totalAtsScore / cvs.length);
-        const hasContact = totalContacts > 0;
-        const hasSummary = totalSummaries > 0;
-        const contactSummaryStatus = hasContact && hasSummary;
-        const hasEdu = totalEdu > 0;
-        const hasExperience = (totalExp + totalProjects + totalInternships) > 0;
-        const hasSkills = totalSkills >= 4;
-        const isAtsOptimal = avgAtsScore >= 80;
-
-        const evaluatedChecklist: ChecklistItem[] = [
-          {
-            label: 'Kontak & Ringkasan Diri',
-            status: contactSummaryStatus,
-            detail: contactSummaryStatus
-              ? `${totalContacts} CV dengan kontak lengkap`
-              : 'Lengkapi nomor kontak dan ringkasan profil',
-          },
-          {
-            label: 'Riwayat Pendidikan',
-            status: hasEdu,
-            detail: hasEdu
-              ? `${totalEdu} riwayat pendidikan dari ${cvs.length} CV`
-              : 'Belum menambahkan data pendidikan',
-          },
-          {
-            label: 'Pengalaman & Portofolio',
-            status: hasExperience,
-            detail: hasExperience
-              ? `${totalExp + totalProjects + totalInternships} total pengalaman/proyek`
-              : 'Tambahkan minimal 1 pengalaman kerja, magang, atau proyek',
-          },
-          {
-            label: 'Skill Teknis & Softskill',
-            status: hasSkills,
-            detail: hasSkills
-              ? `${totalSkills} keahlian dari ${cvs.length} CV`
-              : `${totalSkills} keahlian (target minimal 4 skill relevan)`,
-          },
-          {
-            label: 'Format CV ATS Friendly',
-            status: isAtsOptimal,
-            detail: isAtsOptimal
-              ? `Rata-rata ATS ${avgAtsScore}/100 (Format lolos screening HR)`
-              : `Rata-rata ATS ${avgAtsScore}/100 (Perlu pengayaan kata kunci)`,
-          },
-        ];
-
-        const completedCount = evaluatedChecklist.filter((c) => c.status).length;
-        const totalItems = evaluatedChecklist.length;
-
-        // Perhitungan proporsional: 60% bobot kelengkapan berkas + 40% bobot skor ATS
-        const calculatedScore = Math.round(
-          (completedCount / totalItems) * 60 + (avgAtsScore / 100) * 40
-        );
-
-        setChecklist(evaluatedChecklist);
-        setScore(calculatedScore);
-        setIsLoaded(true);
-      } else {
-        // Default empty profile state
-        const emptyChecklist: ChecklistItem[] = [
-          { label: 'Kontak & Ringkasan Diri', status: false, detail: 'Lengkapi kontak dan ringkasan profil' },
-          { label: 'Riwayat Pendidikan', status: false, detail: 'Belum menambahkan data pendidikan' },
-          { label: 'Pengalaman & Portofolio', status: false, detail: 'Tambahkan pengalaman kerja atau proyek' },
-          { label: 'Skill Teknis & Softskill', status: false, detail: 'Tambahkan minimal 4 skill utama' },
-          { label: 'Format CV ATS Friendly', status: false, detail: 'Buat CV pertamamu di CV Builder' },
-        ];
-        setChecklist(emptyChecklist);
-        setScore(0);
-        setIsLoaded(true);
-      }
-    });
-  }, []);
-
-  const completedCount = checklist.filter((item) => item.status).length;
-  const totalCount = checklist.length || 5;
+  const totalCount = totalItems || 5;
   const pendingCount = totalCount - completedCount;
 
   return (

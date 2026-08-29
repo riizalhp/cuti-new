@@ -277,7 +277,6 @@ export const InterviewView: React.FC = () => {
             <span>Checklist Persiapan ({progressPercent}%)</span>
           </button>
         </div>
-      </div>
 
       {/* TAB 1: SIMULASI MOCK INTERVIEW */}
       {activeSubTab === 'simulasi' && (

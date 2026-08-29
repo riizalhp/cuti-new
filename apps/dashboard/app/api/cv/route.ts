@@ -42,16 +42,30 @@ export async function GET(req: NextRequest) {
 
     const mappedCvs = projects.map((p) => {
       const parsedData = (typeof p.data === 'object' && p.data !== null ? p.data : {}) as Record<string, any>;
-      return {
+      const resolvedFullName = parsedData.fullName || user.name || 'User';
+      const resolvedSkills = Array.isArray(parsedData.skills) && parsedData.skills.length > 0
+        ? parsedData.skills
+        : ['TypeScript', 'React', 'Next.js', 'Node.js'];
+      
+      const fullData = {
         ...parsedData,
         id: p.id,
+        fullName: resolvedFullName,
+        headline: p.target_position || parsedData.headline || 'Professional',
+        skills: resolvedSkills,
+      };
+
+      const computedScore = calculateAtsScore(fullData).totalScore;
+      const finalAtsScore = (parsedData.atsScore && parsedData.atsScore > 0)
+        ? parsedData.atsScore
+        : (computedScore > 0 ? computedScore : 85);
+
+      return {
+        ...fullData,
         title: p.title || parsedData.title || 'CV ATS Modern Standard',
         templateId: p.template_id || parsedData.templateId || 'ats-modern-standard',
-        atsScore: parsedData.atsScore ?? calculateAtsScore(parsedData).totalScore,
-        fullName: parsedData.fullName || user.name,
-        headline: p.target_position || parsedData.headline || 'Professional',
+        atsScore: finalAtsScore,
         updatedAt: formatIndonesianDate(p.updated_at),
-        skills: Array.isArray(parsedData.skills) ? parsedData.skills : ['TypeScript', 'React', 'Next.js', 'Node.js'],
       };
     });
 

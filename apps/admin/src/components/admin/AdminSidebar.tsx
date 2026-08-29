@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Sun,
   Moon,
-  Activity
+  Activity,
+  Zap
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -32,9 +33,9 @@ const navItems: NavItem[] = [
   { title: "Dashboard", href: "/", icon: LayoutDashboard },
   { title: "Users", href: "/users", icon: Users },
   { title: "CV Management", href: "/cv", icon: FileText },
+  { title: "AI Config & Usage", href: "/ai-config", icon: Cpu },
   { title: "Campaigns", href: "/campaigns", icon: Megaphone },
   { title: "CMS Konten", href: "/cms", icon: BookOpen },
-  { title: "AI Config", href: "/ai-config", icon: Cpu },
   { title: "Logs & Security", href: "/logs", icon: Activity },
   { title: "Settings", href: "/settings", icon: Settings },
 ]
@@ -71,7 +72,7 @@ export function AdminSidebar() {
       <div className="flex flex-col h-full p-4">
         {/* Logo */}
         <div className="flex items-center justify-between mb-8 px-2 pt-2">
-          <Link href="/" className="relative flex items-center justify-center h-8 overflow-hidden bg-white rounded-lg px-2 py-1">
+          <Link href="/" className="relative flex items-center justify-center h-8 overflow-hidden">
             {/* Full Expanded Logo */}
             <div
               className={`transition-all duration-300 ease-in-out flex items-center ${
@@ -83,10 +84,10 @@ export function AdminSidebar() {
               <Image
                 src="/logo.webp"
                 alt="Employr Logo"
-                width={130}
+                width={140}
                 height={32}
                 unoptimized
-                className="h-[26px] w-auto max-w-[115px] object-contain"
+                className="h-7 w-auto max-w-[120px] object-contain brightness-0 invert"
               />
             </div>
 
@@ -101,10 +102,10 @@ export function AdminSidebar() {
               <Image
                 src="/logo-minimize.webp"
                 alt="Employr Logo"
-                width={28}
-                height={28}
+                width={32}
+                height={32}
                 unoptimized
-                className="h-6 w-6 object-contain"
+                className="h-7 w-7 object-contain brightness-0 invert"
               />
             </div>
           </Link>

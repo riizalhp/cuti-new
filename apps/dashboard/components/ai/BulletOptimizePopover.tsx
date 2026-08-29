@@ -10,6 +10,8 @@ import {
   CheckCircle2,
   X,
   ArrowRight,
+  Loader2,
+  AlertTriangle,
 } from 'lucide-react';
 
 export interface BulletOptimizePopoverProps {
@@ -27,36 +29,79 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
 }) => {
   const [selectedGoal, setSelectedGoal] = useState<'impact' | 'ats' | 'metrics' | 'concise' | 'grammar'>('impact');
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   if (!isOpen) return null;
 
-  const handleRewrite = () => {
+  const handleRewrite = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      let result = bulletText;
-      let feedback = 'Bullet berhasil dioptimalkan.';
+    setErrorMessage('');
 
-      if (selectedGoal === 'impact') {
-        result = `Meningkatkan efisiensi tim sebesar 35% dengan mengeksekusi ${bulletText.toLowerCase().replace(/^(membuat|mengelola|melakukan)\s*/, '')}.`;
-        feedback = 'Ditambahkan: hasil terukur & kata kerja berorientasi dampak.';
-      } else if (selectedGoal === 'ats') {
-        result = `Mengoptimalkan ${bulletText.toLowerCase()} menggunakan metodologi standar industri dan pelaporan ATS.`;
-        feedback = 'Ditambahkan: kata kunci & terminologi standar ATS.';
-      } else if (selectedGoal === 'metrics') {
-        result = `${bulletText} dan berhasil menghemat 20+ jam kerja per bulan.`;
-        feedback = 'Ditambahkan: metrik kuantitatif terukur.';
-      } else if (selectedGoal === 'concise') {
-        result = bulletText.split(',')[0].replace(/yang sangat|secara berkesinambungan/g, '');
-        feedback = 'Diringkas: kalimat lebih tajam & tanpa kata mubazir.';
-      } else {
-        result = bulletText.charAt(0).toUpperCase() + bulletText.slice(1);
-        feedback = 'Diperbaiki: tata bahasa & ejaan Bahasa Indonesia resmi.';
+    try {
+      const goalPrompts: Record<string, { system: string; user: string; feedback: string }> = {
+        impact: {
+          system: 'Ubah poin pengalaman CV ini menjadi berorientasi dampak (Impact-driven) dengan kata kerja aksi yang kuat dan angka kuantitatif.',
+          user: `Tulis ulang poin pengalaman ini agar lebih berdampak tinggi:\n"${bulletText}"`,
+          feedback: 'Ditambahkan: hasil terukur & kata kerja berorientasi dampak.',
+        },
+        ats: {
+          system: 'Ubah poin pengalaman CV ini agar kaya kata kunci (ATS-friendly) dan terminologi standar industri.',
+          user: `Tulis ulang poin pengalaman ini agar ramah sistem ATS:\n"${bulletText}"`,
+          feedback: 'Ditambahkan: kata kunci & terminologi standar ATS.',
+        },
+        metrics: {
+          system: 'Tambahkan estimasi metrik kuantitatif terukur (persentase, jumlah, atau skala) pada poin pengalaman CV ini.',
+          user: `Tambahkan metrik/data kuantitatif pada poin ini:\n"${bulletText}"`,
+          feedback: 'Ditambahkan: metrik kuantitatif terukur.',
+        },
+        concise: {
+          system: 'Ringkas poin pengalaman CV ini agar lebih padat, tajam, profesional, dan tanpa kata mubazir.',
+          user: `Ringkas poin ini secara tajam:\n"${bulletText}"`,
+          feedback: 'Diringkas: kalimat lebih tajam & tanpa kata mubazir.',
+        },
+        grammar: {
+          system: 'Perbaiki tata bahasa, ejaan, dan kejelasan poin pengalaman CV ini sesuai Bahasa Indonesia baku.',
+          user: `Perbaiki tata bahasa poin ini:\n"${bulletText}"`,
+          feedback: 'Diperbaiki: tata bahasa & ejaan Bahasa Indonesia resmi.',
+        },
+      };
+
+      const selected = goalPrompts[selectedGoal] || goalPrompts.impact;
+
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: selected.user,
+          systemInstruction: `Anda adalah pakar penulisan CV profesional. ${selected.system} Berikan LANGSUNG 1 kalimat poin hasil perbaikan tanpa tanda kutip, tanpa markdown, dan tanpa penjelasan tambahan.`,
+          promptName: `Bullet Optimize (${selectedGoal})`,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Gagal menghubungi server AI.');
+      }
+
+      let resultText = (data.text || '').trim();
+      // Strip outer quotes if returned by AI
+      if (resultText.startsWith('"') && resultText.endsWith('"')) {
+        resultText = resultText.slice(1, -1);
+      }
+
+      if (!resultText) {
+        throw new Error('Respon AI kosong.');
       }
 
       setIsLoading(false);
-      onApplyRewrite(result, feedback);
+      onApplyRewrite(resultText, selected.feedback);
       onClose();
-    }, 1000);
+    } catch (err: any) {
+      console.error('[Bullet Optimize Popover] Error:', err);
+      setErrorMessage(err.message || 'Gagal menghubungkan ke server AI.');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -74,7 +119,7 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 font-extrabold text-xs">
             <Sparkles className="w-4 h-4 fill-orange-500" />
-            <span>Optimalkan Poin Kalimat</span>
+            <span>Optimalkan Poin Kalimat Real AI</span>
           </div>
 
           <button
@@ -90,6 +135,14 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
         <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 italic truncate">
           &quot;{bulletText || 'Poin pengalaman yang dipilih'}&quot;
         </div>
+
+        {/* Error Alert */}
+        {errorMessage && (
+          <div className="p-3 rounded-[10px] bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
 
         {/* Option Choices */}
         <div className="space-y-1.5">
@@ -167,12 +220,15 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
         {/* Action Button */}
         <button
           type="button"
-          disabled={isLoading}
+          disabled={isLoading || !bulletText.trim()}
           onClick={handleRewrite}
           className="w-full py-2.5 px-4 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 border-0"
         >
           {isLoading ? (
-            <span>Menyusun Kalimat...</span>
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Menyusun Kalimat dengan Real AI...</span>
+            </>
           ) : (
             <>
               <Sparkles className="w-4 h-4 fill-white" />

@@ -1,9 +1,10 @@
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,800,700,600,500,400,300&display=swap');
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-sans: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
   --color-navy-50: #EEF2FF;
   --color-navy-100: #E0E7FF;
@@ -513,7 +514,7 @@ select option {
   html, body {
     width: 210mm !important;
     height: auto !important;
-    min-height: 297mm !important;
+    min-height: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #ffffff !important;
@@ -521,8 +522,10 @@ select option {
     overflow: visible !important;
   }
 
-  /* Reset ONLY parent containers carrying the .cv-print-area-wrapper class */
+  /* Reset all layout containers & wrappers during print */
   #__next,
+  #root,
+  body > div,
   main,
   #main-content-scroll,
   .cv-print-area-wrapper {
@@ -547,6 +550,7 @@ select option {
     width: 210mm !important;
     margin: 0 !important;
     padding: 0 !important;
+    overflow: visible !important;
   }
 
   .a4-paper-sheet-container {
@@ -556,21 +560,27 @@ select option {
     gap: 0 !important;
     display: block !important;
     width: 210mm !important;
+    overflow: visible !important;
   }
 
   .a4-paper-sheet-container > div {
     display: block !important;
     width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
     margin: 0 !important;
     padding: 0 !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-  }
-
-  .a4-paper-sheet-container > div:not(:last-child),
-  .a4-paper-sheet:not(:last-child) {
     page-break-after: always !important;
     break-after: page !important;
+    overflow: hidden !important;
+  }
+
+  .a4-paper-sheet-container > div:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
   }
 
   .a4-paper-sheet {
@@ -587,12 +597,6 @@ select option {
     max-height: 297mm !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
-  }
-
-  .a4-paper-sheet:last-child,
-  .a4-paper-sheet-container > div:last-child {
-    page-break-after: avoid !important;
-    break-after: avoid !important;
   }
 }
 

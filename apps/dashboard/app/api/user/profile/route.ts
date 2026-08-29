@@ -329,6 +329,36 @@ async function handleUpsert(req: NextRequest) {
       data,
     });
 
+    // Auto-learn keywords into dynamic dictionary asynchronously (non-blocking)
+    (async () => {
+      try {
+        const toInsert: { category: string; value: string }[] = [];
+        if (Array.isArray(body.skills)) {
+          body.skills.forEach((s: any) => {
+            if (typeof s === 'string' && s.trim().length > 1) {
+              toInsert.push({ category: 'skill', value: s.trim() });
+            }
+          });
+        }
+        if (typeof body.major === 'string' && body.major.trim().length > 1) {
+          toInsert.push({ category: 'institution', value: body.major.trim() });
+        }
+        if (typeof body.targetJob === 'string' && body.targetJob.trim().length > 1) {
+          toInsert.push({ category: 'position', value: body.targetJob.trim() });
+        }
+
+        for (const item of toInsert) {
+          await (prisma as any).cv_learning_dictionary.upsert({
+            where: { value: item.value },
+            update: { frequency: { increment: 1 } },
+            create: { category: item.category, value: item.value, frequency: 1 },
+          }).catch(() => {});
+        }
+      } catch (err) {
+        // Silently ignore learning errors to avoid affecting profile saves
+      }
+    })();
+
     const updatedUser = await prisma.user.findUnique({ where: { id: user.id } });
     const profile = await buildProfilePayload(user.id, updatedUser);
 

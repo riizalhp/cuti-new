@@ -47,15 +47,21 @@ export function isCVEmptyOrDefault(cv: any): boolean {
     cv.summary && cv.summary.trim().length >= 25 && !isPlaceholderText(cv.summary)
   );
 
-  if (
-    !hasRealName &&
-    !hasRealEmail &&
-    !hasRealSummary &&
-    experiences.length === 0 &&
-    education.length === 0 &&
-    projects.length === 0 &&
-    skills.length === 0
-  ) {
+  // 1. Nama Lengkap belum terisi riil
+  if (!hasRealName) {
+    return true;
+  }
+
+  // 2. Jika seluruh pengalaman kerja (jika ada) masih menggunakan nama perusahaan dummy 'Nama Perusahaan'
+  const hasOnlyDummyCompanies = Array.isArray(cv.experience) && cv.experience.length > 0 &&
+    cv.experience.every((e: any) => isPlaceholderText(e.company));
+
+  // 3. Jika pendidikan masih menggunakan nama universitas dummy 'Nama Universitas'
+  const hasOnlyDummyEducation = Array.isArray(cv.education) && cv.education.length > 0 &&
+    cv.education.every((ed: any) => isPlaceholderText(ed.institution || ed.school));
+
+  // Jika perusahaan & universitas dua-duanya masih data dummy template
+  if (hasOnlyDummyCompanies && hasOnlyDummyEducation) {
     return true;
   }
 
@@ -379,6 +385,21 @@ export function calculateDynamicAtsScore(cv: any): DynamicATSResult {
     arPoints += 3;
   } else {
     arPoints += 7;
+  }
+
+  // D. Profile Photo Presence ATS Check
+  const hasPhoto = Boolean(cv?.photoUrl || cv?.personalInfo?.photoUrl);
+  if (hasPhoto) {
+    issues.push({
+      id: 'photo_present_ats',
+      category: 'atsReadability',
+      severity: 'minor',
+      section: 'basics',
+      message: 'CV menyertakan foto profil yang berpotensi mengurangi skor keramahan ATS.',
+      recommendation: 'Format ATS internasional menyarankan CV tanpa foto agar sistem pemindai teks tidak mengalami bias atau kendala parsing.',
+      penalty: 2,
+      potentialGain: 2,
+    });
   }
 
   const atsReadabilityScore = Math.min(100, Math.round((arPoints / maxAr) * 100));

@@ -132,6 +132,7 @@ export interface RveReportResult {
       isDone: boolean;
     }>;
   };
+  highPriorityRecommendations: string[];
 }
 
 /**
@@ -145,6 +146,105 @@ export function parseCvDocument(
   rawText?: string
 ): CvParsedData {
   if (sourceMode === 'saved' && savedData) {
+    const normalizeAchievements = (exp: any): string[] => {
+      if (Array.isArray(exp?.achievements) && exp.achievements.length > 0) {
+        return exp.achievements.map((a: any) => (typeof a === 'string' ? a : String(a))).filter(Boolean);
+      }
+      if (typeof exp?.achievements === 'string' && exp.achievements.trim().length > 0) {
+        return exp.achievements.split('\n').map((s: string) => s.trim()).filter(Boolean);
+      }
+      if (Array.isArray(exp?.bullets) && exp.bullets.length > 0) {
+        return exp.bullets.map((b: any) => (typeof b === 'string' ? b : String(b))).filter(Boolean);
+      }
+      if (typeof exp?.description === 'string' && exp.description.trim().length > 0) {
+        return exp.description.split('\n').map((s: string) => s.trim()).filter(Boolean);
+      }
+      return ['Melaksanakan tanggung jawab operasional dan berkontribusi terhadap pencapaian target.'];
+    };
+
+    const normalizeExperience = (list: any[] | undefined): CvParsedData['experience'] => {
+      if (!Array.isArray(list) || list.length === 0) {
+        return [
+          {
+            id: 'exp-1',
+            role: 'Senior Fullstack Engineer',
+            company: 'PT Solusi Teknologi Nusantara',
+            period: '2023 - Sekarang',
+            achievements: [
+              'Mengembangkan 12+ modul web berbasis React & TypeScript, mempercepat render 35%.',
+              'Memimpin tim 5 engineer dan memangkas bug rilis hingga 40% dalam 6 bulan.',
+              'Merancang arsitektur microservices yang menangani 50.000+ pengguna harian secara stabil.',
+            ],
+            metricsCount: 3,
+          },
+          {
+            id: 'exp-2',
+            role: 'Frontend Developer',
+            company: 'PT Digital Inovasi Kreatif',
+            period: '2021 - 2023',
+            achievements: [
+              'Membangun dashboard internal dengan React & Tailwind CSS untuk 1.200 karyawan.',
+              'Mengoptimalkan bundle size sebesar 28% dan efisiensi loading halaman utama.',
+            ],
+            metricsCount: 2,
+          },
+        ];
+      }
+
+      return list.map((item, idx) => {
+        const achs = normalizeAchievements(item);
+        return {
+          id: item?.id || `exp-${idx + 1}`,
+          role: item?.role || item?.position || item?.jobTitle || 'Pengalaman Kerja',
+          company: item?.company || item?.companyName || 'Perusahaan',
+          period: item?.period || (item?.startDate && item?.endDate ? `${item.startDate} - ${item.endDate}` : '') || item?.year || '2022 - Sekarang',
+          achievements: achs,
+          metricsCount: item?.metricsCount || achs.length || 1,
+        };
+      });
+    };
+
+    const normalizeEducation = (list: any[] | undefined): CvParsedData['education'] => {
+      if (!Array.isArray(list) || list.length === 0) {
+        return [
+          {
+            id: 'edu-1',
+            degree: 'S1 Teknik Informatika',
+            institution: 'Universitas Indonesia',
+            period: '2017 - 2021',
+            gpa: 'IPK 3.82 / 4.00 (Cumlaude)',
+          },
+        ];
+      }
+
+      return list.map((item, idx) => ({
+        id: item?.id || `edu-${idx + 1}`,
+        degree: item?.degree || item?.major || item?.fieldOfStudy || 'Sarjana',
+        institution: item?.institution || item?.school || item?.university || 'Institusi Pendidikan',
+        period: item?.period || (item?.startDate && item?.endDate ? `${item.startDate} - ${item.endDate}` : '') || item?.year || '2018 - 2022',
+        gpa: item?.gpa || item?.score || item?.grade || 'IPK 3.75',
+      }));
+    };
+
+    const normalizeSkills = (skills: any): string[] => {
+      if (Array.isArray(skills) && skills.length > 0) {
+        return skills.map((s) => (typeof s === 'string' ? s : s?.name || String(s))).filter(Boolean);
+      }
+      if (typeof skills === 'string' && skills.trim().length > 0) {
+        return skills.split(',').map((s) => s.trim()).filter(Boolean);
+      }
+      return [
+        'React.js',
+        'Next.js',
+        'TypeScript',
+        'Node.js',
+        'PostgreSQL',
+        'Tailwind CSS',
+        'Docker',
+        'REST API',
+      ];
+    };
+
     return {
       id: savedData.id || 'saved-cv',
       candidateName: savedData.candidateName || 'Rizky Ramadhan, S.Kom',
@@ -155,50 +255,9 @@ export function parseCvDocument(
       summary:
         savedData.summary ||
         'Software Engineer berpengalaman 3+ tahun memimpin pengembangan aplikasi web performa tinggi dengan React, Next.js, & Node.js. Berhasil meningkatkan kecepatan render 35% dan efisiensi tim.',
-      experience: savedData.experience || [
-        {
-          id: 'exp-1',
-          role: 'Senior Fullstack Engineer',
-          company: 'PT Solusi Teknologi Nusantara',
-          period: '2023 - Sekarang',
-          achievements: [
-            'Mengembangkan 12+ modul web berbasis React & TypeScript, mempercepat render 35%.',
-            'Memimpin tim 5 engineer dan memangkas bug rilis hingga 40% dalam 6 bulan.',
-            'Merancang arsitektur microservices yang menangani 50.000+ pengguna harian secara stabil.',
-          ],
-          metricsCount: 3,
-        },
-        {
-          id: 'exp-2',
-          role: 'Frontend Developer',
-          company: 'PT Digital Inovasi Kreatif',
-          period: '2021 - 2023',
-          achievements: [
-            'Membangun dashboard internal dengan React & Tailwind CSS untuk 1.200 karyawan.',
-            'Mengoptimalkan bundle size sebesar 28% dan efisiensi loading halaman utama.',
-          ],
-          metricsCount: 2,
-        },
-      ],
-      education: savedData.education || [
-        {
-          id: 'edu-1',
-          degree: 'S1 Teknik Informatika',
-          institution: 'Universitas Indonesia',
-          period: '2017 - 2021',
-          gpa: 'IPK 3.82 / 4.00 (Cumlaude)',
-        },
-      ],
-      skills: savedData.skills || [
-        'React.js',
-        'Next.js',
-        'TypeScript',
-        'Node.js',
-        'PostgreSQL',
-        'Tailwind CSS',
-        'Docker',
-        'REST API',
-      ],
+      experience: normalizeExperience(savedData.experience),
+      education: normalizeEducation(savedData.education),
+      skills: normalizeSkills(savedData.skills),
       hobbiesAndMisc: savedData.hobbiesAndMisc || 'Bahasa Indonesia (Native), Bahasa Inggris (Profisient). Hobi: Catur & Futsal.',
     };
   }
@@ -472,23 +531,16 @@ export function predictEyeTrackingAndHeatmap(
 /**
  * 6. ATS CORRELATION ENGINE
  * Cross-references Eye-Tracking visual visibility against ATS keyword density.
+ * Menghasilkan daftar kata kunci ATS secara dinamis berdasarkan target posisi & isi CV pengguna.
  */
 export function analyzeAtsCorrelation(
   parsed: CvParsedData,
   fixations: FixationPoint[],
   targetRole: string
 ): AtsCorrelationItem[] {
-  const targetKeywords = [
-    { kw: 'React.js / Next.js', category: 'Frontend Framework' },
-    { kw: 'TypeScript / JavaScript', category: 'Programming Language' },
-    { kw: 'Node.js / REST API', category: 'Backend Integration' },
-    { kw: 'PostgreSQL / Database', category: 'Data Management' },
-    { kw: 'Metrik Performa (%)', category: 'Impact Measurement' },
-    { kw: 'Pengujian Automated (Jest/Cypress)', category: 'Quality Assurance' },
-  ];
+  const roleName = (targetRole || parsed.roleTitle || 'Professional').trim();
 
-  // CV asli (dari DB/CVView) bisa menyimpan achievements sebagai array ATAU
-  // string (field description). Normalisasi dulu supaya aman di semua bentuk.
+  // 1. Kumpulkan seluruh teks CV untuk pencocokan kata kunci
   const getExpText = (e: any): string => {
     const ach = e?.achievements;
     if (Array.isArray(ach)) return ach.join(' ');
@@ -496,35 +548,71 @@ export function analyzeAtsCorrelation(
     return e?.description || '';
   };
 
-  return targetKeywords.map((item, idx) => {
-    const kw = item.kw.split(' ')[0].toLowerCase();
-    const isFound = parsed.skills.some((s) => s.toLowerCase().includes(kw)) ||
-      parsed.summary.toLowerCase().includes(kw) ||
-      parsed.experience.some((e) => getExpText(e).toLowerCase().includes(kw));
+  const allCvText = [
+    parsed.summary || '',
+    ...parsed.skills,
+    ...parsed.experience.map((e) => `${e.role || ''} ${e.company || ''} ${getExpText(e)}`),
+    ...parsed.education.map((e) => `${e.degree || ''} ${e.institution || ''}`),
+  ]
+    .join(' ')
+    .toLowerCase();
 
-    let visibilityScore = 75;
-    let atsScore = isFound ? 90 : 25;
+  // 2. Ekstrak kata kunci dinamis dari skills dan role pengguna
+  const dynamicKeywords: Array<{ kw: string; category: string }> = [];
 
-    if (item.kw.includes('Jest')) {
-      visibilityScore = 20; // Buried/missing
-      atsScore = 15;
-    } else if (item.kw.includes('React')) {
-      visibilityScore = 92;
-      atsScore = 95;
+  // Ambil hingga 4 skill utama milik kandidat
+  if (parsed.skills.length > 0) {
+    parsed.skills.slice(0, 4).forEach((skill) => {
+      dynamicKeywords.push({ kw: skill, category: 'Keahlian Inti CV' });
+    });
+  }
+
+  // Tambahkan kata kunci berbasis target role & kompetensi industri
+  if (dynamicKeywords.length < 6) {
+    const defaultCompetencies = [
+      { kw: roleName, category: 'Target Jabatan' },
+      { kw: 'Metrik Pencapaian (%)', category: 'Dampak Kuantitatif' },
+      { kw: 'Komunikasi & Kolaborasi Tim', category: 'Soft Skill & Leadership' },
+      { kw: 'Penyelesaian Masalah (Problem Solving)', category: 'Metode Kerja' },
+      { kw: 'Manajemen Proyek & Target', category: 'Eksekusi Kerja' },
+      { kw: 'Standar Kualitas & Review', category: 'Quality Assurance' },
+    ];
+
+    for (const comp of defaultCompetencies) {
+      if (dynamicKeywords.length >= 6) break;
+      if (!dynamicKeywords.some((k) => k.kw.toLowerCase() === comp.kw.toLowerCase())) {
+        dynamicKeywords.push(comp);
+      }
+    }
+  }
+
+  return dynamicKeywords.slice(0, 6).map((item, idx) => {
+    const searchTerms = item.kw.toLowerCase().split(/[\s/,&]+/).filter((t) => t.length > 2);
+    const isFound = searchTerms.length > 0
+      ? searchTerms.some((term) => allCvText.includes(term))
+      : allCvText.includes(item.kw.toLowerCase());
+
+    // Hitung skor visibilitas mata dan ATS secara dinamis
+    let visibilityScore = isFound ? 75 + ((idx * 7) % 20) : 30 + ((idx * 11) % 25);
+    let atsScore = isFound ? 85 + ((idx * 5) % 15) : 20 + ((idx * 7) % 20);
+
+    if (item.category.includes('Keahlian Inti') && isFound) {
+      visibilityScore = Math.min(95, 80 + idx * 4);
+      atsScore = Math.min(98, 88 + idx * 3);
     }
 
     let quadrant: AtsCorrelationItem['quadrant'] = 'gold';
     let recommendation = 'Sudah optimal baik untuk pandangan mata recruiter maupun mesin ATS.';
 
-    if (visibilityScore >= 70 && atsScore < 50) {
+    if (visibilityScore >= 65 && atsScore < 50) {
       quadrant = 'prominent_low_ats';
-      recommendation = 'Bagian ini sangat terlihat oleh recruiter, tetapi kata kunci ATS belum tercantum dengan jelas.';
-    } else if (visibilityScore < 50 && atsScore >= 70) {
+      recommendation = 'Bagian ini sangat terlihat oleh recruiter, tetapi kata kunci ATS belum tercantum secara eksplisit.';
+    } else if (visibilityScore < 50 && atsScore >= 65) {
       quadrant = 'hidden_high_ats';
-      recommendation = 'Kata kunci ATS ada di CV, tetapi posisinya berada di zona dingin (cold zone) sehingga jarang terbaca recruiter.';
+      recommendation = 'Kata kunci ada di CV, namun letaknya kurang menonjol di zona pandang utama recruiter.';
     } else if (visibilityScore < 50 && atsScore < 50) {
       quadrant = 'cold_irrelevant';
-      recommendation = 'Tambahkan kata kunci ini di bagian utama Pengalaman atau Skills agar mudah terdeteksi.';
+      recommendation = `Tambahkan kata kunci "${item.kw}" di seksi Ringkasan atau Pengalaman Utama agar terdeteksi ATS.`;
     }
 
     return {
@@ -541,34 +629,168 @@ export function analyzeAtsCorrelation(
 }
 
 /**
- * 7. AI RECOMMENDATION ENGINE (CUTI RVE Advisory)
- * Generates actionable report & interactive 1-click fixes.
+ * 7. AI RECOMMENDATION ENGINE & DYNAMIC HEURISTIC PIPELINE
+ * Evaluasi menyeluruh berbasis data riil CV kandidat & persona target recruiter.
  */
 export function runFullRvePipeline(
   sourceMode: 'saved' | 'upload' | 'text',
   savedData?: Partial<CvParsedData>,
   uploadedFile?: File | null,
   rawText?: string,
-  targetRole: string = 'Senior Fullstack Engineer',
+  targetRole: string = '',
   appliedFixIds: string[] = []
 ): RveReportResult {
   const parsedData = parseCvDocument(sourceMode, savedData, uploadedFile, rawText);
+  const resolvedTargetRole = (targetRole || parsedData.roleTitle || 'Professional').trim();
   const boundingBoxes = calculateLayoutAndHierarchy(parsedData);
   const fixationPoints = predictEyeTrackingAndHeatmap(parsedData, boundingBoxes);
-  const atsCorrelations = analyzeAtsCorrelation(parsedData, fixationPoints, targetRole);
+  const atsCorrelations = analyzeAtsCorrelation(parsedData, fixationPoints, resolvedTargetRole);
+
+  // 1. Analisis Kuantitatif & Sinyal CV
+  const allExpText = parsedData.experience
+    .map((e) => (Array.isArray(e.achievements) ? e.achievements.join(' ') : ''))
+    .join(' ');
+  const metricsFound = (allExpText.match(/\d+%|\d+\+|persen|\bjt\b|\bjuta\b|\bribu\b|meningkatkan|menghemat|mempercepat/gi) || []).length;
+  const hasStrongMetrics = metricsFound >= 2;
+  const hasSkills = parsedData.skills.length >= 4;
+  const hasSummary = parsedData.summary.length > 50;
+  const hasExperience = parsedData.experience.length > 0;
+
+  // 2. Perhitungan Skor Dinamis
+  let baseScore = 68;
+  if (hasStrongMetrics) baseScore += 10;
+  else if (metricsFound > 0) baseScore += 5;
+  if (hasSkills) baseScore += 6;
+  if (hasSummary) baseScore += 5;
+  if (hasExperience) baseScore += 5;
 
   const bonusFromFixes = appliedFixIds.length * 5;
-  const initialBaseScore = 78;
-  const overallAttentionScore = Math.min(98, initialBaseScore + 10 + bonusFromFixes);
-  const fPatternScore = Math.min(99, 88 + bonusFromFixes);
-  const atsScore = Math.min(98, 72 + bonusFromFixes + (appliedFixIds.length > 0 ? 14 : 0));
+  const initialBaseScore = Math.min(95, baseScore);
+  const overallAttentionScore = Math.min(98, initialBaseScore + 5 + bonusFromFixes);
+  const fPatternScore = Math.min(99, (hasSummary && hasExperience ? 86 : 74) + bonusFromFixes);
+  const atsScore = Math.min(98, (hasSkills ? 76 : 60) + bonusFromFixes + (appliedFixIds.length > 0 ? 12 : 0));
 
-  const gpt5Score = Math.min(98, 86 + bonusFromFixes + (appliedFixIds.length > 0 ? 5 : 0));
-  const geminiScore = Math.min(98, 89 + bonusFromFixes + (appliedFixIds.length > 0 ? 4 : 0));
-  const claudeScore = Math.min(98, 84 + bonusFromFixes + (appliedFixIds.length > 0 ? 4 : 0));
-  const consensusScore = Math.round((gpt5Score + geminiScore + claudeScore) / 3);
+  const screenerVisualScore = Math.min(98, fPatternScore);
+  const screenerAtsScore = Math.min(98, atsScore);
+  const screenerImpactScore = Math.min(98, initialBaseScore + bonusFromFixes + (hasStrongMetrics ? 4 : 0));
+  const consensusScore = Math.round((screenerVisualScore + screenerAtsScore + screenerImpactScore) / 3);
 
   const verdictStatus = consensusScore >= 85 ? 'interview' : consensusScore >= 70 ? 'maybe' : 'reject';
+
+  // 3. Drop Reasons Dinamis berdasarkan kelemahan riil CV
+  const dropReasons: string[] = [];
+  if (!hasStrongMetrics) {
+    dropReasons.push('Pencapaian pengalaman kerja belum banyak mencantumkan metrik kuantitatif (%) atau angka konkret.');
+  }
+  if (!hasSummary || parsedData.summary.length < 70) {
+    dropReasons.push('Ringkasan profil masih terlalu singkat, belum menonjolkan keahlian inti untuk posisi target.');
+  }
+  if (parsedData.skills.length < 5) {
+    dropReasons.push('Daftar keterampilan (skills) masih terbatas dan dapat ditambah variasi kompetensi pendukung.');
+  }
+  if (dropReasons.length === 0) {
+    dropReasons.push('Tingkatkan penggunaan kata kerja aksi berdampak tinggi pada poin pencapaian terbaru.');
+  }
+
+  // 4. Rekomendasi Prioritas Tinggi Dinamis
+  const highPriorityRecommendations: string[] = [
+    `Tambahkan metrik angka kuantitatif (%) pada tanggung jawab proyek di posisi ${parsedData.experience[0]?.role || 'terakhir'}.`,
+    `Perjelas Executive Summary agar langsung mengaitkan pengalaman dengan posisi ${resolvedTargetRole}.`,
+    `Cantumkan kata kunci kompetensi utama (${parsedData.skills.slice(0, 3).join(', ') || 'keahlian inti'}) di seksi paling atas.`,
+  ];
+
+  // 5. Perbaikan Sebelum & Sesudah Dinamis dari data CV asli
+  const rawFirstExp = parsedData.experience[0];
+  const firstAch = Array.isArray(rawFirstExp?.achievements) && rawFirstExp.achievements.length > 0
+    ? rawFirstExp.achievements[0]
+    : 'Melaksanakan tugas operasional harian sesuai arahan pimpinan.';
+
+  const optimizedFirstAch = firstAch.includes('%') || firstAch.includes('35%')
+    ? firstAch
+    : `${firstAch.replace(/\.$/, '')}, berhasil meningkatkan efisiensi proses kerja sebesar 25%+ dan memangkas waktu operasional.`;
+
+  const rawSummary = parsedData.summary || 'Kandidat profesional berdedikasi dengan motivasi belajar tinggi.';
+  const optimizedSummary = `${resolvedTargetRole} berpengalaman ${parsedData.experience.length > 1 ? '3+ tahun' : 'dalam bidang terkait'} dengan rekam jejak konsisten pada ${parsedData.skills.slice(0, 2).join(' & ') || 'bidang spesialisasi'}. Fokus pada hasil kerja nyata, efisiensi sistem, dan kolaborasi tim.`;
+
+  const rawSkillsList = parsedData.skills.length > 0
+    ? parsedData.skills.join(', ')
+    : 'Keahlian Teknis, Komunikasi, Pemecahan Masalah';
+  const optimizedSkillsList = parsedData.skills.length > 0
+    ? `${parsedData.skills.join(', ')}, Metrik Efisiensi, Standar Kualitas Kerja, Best Practices`
+    : `${resolvedTargetRole}, Manajemen Waktu, Analisis Data, Kolaborasi Tim, Problem Solving`;
+
+  const beforeAfterFixes = [
+    {
+      id: 'fix-1',
+      section: `Pengalaman Kerja (${rawFirstExp?.role || resolvedTargetRole})`,
+      before: firstAch,
+      after: optimizedFirstAch,
+      impactBonus: 5,
+    },
+    {
+      id: 'fix-2',
+      section: 'Ringkasan Profil (Executive Summary)',
+      before: rawSummary,
+      after: optimizedSummary,
+      impactBonus: 5,
+    },
+    {
+      id: 'fix-3',
+      section: 'Seksi Skills & Kompetensi Inti',
+      before: rawSkillsList,
+      after: optimizedSkillsList,
+      impactBonus: 5,
+    },
+  ];
+
+  // 6. Pertanyaan Wawancara Terprediksi Dinamis
+  const predictedInterviewQuestions = [
+    `Bisa ceritakan salah satu pencapaian paling signifikan saat Anda bertugas di ${rawFirstExp?.company || 'proyek terakhir'}?`,
+    `Bagaimana metode Anda dalam memanfaatkan keahlian ${parsedData.skills[0] || resolvedTargetRole} untuk menyelesaikan tantangan kerja kompleks?`,
+    `Apa pendekatan Anda dalam memastikan kualitas hasil kerja saat berkolaborasi dengan rekan tim lintas divisi?`,
+  ];
+
+  // 7. Multi-Screener Evaluasi Persona (Mematuhi Aturan Brand)
+  const aiEvaluations: AiModelEvaluation[] = [
+    {
+      modelName: 'Screener Algoritma Keyword (ATS Engine)',
+      badgeColor: 'bg-emerald-500',
+      score: screenerAtsScore,
+      pros: [
+        `Kesesuaian kata kunci untuk posisi ${resolvedTargetRole} terdeteksi baik`,
+        `Daftar keahlian teknis relevan dengan filter sistem`,
+      ],
+      cons: [
+        parsedData.skills.length < 6 ? 'Daftar skill pendukung masih dapat diperluas' : 'Format kata kunci dapat lebih dispesifikasikan',
+      ],
+    },
+    {
+      modelName: 'Screener Struktur Visual & Eye-Tracking (HRD)',
+      badgeColor: 'bg-blue-500',
+      score: screenerVisualScore,
+      pros: [
+        'Tata letak judul dan seksi pengalaman bersih (mudah dipindai 6 detik)',
+        'Hierarki visual judul jabatan dan nama instansi terbaca jelas',
+      ],
+      cons: [
+        'Pastikan jeda baris antar poin pencapaian tetap lapang dan konsisten',
+      ],
+    },
+    {
+      modelName: 'Screener Dampak & Kualifikasi (Hiring Manager)',
+      badgeColor: 'bg-amber-500',
+      score: screenerImpactScore,
+      pros: [
+        'Uraian profil mencerminkan kesiapan kerja dan inisiatif profesional',
+        'Tanggung jawab pekerjaan selaras dengan ekspektasi recruiter',
+      ],
+      cons: [
+        !hasStrongMetrics ? 'Perbanyak metrik persentase keberhasilan (%) konkret' : 'Pertajam detail dampak terhadap hasil tim/bisnis',
+      ],
+    },
+  ];
+
+  const beforeScore = Math.max(50, consensusScore - (appliedFixIds.length > 0 ? 14 : 10));
 
   return {
     parsedData,
@@ -579,81 +801,27 @@ export function runFullRvePipeline(
     atsScore,
     recruiterVerdict:
       verdictStatus === 'interview'
-        ? 'Lolos Pre-Screening RVE Pipeline! Struktur visual dan narasi CV sangat memikat perhatian recruiter dalam 6 detik pertama dan memenuhi kualifikasi ATS & Tim Recruiter.'
+        ? `Lolos Pre-Screening RVE Pipeline! Struktur visual dan narasi CV sangat memikat perhatian recruiter target (${resolvedTargetRole}) dalam 6 detik pertama dan memenuhi kualifikasi sistem evaluasi.`
         : verdictStatus === 'maybe'
-        ? 'CV Berpeluang Dipertimbangkan (Maybe). Diperlukan penajaman pada penulisan metrik % pencapaian agar impresi awal lebih kuat.'
-        : 'CV Berisiko Tereliminasi. Mohon optimalkan seksi ringkasan dan tambahkan metrik angka.',
+        ? `CV Berpeluang Dipertimbangkan (Maybe). Diperlukan penajaman pada penulisan metrik angka pencapaian agar impresi awal pada posisi ${resolvedTargetRole} lebih kuat.`
+        : `CV Berisiko Tereliminasi. Mohon optimalkan seksi ringkasan dan tambahkan kata kunci yang sesuai dengan kualifikasi ${resolvedTargetRole}.`,
     verdictStatus,
-    confidenceScore: 87,
-    hrdNotes:
-      'Recruiter Vision Pipeline mencatat tata letak judul dan seksi pengalaman sangat bersih. Mata recruiter tertuju pertama kali pada nama dan metrik efisiensi 35%. Keterbacaan pola F sangat tinggi.',
+    confidenceScore: 88,
+    hrdNotes: `Recruiter Vision Pipeline mencatat tata letak judul dan seksi pengalaman tersusun rapi. Keterbacaan pola-F sangat baik dengan fokus utama pada pengalaman ${rawFirstExp?.role || resolvedTargetRole}.`,
     atsCorrelations,
-    beforeAfterFixes: [
-      {
-        id: 'fix-1',
-        section: 'Pengalaman Kerja (Software Engineer)',
-        before: 'Mengembangkan dan memelihara aplikasi web perusahaan menggunakan React.js.',
-        after: 'Mengembangkan 12+ modul web berbasis React.js & TypeScript, berhasil mempercepat waktu render sebesar 35%.',
-        impactBonus: 5,
-      },
-      {
-        id: 'fix-2',
-        section: 'Ringkasan Profil (Executive Summary)',
-        before: 'Saya adalah developer yang bersemangat dan pekerja keras dalam tim.',
-        after: 'Software Engineer dengan 3+ tahun pengalaman membangun aplikasi web skala tinggi menggunakan Next.js dan Node.js.',
-        impactBonus: 5,
-      },
-      {
-        id: 'fix-3',
-        section: 'Seksi Skills & Tech Stack',
-        before: 'React, HTML, CSS, JavaScript, Web Development',
-        after: 'React.js, Next.js, TypeScript, Node.js, PostgreSQL, Tailwind CSS, REST API, Jest',
-        impactBonus: 5,
-      },
-    ],
-    predictedInterviewQuestions: [
-      'Bisa ceritakan pengalaman tersulit Anda saat mengoptimalkan performa aplikasi web hingga 35%?',
-      'Bagaimana metodologi Anda dalam memastikan kualitas kode saat berkolaborasi dengan tim cross-functional?',
-      'Apa arsitektur database favorit Anda untuk menangani puluhan ribu pengguna harian?',
-    ],
-    // AI Screener Selling Point Breakdown
-    aiEvaluations: [
-      {
-        modelName: 'GPT-5',
-        badgeColor: 'bg-emerald-500',
-        score: gpt5Score,
-        pros: ['Achievement terukur dengan metrik %', 'Tech stack relevan dengan target posisi'],
-        cons: ['Executive Summary terlalu panjang', 'Kurang detail pada sertifikasi pendukung'],
-      },
-      {
-        modelName: 'Gemini',
-        badgeColor: 'bg-blue-500',
-        score: geminiScore,
-        pros: ['Struktur layout A4 & F-Pattern sangat bersih (92%)', 'Urutan kronologis posisi kerja jelas'],
-        cons: ['Format tanggal belum sepenuhnya seragam di seksi edukasi'],
-      },
-      {
-        modelName: 'Claude',
-        badgeColor: 'bg-amber-500',
-        score: claudeScore,
-        pros: ['Narasi karir profesional & berorientasi solusi', 'Penggunaan kata kerja aksi aktif'],
-        cons: ['Angka kuantitatif di posisi kedua masih bisa ditingkatkan'],
-      },
-    ],
+    beforeAfterFixes,
+    predictedInterviewQuestions,
+    aiEvaluations,
     consensusScore,
     topAiSummary: {
-      overview: 'CV Anda memiliki fondasi yang cukup kuat untuk meloloskan tahap awal.',
-      dropReasons: [
-        'Tidak ada angka pencapaian terukur di seksi pengalaman kerja kedua.',
-        'Ringkasan profil masih bersifat deskriptif umum, belum mencantumkan hasil spesifik.',
-        'Kata kerja kurang aktif di beberapa bullet point pengalaman.',
-      ],
+      overview: `CV Anda memiliki fondasi yang ${consensusScore >= 80 ? 'sangat solid' : 'cukup baik'} untuk meloloskan tahap awal seleksi.`,
+      dropReasons,
       estimatedProbability: consensusScore,
     },
     beforeAfterComparison: {
-      beforeScore: 72,
+      beforeScore,
       afterScore: consensusScore,
-      diff: consensusScore - 72,
+      diff: consensusScore - beforeScore,
     },
     gamification: {
       progress: Math.min(100, consensusScore),
@@ -662,21 +830,210 @@ export function runFullRvePipeline(
           id: 'check-1',
           label: 'Metrik Angka & Pencapaian (%)',
           bonus: 8,
-          isDone: appliedFixIds.includes('fix-1'),
+          isDone: appliedFixIds.includes('fix-1') || hasStrongMetrics,
         },
         {
           id: 'check-2',
           label: 'Executive Summary Berorientasi Hasil',
           bonus: 6,
-          isDone: appliedFixIds.includes('fix-2'),
+          isDone: appliedFixIds.includes('fix-2') || hasSummary,
         },
         {
           id: 'check-3',
           label: 'Kata Kunci Spesifik Role & Stack',
           bonus: 6,
-          isDone: appliedFixIds.includes('fix-3'),
+          isDone: appliedFixIds.includes('fix-3') || hasSkills,
         },
       ],
     },
+    highPriorityRecommendations,
   };
 }
+
+/**
+ * 8. PROMPT GENERATOR UNTUK INTEGRASI AI SYSTEM
+ * Membangun prompt terstruktur untuk evaluasi CV Screener via AI Gateway (/api/ai).
+ */
+export function generateCvScreenerAiPrompt(
+  parsed: CvParsedData,
+  targetRole: string,
+  targetLevel: string,
+  persona: RecruiterPersona,
+  appliedFixIds: string[] = []
+): string {
+  const role = targetRole || parsed.roleTitle || 'Professional';
+  return `Evaluasi secara mendalam dokumen CV berikut untuk simulasi screening recruiter.
+
+DATA KANDIDAT:
+- Nama: ${parsed.candidateName}
+- Target Posisi: ${role} (Level: ${targetLevel})
+- Ringkasan Profil: ${parsed.summary || '-'}
+- Keterampilan / Skills: ${parsed.skills.join(', ') || '-'}
+- Pengalaman Kerja:
+${parsed.experience.map((e, idx) => `  ${idx + 1}. ${e.role} di ${e.company} (${e.period}): ${Array.isArray(e.achievements) ? e.achievements.join(' | ') : e.achievements || '-'}`).join('\n')}
+- Pendidikan:
+${parsed.education.map((e, idx) => `  ${idx + 1}. ${e.degree} di ${e.institution} (${e.gpa || e.period})`).join('\n')}
+
+KRITERIA RECRUITER TARGET:
+- Persona: ${persona.name} (${persona.badge})
+- Fokus Evaluasi: ${persona.evalFocus}
+- Ekspektasi Utama: ${persona.highlights.join(', ')}
+- Hal yang Kurang Ditekankan: ${persona.reducedEmphasis.join(', ')}
+- Target Perusahaan: ${persona.companies.join(', ')}
+
+KEMBALIKAN HANYA JSON VALID TANPA MARKDOWN DENGAN STRUKTUR BERIKUT:
+{
+  "consensusScore": 88,
+  "confidenceScore": 90,
+  "verdictStatus": "interview",
+  "recruiterVerdict": "Penjelasan ringkas hasil screening...",
+  "hrdNotes": "Catatan impresi 6 detik pertama...",
+  "topAiSummary": {
+    "overview": "Ringkasan kesiapan CV...",
+    "dropReasons": ["Poin kelemahan 1", "Poin kelemahan 2", "Poin kelemahan 3"],
+    "estimatedProbability": 88
+  },
+  "highPriorityRecommendations": [
+    "Saran prioritas 1...",
+    "Saran prioritas 2...",
+    "Saran prioritas 3..."
+  ],
+  "atsCorrelations": [
+    {
+      "keyword": "Nama Skill / Kompetensi",
+      "category": "Kategori",
+      "foundInCv": true,
+      "visibilityScore": 85,
+      "atsScore": 90,
+      "quadrant": "gold",
+      "recommendation": "Rekomendasi spesifik..."
+    }
+  ],
+  "beforeAfterFixes": [
+    {
+      "id": "fix-1",
+      "section": "Pengalaman Kerja",
+      "before": "Kalimat sebelum...",
+      "after": "Kalimat sesudah yang lebih menjual dan terukur...",
+      "impactBonus": 5
+    },
+    {
+      "id": "fix-2",
+      "section": "Ringkasan Profil (Executive Summary)",
+      "before": "Kalimat sebelum...",
+      "after": "Ringkasan sesudah...",
+      "impactBonus": 5
+    },
+    {
+      "id": "fix-3",
+      "section": "Seksi Skills & Kompetensi",
+      "before": "Skills sebelum...",
+      "after": "Skills sesudah...",
+      "impactBonus": 5
+    }
+  ],
+  "predictedInterviewQuestions": [
+    "Pertanyaan wawancara 1...",
+    "Pertanyaan wawancara 2...",
+    "Pertanyaan wawancara 3..."
+  ],
+  "aiEvaluations": [
+    {
+      "modelName": "Screener Algoritma Keyword (ATS Engine)",
+      "score": 88,
+      "pros": ["Kelebihan 1", "Kelebihan 2"],
+      "cons": ["Catatan 1"]
+    },
+    {
+      "modelName": "Screener Struktur Visual & Eye-Tracking (HRD)",
+      "score": 90,
+      "pros": ["Kelebihan 1", "Kelebihan 2"],
+      "cons": ["Catatan 1"]
+    },
+    {
+      "modelName": "Screener Dampak & Kualifikasi (Hiring Manager)",
+      "score": 86,
+      "pros": ["Kelebihan 1", "Kelebihan 2"],
+      "cons": ["Catatan 1"]
+    }
+  ]
+}`;
+}
+
+/**
+ * 9. PARSER RESPON AI UNTUK RVE RESULT
+ * Mengintegrasikan JSON hasil respons AI Gateway dengan fallback yang aman.
+ */
+export function parseAiScreenerResponse(
+  aiJsonText: string,
+  baselineResult: RveReportResult
+): RveReportResult {
+  try {
+    const cleaned = aiJsonText
+      .replace(/```json/gi, '')
+      .replace(/```/g, '')
+      .trim();
+
+    const parsed = JSON.parse(cleaned);
+
+    return {
+      ...baselineResult,
+      consensusScore: typeof parsed.consensusScore === 'number' ? parsed.consensusScore : baselineResult.consensusScore,
+      confidenceScore: typeof parsed.confidenceScore === 'number' ? parsed.confidenceScore : baselineResult.confidenceScore,
+      verdictStatus: ['interview', 'maybe', 'reject'].includes(parsed.verdictStatus) ? parsed.verdictStatus : baselineResult.verdictStatus,
+      recruiterVerdict: parsed.recruiterVerdict || baselineResult.recruiterVerdict,
+      hrdNotes: parsed.hrdNotes || baselineResult.hrdNotes,
+      topAiSummary: {
+        overview: parsed.topAiSummary?.overview || baselineResult.topAiSummary.overview,
+        dropReasons: Array.isArray(parsed.topAiSummary?.dropReasons) && parsed.topAiSummary.dropReasons.length > 0
+          ? parsed.topAiSummary.dropReasons
+          : baselineResult.topAiSummary.dropReasons,
+        estimatedProbability: typeof parsed.topAiSummary?.estimatedProbability === 'number'
+          ? parsed.topAiSummary.estimatedProbability
+          : baselineResult.topAiSummary.estimatedProbability,
+      },
+      highPriorityRecommendations: Array.isArray(parsed.highPriorityRecommendations) && parsed.highPriorityRecommendations.length > 0
+        ? parsed.highPriorityRecommendations
+        : baselineResult.highPriorityRecommendations,
+      atsCorrelations: Array.isArray(parsed.atsCorrelations) && parsed.atsCorrelations.length > 0
+        ? parsed.atsCorrelations.map((item: any, idx: number) => ({
+            id: `ats-corr-${idx}`,
+            keyword: item.keyword || item.kw || `Skill #${idx + 1}`,
+            category: item.category || 'Kompetensi',
+            foundInCv: Boolean(item.foundInCv),
+            visibilityScore: typeof item.visibilityScore === 'number' ? item.visibilityScore : 75,
+            atsScore: typeof item.atsScore === 'number' ? item.atsScore : 80,
+            quadrant: ['gold', 'prominent_low_ats', 'hidden_high_ats', 'cold_irrelevant'].includes(item.quadrant)
+              ? item.quadrant
+              : 'gold',
+            recommendation: item.recommendation || 'Sesuai standar ATS.',
+          }))
+        : baselineResult.atsCorrelations,
+      beforeAfterFixes: Array.isArray(parsed.beforeAfterFixes) && parsed.beforeAfterFixes.length > 0
+        ? parsed.beforeAfterFixes.map((item: any, idx: number) => ({
+            id: item.id || `fix-${idx + 1}`,
+            section: item.section || `Seksi #${idx + 1}`,
+            before: item.before || '',
+            after: item.after || '',
+            impactBonus: typeof item.impactBonus === 'number' ? item.impactBonus : 5,
+          }))
+        : baselineResult.beforeAfterFixes,
+      predictedInterviewQuestions: Array.isArray(parsed.predictedInterviewQuestions) && parsed.predictedInterviewQuestions.length > 0
+        ? parsed.predictedInterviewQuestions
+        : baselineResult.predictedInterviewQuestions,
+      aiEvaluations: Array.isArray(parsed.aiEvaluations) && parsed.aiEvaluations.length > 0
+        ? parsed.aiEvaluations.map((item: any, idx: number) => ({
+            modelName: item.modelName || `Screener #${idx + 1}`,
+            badgeColor: idx === 0 ? 'bg-emerald-500' : idx === 1 ? 'bg-blue-500' : 'bg-amber-500',
+            score: typeof item.score === 'number' ? item.score : baselineResult.consensusScore,
+            pros: Array.isArray(item.pros) ? item.pros : ['Struktur CV memenuhi standar'],
+            cons: Array.isArray(item.cons) ? item.cons : ['Tingkatkan detail pencapaian'],
+          }))
+        : baselineResult.aiEvaluations,
+    };
+  } catch (err) {
+    console.warn('[parseAiScreenerResponse] Gagal parse JSON AI, menggunakan dynamic heuristic baseline:', err);
+    return baselineResult;
+  }
+}
+

@@ -1,0 +1,31 @@
+---
+interface Props {
+  variant?: 'default' | 'mini' | 'dark';
+}
+
+const { variant = 'default' } = Astro.props;
+---
+
+<article class:list={['cv-artifact', `cv-artifact--${variant}`]}>
+  <div class="cv-artifact__topline">
+    <div class="cv-artifact__identity">
+      <span>MS</span>
+      <div><b>Maria Syafira</b><small>Desainer Produk</small></div>
+    </div>
+    <div class="cv-artifact__meta">Employr<br />CV / 01</div>
+  </div>
+  <div class="cv-artifact__rule"></div>
+  <div class="cv-artifact__columns">
+    <div>
+      <p class="cv-artifact__label">PROFIL</p>
+      <p class="cv-artifact__copy">Merancang pengalaman yang jelas dan berguna, di persimpangan manusia dan produk.</p>
+      <p class="cv-artifact__label cv-artifact__label--spaced">PENGALAMAN</p>
+      <div class="cv-artifact__role"><b>Desainer UI/UX</b><small>Brightworks · 2023—kini</small><i></i></div>
+      <div class="cv-artifact__role"><b>Desainer Visual</b><small>Freelance · 2021—2023</small><i></i></div>
+    </div>
+    <div class="cv-artifact__skills">
+      <p class="cv-artifact__label">KEAHLIAN UTAMA</p>
+      <span>Pemikiran produk</span><span>Desain interaksi</span><span>Figma</span><span>Pembuatan prototipe</span>
+    </div>
+  </div>
+</article>

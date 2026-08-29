@@ -48,10 +48,11 @@ export const ATS_ACTION_VERBS = [
 ];
 
 export const TEMPLATE_PLACEHOLDERS = [
-  'nama perusahaan', 'nama universitas', 'john doe', 'jane doe',
-  'email@example.com', 'your name', 'nama lengkap', 'company name',
+  'nama perusahaan', 'nama perusahaan sebelumnya', 'nama universitas',
+  'john doe', 'jane doe', 'nama lengkap anda', 'nama lengkap',
+  'email@example.com', 'your name', 'company name',
   'job title', 'insert your text', 'add your experience', 'write your summary',
   'lorem ipsum', 'sample text', 'click here to edit', 'double click to edit',
   'replace this text', 'add your content', 'responsible for various tasks',
-  'worked with different teams', 'performed assigned duties'
+  'worked with different teams', 'performed assigned duties',
 ];

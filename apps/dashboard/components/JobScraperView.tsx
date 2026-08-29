@@ -398,7 +398,7 @@ export const JobScraperView: React.FC = () => {
           },
           {
             label: 'Loker Ditemukan',
-            value: extractedJobs.length,
+            value: jobs.length,
             icon: Briefcase,
           },
         ]}

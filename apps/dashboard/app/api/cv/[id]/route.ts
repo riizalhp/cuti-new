@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@cuti/db';
 import { getAuthUser } from '@/lib/server-auth';
+import { calculateAtsScore } from '@/lib/ats-score';
+
+function isValidUUID(str: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
+}
 
 function formatIndonesianDate(date: Date): string {
   const now = new Date();
@@ -26,6 +31,15 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+
+    // Handle non-UUID (local draft timestamp IDs like cv-1787624633277) gracefully
+    if (!isValidUUID(id)) {
+      return NextResponse.json(
+        { success: false, message: 'Draf CV lokal (belum tersinkron ke DB).' },
+        { status: 404 }
+      );
+    }
+
     const user = await getAuthUser(req);
     if (!user) {
       return NextResponse.json(
@@ -46,13 +60,23 @@ export async function GET(
     }
 
     const parsedData = (typeof cv.data === 'object' && cv.data !== null ? cv.data : {}) as Record<string, any>;
-    const mapped = {
+    const resolvedFullName = parsedData.fullName || user.name || 'User';
+    const fullData = {
       ...parsedData,
       id: cv.id,
+      fullName: resolvedFullName,
+      headline: cv.target_position || parsedData.headline || 'Professional',
+    };
+    const computedScore = calculateAtsScore(fullData).totalScore;
+    const finalAtsScore = (parsedData.atsScore && parsedData.atsScore > 0)
+      ? parsedData.atsScore
+      : (computedScore > 0 ? computedScore : 85);
+
+    const mapped = {
+      ...fullData,
       title: cv.title || parsedData.title,
       templateId: cv.template_id || parsedData.templateId || 'ats-modern-standard',
-      atsScore: parsedData.atsScore ?? 85,
-      headline: cv.target_position || parsedData.headline,
+      atsScore: finalAtsScore,
       updatedAt: formatIndonesianDate(cv.updated_at),
     };
 
@@ -72,6 +96,16 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
+    const body = await req.json();
+
+    // Handle non-UUID gracefully (e.g. cv-1787624633277)
+    if (!isValidUUID(id)) {
+      return NextResponse.json(
+        { success: false, message: 'ID draf lokal. Gunakan POST /api/cv untuk menyimpan ke DB.' },
+        { status: 404 }
+      );
+    }
+
     const user = await getAuthUser(req);
     if (!user) {
       return NextResponse.json(
@@ -80,7 +114,6 @@ export async function PATCH(
       );
     }
 
-    const body = await req.json();
     const existing = await prisma.cv_projects.findFirst({
       where: { id, user_id: user.id },
     });
@@ -136,6 +169,10 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ success: true, message: 'Draf lokal dihapus.' });
+    }
+
     const user = await getAuthUser(req);
     if (!user) {
       return NextResponse.json(

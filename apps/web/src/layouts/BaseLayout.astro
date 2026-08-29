@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import '../styles/employer.css';
 
 interface Props {
   title: string;
@@ -22,19 +23,12 @@ const {
 const siteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'CUTI',
+  name: 'Employr',
   alternateName: 'Employr',
   url: 'https://employr.id/',
-  description: 'Career Operating System untuk siswa SMA/SMK, mahasiswa, dan fresh graduate Indonesia.',
+  description: 'Ruang kerja karier untuk langkah berikutnya — bangun CV, temukan kecocokan, dan sesuaikan pengalamanmu untuk setiap peran.',
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'All',
-  offers: {
-    '@type': 'Offer',
-    price: '99000',
-    priceCurrency: 'IDR',
-    priceValidUntil: '2030-12-31',
-    availability: 'https://schema.org/InStock',
-  },
   publisher: {
     '@type': 'Organization',
     name: 'Employr',
@@ -56,7 +50,7 @@ const siteSchema = {
     <meta name="description" content={description} />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <link rel="canonical" href={canonicalUrl} />
-    <meta name="theme-color" content="#1738D1" />
+    <meta name="theme-color" content="#101010" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content={ogType} />
@@ -64,7 +58,7 @@ const siteSchema = {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage} />
-    <meta property="og:site_name" content="CUTI" />
+    <meta property="og:site_name" content="Employr" />
     <meta property="og:locale" content="id_ID" />
 
     <!-- Twitter Cards -->
@@ -74,10 +68,13 @@ const siteSchema = {
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
 
-    <!-- Preconnect & Google Fonts -->
+    <!-- Preconnect & Google Fonts (DM Sans · Instrument Sans · Instrument Serif · Inter Tight · Manrope) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,300..800&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:ital,wght@0,300..900;1,300..900&family=Manrope:wght@400..800&display=swap"
+      rel="stylesheet"
+    />
 
     <!-- JSON-LD Structured Data -->
     <script is:inline type="application/ld+json" set:html={JSON.stringify(siteSchema)} />
@@ -85,190 +82,97 @@ const siteSchema = {
   </head>
   <body>
     <slot />
-    <script is:inline>
-      const menuButton = document.querySelector('[data-menu-button]');
-      const menu = document.querySelector('[data-menu]');
-      menuButton?.addEventListener('click', () => {
-        const open = menuButton.getAttribute('aria-expanded') === 'true';
-        menuButton.setAttribute('aria-expanded', String(!open));
-        menu?.classList.toggle('is-open');
-      });
-      menu?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
-        menuButton?.setAttribute('aria-expanded', 'false');
-        menu.classList.remove('is-open');
-      }));
-    </script>
+
     <script>
       import { gsap } from 'gsap';
       import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
       gsap.registerPlugin(ScrollTrigger);
 
+      // ---------- Header scroll-state (smooth morph & hysteresis) ----------
+      const header = document.querySelector('.site-header');
+      if (header) {
+        let isSolid = window.scrollY > 50;
+        if (isSolid) header.classList.add('site-header--solid');
+
+        ScrollTrigger.create({
+          start: 'top -50px',
+          onEnter: () => {
+            if (isSolid) return;
+            isSolid = true;
+            header.classList.add('site-header--solid');
+            gsap.fromTo(
+              header,
+              { opacity: 0, y: -20 },
+              { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }
+            );
+          },
+          onLeaveBack: () => {
+            if (!isSolid) return;
+            isSolid = false;
+            header.classList.remove('site-header--solid');
+            gsap.set(header, { clearProps: 'all' });
+            gsap.fromTo(
+              header,
+              { opacity: 0, y: -10 },
+              { opacity: 1, y: 0, duration: 0.25, ease: 'power2.out', clearProps: 'all' }
+            );
+          },
+        });
+      }
+
+      // ---------- Motion (hormati prefers-reduced-motion) ----------
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
       if (!prefersReducedMotion) {
-        // 1. Hero Entrance Animation (Timeline)
-        const heroCopyEls = document.querySelectorAll('.hero-copy > *');
-        if (heroCopyEls.length > 0) {
-          gsap.fromTo(
-            heroCopyEls,
-            { autoAlpha: 0, y: 35 },
-            { autoAlpha: 1, y: 0, duration: 0.85, stagger: 0.12, ease: 'power3.out' }
-          );
-        }
+        // Parallax halus hanya pada foto & artefak visual (bukan teks utama)
+        const parallaxLayers: Array<[string, number]> = [
+          ['.hero__product', -13],
+          ['.builder__visual', -9],
+          ['.career-observation__image img', 8],
+          ['.pricing__scene img', 7],
+          ['.versions__stage', 9],
+          ['.pivot__photo img', 10],
+          ['.final-cta > img', -8],
+        ];
 
-        const heroVisual = document.querySelector('.hero-visual');
-        if (heroVisual) {
-          gsap.fromTo(
-            heroVisual,
-            { autoAlpha: 0, scale: 0.94 },
-            { autoAlpha: 1, scale: 1, duration: 1.1, ease: 'power3.out', delay: 0.2 }
-          );
-        }
-
-        const heroStickers = document.querySelectorAll('.hero-sticker');
-        if (heroStickers.length > 0) {
-          gsap.fromTo(
-            heroStickers,
-            { autoAlpha: 0, scale: 0.7, y: 25 },
-            { autoAlpha: 1, scale: 1, y: 0, duration: 0.75, stagger: 0.15, ease: 'back.out(1.7)', delay: 0.5 }
-          );
-        }
-
-        // 2. Feature Cards ScrollTrigger (Stagger Reveal)
-        const featureCards = document.querySelectorAll('.feature-card');
-        if (featureCards.length > 0) {
-          gsap.fromTo(
-            featureCards,
-            { autoAlpha: 0, y: 50 },
-            {
-              scrollTrigger: {
-                trigger: '.feature-grid',
-                start: 'top 80%',
-              },
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.8,
-              stagger: 0.15,
-              ease: 'power2.out',
-            }
-          );
-        }
-
-        // 3. Section Headings ScrollTrigger
-        const headings = document.querySelectorAll('.section-heading');
-        headings.forEach((heading) => {
-          gsap.fromTo(
-            heading,
-            { autoAlpha: 0, y: 30 },
-            {
-              scrollTrigger: {
-                trigger: heading,
-                start: 'top 85%',
-              },
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.8,
-              ease: 'power2.out',
-            }
-          );
+        parallaxLayers.forEach(([selector, yPercent]) => {
+          const el = document.querySelector(selector);
+          if (!el) return;
+          gsap.to(el, {
+            yPercent,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: el.closest('section') ?? el,
+              start: 'top bottom',
+              end: 'bottom top',
+              scrub: 0.85,
+            },
+          });
         });
 
-        // 4. Steps ScrollTrigger
-        const stepItems = document.querySelectorAll('.steps li');
-        if (stepItems.length > 0) {
-          gsap.fromTo(
-            stepItems,
-            { autoAlpha: 0, x: -40 },
-            {
-              scrollTrigger: {
-                trigger: '.steps',
-                start: 'top 80%',
-              },
-              autoAlpha: 1,
-              x: 0,
-              duration: 0.7,
-              stagger: 0.12,
-              ease: 'power2.out',
-            }
-          );
+        // Horizontal job rail — dipin di desktop, native scroll di mobile
+        const jobs = document.querySelector<HTMLElement>('.jobs');
+        const rail = document.querySelector<HTMLElement>('.job-rail');
+        const desktopMotion = window.matchMedia('(min-width: 701px)');
+
+        if (jobs && rail && desktopMotion.matches) {
+          const getDistance = () => Math.max(0, rail.scrollWidth - window.innerWidth + 92);
+          gsap.to(rail, {
+            x: () => -getDistance(),
+            ease: 'none',
+            scrollTrigger: {
+              trigger: jobs,
+              start: 'top top+=90',
+              end: () => `+=${getDistance()}`,
+              pin: true,
+              pinSpacing: true,
+              scrub: 0.9,
+              invalidateOnRefresh: true,
+            },
+          });
         }
 
-        // 5. Access Section & Price Card
-        const accessCopy = document.querySelector('.access-copy');
-        const priceCard = document.querySelector('.price-card');
-        if (accessCopy && priceCard) {
-          gsap.fromTo(
-            accessCopy,
-            { autoAlpha: 0, x: -50 },
-            {
-              scrollTrigger: {
-                trigger: '.access-section',
-                start: 'top 75%',
-              },
-              autoAlpha: 1,
-              x: 0,
-              duration: 0.9,
-              ease: 'power3.out',
-            }
-          );
-
-          gsap.fromTo(
-            priceCard,
-            { autoAlpha: 0, x: 50, scale: 0.92 },
-            {
-              scrollTrigger: {
-                trigger: '.access-section',
-                start: 'top 75%',
-              },
-              autoAlpha: 1,
-              x: 0,
-              scale: 1,
-              duration: 0.9,
-              ease: 'power3.out',
-            }
-          );
-        }
-
-        // 6. FAQ Details Reveal
-        const faqItems = document.querySelectorAll('.faq-list details');
-        if (faqItems.length > 0) {
-          gsap.fromTo(
-            faqItems,
-            { autoAlpha: 0, y: 25 },
-            {
-              scrollTrigger: {
-                trigger: '.faq-list',
-                start: 'top 85%',
-              },
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.6,
-              stagger: 0.1,
-              ease: 'power2.out',
-            }
-          );
-        }
-
-        // 7. Company Cards ScrollTrigger (User Distribution)
-        const companyCards = document.querySelectorAll('.company-card');
-        if (companyCards.length > 0) {
-          gsap.fromTo(
-            companyCards,
-            { autoAlpha: 0, y: 30 },
-            {
-              scrollTrigger: {
-                trigger: '.category-tabs-container',
-                start: 'top 80%',
-              },
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.6,
-              stagger: 0.08,
-              ease: 'power2.out',
-            }
-          );
-        }
+        ScrollTrigger.refresh();
       }
     </script>
   </body>

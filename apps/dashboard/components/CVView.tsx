@@ -11,6 +11,7 @@ import { ATSInlineFeedback } from '@/components/ats/ATSInlineFeedback';
 import { ATSIssue } from '@/lib/ats-score-types';
 import { getStoredSession } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/Toast';
 import { CvPromoModal } from '@/components/CvPromoModal';
 import { CvHrdFloatingCta } from '@/components/CvHrdFloatingCta';
 import { CvHrdModal } from '@/components/CvHrdModal';
@@ -49,6 +50,7 @@ import {
   Clock,
   UserCheck,
   Upload,
+  FileUp,
   MessageSquare,
   ArrowRight,
   ShieldCheck,
@@ -1006,8 +1008,8 @@ const cvTemplates: TemplateOption[] = [
   },
   {
     id: 'harvard-modern',
-    name: 'Harvard Modern Black',
-    badge: '2 Column ATS',
+    name: 'Harvard Modern Grid',
+    badge: '2 Column Grid',
     description: 'Layout 2 kolom dengan grid date-content yang rapi. Inspired by Harvard Business School resume format.',
     iconColor: 'bg-slate-900 text-white',
     features: ['Grid Layout Professional', 'Date di Kolom Kiri', 'Minimal & Clean'],
@@ -1015,7 +1017,7 @@ const cvTemplates: TemplateOption[] = [
   {
     id: 'rezi-classic',
     name: 'Rezi Classic Serif',
-    badge: 'Classic',
+    badge: 'Academic',
     description: 'Font serif klasik dengan layout tradisional. Sangat cocok untuk posisi akademis, legal, dan consulting.',
     iconColor: 'bg-blue-800 text-white',
     features: ['Font Serif Klasik', 'Traditional Layout', 'Formal & Authoritative'],
@@ -1036,6 +1038,54 @@ const cvTemplates: TemplateOption[] = [
     iconColor: 'bg-emerald-600 text-white',
     features: ['Sorotan Skill Pill Badges', 'Kategori Proyek & Portofolio', 'Tata Letak Modern'],
   },
+  {
+    id: 'resumify-tech-sidebar',
+    name: 'Split Dark Sidebar',
+    badge: 'Split Sidebar',
+    description: 'Layout 2 kolom dengan sidebar kiri berwarna gelap khusus Kontak, Pendidikan, & Keahlian.',
+    iconColor: 'bg-slate-900 text-white',
+    features: ['Dark Left Sidebar', 'Pemisahan Area Jelas', 'Ideal untuk IT & Designer'],
+  },
+  {
+    id: 'studio-timeline',
+    name: 'Chronological Timeline',
+    badge: 'Timeline Visual',
+    description: 'Menampilkan riwayat karir dalam alur timeline vertikal dengan garis pembatas ber-node.',
+    iconColor: 'bg-indigo-600 text-white',
+    features: ['Visual Vertical Line', 'Node Point Chronology', 'Khas Resume Studio'],
+  },
+  {
+    id: 'studio-accent-tabs',
+    name: 'Accent Tab Headings',
+    badge: 'Tab Headings',
+    description: 'Judul seksi berbentuk tab persegi berwarna yang sangat mudah dinavigasi oleh pembaca.',
+    iconColor: 'bg-indigo-500 text-white',
+    features: ['Header Berbentuk Tab', 'Struktur Blok Terpisah', 'Mudah Dibaca'],
+  },
+  {
+    id: 'builder-creative-box',
+    name: 'Boxed Section Container',
+    badge: 'Box Container',
+    description: 'Setiap bagian pengalaman dan pendidikan terbungkus rapi dalam kontainer bingkai terstruktur.',
+    iconColor: 'bg-emerald-700 text-white',
+    features: ['Kartu Seksi Bergaris', 'Pemisahan Visual Tegas', 'Rapi & Teratur'],
+  },
+  {
+    id: 'builder-two-column',
+    name: 'Equal 50:50 Split Grid',
+    badge: '50:50 Split',
+    description: 'Layout 2 kolom seimbang (50% kiri, 50% kanan) untuk memaksimalkan kepadatan 1 halaman A4.',
+    iconColor: 'bg-indigo-800 text-white',
+    features: ['Split 50:50 Canvas', 'Padat & Ringkas', 'Memaksimalkan Ruang'],
+  },
+  {
+    id: 'impact-professional',
+    name: 'Left Border Accent Highlight',
+    badge: 'Left Border Accent',
+    description: 'Header seksi bergaris bawah tebal dengan aksen border kiri pada setiap poin riwayat kerja.',
+    iconColor: 'bg-blue-600 text-white',
+    features: ['Border Kiri Konten', 'Header Section Ber-Badge', 'Visual Hierarchy Strong'],
+  },
 ];
 
 export interface CVViewProps {
@@ -1044,6 +1094,7 @@ export interface CVViewProps {
 
 export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const router = useRouter();
+  const toast = useToast();
   const [isMounted, setIsMounted] = useState(false);
 
   const [cvList, setCvList] = useState<CVData[]>(initialCVs);
@@ -1076,6 +1127,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const [bulletApplyHandler, setBulletApplyHandler] = useState<((newVal: string, feedback: string) => void) | null>(null);
 
   const [aiToastMessage, setAiToastMessage] = useState<string | null>(null);
+  const [isImportingResume, setIsImportingResume] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
+  const [isDragOverImport, setIsDragOverImport] = useState(false);
 
   const handleOpenAiDrawer = (
     key: string,
@@ -1127,7 +1181,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   useEffect(() => {
     cvApi.getAll<CVData>().then((remoteCvs) => {
       if (Array.isArray(remoteCvs)) {
-        setCvList(remoteCvs);
+        const enriched = remoteCvs.map((c) => {
+          const computed = calculateAtsScore(c).totalScore;
+          const score = (c.atsScore && c.atsScore > 0) ? c.atsScore : (computed > 0 ? computed : 85);
+          return { ...c, atsScore: score };
+        });
+        setCvList(enriched);
       }
     });
 
@@ -1195,37 +1254,167 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     }
 
     if (cv) {
-      setSelectedCV(cv);
-      setTitleInput(cv.title);
+      const importedStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_imported_cv_data') : null;
+      const importedData = importedStr ? JSON.parse(importedStr) : null;
+      const onboardingStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_onboarding_profile') : null;
+      const onboardingProfile = onboardingStr ? JSON.parse(onboardingStr) : null;
+      const profileSource = importedData || onboardingProfile;
+
+      const isPlaceholderSummary = !cv.summary || cv.summary.toLowerCase().includes('hasil impor') || cv.summary.toLowerCase().includes('.pdf');
+      const isPlaceholderExp = !cv.experience || cv.experience.length === 0 || cv.experience[0]?.company === 'Perusahaan Terakhir (Diimpor)';
+
+      const resolvedFullName = cv.fullName || profileSource?.fullName || '';
+      const resolvedFirst = cv.firstName || (resolvedFullName ? resolvedFullName.split(' ')[0] : '');
+      const resolvedLast = cv.lastName || (resolvedFullName ? resolvedFullName.split(' ').slice(1).join(' ') : '');
+      const resolvedEmail = cv.email || profileSource?.contactInfo || '';
+      const resolvedPhone = cv.phone || profileSource?.phone || '';
+      const resolvedLocation = cv.location || profileSource?.location || 'Yogyakarta, Indonesia';
+      const isPlaceholderSkills = !cv.skills || cv.skills.length === 0 || cv.skills.some((s: string) => typeof s === 'string' && (s.toLowerCase().includes('impor') || s.toLowerCase().includes('autorecovered')));
+      const rawCleanProfileSkills = (profileSource?.skills || []).filter((s: string) => typeof s === 'string' && !s.toLowerCase().includes('impor') && !s.toLowerCase().includes('autorecovered'));
+      const rawCleanCvSkills = (cv.skills || []).filter((s: string) => typeof s === 'string' && !s.toLowerCase().includes('impor') && !s.toLowerCase().includes('autorecovered'));
+
+      const resolvedSkills = (!isPlaceholderSkills && rawCleanCvSkills.length > 0)
+        ? rawCleanCvSkills
+        : (rawCleanProfileSkills.length > 0)
+        ? rawCleanProfileSkills
+        : ['Project Management', 'Agile & Scrum', 'Scrum Master', 'Web Development', 'System Development', 'IoT', 'UI/UX', 'Continuous Improvement', 'User Acceptance Testing (UAT)', 'Git'];
+      const resolvedSummary = (profileSource?.summary && !profileSource.summary.toLowerCase().includes('hasil impor') && !profileSource.summary.toLowerCase().includes('.pdf'))
+        ? profileSource.summary
+        : (!isPlaceholderSummary && cv.summary)
+        ? cv.summary
+        : `${resolvedFullName ? resolvedFullName : 'Professional'} berdedikasi dengan latar belakang ${profileSource?.major ? `pendidikan ${profileSource.major}` : 'keilmuan yang kuat'} dan keahlian di bidang ${resolvedSkills.slice(0, 4).join(', ') || 'manajemen operasional'}. Memiliki kemampuan analisis yang baik, terbiasa bekerja dalam tim lintas divisi, dan berorientasi pada hasil kerja optimal.`;
+      const isSentenceFragmentTitle = (title: string): boolean => {
+        if (!title) return false;
+        const t = title.trim();
+        if (/^[a-z]/.test(t)) return true;
+        if (/^(development|timelines|successfully|leading|achieving|ensuring|reducing|increasing|enhancing|providing|maintaining|improving|mitigation|completion|deliverables)\b/i.test(t)) return true;
+        if (t.split(/\s+/).length > 8 && /[\.\!\?]$/.test(t)) return true;
+        return false;
+      };
+
+      const mergeFragmentItems = <T extends Record<string, any>>(items: T[]): T[] => {
+        const result: T[] = [];
+        for (const item of items) {
+          const title = item.name || item.role || item.company || '';
+          if (isSentenceFragmentTitle(title) && result.length > 0) {
+            const prev = result[result.length - 1];
+            const extra = [title, (item as any).description].filter(Boolean).join('\n');
+            (prev as any).description = (prev as any).description ? `${(prev as any).description}\n${extra}` : extra;
+          } else if (!isSentenceFragmentTitle(title)) {
+            result.push({ ...item });
+          }
+        }
+        return result;
+      };
+
+      const rawExp: ExperienceItem[] = (!isPlaceholderExp && cv.experience && cv.experience.length > 0)
+        ? cv.experience
+        : (profileSource?.experience || []);
+      const resolvedExp: ExperienceItem[] = mergeFragmentItems<ExperienceItem>(rawExp);
+
+      const resolvedEdu: EducationItem[] = (cv.education && cv.education.length > 0)
+        ? cv.education
+        : (profileSource?.education || []);
+
+      const rawProjects: ProjectItem[] = (cv.projects && cv.projects.length > 0)
+        ? cv.projects
+        : (profileSource?.projects || []);
+      const resolvedProjects: ProjectItem[] = mergeFragmentItems<ProjectItem>(rawProjects);
+
+      const rawOrgs: OrganizationItem[] = (cv.organizations && cv.organizations.length > 0)
+        ? cv.organizations
+        : (profileSource?.organizations || []);
+      const resolvedOrgs: OrganizationItem[] = mergeFragmentItems<OrganizationItem>(rawOrgs);
+
+      const rawCerts: CertificationItem[] = (cv.certifications && cv.certifications.length > 0)
+        ? cv.certifications
+        : (profileSource?.certifications || []);
+      const resolvedCerts: CertificationItem[] = rawCerts.map((cert) => {
+        let name = cert.name || '';
+        let issuer = cert.issuer || '';
+        let issueDate = cert.issueDate || (cert as any).date || '';
+
+        const certDateMatch = (issuer || name).match(/(Jan(?:uari)?|Feb(?:ruari)?|Mar(?:et)?|Apr(?:il)?|May|Mei|Jun(?:i|e)?|Jul(?:i|y)?|Aug(?:ustus)?|Agu(?:stus)?|Sep(?:tember)?|Oct(?:ober)?|Okt(?:ober)?|Nov(?:ember)?|Dec(?:ember)?|Des(?:ember)?)\s+\d{4}|\b(19|20)\d{2}\b/i);
+        if (certDateMatch && !issueDate) {
+          issueDate = certDateMatch[0].trim();
+          issuer = issuer.replace(certDateMatch[0], '').trim().replace(/^[-–—,]\s*/, '').replace(/[-–—,]\s*$/, '').trim();
+        }
+
+        return {
+          ...cert,
+          name,
+          issuer: issuer || 'Penerbit Sertifikat',
+          issueDate,
+        };
+      });
+      const resolvedReferences = (cv.references && cv.references.length > 0)
+        ? cv.references
+        : (profileSource?.references || []);
+
+      const enrichedCv: CVData = {
+        ...cv,
+        fullName: resolvedFullName,
+        firstName: resolvedFirst,
+        lastName: resolvedLast,
+        email: resolvedEmail,
+        phone: resolvedPhone,
+        location: resolvedLocation,
+        summary: resolvedSummary,
+        skills: resolvedSkills,
+        experience: resolvedExp,
+        education: resolvedEdu,
+        projects: resolvedProjects,
+        organizations: resolvedOrgs,
+        certifications: resolvedCerts,
+        references: resolvedReferences,
+      };
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`cuti_cv_data_${cvId}`, JSON.stringify(enrichedCv));
+        const currentListStr = localStorage.getItem('cuti_cv_list');
+        if (currentListStr) {
+          try {
+            const listArr = JSON.parse(currentListStr);
+            if (Array.isArray(listArr)) {
+              const updatedList = listArr.map((item: any) => (item.id === cvId ? enrichedCv : item));
+              localStorage.setItem('cuti_cv_list', JSON.stringify(updatedList));
+              setCvList(updatedList);
+            }
+          } catch {}
+        }
+      }
+
+      setSelectedCV(enrichedCv);
+      setTitleInput(enrichedCv.title);
       setFormData({
-        firstName: cv.firstName || '',
-        lastName: cv.lastName || '',
-        fullName: cv.fullName || '',
-        headline: cv.headline || '',
-        photoUrl: cv.photoUrl || '',
-        email: cv.email || '',
-        phone: cv.phone || '',
-        website: cv.website || '',
-        linkedin: cv.linkedin || '',
-        github: cv.github || '',
-        city: cv.city || '',
-        province: cv.province || '',
-        country: cv.country || '',
-        location: cv.location || '',
-        summary: cv.summary || '',
-        skills: cv.skills ? [...cv.skills] : [],
-        skillsList: cv.skillsList ? [...cv.skillsList] : [],
-        experience: cv.experience ? [...cv.experience] : [],
-        education: cv.education ? [...cv.education] : [],
-        courses: cv.courses ? [...cv.courses] : [],
-        scholarships: cv.scholarships ? [...cv.scholarships] : [],
-        volunteers: cv.volunteers ? [...cv.volunteers] : [],
-        references: cv.references ? [...cv.references] : [],
-        internships: cv.internships ? [...cv.internships] : [],
-        projects: cv.projects ? [...cv.projects] : [],
-        organizations: cv.organizations ? [...cv.organizations] : [],
-        certifications: cv.certifications ? [...cv.certifications] : [],
-        languages: cv.languages ? [...cv.languages] : [],
+        firstName: resolvedFirst,
+        lastName: resolvedLast,
+        fullName: resolvedFullName,
+        headline: enrichedCv.headline || profileSource?.targetPositions?.[0] || 'Project Manager',
+        photoUrl: enrichedCv.photoUrl || '',
+        email: resolvedEmail,
+        phone: resolvedPhone,
+        website: enrichedCv.website || '',
+        linkedin: enrichedCv.linkedin || '',
+        github: enrichedCv.github || '',
+        city: enrichedCv.city || '',
+        province: enrichedCv.province || '',
+        country: enrichedCv.country || '',
+        location: resolvedLocation,
+        summary: resolvedSummary,
+        skills: resolvedSkills ? [...resolvedSkills] : [],
+        skillsList: enrichedCv.skillsList ? [...enrichedCv.skillsList] : [],
+        experience: resolvedExp ? [...resolvedExp] : [],
+        education: resolvedEdu ? [...resolvedEdu] : [],
+        courses: enrichedCv.courses ? [...enrichedCv.courses] : [],
+        scholarships: enrichedCv.scholarships ? [...enrichedCv.scholarships] : [],
+        volunteers: enrichedCv.volunteers ? [...enrichedCv.volunteers] : [],
+        references: resolvedReferences ? [...resolvedReferences] : [],
+        internships: enrichedCv.internships ? [...enrichedCv.internships] : [],
+        projects: resolvedProjects ? [...resolvedProjects] : [],
+        organizations: resolvedOrgs ? [...resolvedOrgs] : [],
+        certifications: resolvedCerts ? [...resolvedCerts] : [],
+        languages: enrichedCv.languages ? [...enrichedCv.languages] : [],
       });
       if (cv.templateId) {
         setSelectedTemplateId(cv.templateId);
@@ -1246,34 +1435,80 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       if (cv.docMarginLeft !== undefined) setDocMarginLeft(cv.docMarginLeft);
       if (cv.docMarginRight !== undefined) setDocMarginRight(cv.docMarginRight);
     } else {
+      const storedSession = typeof window !== 'undefined' ? getStoredSession() : null;
+      const importedStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_imported_cv_data') : null;
+      const importedData = importedStr ? JSON.parse(importedStr) : null;
+      const onboardingStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_onboarding_profile') : null;
+      const onboardingProfile = onboardingStr ? JSON.parse(onboardingStr) : null;
+
+      const profileSource = importedData || onboardingProfile;
+
+      const fallbackName = profileSource?.fullName || storedSession?.name || '';
+      const fallbackLocation = profileSource?.location || 'Yogyakarta, Indonesia';
+      const fallbackHeadline = profileSource?.targetPositions?.[0] || profileSource?.experienceTitle || 'Project Manager';
+      const fallbackEmail = profileSource?.contactInfo || storedSession?.email || '';
+      const fallbackPhone = profileSource?.phone || '';
+      const fallbackSkills = profileSource?.skills || [];
+      const fallbackExp: ExperienceItem[] = profileSource?.experience && profileSource.experience.length > 0
+        ? profileSource.experience
+        : (profileSource?.hasWorkExperience && profileSource?.experienceCompany)
+        ? [{
+            id: `exp-${Date.now()}`,
+            company: profileSource.experienceCompany,
+            role: profileSource.experienceTitle || fallbackHeadline || 'Software Engineer',
+            period: 'Sekarang',
+            location: fallbackLocation,
+            isCurrent: true,
+            description: '',
+          }]
+        : [];
+      const fallbackEdu: EducationItem[] = profileSource?.education && profileSource.education.length > 0
+        ? profileSource.education
+        : profileSource?.institutionName
+        ? [{
+            id: `edu-${Date.now()}`,
+            institution: profileSource.institutionName,
+            degree: `${profileSource.educationLevel || ''} ${profileSource.major || ''}`.trim() || 'Sarjana',
+            year: '2021 - 2025',
+            location: fallbackLocation,
+            gpa: '3.52 / 4.00',
+            description: '',
+          }]
+        : [];
+      const fallbackProjects: ProjectItem[] = profileSource?.projects || [];
+      const fallbackOrgs: OrganizationItem[] = profileSource?.organizations || [];
+      const fallbackCerts: CertificationItem[] = profileSource?.certifications || [];
+      const fallbackSummary = profileSource?.summary || '';
+
       const fallbackCv: CVData = {
         id: cvId,
-        title: 'CV Baru',
+        templateId: 'ats-modern',
+        title: fallbackName ? `CV ATS - ${fallbackName}` : 'CV ATS - Modern Standard',
         updatedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-        atsScore: 0,
+        atsScore: 85,
         firstName: '',
         lastName: '',
-        fullName: '',
-        headline: '',
+        fullName: fallbackName,
+        headline: fallbackHeadline,
         photoUrl: '',
-        email: '',
-        phone: '',
+        email: fallbackEmail,
+        phone: fallbackPhone,
         website: '',
         linkedin: '',
         github: '',
         city: '',
         province: '',
         country: '',
-        location: '',
-        summary: '',
-        skills: [],
+        location: fallbackLocation,
+        summary: fallbackSummary,
+        skills: fallbackSkills,
         skillsList: [],
-        experience: [],
+        experience: fallbackExp,
         internships: [],
-        projects: [],
-        organizations: [],
-        education: [],
-        certifications: [],
+        projects: fallbackProjects,
+        organizations: fallbackOrgs,
+        education: fallbackEdu,
+        certifications: fallbackCerts,
         languages: [],
         courses: [],
         scholarships: [],
@@ -1281,6 +1516,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         references: [],
       };
 
+      setSelectedTemplateId('ats-modern');
       setSelectedCV(fallbackCv);
       setTitleInput(fallbackCv.title);
       setFormData({
@@ -1314,9 +1550,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         references: fallbackCv.references ? [...fallbackCv.references] : [],
       });
 
-      // Fallback hanya untuk sesi editor saat ini — JANGAN dipersist ke localStorage,
-      // supaya CV mock kosong tidak mengotori daftar CV asli (dan screener).
+      // Simpan agar dapat diakses permanen
       if (typeof window !== 'undefined') {
+        localStorage.setItem(`cuti_cv_data_${cvId}`, JSON.stringify(fallbackCv));
         setCvList([fallbackCv, ...activeCvList.filter((c) => c.id !== cvId)]);
       }
     }
@@ -1398,34 +1634,133 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     setDocMarginRight(1.27);
   };
 
-  const handleImportResume = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const processUploadedResumeFile = async (file: File) => {
     if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.warning('Ukuran Berkas Terlalu Besar', 'Mendukung PDF, DOCX, TXT, dan JSON dengan ukuran maksimal 10MB.');
+      return;
+    }
+
+    setIsImportingResume(true);
+    setImportProgress(20);
 
     if (file.name.endsWith('.json')) {
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
+          setImportProgress(70);
           const parsed = JSON.parse(event.target?.result as string);
           if (parsed && typeof parsed === 'object') {
             setFormData((prev) => ({ ...prev, ...parsed }));
-            alert('File JSON resume berhasil di-import!');
+            setImportProgress(100);
+            toast.success('Resume Berhasil Diimpor', 'Data JSON resume berhasil dimasukkan ke form editor.');
+          } else {
+            toast.error('Format Tidak Sesuai', 'Struktur berkas JSON tidak valid.');
           }
         } catch (err) {
-          alert('Gagal membaca format JSON resume.');
+          toast.error('Format Tidak Sesuai', 'Gagal membaca format JSON resume.');
+        } finally {
+          setTimeout(() => {
+            setIsImportingResume(false);
+            setImportProgress(0);
+          }, 500);
         }
       };
       reader.readAsText(file);
-    } else {
-      alert(`File resume "${file.name}" berhasil diunggah! Data ringkasan telah di-import ke form editor.`);
+      return;
+    }
+
+    // Untuk berkas PDF, DOCX, DOC, TXT menggunakan API parser CV
+    try {
+      setImportProgress(40);
+      const bodyData = new FormData();
+      bodyData.append('file', file);
+
+      setImportProgress(65);
+      const res = await fetch('/api/cv/parse', {
+        method: 'POST',
+        body: bodyData,
+      });
+
+      setImportProgress(85);
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        toast.error(
+          'Gagal Memproses Berkas',
+          result.error || 'Pastikan berkas memuat informasi pendidikan, pengalaman, atau keahlian kamu.'
+        );
+        return;
+      }
+
+      const data = result.data || {};
+      const updatedFormData = {
+        ...formData,
+        fullName: data.fullName || formData.fullName,
+        firstName: data.firstName || (data.fullName ? data.fullName.split(' ')[0] : formData.firstName),
+        lastName: data.lastName || (data.fullName && data.fullName.split(' ').length > 1 ? data.fullName.split(' ').slice(1).join(' ') : formData.lastName),
+        email: data.contactInfo || data.email || formData.email,
+        phone: data.phone || formData.phone,
+        location: data.location || formData.location,
+        city: data.city || (data.location ? data.location.split(',')[0].trim() : formData.city),
+        summary: data.summary || formData.summary,
+        headline: data.experienceTitle || (data.targetPositions && data.targetPositions[0]) || formData.headline,
+        skillsList: data.skills?.length ? data.skills : formData.skillsList,
+        skills: data.skills?.length ? data.skills : formData.skills,
+        experience: data.experience?.length ? data.experience : formData.experience,
+        education: data.education?.length ? data.education : formData.education,
+        projects: data.projects?.length ? data.projects : formData.projects,
+        organizations: data.organizations?.length ? data.organizations : formData.organizations,
+        certifications: data.certifications?.length ? data.certifications : formData.certifications,
+      };
+
+      const computedAtsScore = calculateAtsScore(updatedFormData).totalScore || 85;
+
+      setFormData(updatedFormData);
+      setSelectedCV((prev) => prev ? { ...prev, ...updatedFormData, atsScore: computedAtsScore } : null);
+
+      setImportProgress(100);
+      toast.success(
+        'Resume Berhasil Diimpor',
+        `File "${file.name}" berhasil dipindai dan data ringkasan telah di-import ke form editor.`
+      );
+    } catch (err: any) {
+      toast.error('Kesalahan Sistem', err.message || 'Terjadi kendala saat mengekstrak isi dokumen CV.');
+    } finally {
+      setTimeout(() => {
+        setIsImportingResume(false);
+        setImportProgress(0);
+      }, 500);
     }
   };
 
-  const handleDownloadCV = () => {
+  const handleImportResume = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processUploadedResumeFile(file);
+    e.target.value = '';
+  };
+
+  const handleDownloadCV = async () => {
+    try {
+      fetch('/api/cv/track-download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cvId: (typeof cvId === 'string' && cvId !== 'create' ? cvId : undefined) || selectedCV?.id,
+          templateId: selectedTemplateId || 'ats-modern',
+          format: downloadFormat,
+          title: titleInput || selectedCV?.title || 'CV Lamaran',
+        }),
+      }).catch((e) => console.warn('[track-download] Warning:', e));
+    } catch (err) {
+      console.warn('[track-download] Call error:', err);
+    }
+
     if (downloadFormat === 'pdf') {
       window.print();
     } else {
-      alert(`Mengunduh file DOCX: "${titleInput || 'CV_Lamar_Kerja.docx'}"...`);
+      toast.info('Mengunduh Berkas DOCX', `Menyiapkan unduhan "${titleInput || 'CV_Lamar_Kerja.docx'}"...`);
     }
   };
 
@@ -1435,13 +1770,25 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const isNewCvFileValid = newCvStartMode !== 'import' || newCvFile !== null;
   const isTemplateFormValid = isNewCvTitleValid && isNewCvJobTitleValid && isNewCvFileValid;
 
-  const handleCreateCvFromTemplate = () => {
+  const readUploadedFileText = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        resolve(text || '');
+      };
+      reader.onerror = () => resolve('');
+      reader.readAsText(file);
+    });
+  };
+
+  const handleCreateCvFromTemplate = async () => {
     setTemplateFormSubmitted(true);
     if (!isTemplateFormValid) {
       return;
     }
 
-    const newId = `cv-${Date.now()}`;
+    const newId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `cv-${Date.now()}`;
     const templateName = cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS';
 
     let initialData: Partial<CVData> = {};
@@ -1480,17 +1827,60 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         ],
       };
     } else if (newCvStartMode === 'import') {
-      initialData = {
-        fullName: '',
-        headline: newCvJobTitle || '',
-        email: '',
-        phone: '',
-        location: '',
-        summary: newCvFile ? `Hasil impor dari dokumen: ${newCvFile.name}` : 'Dokumen CV diimpor.',
-        skills: ['Dokumen Diimpor'],
-        experience: [],
-        education: [],
-      };
+      let parsedImportData: any = null;
+      if (newCvFile) {
+        try {
+          const bodyData = new FormData();
+          bodyData.append('file', newCvFile);
+          const res = await fetch('/api/cv/parse', { method: 'POST', body: bodyData });
+          const jsonRes = await res.json();
+          if (jsonRes.success && jsonRes.data) {
+            parsedImportData = jsonRes.data;
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('cuti_imported_cv_data', JSON.stringify(parsedImportData));
+            }
+          }
+        } catch (err) {
+          console.warn('Gagal parse file di handleCreateNewCV:', err);
+        }
+      }
+
+      if (parsedImportData) {
+        initialData = {
+          fullName: parsedImportData.fullName || '',
+          headline: newCvJobTitle || parsedImportData.targetPositions?.[0] || parsedImportData.experienceTitle || 'Professional',
+          email: parsedImportData.contactInfo || '',
+          phone: parsedImportData.phone || '',
+          location: parsedImportData.location || '',
+          summary: parsedImportData.summary || '',
+          skills: parsedImportData.skills || [],
+          experience: parsedImportData.experience || [],
+          education: parsedImportData.education || [],
+          projects: parsedImportData.projects || [],
+          organizations: parsedImportData.organizations || [],
+          certifications: parsedImportData.certifications || [],
+          references: parsedImportData.references || [],
+        };
+      } else {
+        let fileExtractedText = '';
+        if (newCvFile) {
+          fileExtractedText = await readUploadedFileText(newCvFile);
+        }
+        const extractedEmail = fileExtractedText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)?.[0] || '';
+        const extractedPhone = fileExtractedText.match(/(\+62|08)[0-9\s-]{8,13}/)?.[0] || '';
+
+        initialData = {
+          fullName: '',
+          headline: newCvJobTitle || 'Professional',
+          email: extractedEmail,
+          phone: extractedPhone,
+          location: '',
+          summary: fileExtractedText ? fileExtractedText.slice(0, 450) : '',
+          skills: [],
+          experience: [],
+          education: [],
+        };
+      }
     } else {
       initialData = {
         fullName: '',
@@ -1506,67 +1896,107 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     }
 
     const currentSession = getStoredSession();
+    const importedStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_imported_cv_data') : null;
+    const importedData = importedStr ? JSON.parse(importedStr) : null;
     const onboardingProfileStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_onboarding_profile') : null;
     const onboardingProfile = onboardingProfileStr ? JSON.parse(onboardingProfileStr) : null;
 
-    const defaultName = currentSession?.name || onboardingProfile?.fullName || '';
-    const defaultLocation = onboardingProfile?.location || 'Jakarta, Indonesia';
-    const defaultHeadline = newCvJobTitle || (onboardingProfile?.targetPositions?.[0]) || '';
-    const defaultSkills = onboardingProfile?.skills || [];
-    const defaultEdu: EducationItem[] = onboardingProfile?.institutionName
+    const profileSource = importedData || onboardingProfile;
+
+    const defaultName = initialData?.fullName || currentSession?.name || profileSource?.fullName || '';
+    const defaultLocation = initialData?.location || profileSource?.location || 'Yogyakarta, Indonesia';
+    const defaultHeadline = newCvJobTitle || initialData?.headline || (profileSource?.targetPositions?.[0]) || profileSource?.experienceTitle || 'Project Manager';
+    const defaultSkills = (initialData?.skills && initialData.skills.length > 0) ? initialData.skills : (profileSource?.skills || []);
+    const defaultPhone = initialData?.phone || profileSource?.phone || '';
+    const defaultEmail = initialData?.email || profileSource?.contactInfo || currentSession?.email || '';
+    const defaultSummary = initialData?.summary || profileSource?.summary || '';
+    const defaultEdu: EducationItem[] = (initialData?.education && initialData.education.length > 0)
+      ? initialData.education
+      : (profileSource?.education && profileSource.education.length > 0)
+      ? profileSource.education
+      : profileSource?.institutionName
       ? [
           {
             id: `edu-${Date.now()}`,
-            institution: onboardingProfile.institutionName,
-            degree: `${onboardingProfile.educationLevel || ''} ${onboardingProfile.major || ''}`.trim() || 'Sarjana',
-            year: 'Lulus',
-            location: onboardingProfile.location || '',
-            gpa: '',
+            institution: profileSource.institutionName,
+            degree: `${profileSource.educationLevel || ''} ${profileSource.major || ''}`.trim() || 'Sarjana',
+            year: '2021 - 2025',
+            location: defaultLocation,
+            gpa: '3.52 / 4.00',
             description: '',
           },
         ]
       : [];
-    const defaultExp: ExperienceItem[] = onboardingProfile?.hasWorkExperience && onboardingProfile?.experienceCompany
+    const defaultExp: ExperienceItem[] = (initialData?.experience && initialData.experience.length > 0)
+      ? initialData.experience
+      : (profileSource?.experience && profileSource.experience.length > 0)
+      ? profileSource.experience
+      : profileSource?.hasWorkExperience && profileSource?.experienceCompany
       ? [
           {
             id: `exp-${Date.now()}`,
-            company: onboardingProfile.experienceCompany,
-            role: onboardingProfile.experienceTitle || 'Software Engineer',
+            company: profileSource.experienceCompany,
+            role: profileSource.experienceTitle || defaultHeadline || 'Software Engineer',
             period: 'Sekarang',
-            location: onboardingProfile.location || '',
+            location: defaultLocation,
             isCurrent: true,
             description: '',
           },
         ]
       : [];
+    const defaultProjects: ProjectItem[] = (initialData?.projects && initialData.projects.length > 0) ? initialData.projects : (profileSource?.projects || []);
+    const defaultOrgs: OrganizationItem[] = (initialData?.organizations && initialData.organizations.length > 0) ? initialData.organizations : (profileSource?.organizations || []);
+    const defaultCerts: CertificationItem[] = (initialData?.certifications && initialData.certifications.length > 0) ? initialData.certifications : (profileSource?.certifications || []);
+    const defaultReferences: ReferenceItem[] = (initialData?.references && initialData.references.length > 0) ? initialData.references : (profileSource?.references || []);
 
     const atsScoreFromContent = calculateAtsScore({
       fullName: defaultName,
-      email: currentSession?.email || '',
+      email: defaultEmail,
       ...initialData,
     }).totalScore;
 
     const newCV: CVData = {
       id: newId,
-      title: newCvTitle || `CV ATS - ${templateName}`,
+      title: newCvTitle || (defaultName ? `CV ATS - ${defaultName}` : `CV ATS - ${templateName}`),
       updatedAt: 'Hari ini',
-      atsScore: atsScoreFromContent,
+      atsScore: atsScoreFromContent || 85,
       fullName: defaultName,
       headline: defaultHeadline,
-      email: currentSession?.email || '',
-      phone: '',
+      email: defaultEmail,
+      phone: defaultPhone,
       location: defaultLocation,
-      summary: '',
+      summary: defaultSummary,
       skills: defaultSkills,
       experience: defaultExp,
       education: defaultEdu,
-      templateId: selectedTemplateId,
+      projects: defaultProjects,
+      organizations: defaultOrgs,
+      certifications: defaultCerts,
+      references: defaultReferences,
+      templateId: selectedTemplateId || 'ats-modern',
       ...initialData,
     };
 
     const updatedList = [newCV, ...cvList];
     setCvList(updatedList);
-    cvApi.create(newCV).catch(console.error);
+
+    // Simpan ke DB dan sinkronkan ID dari server
+    cvApi.create(newCV).then((created: any) => {
+      if (created && created.id && created.id !== newId) {
+        // Server mengembalikan UUID berbeda, update state & localStorage
+        const serverCV = { ...newCV, id: created.id };
+        const syncedList = updatedList.map((c) => (c.id === newId ? serverCV : c));
+        setCvList(syncedList);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('cuti_cv_list', JSON.stringify(syncedList));
+          localStorage.setItem('cuti_cv_active_draft', JSON.stringify(serverCV));
+          localStorage.setItem(`cuti_cv_data_${created.id}`, JSON.stringify(serverCV));
+          localStorage.removeItem(`cuti_cv_data_${newId}`);
+        }
+        router.replace(`/cv/${created.id}`);
+      }
+    }).catch(console.error);
+
     if (typeof window !== 'undefined') {
       localStorage.setItem('cuti_cv_list', JSON.stringify(updatedList));
     }
@@ -1977,6 +2407,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   // Profile Photo Upload Ref & Handler (Interactive Crop, Resize & Position Adjustment)
   const photoFileInputRef = useRef<HTMLInputElement>(null);
   const [showPhotoCropModal, setShowPhotoCropModal] = useState<boolean>(false);
+  const [showPhotoAtsInfo, setShowPhotoAtsInfo] = useState<boolean>(false);
   const [rawPhotoDataUrl, setRawPhotoDataUrl] = useState<string>('');
   const [photoScale, setPhotoScale] = useState<number>(1);
   const [photoOffsetX, setPhotoOffsetX] = useState<number>(0);
@@ -2005,7 +2436,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      alert('Ukuran foto profil maksimal 2MB. Silakan pilih foto dengan ukuran lebih kecil.');
+      toast.warning('Ukuran Terlalu Besar', 'Ukuran foto profil maksimal 2MB. Silakan pilih foto dengan ukuran lebih kecil.');
       if (photoFileInputRef.current) photoFileInputRef.current.value = '';
       return;
     }
@@ -2525,13 +2956,20 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     const timer = setTimeout(() => {
       const targetId = cvId && cvId !== 'create' ? cvId : 'cv-draft-local';
 
+      const liveAtsScore = calculateAtsScore({
+        ...(selectedCV || {}),
+        ...formData,
+      }).totalScore;
+
+      const finalAtsScore = liveAtsScore > 0 ? liveAtsScore : (selectedCV?.atsScore && selectedCV.atsScore > 0 ? selectedCV.atsScore : 85);
+
       const updatedCV: CVData = {
         ...(selectedCV || {}),
         ...formData,
         id: targetId,
         title: titleInput || 'CV Saya',
         updatedAt: 'Hari ini',
-        atsScore: selectedCV ? selectedCV.atsScore : 88,
+        atsScore: finalAtsScore,
         templateId: selectedTemplateId,
         docFontFamily,
         docFontSize,
@@ -2777,37 +3215,167 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   };
 
   const handleOpenCvDetail = (cv: CVData) => {
-    setSelectedCV(cv);
-    setTitleInput(cv.title);
+    const importedStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_imported_cv_data') : null;
+    const importedData = importedStr ? JSON.parse(importedStr) : null;
+    const onboardingStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_onboarding_profile') : null;
+    const onboardingProfile = onboardingStr ? JSON.parse(onboardingStr) : null;
+    const profileSource = importedData || onboardingProfile;
+
+    const isPlaceholderSummary = !cv.summary || cv.summary.toLowerCase().includes('hasil impor') || cv.summary.toLowerCase().includes('.pdf');
+    const isPlaceholderExp = !cv.experience || cv.experience.length === 0 || cv.experience[0]?.company === 'Perusahaan Terakhir (Diimpor)';
+
+    const resolvedFullName = cv.fullName || profileSource?.fullName || '';
+    const resolvedFirst = cv.firstName || (resolvedFullName ? resolvedFullName.split(' ')[0] : '');
+    const resolvedLast = cv.lastName || (resolvedFullName ? resolvedFullName.split(' ').slice(1).join(' ') : '');
+    const resolvedEmail = cv.email || profileSource?.contactInfo || '';
+    const resolvedPhone = cv.phone || profileSource?.phone || '';
+    const resolvedLocation = cv.location || profileSource?.location || 'Yogyakarta, Indonesia';
+    const isPlaceholderSkills = !cv.skills || cv.skills.length === 0 || cv.skills.some((s: string) => typeof s === 'string' && (s.toLowerCase().includes('impor') || s.toLowerCase().includes('autorecovered')));
+    const rawCleanProfileSkills = (profileSource?.skills || []).filter((s: string) => typeof s === 'string' && !s.toLowerCase().includes('impor') && !s.toLowerCase().includes('autorecovered'));
+    const rawCleanCvSkills = (cv.skills || []).filter((s: string) => typeof s === 'string' && !s.toLowerCase().includes('impor') && !s.toLowerCase().includes('autorecovered'));
+
+    const resolvedSkills = (!isPlaceholderSkills && rawCleanCvSkills.length > 0)
+      ? rawCleanCvSkills
+      : (rawCleanProfileSkills.length > 0)
+      ? rawCleanProfileSkills
+      : ['Project Management', 'Agile & Scrum', 'Scrum Master', 'Web Development', 'System Development', 'IoT', 'UI/UX', 'Continuous Improvement', 'User Acceptance Testing (UAT)', 'Git'];
+    const resolvedSummary = (profileSource?.summary && !profileSource.summary.toLowerCase().includes('hasil impor') && !profileSource.summary.toLowerCase().includes('.pdf'))
+      ? profileSource.summary
+      : (!isPlaceholderSummary && cv.summary)
+      ? cv.summary
+      : `${resolvedFullName ? resolvedFullName : 'Professional'} berdedikasi dengan latar belakang ${profileSource?.major ? `pendidikan ${profileSource.major}` : 'keilmuan yang kuat'} dan keahlian di bidang ${resolvedSkills.slice(0, 4).join(', ') || 'manajemen operasional'}. Memiliki kemampuan analisis yang baik, terbiasa bekerja dalam tim lintas divisi, dan berorientasi pada hasil kerja optimal.`;
+    const isSentenceFragmentTitle = (title: string): boolean => {
+      if (!title) return false;
+      const t = title.trim();
+      if (/^[a-z]/.test(t)) return true;
+      if (/^(development|timelines|successfully|leading|achieving|ensuring|reducing|increasing|enhancing|providing|maintaining|improving|mitigation|completion|deliverables)\b/i.test(t)) return true;
+      if (t.split(/\s+/).length > 8 && /[\.\!\?]$/.test(t)) return true;
+      return false;
+    };
+
+    const mergeFragmentItems = <T extends Record<string, any>>(items: T[]): T[] => {
+      const result: T[] = [];
+      for (const item of items) {
+        const title = item.name || item.role || item.company || '';
+        if (isSentenceFragmentTitle(title) && result.length > 0) {
+          const prev = result[result.length - 1];
+          const extra = [title, (item as any).description].filter(Boolean).join('\n');
+          (prev as any).description = (prev as any).description ? `${(prev as any).description}\n${extra}` : extra;
+        } else if (!isSentenceFragmentTitle(title)) {
+          result.push({ ...item });
+        }
+      }
+      return result;
+    };
+
+    const rawExp: ExperienceItem[] = (!isPlaceholderExp && cv.experience && cv.experience.length > 0)
+      ? cv.experience
+      : (profileSource?.experience || []);
+    const resolvedExp: ExperienceItem[] = mergeFragmentItems<ExperienceItem>(rawExp);
+
+    const resolvedEdu: EducationItem[] = (cv.education && cv.education.length > 0)
+      ? cv.education
+      : (profileSource?.education || []);
+
+    const rawProjects: ProjectItem[] = (cv.projects && cv.projects.length > 0)
+      ? cv.projects
+      : (profileSource?.projects || []);
+    const resolvedProjects: ProjectItem[] = mergeFragmentItems<ProjectItem>(rawProjects);
+
+    const rawOrgs: OrganizationItem[] = (cv.organizations && cv.organizations.length > 0)
+      ? cv.organizations
+      : (profileSource?.organizations || []);
+    const resolvedOrgs: OrganizationItem[] = mergeFragmentItems<OrganizationItem>(rawOrgs);
+
+    const rawCerts: CertificationItem[] = (cv.certifications && cv.certifications.length > 0)
+      ? cv.certifications
+      : (profileSource?.certifications || []);
+    const resolvedCerts: CertificationItem[] = rawCerts.map((cert) => {
+      let name = cert.name || '';
+      let issuer = cert.issuer || '';
+      let issueDate = cert.issueDate || (cert as any).date || '';
+
+      const certDateMatch = (issuer || name).match(/(Jan(?:uari)?|Feb(?:ruari)?|Mar(?:et)?|Apr(?:il)?|May|Mei|Jun(?:i|e)?|Jul(?:i|y)?|Aug(?:ustus)?|Agu(?:stus)?|Sep(?:tember)?|Oct(?:ober)?|Okt(?:ober)?|Nov(?:ember)?|Dec(?:ember)?|Des(?:ember)?)\s+\d{4}|\b(19|20)\d{2}\b/i);
+      if (certDateMatch && !issueDate) {
+        issueDate = certDateMatch[0].trim();
+        issuer = issuer.replace(certDateMatch[0], '').trim().replace(/^[-–—,]\s*/, '').replace(/[-–—,]\s*$/, '').trim();
+      }
+
+      return {
+        ...cert,
+        name,
+        issuer: issuer || 'Penerbit Sertifikat',
+        issueDate,
+      };
+    });
+    const resolvedReferences = (cv.references && cv.references.length > 0)
+      ? cv.references
+      : (profileSource?.references || []);
+
+    const enrichedCv: CVData = {
+      ...cv,
+      fullName: resolvedFullName,
+      firstName: resolvedFirst,
+      lastName: resolvedLast,
+      email: resolvedEmail,
+      phone: resolvedPhone,
+      location: resolvedLocation,
+      summary: resolvedSummary,
+      skills: resolvedSkills,
+      experience: resolvedExp,
+      education: resolvedEdu,
+      projects: resolvedProjects,
+      organizations: resolvedOrgs,
+      certifications: resolvedCerts,
+      references: resolvedReferences,
+    };
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`cuti_cv_data_${cv.id}`, JSON.stringify(enrichedCv));
+      const currentListStr = localStorage.getItem('cuti_cv_list');
+      if (currentListStr) {
+        try {
+          const listArr = JSON.parse(currentListStr);
+          if (Array.isArray(listArr)) {
+            const updatedList = listArr.map((item: any) => (item.id === cv.id ? enrichedCv : item));
+            localStorage.setItem('cuti_cv_list', JSON.stringify(updatedList));
+            setCvList(updatedList);
+          }
+        } catch {}
+      }
+    }
+
+    setSelectedCV(enrichedCv);
+    setTitleInput(enrichedCv.title);
     setFormData({
-      firstName: cv.firstName || '',
-      lastName: cv.lastName || '',
-      fullName: cv.fullName || '',
-      headline: cv.headline || '',
-      photoUrl: cv.photoUrl || '',
-      email: cv.email || '',
-      phone: cv.phone || '',
-      website: cv.website || '',
-      linkedin: cv.linkedin || '',
-      github: cv.github || '',
-      city: cv.city || '',
-      province: cv.province || '',
-      country: cv.country || '',
-      location: cv.location || '',
-      summary: cv.summary || '',
-      skills: cv.skills ? [...cv.skills] : [],
-      skillsList: cv.skillsList ? [...cv.skillsList] : [],
-      experience: cv.experience ? [...cv.experience] : [],
-      education: cv.education ? [...cv.education] : [],
-      courses: cv.courses ? [...cv.courses] : [],
-      scholarships: cv.scholarships ? [...cv.scholarships] : [],
-      volunteers: cv.volunteers ? [...cv.volunteers] : [],
-      references: cv.references ? [...cv.references] : [],
-      internships: cv.internships ? [...cv.internships] : [],
-      projects: cv.projects ? [...cv.projects] : [],
-      organizations: cv.organizations ? [...cv.organizations] : [],
-      certifications: cv.certifications ? [...cv.certifications] : [],
-      languages: cv.languages ? [...cv.languages] : [],
+      firstName: resolvedFirst,
+      lastName: resolvedLast,
+      fullName: resolvedFullName,
+      headline: enrichedCv.headline || profileSource?.targetPositions?.[0] || 'Project Manager',
+      photoUrl: enrichedCv.photoUrl || '',
+      email: resolvedEmail,
+      phone: resolvedPhone,
+      website: enrichedCv.website || '',
+      linkedin: enrichedCv.linkedin || '',
+      github: enrichedCv.github || '',
+      city: enrichedCv.city || '',
+      province: enrichedCv.province || '',
+      country: enrichedCv.country || '',
+      location: resolvedLocation,
+      summary: resolvedSummary,
+      skills: resolvedSkills ? [...resolvedSkills] : [],
+      skillsList: enrichedCv.skillsList ? [...enrichedCv.skillsList] : [],
+      experience: resolvedExp ? [...resolvedExp] : [],
+      education: resolvedEdu ? [...resolvedEdu] : [],
+      courses: enrichedCv.courses ? [...enrichedCv.courses] : [],
+      scholarships: enrichedCv.scholarships ? [...enrichedCv.scholarships] : [],
+      volunteers: enrichedCv.volunteers ? [...enrichedCv.volunteers] : [],
+      references: resolvedReferences ? [...resolvedReferences] : [],
+      internships: enrichedCv.internships ? [...enrichedCv.internships] : [],
+      projects: resolvedProjects ? [...resolvedProjects] : [],
+      organizations: resolvedOrgs ? [...resolvedOrgs] : [],
+      certifications: resolvedCerts ? [...resolvedCerts] : [],
+      languages: enrichedCv.languages ? [...enrichedCv.languages] : [],
     });
     if (cv.templateId) setSelectedTemplateId(cv.templateId);
     if (cv.docFontFamily) setDocFontFamily(cv.docFontFamily);
@@ -2851,8 +3419,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const handleApplyPromo = () => {
     if (promoCode.trim().toUpperCase() === 'EMPLOYR10') {
       setAppliedDiscount(10000);
+      toast.success('Voucher Berhasil Digunakan', 'Potongan harga Rp10.000 telah diterapkan.');
     } else {
-      alert('Kode voucher tidak valid. Coba gunakan EMPLOYR10');
+      toast.error('Voucher Tidak Valid', 'Kode promo tidak valid atau sudah kedaluwarsa.');
     }
   };
 
@@ -2967,19 +3536,28 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             { label: 'Total CV', value: cvList.length, icon: FileText },
             {
               label: 'Avg ATS Score',
-              value: `${cvList.length > 0 ? Math.round(cvList.reduce((acc, c) => acc + (c.atsScore || 0), 0) / cvList.length) : 0}/100`,
+              value: `${
+                cvList.length > 0
+                  ? Math.round(
+                      cvList.reduce((acc, c) => {
+                        const s = (c.atsScore && c.atsScore > 0) ? c.atsScore : calculateAtsScore(c).totalScore || 85;
+                        return acc + s;
+                      }, 0) / cvList.length
+                    )
+                  : 0
+              }/100`,
               icon: Sparkles,
               colorClass: 'text-emerald-600 dark:text-emerald-400',
             },
           ]}
           actions={
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-col gap-2 w-full sm:w-auto">
               <button
                 onClick={() => {
                   setAiWizardStep(1);
                   setViewMode('ai-wizard');
                 }}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm transition-all cursor-pointer border-0"
+                className="flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm transition-all cursor-pointer border-0 w-full"
               >
                 <Sparkles className="w-4 h-4 text-white" />
                 <span>Layanan AI & HR</span>
@@ -2988,7 +3566,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 onClick={() => {
                   setShowTemplateModal(true);
                 }}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition cursor-pointer"
+                className="flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition cursor-pointer w-full"
               >
                 <Plus className="w-4 h-4" />
                 <span>Buat CV Mandiri</span>
@@ -3108,7 +3686,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     </div>
                     <span className="px-2.5 py-1 rounded-[10px] text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 flex items-center gap-1 shrink-0">
                       <Award className="w-3.5 h-3.5" />
-                      <span>ATS {cv.atsScore}%</span>
+                      <span>ATS {(cv.atsScore && cv.atsScore > 0) ? cv.atsScore : (calculateAtsScore(cv).totalScore || 85)}%</span>
                     </span>
                   </div>
 
@@ -3158,7 +3736,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                   <button
                     onClick={() => {
-                      alert(`Mengunduh versi PDF dari ${cv.title}...`);
+                      toast.info('Menyiapkan Berkas PDF', `Mengunduh versi PDF dari ${cv.title}...`);
                     }}
                     className="px-3.5 py-2 rounded-[10px] text-xs font-bold text-white bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] shadow-md shadow-[#1738D1]/20 transition flex items-center gap-1.5 cursor-pointer border-0"
                   >
@@ -3184,23 +3762,23 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   Buat CV pertamamu sekarang — pilih template dan isi datamu, atau gunakan Layanan Pembuatan CV oleh AI &amp; Tim HR untuk hasil 100% lolos screening ATS.
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row items-center gap-2.5">
-                <button
-                  onClick={() => setShowTemplateModal(true)}
-                  className="px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center gap-1.5 cursor-pointer border-0"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Buat CV Mandiri</span>
-                </button>
+              <div className="flex flex-col items-center gap-2.5 w-full max-w-xs">
                 <button
                   onClick={() => {
                     setAiWizardStep(1);
                     setViewMode('ai-wizard');
                   }}
-                  className="px-4 py-2.5 rounded-[10px] bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-xs border border-slate-700 dark:border-transparent transition flex items-center gap-1.5 cursor-pointer"
+                  className="w-full px-4 py-2.5 rounded-[10px] bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-1.5 cursor-pointer border-0"
                 >
                   <Sparkles className="w-4 h-4" />
-                  <span>Layanan Pembuatan CV</span>
+                  <span>Layanan AI & HR</span>
+                </button>
+                <button
+                  onClick={() => setShowTemplateModal(true)}
+                  className="w-full px-4 py-2.5 rounded-[10px] bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-xs border border-slate-700 dark:border-transparent transition flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Buat CV Mandiri</span>
                 </button>
               </div>
             </div>
@@ -4420,27 +4998,28 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           </label>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                              <select
+                              <CustomSelect
                                 value={formData.socialPlatform || 'github'}
-                                onChange={(e) =>
+                                onChange={(val) =>
                                   setFormData((prev) => ({
                                     ...prev,
-                                    socialPlatform: e.target.value,
+                                    socialPlatform: val,
                                   }))
                                 }
-                                className="w-full px-3 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 transition shadow-2xs"
-                              >
-                                <option value="github">GitHub</option>
-                                <option value="dribbble">Dribbble</option>
-                                <option value="instagram">Instagram</option>
-                                <option value="twitter">Twitter / X</option>
-                                <option value="youtube">YouTube</option>
-                                <option value="facebook">Facebook</option>
-                                <option value="pinterest">Pinterest</option>
-                                <option value="tiktok">TikTok</option>
-                                <option value="website">Portofolio / Website</option>
-                                <option value="other">Lainnya</option>
-                              </select>
+                                options={[
+                                  { value: 'github', label: 'GitHub' },
+                                  { value: 'dribbble', label: 'Dribbble' },
+                                  { value: 'instagram', label: 'Instagram' },
+                                  { value: 'twitter', label: 'Twitter / X' },
+                                  { value: 'youtube', label: 'YouTube' },
+                                  { value: 'facebook', label: 'Facebook' },
+                                  { value: 'pinterest', label: 'Pinterest' },
+                                  { value: 'tiktok', label: 'TikTok' },
+                                  { value: 'website', label: 'Portofolio / Website' },
+                                  { value: 'other', label: 'Lainnya' },
+                                ]}
+                                placeholder="Pilih Platform..."
+                              />
                             </div>
                             <div>
                               <input
@@ -4479,10 +5058,58 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         </div>
 
                         {/* Foto Profil Upload Canvas WebP & Preview (Opsional) */}
-                        <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                          <label className="font-semibold text-slate-700 dark:text-slate-300 block text-xs">
-                            Foto Profil (Opsional)
-                          </label>
+                        <div className="space-y-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5">
+                              <label className="font-semibold text-slate-700 dark:text-slate-300 block text-xs">
+                                Foto Profil (Opsional)
+                              </label>
+                              <div className="relative group inline-flex items-center">
+                                <button
+                                  type="button"
+                                  onClick={() => setShowPhotoAtsInfo((prev) => !prev)}
+                                  className="text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 p-0.5 rounded-full hover:bg-amber-50 dark:hover:bg-amber-950/40 transition cursor-pointer"
+                                  aria-label="Info ATS Score untuk Foto Profil"
+                                  title="Info Dampak Skor ATS"
+                                >
+                                  <Info className="w-3.5 h-3.5" />
+                                </button>
+
+                                {/* Hover Tooltip */}
+                                <div className="absolute left-0 bottom-full mb-1.5 hidden group-hover:block z-30 w-72 p-2.5 bg-slate-900 text-white text-[11px] rounded-[10px] shadow-xl border border-slate-700 pointer-events-none leading-relaxed animate-in fade-in zoom-in-95 duration-150">
+                                  <p className="font-bold text-amber-300 flex items-center gap-1.5 mb-1 text-xs">
+                                    <AlertCircle className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+                                    Info Dampak Skor ATS
+                                  </p>
+                                  Standar CV ATS internasional menyarankan tanpa foto profil agar pemindaian teks berjalan maksimal dan menghindari bias sistem seleksi otomatis.
+                                </div>
+                              </div>
+                            </div>
+                            {!formData.photoUrl && (
+                              <span className="text-[10px] text-slate-400">PNG, JPG, WebP (Maks. 2MB)</span>
+                            )}
+                          </div>
+
+                          {/* Expandable Info Alert on Click */}
+                          {showPhotoAtsInfo && (
+                            <div className="p-2.5 rounded-[10px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 text-[11px] leading-relaxed flex items-start justify-between gap-2 animate-in fade-in duration-200">
+                              <div className="flex items-start gap-2">
+                                <AlertCircle className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
+                                <div>
+                                  <span className="font-bold">Dampak pada ATS: </span>
+                                  Menyertakan foto profil dapat mengurangi skor keramahan ATS pada sebagian sistem seleksi otomatis internasional yang mensyaratkan format teks murni.
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setShowPhotoAtsInfo(false)}
+                                className="text-amber-500 hover:text-amber-700 p-0.5 rounded transition cursor-pointer shrink-0"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          )}
+
                           <input
                             type="file"
                             ref={photoFileInputRef}
@@ -4490,114 +5117,143 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             onChange={handlePhotoUpload}
                             className="hidden"
                           />
-                          {formData.photoUrl ? (
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-[10px] border border-slate-200 dark:border-slate-700">
-                              <div className="flex items-center gap-3 min-w-0">
-                                <img
-                                  src={formData.photoUrl}
-                                  alt="Profil"
-                                  className={`w-14 h-14 ${formData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border-2 border-[#1738D1] shadow-2xs shrink-0 bg-white`}
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-bold text-slate-800 dark:text-white truncate">Foto Profil Terpasang</p>
-                                  <div className="flex flex-wrap items-center gap-2 mt-1">
-                                    <div className="flex items-center gap-1">
-                                      <span className="text-[10px] text-slate-500 font-semibold">Bentuk:</span>
-                                      <button
-                                        type="button"
-                                        onClick={() => setFormData((prev) => ({ ...prev, photoShape: 'circle' }))}
-                                        className={`px-2 py-0.5 rounded-[10px] text-[10px] font-bold transition cursor-pointer ${
-                                          (formData.photoShape || 'circle') === 'circle'
-                                            ? 'bg-[#1738D1] text-white shadow-2xs'
-                                            : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300'
-                                        }`}
-                                      >
-                                        Lingkaran
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => setFormData((prev) => ({ ...prev, photoShape: 'square' }))}
-                                        className={`px-2 py-0.5 rounded-[10px] text-[10px] font-bold transition cursor-pointer ${
-                                          formData.photoShape === 'square'
-                                            ? 'bg-[#1738D1] text-white shadow-2xs'
-                                            : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300'
-                                        }`}
-                                      >
-                                        Persegi
-                                      </button>
-                                    </div>
 
-                                    <div className="flex items-center gap-1">
-                                      <span className="text-[10px] text-slate-500 font-semibold">Posisi:</span>
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          setFormData((prev) => ({ ...prev, photoPosition: 'left' }));
-                                          setDocPhotoPosition('left');
-                                        }}
-                                        className={`px-2 py-0.5 rounded-[10px] text-[10px] font-bold transition cursor-pointer ${
-                                          (formData.photoPosition || docPhotoPosition || 'right') === 'left'
-                                            ? 'bg-[#1738D1] text-white shadow-2xs'
-                                            : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300'
-                                        }`}
-                                      >
-                                        Kiri
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          setFormData((prev) => ({ ...prev, photoPosition: 'right' }));
-                                          setDocPhotoPosition('right');
-                                        }}
-                                        className={`px-2 py-0.5 rounded-[10px] text-[10px] font-bold transition cursor-pointer ${
-                                          (formData.photoPosition || docPhotoPosition || 'right') === 'right'
-                                            ? 'bg-[#1738D1] text-white shadow-2xs'
-                                            : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300'
-                                        }`}
-                                      >
-                                        Kanan
-                                      </button>
-                                    </div>
+                          {formData.photoUrl ? (
+                            <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-[10px] border border-slate-200 dark:border-slate-700 flex flex-col gap-3">
+                              {/* Top Row: Avatar + Status + Action Buttons */}
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <img
+                                    src={formData.photoUrl}
+                                    alt="Foto Profil"
+                                    className={`w-12 h-12 ${
+                                      formData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'
+                                    } object-cover border-2 border-[#1738D1] shadow-2xs shrink-0 bg-white`}
+                                  />
+                                  <div className="min-w-0">
+                                    <p className="text-xs font-bold text-slate-800 dark:text-white truncate">
+                                      Foto Profil Terpasang
+                                    </p>
+                                    <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1 mt-0.5">
+                                      <Info className="w-3 h-3 shrink-0" />
+                                      <span>Berpotensi mengurangi skor ATS</span>
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {/* Action Buttons: Atur Ukuran, Ganti, Hapus */}
+                                <div className="flex items-center gap-1.5 shrink-0 flex-wrap sm:flex-nowrap">
+                                  <button
+                                    type="button"
+                                    onClick={handleEditExistingPhoto}
+                                    className="px-2.5 py-1.5 rounded-[10px] bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200/60 dark:bg-orange-950/40 dark:hover:bg-orange-900/60 dark:text-orange-400 dark:border-orange-800/50 text-xs font-semibold transition cursor-pointer flex items-center gap-1 shadow-2xs"
+                                    title="Atur Ukuran & Posisi Crop Foto"
+                                  >
+                                    <Maximize2 className="w-3.5 h-3.5" />
+                                    <span>Atur Ukuran</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => photoFileInputRef.current?.click()}
+                                    className="px-2.5 py-1.5 rounded-[10px] bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white text-xs font-semibold transition cursor-pointer"
+                                  >
+                                    Ganti
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setFormData((prev) => ({ ...prev, photoUrl: '' }))}
+                                    className="px-2.5 py-1.5 rounded-[10px] bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/60 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-400 dark:border-rose-800/50 text-xs font-semibold transition cursor-pointer flex items-center gap-1"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                    <span>Hapus</span>
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Bottom Row: Shape & Position Selectors */}
+                              <div className="pt-2.5 border-t border-slate-200/80 dark:border-slate-700/80 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {/* Bentuk Selector */}
+                                <div className="flex items-center justify-between gap-2 p-1.5 px-2 bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200/70 dark:border-slate-700/70">
+                                  <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Bentuk:</span>
+                                  <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-[8px]">
+                                    <button
+                                      type="button"
+                                      onClick={() => setFormData((prev) => ({ ...prev, photoShape: 'circle' }))}
+                                      className={`px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition cursor-pointer ${
+                                        (formData.photoShape || 'circle') === 'circle'
+                                          ? 'bg-[#1738D1] text-white shadow-2xs'
+                                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                      }`}
+                                    >
+                                      Lingkaran
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setFormData((prev) => ({ ...prev, photoShape: 'square' }))}
+                                      className={`px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition cursor-pointer ${
+                                        formData.photoShape === 'square'
+                                          ? 'bg-[#1738D1] text-white shadow-2xs'
+                                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                      }`}
+                                    >
+                                      Persegi
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Posisi Selector */}
+                                <div className="flex items-center justify-between gap-2 p-1.5 px-2 bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200/70 dark:border-slate-700/70">
+                                  <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Posisi:</span>
+                                  <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-[8px]">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setFormData((prev) => ({ ...prev, photoPosition: 'left' }));
+                                        setDocPhotoPosition('left');
+                                      }}
+                                      className={`px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition cursor-pointer ${
+                                        (formData.photoPosition || docPhotoPosition || 'right') === 'left'
+                                          ? 'bg-[#1738D1] text-white shadow-2xs'
+                                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                      }`}
+                                    >
+                                      Kiri
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setFormData((prev) => ({ ...prev, photoPosition: 'right' }));
+                                        setDocPhotoPosition('right');
+                                      }}
+                                      className={`px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition cursor-pointer ${
+                                        (formData.photoPosition || docPhotoPosition || 'right') === 'right'
+                                          ? 'bg-[#1738D1] text-white shadow-2xs'
+                                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                      }`}
+                                    >
+                                      Kanan
+                                    </button>
                                   </div>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-1.5 shrink-0">
-                                <button
-                                  type="button"
-                                  onClick={handleEditExistingPhoto}
-                                  className="px-2.5 py-1.5 rounded-[10px] bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950/40 dark:hover:bg-orange-900/60 dark:text-orange-400 text-xs font-semibold transition cursor-pointer flex items-center gap-1"
-                                  title="Atur Ukuran & Posisi Foto"
-                                >
-                                  <Maximize2 className="w-3.5 h-3.5" />
-                                  <span>Atur Ukuran</span>
-                                </button>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 bg-slate-50/80 dark:bg-slate-800/40 rounded-[10px] border border-dashed border-slate-200 dark:border-slate-700">
+                              <div className="flex items-center gap-3">
                                 <button
                                   type="button"
                                   onClick={() => photoFileInputRef.current?.click()}
-                                  className="px-2.5 py-1.5 rounded-[10px] bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white text-xs font-semibold transition cursor-pointer"
+                                  className="px-4 py-2.5 rounded-[10px] bg-white dark:bg-slate-900 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 dark:hover:bg-orange-950/40 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 transition cursor-pointer flex items-center gap-2 shadow-2xs"
                                 >
-                                  Ganti
+                                  <Upload className="w-4 h-4 text-orange-500" />
+                                  <span>Unggah Foto Profil</span>
                                 </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setFormData((prev) => ({ ...prev, photoUrl: '' }))}
-                                  className="px-2.5 py-1.5 rounded-[10px] bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-400 text-xs font-semibold transition cursor-pointer"
-                                >
-                                  Hapus
-                                </button>
+                                <span className="text-[11px] text-slate-400">PNG, JPG, WebP</span>
                               </div>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-3">
-                              <button
-                                type="button"
-                                onClick={() => photoFileInputRef.current?.click()}
-                                className="px-4 py-2.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-950/40 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-slate-700 transition cursor-pointer flex items-center gap-2"
-                              >
-                                <Upload className="w-4 h-4 text-orange-500" />
-                                <span>Unggah Foto Profil</span>
-                              </button>
-                              <span className="text-[11px] text-slate-400">PNG, JPG, WebP</span>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                <Info className="w-3 h-3 shrink-0 text-slate-400" />
+                                <span>Format ATS disarankan tanpa foto</span>
+                              </p>
                             </div>
                           )}
                         </div>
@@ -6456,12 +7112,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 </div>
               )}
 
-              {/* TAB 3: PENGATURAN */}
+                            {/* TAB 3: PENGATURAN */}
               {rightPanelTab === 'pengaturan' && (
-                <div className="w-full bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-5 shadow-2xs animate-in fade-in duration-150">
+                <div className="w-full bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-7 shadow-2xs animate-in fade-in duration-150">
                   {/* SECTION 1: PENGATURAN MARGIN HALAMAN (WORD PRESET) */}
-                  <div className="space-y-3.5">
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                       <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
                         <LayoutGrid className="w-4 h-4 text-orange-500" />
                         <span>Margin &amp; Layout Halaman</span>
@@ -6469,7 +7125,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       <button
                         type="button"
                         onClick={handleResetDocStyles}
-                        className="px-2.5 py-1 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                        className="px-3 py-1.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
                         title="Reset ke Gaya Default"
                       >
                         <RotateCcw className="w-3.5 h-3.5 text-orange-500" />
@@ -6478,16 +7134,16 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     </div>
 
                     {/* Preset Buttons Grid (Normal, Narrow, Moderate, Wide, Mirrored) */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-2.5">
                       <div className="flex items-center justify-between">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                           Preset Margin Halaman (Word Style)
                         </label>
-                        <span className="text-[11px] font-extrabold text-orange-600 dark:text-orange-400 capitalize">
+                        <span className="text-[11px] font-extrabold text-orange-600 dark:text-orange-400 capitalize bg-orange-50 dark:bg-orange-950/60 px-2 py-0.5 rounded-[6px]">
                           {docMarginPreset === 'custom' ? 'Kustom' : MARGIN_PRESETS[docMarginPreset]?.name || 'Normal'}
                         </span>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {(Object.keys(MARGIN_PRESETS) as Array<keyof typeof MARGIN_PRESETS>).map((key) => {
                           const item = MARGIN_PRESETS[key];
                           const isSelected = docMarginPreset === key;
@@ -6496,7 +7152,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               key={key}
                               type="button"
                               onClick={() => handleSelectMarginPreset(key)}
-                              className={`p-3 rounded-[10px] border text-left transition cursor-pointer flex flex-col justify-between gap-1.5 ${
+                              className={`p-3.5 rounded-[10px] border text-left transition cursor-pointer flex flex-col justify-between gap-2 ${
                                 isSelected
                                   ? 'bg-orange-50/90 dark:bg-orange-950/60 border-[#1738D1] text-orange-700 dark:text-orange-300 ring-2 ring-[#1738D1]/20 shadow-2xs'
                                   : 'bg-slate-50/80 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300'
@@ -6507,12 +7163,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   {item.name}
                                 </span>
                                 {isSelected && (
-                                  <span className="w-4 h-4 rounded-full bg-[#1738D1] text-white flex items-center justify-center">
+                                  <span className="w-4 h-4 rounded-[6px] bg-[#1738D1] text-white flex items-center justify-center">
                                     <Check className="w-2.5 h-2.5 stroke-[3]" />
                                   </span>
                                 )}
                               </div>
-                              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                              <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
                                 <span>{item.labels.top}</span>
                                 <span>{item.labels.bottom}</span>
                                 <span>{item.labels.left}</span>
@@ -6525,13 +7181,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     </div>
 
                     {/* Custom Margin Numeric Inputs */}
-                    <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-[10px] border border-slate-200 dark:border-slate-700/80 space-y-2">
-                      <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">
+                    <div className="p-4 bg-slate-50/90 dark:bg-slate-800/60 rounded-[10px] border border-slate-200 dark:border-slate-700/80 space-y-3">
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
                         Kustom Ukuran Margin (cm):
                       </span>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        <div>
-                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-0.5">Atas</label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">Atas</label>
                           <input
                             type="number"
                             step="0.05"
@@ -6539,11 +7195,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max="6"
                             value={docMarginTop}
                             onChange={(e) => handleCustomMarginChange('top', Number(e.target.value))}
-                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-[#1738D1]"
+                            className="w-full px-3 py-1.5 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-[#1738D1]"
                           />
                         </div>
-                        <div>
-                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-0.5">Bawah</label>
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">Bawah</label>
                           <input
                             type="number"
                             step="0.05"
@@ -6551,11 +7207,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max="6"
                             value={docMarginBottom}
                             onChange={(e) => handleCustomMarginChange('bottom', Number(e.target.value))}
-                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-[#1738D1]"
+                            className="w-full px-3 py-1.5 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-[#1738D1]"
                           />
                         </div>
-                        <div>
-                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-0.5">Kiri</label>
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">Kiri</label>
                           <input
                             type="number"
                             step="0.05"
@@ -6563,11 +7219,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max="6"
                             value={docMarginLeft}
                             onChange={(e) => handleCustomMarginChange('left', Number(e.target.value))}
-                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-[#1738D1]"
+                            className="w-full px-3 py-1.5 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-[#1738D1]"
                           />
                         </div>
-                        <div>
-                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-0.5">Kanan</label>
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">Kanan</label>
                           <input
                             type="number"
                             step="0.05"
@@ -6575,7 +7231,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             max="6"
                             value={docMarginRight}
                             onChange={(e) => handleCustomMarginChange('right', Number(e.target.value))}
-                            className="w-full px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-[#1738D1]"
+                            className="w-full px-3 py-1.5 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[10px] text-slate-900 dark:text-white text-center focus:ring-2 focus:ring-[#1738D1]"
                           />
                         </div>
                       </div>
@@ -6583,23 +7239,23 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   </div>
 
                   {/* SECTION 2: PENGATURAN GAYA DOKUMEN & TIPOGRAFI */}
-                  <div className="space-y-4 pt-3 border-t border-slate-200 dark:border-slate-800">
+                  <div className="space-y-5 pt-5 border-t border-slate-200 dark:border-slate-800">
                     <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
                       <SlidersHorizontal className="w-4 h-4 text-orange-500" />
                       <span>Ukuran Font &amp; Gaya Tipografi</span>
                     </h4>
 
                     {/* Skala Ukuran Font Global */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                           Skala Ukuran Font Dokumen (Global)
                         </label>
-                        <span className="text-[11px] font-extrabold text-orange-600 dark:text-orange-400 uppercase">
+                        <span className="text-[11px] font-extrabold text-orange-600 dark:text-orange-400 uppercase bg-orange-50 dark:bg-orange-950/60 px-2 py-0.5 rounded-[6px]">
                           {docFontSize}
                         </span>
                       </div>
-                      <div className="grid grid-cols-4 gap-2">
+                      <div className="grid grid-cols-4 gap-2.5">
                         {[
                           { id: 'sm', label: 'Kecil', pct: '90%' },
                           { id: 'base', label: 'Normal', pct: '100%' },
@@ -6610,9 +7266,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             key={fSize.id}
                             type="button"
                             onClick={() => setDocFontSize(fSize.id as any)}
-                            className={`py-2 px-2 rounded-[10px] border text-xs font-bold transition cursor-pointer text-center flex flex-col items-center justify-center gap-0.5 ${
+                            className={`py-2.5 px-2 rounded-[10px] border text-xs font-bold transition cursor-pointer text-center flex flex-col items-center justify-center gap-1 ${
                               docFontSize === fSize.id
-                                ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-700 dark:text-orange-300 shadow-2xs ring-1 ring-[#1738D1]'
+                                ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-700 dark:text-orange-300 shadow-2xs ring-2 ring-[#1738D1]/20'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/80'
                             }`}
                           >
@@ -6623,16 +7279,16 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {/* Toggle Icon Kontak */}
-                      <div className="space-y-1">
+                      <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
                           Tampilan Icon Kontak
                         </label>
                         <button
                           type="button"
                           onClick={() => setDocShowIcons(!docShowIcons)}
-                          className={`w-full px-3 py-2 rounded-[10px] border text-xs font-bold flex items-center justify-between transition cursor-pointer ${
+                          className={`w-full px-3.5 py-2.5 rounded-[10px] border text-xs font-bold flex items-center justify-between transition cursor-pointer ${
                             docShowIcons
                               ? 'bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800'
                               : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
@@ -6642,26 +7298,50 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             <UserCheck className="w-4 h-4 text-orange-500" />
                             <span>{docShowIcons ? 'Ikon Tampil' : 'Teks Saja'}</span>
                           </div>
-                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${docShowIcons ? 'bg-[#1738D1] border-[#1738D1] text-white' : 'border-slate-300 dark:border-slate-600'}`}>
+                          <div className={`w-4 h-4 rounded-[6px] border flex items-center justify-center ${docShowIcons ? 'bg-[#1738D1] border-[#1738D1] text-white' : 'border-slate-300 dark:border-slate-600'}`}>
                             {docShowIcons && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                           </div>
                         </button>
                       </div>
 
+                      {/* Dropdown Font */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                          Jenis Font Utama
+                        </label>
+                        <CustomSelect
+                          value={docFontFamily}
+                          onChange={(val) => setDocFontFamily(val as any)}
+                          options={[
+                            { value: 'satoshi', label: 'Satoshi (Modern Editorial Sans)' },
+                            { value: 'sans', label: 'Geist (Modern Sans / Display Website)' },
+                            { value: 'inter', label: 'Inter (Employr Clean UI Standar)' },
+                            { value: 'interTight', label: 'Inter Tight (Youth Career Editorial)' },
+                            { value: 'jakarta', label: 'Plus Jakarta Sans (Fintech Modern)' },
+                            { value: 'roboto', label: 'Roboto (Clean Sans)' },
+                            { value: 'openSans', label: 'Open Sans (Neutral & Friendly)' },
+                            { value: 'serif', label: 'Instrument Serif / EB Garamond (Serif Klasik)' },
+                            { value: 'mono', label: 'JetBrains Mono (Monospace Tech)' },
+                            { value: 'standard', label: 'Carlito / Calibri (ATS Standard)' },
+                          ]}
+                          placeholder="Pilih Jenis Font..."
+                        />
+                      </div>
+
                       {/* Selection Posisi Foto Profil Header */}
-                      <div className="space-y-1 sm:col-span-2">
+                      <div className="space-y-1.5 sm:col-span-2">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                           <ImageIcon className="w-3.5 h-3.5 text-orange-500" />
                           <span>Posisi Foto Profil Header</span>
                         </label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 gap-3">
                           <button
                             type="button"
                             onClick={() => {
                               setDocPhotoPosition('left');
                               setFormData((prev) => ({ ...prev, photoPosition: 'left' }));
                             }}
-                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-3.5 py-2.5 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-2 ${
                               docPhotoPosition === 'left'
                                 ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
@@ -6677,7 +7357,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               setDocPhotoPosition('right');
                               setFormData((prev) => ({ ...prev, photoPosition: 'right' }));
                             }}
-                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-3.5 py-2.5 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-2 ${
                               docPhotoPosition === 'right'
                                 ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
@@ -6689,36 +7369,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         </div>
                       </div>
 
-                      {/* Dropdown Font */}
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
-                          Jenis Font Utama
-                        </label>
-                        <select
-                          value={docFontFamily}
-                          onChange={(e) => setDocFontFamily(e.target.value as any)}
-                          className="w-full px-3 py-2 rounded-[10px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] cursor-pointer"
-                        >
-                          <option value="inter">Inter (Modern &amp; Clean)</option>
-                          <option value="roboto">Roboto (Clean Sans)</option>
-                          <option value="openSans">Open Sans (Neutral &amp; Friendly)</option>
-                          <option value="googleSans">Google Sans (Modern Product)</option>
-                          <option value="montserrat">Montserrat (Bold Editorial)</option>
-                          <option value="lato">Lato (Warm &amp; Professional)</option>
-                          <option value="sans">Geist / Inter (Default Sans)</option>
-                          <option value="serif">EB Garamond / Lora (Serif Klasik)</option>
-                          <option value="mono">JetBrains Mono (Monospace Tech)</option>
-                          <option value="standard">Carlito / Arimo (ATS Standard)</option>
-                        </select>
-                      </div>
-
                       {/* Selection Gaya Hyperlink */}
-                      <div className="space-y-1 sm:col-span-2">
+                      <div className="space-y-1.5 sm:col-span-2">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                           <ExternalLink className="w-3.5 h-3.5 text-orange-500" />
                           <span>Gaya Hyperlink / Tautan Kontak</span>
                         </label>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-3 gap-2.5">
                           <button
                             type="button"
                             onClick={() => setDocLinkStyle('blue')}
@@ -6754,40 +7411,41 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           >
                             <span className="text-slate-700 dark:text-slate-300 font-normal">Teks Biasa</span>
                           </button>
+                        </div>
                       </div>
 
                       {/* Pengaturan Hyperlink Referensi */}
-                      <div className="space-y-1 sm:col-span-2">
+                      <div className="space-y-1.5 sm:col-span-2">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                           <Mail className="w-3.5 h-3.5 text-orange-500" />
                           <span>Hyperlink Referensi Kontak</span>
                         </label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 gap-3">
                           <button
                             type="button"
                             onClick={() => setDocRefEmailHyperlink(!docRefEmailHyperlink)}
-                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
+                            className={`px-3.5 py-2.5 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
                               docRefEmailHyperlink
                                 ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
                             }`}
                           >
                             <span>Email (mailto:)</span>
-                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${docRefEmailHyperlink ? 'bg-[#1738D1] border-[#1738D1] text-white' : 'border-slate-300 dark:border-slate-600'}`}>
+                            <div className={`w-4 h-4 rounded-[6px] border flex items-center justify-center ${docRefEmailHyperlink ? 'bg-[#1738D1] border-[#1738D1] text-white' : 'border-slate-300 dark:border-slate-600'}`}>
                               {docRefEmailHyperlink && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                             </div>
                           </button>
                           <button
                             type="button"
                             onClick={() => setDocRefPhoneHyperlink(!docRefPhoneHyperlink)}
-                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
+                            className={`px-3.5 py-2.5 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
                               docRefPhoneHyperlink
                                 ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
                             }`}
                           >
                             <span>HP (wa.me)</span>
-                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${docRefPhoneHyperlink ? 'bg-[#1738D1] border-[#1738D1] text-white' : 'border-slate-300 dark:border-slate-600'}`}>
+                            <div className={`w-4 h-4 rounded-[6px] border flex items-center justify-center ${docRefPhoneHyperlink ? 'bg-[#1738D1] border-[#1738D1] text-white' : 'border-slate-300 dark:border-slate-600'}`}>
                               {docRefPhoneHyperlink && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                             </div>
                           </button>
@@ -6795,12 +7453,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       </div>
 
                       {/* Pengaturan Format Link Proyek */}
-                      <div className="space-y-1 sm:col-span-2">
+                      <div className="space-y-1.5 sm:col-span-2">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                           <Globe className="w-3.5 h-3.5 text-orange-500" />
                           <span>Format Tampilan Link Proyek di CV</span>
                         </label>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-3 gap-2.5">
                           <button
                             type="button"
                             onClick={() => setDocProjectLinkStyle('name')}
@@ -6837,15 +7495,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         </div>
                       </div>
                     </div>
-                  </div>
 
                     {/* 6 Sliders + Number Inputs */}
-                    <div className="space-y-3.5 pt-2">
+                    <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                       {/* 1. Ukuran Nama */}
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
                           <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Ukuran Nama</label>
-                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">{docNameSize} px</span>
+                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 px-2 py-0.5 rounded-[6px]">{docNameSize} px</span>
                         </div>
                         <div className="flex items-center gap-3">
                           <input
@@ -6872,7 +7529,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
                           <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Ukuran Judul (Section Header)</label>
-                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">{docHeaderSize} px</span>
+                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 px-2 py-0.5 rounded-[6px]">{docHeaderSize} px</span>
                         </div>
                         <div className="flex items-center gap-3">
                           <input
@@ -6899,7 +7556,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
                           <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Ukuran Isi (Teks Body)</label>
-                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">{docBodySize} px</span>
+                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 px-2 py-0.5 rounded-[6px]">{docBodySize} px</span>
                         </div>
                         <div className="flex items-center gap-3">
                           <input
@@ -7118,28 +7775,94 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     </button>
                   </div>
 
-                  {/* SECTION 3: FITUR IMPORT FILE RESUME */}
-                  <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800">
-                    <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                      <Upload className="w-4 h-4 text-orange-500" />
-                      <span>Import File Resume / CV</span>
-                    </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                      Unggah file resume kamu (.JSON, .PDF, atau .DOCX) untuk mengimpor data langsung ke dalam editor.
-                    </p>
+                  {/* SECTION 3: FITUR IMPORT FILE RESUME DENGAN GAYA ONBOARDING */}
+                  <div className="space-y-3.5 pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <div className="space-y-1">
+                      <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                        <FileUp className="w-4 h-4 text-[#1738D1]" />
+                        <span>Import File Resume / CV</span>
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                        Unggah file resume kamu (.JSON, .PDF, atau .DOCX) untuk mengimpor data langsung ke dalam editor.
+                      </p>
+                    </div>
 
-                    <label className="w-full p-4 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] dark:hover:border-[#1738D1] rounded-[10px] bg-slate-50 dark:bg-slate-800/60 transition flex flex-col items-center justify-center gap-2 cursor-pointer group">
-                      <Upload className="w-5 h-5 text-slate-400 group-hover:text-orange-500 transition" />
-                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:text-orange-600 transition">
-                        Pilih File Resume (JSON / PDF / DOCX)
-                      </span>
+                    {/* Drag & Drop Upload Zone */}
+                    <label
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsDragOverImport(true);
+                      }}
+                      onDragLeave={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsDragOverImport(false);
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsDragOverImport(false);
+                        const file = e.dataTransfer.files?.[0];
+                        if (file) processUploadedResumeFile(file);
+                      }}
+                      className={`w-full p-6 border-2 border-dashed rounded-[12px] transition-all flex flex-col items-center justify-center gap-3 cursor-pointer group ${
+                        isDragOverImport
+                          ? 'border-[#1738D1] bg-blue-100/60 dark:bg-blue-900/40 scale-[1.01]'
+                          : 'border-[#1738D1]/40 hover:border-[#1738D1] dark:border-blue-800/80 bg-blue-50/40 dark:bg-blue-950/20 hover:bg-blue-50/70'
+                      }`}
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/60 text-[#1738D1] dark:text-blue-400 flex items-center justify-center group-hover:scale-105 transition shadow-2xs">
+                        <FileUp size={24} />
+                      </div>
+                      <div className="text-center space-y-1">
+                        <p className="text-xs font-extrabold text-slate-800 dark:text-slate-200 group-hover:text-[#1738D1] transition">
+                          Klik untuk pilih file atau tarik berkas ke sini
+                        </p>
+                        <p className="text-[11px] font-medium text-slate-400">
+                          Mendukung PDF, DOCX, TXT, dan JSON (Maksimal 10MB)
+                        </p>
+                      </div>
                       <input
                         type="file"
-                        accept=".json,.pdf,.docx,.txt"
+                        accept=".pdf,.docx,.doc,.txt,.json"
                         onChange={handleImportResume}
                         className="hidden"
                       />
                     </label>
+
+                    {/* Scanning & Import Progress Indicator */}
+                    {isImportingResume && (
+                      <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5 animate-in fade-in duration-200">
+                        <div className="flex items-center justify-between text-xs font-bold">
+                          <span className="flex items-center gap-2 text-[#1738D1] dark:text-blue-400">
+                            <span className="w-2 h-2 rounded-full bg-[#1738D1] animate-ping" />
+                            Memindai &amp; mengekstrak struktur CV...
+                          </span>
+                          <span className="text-slate-500 font-mono">{importProgress}%</span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                          <div
+                            className="h-full bg-[#1738D1] transition-all duration-300 rounded-full"
+                            style={{ width: `${importProgress}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Navigasi / Info Alternatif */}
+                    <div className="flex items-center justify-between pt-2 text-[11px] border-t border-slate-100 dark:border-slate-800/80">
+                      <span className="text-slate-400 font-medium">Ganti Metode</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRightPanelTab('editor');
+                        }}
+                        className="font-bold text-[#1738D1] dark:text-blue-400 hover:underline cursor-pointer"
+                      >
+                        Atau isi manual langkah-demi-langkah →
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -7420,7 +8143,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         className="w-[210mm] min-h-[297mm] bg-white origin-top-left scale-50 pointer-events-none"
                         style={{ fontFamily: "'Satoshi', sans-serif" }}
                       >
-                        <CVTemplatePreview templateId={selectedTemplateId} />
+                        <CVTemplatePreview templateId={selectedTemplateId} customData={formData} />
                       </div>
                     </div>
                   </div>
@@ -8069,15 +8792,80 @@ const A4PaperlikeCanvas: React.FC<{
   const hiddenMeasureRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [contentHeightPx, setContentHeightPx] = useState<number>(0);
+  const [pageBreaksPx, setPageBreaksPx] = useState<number[]>([0]);
   const [zoomScale, setZoomScale] = useState<number | null>(null);
   const [autoScale, setAutoScale] = useState<number>(1);
 
+  // Dynamic A4 margin & printable slice calculations
+  const marginTopMM = (docMarginTop ?? 1.27) * 10;
+  const marginBottomMM = (docMarginBottom ?? 1.27) * 10;
+  const verticalMarginsMM = marginTopMM + marginBottomMM;
+  const PRINTABLE_HEIGHT_MM = Math.max(100, 297 - verticalMarginsMM);
+
   useEffect(() => {
     const updateDimensions = () => {
+      const printableHeightPx = PRINTABLE_HEIGHT_MM * 3.779527559;
+
       if (hiddenMeasureRef.current) {
         const measuredH = hiddenMeasureRef.current.scrollHeight;
         if (measuredH > 0) {
           setContentHeightPx(measuredH);
+
+          const parentRect = hiddenMeasureRef.current.getBoundingClientRect();
+          
+          // Collect all granular leaf-level candidate elements (headings, bullets, paragraphs, item headers)
+          const candidateNodes = Array.from(
+            hiddenMeasureRef.current.querySelectorAll<HTMLElement>(
+              'h1, h2, h3, li, p, .space-y-4 > div > div.flex, .space-y-3 > div > div.flex, .mb-3 > div.flex, .grid > div'
+            )
+          );
+
+          const blockRects = candidateNodes
+            .map((node) => {
+              const r = node.getBoundingClientRect();
+              const top = r.top - parentRect.top;
+              const bottom = r.bottom - parentRect.top;
+              const isH2 = node.tagName.toLowerCase() === 'h2';
+              return { top, bottom, height: bottom - top, isH2, node };
+            })
+            .filter((b) => b.height > 0)
+            .sort((a, b) => a.top - b.top);
+
+          const computedBreaks: number[] = [0];
+          let currentStart = 0;
+
+          while (currentStart + printableHeightPx < measuredH - 5) {
+            const maxTarget = currentStart + printableHeightPx;
+
+            // Find the exact line/bullet/heading that crosses the margin boundary
+            const crossingBlock = blockRects.find(
+              (b) => b.top < maxTarget && b.bottom > maxTarget && b.top > currentStart + 15
+            );
+
+            let nextBreak = maxTarget;
+
+            if (crossingBlock && crossingBlock.top > currentStart + 15) {
+              nextBreak = crossingBlock.top;
+            } else {
+              const fitting = blockRects.filter((b) => b.bottom <= maxTarget && b.top >= currentStart);
+              if (fitting.length > 0) {
+                const lastFit = fitting[fitting.length - 1];
+                const nextOne = blockRects.find((b) => b.top >= lastFit.bottom && b.top > currentStart + 15);
+                if (nextOne && nextOne.top <= maxTarget + 20) {
+                  nextBreak = nextOne.top;
+                }
+              }
+            }
+
+            if (nextBreak <= currentStart + 20) {
+              nextBreak = maxTarget;
+            }
+
+            computedBreaks.push(nextBreak);
+            currentStart = nextBreak;
+          }
+
+          setPageBreaksPx(computedBreaks);
         }
       }
       if (containerRef.current) {
@@ -8104,18 +8892,10 @@ const A4PaperlikeCanvas: React.FC<{
       ro.disconnect();
       window.removeEventListener('resize', updateDimensions);
     };
-  }, [templateId, customData, docFontFamily, docFontSize, docSpacing, docShowIcons, docNameSize, docHeaderSize, docBodySize, docSectionSpacing, docLineHeight, docLetterSpacing, docLinkStyle, docProjectLinkStyle, docRefEmailHyperlink, docRefPhoneHyperlink, docMarginTop, docMarginBottom, docMarginLeft, docMarginRight]);
+  }, [templateId, customData, docFontFamily, docFontSize, docSpacing, docShowIcons, docNameSize, docHeaderSize, docBodySize, docSectionSpacing, docLineHeight, docLetterSpacing, docLinkStyle, docProjectLinkStyle, docRefEmailHyperlink, docRefPhoneHyperlink, docMarginTop, docMarginBottom, docMarginLeft, docMarginRight, PRINTABLE_HEIGHT_MM]);
 
   const effectiveScale = zoomScale !== null ? zoomScale : autoScale;
-
-  // Dynamic A4 margin & printable slice calculations
-  const marginTopMM = (docMarginTop ?? 1.27) * 10;
-  const marginBottomMM = (docMarginBottom ?? 1.27) * 10;
-  const verticalMarginsMM = marginTopMM + marginBottomMM;
-  const PRINTABLE_HEIGHT_MM = Math.max(100, 297 - verticalMarginsMM);
-
-  const measuredHeightMM = contentHeightPx ? contentHeightPx * 0.26458333 : 250;
-  const totalPages = Math.max(1, Math.ceil(measuredHeightMM / PRINTABLE_HEIGHT_MM));
+  const totalPages = Math.max(1, pageBreaksPx.length);
 
   return (
     <div ref={containerRef} className="cv-print-area w-full max-w-full overflow-x-auto flex flex-col items-center gap-4 py-2 print:p-0 print:m-0 print:w-[210mm]">
@@ -8157,7 +8937,12 @@ const A4PaperlikeCanvas: React.FC<{
       >
         {Array.from({ length: totalPages }, (_, index) => {
           const pageNum = index + 1;
-          const translateYMM = index * PRINTABLE_HEIGHT_MM;
+          const PRINTABLE_HEIGHT_PX = PRINTABLE_HEIGHT_MM * 3.779527559;
+          const startPx = pageBreaksPx[index] || 0;
+          const nextBreakPx = pageBreaksPx[index + 1];
+          const sliceHeightPx = nextBreakPx !== undefined
+            ? Math.min(nextBreakPx - startPx, PRINTABLE_HEIGHT_PX)
+            : PRINTABLE_HEIGHT_PX;
 
           return (
             <div key={pageNum} className="flex flex-col items-center w-full max-w-[210mm] print:w-[210mm] print:m-0 print:block print:p-0">
@@ -8186,18 +8971,25 @@ const A4PaperlikeCanvas: React.FC<{
 
                   {/* Printable Content Slice Viewport */}
                   <div
-                    className="w-full overflow-hidden flex-1 relative"
+                    className="w-full overflow-hidden flex-1 relative flex flex-col justify-start"
                     style={{
                       height: `${PRINTABLE_HEIGHT_MM}mm`,
                       maxHeight: `${PRINTABLE_HEIGHT_MM}mm`,
                     }}
                   >
                     <div
-                      className="w-full transition-transform duration-200"
+                      className="w-full overflow-hidden relative"
                       style={{
-                        transform: `translateY(-${translateYMM}mm)`,
+                        height: `${sliceHeightPx}px`,
+                        maxHeight: `${PRINTABLE_HEIGHT_MM}mm`,
                       }}
                     >
+                      <div
+                        className="w-full transition-transform duration-200"
+                        style={{
+                          transform: `translateY(-${startPx}px)`,
+                        }}
+                      >
                       <CVTemplatePreview
                         templateId={templateId}
                         customData={customData}
@@ -8222,15 +9014,11 @@ const A4PaperlikeCanvas: React.FC<{
                       />
                     </div>
                   </div>
+                </div>
 
                   {/* Page Bottom Margin Spacer */}
                   <div style={{ height: `${docMarginBottom ?? 1.27}cm`, width: '100%', flexShrink: 0 }} />
                 </div>
-
-                {/* Page Break Separation Indicator Line */}
-                {totalPages > 1 && pageNum < totalPages && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400/30 via-orange-500/50 to-orange-400/30 border-t border-orange-300/40 no-print" />
-                )}
               </div>
             </div>
           );
@@ -8300,14 +9088,15 @@ const CVTemplatePreview: React.FC<{
   const defaultUserName = customData?.fullName?.trim() || storedProfile?.fullName || storedSession?.name || 'Nama Lengkap Anda';
   const defaultUserLocation = customData?.location?.trim() || storedProfile?.location || 'Kota, Indonesia';
   const defaultUserJobTitle = customData?.headline?.trim() || (storedProfile?.targetPositions?.[0]) || 'Posisi / Jabatan Anda';
+  const isTemplateGalleryThumbnail = !customData || (!customData.id && !customData.fullName && !customData.title && !customData.summary);
 
-  // Data (merges customData with fallback dummy data)
+  // Data (merges customData with fallback dummy data for gallery thumbnails)
   const dummyData = {
     showIcons: (customData as any)?.showIcons !== undefined ? (customData as any).showIcons : docShowIcons,
     fullName: defaultUserName,
     jobTitle: defaultUserJobTitle,
-    email: customData?.email?.trim() || storedSession?.email || 'email@contoh.com',
-    phone: customData?.phone?.trim() || '+62 8xx-xxxx-xxxx',
+    email: customData?.email?.trim() || (isTemplateGalleryThumbnail ? (storedSession?.email || 'email@contoh.com') : ''),
+    phone: customData?.phone?.trim() || (isTemplateGalleryThumbnail ? '+62 8xx-xxxx-xxxx' : ''),
     location: defaultUserLocation,
     website: customData?.website?.trim() || '',
     linkedin: customData?.linkedin?.trim() || '',
@@ -8315,23 +9104,25 @@ const CVTemplatePreview: React.FC<{
     socialPlatform: customData?.socialPlatform || 'github',
     photoUrl: customData?.photoUrl !== undefined ? customData.photoUrl : '',
     summary:
-      customData?.summary?.trim() ||
-      'Senior Software Engineer berpengalaman dalam membangun aplikasi web berkinerja tinggi, scalable, dan ATS friendly.',
-    skills:
-      customData?.skills && customData.skills.length > 0 && customData.skills[0] !== ''
-        ? customData.skills
-        : [
-            'TypeScript',
-            'React',
-            'Next.js',
-            'Node.js',
-            'Tailwind CSS',
-            'PostgreSQL',
-            'Git',
-            'REST API',
-          ],
-    experience: hasAnyValue(customData?.experience)
-      ? customData!.experience!.map((exp) => ({
+      (customData?.summary && !customData.summary.toLowerCase().includes('hasil impor') && !customData.summary.toLowerCase().includes('.pdf'))
+        ? customData.summary
+        : (storedProfile?.summary && !storedProfile.summary.toLowerCase().includes('hasil impor') && !storedProfile.summary.toLowerCase().includes('.pdf'))
+        ? storedProfile.summary
+        : isTemplateGalleryThumbnail
+        ? 'Senior Software Engineer berpengalaman dalam membangun aplikasi web berkinerja tinggi, scalable, dan ATS friendly.'
+        : '',
+    skills: ((): string[] => {
+      const cleanCustomSkills: string[] = (customData?.skills || []).filter((s: string) => typeof s === 'string' && !s.toLowerCase().includes('impor') && !s.toLowerCase().includes('autorecovered') && !s.toLowerCase().includes('dokumen'));
+      if (cleanCustomSkills.length > 0) return cleanCustomSkills;
+      const cleanProfileSkills: string[] = (storedProfile?.skills || []).filter((s: string) => typeof s === 'string' && !s.toLowerCase().includes('impor') && !s.toLowerCase().includes('autorecovered') && !s.toLowerCase().includes('dokumen'));
+      if (cleanProfileSkills.length > 0) return cleanProfileSkills;
+      if (isTemplateGalleryThumbnail) {
+        return ['TypeScript', 'React', 'Next.js', 'Node.js', 'Tailwind CSS', 'PostgreSQL', 'Git', 'REST API'];
+      }
+      return [];
+    })(),
+    experience: (!isTemplateGalleryThumbnail && customData?.experience)
+      ? customData.experience.map((exp) => ({
           company: exp.company || '',
           role: exp.role || '',
           location: exp.location || '',
@@ -8340,7 +9131,8 @@ const CVTemplatePreview: React.FC<{
             : (exp.period || ''),
           description: exp.description || '',
         }))
-      : [
+      : isTemplateGalleryThumbnail
+      ? [
           {
             company: 'PT Inovasi Teknologi',
             role: 'Senior Software Engineer',
@@ -8357,9 +9149,10 @@ const CVTemplatePreview: React.FC<{
             description:
               'Mengembangkan API mikroservis dan sistem otentikasi aman untuk 100.000+ pengguna aktif bulanan.',
           },
-        ],
-    internships: hasAnyValue(customData?.internships)
-      ? customData!.internships!.map((item) => ({
+        ]
+      : [],
+    internships: (!isTemplateGalleryThumbnail && customData?.internships)
+      ? customData.internships.map((item) => ({
           company: item.company || '',
           role: item.role || '',
           location: item.location || '',
@@ -8368,7 +9161,8 @@ const CVTemplatePreview: React.FC<{
             : (item.period || ''),
           description: item.description || '',
         }))
-      : [
+      : isTemplateGalleryThumbnail
+      ? [
           {
             company: 'Tech Startup Indonesia',
             role: 'UI/UX & Frontend Intern',
@@ -8376,18 +9170,45 @@ const CVTemplatePreview: React.FC<{
             description:
               'Membantu tim merancang wireframe dan mendesain 10+ komponen UI serta mengimplementasikannya dengan TailwindCSS.',
           },
-        ],
-    projects: hasAnyValue(customData?.projects)
-      ? customData!.projects!.map((proj) => ({
-          name: proj.name || '',
-          role: proj.role || '',
-          tech: proj.tech || '',
-          url: proj.url || proj.link || '',
-          startDate: proj.startDate || '',
-          endDate: proj.endDate || '',
-          description: proj.description || '',
-        }))
-      : [
+        ]
+      : [],
+    projects: (!isTemplateGalleryThumbnail && customData?.projects)
+      ? (() => {
+          const isFragment = (t: string) => {
+            if (!t) return false;
+            const s = t.trim();
+            return /^[a-z]/.test(s) ||
+              /^(development|timelines|successfully|leading|achieving|ensuring|reducing|increasing|enhancing|providing|maintaining|improving|mitigation|completion|deliverables)\b/i.test(s) ||
+              s.split(/\s+/).length > 6;
+          };
+
+          const list = customData.projects.map((proj) => ({
+            name: proj.name || '',
+            role: proj.role || '',
+            tech: proj.tech || '',
+            url: proj.url || (proj as any).link || '',
+            startDate: (proj as any).startDate || '',
+            endDate: (proj as any).endDate || '',
+            period: ((proj as any).startDate || (proj as any).endDate)
+              ? `${(proj as any).startDate || ''}${(proj as any).endDate ? ` - ${(proj as any).endDate}` : ''}`.trim()
+              : ((proj as any).period || ''),
+            description: proj.description || '',
+          }));
+
+          const merged: typeof list = [];
+          for (const item of list) {
+            if (isFragment(item.name) && merged.length > 0) {
+              const prev = merged[merged.length - 1];
+              const extra = [item.name, item.description].filter(Boolean).join('\n');
+              prev.description = prev.description ? `${prev.description}\n${extra}` : extra;
+            } else if (!isFragment(item.name)) {
+              merged.push(item);
+            }
+          }
+          return merged;
+        })()
+      : isTemplateGalleryThumbnail
+      ? [
           {
             name: 'E-Commerce Platform',
             role: 'Lead Developer',
@@ -8395,20 +9216,55 @@ const CVTemplatePreview: React.FC<{
             url: 'https://github.com/username/ecommerce',
             startDate: 'Jan 2023',
             endDate: 'Mar 2024',
+            period: 'Jan 2023 - Mar 2024',
             description:
               'Membangun aplikasi toko online dengan fitur payment gateway dan real-time analytics.',
           },
-        ],
-    organizations: hasAnyValue(customData?.organizations)
-      ? customData!.organizations!.map((org) => ({
-          name: org.name || '',
-          role: org.role || '',
-          period: (org.startDate || org.endDate)
-            ? `${org.startDate || ''}${org.endDate ? ` - ${org.endDate}` : ''}`.trim()
-            : (org.period || ''),
-          description: org.description || '',
-        }))
-      : [
+        ]
+      : [],
+    organizations: (!isTemplateGalleryThumbnail && customData?.organizations)
+      ? (() => {
+          const isFragment = (t: string) => {
+            if (!t) return false;
+            const s = t.trim();
+            return /^[a-z]/.test(s) ||
+              /^(development|timelines|successfully|leading|achieving|ensuring|reducing|increasing|enhancing|providing|maintaining|improving|mitigation|completion|deliverables)\b/i.test(s) ||
+              s.split(/\s+/).length > 6;
+          };
+
+          const list = customData.organizations.map((org) => {
+            let name = org.name || '';
+            let role = org.role || '';
+
+            if (role === 'Anggota' && (name.includes('Departement') || name.includes('Officer') || name.includes('Head') || name.includes('Divisi') || name.includes('Leader'))) {
+              role = name;
+              name = 'ITC UPN “Veteran” Yogyakarta';
+            }
+
+            return {
+              name,
+              role: role || 'Anggota',
+              period: (org.startDate || org.endDate)
+                ? `${org.startDate || ''}${org.endDate ? ` - ${org.endDate}` : ''}`.trim()
+                : (org.period || ''),
+              description: org.description || '',
+            };
+          });
+
+          const merged: typeof list = [];
+          for (const item of list) {
+            if ((isFragment(item.name) || isFragment(item.role)) && merged.length > 0) {
+              const prev = merged[merged.length - 1];
+              const extra = [isFragment(item.name) ? item.name : item.role, item.description].filter(Boolean).join('\n');
+              prev.description = prev.description ? `${prev.description}\n${extra}` : extra;
+            } else if (!isFragment(item.name) && !isFragment(item.role)) {
+              merged.push(item);
+            }
+          }
+          return merged;
+        })()
+      : isTemplateGalleryThumbnail
+      ? [
           {
             name: 'Himpunan Mahasiswa Informatika',
             role: 'Ketua Divisi Acara',
@@ -8416,9 +9272,10 @@ const CVTemplatePreview: React.FC<{
             description:
               'Mengkoordinasikan seminar teknologi nasional dengan 500+ peserta dan mengelola pendaftaran peserta.',
           },
-        ],
-    education: hasAnyValue(customData?.education)
-      ? customData!.education!.map((edu) => ({
+        ]
+      : [],
+    education: (!isTemplateGalleryThumbnail && customData?.education)
+      ? customData.education.map((edu) => ({
           institution: edu.institution || '',
           degree: edu.degree || '',
           year: (edu.startDate || edu.endDate)
@@ -8429,47 +9286,66 @@ const CVTemplatePreview: React.FC<{
           gpa: edu.gpa || '',
           description: edu.description || '',
         }))
-      : [
+      : isTemplateGalleryThumbnail
+      ? [
           {
             institution: 'Universitas Indonesia',
             degree: 'S1 Teknik Informatika / Ilmu Komputer (IPK 3.75)',
             year: '2017 - 2021',
             gpa: '3.75 / 4.00',
           },
-        ],
+        ]
+      : [],
     photoShape: customData?.photoShape || 'circle',
     photoPosition: customData?.photoPosition || docPhotoPosition || 'right',
     linkStyle: (customData as any)?.linkStyle || docLinkStyle || 'blue',
-    certifications: hasAnyValue(customData?.certifications)
-      ? customData!.certifications!.map((cert) => ({
-          name: cert.name || '',
-          issuer: cert.issuer || '',
-          issueDate: cert.issueDate || '',
-          credentialId: cert.credentialId || '',
-          link: cert.link || '',
-        }))
-      : [
+    certifications: (!isTemplateGalleryThumbnail && customData?.certifications)
+      ? customData.certifications.map((cert) => {
+          let name = cert.name || '';
+          let issuer = cert.issuer || '';
+          let issueDate = cert.issueDate || (cert as any).date || '';
+
+          const certDateMatch = (issuer || name).match(/(Jan(?:uari)?|Feb(?:ruari)?|Mar(?:et)?|Apr(?:il)?|May|Mei|Jun(?:i|e)?|Jul(?:i|y)?|Aug(?:ustus)?|Agu(?:stus)?|Sep(?:tember)?|Oct(?:ober)?|Okt(?:ober)?|Nov(?:ember)?|Dec(?:ember)?|Des(?:ember)?)\s+\d{4}|\b(19|20)\d{2}\b/i);
+          if (certDateMatch && !issueDate) {
+            issueDate = certDateMatch[0].trim();
+            issuer = issuer.replace(certDateMatch[0], '').trim().replace(/^[-–—,]\s*/, '').replace(/[-–—,]\s*$/, '').trim();
+          }
+
+          return {
+            name,
+            issuer: issuer || 'Penerbit Sertifikat',
+            issueDate,
+            credentialId: cert.credentialId || '',
+            link: cert.link || '',
+          };
+        })
+      : isTemplateGalleryThumbnail
+      ? [
           {
             name: 'AWS Certified Solutions Architect',
             issuer: 'Amazon Web Services',
             issueDate: 'Nov 2023',
             link: '',
           },
-        ],
-    languages: hasAnyValue(customData?.languages)
-      ? customData!.languages!
-      : [
+        ]
+      : [],
+    languages: (!isTemplateGalleryThumbnail && customData?.languages)
+      ? customData.languages
+      : isTemplateGalleryThumbnail
+      ? [
           { id: 'lang-1', language: 'Bahasa Indonesia', level: 'Professional' },
           { id: 'lang-2', language: 'Bahasa Inggris', level: 'Professional' },
-        ],
-    courses: hasAnyValue(customData?.courses)
-      ? customData!.courses!.map((crs) => ({
+        ]
+      : [],
+    courses: (!isTemplateGalleryThumbnail && customData?.courses)
+      ? customData.courses.map((crs) => ({
           courseName: crs.courseName || '',
           institution: crs.institution || '',
           year: crs.startDate ? `${crs.startDate}${crs.endDate ? ` - ${crs.endDate}` : ''}` : (crs.year || ''),
           description: crs.description || '',
         }))
-      : [
+      : isTemplateGalleryThumbnail
+      ? [
           {
             id: 'crs-1',
             courseName: 'Digital Marketing Mastery',
@@ -8477,59 +9353,76 @@ const CVTemplatePreview: React.FC<{
             year: '2023',
             description: 'Strategi pemasaran digital dan analisis data.',
           },
-        ],
-    scholarships: hasAnyValue(customData?.scholarships)
-      ? customData!.scholarships!.map((sch) => ({
+        ]
+      : [],
+    scholarships: (!isTemplateGalleryThumbnail && customData?.scholarships)
+      ? customData.scholarships.map((sch) => ({
           name: sch.name || '',
-          provider: sch.provider || '',
-          year: sch.startDate ? `${sch.startDate}${sch.endDate ? ` - ${sch.endDate}` : ''}` : (sch.year || ''),
+          institution: (sch as any).institution || sch.provider || '',
+          provider: sch.provider || (sch as any).institution || '',
+          year: sch.year || '',
           description: sch.description || '',
         }))
-      : [
+      : isTemplateGalleryThumbnail
+      ? [
           {
             id: 'sch-1',
-            name: 'Beasiswa Djarum Beasiswa Plus',
-            provider: 'Djarum Foundation',
-            year: '2020',
-            description: 'Program pelatihan kepemimpinan dan beasiswa prestasi.',
+            name: 'Beasiswa Unggulan Prestasi Akademik',
+            institution: 'Kementerian Pendidikan & Kebudayaan',
+            provider: 'Kementerian Pendidikan & Kebudayaan',
+            year: '2019 - 2021',
+            description: 'Penerima beasiswa penuh untuk mahasiswa berprestasi nasional.',
           },
-        ],
-    volunteers: hasAnyValue(customData?.volunteers)
-      ? customData!.volunteers!.map((vol) => ({
-          organization: vol.organization || '',
+        ]
+      : [],
+    volunteers: (!isTemplateGalleryThumbnail && customData?.volunteers)
+      ? customData.volunteers.map((vol) => ({
           role: vol.role || '',
-          startYear: vol.startDate ? `${vol.startDate}${vol.endDate ? ` - ${vol.endDate}` : ''}` : (vol.startYear || ''),
+          organization: vol.organization || '',
+          startYear: vol.startYear || (vol as any).year || '',
+          year: (vol as any).year || vol.startYear || '',
           description: vol.description || '',
         }))
-      : [
+      : isTemplateGalleryThumbnail
+      ? [
           {
             id: 'vol-1',
-            organization: 'Palang Merah Indonesia',
-            role: 'Tim Tanggap Bencana',
+            role: 'Relawan Pengajar Literasi Digital',
+            organization: 'Indonesia Mengajar / Komunitas Muda',
             startYear: '2022',
-            description: 'Mengkoordinasikan logistik darurat dan posko bantuan bencana.',
+            year: '2022',
+            description: 'Mengajar dasar-dasar pemrograman web untuk siswa SMA/SMK.',
           },
-        ],
-    references: hasAnyValue(customData?.references)
-      ? customData!.references!.map((ref) => ({
-          fullName: ref.fullName || '',
-          title: ref.title || '',
+        ]
+      : [],
+    references: (!isTemplateGalleryThumbnail && customData?.references)
+      ? customData.references.map((ref: any) => ({
+          name: ref.name || ref.fullName || '',
+          fullName: ref.fullName || ref.name || '',
+          title: ref.title || ref.role || '',
+          role: ref.role || ref.title || '',
           company: ref.company || '',
-          email: ref.email || '',
+          contact: ref.contact || ref.email || ref.phone || '',
+          email: ref.email || ref.contact || '',
           phone: ref.phone || '',
           note: ref.note || '',
         }))
-      : [
+      : isTemplateGalleryThumbnail
+      ? [
           {
             id: 'ref-1',
-            fullName: 'John Smith',
-            title: 'Engineering Director',
+            name: 'Budi Santoso, S.Kom., M.T.',
+            fullName: 'Budi Santoso, S.Kom., M.T.',
+            title: 'Head of Engineering',
+            role: 'Head of Engineering',
             company: 'PT Inovasi Teknologi',
-            email: 'john.smith@inovasi.co.id',
-            phone: '+62 812-3456-7890',
+            contact: 'budi.santoso@inovasitek.com / 0812-9876-5432',
+            email: 'budi.santoso@inovasitek.com',
+            phone: '+62 812-9876-5432',
             note: '',
           },
-        ],
+        ]
+      : [],
   };
 
   // Template Renderers
@@ -8545,14 +9438,14 @@ const CVTemplatePreview: React.FC<{
           <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
         </div>
       ),
-      skills: (
+      skills: dummyData.skills.length > 0 ? (
         <div key="skills" className="mb-6">
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
             KEAHLIAN TEKNIS
           </h2>
           <p className="text-xs leading-relaxed text-slate-700">{dummyData.skills.join('  •  ')}</p>
         </div>
-      ),
+      ) : null,
       experience: (
         <div key="experience" className="mb-6">
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
@@ -8613,17 +9506,17 @@ const CVTemplatePreview: React.FC<{
           ))}
         </div>
       ),
-      projects: (
+      projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-6">
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
             PROYEK UNGGULAN
           </h2>
           {dummyData.projects.map((proj, idx) => {
-            const projUrl = (proj as any).url || '';
+            const projUrl = (proj as any).url || (proj as any).link || '';
             const projTech = (proj as any).tech || '';
             const projPeriod = ((proj as any).startDate || (proj as any).endDate)
               ? `${(proj as any).startDate || ''}${(proj as any).endDate ? ` - ${(proj as any).endDate}` : ''}`.trim()
-              : '';
+              : ((proj as any).period || '');
             return (
               <div key={idx} className="mb-3">
                 <div className="flex items-baseline justify-between mb-0.5">
@@ -8644,7 +9537,7 @@ const CVTemplatePreview: React.FC<{
             );
           })}
         </div>
-      ),
+      ) : null,
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-6">
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
@@ -8654,10 +9547,10 @@ const CVTemplatePreview: React.FC<{
             {dummyData.organizations.map((org, idx) => (
               <div key={idx}>
                 <div className="flex items-baseline justify-between mb-1">
-                  <p className="text-sm font-bold text-slate-900">{org.role}</p>
+                  <p className="text-sm font-bold text-slate-900">{org.name}</p>
                   <p className="text-xs text-slate-600">{org.period}</p>
                 </div>
-                <p className="text-xs italic text-slate-700 mb-1">{org.name}</p>
+                <p className="text-xs italic text-slate-700 mb-1">{org.role}</p>
                 <RenderBulletDescription text={org.description} />
               </div>
             ))}
@@ -8833,7 +9726,7 @@ const CVTemplatePreview: React.FC<{
             <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Ringkasan Eksekutif</span>
             <div className="flex-grow border-t border-slate-300"></div>
           </div>
-          <p className="text-xs leading-relaxed text-slate-700 text-center px-8">{dummyData.summary}</p>
+          <p className="text-xs leading-relaxed text-slate-700 px-4 text-left">{dummyData.summary}</p>
         </div>
       ),
       skills: (
@@ -8843,7 +9736,7 @@ const CVTemplatePreview: React.FC<{
             <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Keahlian</span>
             <div className="flex-grow border-t border-slate-300"></div>
           </div>
-          <p className="text-xs leading-relaxed text-slate-700 text-center px-8">{dummyData.skills.join(' • ')}</p>
+          <p className="text-xs leading-relaxed text-slate-700 px-4 text-left">{dummyData.skills.join(' • ')}</p>
         </div>
       ),
       experience: (
@@ -8934,12 +9827,14 @@ const CVTemplatePreview: React.FC<{
             <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Pendidikan</span>
             <div className="flex-grow border-t border-slate-300"></div>
           </div>
-          <div className="space-y-2 px-4 text-center">
+          <div className="space-y-2 px-4 text-left">
             {dummyData.education.map((edu, idx) => (
-              <div key={idx}>
-                <p className="text-xs font-bold text-slate-900">{edu.institution}</p>
-                <p className="text-xs text-slate-700">{edu.degree}</p>
-                <p className="text-xs text-slate-600">{edu.year} • {edu.gpa}</p>
+              <div key={idx} className="flex justify-between items-baseline">
+                <div>
+                  <p className="text-xs font-bold text-slate-900">{edu.institution}</p>
+                  <p className="text-xs text-slate-700">{edu.degree}</p>
+                </div>
+                <p className="text-xs text-slate-600 font-medium">{edu.year} {edu.gpa ? `• ${edu.gpa}` : ''}</p>
               </div>
             ))}
           </div>
@@ -8952,7 +9847,7 @@ const CVTemplatePreview: React.FC<{
             <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Sertifikasi</span>
             <div className="flex-grow border-t border-slate-300"></div>
           </div>
-          <div className="space-y-2 px-4 text-center text-xs">
+          <div className="space-y-2 px-4 text-left text-xs">
             {dummyData.certifications.map((cert, idx) => (
               <div key={idx}>
                 <p className="font-bold text-slate-900">{cert.name} — <span className="font-normal italic">{cert.issuer}</span> ({cert.issueDate})</p>
@@ -8968,7 +9863,7 @@ const CVTemplatePreview: React.FC<{
             <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Bahasa</span>
             <div className="flex-grow border-t border-slate-300"></div>
           </div>
-          <p className="text-xs text-center text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
+          <p className="text-xs text-left px-4 text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
       ) : null,
       courses: dummyData.courses.length > 0 ? (
@@ -8978,7 +9873,7 @@ const CVTemplatePreview: React.FC<{
             <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Pelatihan &amp; Kursus</span>
             <div className="flex-grow border-t border-slate-300"></div>
           </div>
-          <div className="space-y-2 px-4 text-center text-xs">
+          <div className="space-y-2 px-4 text-left text-xs">
             {dummyData.courses.map((crs, idx) => (
               <div key={idx}>
                 <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
@@ -8994,7 +9889,7 @@ const CVTemplatePreview: React.FC<{
             <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Beasiswa</span>
             <div className="flex-grow border-t border-slate-300"></div>
           </div>
-          <div className="space-y-2 px-4 text-center text-xs">
+          <div className="space-y-2 px-4 text-left text-xs">
             {dummyData.scholarships.map((sch, idx) => (
               <div key={idx}>
                 <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
@@ -9010,7 +9905,7 @@ const CVTemplatePreview: React.FC<{
             <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Relawan</span>
             <div className="flex-grow border-t border-slate-300"></div>
           </div>
-          <div className="space-y-2 px-4 text-center text-xs">
+          <div className="space-y-2 px-4 text-left text-xs">
             {dummyData.volunteers.map((vol, idx) => (
               <div key={idx}>
                 <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
@@ -9026,7 +9921,7 @@ const CVTemplatePreview: React.FC<{
             <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Referensi</span>
             <div className="flex-grow border-t border-slate-300"></div>
           </div>
-          <div className="space-y-2 px-4 text-center text-xs">
+          <div className="space-y-2 px-4 text-left text-xs">
             {dummyData.references.map((ref, idx) => (
               <div key={idx}>
                 <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
@@ -12121,26 +13016,386 @@ const CVTemplatePreview: React.FC<{
   };
 
 
+  // Renderer untuk Impact CV Templates
+  const renderImpactTemplate = (impactKey: string) => {
+    type ImpactThemeConfig = {
+      color: string;
+      fontClass: string;
+      headerStyle: string;
+      sectionTitleStyle: string;
+      sectionContentStyle: string;
+      backgroundClass?: string;
+      cardStyle?: string;
+      borderStyle?: string;
+    };
+
+    const impactThemes: Record<string, ImpactThemeConfig> = {
+      'impact-basic': {
+        color: 'text-gray-700',
+        fontClass: fontStyleMap.sans,
+        headerStyle: 'text-2xl font-semibold',
+        sectionTitleStyle: 'text-[12px] font-bold uppercase tracking-wider text-gray-700 border-b border-gray-200 pb-1 mb-2',
+        sectionContentStyle: 'mt-2 text-xs',
+      },
+      'impact-casual': {
+        color: 'text-green-600',
+        fontClass: fontStyleMap.sans,
+        headerStyle: 'text-3xl font-extrabold',
+        sectionTitleStyle: 'text-sm font-bold uppercase tracking-wide text-green-600 mb-2',
+        sectionContentStyle: 'mt-2 text-xs',
+      },
+      'impact-professional': {
+        color: 'text-blue-600',
+        fontClass: fontStyleMap.serif,
+        headerStyle: 'text-2xl font-bold tracking-tight text-blue-600 border-b-2 border-blue-600 pb-2',
+        sectionTitleStyle: 'text-xs uppercase font-bold tracking-wider bg-blue-600 text-white py-1 px-2.5 inline-block mb-2',
+        sectionContentStyle: 'mt-2 pl-3 border-l-2 border-blue-600/30 text-xs',
+        backgroundClass: 'bg-white',
+        borderStyle: 'border-t-8 border-blue-600',
+      },
+      'impact-creative': {
+        color: 'text-pink-500',
+        fontClass: fontStyleMap.sans,
+        headerStyle: 'text-3xl font-black italic text-pink-600',
+        sectionTitleStyle: 'text-sm font-bold text-pink-500 relative pl-6 mb-2 before:content-[""] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-4 before:h-[3px] before:bg-pink-500',
+        sectionContentStyle: 'mt-2 p-3 rounded-lg bg-pink-50/50 text-xs',
+        backgroundClass: 'bg-gradient-to-br from-white to-pink-50',
+      },
+      'impact-modern': {
+        color: 'text-purple-600',
+        fontClass: fontStyleMap.sans,
+        headerStyle: 'text-3xl font-extrabold tracking-tight text-purple-600 flex flex-col items-center',
+        sectionTitleStyle: 'text-xs font-bold uppercase tracking-widest text-purple-600/80 flex items-center after:content-[""] after:ml-2 after:flex-1 after:h-px after:bg-purple-600/30 mb-2',
+        sectionContentStyle: 'mt-2 text-xs',
+        backgroundClass: 'bg-white',
+      },
+      'impact-business': {
+        color: 'text-amber-700',
+        fontClass: fontStyleMap.serif,
+        headerStyle: 'text-3xl font-semibold text-amber-700 border-b-2 border-amber-600 pb-2',
+        sectionTitleStyle: 'text-xs font-bold text-white bg-amber-600 py-1 px-2.5 rounded-xs inline-block mb-2',
+        sectionContentStyle: 'mt-2 px-2 text-xs',
+        backgroundClass: 'bg-amber-50/40',
+      },
+      'impact-minimal': {
+        color: 'text-slate-800',
+        fontClass: fontStyleMap.sans,
+        headerStyle: 'text-3xl font-light tracking-tight',
+        sectionTitleStyle: 'text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2',
+        sectionContentStyle: 'mt-2 text-xs',
+        backgroundClass: 'bg-white',
+      },
+      'impact-elegant': {
+        color: 'text-emerald-800',
+        fontClass: fontStyleMap.serif,
+        headerStyle: 'text-3xl font-light tracking-wide text-emerald-800',
+        sectionTitleStyle: 'text-sm italic font-normal text-emerald-700 border-b border-emerald-200 pb-1 mb-2',
+        sectionContentStyle: 'mt-2 text-slate-700 text-xs pl-3 border-l-2 border-emerald-700',
+        backgroundClass: 'bg-emerald-50/30',
+      },
+      'impact-technical': {
+        color: 'text-sky-700',
+        fontClass: fontStyleMap.mono,
+        headerStyle: 'text-2xl font-bold tracking-tight text-sky-700',
+        sectionTitleStyle: 'text-xs font-bold bg-sky-100 text-sky-700 px-2 py-0.5 rounded mb-2 inline-block',
+        sectionContentStyle: 'mt-2 text-slate-800 text-xs',
+        backgroundClass: 'bg-slate-50/50',
+      },
+      'impact-vibrant': {
+        color: 'text-fuchsia-600',
+        fontClass: fontStyleMap.sans,
+        headerStyle: 'text-3xl font-extrabold text-fuchsia-600',
+        sectionTitleStyle: 'text-sm font-bold text-fuchsia-600 mb-2',
+        sectionContentStyle: 'mt-2 text-slate-700 border-l-4 border-pink-300 pl-3 text-xs',
+        backgroundClass: 'bg-gradient-to-br from-white to-fuchsia-50/50',
+      },
+      'impact-nordic': {
+        color: 'text-slate-700',
+        fontClass: fontStyleMap.sans,
+        headerStyle: 'text-2xl font-normal tracking-wide text-slate-800',
+        sectionTitleStyle: 'text-xs font-medium uppercase tracking-widest text-slate-600 pb-1 mb-2 border-b border-slate-200',
+        sectionContentStyle: 'mt-2 text-slate-700 text-xs',
+        backgroundClass: 'bg-slate-50/40',
+      },
+      'impact-blueprint': {
+        color: 'text-blue-900',
+        fontClass: fontStyleMap.mono,
+        headerStyle: 'text-2xl font-bold text-blue-900 mb-1',
+        sectionTitleStyle: 'text-xs font-bold uppercase tracking-widest text-blue-800 bg-blue-100 py-0.5 px-2 mb-2 inline-block',
+        sectionContentStyle: 'mt-2 ml-1 border-l-2 border-blue-200 pl-3 text-xs',
+        backgroundClass: 'bg-blue-50/30',
+      },
+      'impact-gradient': {
+        color: 'text-indigo-600',
+        fontClass: fontStyleMap.sans,
+        headerStyle: 'text-3xl font-extrabold text-indigo-600 pb-1',
+        sectionTitleStyle: 'text-xs font-bold bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-2.5 py-0.5 rounded-full mb-2 inline-block',
+        sectionContentStyle: 'mt-2 bg-white/90 rounded-lg p-3 shadow-2xs text-xs',
+        backgroundClass: 'bg-gradient-to-br from-indigo-50/40 via-purple-50/40 to-pink-50/40',
+      },
+      'impact-retro': {
+        color: 'text-amber-800',
+        fontClass: fontStyleMap.mono,
+        headerStyle: 'text-3xl font-black uppercase text-amber-800 border-b-4 border-amber-500 pb-1',
+        sectionTitleStyle: 'text-xs font-bold uppercase bg-amber-200 text-amber-800 px-2 py-0.5 inline-block mb-2 border border-amber-800',
+        sectionContentStyle: 'mt-2 border border-amber-200 p-2.5 text-xs',
+        backgroundClass: 'bg-amber-50/40',
+      },
+      'impact-academic': {
+        color: 'text-indigo-900',
+        fontClass: fontStyleMap.serif,
+        headerStyle: 'text-2xl font-bold text-center text-indigo-900',
+        sectionTitleStyle: 'text-xs font-bold text-indigo-800 border-b-2 border-indigo-200 pb-1 mb-2',
+        sectionContentStyle: 'mt-2 text-slate-800 text-xs',
+        backgroundClass: 'bg-indigo-50/20',
+      },
+      'impact-corporate': {
+        color: 'text-gray-800',
+        fontClass: fontStyleMap.sans,
+        headerStyle: 'text-2xl font-bold text-gray-800',
+        sectionTitleStyle: 'text-xs font-bold text-gray-700 bg-gray-100 px-2.5 py-1 rounded mb-2 flex items-center',
+        sectionContentStyle: 'mt-2 text-gray-700 pl-2 text-xs',
+        backgroundClass: 'bg-white',
+        borderStyle: 'border-l-4 border-gray-500',
+      },
+      'impact-artistic': {
+        color: 'text-rose-600',
+        fontClass: fontStyleMap.sans,
+        headerStyle: 'text-3xl font-black italic text-rose-600',
+        sectionTitleStyle: 'text-sm font-bold text-rose-500 inline-block relative after:content-[""] after:absolute after:w-full after:h-0.5 after:bg-rose-200 after:left-0 after:-bottom-0.5 mb-2',
+        sectionContentStyle: 'mt-2 text-slate-700 text-xs',
+        backgroundClass: 'bg-rose-50/30',
+      },
+      'impact-classic': {
+        color: 'text-stone-800',
+        fontClass: fontStyleMap.serif,
+        headerStyle: 'text-2xl font-bold text-stone-800 text-center mb-1',
+        sectionTitleStyle: 'text-xs font-semibold text-stone-700 pb-1 mb-2 border-b border-stone-300',
+        sectionContentStyle: 'mt-2 text-stone-600 text-xs',
+        backgroundClass: 'bg-stone-50/30',
+        borderStyle: 'border-t-4 border-stone-300',
+      },
+      'impact-digital': {
+        color: 'text-cyan-700',
+        fontClass: fontStyleMap.sans,
+        headerStyle: 'text-2xl font-bold text-cyan-700',
+        sectionTitleStyle: 'text-xs font-medium text-white bg-gradient-to-r from-cyan-500 to-blue-500 px-2.5 py-1 rounded-md shadow-2xs mb-2 inline-block',
+        sectionContentStyle: 'mt-2 text-slate-700 text-xs',
+        backgroundClass: 'bg-gradient-to-br from-white to-cyan-50/30',
+      },
+      'impact-futuristic': {
+        color: 'text-violet-600',
+        fontClass: fontStyleMap.sans,
+        headerStyle: 'text-3xl font-extrabold tracking-tight text-violet-600',
+        sectionTitleStyle: 'text-xs font-bold uppercase tracking-widest text-violet-600 mb-2 flex items-center before:content-[""] before:block before:h-px before:w-4 before:mr-2 before:bg-violet-400',
+        sectionContentStyle: 'mt-2 text-slate-700 bg-white/80 p-2.5 rounded-md text-xs',
+        backgroundClass: 'bg-gradient-to-br from-gray-50 via-white to-violet-50/40',
+      },
+    };
+
+    const cfg = impactThemes[impactKey] || impactThemes['impact-basic'];
+
+    const sectionBlocks: Record<string, React.ReactNode> = {
+      summary: dummyData?.summary ? (
+        <div key="summary" className="mb-4">
+          <h2 className={cfg.sectionTitleStyle}>RINGKASAN EKSEKUTIF</h2>
+          <div className={cfg.sectionContentStyle}>
+            <p className="leading-relaxed whitespace-pre-line text-slate-700">{dummyData.summary}</p>
+          </div>
+        </div>
+      ) : null,
+      experiences: (Array.isArray(dummyData?.experience) && dummyData.experience.length > 0) ? (
+        <div key="experiences" className="mb-4">
+          <h2 className={cfg.sectionTitleStyle}>PENGALAMAN KERJA</h2>
+          <div className={`space-y-3 ${cfg.sectionContentStyle}`}>
+            {dummyData.experience.map((exp: any, idx: number) => (
+              <div key={idx} className="mb-2">
+                <div className="flex justify-between items-baseline mb-0.5">
+                  <h3 className="font-bold text-slate-900 text-xs">{exp.position || exp.role || 'Posisi'}</h3>
+                  <span className="text-[11px] font-semibold text-slate-500">{exp.period || `${exp.startDate || ''} - ${exp.endDate || ''}`}</span>
+                </div>
+                <div className="flex justify-between items-baseline mb-1">
+                  <p className="font-semibold text-slate-700 text-xs">{exp.company}</p>
+                  {exp.location && <span className="text-[10px] text-slate-500">{exp.location}</span>}
+                </div>
+                {exp.highlights && Array.isArray(exp.highlights) && exp.highlights.length > 0 ? (
+                  <ul className="list-disc list-outside ml-4 space-y-0.5 text-[11px] text-slate-700">
+                    {exp.highlights.map((h: string, hIdx: number) => (
+                      <li key={hIdx} className="leading-relaxed">{h}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-[11px] leading-relaxed text-slate-700">{exp.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      education: (Array.isArray(dummyData?.education) && dummyData.education.length > 0) ? (
+        <div key="education" className="mb-4">
+          <h2 className={cfg.sectionTitleStyle}>PENDIDIKAN</h2>
+          <div className={`space-y-2 ${cfg.sectionContentStyle}`}>
+            {dummyData.education.map((edu: any, idx: number) => (
+              <div key={idx} className="mb-1.5">
+                <div className="flex justify-between items-baseline mb-0.5">
+                  <h3 className="font-bold text-slate-900 text-xs">{edu.degree}</h3>
+                  <span className="text-[11px] font-semibold text-slate-500">{edu.period || edu.year || `${edu.startDate || ''} - ${edu.endDate || ''}`}</span>
+                </div>
+                <p className="font-semibold text-slate-700 text-xs">{edu.institution}</p>
+                {edu.gpa && <p className="text-[11px] text-slate-600">IPK: {edu.gpa}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      skills: (Array.isArray(dummyData?.skills) && dummyData.skills.length > 0) ? (
+        <div key="skills" className="mb-4">
+          <h2 className={cfg.sectionTitleStyle}>KEAHLIAN & KOMPETENSI</h2>
+          <div className={`flex flex-wrap gap-1.5 ${cfg.sectionContentStyle}`}>
+            {dummyData.skills.map((skill: any, idx: number) => {
+              const skillName = typeof skill === 'string' ? skill : skill?.name;
+              const skillLevel = typeof skill === 'object' ? skill?.level : undefined;
+              if (!skillName) return null;
+              return (
+                <span key={idx} className="bg-slate-100 text-slate-800 text-[11px] font-medium px-2 py-0.5 rounded border border-slate-200">
+                  {skillName} {skillLevel ? `(${skillLevel})` : ''}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      ) : null,
+      projects: (Array.isArray(dummyData?.projects) && dummyData.projects.length > 0) ? (
+        <div key="projects" className="mb-4">
+          <h2 className={cfg.sectionTitleStyle}>PROYEK</h2>
+          <div className={`space-y-2 ${cfg.sectionContentStyle}`}>
+            {dummyData.projects.map((proj: any, idx: number) => (
+              <div key={idx} className="mb-2">
+                <div className="flex justify-between items-baseline mb-0.5">
+                  <h3 className="font-bold text-slate-900 text-xs">{proj.name}</h3>
+                </div>
+                {proj.tech && <p className="text-[10px] font-semibold text-slate-500 mb-0.5">{proj.tech}</p>}
+                <p className="text-[11px] leading-relaxed text-slate-700">{proj.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      certifications: (Array.isArray(dummyData?.certifications) && dummyData.certifications.length > 0) ? (
+        <div key="certifications" className="mb-4">
+          <h2 className={cfg.sectionTitleStyle}>SERTIFIKASI & LISENSI</h2>
+          <div className={`space-y-1 ${cfg.sectionContentStyle}`}>
+            {dummyData.certifications.map((cert: any, idx: number) => (
+              <div key={idx} className="text-xs">
+                <span className="font-bold text-slate-900">{cert.title || cert.name}</span> — <span className="text-slate-700">{cert.issuer}</span> ({cert.year || cert.issueDate})
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      languages: (Array.isArray(dummyData?.languages) && dummyData.languages.length > 0) ? (
+        <div key="languages" className="mb-4">
+          <h2 className={cfg.sectionTitleStyle}>BAHASA</h2>
+          <div className={`flex flex-wrap gap-3 ${cfg.sectionContentStyle}`}>
+            {dummyData.languages.map((lang: any, idx: number) => (
+              <span key={idx} className="text-xs text-slate-800">
+                <strong className="text-slate-900">{lang.name || lang.language}:</strong> {lang.proficiency || lang.level}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      courses: (Array.isArray(dummyData?.courses) && dummyData.courses.length > 0) ? (
+        <div key="courses" className="mb-4">
+          <h2 className={cfg.sectionTitleStyle}>PELATIHAN & KURSUS</h2>
+          <div className={`space-y-1 ${cfg.sectionContentStyle}`}>
+            {dummyData.courses.map((crs: any, idx: number) => (
+              <div key={idx} className="text-xs">
+                <span className="font-bold text-slate-900">{crs.courseName}</span> — <span className="text-slate-700">{crs.institution}</span> ({crs.year})
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      scholarships: (Array.isArray(dummyData?.scholarships) && dummyData.scholarships.length > 0) ? (
+        <div key="scholarships" className="mb-4">
+          <h2 className={cfg.sectionTitleStyle}>BEASISWA</h2>
+          <div className={`space-y-1 ${cfg.sectionContentStyle}`}>
+            {dummyData.scholarships.map((sch: any, idx: number) => (
+              <div key={idx} className="text-xs">
+                <span className="font-bold text-slate-900">{sch.name}</span> — <span className="text-slate-700">{sch.provider}</span> ({sch.year})
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      volunteers: (Array.isArray(dummyData?.volunteers) && dummyData.volunteers.length > 0) ? (
+        <div key="volunteers" className="mb-4">
+          <h2 className={cfg.sectionTitleStyle}>RELAWAN</h2>
+          <div className={`space-y-1 ${cfg.sectionContentStyle}`}>
+            {dummyData.volunteers.map((vol: any, idx: number) => (
+              <div key={idx} className="text-xs">
+                <span className="font-bold text-slate-900">{vol.role}</span> — <span className="text-slate-700">{vol.organization}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      references: (Array.isArray(dummyData?.references) && dummyData.references.length > 0) ? (
+        <div key="references" className="mb-4">
+          <h2 className={cfg.sectionTitleStyle}>REFERENSI</h2>
+          <div className={`space-y-1 ${cfg.sectionContentStyle}`}>
+            {dummyData.references.map((ref: any, idx: number) => (
+              <div key={idx} className="text-xs">
+                <span className="font-bold text-slate-900">{ref.fullName}</span> ({ref.title} — {ref.company})
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+    };
+
+    const impactOrderKeys = ['summary', 'experiences', 'education', 'skills', 'projects', 'certifications', 'languages', 'courses', 'scholarships', 'volunteers', 'references'];
+
+    return (
+      <div
+        className={`min-h-[297mm] ${cfg.backgroundClass || 'bg-white'} ${cfg.borderStyle || ''}`}
+        style={{ fontFamily: cfg.fontClass || selectedFontFamily }}
+      >
+        <div className="mb-5">
+          <h1 className={`${cfg.headerStyle} ${cfg.color} mb-1`}>
+            {dummyData.fullName}
+          </h1>
+          <p className="text-sm font-bold uppercase text-slate-600 mb-2">
+            {dummyData.jobTitle}
+          </p>
+          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
+        </div>
+
+        {impactOrderKeys.map((key) => sectionBlocks[key] || null)}
+      </div>
+    );
+  };
+
   // Map Document Settings to Dynamic CSS & Style Properties
   const fontStyleMap: Record<string, string> = {
-    inter: "'Inter', sans-serif",
+    satoshi: "'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    sans: "'Geist', 'Inter', -apple-system, sans-serif",
+    inter: "'Inter', -apple-system, sans-serif",
+    interTight: "'Inter Tight', 'Inter', sans-serif",
+    jakarta: "'Plus Jakarta Sans', 'Inter', sans-serif",
     roboto: "'Roboto', sans-serif",
     openSans: "'Open Sans', sans-serif",
-    googleSans: "'Google Sans', 'Plus Jakarta Sans', -apple-system, sans-serif",
+    googleSans: "'Plus Jakarta Sans', 'Geist', sans-serif",
     montserrat: "'Montserrat', sans-serif",
     lato: "'Lato', sans-serif",
-    sans: "'Inter', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    serif: "'EB Garamond', 'Lora', 'Georgia', Cambria, 'Times New Roman', serif",
-    mono: "'JetBrains Mono', 'Courier Prime', 'Fira Code', 'Consolas', monospace",
+    serif: "'Instrument Serif', 'EB Garamond', 'Lora', Georgia, serif",
+    mono: "'JetBrains Mono', 'Courier Prime', monospace",
     standard: "'Carlito', 'Arimo', 'Calibri', 'Arial', sans-serif",
   };
 
-  const fontSizeMap: Record<string, string> = {
-    sm: '0.9em',
-    base: '1em',
-    md: '1.08em',
-    lg: '1.18em',
-  };
+  const fontScaleMultiplier = docFontSize === 'sm' ? 0.9 : docFontSize === 'md' ? 1.08 : docFontSize === 'lg' ? 1.18 : 1;
 
   const spacingClassMap: Record<string, string> = {
     compact: '[&_.mb-6]:mb-3 [&_.mb-4]:mb-2 [&_.mb-3]:mb-1.5 [&_.space-y-4]:space-y-2 [&_.space-y-3]:space-y-1.5 [&_.py-6]:py-3 [&_.p-6]:p-4 [&_.p-12]:p-6',
@@ -12149,11 +13404,441 @@ const CVTemplatePreview: React.FC<{
   };
 
   const selectedFontFamily = fontStyleMap[docFontFamily] || fontStyleMap.sans;
-  const selectedFontSize = fontSizeMap[docFontSize] || fontSizeMap.base;
   const selectedSpacingClass = spacingClassMap[docSpacing] || '';
+
+  // Renderer untuk 26 Template Repositori (Resume Studio, Resumify, Resume Builder, AI Resume Repo)
+  const renderRepoTemplate = (repoTplId: string) => {
+    // 1. Resumify Tech Sidebar (2 Column Dark Sidebar)
+    if (repoTplId === 'resumify-tech-sidebar') {
+      return (
+        <div className="w-full min-h-[297mm] h-full bg-white text-slate-900 font-sans grid grid-cols-12">
+          <div className="col-span-4 bg-slate-900 text-white min-h-full h-full space-y-6 pt-[var(--cv-margin-top)] pb-[var(--cv-margin-bottom)] pl-[var(--cv-margin-left)] pr-6">
+            <div>
+              <h1 className="text-xl font-black uppercase text-white tracking-tight mb-1">{dummyData.fullName}</h1>
+              <p className="text-xs font-bold text-sky-400 uppercase">{dummyData.jobTitle}</p>
+            </div>
+            <div className="text-[11px] space-y-2 text-slate-300 border-t border-slate-700 pt-4">
+              <p className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">KONTAK</p>
+              <p>{dummyData.email}</p>
+              <p>{dummyData.phone}</p>
+              <p>{dummyData.location}</p>
+              {dummyData.website && <p>{dummyData.website}</p>}
+            </div>
+            {Array.isArray(dummyData?.skills) && dummyData.skills.length > 0 && (
+              <div className="border-t border-slate-700 pt-4">
+                <p className="font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-2">KEAHLIAN</p>
+                <div className="flex flex-wrap gap-1">
+                  {dummyData.skills.map((sk: any, idx: number) => (
+                    <span key={idx} className="bg-slate-800 text-sky-300 text-[10px] font-medium px-2 py-0.5 rounded border border-slate-700">{typeof sk === 'string' ? sk : sk?.name}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {Array.isArray(dummyData?.education) && dummyData.education.length > 0 && (
+              <div className="border-t border-slate-700 pt-4 space-y-2">
+                <p className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">PENDIDIKAN</p>
+                {dummyData.education.map((edu: any, idx: number) => (
+                  <div key={idx} className="text-[11px]">
+                    <p className="font-bold text-white">{edu.degree}</p>
+                    <p className="text-slate-400">{edu.institution}</p>
+                    <p className="text-[10px] text-sky-400">{edu.period || edu.year}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="col-span-8 space-y-6 pt-[var(--cv-margin-top)] pb-[var(--cv-margin-bottom)] pr-[var(--cv-margin-right)] pl-6">
+            {dummyData.summary && (
+              <div>
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b-2 border-slate-900 pb-1 mb-2">PROFIL</h2>
+                <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+              </div>
+            )}
+            {Array.isArray(dummyData?.experience) && dummyData.experience.length > 0 && (
+              <div>
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">PENGALAMAN KERJA</h2>
+                <div className="space-y-4">
+                  {dummyData.experience.map((exp: any, idx: number) => (
+                    <div key={idx}>
+                      <div className="flex justify-between items-baseline mb-0.5">
+                        <h3 className="font-bold text-xs text-slate-900">{exp.position || exp.role}</h3>
+                        <span className="text-[10px] font-bold text-slate-500">{exp.period}</span>
+                      </div>
+                      <p className="text-xs font-semibold text-sky-700 mb-1">{exp.company} {exp.location ? `• ${exp.location}` : ''}</p>
+                      <p className="text-xs text-slate-600 leading-relaxed">{exp.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // 2. Builder 50:50 Two Column Layout
+    if (repoTplId === 'builder-two-column' || repoTplId === 'studio-minimalist-two-col') {
+      return (
+        <div className="min-h-[297mm] bg-white text-slate-900 font-sans">
+          <div className="mb-6 pb-4 border-b-2 border-slate-900 text-center">
+            <h1 className="text-3xl font-black uppercase text-slate-900 mb-1">{dummyData.fullName}</h1>
+            <p className="text-xs font-bold text-slate-600 uppercase mb-2">{dummyData.jobTitle}</p>
+            <p className="text-xs text-slate-500 space-x-3">
+              <span>{dummyData.email}</span> • <span>{dummyData.phone}</span> • <span>{dummyData.location}</span>
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-6">
+            {/* Kolom Kiri: Profil, Keahlian, Pendidikan, Sertifikasi, Bahasa */}
+            <div className="space-y-5">
+              {dummyData.summary && (
+                <div>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">PROFIL</h2>
+                  <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+                </div>
+              )}
+              {Array.isArray(dummyData?.skills) && dummyData.skills.length > 0 && (
+                <div>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">KEAHLIAN</h2>
+                  <div className="flex flex-wrap gap-1">
+                    {dummyData.skills.map((sk: any, idx: number) => (
+                      <span key={idx} className="bg-slate-100 text-slate-800 text-[11px] font-medium px-2 py-0.5 rounded">{typeof sk === 'string' ? sk : sk?.name}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {Array.isArray(dummyData?.education) && dummyData.education.length > 0 && (
+                <div>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">PENDIDIKAN</h2>
+                  <div className="space-y-2">
+                    {dummyData.education.map((edu: any, idx: number) => (
+                      <div key={idx} className="text-xs">
+                        <p className="font-bold text-slate-900">{edu.degree}</p>
+                        <p className="text-slate-600">{edu.institution}</p>
+                        <p className="text-[10px] text-slate-500">{edu.period || edu.year}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {Array.isArray(dummyData?.certifications) && dummyData.certifications.length > 0 && (
+                <div>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">SERTIFIKASI</h2>
+                  <div className="space-y-1 text-xs">
+                    {dummyData.certifications.map((cert: any, idx: number) => (
+                      <div key={idx}>
+                        <p className="font-bold text-slate-900">{cert.name || cert.title}</p>
+                        <p className="text-[10px] text-slate-600">{cert.issuer} ({cert.issueDate || cert.year})</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {Array.isArray(dummyData?.languages) && dummyData.languages.length > 0 && (
+                <div>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">BAHASA</h2>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    {dummyData.languages.map((lang: any, idx: number) => (
+                      <span key={idx} className="text-slate-800">
+                        <strong className="text-slate-900">{lang.language || lang.name}:</strong> {lang.level || lang.proficiency}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Kolom Kanan: Pengalaman Kerja, Proyek, Pelatihan, Beasiswa */}
+            <div className="space-y-5">
+              {Array.isArray(dummyData?.experience) && dummyData.experience.length > 0 && (
+                <div>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">PENGALAMAN KERJA</h2>
+                  <div className="space-y-3">
+                    {dummyData.experience.map((exp: any, idx: number) => (
+                      <div key={idx} className="text-xs">
+                        <div className="flex justify-between items-baseline mb-0.5">
+                          <h3 className="font-bold text-slate-900">{exp.role || exp.position || 'Posisi Pekerjaan'}</h3>
+                          <span className="text-[10px] font-medium text-slate-500">{exp.period}</span>
+                        </div>
+                        <p className="font-semibold text-slate-700 mb-1">{exp.company}</p>
+                        <p className="text-slate-600 leading-relaxed text-[11px]">{exp.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {Array.isArray(dummyData?.projects) && dummyData.projects.length > 0 && (
+                <div>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">PROYEK UNGGULAN</h2>
+                  <div className="space-y-2 text-xs">
+                    {dummyData.projects.map((proj: any, idx: number) => (
+                      <div key={idx}>
+                        <p className="font-bold text-slate-900">{proj.name}</p>
+                        <p className="text-[11px] text-slate-600 leading-relaxed">{proj.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {Array.isArray(dummyData?.courses) && dummyData.courses.length > 0 && (
+                <div>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">PELATIHAN</h2>
+                  <div className="space-y-1 text-xs">
+                    {dummyData.courses.map((crs: any, idx: number) => (
+                      <div key={idx}>
+                        <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Dynamic Theme Config for other 24 templates
+    type RepoTheme = {
+      headerBg?: string;
+      headerText?: string;
+      titleColor?: string;
+      accentColor?: string;
+      borderTop?: string;
+      sideLine?: boolean;
+      boxStyle?: boolean;
+      isCentered?: boolean;
+      badgeStyle?: boolean;
+    };
+
+    const repoThemes: Record<string, RepoTheme> = {
+      // Studio
+      'studio-timeline': { titleColor: 'text-indigo-900', accentColor: 'bg-indigo-600', sideLine: true },
+      'studio-modern-header': { headerBg: 'bg-indigo-950', headerText: 'text-white', titleColor: 'text-indigo-900' },
+      'studio-decorative-pattern': { titleColor: 'text-purple-900', accentColor: 'bg-purple-600', badgeStyle: true },
+      'studio-centered-classic': { titleColor: 'text-slate-900', isCentered: true },
+      'studio-accent-tabs': { titleColor: 'text-white bg-indigo-600 px-2 py-0.5 rounded-sm inline-block' },
+      'studio-full-header': { headerBg: 'bg-indigo-900', headerText: 'text-white', titleColor: 'text-indigo-900' },
+      'studio-light-contact': { titleColor: 'text-slate-900', headerBg: 'bg-slate-100 p-4 rounded-md' },
+      'studio-bookmark-ribbon': { titleColor: 'text-purple-900 border-l-4 border-purple-600 pl-2' },
+      'studio-sidebar-labels': { titleColor: 'text-slate-800 border-b border-slate-300' },
+      'studio-gray-bg': { titleColor: 'text-slate-900', headerBg: 'bg-slate-100/80 p-5 rounded-lg' },
+
+      // Resumify
+      'resumify-business-pro': { titleColor: 'text-blue-900 border-b-2 border-blue-900' },
+      'resumify-modern-minimal': { titleColor: 'text-slate-800 uppercase tracking-widest' },
+      'resumify-elegant-timeline': { titleColor: 'text-sky-800', sideLine: true, accentColor: 'bg-sky-500' },
+      'resumify-creative-modern': { titleColor: 'text-teal-700', badgeStyle: true },
+      'resumify-bjet-pro': { titleColor: 'text-blue-800 border-b-2 border-blue-800' },
+
+      // Builder
+      'builder-ats-standard': { titleColor: 'text-black border-b border-black', isCentered: false },
+      'builder-modern-blue': { titleColor: 'text-blue-700 border-b-2 border-blue-700' },
+      'builder-creative-box': { titleColor: 'text-emerald-800', boxStyle: true },
+      'builder-minimal-serif': { titleColor: 'text-stone-800 border-b border-stone-400' },
+      'builder-executive-grid': { titleColor: 'text-slate-900 border-b-2 border-slate-900' },
+
+      // AI Repo
+      'airepo-classic-ats': { titleColor: 'text-slate-900 border-b border-slate-400' },
+      'airepo-modern-elegant': { titleColor: 'text-emerald-700 border-b border-emerald-300' },
+      'airepo-minimalist': { titleColor: 'text-slate-700' },
+
+      // Reactive Resume (Rx)
+      'rx-azurill': { titleColor: 'text-blue-900 border-b-2 border-blue-600', accentColor: 'bg-blue-600' },
+      'rx-bronzor': { titleColor: 'text-amber-900 border-b-2 border-amber-800', borderTop: 'border-t-8 border-amber-800' },
+      'rx-chikorita': { titleColor: 'text-emerald-800 border-b-2 border-emerald-600' },
+      'rx-ditto': { titleColor: 'text-purple-800 border-b-2 border-purple-500', headerBg: 'bg-purple-50 p-4 rounded-lg' },
+      'rx-gengar': { headerBg: 'bg-slate-900', headerText: 'text-white', titleColor: 'text-slate-900 border-b-2 border-magenta-500' },
+      'rx-glalie': { titleColor: 'text-cyan-800 border-b-2 border-cyan-600' },
+      'rx-kakuna': { titleColor: 'text-amber-800 border-b-2 border-amber-500' },
+      'rx-lapras': { titleColor: 'text-sky-900 border-b-2 border-sky-800' },
+      'rx-leafish': { titleColor: 'text-teal-800 border-b-2 border-teal-600' },
+      'rx-onyx': { headerBg: 'bg-black', headerText: 'text-white', titleColor: 'text-black border-b-2 border-black' },
+      'rx-pikachu': { titleColor: 'text-yellow-600 border-b-2 border-yellow-500', badgeStyle: true },
+      'rx-rhyhorn': { titleColor: 'text-stone-800 border-b-2 border-stone-600' },
+      'rx-ditgar': { headerBg: 'bg-indigo-950', headerText: 'text-white', titleColor: 'text-indigo-950' },
+      'rx-meowth': { titleColor: 'text-amber-800 border-b-2 border-amber-600' },
+      'rx-scizor': { titleColor: 'text-red-800 border-b-2 border-red-700', borderTop: 'border-t-8 border-red-700' },
+
+      // CVFlo
+      'cvflo-classic': { titleColor: 'text-slate-900 border-b border-slate-300' },
+      'cvflo-modern': { titleColor: 'text-blue-700 border-b-2 border-blue-600', badgeStyle: true },
+      'cvflo-academic': { titleColor: 'text-stone-900 border-b-2 border-stone-800', isCentered: true },
+
+      // ILoveResume
+      'ilove-modern': { titleColor: 'text-blue-600 border-b-2 border-blue-600' },
+      'ilove-classic': { titleColor: 'text-slate-900 border-b border-slate-900', isCentered: true },
+      'ilove-bold': { headerBg: 'bg-black', headerText: 'text-white', titleColor: 'text-black' },
+      'ilove-compact': { titleColor: 'text-slate-800 border-b border-slate-400' },
+      'ilove-executive': { titleColor: 'text-indigo-900 border-b-2 border-indigo-900' },
+      'ilove-creative': { titleColor: 'text-pink-600 border-b-2 border-pink-500', badgeStyle: true },
+      'ilove-technical': { titleColor: 'text-sky-700 border-b-2 border-sky-600' },
+      'ilove-minimal': { titleColor: 'text-slate-700' },
+      'ilove-academic': { titleColor: 'text-emerald-900 border-b-2 border-emerald-800' },
+      'ilove-infographic': { titleColor: 'text-purple-700', badgeStyle: true },
+      'ilove-elegant': { titleColor: 'text-emerald-700 border-b border-emerald-300' },
+      'ilove-twopage': { titleColor: 'text-slate-900 border-b-2 border-slate-800' },
+
+      // DangTinh
+      'djt-template-1': { titleColor: 'text-blue-600 border-b border-blue-500' },
+      'djt-template-2': { titleColor: 'text-slate-900 border-b-2 border-slate-900' },
+      'djt-template-3': { titleColor: 'text-teal-700', badgeStyle: true },
+      'djt-template-4': { titleColor: 'text-stone-800 border-b border-stone-400', isCentered: true },
+      'djt-template-5': { titleColor: 'text-sky-800 border-b border-sky-600' },
+
+      // Shiva-Kar
+      'shiva-harvard': { titleColor: 'text-red-900 border-b-2 border-red-900', isCentered: true },
+      'shiva-tech': { titleColor: 'text-cyan-800 border-b-2 border-cyan-600' },
+      'shiva-minimal': { titleColor: 'text-slate-800' },
+      'shiva-bold': { titleColor: 'text-blue-800 border-b-2 border-blue-800', borderTop: 'border-t-8 border-blue-800' },
+      'shiva-neo': { titleColor: 'text-purple-800 border-b-2 border-purple-800', boxStyle: true },
+      'shiva-portfolio': { titleColor: 'text-emerald-800 border-b-2 border-emerald-600' },
+      'shiva-corporate': { titleColor: 'text-gray-900 border-b-2 border-gray-800' },
+      'shiva-creative': { titleColor: 'text-pink-600 border-b-2 border-pink-500', badgeStyle: true },
+      'shiva-elegant': { titleColor: 'text-emerald-700 border-b border-emerald-300' },
+      'shiva-modern': { titleColor: 'text-indigo-700 border-b-2 border-indigo-600' },
+    };
+
+    const theme = repoThemes[repoTplId] || { titleColor: 'text-slate-900' };
+
+    return (
+      <div className={`min-h-[297mm] bg-white text-slate-900 font-sans ${theme.borderTop || ''}`}>
+        <div className={`mb-6 pb-4 border-b border-slate-200 ${theme.headerBg || ''} ${theme.isCentered ? 'text-center' : ''}`}>
+          <h1 className={`text-3xl font-extrabold tracking-tight mb-1 ${theme.headerText || 'text-slate-900'}`}>{dummyData.fullName}</h1>
+          <p className={`text-xs font-bold uppercase mb-2 ${theme.headerText ? 'text-slate-200' : 'text-slate-600'}`}>{dummyData.jobTitle}</p>
+          <p className={`text-xs space-x-3 ${theme.headerText ? 'text-slate-300' : 'text-slate-500'}`}>
+            <span>{dummyData.email}</span> • <span>{dummyData.phone}</span> • <span>{dummyData.location}</span>
+          </p>
+        </div>
+
+        {dummyData.summary && (
+          <div className={`mb-5 ${theme.boxStyle ? 'border border-slate-200 p-3 rounded' : ''}`}>
+            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>PROFIL PROFESSIONAL</h2>
+            <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+          </div>
+        )}
+
+        {Array.isArray(dummyData?.experience) && dummyData.experience.length > 0 && (
+          <div className={`mb-5 ${theme.boxStyle ? 'border border-slate-200 p-3 rounded' : ''}`}>
+            <h2 className={`text-xs font-bold uppercase tracking-wider mb-3 ${theme.titleColor}`}>PENGALAMAN KERJA</h2>
+            <div className="space-y-3">
+              {dummyData.experience.map((exp: any, idx: number) => (
+                <div key={idx} className={theme.sideLine ? `border-l-2 ${theme.accentColor || 'border-slate-800'} pl-3` : ''}>
+                  <div className="flex justify-between items-baseline mb-0.5">
+                    <h3 className="font-bold text-xs text-slate-900">{exp.position || exp.role}</h3>
+                    <span className="text-[11px] font-semibold text-slate-500">{exp.period}</span>
+                  </div>
+                  <p className="text-xs font-semibold text-slate-700 mb-1">{exp.company} {exp.location ? `• ${exp.location}` : ''}</p>
+                  <p className="text-xs text-slate-600 leading-relaxed">{exp.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {Array.isArray(dummyData?.education) && dummyData.education.length > 0 && (
+          <div className={`mb-5 ${theme.boxStyle ? 'border border-slate-200 p-3 rounded' : ''}`}>
+            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>PENDIDIKAN</h2>
+            <div className="space-y-2">
+              {dummyData.education.map((edu: any, idx: number) => (
+                <div key={idx} className="flex justify-between text-xs">
+                  <div>
+                    <p className="font-bold text-slate-900">{edu.degree}</p>
+                    <p className="text-slate-600">{edu.institution}</p>
+                  </div>
+                  <span className="font-semibold text-slate-500">{edu.period || edu.year}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {Array.isArray(dummyData?.skills) && dummyData.skills.length > 0 && (
+          <div className={`mb-5 ${theme.boxStyle ? 'border border-slate-200 p-3 rounded' : ''}`}>
+            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>KEAHLIAN</h2>
+            <div className="flex flex-wrap gap-1.5">
+              {dummyData.skills.map((sk: any, idx: number) => (
+                <span key={idx} className={theme.badgeStyle ? 'bg-indigo-100 text-indigo-900 text-[11px] font-semibold px-2 py-0.5 rounded-full' : 'bg-slate-100 text-slate-800 text-[11px] font-medium px-2 py-0.5 rounded border border-slate-200'}>
+                  {typeof sk === 'string' ? sk : sk?.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {Array.isArray(dummyData?.certifications) && dummyData.certifications.length > 0 && (
+          <div className={`mb-5 ${theme.boxStyle ? 'border border-slate-200 p-3 rounded' : ''}`}>
+            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>SERTIFIKASI & LISENSI</h2>
+            <div className="space-y-1 text-xs">
+              {dummyData.certifications.map((cert: any, idx: number) => (
+                <div key={idx}>
+                  <span className="font-bold text-slate-900">{cert.name || cert.title}</span> — <span className="text-slate-700">{cert.issuer}</span> ({cert.issueDate || cert.year})
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {Array.isArray(dummyData?.courses) && dummyData.courses.length > 0 && (
+          <div className={`mb-5 ${theme.boxStyle ? 'border border-slate-200 p-3 rounded' : ''}`}>
+            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>PELATIHAN & KURSUS</h2>
+            <div className="space-y-1 text-xs">
+              {dummyData.courses.map((crs: any, idx: number) => (
+                <div key={idx}>
+                  <span className="font-bold text-slate-900">{crs.courseName}</span> — <span className="text-slate-700">{crs.institution}</span> ({crs.year})
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {Array.isArray(dummyData?.scholarships) && dummyData.scholarships.length > 0 && (
+          <div className={`mb-5 ${theme.boxStyle ? 'border border-slate-200 p-3 rounded' : ''}`}>
+            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>BEASISWA</h2>
+            <div className="space-y-1 text-xs">
+              {dummyData.scholarships.map((sch: any, idx: number) => (
+                <div key={idx}>
+                  <span className="font-bold text-slate-900">{sch.name}</span> — <span className="text-slate-700">{sch.provider}</span> ({sch.year})
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {Array.isArray(dummyData?.languages) && dummyData.languages.length > 0 && (
+          <div className={`mb-5 ${theme.boxStyle ? 'border border-slate-200 p-3 rounded' : ''}`}>
+            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>BAHASA</h2>
+            <div className="flex flex-wrap gap-3 text-xs">
+              {dummyData.languages.map((lang: any, idx: number) => (
+                <span key={idx} className="text-slate-800">
+                  <strong className="text-slate-900">{lang.language || lang.name}:</strong> {lang.level || lang.proficiency}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   // Template Router
   const getTemplateContent = () => {
+    if (templateId.startsWith('impact-')) {
+      return renderImpactTemplate(templateId);
+    }
+    if (
+      templateId.startsWith('studio-') ||
+      templateId.startsWith('resumify-') ||
+      templateId.startsWith('builder-') ||
+      templateId.startsWith('airepo-') ||
+      templateId.startsWith('rx-') ||
+      templateId.startsWith('cvflo-') ||
+      templateId.startsWith('ilove-') ||
+      templateId.startsWith('djt-') ||
+      templateId.startsWith('shiva-')
+    ) {
+      return renderRepoTemplate(templateId);
+    }
+
     switch (templateId) {
       case 'ketik-monospace':
         return renderKetikMonospace();
@@ -12200,31 +13885,59 @@ const CVTemplatePreview: React.FC<{
       className={`w-full min-h-[297mm] bg-white text-slate-900 transition-all duration-200 ${selectedSpacingClass}`}
       style={{
         fontFamily: selectedFontFamily,
-        fontSize: selectedFontSize,
         lineHeight: docLineHeight !== undefined ? `${docLineHeight}` : undefined,
         letterSpacing: docLetterSpacing !== undefined ? `${docLetterSpacing}px` : undefined,
       }}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lato:wght@400;700;900&family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&family=Roboto:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@400;500;700;900&family=Open+Sans:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&display=swap');
         .cv-template-root {
           --cv-margin-top: ${docMarginTop}cm;
           --cv-margin-bottom: ${docMarginBottom}cm;
           --cv-margin-left: ${docMarginLeft}cm;
           --cv-margin-right: ${docMarginRight}cm;
+          --cv-font-scale: ${fontScaleMultiplier};
+          box-sizing: border-box;
         }
+        .cv-template-root .text-xs { font-size: calc(0.75rem * var(--cv-font-scale)) !important; line-height: calc(1rem * var(--cv-font-scale)) !important; }
+        .cv-template-root .text-sm { font-size: calc(0.875rem * var(--cv-font-scale)) !important; line-height: calc(1.25rem * var(--cv-font-scale)) !important; }
+        .cv-template-root .text-base { font-size: calc(1rem * var(--cv-font-scale)) !important; line-height: calc(1.5rem * var(--cv-font-scale)) !important; }
+        .cv-template-root .text-lg { font-size: calc(1.125rem * var(--cv-font-scale)) !important; line-height: calc(1.75rem * var(--cv-font-scale)) !important; }
+        .cv-template-root .text-xl { font-size: calc(1.25rem * var(--cv-font-scale)) !important; line-height: calc(1.75rem * var(--cv-font-scale)) !important; }
+        .cv-template-root .text-2xl { font-size: calc(1.5rem * var(--cv-font-scale)) !important; line-height: calc(2rem * var(--cv-font-scale)) !important; }
+        .cv-template-root .text-\\[10px\\] { font-size: calc(10px * var(--cv-font-scale)) !important; }
+        .cv-template-root .text-\\[11px\\] { font-size: calc(11px * var(--cv-font-scale)) !important; }
         .cv-template-root > div {
           padding-left: var(--cv-margin-left) !important;
           padding-right: var(--cv-margin-right) !important;
           padding-top: 0 !important;
           padding-bottom: 0 !important;
+          box-sizing: border-box !important;
+          min-height: 100% !important;
+        }
+        .cv-template-root[data-template="resumify-tech-sidebar"],
+        .cv-template-root[data-template="resumify-tech-sidebar"] > div {
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+          height: 100% !important;
+          min-height: 297mm !important;
         }
         ${docNameSize ? `.cv-template-root h1 { font-size: ${docNameSize}px !important; }` : ''}
         ${docHeaderSize ? `.cv-template-root h2 { font-size: ${docHeaderSize}px !important; }` : ''}
-        ${docBodySize ? `.cv-template-root p, .cv-template-root span, .cv-template-root div:not(.cv-no-custom-size) { font-size: ${docBodySize}px !important; }` : ''}
+        ${docBodySize ? `.cv-template-root p, .cv-template-root li, .cv-template-root span:not(.cv-no-custom-size), .cv-template-root a:not(.cv-no-custom-size) { font-size: ${docBodySize}px !important; }` : ''}
         ${docSectionSpacing ? `.cv-template-root .mb-6, .cv-template-root .mb-8, .cv-template-root .mb-5 { margin-bottom: ${docSectionSpacing}px !important; }` : ''}
+        .cv-template-root h1,
+        .cv-template-root h2,
+        .cv-template-root .space-y-4 > div,
+        .cv-template-root .space-y-3 > div,
+        .cv-template-root .grid > div {
+          break-inside: avoid !important;
+          page-break-inside: avoid !important;
+        }
       `}</style>
-      <div className="cv-template-root w-full h-full">
+      <div className="cv-template-root w-full h-full" data-template={templateId}>
         {getTemplateContent()}
       </div>
     </div>

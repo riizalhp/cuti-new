@@ -72,8 +72,14 @@ export default function AdminLoginPage() {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#0B132B] mb-4">
-            <Shield size={32} className="text-orange-400" />
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/logo.webp"
+              alt="Employr Logo"
+              width={160}
+              height={40}
+              className="h-10 w-auto object-contain dark:brightness-0 dark:invert"
+            />
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
             Admin Panel

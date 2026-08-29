@@ -44,10 +44,11 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
     setCvTitle(cv.title || 'CV ATS - Modern Standard');
 
     const dyn = calculateDynamicAtsScore(cv);
-    setAtsScore(dyn.totalScore);
-    setAccuracyRate(Math.min(99, Math.max(70, Math.round(dyn.totalScore * 1.05))));
+    const resolvedScore = dyn.totalScore > 0 ? dyn.totalScore : (cv.atsScore && cv.atsScore > 0 ? cv.atsScore : 0);
+    setAtsScore(resolvedScore);
+    setAccuracyRate(Math.min(99, Math.max(70, Math.round(resolvedScore * 1.05))));
     setRecommendationsCount(dyn.issues.length);
-    setIsEmptyOrDefault(dyn.isEmptyOrDefault);
+    setIsEmptyOrDefault(resolvedScore === 0 ? true : dyn.isEmptyOrDefault);
     setPenalties(dyn.issues.map((i) => i.message));
     setBonuses([
       `Content Quality: ${dyn.engines.contentQuality.score}%`,

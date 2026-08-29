@@ -45,6 +45,8 @@ model User {
   sessions                                    sessions[]
   system_settings                             system_settings[]
   transactions                                transactions[]
+  smtp_accounts                               SmtpAccount[]
+  email_batch_jobs                            EmailBatchJob[]
   withdrawals_withdrawals_processed_byTousers withdrawals[]       @relation("withdrawals_processed_byTousers")
   withdrawals_withdrawals_user_idTousers      withdrawals[]       @relation("withdrawals_user_idTousers")
 
@@ -92,19 +94,33 @@ model ai_prompts {
 }
 
 model ai_providers {
-  id             String    @id @db.Uuid
-  name           String
-  label          String
-  base_url       String    @default("https://api.openai.com/v1")
-  api_key        String
-  model          String    @default("gpt-4o-mini")
-  priority       Int       @default(0)
-  is_active      Boolean   @default(true)
-  cooldown_until DateTime?
-  created_at     DateTime  @default(now())
-  updated_at     DateTime
-  alias          String?
-  auth_type      String    @default("apikey")
+  id               String                @id @db.Uuid
+  name             String
+  label            String
+  base_url         String                @default("https://api.openai.com/v1")
+  api_key          String
+  model            String                @default("gpt-4o-mini")
+  priority         Int                   @default(0)
+  is_active        Boolean               @default(true)
+  cooldown_until   DateTime?
+  created_at       DateTime              @default(now())
+  updated_at       DateTime
+  alias            String?
+  auth_type        String                @default("apikey")
+  feature_mappings ai_feature_mappings[]
+}
+
+model ai_feature_mappings {
+  id           String        @id @default(uuid()) @db.Uuid
+  feature_key  String        @unique
+  feature_name String
+  provider_id  String?       @db.Uuid
+  provider     ai_providers? @relation(fields: [provider_id], references: [id], onDelete: SetNull)
+  temperature  Float         @default(0.2)
+  max_tokens   Int           @default(2000)
+  is_active    Boolean       @default(true)
+  updated_at   DateTime      @updatedAt
+  created_at   DateTime      @default(now())
 }
 
 model ai_usage_logs {
@@ -118,6 +134,33 @@ model ai_usage_logs {
   tokens_output Int
   cost          Decimal  @db.Decimal(10, 4)
   created_at    DateTime @default(now())
+}
+
+model ai_generation_history {
+  id               String   @id @db.Uuid
+  user_id          String   @db.Uuid
+  section_key      String
+  section_title    String
+  target_job_title String?
+  goal             String?
+  formula          String?
+  input_text       String
+  options          Json
+  created_at       DateTime @default(now())
+
+  @@index([user_id, created_at])
+}
+
+model ai_semantic_cache {
+  id         String   @id @db.Uuid
+  cache_key  String   @unique
+  input_hash String
+  response   String
+  hits       Int      @default(1)
+  created_at DateTime @default(now())
+
+  @@index([cache_key])
+  @@index([input_hash])
 }
 
 model application_notes {
@@ -500,6 +543,15 @@ model verifications {
   updated_at DateTime
 }
 
+model cv_learning_dictionary {
+  id         String   @id @default(uuid()) @db.Uuid
+  category   String   @db.VarChar(50)
+  value      String   @unique @db.VarChar(255)
+  frequency  Int      @default(1)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
 model withdrawals {
   id                                    String           @id @db.Uuid
   user_id                               String           @db.Uuid
@@ -717,4 +769,41 @@ enum WorkType {
   REMOTE
   HYBRID
   ONLINE
+}
+
+model SmtpAccount {
+  id          String   @id @default(uuid()) @db.Uuid
+  user_id     String   @db.Uuid
+  host        String
+  port        Int      @default(587)
+  secure      Boolean  @default(false)
+  username    String
+  password    String
+  from_name   String
+  from_email  String?
+  daily_limit Int      @default(500)
+  sent_today  Int      @default(0)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  users       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("smtp_accounts")
+}
+
+model EmailBatchJob {
+  id           String    @id @default(uuid()) @db.Uuid
+  user_id      String    @db.Uuid
+  title        String    @default("Batch Lamaran")
+  status       String    @default("QUEUED") // QUEUED, RUNNING, PAUSED, COMPLETED, FAILED
+  total_emails Int       @default(0)
+  sent_count   Int       @default(0)
+  failed_count Int       @default(0)
+  payload      Json?
+  logs         Json?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  users        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("email_batch_jobs")
 }

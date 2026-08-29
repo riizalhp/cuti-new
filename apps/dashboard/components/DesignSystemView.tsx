@@ -94,7 +94,7 @@ export const DesignSystemView: React.FC = () => {
             { id: 'overview', label: '5 Pilar Utama', icon: ShieldCheck },
             { id: 'colors', label: 'Palet Warna (Orange & Navy)', icon: Palette },
             { id: 'scores', label: 'Standar Skor (Kotak vs Radial)', icon: PieChart },
-            { id: 'typography', label: 'Tipografi (Geist & Inter)', icon: Type },
+            { id: 'typography', label: 'Tipografi (Satoshi)', icon: Type },
             { id: 'components', label: 'Komponen & Drawer', icon: Layers },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -336,15 +336,15 @@ export const DesignSystemView: React.FC = () => {
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
             <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Type className="w-5 h-5 text-orange-500" />
-              <span>Hierarki Tipografi Resmi (Geist &amp; Inter)</span>
+              <span>Hierarki Tipografi Resmi (Satoshi)</span>
             </h2>
-            <span className="text-xs font-mono text-slate-400">Geist / Inter / JetBrains Mono</span>
+            <span className="text-xs font-mono text-slate-400">Satoshi / JetBrains Mono</span>
           </div>
 
           <div className="space-y-4">
             <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-2">
               <div>
-                <p className="text-xs font-bold text-orange-600 dark:text-orange-400 font-mono mb-1">Page Title / Hero Heading (Geist / text-2xl / font-extrabold)</p>
+                <p className="text-xs font-bold text-orange-600 dark:text-orange-400 font-mono mb-1">Page Title / Hero Heading (Satoshi / text-2xl / font-extrabold)</p>
                 <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Ringkasan Progres Karier &amp; Lamaran Kerja</h1>
               </div>
               <span className="text-xs font-mono text-slate-400 shrink-0">24px / 1.25</span>
@@ -352,7 +352,7 @@ export const DesignSystemView: React.FC = () => {
 
             <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-2">
               <div>
-                <p className="text-xs font-bold text-orange-600 dark:text-orange-400 font-mono mb-1">Body Text (Inter / text-sm / font-medium)</p>
+                <p className="text-xs font-bold text-orange-600 dark:text-orange-400 font-mono mb-1">Body Text (Satoshi / text-sm / font-medium)</p>
                 <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
                   Pantau terus jadwal interview serta status tindak lanjut recruiter dari setiap perusahaan yang Anda lamar.
                 </p>

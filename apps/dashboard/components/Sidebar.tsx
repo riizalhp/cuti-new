@@ -31,7 +31,8 @@ import {
   Globe,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { cvApi, trackerApi } from '@/lib/api';
+import { trackerApi } from '@/lib/api';
+import { useCareerReadiness } from '@/hooks/useCareerReadiness';
 
 interface SidebarProps {
   onOpenUpgradeModal: () => void;
@@ -47,6 +48,8 @@ interface SidebarMenuItem {
   label: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
+  isPro?: boolean;
+  isAi?: boolean;
   badge?: string | null;
 }
 
@@ -65,39 +68,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
 }) => {
   const pathname = usePathname();
-  const [readinessScore, setReadinessScore] = React.useState(0);
+  const { score: readinessScore } = useCareerReadiness();
   const [trackerCount, setTrackerCount] = React.useState(0);
 
   React.useEffect(() => {
-    cvApi.getAll().then((cvs) => {
-      if (Array.isArray(cvs) && cvs.length > 0) {
-        const primary = cvs.find((c: any) => c.isPrimary) || cvs[0];
-        const hasContact = Boolean(primary.fullName && primary.email && primary.phone);
-        const hasSummary = Boolean(primary.summary && primary.summary.trim().length >= 20);
-        const hasEdu =
-          Array.isArray(primary.education) &&
-          primary.education.length > 0 &&
-          Boolean(primary.education[0]?.institution || primary.education[0]?.degree);
-        const hasExperience =
-          (primary.experience?.length || 0) > 0 ||
-          (primary.projects?.length || 0) > 0 ||
-          (primary.internships?.length || 0) > 0;
-        const hasSkills = Array.isArray(primary.skills) && primary.skills.length >= 4;
-        const atsScore = primary.atsScore ?? 0;
-        const isAtsOptimal = atsScore >= 80;
-
-        let completed = 0;
-        if (hasContact && hasSummary) completed++;
-        if (hasEdu) completed++;
-        if (hasExperience) completed++;
-        if (hasSkills) completed++;
-        if (isAtsOptimal) completed++;
-
-        const dynamicScore = Math.round((completed / 5) * 60 + (atsScore / 100) * 40);
-        setReadinessScore(dynamicScore);
-      }
-    });
-
     trackerApi.getAll().then((apps) => {
       if (Array.isArray(apps)) {
         const activeCount = apps.filter((a: any) =>
@@ -130,6 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Briefcase,
       items: [
         { id: 'tracker', label: 'Tracker Lamaran', href: '/tracker', icon: Briefcase, badge: trackerCount > 0 ? String(trackerCount) : null },
+        { id: 'mailer', label: 'Auto Mailer', href: '/mailer', icon: Send, badge: 'Baru' },
         { id: 'scrape-jobs', label: 'Scraper Lowongan', href: '/scrape-jobs', icon: Globe, badge: 'Baru' },
         { id: 'cari-lowongan', label: 'Cari Lowongan', href: 'https://loker.employr.id', icon: Compass },
         { id: 'match-cv', label: 'Kecocokan Lowongan', href: '/match-cv', icon: Sparkles },

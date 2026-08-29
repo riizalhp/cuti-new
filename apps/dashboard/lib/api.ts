@@ -326,3 +326,45 @@ export const aiGatewayApi = {
     }
   },
 };
+
+/**
+ * Auto Mailer API Client
+ */
+export const mailerApi = {
+  // SMTP Accounts
+  async getSmtpAccounts() {
+    try {
+      const res = await apiGet<any[]>("/api/mailer/smtp");
+      return res.data || [];
+    } catch {
+      return [];
+    }
+  },
+  async createSmtpAccount(data: any) {
+    return await apiPost<any>("/api/mailer/smtp", data);
+  },
+  async testSmtpConnection(data: any) {
+    return await apiPost<any>("/api/mailer/smtp", { ...data, action: "test" });
+  },
+  async deleteSmtpAccount(id: string) {
+    return await apiDelete(`/api/mailer/smtp?id=${id}`);
+  },
+
+  // Single Email Sending
+  async sendSingle(data: any) {
+    return await apiPost<any>("/api/mailer/send", data);
+  },
+
+  // Batch Sending
+  async getBatchJobs() {
+    try {
+      const res = await apiGet<any[]>("/api/mailer/batch");
+      return res.data || [];
+    } catch {
+      return [];
+    }
+  },
+  async startBatch(data: any) {
+    return await apiPost<any>("/api/mailer/batch", data);
+  },
+};

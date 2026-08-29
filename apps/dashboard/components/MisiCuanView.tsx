@@ -327,7 +327,6 @@ export const MisiCuanView: React.FC = () => {
             <span>Riwayat Misi Diselesaikan &amp; Penukaran</span>
           </button>
         </div>
-      </div>
 
       {/* SUBTAB 1: DAFTAR MISI AKTIF */}
       {activeSubTab === 'misi' && (

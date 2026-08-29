@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useToast } from '@/components/ui/Toast';
 import {
   Crown,
   CheckCircle2,
@@ -25,6 +26,10 @@ import {
   ChevronRight,
   Award,
   RefreshCw,
+  Mic,
+  Briefcase,
+  ChevronDown,
+  Layers,
 } from 'lucide-react';
 
 interface PaymentViewProps {
@@ -36,13 +41,15 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
   onPaymentSuccess,
   onBackToDashboard,
 }) => {
-  // Plan Selection State
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly' | 'lifetime'>('yearly');
+  const toast = useToast();
+  // Plan Selection State: 'siap_kerja' | 'profesional' | 'siap_lamar'
+  const [selectedPlan, setSelectedPlan] = useState<'siap_kerja' | 'profesional' | 'siap_lamar'>('siap_kerja');
 
-  // Payment Method State
+  // Payment Method State: 'qris' | 'va' | 'card' | 'retail'
   const [paymentCategory, setPaymentCategory] = useState<'qris' | 'va' | 'card' | 'retail'>('qris');
   const [selectedVaBank, setSelectedVaBank] = useState<'bca' | 'mandiri' | 'bni' | 'bri' | 'bsi'>('bca');
   const [selectedRetail, setSelectedRetail] = useState<'indomaret' | 'alfamart'>('indomaret');
+  const [showVaGuide, setShowVaGuide] = useState(false);
 
   // Voucher Code State
   const [voucherCode, setVoucherCode] = useState('');
@@ -59,16 +66,33 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
 
   // Step Status: 'checkout' | 'processing' | 'success'
   const [stepStatus, setStepStatus] = useState<'checkout' | 'processing' | 'success'>('checkout');
+  const [processingStage, setProcessingStage] = useState(0);
   const [copiedCode, setCopiedCode] = useState(false);
   const [transactionId, setTransactionId] = useState('');
 
-  // Timer for QRIS / VA countdown
-  const [timeLeft, setTimeLeft] = useState(899); // 14 mins 59 secs
+  // Timer for countdown (14m 59s)
+  const [timeLeft, setTimeLeft] = useState(899);
+
+  // Read pre-applied promo code if any
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedPromo = localStorage.getItem('promo_claimed_code');
+      if (storedPromo) {
+        if (storedPromo.toUpperCase() === 'PRO2026' || storedPromo.toUpperCase() === 'CUTI') {
+          setAppliedVoucher({
+            code: storedPromo.toUpperCase(),
+            discount: 20000,
+            label: 'Diskon Spesial Promo Member - Rp 20.000',
+          });
+        }
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (stepStatus === 'checkout') {
       const timer = setInterval(() => {
-        setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+        setTimeLeft((prev) => (prev > 0 ? prev - 1 : 899));
       }, 1000);
       return () => clearInterval(timer);
     }
@@ -80,16 +104,28 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  // Pricing Calculation
-  const planPrices = {
-    monthly: 49000,
-    yearly: 348000, // Rp 29.000/bln
-    lifetime: 499000,
+  // Pricing Matrix (Single Lifetime Payment as per Business Rules)
+  const planPrices: Record<'siap_kerja' | 'profesional' | 'siap_lamar', { price: number; name: string; tag: string }> = {
+    siap_kerja: {
+      price: 99000,
+      name: 'Paket Siap Kerja',
+      tag: 'Paling Lengkap & Rekomendasi',
+    },
+    profesional: {
+      price: 59000,
+      name: 'CV Profesional',
+      tag: 'Paling Populer',
+    },
+    siap_lamar: {
+      price: 19000,
+      name: 'CV Siap Lamar',
+      tag: 'Starter',
+    },
   };
 
-  const originalPrice = planPrices[selectedPlan];
+  const originalPrice = planPrices[selectedPlan].price;
   const discountAmount = appliedVoucher ? appliedVoucher.discount : 0;
-  const adminFee = 0; // PPN & Layanan Gratis
+  const adminFee = 0; // Bebas biaya admin
   const totalPrice = Math.max(0, originalPrice - discountAmount + adminFee);
 
   const handleApplyVoucher = (e: React.FormEvent) => {
@@ -100,16 +136,16 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
     if (cleanCode === 'PRO2026' || cleanCode === 'CUTI') {
       setAppliedVoucher({
         code: cleanCode,
-        discount: 50000,
-        label: 'Diskon Spesial Promo Member - Rp 50.000',
+        discount: 20000,
+        label: 'Diskon Spesial Promo Member - Rp 20.000',
       });
       setVoucherCode('');
-    } else if (cleanCode === 'LOKER50') {
-      const disc = Math.round(originalPrice * 0.2);
+    } else if (cleanCode === 'BUMN2026' || cleanCode === 'LOKER50') {
+      const disc = Math.round(originalPrice * 0.25);
       setAppliedVoucher({
         code: cleanCode,
         discount: disc,
-        label: 'Potongan 20% Voucher Karir',
+        label: 'Potongan 25% Spesial Persiapan Kerja',
       });
       setVoucherCode('');
     } else {
@@ -119,15 +155,28 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
 
   const handleProcessPayment = () => {
     setStepStatus('processing');
-    const randomTrx = 'TRX-KK-' + Math.floor(100000 + Math.random() * 900000);
+    setProcessingStage(1);
+    const randomTrx = 'TRX-CUTI-' + Math.floor(100000 + Math.random() * 900000);
     setTransactionId(randomTrx);
 
     setTimeout(() => {
+      setProcessingStage(2);
+    }, 900);
+
+    setTimeout(() => {
+      setProcessingStage(3);
+    }, 1800);
+
+    setTimeout(() => {
       setStepStatus('success');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cuti_is_pro_member', 'true');
+        localStorage.setItem('cuti_membership_plan', selectedPlan);
+      }
       if (onPaymentSuccess) {
         onPaymentSuccess();
       }
-    }, 2000);
+    }, 2600);
   };
 
   const handleCopyCode = (text: string) => {
@@ -140,30 +189,49 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
     return 'Rp ' + num.toLocaleString('id-ID');
   };
 
+  const getVaNumber = (bank: string) => {
+    switch (bank) {
+      case 'bca':
+        return '88001 812 3456 7890';
+      case 'mandiri':
+        return '89508 812 3456 7890';
+      case 'bni':
+        return '88100 812 3456 7890';
+      case 'bri':
+        return '88017 812 3456 7890';
+      case 'bsi':
+        return '88701 812 3456 7890';
+      default:
+        return '88001 812 3456 7890';
+    }
+  };
+
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Top Banner Header */}
-      <div className="bg-navy-700 rounded-[10px] p-6 md:p-8 text-white border border-navy-800 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="w-full space-y-6 sm:space-y-8 animate-in fade-in duration-300">
+      {/* Top Banner Header with User Requested Copy */}
+      <div className="bg-navy-700 rounded-[10px] p-6 sm:p-8 text-white border border-navy-800 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-xs font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+          <div className="space-y-2.5">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-xs font-black bg-amber-400/20 text-amber-300 border border-amber-400/30">
               <Crown className="w-3.5 h-3.5" />
               <span>CUTI Premium Pass</span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
               Aktivasi Pembayaran Keanggotaan
-            </h2>
-            <p className="text-xs text-slate-300 max-w-xl">
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
               Selesaikan pembayaran secara aman dengan enkripsi SSL 256-bit. Dapatkan akses penuh ke fitur AI CV ATS, Simulasi Interview Voice, &amp; Prioritas Lamaran BUMN.
             </p>
           </div>
 
-          <div className="px-4 py-3 rounded-[10px] bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-3 shrink-0">
-            <Clock className="w-5 h-5 text-amber-400" />
+          <div className="px-4 py-3.5 rounded-[10px] bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-3 shrink-0 self-stretch md:self-auto justify-between md:justify-start">
+            <div className="w-9 h-9 rounded-[8px] bg-amber-400/20 flex items-center justify-center text-amber-400">
+              <Clock className="w-5 h-5" />
+            </div>
             <div>
-              <span className="text-[10px] text-slate-300 font-bold uppercase block">Batas Pembayaran</span>
-              <span className="text-base font-black text-amber-300 font-mono">{formatTimer(timeLeft)}</span>
+              <span className="text-[10px] text-slate-300 font-bold uppercase tracking-wider block">Batas Pembayaran</span>
+              <span className="text-lg font-black text-amber-300 font-mono tracking-tight">{formatTimer(timeLeft)}</span>
             </div>
           </div>
         </div>
@@ -171,21 +239,21 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
 
       {/* SUCCESS STATE DISPLAY */}
       {stepStatus === 'success' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-8 text-center space-y-6 shadow-xl max-w-2xl mx-auto my-8">
-          <div className="w-16 h-16 rounded-[10px] bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto border-2 border-emerald-500/30 shadow-lg">
-            <CheckCircle2 className="w-10 h-10" />
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 sm:p-10 text-center space-y-6 shadow-xl max-w-2xl mx-auto my-8 animate-in zoom-in-95 duration-300">
+          <div className="w-20 h-20 rounded-[10px] bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto border-2 border-emerald-500/30 shadow-lg">
+            <CheckCircle2 className="w-12 h-12" />
           </div>
 
           <div className="space-y-2">
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-[10px] text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              PEMBAYARAN BERHASIL
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+              <ShieldCheck className="w-4 h-4" />
+              PEMBAYARAN BERHASIL DIVERIFIKASI
             </span>
-            <h3 className="text-2xl font-black text-slate-900 dark:text-white">
-              Selamat! Akun Kamu Telah Aktif
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-              Fitur CUTI Premium Pass telah berhasil diaktifkan. Bukti transaksi dan rincian lisensi telah dikirimkan ke email kamu.
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+              Selamat! Akun Kamu Resmi Menjadi Member
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+              Fitur CUTI Premium Pass telah aktif selamanya di akun kamu. Akses AI CV ATS, Simulasi Interview Voice, dan prioritas lamaran langsung terbuka.
             </p>
           </div>
 
@@ -196,9 +264,9 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
               <span className="font-mono font-bold text-slate-900 dark:text-white">{transactionId}</span>
             </div>
             <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
-              <span className="text-slate-500 dark:text-slate-400">Paket Dibelinya</span>
-              <span className="font-bold text-slate-900 dark:text-white uppercase">
-                {selectedPlan === 'monthly' ? 'Pass Bulanan' : selectedPlan === 'yearly' ? 'Pass Tahunan Pro' : 'Pass Lifetime VIP'}
+              <span className="text-slate-500 dark:text-slate-400">Paket Terpilih</span>
+              <span className="font-black text-slate-900 dark:text-white uppercase">
+                {planPrices[selectedPlan].name} (Sekali Bayar)
               </span>
             </div>
             <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
@@ -206,9 +274,9 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
               <span className="font-black text-emerald-600 dark:text-emerald-400 text-sm">{formatRupiah(totalPrice)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-500 dark:text-slate-400">Status Akses</span>
+              <span className="text-slate-500 dark:text-slate-400">Status Keanggotaan</span>
               <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                <Check className="w-3.5 h-3.5" /> Aktif
+                <Check className="w-3.5 h-3.5" /> Lifetime Member (Aktif Selamanya)
               </span>
             </div>
           </div>
@@ -216,19 +284,23 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <button
               onClick={() => {
-                if (onBackToDashboard) onBackToDashboard();
+                if (onBackToDashboard) {
+                  onBackToDashboard();
+                } else if (typeof window !== 'undefined') {
+                  window.location.href = '/beranda';
+                }
               }}
-              className="w-full sm:w-auto px-6 py-3 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs transition shadow-md flex items-center justify-center gap-2 cursor-pointer border-0"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs transition shadow-md flex items-center justify-center gap-2 cursor-pointer border-0"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Gunakan Fitur Member Sekarang</span>
+              <span>Mulai Gunakan Fitur Member di Dashboard</span>
             </button>
             <button
-              onClick={() => alert('Faktur PDF berhasil diunduh.')}
-              className="w-full sm:w-auto px-5 py-3 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer"
+              onClick={() => toast.success('Kuitansi Siap', `Bukti pembayaran untuk ID ${transactionId} berhasil dicetak.`)}
+              className="w-full sm:w-auto px-5 py-3.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <Download className="w-4 h-4" />
-              <span>Unduh Bukti Bayar (PDF)</span>
+              <span>Unduh Kuitansi (PDF)</span>
             </button>
           </div>
         </div>
@@ -236,18 +308,27 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
 
       {/* PROCESSING STATE DISPLAY */}
       {stepStatus === 'processing' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-12 text-center space-y-6 shadow-xl max-w-xl mx-auto my-12">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-8 sm:p-14 text-center space-y-6 shadow-xl max-w-lg mx-auto my-12 animate-in zoom-in-95 duration-200">
           <div className="relative w-16 h-16 mx-auto">
-            <div className="w-16 h-16 rounded-full border-4 border-orange-200 dark:border-orange-900 border-t-orange-500 animate-spin" />
-            <RefreshCw className="w-6 h-6 text-orange-500 absolute inset-0 m-auto" />
+            <div className="w-16 h-16 rounded-full border-4 border-blue-200 dark:border-blue-900 border-t-[#1738D1] animate-spin" />
+            <RefreshCw className="w-6 h-6 text-[#1738D1] absolute inset-0 m-auto animate-pulse" />
           </div>
-          <div>
-            <h3 className="text-lg font-black text-slate-900 dark:text-white">
+          <div className="space-y-2">
+            <h3 className="text-xl font-black text-slate-900 dark:text-white">
               Memproses Pembayaran Kamu...
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Mohon tunggu sebentar, sistem sedang melakukan verifikasi transaksi secara otomatis.
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {processingStage === 1 && 'Menghubungkan ke gateway pembayaran Bank Indonesia...'}
+              {processingStage === 2 && 'Melakukan validasi keamanan enkripsi SSL 256-bit...'}
+              {processingStage === 3 && 'Mengaktifkan hak akses lisensi ke akun kamu...'}
             </p>
+          </div>
+
+          <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+            <div
+              className="bg-[#1738D1] h-full transition-all duration-700"
+              style={{ width: processingStage === 1 ? '35%' : processingStage === 2 ? '75%' : '100%' }}
+            />
           </div>
         </div>
       )}
@@ -255,99 +336,137 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
       {/* CHECKOUT FORM VIEW */}
       {stepStatus === 'checkout' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Side: Step 1 Plan Selection & Step 2 Payment Method */}
+          {/* Left Column: Step 1 Plan Selection & Step 2 Payment Method */}
           <div className="lg:col-span-7 space-y-6">
-            {/* 1. Pilih Paket */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 space-y-4 shadow-xs">
+            {/* Step 1: Pilih Paket Keanggotaan */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 sm:p-6 space-y-4 shadow-xs">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h3 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-[10px] bg-navy-700 text-white font-bold text-xs flex items-center justify-center">
+                <h2 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2.5">
+                  <span className="w-6 h-6 rounded-[8px] bg-navy-700 text-white font-black text-xs flex items-center justify-center">
                     1
-                  </div>
+                  </span>
                   <span>Pilih Paket Keanggotaan</span>
-                </h3>
-                <span className="text-xs text-slate-400">Pilih opsi lisensi yang paling hemat</span>
+                </h2>
+                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5" /> Sekali Bayar Selamanya
+                </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* Monthly Option */}
+                {/* 1. Paket Siap Kerja */}
                 <button
                   type="button"
-                  onClick={() => setSelectedPlan('monthly')}
+                  onClick={() => setSelectedPlan('siap_kerja')}
                   className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 relative cursor-pointer ${
-                    selectedPlan === 'monthly'
-                      ? 'border-[#1738D1] bg-orange-50/50 dark:bg-orange-950/40 ring-2 ring-[#1738D1]/20'
-                      : 'border-slate-200 dark:border-slate-800 hover:border-orange-300'
+                    selectedPlan === 'siap_kerja'
+                      ? 'border-[#1738D1] bg-blue-50/50 dark:bg-blue-950/40 ring-2 ring-[#1738D1]/30 shadow-sm'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs text-slate-900 dark:text-white">Bulanan</span>
-                    {selectedPlan === 'monthly' && <CheckCircle2 className="w-4 h-4 text-orange-500" />}
-                  </div>
-                  <div>
-                    <span className="text-lg font-black text-slate-900 dark:text-white block">Rp 49.000</span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400">/ bulan</span>
-                  </div>
-                </button>
-
-                {/* Yearly Option */}
-                <button
-                  type="button"
-                  onClick={() => setSelectedPlan('yearly')}
-                  className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 relative cursor-pointer ${
-                    selectedPlan === 'yearly'
-                      ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/40 ring-2 ring-amber-500/30'
-                      : 'border-slate-200 dark:border-slate-800 hover:border-amber-300'
-                  }`}
-                >
-                  <span className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-[10px] text-[9px] font-black uppercase bg-amber-400 text-slate-950 shadow-xs">
-                    Rekomendasi Hemat 40%
+                  <span className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-[6px] text-[9px] font-black uppercase bg-amber-400 text-slate-950 shadow-xs">
+                    Rekomendasi
                   </span>
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs text-slate-900 dark:text-white">Tahunan Pro</span>
-                    {selectedPlan === 'yearly' && <CheckCircle2 className="w-4 h-4 text-amber-500" />}
+                    <span className="font-black text-xs text-slate-900 dark:text-white">Siap Kerja</span>
+                    {selectedPlan === 'siap_kerja' ? (
+                      <CheckCircle2 className="w-4 h-4 text-[#1738D1]" />
+                    ) : (
+                      <div className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700" />
+                    )}
                   </div>
                   <div>
-                    <span className="text-lg font-black text-amber-600 dark:text-amber-400 block">Rp 348.000</span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400">Rp 29.000 / bln (Tagihan 1 thn)</span>
+                    <span className="text-lg font-black text-[#1738D1] dark:text-blue-400 block">Rp 99.000</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Akses Penuh Selamanya</span>
+                  </div>
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-600 dark:text-slate-400 space-y-1">
+                    <span className="flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-amber-500 shrink-0" /> AI CV ATS + Voice Interview
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Check className="w-3 h-3 text-emerald-500 shrink-0" /> Prioritas BUMN &amp; Startup
+                    </span>
                   </div>
                 </button>
 
-                {/* Lifetime Option */}
+                {/* 2. CV Profesional */}
                 <button
                   type="button"
-                  onClick={() => setSelectedPlan('lifetime')}
+                  onClick={() => setSelectedPlan('profesional')}
                   className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 relative cursor-pointer ${
-                    selectedPlan === 'lifetime'
-                      ? 'border-[#1738D1] bg-orange-50/50 dark:bg-orange-950/40 ring-2 ring-[#1738D1]/20'
-                      : 'border-slate-200 dark:border-slate-800 hover:border-orange-300'
+                    selectedPlan === 'profesional'
+                      ? 'border-[#1738D1] bg-blue-50/50 dark:bg-blue-950/40 ring-2 ring-[#1738D1]/30 shadow-sm'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs text-slate-900 dark:text-white">Lifetime VIP</span>
-                    {selectedPlan === 'lifetime' && <CheckCircle2 className="w-4 h-4 text-orange-500" />}
+                    <span className="font-black text-xs text-slate-900 dark:text-white">CV Profesional</span>
+                    {selectedPlan === 'profesional' ? (
+                      <CheckCircle2 className="w-4 h-4 text-[#1738D1]" />
+                    ) : (
+                      <div className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700" />
+                    )}
                   </div>
                   <div>
-                    <span className="text-lg font-black text-slate-900 dark:text-white block">Rp 499.000</span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400">Sekali Bayar Seumur Hidup</span>
+                    <span className="text-lg font-black text-slate-900 dark:text-white block">Rp 59.000</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Lifetime Access</span>
+                  </div>
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-600 dark:text-slate-400 space-y-1">
+                    <span className="flex items-center gap-1">
+                      <Check className="w-3 h-3 text-emerald-500 shrink-0" /> Pembuat CV ATS Unlimited
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Check className="w-3 h-3 text-emerald-500 shrink-0" /> Job Tracker &amp; Match
+                    </span>
+                  </div>
+                </button>
+
+                {/* 3. CV Siap Lamar */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedPlan('siap_lamar')}
+                  className={`p-4 rounded-[10px] border text-left transition flex flex-col justify-between space-y-3 relative cursor-pointer ${
+                    selectedPlan === 'siap_lamar'
+                      ? 'border-[#1738D1] bg-blue-50/50 dark:bg-blue-950/40 ring-2 ring-[#1738D1]/30 shadow-sm'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-xs text-slate-900 dark:text-white">CV Siap Lamar</span>
+                    {selectedPlan === 'siap_lamar' ? (
+                      <CheckCircle2 className="w-4 h-4 text-[#1738D1]" />
+                    ) : (
+                      <div className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700" />
+                    )}
+                  </div>
+                  <div>
+                    <span className="text-lg font-black text-slate-900 dark:text-white block">Rp 19.000</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Starter Pack</span>
+                  </div>
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-600 dark:text-slate-400 space-y-1">
+                    <span className="flex items-center gap-1">
+                      <Check className="w-3 h-3 text-emerald-500 shrink-0" /> 1x Penyusunan CV ATS
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Check className="w-3 h-3 text-emerald-500 shrink-0" /> Ekspor Standar PDF
+                    </span>
                   </div>
                 </button>
               </div>
             </div>
 
-            {/* 2. Pilih Metode Pembayaran */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 space-y-5 shadow-xs">
+            {/* Step 2: Pilih Metode Pembayaran */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 sm:p-6 space-y-5 shadow-xs">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h3 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-[10px] bg-navy-700 text-white font-bold text-xs flex items-center justify-center">
+                <h2 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2.5">
+                  <span className="w-6 h-6 rounded-[8px] bg-navy-700 text-white font-black text-xs flex items-center justify-center">
                     2
-                  </div>
+                  </span>
                   <span>Pilih Metode Pembayaran</span>
-                </h3>
-                <span className="text-xs text-slate-400">Proses Instant &amp; Otomatis</span>
+                </h2>
+                <span className="text-xs text-slate-400">Verifikasi Otomatis 24/7</span>
               </div>
 
-              {/* Payment Method Tabs */}
+              {/* Payment Categories Tabs */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <button
                   type="button"
@@ -398,7 +517,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                   }`}
                 >
                   <Store className="w-4 h-4" />
-                  <span>Indomaret/Alfamart</span>
+                  <span>Minimarket</span>
                 </button>
               </div>
 
@@ -406,30 +525,33 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
               {paymentCategory === 'qris' && (
                 <div className="p-5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-4">
                   <div className="flex flex-col sm:flex-row items-center gap-5">
-                    {/* Simulated QR Code Canvas */}
-                    <div className="p-3 bg-white rounded-[10px] border-2 border-[#1738D1] shadow-md shrink-0 text-center">
-                      <div className="w-36 h-36 bg-slate-900 rounded-[10px] p-2 flex flex-col items-center justify-center text-white relative">
-                        <QrCode className="w-24 h-24 text-amber-400" />
-                        <span className="text-[8px] font-black tracking-widest text-slate-400 uppercase mt-1">
-                          SCAN QRIS HERE
+                    {/* Simulated QR Code Box */}
+                    <div className="p-3.5 bg-white rounded-[10px] border-2 border-[#1738D1] shadow-md shrink-0 text-center">
+                      <div className="w-40 h-40 bg-slate-900 rounded-[10px] p-2 flex flex-col items-center justify-center text-white relative">
+                        <QrCode className="w-28 h-28 text-amber-400" />
+                        <span className="text-[8px] font-black tracking-widest text-slate-300 uppercase mt-1">
+                          SCAN QRIS DISINI
                         </span>
                       </div>
-                      <span className="text-[10px] font-bold text-slate-600 mt-2 block">QRIS National Standard</span>
+                      <span className="text-[10px] font-bold text-slate-700 mt-2 block">
+                        Standar QRIS Nasional
+                      </span>
                     </div>
 
-                    <div className="space-y-2 text-xs">
-                      <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">
-                        Scan menggunakan e-Wallet favorit kamu:
-                      </h4>
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        <span className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-blue-600">GoPay</span>
-                        <span className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-orange-600">ShopeePay</span>
-                        <span className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-navy-700 dark:text-navy-300">OVO</span>
-                        <span className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-sky-600">DANA</span>
-                        <span className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-rose-600">LinkAja</span>
+                    <div className="space-y-3 text-xs flex-1">
+                      <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">
+                        Scan menggunakan aplikasi pembayaran kamu:
+                      </h3>
+                      <div className="flex flex-wrap gap-1.5 pt-0.5">
+                        <span className="px-2.5 py-1 rounded-[8px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-blue-600">GoPay</span>
+                        <span className="px-2.5 py-1 rounded-[8px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-orange-600">ShopeePay</span>
+                        <span className="px-2.5 py-1 rounded-[8px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-navy-700 dark:text-navy-300">OVO</span>
+                        <span className="px-2.5 py-1 rounded-[8px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-sky-600">DANA</span>
+                        <span className="px-2.5 py-1 rounded-[8px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-rose-600">LinkAja</span>
+                        <span className="px-2.5 py-1 rounded-[8px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-emerald-600">m-Banking (BCA/Mandiri/BRI)</span>
                       </div>
-                      <p className="text-slate-500 dark:text-slate-400 leading-relaxed pt-1">
-                        Buka aplikasi e-Wallet atau m-Banking di HP kamu, pilih menu Scan QR, lalu arahkan kamera ke kode QR di atas. Pembayaran terverifikasi otomatis dalam 3 detik.
+                      <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-[11px]">
+                        Buka aplikasi e-Wallet atau mobile banking, pilih fitur <strong>Scan QR</strong>, lalu arahkan kamera ke barcode. Transaksi langsung diverifikasi secara otomatis dalam hitungan detik.
                       </p>
                     </div>
                   </div>
@@ -456,7 +578,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                           className={`p-2.5 rounded-[10px] border text-xs font-bold transition text-center cursor-pointer ${
                             selectedVaBank === bank.id
                               ? 'bg-[#1738D1] text-white border-[#1738D1] shadow-sm'
-                              : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-orange-300'
+                              : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300'
                           }`}
                         >
                           {bank.name}
@@ -467,29 +589,53 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
 
                   <div className="p-4 bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase block">Nomor Virtual Account {selectedVaBank.toUpperCase()}</span>
-                      <span className="text-base sm:text-lg font-mono font-black text-orange-600 dark:text-orange-400">
-                        88001 812 3456 7890
+                      <span className="text-[10px] text-slate-400 font-bold uppercase block">
+                        Nomor Virtual Account {selectedVaBank.toUpperCase()}
+                      </span>
+                      <span className="text-base sm:text-lg font-mono font-black text-slate-900 dark:text-white">
+                        {getVaNumber(selectedVaBank)}
                       </span>
                     </div>
 
                     <button
                       type="button"
-                      onClick={() => handleCopyCode('8800181234567890')}
+                      onClick={() => handleCopyCode(getVaNumber(selectedVaBank).replace(/\s+/g, ''))}
                       className="px-3.5 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 font-bold text-xs transition flex items-center gap-1.5 shrink-0 cursor-pointer"
                     >
                       {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{copiedCode ? 'Tersalin' : 'Salin Nomor'}</span>
+                      <span>{copiedCode ? 'Tersalin' : 'Salin Nomor VA'}</span>
                     </button>
+                  </div>
+
+                  {/* VA Guide Accordion */}
+                  <div className="border-t border-slate-200 dark:border-slate-700 pt-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowVaGuide(!showVaGuide)}
+                      className="text-[11px] font-bold text-[#1738D1] dark:text-blue-400 flex items-center gap-1 hover:underline cursor-pointer"
+                    >
+                      <span>Lihat panduan transfer {selectedVaBank.toUpperCase()}</span>
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showVaGuide ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showVaGuide && (
+                      <ol className="list-decimal list-inside text-[11px] text-slate-600 dark:text-slate-400 space-y-1.5 mt-2.5 pl-1 leading-relaxed">
+                        <li>Buka aplikasi m-Banking atau ATM {selectedVaBank.toUpperCase()}.</li>
+                        <li>Pilih menu <strong>Transfer</strong> &gt; <strong>Virtual Account</strong>.</li>
+                        <li>Masukkan nomor VA: <strong>{getVaNumber(selectedVaBank)}</strong>.</li>
+                        <li>Pastikan nama penerima tertulis <strong>AmbilCUTI / {planPrices[selectedPlan].name}</strong> dengan nominal <strong>{formatRupiah(totalPrice)}</strong>.</li>
+                        <li>Konfirmasi PIN transaksi kamu. Status akan terupdate otomatis.</li>
+                      </ol>
+                    )}
                   </div>
                 </div>
               )}
 
-              {/* METHOD 3: KARTU KREDIT */}
+              {/* METHOD 3: KARTU KREDIT / DEBIT */}
               {paymentCategory === 'card' && (
-                <div className="p-5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-3">
+                <div className="p-5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-3.5">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nomor Kartu Kredit / Debit</label>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nomor Kartu (Visa / Mastercard / JCB)</label>
                     <input
                       type="text"
                       placeholder="4111 2222 3333 4444"
@@ -511,7 +657,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Kode CVV</label>
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Kode CVV / CVC</label>
                       <input
                         type="password"
                         placeholder="123"
@@ -522,6 +668,11 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                       />
                     </div>
                   </div>
+
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 pt-1">
+                    <Lock className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Data kartu dienkripsi penuh dengan standar keamanan PCI-DSS Tier 1.</span>
+                  </p>
                 </div>
               )}
 
@@ -535,7 +686,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                       className={`px-4 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer ${
                         selectedRetail === 'indomaret'
                           ? 'bg-[#1738D1] text-white border-[#1738D1]'
-                          : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200'
+                          : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                       }`}
                     >
                       Indomaret
@@ -546,7 +697,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                       className={`px-4 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer ${
                         selectedRetail === 'alfamart'
                           ? 'bg-[#1738D1] text-white border-[#1738D1]'
-                          : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200'
+                          : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                       }`}
                     >
                       Alfamart / Lawson
@@ -554,10 +705,14 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                   </div>
 
                   <div className="p-4 bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block">Kode Pembayaran Kasir {selectedRetail.toUpperCase()}</span>
-                    <span className="text-lg font-mono font-black text-amber-500 block">KK2026-9921-3341</span>
-                    <p className="text-slate-500 dark:text-slate-400">
-                      Tunjukkan kode transaksi ini kepada kasir {selectedRetail === 'indomaret' ? 'Indomaret' : 'Alfamart'} terdekat dan sebutkan pembayaran &quot;CUTI Premium&quot;.
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block">
+                      Kode Pembayaran Kasir {selectedRetail.toUpperCase()}
+                    </span>
+                    <span className="text-lg font-mono font-black text-amber-500 block">
+                      CUTI2026-9921-3341
+                    </span>
+                    <p className="text-slate-500 dark:text-slate-400 text-[11px]">
+                      Tunjukkan kode transaksi ini kepada kasir {selectedRetail === 'indomaret' ? 'Indomaret' : 'Alfamart'} terdekat dan sebutkan pembayaran <strong>AmbilCUTI Member</strong>.
                     </p>
                   </div>
                 </div>
@@ -565,16 +720,16 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
             </div>
           </div>
 
-          {/* Right Side: Step 3 Summary & Pay Action */}
+          {/* Right Column: Step 3 Summary & Pay Action */}
           <div className="lg:col-span-5 space-y-6">
             {/* Rincian Tagihan Card */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 space-y-5 shadow-xs sticky top-24">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 sm:p-6 space-y-5 shadow-xs sticky top-24">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <h3 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                  <Receipt className="w-4 h-4 text-orange-500" />
+                  <Receipt className="w-4 h-4 text-[#1738D1]" />
                   <span>Ringkasan Pesanan</span>
                 </h3>
-                <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                <span className="px-2.5 py-0.5 rounded-[6px] text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
                   Enkripsi SSL 256-Bit
                 </span>
               </div>
@@ -584,10 +739,14 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                 <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                   <div>
                     <h4 className="font-bold text-slate-900 dark:text-white">
-                      CUTI Member Pass ({selectedPlan === 'monthly' ? 'Bulanan' : selectedPlan === 'yearly' ? 'Tahunan Pro' : 'Lifetime VIP'})
+                      {planPrices[selectedPlan].name}
                     </h4>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      Akses Pengoptimal CV ATS, Interview Voice Simulator, &amp; Prioritas Lamaran BUMN
+                      {selectedPlan === 'siap_kerja'
+                        ? 'Akses Semua Fitur AI CV ATS, Voice Simulator, & Prioritas BUMN'
+                        : selectedPlan === 'profesional'
+                        ? 'Akses Pengoptimal CV ATS, Job Tracker & Auto-Match'
+                        : 'Penyusunan CV ATS Standar & Ekspor PDF'}
                     </p>
                   </div>
                   <span className="font-extrabold text-slate-900 dark:text-white shrink-0">
@@ -622,7 +781,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                     <div className="flex gap-2">
                       <input
                         type="text"
-                        placeholder="Contoh: PRO2026 atau LOKER50"
+                        placeholder="Contoh: PRO2026 atau BUMN2026"
                         value={voucherCode}
                         onChange={(e) => setVoucherCode(e.target.value)}
                         className="flex-1 px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
@@ -631,7 +790,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                         type="submit"
                         className="px-4 py-2 rounded-[10px] bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold text-xs transition shrink-0 cursor-pointer"
                       >
-                        Gunakan
+                        Pakai
                       </button>
                     </div>
                     {voucherError && <p className="text-[10px] font-bold text-rose-500 mt-1">{voucherError}</p>}
@@ -641,19 +800,19 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                 {/* Cost Calculations */}
                 <div className="pt-2 space-y-2 text-slate-600 dark:text-slate-400">
                   <div className="flex items-center justify-between">
-                    <span>Harga Subtotal</span>
+                    <span>Harga Paket</span>
                     <span>{formatRupiah(originalPrice)}</span>
                   </div>
 
                   {appliedVoucher && (
                     <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 font-bold">
-                      <span>Diskon Promo ({appliedVoucher.code})</span>
+                      <span>Diskon Voucher ({appliedVoucher.code})</span>
                       <span>-{formatRupiah(discountAmount)}</span>
                     </div>
                   )}
 
                   <div className="flex items-center justify-between">
-                    <span>Biaya Layanan &amp; PPN</span>
+                    <span>Biaya Transaksi &amp; Layanan</span>
                     <span className="text-emerald-600 font-bold">GRATIS (Rp 0)</span>
                   </div>
                 </div>
@@ -661,12 +820,12 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                 {/* Total */}
                 <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
                   <div>
-                    <span className="text-xs text-slate-500 dark:text-slate-400 block font-bold">Total Tagihan</span>
-                    <span className="text-xl font-black text-orange-600 dark:text-orange-400">{formatRupiah(totalPrice)}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 block font-bold">Total Pembayaran</span>
+                    <span className="text-xl font-black text-[#1738D1] dark:text-blue-400">{formatRupiah(totalPrice)}</span>
                   </div>
 
-                  <span className="px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-                    Jaminan Lolos ATS 90%+
+                  <span className="px-2.5 py-1 rounded-[8px] text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                    Akses Lifetime
                   </span>
                 </div>
               </div>
@@ -682,9 +841,15 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                 <ArrowRight className="w-4 h-4" />
               </button>
 
-              <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 text-center">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Transaksi dijamin 100% aman &amp; lisensi langsung aktif otomatis.</span>
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 text-center">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>Enkripsi SSL 256-bit &amp; verifikasi transaksi langsung otomatis.</span>
+                </div>
+                <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 text-center">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span>Garansi kepuasan &amp; jaminan bebas langganan berulang.</span>
+                </div>
               </div>
             </div>
           </div>

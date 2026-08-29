@@ -2,6 +2,7 @@
 
 import { PageHeader } from '@/components/ui/PageHeader';
 import React, { useState, useEffect } from 'react';
+import { useToast } from '@/components/ui/Toast';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { userApi } from '@/lib/api';
 import {
@@ -30,6 +31,7 @@ interface SavedCoverLetter {
 const initialSavedLetters: SavedCoverLetter[] = [];
 
 export const CoverLetterView: React.FC = () => {
+  const toast = useToast();
   const [savedLetters, setSavedLetters] = useState<SavedCoverLetter[]>(initialSavedLetters);
   const [targetCompany, setTargetCompany] = useState('');
   const [targetPosition, setTargetPosition] = useState('');
@@ -122,7 +124,7 @@ ${userEmail || 'email@email.com'}`;
       content: generatedLetter,
     };
     setSavedLetters([newLetter, ...savedLetters]);
-    alert('Surat lamaran berhasil disimpan ke daftar dokumen tersimpan!');
+    toast.success('Surat Lamaran Tersimpan', 'Surat lamaran berhasil disimpan ke daftar dokumen kamu.');
   };
 
   const handleDeleteSaved = (id: string) => {
@@ -253,7 +255,7 @@ ${userEmail || 'email@email.com'}`;
                 </h3>
               </div>
               {generatedLetter && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <button
                     onClick={handleCopy}
                     className="px-3 py-1.5 rounded-[10px] text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center gap-1.5 cursor-pointer"
@@ -263,10 +265,17 @@ ${userEmail || 'email@email.com'}`;
                   </button>
                   <button
                     onClick={handleSaveToLibrary}
-                    className="px-3 py-1.5 rounded-[10px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] text-white transition flex items-center gap-1.5 cursor-pointer border-0 shadow-xs shadow-[#1738D1]/20"
+                    className="px-3 py-1.5 rounded-[10px] text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition flex items-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-700"
                   >
                     <span>Simpan Dokumen</span>
                   </button>
+                  <a
+                    href="/mailer"
+                    className="px-3 py-1.5 rounded-[10px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] text-white transition flex items-center gap-1.5 cursor-pointer shadow-xs shadow-[#1738D1]/20"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Kirim via Auto Mailer</span>
+                  </a>
                 </div>
               )}
             </div>
@@ -325,7 +334,7 @@ ${userEmail || 'email@email.com'}`;
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(letter.content);
-                    alert('Surat lamaran berhasil disalin!');
+                    toast.success('Teks Tersalin', 'Surat lamaran berhasil disalin ke clipboard!');
                   }}
                   className="font-semibold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
                 >

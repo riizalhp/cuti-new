@@ -57,6 +57,8 @@ import {
 } from 'lucide-react';
 import {
   runFullRvePipeline,
+  generateCvScreenerAiPrompt,
+  parseAiScreenerResponse,
   CvParsedData,
   RecruiterPersona,
   RveReportResult,
@@ -459,6 +461,9 @@ export const AiCvScreenerView: React.FC = () => {
         }));
 
         setSavedCvs(normalized);
+        if (normalized.length > 0 && normalized[0]?.roleTitle) {
+          setTargetRole((prev) => prev || normalized[0].roleTitle);
+        }
       }
     }).catch(() => {});
   }, []);
@@ -474,6 +479,12 @@ export const AiCvScreenerView: React.FC = () => {
   const [targetRole, setTargetRole] = useState('');
   const [targetLevel, setTargetLevel] = useState<'Entry' | 'Junior' | 'Mid' | 'Senior'>('Mid');
   const [selectedPersonaId, setSelectedPersonaId] = useState<string>('startup');
+  const [aiReportData, setAiReportData] = useState<RveReportResult | null>(null);
+
+  // Reset aiReportData when inputs change
+  useEffect(() => {
+    setAiReportData(null);
+  }, [selectedCvId, selectedPersonaId, targetRole, cvSourceMode, uploadedFile]);
 
   // Custom Seniority Dropdown Popover State & Click Outside Ref
   const [isSeniorityDropdownOpen, setIsSeniorityDropdownOpen] = useState(false);
@@ -584,26 +595,41 @@ export const AiCvScreenerView: React.FC = () => {
   const selectedSavedCv = savedCvs.find((c) => c.id === selectedCvId) || savedCvs[0] || undefined;
   const currentPersona = recruiterPersonas.find((p) => p.id === selectedPersonaId) || recruiterPersonas[0];
 
-  // CV benar-benar tersedia (dari DB/localStorage) atau berkas terunggah?
-  // Kalau tidak ada, UI menampilkan state kosong, bukan CV mock / skor palsu.
   const hasSavedCvs = savedCvs.length > 0;
   const hasUsableCv = cvSourceMode === 'upload' ? Boolean(uploadedFile) : hasSavedCvs;
 
-  // Execute RVE Pipeline based on user selections.
-  // Pipeline sudah aman terhadap selectedSavedCv undefined & struktur CV asli
-  // (experience pakai description/string, bukan achievements array).
+  // Execute RVE Pipeline (Dynamic Heuristic or Real AI Result)
   const rveReport = useMemo(() => {
-    return runFullRvePipeline(
+    const baseline = runFullRvePipeline(
       cvSourceMode,
       selectedSavedCv,
       uploadedFile,
       rawCvText,
-      targetRole,
+      targetRole || selectedSavedCv?.roleTitle || '',
       appliedFixes
     );
-  }, [cvSourceMode, selectedSavedCv, uploadedFile, rawCvText, targetRole, appliedFixes]);
 
-  // Skor match dinamis per persona berdasarkan isi CV (bukan angka hardcoded)
+    if (aiReportData) {
+      const bonus = appliedFixes.length * 5;
+      const updatedConsensus = Math.min(99, aiReportData.consensusScore + bonus);
+      return {
+        ...aiReportData,
+        consensusScore: updatedConsensus,
+        verdictStatus: (updatedConsensus >= 85 ? 'interview' : updatedConsensus >= 70 ? 'maybe' : 'reject') as any,
+        gamification: {
+          progress: updatedConsensus,
+          checklist: aiReportData.gamification.checklist.map((c) => ({
+            ...c,
+            isDone: appliedFixes.includes(c.id) || c.isDone,
+          })),
+        },
+      };
+    }
+
+    return baseline;
+  }, [cvSourceMode, selectedSavedCv, uploadedFile, rawCvText, targetRole, appliedFixes, aiReportData]);
+
+  // Skor match dinamis per persona berdasarkan isi CV
   const personaMatchScores = useMemo(() => {
     const map: Record<string, number> = {};
     const quality = rveReport?.consensusScore ?? 70;
@@ -650,7 +676,7 @@ export const AiCvScreenerView: React.FC = () => {
     });
   }, [selectedModules, activeStepMap]);
 
-  const handleStartRvePipeline = () => {
+  const handleStartRvePipeline = async () => {
     if (cvSourceMode === 'upload' && !uploadedFile) {
       toast.warning('Silakan pilih atau upload file CV Anda terlebih dahulu.');
       return;
@@ -660,48 +686,105 @@ export const AiCvScreenerView: React.FC = () => {
       return;
     }
 
+    const effectiveRole = targetRole || selectedSavedCv?.roleTitle || 'Professional';
+    if (!targetRole && selectedSavedCv?.roleTitle) {
+      setTargetRole(selectedSavedCv.roleTitle);
+    }
+
     setIsProcessing(true);
     setPipelineStep(0);
     setHasRunPipeline(false);
-    setActivePhase('report'); // Switch to full width report phase
+    setActivePhase('report');
 
-    let step = 0;
-    const interval = setInterval(() => {
-      step += 1;
-      if (step < activePipelineSteps.length) {
-        setPipelineStep(step);
-      } else {
-        clearInterval(interval);
-        setIsProcessing(false);
-        setHasRunPipeline(true);
+    const baseline = runFullRvePipeline(
+      cvSourceMode,
+      selectedSavedCv,
+      uploadedFile,
+      rawCvText,
+      effectiveRole,
+      appliedFixes
+    );
 
-        // Auto Save to Report History
-        const newHistItem: SavedReportHistoryItem = {
-          id: `hist-${Date.now()}`,
-          candidateName:
-            cvSourceMode === 'saved'
-              ? selectedSavedCv.candidateName
-              : uploadedFile?.name || 'CV Upload',
-          targetRole,
-          personaName: currentPersona.name,
-          consensusScore: rveReport.consensusScore,
-          verdictStatus: rveReport.verdictStatus,
-          timestamp: new Date().toLocaleString('id-ID', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-          appliedFixes: [...appliedFixes],
-          cvSourceMode,
-          selectedCvId,
-          selectedPersonaId,
-        };
+    let finalReport = baseline;
 
-        setReportHistory((prev) => [newHistItem, ...prev.filter((h) => h.id !== newHistItem.id)]);
-      }
-    }, 450);
+    try {
+      const aiPrompt = generateCvScreenerAiPrompt(
+        baseline.parsedData,
+        effectiveRole,
+        targetLevel,
+        currentPersona,
+        appliedFixes
+      );
+
+      const aiPromise = fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          feature: 'cv_screener',
+          task: 'cv_screener',
+          promptName: 'CV Screener & Recruiter Simulation',
+          prompt: aiPrompt,
+          systemInstruction: 'Anda adalah Sistem Multi-Screener & Recruiter Intelligence untuk platform karier Employr. Kembalikan HANYA format JSON valid tanpa teks pengantar atau markdown block.',
+        }),
+      }).then(async (res) => {
+        if (!res.ok) throw new Error(`AI API status ${res.status}`);
+        const json = await res.json();
+        if (json.text) {
+          return parseAiScreenerResponse(json.text, baseline);
+        }
+        return baseline;
+      });
+
+      let step = 0;
+      const stepInterval = setInterval(() => {
+        step += 1;
+        if (step < activePipelineSteps.length) {
+          setPipelineStep(step);
+        }
+      }, 450);
+
+      const [aiResult] = await Promise.all([
+        aiPromise.catch(() => baseline),
+        new Promise((resolve) => setTimeout(resolve, Math.max(1200, activePipelineSteps.length * 450))),
+      ]);
+
+      clearInterval(stepInterval);
+      finalReport = aiResult;
+      setAiReportData(aiResult);
+    } catch (e) {
+      console.warn('[handleStartRvePipeline] Fallback ke dynamic heuristic pipeline:', e);
+      setAiReportData(baseline);
+      finalReport = baseline;
+    } finally {
+      setIsProcessing(false);
+      setHasRunPipeline(true);
+
+      // Auto Save to Report History
+      const newHistItem: SavedReportHistoryItem = {
+        id: `hist-${Date.now()}`,
+        candidateName:
+          cvSourceMode === 'saved'
+            ? (selectedSavedCv?.candidateName || 'Kandidat')
+            : (uploadedFile?.name || 'CV Upload'),
+        targetRole: effectiveRole,
+        personaName: currentPersona.name,
+        consensusScore: finalReport.consensusScore,
+        verdictStatus: finalReport.verdictStatus,
+        timestamp: new Date().toLocaleString('id-ID', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        appliedFixes: [...appliedFixes],
+        cvSourceMode,
+        selectedCvId,
+        selectedPersonaId,
+      };
+
+      setReportHistory((prev) => [newHistItem, ...prev.filter((h) => h.id !== newHistItem.id)]);
+    }
   };
 
   const handleLoadHistoryReport = (hist: SavedReportHistoryItem) => {
@@ -711,7 +794,7 @@ export const AiCvScreenerView: React.FC = () => {
     setTargetRole(hist.targetRole);
     setAppliedFixes(hist.appliedFixes || []);
     setHasRunPipeline(true);
-    setActivePhase('report'); // Switch to report view instantly
+    setActivePhase('report');
   };
 
   const handleDeleteHistory = (id: string, e: React.MouseEvent) => {
@@ -725,12 +808,11 @@ export const AiCvScreenerView: React.FC = () => {
     setTimeout(() => {
       setAppliedFixes(['fix-1', 'fix-2', 'fix-3']);
       setIsAutoOptimizing(false);
-      // Smooth scroll to top of verdict
       const elem = document.getElementById('verdict-summary-top');
       if (elem) {
         elem.scrollIntoView({ behavior: 'smooth' });
       }
-    }, 600);
+    }, 500);
   };
 
   const handleApplyFix = (fixId: string) => {
@@ -739,8 +821,8 @@ export const AiCvScreenerView: React.FC = () => {
     }
   };
 
-  // Chat handling logic
-  const handleSendChatMessage = (textToSend?: string) => {
+  // Chat handling logic connected to AI system
+  const handleSendChatMessage = async (textToSend?: string) => {
     const query = textToSend || inputChatText;
     if (!query.trim()) return;
 
@@ -754,18 +836,54 @@ export const AiCvScreenerView: React.FC = () => {
     setChatMessages((prev) => [...prev, userMsg]);
     if (!textToSend) setInputChatText('');
 
-    setTimeout(() => {
+    const effectiveRole = targetRole || selectedSavedCv?.roleTitle || 'Professional';
+
+    try {
+      const aiPrompt = `Anda adalah Tim Recruiter Konsultan Karier untuk platform Employr.
+Pengguna sedang berkonsultasi mengenai hasil evaluasi CV untuk target posisi "${effectiveRole}".
+Kriteria Recruiter: ${currentPersona.name} (${currentPersona.evalFocus}).
+Ringkasan CV: ${rveReport.parsedData.summary || '-'}
+Keahlian: ${rveReport.parsedData.skills.join(', ') || '-'}
+Skor Konsensus Saat Ini: ${rveReport.consensusScore}%
+Catatan Evaluasi: ${rveReport.topAiSummary.dropReasons.join('; ')}
+
+Pertanyaan Pengguna: "${query}"
+
+Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), dan berorientasi aksi nyata dalam Bahasa Indonesia. Jangan menyebut istilah prompt atau LLM.`;
+
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          feature: 'cv_screener',
+          task: 'cv_screener',
+          prompt: aiPrompt,
+          systemInstruction: 'Anda adalah Tim Recruiter Profesional di Indonesia. Jawab secara ringkas, solutif, dan jelas.',
+        }),
+      });
+
+      const data = await res.json();
+      if (!data.text) throw new Error('No response text');
+
+      const aiMsg: ChatMessage = {
+        id: `ai-${Date.now()}`,
+        sender: 'ai',
+        text: data.text,
+        time: 'Baru saja',
+      };
+      setChatMessages((prev) => [...prev, aiMsg]);
+    } catch {
       let responseText = '';
       const lower = query.toLowerCase();
 
       if (lower.includes('ditolak') || lower.includes('kelemahan') || lower.includes('kurang')) {
-        responseText = `Berdasarkan evaluasi konsensus ${currentPersona.name}, CV Anda berisiko tereliminasi karena seksi pengalaman kerja kedua belum memiliki metrik angka (%). Tambahkan metrik seperti "berhasil menghemat waktu 30%" agar skor naik ke 91%+!`;
+        responseText = `Berdasarkan evaluasi kriteria ${currentPersona.name}, CV Anda berpeluang lolos lebih tinggi bila menambahkan metrik angka (%) pada pengalaman proyek serta menonjolkan keahlian relevan untuk posisi ${effectiveRole}.`;
       } else if (lower.includes('summary') || lower.includes('ringkasan')) {
-        responseText = `Jika Anda mengubah ringkasan profil menjadi berorientasi hasil (seperti "Software Engineer 3+ tahun pengalaman dengan React & Node.js"), skor konsensus Recruiter akan langsung melesat menjadi 93%! Klik tombol "Optimalkan CV Saya" untuk menerapkannya secara otomatis.`;
+        responseText = `Menyesuaikan ringkasan profil agar langsung menyebutkan keunggulan utama dan pengalaman ${effectiveRole} akan memikat recruiter dalam 6 detik pertama! Klik "Optimalkan CV Saya" untuk memperbarui otomatis.`;
       } else if (lower.includes('100%') || lower.includes('sempurna')) {
-        responseText = `Untuk mencapai 100% Sempurna, terapkan 3 rekomendasi utama: 1) Sertakan metrik %, 2) Perjelas tech stack utama di bagian atas, dan 3) Gunakan kata kerja aksi di setiap bullet point.`;
+        responseText = `Untuk mencapai hasil 100% optimal: 1) Sertakan metrik keberhasilan %, 2) Pastikan kata kunci ${effectiveRole} berada di bagian teratas, dan 3) Gunakan kata kerja aktif pada tiap poin pengalaman.`;
       } else {
-        responseText = `Pertanyaan yang sangat baik! Hasil screening kami menunjukkan bahwa recruiter tipe ${currentPersona.name} akan langsung melihat seksi Pengalaman Kerja Anda dalam 3 detik pertama. Mengoptimalkan bagian tersebut akan memberikan dampak peningkatan paling dramatis.`;
+        responseText = `Pertanyaan yang sangat bagus! Recruiter tipe ${currentPersona.name} sangat memprioritaskan ${currentPersona.focusArea}. Mengoptimalkan bagian tersebut akan memberikan dampak peningkatan skor paling nyata.`;
       }
 
       const aiMsg: ChatMessage = {
@@ -775,7 +893,7 @@ export const AiCvScreenerView: React.FC = () => {
         time: 'Baru saja',
       };
       setChatMessages((prev) => [...prev, aiMsg]);
-    }, 500);
+    }
   };
 
   return (
@@ -1364,7 +1482,7 @@ export const AiCvScreenerView: React.FC = () => {
                     Recruiter: {currentPersona.name}
                   </span>
                   <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-navy-800">
-                    Posisi: {targetRole}
+                    Posisi: {targetRole || selectedSavedCv?.roleTitle || 'Sesuai Profil CV'}
                   </span>
                 </div>
               </div>
@@ -1579,23 +1697,24 @@ export const AiCvScreenerView: React.FC = () => {
                       </h4>
                     </div>
                     <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400">
-                      3 Poin Ditemukan
+                      {rveReport.highPriorityRecommendations?.length || 3} Poin Ditemukan
                     </span>
                   </div>
 
                   <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
-                    <li className="flex items-start gap-2">
-                      <span className="font-bold text-orange-500">1.</span>
-                      <span>Tambahkan metrik angka kuantitatif (%) pada pencapaian proyek di posisi kedua.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="font-bold text-orange-500">2.</span>
-                      <span>Persingkat Executive Summary menjadi 2-3 kalimat berorientasi dampak langsung.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="font-bold text-orange-500">3.</span>
-                      <span>Masukkan kata kunci spesifik stack (React, Node.js, TypeScript) di seksi teratas.</span>
-                    </li>
+                    {(rveReport.highPriorityRecommendations && rveReport.highPriorityRecommendations.length > 0
+                      ? rveReport.highPriorityRecommendations
+                      : [
+                          `Tambahkan metrik angka kuantitatif (%) pada pencapaian proyek di posisi terakhir.`,
+                          `Persingkat Executive Summary menjadi 2-3 kalimat berorientasi dampak langsung.`,
+                          `Masukkan kata kunci spesifik kompetensi di seksi paling atas.`,
+                        ]
+                    ).map((rec, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="font-bold text-orange-500">{idx + 1}.</span>
+                        <span>{rec}</span>
+                      </li>
+                    ))}
                   </ul>
 
                   {/* Satu Tombol Besar: ✨ Optimalkan CV Saya */}

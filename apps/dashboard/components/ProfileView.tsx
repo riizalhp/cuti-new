@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
+import { useToast } from '@/components/ui/Toast';
 import { useModals } from '@/context/ModalContext';
 import { userApi } from '../lib/api';
 import {
@@ -51,6 +52,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   initialSubTab = 'profil',
 }) => {
   const router = useRouter();
+  const toast = useToast();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { openUpgrade } = useModals();
   const isDarkMode = resolvedTheme === 'dark';
@@ -204,7 +206,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               )}
               <button
                 type="button"
-                onClick={() => alert('Fitur unggah foto profil baru dapat diakses.')}
+                onClick={() => toast.info('Ubah Foto Profil', 'Fitur unggah foto profil baru dapat diakses.')}
                 className="absolute -bottom-2 -right-2 p-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-md border-2 border-slate-900 transition cursor-pointer"
                 title="Ubah Foto Profil"
               >
@@ -540,7 +542,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                alert('Kata sandi berhasil diperbarui!');
+                toast.success('Kata Sandi Diperbarui', 'Kata sandi akun kamu berhasil diperbarui.');
                 setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
               }}
               className="space-y-4 max-w-lg"
@@ -926,7 +928,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   setIsExportingData(true);
                   setTimeout(() => {
                     setIsExportingData(false);
-                    alert('File backup data akun berhasil diunduh (employr-data-backup.json)');
+                    toast.success('Data Berhasil Diunduh', 'File backup data akun berhasil diunduh (employr-data-backup.json).');
                   }, 1200);
                 }}
                 className="px-4 py-2.5 rounded-[10px] bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition shadow-sm flex items-center gap-2 shrink-0 cursor-pointer"

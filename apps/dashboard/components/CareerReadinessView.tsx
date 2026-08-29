@@ -1,7 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useToast } from '@/components/ui/Toast';
 import { cvApi, trackerApi } from '@/lib/api';
+import { useCareerReadiness } from '@/hooks/useCareerReadiness';
+import {
+  calculatePillars,
+  getReadinessBadge,
+  PillarEvaluation,
+} from '@/lib/readiness';
 import {
   TrendingUp,
   FileText,
@@ -9,78 +16,29 @@ import {
   Mic,
   Briefcase,
   CheckCircle2,
-  AlertCircle,
   Sparkles,
-  ArrowRight,
   Download,
   Share2,
   Award,
-  BookOpen,
   Target,
   BarChart2,
   ShieldCheck,
   RotateCcw,
+  RefreshCw,
 } from 'lucide-react';
 
 export const CareerReadinessView: React.FC = () => {
+  const toast = useToast();
   const [activeSubTab, setActiveSubTab] = useState<'pilar' | 'tes' | 'roadmap' | 'sertifikat'>('pilar');
+  const { score: readinessScore, updateScore, resetScore, isDiagnosticStored, isLoaded } = useCareerReadiness();
 
-  // Overall Score State
-  const [readinessScore, setReadinessScore] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('cuti_career_readiness_score');
-      if (stored && !isNaN(Number(stored))) return Number(stored);
-    }
-    return 0;
-  });
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('cuti_career_readiness_score');
-      if (stored && !isNaN(Number(stored))) {
-        setReadinessScore(Number(stored));
-        return;
-      }
-    }
-    cvApi.getAll().then((cvs) => {
-      if (Array.isArray(cvs) && cvs.length > 0) {
-        const primary = cvs.find((c: any) => c.isPrimary) || cvs[0];
-        const hasPhoto = Boolean(primary.photoUrl);
-        const hasEdu = Array.isArray(primary.education) && primary.education.length > 0;
-        const hasSkills = Array.isArray(primary.skills) && primary.skills.length >= 3;
-        const atsScore = primary.atsScore ?? 0;
-        const isAtsOptimized = atsScore >= 80;
-
-        let completed = 0;
-        if (hasPhoto) completed++;
-        if (hasEdu) completed++;
-        if (hasSkills) completed++;
-        if (isAtsOptimized) completed++;
-
-        const dynamicScore = Math.round((completed / 4) * 50 + (atsScore / 100) * 50);
-        setReadinessScore(dynamicScore);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('cuti_career_readiness_score', String(dynamicScore));
-        }
-      }
-    });
-  }, []);
-
-  // Pillar Scores — dynamic
-  const getStatusFromScore = (score: number) => {
-    if (score >= 85) return 'Sangat Baik';
-    if (score >= 70) return 'Cukup Baik';
-    if (score >= 50) return 'Perlu Perbaikan';
-    return 'Belum Optimal';
-  };
-
-  const [pillars, setPillars] = useState([
+  const [pillars, setPillars] = useState<PillarEvaluation[]>([
     {
       id: 'cv',
       title: 'Kualitas CV & ATS Score',
       score: 0,
       status: 'Memuat...',
-      icon: FileText,
+      icon: 'FileText' as any,
       desc: 'Memuat data CV...',
       recommendation: 'Memuat...',
       actionTab: 'cv',
@@ -90,7 +48,7 @@ export const CareerReadinessView: React.FC = () => {
       title: 'Profil LinkedIn & Portofolio',
       score: 0,
       status: 'Memuat...',
-      icon: Linkedin,
+      icon: 'Linkedin' as any,
       desc: 'Memuat data profil...',
       recommendation: 'Memuat...',
       actionTab: 'cv',
@@ -100,7 +58,7 @@ export const CareerReadinessView: React.FC = () => {
       title: 'Keterampilan Interview',
       score: 0,
       status: 'Memuat...',
-      icon: Mic,
+      icon: 'Mic' as any,
       desc: 'Memuat data interview...',
       recommendation: 'Memuat...',
       actionTab: 'interview',
@@ -110,7 +68,7 @@ export const CareerReadinessView: React.FC = () => {
       title: 'Aktivitas Lamaran & Networking',
       score: 0,
       status: 'Memuat...',
-      icon: Briefcase,
+      icon: 'Briefcase' as any,
       desc: 'Memuat data aktivitas...',
       recommendation: 'Memuat...',
       actionTab: 'tracker',
@@ -121,156 +79,12 @@ export const CareerReadinessView: React.FC = () => {
     const loadPillars = async () => {
       try {
         const [cvs, apps] = await Promise.all([
-          cvApi.getAll(),
-          trackerApi.getAll(),
+          cvApi.getAll().catch(() => []),
+          trackerApi.getAll().catch(() => []),
         ]);
 
-        const updatedPillars = [...pillars];
-
-        // 1. CV & ATS pillar
-        if (Array.isArray(cvs) && cvs.length > 0) {
-          const primary = cvs.find((c: any) => c.isPrimary) || cvs[0];
-          const ats = primary.atsScore ?? 0;
-          const cvScore = Math.min(100, ats);
-
-          const needsImprovements: string[] = [];
-          if (!primary.summary || primary.summary.trim().length < 20) needsImprovements.push('ringkasan');
-          if (!primary.skills || primary.skills.length < 5) needsImprovements.push('skill');
-          if (!primary.experience || primary.experience.length === 0) needsImprovements.push('pengalaman');
-
-          updatedPillars[0] = {
-            ...updatedPillars[0],
-            score: cvScore,
-            status: getStatusFromScore(cvScore),
-            desc: cvScore >= 80
-              ? 'CV sudah menggunakan format standar ATS dengan kata kunci industri yang tepat.'
-              : needsImprovements.length > 0
-                ? `CV perlu perbaikan di bagian: ${needsImprovements.join(', ')}.`
-                : 'CV perlu dioptimalkan untuk meningkatkan skor ATS.',
-            recommendation: cvScore >= 85
-              ? 'Tambahkan kuantifikasi hasil pencapaian di bagian pengalaman kerja.'
-              : needsImprovements.length > 0
-                ? `Lengkapi bagian ${needsImprovements[0]} untuk meningkatkan skor ATS.`
-                : 'Optimalkan kata kunci di CV sesuai lowongan yang dituju.',
-          };
-
-          // 2. LinkedIn & Portfolio pillar — based on CV completeness
-          let profileSections = 0;
-          const totalProfileSections = 5;
-          if (primary.summary && primary.summary.trim().length >= 20) profileSections++;
-          if (primary.skills && primary.skills.length >= 3) profileSections++;
-          if (primary.experience && primary.experience.length > 0) profileSections++;
-          if (primary.projects && primary.projects.length > 0) profileSections++;
-          if (primary.photoUrl) profileSections++;
-
-          const linkedinScore = Math.round((profileSections / totalProfileSections) * 100);
-          updatedPillars[1] = {
-            ...updatedPillars[1],
-            score: linkedinScore,
-            status: getStatusFromScore(linkedinScore),
-            desc: linkedinScore >= 80
-              ? 'Profil sudah lengkap dengan headline, pengalaman, dan portofolio.'
-              : linkedinScore >= 50
-                ? 'Profil memiliki informasi dasar, namun perlu dilengkapi.'
-                : 'Profil masih perlu banyak perbaikan dan kelengkapan.',
-            recommendation: !primary.projects || primary.projects.length === 0
-              ? 'Tambahkan proyek portofolio untuk memperkuat profil.'
-              : !primary.photoUrl
-                ? 'Tambahkan foto profil profesional.'
-                : 'Perbarui headline dan deskripsi profil secara berkala.',
-          };
-        } else {
-          // No CV data
-          updatedPillars[0] = {
-            ...updatedPillars[0],
-            score: 0,
-            status: 'Belum Optimal',
-            desc: 'Belum ada CV. Buat CV untuk memulai analisis.',
-            recommendation: 'Buat CV pertamamu untuk mendapatkan skor ATS.',
-          };
-          updatedPillars[1] = {
-            ...updatedPillars[1],
-            score: 0,
-            status: 'Belum Optimal',
-            desc: 'Belum ada data profil. Buat CV terlebih dahulu.',
-            recommendation: 'Lengkapi CV dan hubungkan dengan profil LinkedIn.',
-          };
-        }
-
-        // 3. Interview pillar — based on interview-stage applications
-        if (Array.isArray(apps) && apps.length > 0) {
-          const interviewApps = apps.filter((a: any) =>
-            ['Interview', 'Offering'].includes(a.status)
-          ).length;
-          const totalApps = apps.length;
-
-          // Score based on interview conversion rate
-          const interviewRate = totalApps > 0 ? (interviewApps / totalApps) * 100 : 0;
-          const interviewScore = Math.min(100, Math.round(interviewRate * 3 + (interviewApps > 0 ? 50 : 0)));
-
-          updatedPillars[2] = {
-            ...updatedPillars[2],
-            score: interviewScore,
-            status: getStatusFromScore(interviewScore),
-            desc: interviewApps > 0
-              ? `${interviewApps} dari ${totalApps} lamaran sudah masuk tahap interview/offering.`
-              : 'Belum ada lamaran yang masuk tahap interview.',
-            recommendation: interviewApps === 0
-              ? 'Latih kemampuan interview dengan simulasi AI.'
-              : interviewScore < 70
-                ? 'Tingkatkan persiapan interview untuk meningkatkan konversi.'
-                : 'Pertahankan performa interview dan latih pertanyaan teknis.',
-          };
-        } else {
-          updatedPillars[2] = {
-            ...updatedPillars[2],
-            score: 0,
-            status: 'Belum Optimal',
-            desc: 'Belum ada data lamaran untuk mengukur keterampilan interview.',
-            recommendation: 'Mulai melamar dan latih simulasi interview AI.',
-          };
-        }
-
-        // 4. Activity & Networking pillar — based on application frequency
-        if (Array.isArray(apps) && apps.length > 0) {
-          const now = new Date();
-          const thirtyDaysAgo = new Date(now);
-          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-          const recentApps = apps.filter((a: any) => {
-            const d = new Date(a.createdAt || a.appliedDate || 0);
-            return d >= thirtyDaysAgo;
-          }).length;
-
-          // Target: at least 12 apps per month (3/week)
-          const activityScore = Math.min(100, Math.round((recentApps / 12) * 100));
-
-          updatedPillars[3] = {
-            ...updatedPillars[3],
-            score: activityScore,
-            status: getStatusFromScore(activityScore),
-            desc: recentApps >= 12
-              ? `Sangat aktif: ${recentApps} lamaran dalam 30 hari terakhir.`
-              : recentApps > 0
-                ? `${recentApps} lamaran dalam 30 hari terakhir. Target: 12+.`
-                : 'Belum ada lamaran dalam 30 hari terakhir.',
-            recommendation: recentApps < 3
-              ? 'Mulai melamar secara konsisten minimal 3 per minggu.'
-              : recentApps < 12
-                ? 'Tingkatkan frekuensi lamaran untuk peluang lebih besar.'
-                : 'Pertahankan konsistensi dan manfaatkan fitur Referral.',
-          };
-        } else {
-          updatedPillars[3] = {
-            ...updatedPillars[3],
-            score: 0,
-            status: 'Belum Optimal',
-            desc: 'Belum ada data aktivitas lamaran.',
-            recommendation: 'Mulai lacak lamaran kerjamu di Tracker.',
-          };
-        }
-
-        setPillars(updatedPillars);
+        const evaluatedPillars = calculatePillars(cvs, apps);
+        setPillars(evaluatedPillars);
       } catch (error) {
         console.error('[CareerReadinessView] Failed to load pillar data:', error);
       }
@@ -337,20 +151,25 @@ export const CareerReadinessView: React.FC = () => {
 
   const handleCalculateTest = () => {
     const totalPoints = Object.values(testAnswers).reduce((a, b) => a + b, 0);
-    setReadinessScore(totalPoints);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('cuti_career_readiness_score', String(totalPoints));
-    }
+    updateScore(totalPoints);
     setIsTestSubmitted(true);
   };
 
-  const getReadinessBadge = (score: number) => {
-    if (score >= 85) return { label: 'Sangat Siap Kerja (Job Ready)', color: 'bg-emerald-500 text-white' };
-    if (score >= 70) return { label: 'Siap Kerja (Perlu Sedikit Optimasi)', color: 'bg-[#1738D1] text-white' };
-    return { label: 'Perlu Pembenahan Karir', color: 'bg-amber-500 text-slate-950 font-bold' };
-  };
-
   const currentBadge = getReadinessBadge(readinessScore);
+
+  const getPillarIcon = (id: string) => {
+    switch (id) {
+      case 'cv':
+        return FileText;
+      case 'linkedin':
+        return Linkedin;
+      case 'interview':
+        return Mic;
+      case 'activity':
+      default:
+        return Briefcase;
+    }
+  };
 
   return (
     <div className="space-y-6 font-sans">
@@ -391,10 +210,26 @@ export const CareerReadinessView: React.FC = () => {
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
               </svg>
-              <span className="absolute text-sm font-black text-white">{readinessScore}%</span>
+              <span className="absolute text-sm font-black text-white">
+                {isLoaded ? `${readinessScore}%` : '...'}
+              </span>
             </div>
             <div>
-              <span className="text-[10px] text-slate-300 uppercase tracking-wider block font-bold">Status Kesiapan</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-slate-300 uppercase tracking-wider block font-bold">
+                  Status Kesiapan
+                </span>
+                {isDiagnosticStored && (
+                  <button
+                    onClick={resetScore}
+                    title="Kembalikan ke kalkulasi profil otomatis"
+                    className="text-[10px] text-orange-300 hover:text-orange-200 underline flex items-center gap-0.5 cursor-pointer"
+                  >
+                    <RefreshCw className="w-2.5 h-2.5" />
+                    <span>Reset</span>
+                  </button>
+                )}
+              </div>
               <span className={`inline-block px-2.5 py-1 rounded-[10px] text-xs font-extrabold mt-1 ${currentBadge.color}`}>
                 {currentBadge.label}
               </span>
@@ -458,7 +293,7 @@ export const CareerReadinessView: React.FC = () => {
       {activeSubTab === 'pilar' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {pillars.map((p) => {
-            const Icon = p.icon;
+            const Icon = getPillarIcon(p.id);
 
             return (
               <div
@@ -514,7 +349,7 @@ export const CareerReadinessView: React.FC = () => {
                 <span>Tes Diagnostik Kesiapan Kerja Singkat (5 Pertanyaan)</span>
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Jawab pertanyaan berikut sesuai kondisi riil Anda saat ini untuk memperbarui skor kesiapan kerja secara instan.
+                Jawab pertanyaan berikut sesuai kondisi riil Anda saat ini untuk memperbarui skor kesiapan kerja secara instan di seluruh sistem.
               </p>
             </div>
           </div>
@@ -561,20 +396,21 @@ export const CareerReadinessView: React.FC = () => {
               onClick={() => {
                 setTestAnswers({});
                 setIsTestSubmitted(false);
+                resetScore();
               }}
-              className="px-4 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset Jawaban</span>
+              <span>Reset Hasil &amp; Jawaban</span>
             </button>
 
             <button
               onClick={handleCalculateTest}
               disabled={Object.keys(testAnswers).length < testQuestions.length}
-              className="px-6 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] disabled:opacity-50 text-white font-bold text-xs transition shadow-md shadow-[#1738D1]/20 flex items-center gap-2"
+              className="px-6 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] disabled:opacity-50 text-white font-bold text-xs transition shadow-md shadow-[#1738D1]/20 flex items-center gap-2 cursor-pointer border-0"
             >
               <BarChart2 className="w-4 h-4" />
-              <span>Hitung Skor Kesiapan Baru</span>
+              <span>Hitung &amp; Sinkronkan Skor Baru</span>
             </button>
           </div>
 
@@ -585,7 +421,7 @@ export const CareerReadinessView: React.FC = () => {
                 <span>Skor Kesiapan Anda Berhasil Diperbarui: {readinessScore} / 100</span>
               </div>
               <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                Hasil evaluasi diagnostik ini mengonfirmasi bahwa Anda sudah memiliki fondasi yang solid. Pertahankan ritme melamar dan terus lakukan simulasi interview AI secara berkala!
+                Hasil evaluasi diagnostik ini telah disinkronkan ke seluruh sistem dashboard dan sidebar. Pertahankan ritme melamar dan terus lakukan simulasi interview secara berkala!
               </p>
             </div>
           )}
@@ -605,27 +441,27 @@ export const CareerReadinessView: React.FC = () => {
               <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300 border border-orange-200">
                 Minggu 1: Pembenahan Fondasi Dokumen
               </span>
-              <h4 className="font-bold text-xs text-slate-900 dark:text-white">Optimasi CV ATS & Profil LinkedIn</h4>
+              <h4 className="font-bold text-xs text-slate-900 dark:text-white">Optimasi CV ATS &amp; Profil LinkedIn</h4>
               <p className="text-xs text-slate-600 dark:text-slate-400">
-                Gunakan AI CV Optimizer untuk menyesuaikan kata kunci spesifik berdasarkan deskripsi pekerjaan yang dituju. Pastikan profil LinkedIn dipasang foto profesional dan tautan portofolio.
+                Sesuaikan kata kunci spesifik berdasarkan deskripsi lowongan yang dituju. Pastikan profil LinkedIn dilengkapi deskripsi profesional dan tautan portofolio.
               </p>
             </div>
 
             <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2">
               <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300 border border-orange-200">
-                Minggu 2: Latihan Komunikasi & Interview
+                Minggu 2: Latihan Komunikasi &amp; Interview
               </span>
-              <h4 className="font-bold text-xs text-slate-900 dark:text-white">Simulasi AI Interview & Pertanyaan Jebakan</h4>
+              <h4 className="font-bold text-xs text-slate-900 dark:text-white">Simulasi Interview &amp; Pertanyaan Kunci</h4>
               <p className="text-xs text-slate-600 dark:text-slate-400">
-                Lakukan minimal 3 kali simulasi interview AI di halaman Panduan Interview. Kuasai jawaban pertanyaan jebakan seputar ekspektasi gaji dan alasan pindah kerja.
+                Lakukan simulasi di halaman Panduan Interview. Kuasai jawaban pertanyaan seputar ekspektasi gaji dan alasan melamar kerja dengan metode STAR.
               </p>
             </div>
 
             <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2">
               <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300 border border-orange-200">
-                Minggu 3: Eksekusi Pelamaran & Networking
+                Minggu 3: Eksekusi Pelamaran &amp; Networking
               </span>
-              <h4 className="font-bold text-xs text-slate-900 dark:text-white">Aktivitas Tracker & Program Referral</h4>
+              <h4 className="font-bold text-xs text-slate-900 dark:text-white">Aktivitas Tracker &amp; Program Referral</h4>
               <p className="text-xs text-slate-600 dark:text-slate-400">
                 Kirimkan 5+ lamaran kerja terfokus setiap minggu. Catat semua proses interview di Tracker Lamaran untuk memantau kemajuan hingga tahap Offering.
               </p>
@@ -647,7 +483,7 @@ export const CareerReadinessView: React.FC = () => {
             </span>
 
             <h3 className="text-xl md:text-2xl font-black text-white">
-              Sertifikat Career Readiness Employr AI
+              Sertifikat Career Readiness Employr
             </h3>
 
             <p className="text-xs text-slate-300 max-w-lg mx-auto">
@@ -661,16 +497,16 @@ export const CareerReadinessView: React.FC = () => {
 
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
-                onClick={() => alert('Sertifikat siap diunduh dalam format PDF!')}
-                className="px-4 py-2 rounded-[10px] bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow-md"
+                onClick={() => toast.success('Sertifikat Siap', 'Sertifikat siap diunduh dalam format PDF!')}
+                className="px-4 py-2 rounded-[10px] bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow-md cursor-pointer border-0"
               >
                 <Download className="w-4 h-4" />
                 <span>Unduh PDF</span>
               </button>
 
               <button
-                onClick={() => alert('Link sertifikat berhasil disalin untuk dipasang di LinkedIn!')}
-                className="px-4 py-2 rounded-[10px] bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition flex items-center gap-1.5 border border-white/20"
+                onClick={() => toast.success('Tautan Tersalin', 'Link sertifikat berhasil disalin untuk dipasang di LinkedIn!')}
+                className="px-4 py-2 rounded-[10px] bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition flex items-center gap-1.5 border border-white/20 cursor-pointer"
               >
                 <Share2 className="w-4 h-4" />
                 <span>Bagikan ke LinkedIn</span>

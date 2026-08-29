@@ -51,9 +51,24 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
   const [domFixations, setDomFixations] = useState<TextDomPosition[]>([]);
 
   // State for CV bullet point sections
-  const [cvExperience, setCvExperience] = useState(parsedData.experience);
-  const [cvSkills, setCvSkills] = useState(parsedData.skills);
-  const [cvEducation, setCvEducation] = useState(parsedData.education);
+  const [cvExperience, setCvExperience] = useState<CvParsedData['experience']>(() =>
+    Array.isArray(parsedData?.experience)
+      ? parsedData.experience.map((e) => ({
+          ...e,
+          achievements: Array.isArray(e?.achievements)
+            ? e.achievements
+            : typeof (e as any)?.description === 'string'
+            ? (e as any).description.split('\n').filter(Boolean)
+            : [],
+        }))
+      : []
+  );
+  const [cvSkills, setCvSkills] = useState<string[]>(() =>
+    Array.isArray(parsedData?.skills)
+      ? parsedData.skills.map((s: any) => (typeof s === 'string' ? s : s?.name || String(s)))
+      : []
+  );
+  const [cvEducation, setCvEducation] = useState<CvParsedData['education']>(() => parsedData?.education || []);
   const [cvMiscPoints, setCvMiscPoints] = useState<string[]>([
     'Bahasa Indonesia (Native)',
     'Bahasa Inggris (Professional / Working Proficiency)',
@@ -62,20 +77,35 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
 
   // Keep state synced if parsedData updates from parent
   useEffect(() => {
-    setCvExperience(parsedData.experience);
-    setCvSkills(parsedData.skills);
-    setCvEducation(parsedData.education);
+    setCvExperience(
+      Array.isArray(parsedData?.experience)
+        ? parsedData.experience.map((e) => ({
+            ...e,
+            achievements: Array.isArray(e?.achievements)
+              ? e.achievements
+              : typeof (e as any)?.description === 'string'
+              ? (e as any).description.split('\n').filter(Boolean)
+              : [],
+          }))
+        : []
+    );
+    setCvSkills(
+      Array.isArray(parsedData?.skills)
+        ? parsedData.skills.map((s: any) => (typeof s === 'string' ? s : s?.name || String(s)))
+        : []
+    );
+    setCvEducation(parsedData?.education || []);
   }, [parsedData]);
 
   // Add Achievement Point to Experience
   const handleAddAchievement = (expId: string) => {
     setCvExperience((prev) =>
-      prev.map((exp) => {
+      (prev || []).map((exp) => {
         if (exp.id === expId) {
           return {
             ...exp,
             achievements: [
-              ...exp.achievements,
+              ...(exp.achievements || []),
               `Poin pencapaian baru (+25% peningkatan efisiensi & metrik kerja)`,
             ],
           };
@@ -88,14 +118,15 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
   // Add Skill Tag
   const handleAddSkill = () => {
     const defaultNewSkills = ['Docker', 'GraphQL', 'Tailwind CSS', 'Redux Toolkit', 'Jest Unit Test'];
-    const unusedSkill = defaultNewSkills.find((s) => !cvSkills.includes(s)) || `Skill Baru #${cvSkills.length + 1}`;
-    setCvSkills((prev) => [...prev, unusedSkill]);
+    const current = cvSkills || [];
+    const unusedSkill = defaultNewSkills.find((s) => !current.includes(s)) || `Skill Baru #${current.length + 1}`;
+    setCvSkills((prev) => [...(prev || []), unusedSkill]);
   };
 
   // Add Education Bullet Line
   const handleAddEducation = () => {
     setCvEducation((prev) => [
-      ...prev,
+      ...(prev || []),
       {
         id: `edu-new-${Date.now()}`,
         institution: 'Universitas Indonesia / Sertifikasi BNSP',
@@ -109,17 +140,16 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
   // Add Misc Info Line
   const handleAddMiscPoint = () => {
     setCvMiscPoints((prev) => [
-      ...prev,
-      `Poin Informasi Tambahan Baru #${prev.length + 1} (Sertifikasi Profesional / Keahlian Khusus)`,
+      ...(prev || []),
+      `Poin Informasi Tambahan Baru #${(prev || []).length + 1} (Sertifikasi Profesional / Keahlian Khusus)`,
     ]);
   };
 
-
-
   // Function to highlight metric numbers in achievements
   const renderAchievementWithMetrics = (text: string) => {
+    if (!text) return null;
     // Match percentages, numbers with +, or multipliers like 35%, 12+, 40%, 50.000+
-    const parts = text.split(/(\b\d+[\d.,]*%|\b\d+[\d.,]*\+|\b\d+\b)/g);
+    const parts = String(text).split(/(\b\d+[\d.,]*%|\b\d+[\d.,]*\+|\b\d+\b)/g);
     return parts.map((part, i) => {
       const isMetric = /^\d+[\d.,]*%?$|^\d+[\d.,]*\+$/.test(part);
       if (isMetric) {
@@ -374,7 +404,7 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
           </div>
 
           <div className="space-y-3">
-            {cvExperience.map((exp) => (
+            {(cvExperience || []).map((exp) => (
               <div key={exp.id} className="space-y-1 text-xs">
                 <div className="flex justify-between items-baseline">
                   <span
@@ -389,7 +419,7 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
                 </div>
                 {/* Per-poin Per-baris Bullet Items */}
                 <ul className="list-disc list-inside text-slate-700 space-y-1 pl-1 text-[11px]">
-                  {exp.achievements.map((ach, idx) => (
+                  {(exp.achievements || []).map((ach: string, idx: number) => (
                     <li key={idx} className="leading-relaxed">
                       {renderAchievementWithMetrics(ach)}
                     </li>
@@ -424,7 +454,7 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
             </div>
           </div>
           <div className="flex flex-wrap gap-1.5 pt-0.5">
-            {cvSkills.map((sk) => (
+            {(cvSkills || []).map((sk) => (
               <span
                 key={sk}
                 data-heatmap="skill-badge"
@@ -463,7 +493,7 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
           </div>
 
           <ul className="list-disc list-inside text-slate-700 space-y-1 pl-1 text-[11px]">
-            {cvEducation.map((edu) => (
+            {(cvEducation || []).map((edu) => (
               <li
                 key={edu.id}
                 data-heatmap="education"
@@ -491,7 +521,7 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
               </button>
             </div>
             <ul className="list-disc list-inside text-slate-700 space-y-1 pl-1 text-[11px]">
-              {cvMiscPoints.map((misc, idx) => (
+              {(cvMiscPoints || []).map((misc, idx) => (
                 <li key={idx} className="leading-relaxed">
                   {misc}
                 </li>
@@ -503,7 +533,7 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
         {/* OVERLAY MODE: Bounded Boxes Wireframe */}
         {showOverlay && viewMode === 'bbox' && (
           <div className="absolute inset-0 pointer-events-none z-30 p-7 md:p-9">
-            {boundingBoxes.map((box) => (
+            {(boundingBoxes || []).map((box) => (
               <div
                 key={box.id}
                 style={{
@@ -525,7 +555,7 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
         {/* OVERLAY MODE: Fixation Badges for F-Pattern */}
         {showOverlay && viewMode === 'f-pattern' && (
           <div className="absolute inset-0 pointer-events-none z-40">
-            {domFixations.map((fp) => (
+            {(domFixations || []).map((fp) => (
               <div
                 key={fp.id}
                 style={{
@@ -554,7 +584,7 @@ export const A4HeatmapCanvas: React.FC<A4HeatmapCanvasProps> = ({
                 <span>Analisis Korelasi Visibilitas Heatmap vs Kata Kunci ATS</span>
               </div>
               <div className="grid grid-cols-2 gap-2 text-[11px]">
-                {atsCorrelations.slice(0, 4).map((item) => (
+                {(atsCorrelations || []).slice(0, 4).map((item) => (
                   <div
                     key={item.id}
                     className="p-1.5 rounded-[10px] bg-slate-800 border border-slate-700 flex justify-between items-center"

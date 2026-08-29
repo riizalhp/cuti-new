@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1300" height="1100" viewBox="0 0 1300 1100" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b2334"/>
+      <stop offset=".6" stop-color="#191720"/>
+      <stop offset="1" stop-color="#0c0b10"/>
+    </linearGradient>
+    <linearGradient id="stair" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#0000ff" stop-opacity=".15"/>
+      <stop offset="1" stop-color="#0000ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1300" height="1100" fill="url(#dusk)"/>
+  <g fill="#15141c">
+    <rect x="120" y="420" width="260" height="680"/><rect x="950" y="500" width="280" height="600"/>
+  </g>
+  <g fill="url(#stair)">
+    <rect x="560" y="880" width="190" height="46"/><rect x="596" y="760" width="190" height="46"/>
+    <rect x="556" y="640" width="190" height="46"/><rect x="600" y="520" width="190" height="46"/>
+    <rect x="566" y="400" width="190" height="46"/><rect x="606" y="280" width="190" height="46"/>
+  </g>
+  <circle cx="700" cy="180" r="70" fill="#0000ff" opacity=".22"/>
+  <circle cx="700" cy="180" r="26" fill="#0000ff" opacity=".65"/>
+</svg>

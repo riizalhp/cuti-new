@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: ["@cuti/ui", "@cuti/auth", "@cuti/config", "@cuti/db", "@cuti/faq"],
+  serverExternalPackages: ["pdf-parse", "mammoth"],
 
   // Enable optimizations
   compiler: {
