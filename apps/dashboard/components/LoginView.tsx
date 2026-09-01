@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { setSessionCookie, getStoredSession } from '@/lib/auth';
-import { Sun, Moon, Loader2, Eye, EyeOff, Sparkles, Quote } from 'lucide-react';
+import { Sun, Moon, Loader2, Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
+import { AuthReviewsCarousel } from '@/components/AuthReviewsCarousel';
 
 interface LoginViewProps {}
 
@@ -319,41 +320,26 @@ export const LoginView: React.FC<LoginViewProps> = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-[#1F3578]/50 to-slate-950/60 pointer-events-none" />
 
         {/* Top Tagline */}
-        <div className="relative z-10 flex items-center gap-2 text-xs font-semibold text-blue-200/90 uppercase tracking-wider">
-          <Sparkles className="w-3.5 h-3.5 text-blue-300" />
+        <div className="relative z-10 flex items-center gap-2.5 text-[10px] font-extrabold text-blue-200 uppercase tracking-[0.145em]">
+          <span className="w-1.5 h-1.5 bg-blue-400 inline-block shrink-0" />
           <span>Platform Karier Terintegrasi</span>
         </div>
 
         {/* Large Headline */}
         <div className="relative z-10 my-auto max-w-lg">
-          <h2 className="text-3xl xl:text-4xl font-extrabold tracking-tight leading-tight text-white drop-shadow-sm">
-            Semua urusan kariermu, siap di satu ruang kerja.
+          <h2 className="text-3xl xl:text-[2.65rem] font-semibold tracking-[-0.04em] leading-[1.08] text-white drop-shadow-sm">
+            Semua urusan kariermu,<br />
+            <em className="font-serif italic font-normal text-white text-[1.12em] tracking-[-0.01em]">
+              siap di satu ruang kerja.
+            </em>
           </h2>
-          <p className="mt-4 text-sm text-blue-100/90 leading-relaxed font-normal drop-shadow-sm">
+          <p className="mt-4 text-sm text-blue-100/90 leading-relaxed font-normal drop-shadow-sm max-w-md">
             Bikin CV lolos ATS, cocokan keahlian dengan kriteria lowongan, dan pantau setiap tahapan wawancara secara real-time.
           </p>
         </div>
 
-        {/* Testimonial Quote Card */}
-        <div className="relative z-10 p-5 rounded-2xl bg-slate-900/60 backdrop-blur-md border border-white/15 max-w-md shadow-2xl">
-          <div className="flex items-start gap-3">
-            <Quote className="w-5 h-5 text-blue-200 shrink-0 mt-0.5 opacity-80" />
-            <div>
-              <p className="text-xs font-medium text-white/95 leading-relaxed italic">
-                “Employr bikin proses bikin CV dan tracking lamaran jadi jauh lebih cepat dan terstruktur. Diterima kerja dalam 3 minggu!”
-              </p>
-              <div className="mt-3 flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-full bg-white/20 text-white font-bold text-[11px] flex items-center justify-center border border-white/30">
-                  RP
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-white leading-none">Rian Pratama</p>
-                  <p className="text-[10px] text-blue-200/90 mt-0.5">Software Engineer di Tech Company</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Testimonial Review Carousel — Port 4321 Stacked Animation without Pagination */}
+        <AuthReviewsCarousel />
       </div>
     </div>
   );

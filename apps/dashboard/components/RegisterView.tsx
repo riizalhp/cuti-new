@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { setSessionCookie, getStoredSession } from '@/lib/auth';
-import { Sun, Moon, Loader2, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { Sun, Moon, Loader2, Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
+import { AuthReviewsCarousel } from '@/components/AuthReviewsCarousel';
 
 export const RegisterView: React.FC = () => {
   const router = useRouter();
@@ -319,35 +320,26 @@ export const RegisterView: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-[#1F3578]/50 to-slate-950/60 pointer-events-none" />
 
         {/* Top Tagline */}
-        <div className="relative z-10 flex items-center gap-2 text-xs font-semibold text-blue-200/90 uppercase tracking-wider">
-          <Sparkles className="w-3.5 h-3.5 text-blue-300" />
+        <div className="relative z-10 flex items-center gap-2.5 text-[10px] font-extrabold text-blue-200 uppercase tracking-[0.145em]">
+          <span className="w-1.5 h-1.5 bg-blue-400 inline-block shrink-0" />
           <span>Bergabung dengan Ribuan Pencari Kerja</span>
         </div>
 
         {/* Large Headline */}
         <div className="relative z-10 my-auto max-w-lg">
-          <h2 className="text-3xl xl:text-4xl font-extrabold tracking-tight leading-tight text-white drop-shadow-sm">
-            Langkah pertamamu menuju karier impian dimulai di sini.
+          <h2 className="text-3xl xl:text-[2.65rem] font-semibold tracking-[-0.04em] leading-[1.08] text-white drop-shadow-sm">
+            Langkah pertamamu,<br />
+            <em className="font-serif italic font-normal text-white text-[1.12em] tracking-[-0.01em]">
+              menuju karier impian.
+            </em>
           </h2>
-          <p className="mt-4 text-sm text-blue-100/90 leading-relaxed font-normal drop-shadow-sm">
+          <p className="mt-4 text-sm text-blue-100/90 leading-relaxed font-normal drop-shadow-sm max-w-md">
             Akses pembuat CV lolos ATS, analisis kecocokan lowongan, latihan interview, dan pelacak lamaran terintegrasi.
           </p>
         </div>
 
-        {/* Info Card */}
-        <div className="relative z-10 p-5 rounded-2xl bg-slate-900/60 backdrop-blur-md border border-white/15 max-w-md shadow-2xl">
-          <div className="flex items-center gap-4">
-            <div className="flex -space-x-2">
-              <div className="w-8 h-8 rounded-full bg-blue-400 border-2 border-navy-700 flex items-center justify-center font-bold text-[10px] text-navy-950">A</div>
-              <div className="w-8 h-8 rounded-full bg-orange-400 border-2 border-navy-700 flex items-center justify-center font-bold text-[10px] text-navy-950">B</div>
-              <div className="w-8 h-8 rounded-full bg-emerald-400 border-2 border-navy-700 flex items-center justify-center font-bold text-[10px] text-navy-950">C</div>
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-white">10.000+ Pengguna Aktif</p>
-              <p className="text-[11px] text-blue-200/90">Meningkatkan peluang kerja hingga 3x lipat</p>
-            </div>
-          </div>
-        </div>
+        {/* Testimonial Review Carousel — Port 4321 Stacked Animation without Pagination */}
+        <AuthReviewsCarousel />
       </div>
     </div>
   );

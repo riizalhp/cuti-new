@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface CardData {
   id: number;
@@ -49,14 +53,63 @@ const cards: CardData[] = [
 ];
 
 export default function WhyEmployr() {
-  const [activeId, setActiveId] = useState<number | null>(null);
+  const [activeId, setActiveId] = useState<number | null>(1);
+  const sectionRef = useRef<HTMLElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const isMobile = window.matchMedia('(max-width: 900px)').matches;
+    const section = sectionRef.current;
+    const track = trackRef.current;
+
+    if (!isMobile || !section || !track) return;
+
+    let anim: gsap.core.Tween | undefined;
+
+    // Small delay to ensure all nested artifact images/DOM sizes are measured correctly
+    const timer = setTimeout(() => {
+      const getScrollDistance = () => Math.max(0, track.scrollWidth - window.innerWidth + 48);
+
+      anim = gsap.to(track, {
+        x: () => -getScrollDistance(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top+=20',
+          end: () => `+=${getScrollDistance() * 1.6}`,
+          pin: true,
+          pinSpacing: true,
+          scrub: 0.6,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            const p = self.progress;
+            const cardIdx = Math.min(3, Math.floor(p * 4));
+            setActiveId(cardIdx + 1);
+          },
+        },
+      });
+    }, 150);
+
+    return () => {
+      clearTimeout(timer);
+      anim?.scrollTrigger?.kill();
+      anim?.kill();
+    };
+  }, []);
 
   const handleTrackMouseLeave = () => {
-    setActiveId(null);
+    if (!window.matchMedia('(max-width: 900px)').matches) {
+      setActiveId(null);
+    }
   };
 
   return (
-    <section className="why-employr why-employr--dark section-space" id="why-employr" aria-label="Why Employr">
+    <section
+      ref={sectionRef}
+      className="why-employr why-employr--dark section-space"
+      id="why-employr"
+      aria-label="Why Employr"
+    >
       <div className="editorial-frame why-employr__container">
         {/* TOP EDITORIAL HEADER */}
         <div className="why-employr__top">
@@ -80,6 +133,7 @@ export default function WhyEmployr() {
 
         {/* 4 CARDS TRACK */}
         <div
+          ref={trackRef}
           className="why-employr__cards-track"
           onMouseLeave={handleTrackMouseLeave}
         >
@@ -89,6 +143,7 @@ export default function WhyEmployr() {
             return (
               <div
                 key={card.id}
+                data-card-id={card.id}
                 className={`why-employr__card ${isActive ? 'is-active' : activeId !== null ? 'is-inactive' : 'is-default'}`}
                 onMouseEnter={() => setActiveId(card.id)}
                 onMouseLeave={() => setActiveId(null)}
@@ -977,10 +1032,12 @@ export default function WhyEmployr() {
           margin: 0;
         }
 
-        /* RESPONSIVE (< 900px) */
+        /* RESPONSIVE: GSAP scroll-pinned horizontal cards */
         @media (max-width: 900px) {
           .why-employr--dark {
             padding: 85px 0 75px;
+            overflow: hidden !important;
+            width: 100% !important;
           }
 
           .why-employr__top {
@@ -990,25 +1047,69 @@ export default function WhyEmployr() {
           }
 
           .why-employr__cards-track {
-            flex-direction: column;
-            gap: 12px;
-            min-height: auto;
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 16px;
+            overflow: visible !important;
+            padding: 8px 16px 26px;
+            margin: 0;
+            min-height: 0;
+            align-items: stretch;
+            will-change: transform;
+            width: max-content !important;
+          }
+
+          .why-employr__cards-track::-webkit-scrollbar {
+            display: none;
           }
 
           .why-employr__card {
-            flex: none !important;
-            width: 100%;
-            height: auto;
-            min-height: 280px;
+            flex: 0 0 min(82vw, 330px) !important;
+            height: 380px;
+            min-height: 0;
+            transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
           }
 
-          .why-employr__glossy-glass-box {
-            height: auto;
-            min-height: 165px;
+          /* DEFAULT & INACTIVE: dimmed, compact like unhovered desktop */
+          .why-employr__card.is-default,
+          .why-employr__card.is-inactive {
+            opacity: 0.55;
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: none;
           }
 
+          .why-employr__card.is-default .why-employr__glossy-glass-box,
+          .why-employr__card.is-inactive .why-employr__glossy-glass-box {
+            opacity: 0;
+            transform: translateY(12px) scale(0.95);
+            pointer-events: none;
+          }
+
+          .why-employr__card.is-default .why-employr__desc-wrap,
+          .why-employr__card.is-inactive .why-employr__desc-wrap {
+            max-height: 0;
+            opacity: 0;
+          }
+
+          /* ACTIVE: highlighted, glass box reveals, description open */
           .why-employr__card.is-active {
-            min-height: 340px;
+            opacity: 1;
+            border-color: rgba(96, 165, 250, 0.85);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.22);
+            transform: translateY(-2px);
+          }
+
+          .why-employr__card.is-active .why-employr__glossy-glass-box {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+          }
+
+          .why-employr__card.is-active .why-employr__desc-wrap {
+            max-height: 90px;
+            opacity: 1;
           }
         }
       `}</style>

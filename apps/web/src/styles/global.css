@@ -42,7 +42,8 @@ button, a { font: inherit; }
 button { cursor: pointer; background: none; border: 0; padding: 0; color: inherit; }
 button:focus-visible, a:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
 
-.site-shell { overflow: hidden; background: var(--paper); }
+.site-shell { overflow: hidden; background: #101010; }
+main, .site-main { position: relative; z-index: 10; background: var(--paper); width: 100%; }
 .editorial-frame { width: min(1380px, calc(100% - 64px)); margin: 0 auto; }
 .section-space { position: relative; }
 
@@ -364,7 +365,7 @@ h2 em, h1 em {
     height: 24px !important;
     min-width: auto !important;
     max-width: 110px !important;
-    filter: brightness(0) invert(1);
+    filter: brightness(0) invert(1) !important;
   }
   .site-header .header-left {
     display: none !important;
@@ -506,8 +507,8 @@ h2 em, h1 em {
 /* ---------- Hero Frame & Card Canvas ---------- */
 .hero-frame-container {
   margin: 0 auto;
-  max-width: 1480px;
-  padding: 10px 24px 28px;
+  max-width: 1680px;
+  padding: 10px clamp(12px, 2.5vw, 36px) 28px;
   width: 100%;
   position: relative;
   background: var(--paper);
@@ -515,15 +516,14 @@ h2 em, h1 em {
 }
 .hero-card {
   background: #111;
-  border-radius: 32px;
+  border-radius: clamp(20px, 2.2vw, 32px);
   box-shadow: 0 20px 50px rgba(0, 0, 0, .08);
   color: #fff;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  aspect-ratio: 16 / 9;
-  min-height: 620px;
-  max-height: 860px;
+  min-height: clamp(520px, 72vh, 840px);
+  height: auto;
   overflow: hidden;
   position: relative;
   width: 100%;

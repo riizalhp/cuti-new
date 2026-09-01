@@ -13,6 +13,13 @@ export default function FooterReveal({ logoMark }: FooterRevealProps) {
       <div className="footer-reveal-spacer" aria-hidden="true" />
 
       <footer className="footer-reveal-fixed" aria-label="Footer navigation">
+        {/* Giant decorative Employr wordmark (background watermark) */}
+        <img
+          src="/logo.svg"
+          alt=""
+          aria-hidden="true"
+          className="footer-reveal-watermark"
+        />
         <div className="footer-reveal-inner">
           <div className="editorial-frame footer__top">
             <div>
