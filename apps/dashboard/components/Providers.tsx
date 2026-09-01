@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { ThemeProvider } from 'next-themes';
 import { ModalProvider } from '@/context/ModalContext';
 import { ToastProvider } from '@/components/ui/Toast';
 import { ConfirmDialogProvider } from '@/components/ui/ConfirmDialog';
+import { VisitorTracker } from '@/components/VisitorTracker';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
@@ -23,7 +24,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
     >
       <ModalProvider>
         <ToastProvider>
-          <ConfirmDialogProvider>{children}</ConfirmDialogProvider>
+          <ConfirmDialogProvider>
+            <Suspense fallback={null}>
+              <VisitorTracker />
+            </Suspense>
+            {children}
+          </ConfirmDialogProvider>
         </ToastProvider>
       </ModalProvider>
     </ThemeProvider>

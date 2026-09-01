@@ -39,7 +39,7 @@ const faqSchema = {
       name: 'Is Employr only for fresh graduates?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No. Anyone actively looking for work, making a career switch, or wanting to polish their portfolio and CV can use Employr.',
+        text: 'No. Anyone actively looking for work, making a career switch, or wanting to polish their portfolio and CV can use Employr to tailor resumes and track their applications.',
       },
     },
     {
@@ -47,7 +47,31 @@ const faqSchema = {
       name: 'Can I create multiple CV versions in one account?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes. Every role requires a different focus. You can save dedicated versions for UI/UX, marketing, or any other role without overwriting previous drafts.',
+        text: 'Yes. Every role requires a different focus. You can save dedicated versions for UI/UX, marketing, software engineering, or any target role without overwriting previous drafts.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How does the role match score work?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Employr compares your experience against job requirements, highlighting missing keywords, measuring action point relevance, and helping you optimize your score before sending.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Is there a monthly or recurring subscription?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'No recurring subscription. Employr provides lifetime access with a single payment, giving you permanent access to all your CV versions and future dashboard updates.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How do I export my CV to PDF?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'You can export clean, ATS-compliant PDF resumes directly from the client preview in one click, perfectly formatted for HR parsing systems.',
       },
     },
   ],
@@ -201,7 +225,7 @@ const faqSchema = {
         <div class="editorial-frame">
           <div class="why-employer__top">
             <div class="why-employer__heading">
-              <div class="section-label section-label--inverse"><span>05</span><i></i><span>WHY Employr</span></div>
+              <div class="section-label"><span>05</span><i></i><span>WHY EMPLOYR</span></div>
               <h2 id="why-employer-title">More than an<br /><em>online form.</em></h2>
             </div>
             <p class="why-employer__lead">
@@ -310,6 +334,73 @@ const faqSchema = {
                 />
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 FAQ -->
+      <section class="faq-section section-space" id="faq" aria-labelledby="faq-title">
+        <div class="editorial-frame faq-section__frame">
+          <div class="faq-section__top">
+            <div class="faq-section__heading">
+              <div class="section-label section-label--inverse"><span>06</span><i></i><span>FAQ</span></div>
+              <h2 id="faq-title">Questions &amp; answers,<br /><em>everything you need to know.</em></h2>
+            </div>
+            <p class="faq-section__lead">
+              Got questions about our CV workspace, smart role alignment, or lifetime membership? We have answers.
+            </p>
+          </div>
+
+          <div class="faq-section__list">
+            <details class="faq-item" name="faq-accordion">
+              <summary class="faq-item__question">
+                <span>Is Employr only for fresh graduates?</span>
+                <span class="faq-item__icon"><Icon name="plus" size={18} /></span>
+              </summary>
+              <div class="faq-item__answer">
+                <p>No. Anyone actively looking for work, making a career switch, or wanting to polish their portfolio and CV can use Employr to tailor resumes and track their applications.</p>
+              </div>
+            </details>
+
+            <details class="faq-item" name="faq-accordion">
+              <summary class="faq-item__question">
+                <span>Can I create multiple CV versions in one account?</span>
+                <span class="faq-item__icon"><Icon name="plus" size={18} /></span>
+              </summary>
+              <div class="faq-item__answer">
+                <p>Yes. Every role requires a different focus. You can save dedicated versions for UI/UX, marketing, software engineering, or any target role without overwriting previous drafts.</p>
+              </div>
+            </details>
+
+            <details class="faq-item" name="faq-accordion">
+              <summary class="faq-item__question">
+                <span>How does the role match score work?</span>
+                <span class="faq-item__icon"><Icon name="plus" size={18} /></span>
+              </summary>
+              <div class="faq-item__answer">
+                <p>Employr compares your experience against job requirements, highlighting missing keywords, measuring action point relevance, and helping you optimize your score before sending.</p>
+              </div>
+            </details>
+
+            <details class="faq-item" name="faq-accordion">
+              <summary class="faq-item__question">
+                <span>Is there a monthly or recurring subscription?</span>
+                <span class="faq-item__icon"><Icon name="plus" size={18} /></span>
+              </summary>
+              <div class="faq-item__answer">
+                <p>No recurring subscription. Employr provides lifetime access with a single payment, giving you permanent access to all your CV versions and future dashboard updates.</p>
+              </div>
+            </details>
+
+            <details class="faq-item" name="faq-accordion">
+              <summary class="faq-item__question">
+                <span>How do I export my CV to PDF?</span>
+                <span class="faq-item__icon"><Icon name="plus" size={18} /></span>
+              </summary>
+              <div class="faq-item__answer">
+                <p>You can export clean, ATS-compliant PDF resumes directly from the client preview in one click, perfectly formatted for HR parsing systems.</p>
+              </div>
+            </details>
           </div>
         </div>
       </section>
@@ -512,6 +603,20 @@ const faqSchema = {
 
       card.addEventListener('mouseenter', activate);
       card.addEventListener('click', activate);
+    });
+
+    // Exclusive Accordion for FAQ (close others when one opens)
+    const faqItems = document.querySelectorAll<HTMLDetailsElement>('.faq-item');
+    faqItems.forEach((item) => {
+      item.addEventListener('toggle', () => {
+        if (item.open) {
+          faqItems.forEach((other) => {
+            if (other !== item && other.open) {
+              other.open = false;
+            }
+          });
+        }
+      });
     });
   </script>
 </BaseLayout>

@@ -43,5 +43,100 @@ const {
         menu?.classList.remove('is-open');
       }));
     </script>
+
+    <!-- Visitor Tracker Script -->
+    <script is:inline>
+      (function() {
+        var VISITOR_KEY = 'cuti_visitor_id';
+        var SESSION_KEY = 'cuti_session_id';
+        var LAST_ACTIVE_KEY = 'cuti_session_last_active';
+        var TIMEOUT = 30 * 60 * 1000;
+
+        function getCookie(name) {
+          var m = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+          return m ? decodeURIComponent(m[2]) : null;
+        }
+        function setCookie(name, val, days) {
+          var exp = new Date(Date.now() + (days || 365) * 864e5).toUTCString();
+          document.cookie = name + '=' + encodeURIComponent(val) + '; expires=' + exp + '; path=/; SameSite=Lax';
+        }
+
+        var visId = localStorage.getItem(VISITOR_KEY) || getCookie(VISITOR_KEY);
+        if (!visId) {
+          visId = 'vis_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 9);
+        }
+        localStorage.setItem(VISITOR_KEY, visId);
+        setCookie(VISITOR_KEY, visId, 365);
+
+        var now = Date.now();
+        var lastActive = sessionStorage.getItem(LAST_ACTIVE_KEY);
+        var sessId = sessionStorage.getItem(SESSION_KEY);
+        if (!sessId || !lastActive || (now - parseInt(lastActive, 10)) > TIMEOUT) {
+          sessId = 'sess_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 9);
+          sessionStorage.setItem(SESSION_KEY, sessId);
+        }
+        sessionStorage.setItem(LAST_ACTIVE_KEY, now.toString());
+
+        var ua = navigator.userAgent;
+        var device_type = 'Desktop';
+        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) device_type = 'Tablet';
+        else if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry/i.test(ua)) device_type = 'Mobile';
+
+        var os = 'Unknown OS';
+        if (/Windows/i.test(ua)) os = 'Windows';
+        else if (/Macintosh|Mac OS X/i.test(ua)) os = 'macOS';
+        else if (/iPhone|iPad|iPod/i.test(ua)) os = 'iOS';
+        else if (/Android/i.test(ua)) os = 'Android';
+        else if (/Linux/i.test(ua)) os = 'Linux';
+
+        var browser = 'Browser';
+        var browser_version = '';
+        if (/Edg\/([0-9.]+)/i.test(ua)) { browser = 'Edge'; browser_version = RegExp.$1; }
+        else if (/Chrome\/([0-9.]+)/i.test(ua)) { browser = 'Chrome'; browser_version = RegExp.$1; }
+        else if (/Safari\/([0-9.]+)/i.test(ua) && !/Chrome/i.test(ua)) { browser = 'Safari'; browser_version = RegExp.$1; }
+        else if (/Firefox\/([0-9.]+)/i.test(ua)) { browser = 'Firefox'; browser_version = RegExp.$1; }
+
+        var ref = document.referrer || '';
+        var params = new URLSearchParams(window.location.search);
+        var utm_source = params.get('utm_source') || undefined;
+        var utm_medium = params.get('utm_medium') || undefined;
+        var utm_campaign = params.get('utm_campaign') || undefined;
+
+        var source = 'Direct';
+        if (utm_source) source = 'Campaign (' + utm_source + (utm_medium ? ' / ' + utm_medium : '') + ')';
+        else if (ref.includes('google.')) source = 'Google Organic';
+        else if (ref.includes('instagram.com')) source = 'Instagram';
+        else if (ref.includes('tiktok.com')) source = 'TikTok';
+        else if (ref.includes('facebook.com')) source = 'Facebook';
+        else if (ref.includes('linkedin.com')) source = 'LinkedIn';
+        else if (ref.includes('whatsapp.com')) source = 'WhatsApp';
+        else if (ref && !ref.includes(window.location.hostname)) source = 'Referral';
+
+        function send(action, dur) {
+          var payload = {
+            action: action,
+            visitor_id: visId,
+            session_id: sessId,
+            url: window.location.href,
+            path: window.location.pathname,
+            title: document.title || 'Portal Loker AmbilCUTI',
+            device: { device_type: device_type, browser: browser, browser_version: browser_version, os: os, screen_resolution: window.screen.width + 'x' + window.screen.height },
+            traffic: { traffic_source: source, referrer: ref, utm_source: utm_source, utm_medium: utm_medium, utm_campaign: utm_campaign },
+            duration_increment_sec: dur || 25
+          };
+          var blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+          if (navigator.sendBeacon) {
+            navigator.sendBeacon('http://localhost:3002/api/track', blob);
+          } else {
+            fetch('http://localhost:3002/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), keepalive: true }).catch(function() {});
+          }
+        }
+
+        send('page_view');
+        setInterval(function() {
+          if (document.visibilityState === 'visible') send('heartbeat', 25);
+        }, 25000);
+      })();
+    </script>
   </body>
 </html>

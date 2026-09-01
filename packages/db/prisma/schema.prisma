@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/client"
 }
 
 datasource db {
@@ -49,6 +50,8 @@ model User {
   email_batch_jobs                            EmailBatchJob[]
   withdrawals_withdrawals_processed_byTousers withdrawals[]       @relation("withdrawals_processed_byTousers")
   withdrawals_withdrawals_user_idTousers      withdrawals[]       @relation("withdrawals_user_idTousers")
+  visitors                                    Visitor[]
+  visitor_activities                          VisitorActivity[]
 
   @@map("users")
 }
@@ -820,3 +823,122 @@ model EarlyTester {
 
   @@map("early_testers")
 }
+
+model Visitor {
+  id                 String            @id @default(uuid()) @db.Uuid
+  visitor_id         String            @unique @db.VarChar(100)
+  user_id            String?           @db.Uuid
+  first_seen         DateTime          @default(now())
+  last_seen          DateTime          @default(now())
+  is_active          Boolean           @default(true)
+  current_page       String?           @db.VarChar(500)
+  current_title      String?           @db.VarChar(500)
+  total_visits       Int               @default(1)
+  total_pageviews    Int               @default(1)
+  total_duration_sec Int               @default(0)
+  device_type        String?           @db.VarChar(50)
+  browser            String?           @db.VarChar(100)
+  browser_version    String?           @db.VarChar(50)
+  os                 String?           @db.VarChar(100)
+  screen_resolution  String?           @db.VarChar(50)
+  ip_address         String?           @db.VarChar(100)
+  country            String?           @db.VarChar(100)
+  city               String?           @db.VarChar(100)
+  first_referrer     String?           @db.VarChar(1000)
+  traffic_source     String?           @db.VarChar(100)
+  utm_source         String?           @db.VarChar(255)
+  utm_medium         String?           @db.VarChar(255)
+  utm_campaign       String?           @db.VarChar(255)
+  utm_content        String?           @db.VarChar(255)
+  utm_term           String?           @db.VarChar(255)
+  created_at         DateTime          @default(now())
+  updated_at         DateTime          @updatedAt
+
+  users              User?             @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  sessions           VisitorSession[]
+  page_views         VisitorPageView[]
+  activities         VisitorActivity[]
+
+  @@index([user_id])
+  @@index([last_seen])
+  @@index([traffic_source])
+  @@index([device_type])
+  @@map("visitors")
+}
+
+model VisitorSession {
+  id              String            @id @default(uuid()) @db.Uuid
+  session_id      String            @unique @db.VarChar(100)
+  visitor_id      String            @db.VarChar(100)
+  user_id         String?           @db.Uuid
+  started_at      DateTime          @default(now())
+  last_active_at  DateTime          @default(now())
+  duration_sec    Int               @default(0)
+  entry_page      String            @db.VarChar(500)
+  exit_page       String?           @db.VarChar(500)
+  pageviews_count Int               @default(1)
+  referrer        String?           @db.VarChar(1000)
+  traffic_source  String?           @db.VarChar(100)
+  utm_source      String?           @db.VarChar(255)
+  utm_medium      String?           @db.VarChar(255)
+  utm_campaign    String?           @db.VarChar(255)
+  device_type     String?           @db.VarChar(50)
+  browser         String?           @db.VarChar(100)
+  os              String?           @db.VarChar(100)
+  ip_address      String?           @db.VarChar(100)
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt
+
+  visitor         Visitor           @relation(fields: [visitor_id], references: [visitor_id], onDelete: Cascade)
+  page_views      VisitorPageView[]
+  activities      VisitorActivity[]
+
+  @@index([visitor_id])
+  @@index([started_at])
+  @@map("visitor_sessions")
+}
+
+model VisitorPageView {
+  id           String         @id @default(uuid()) @db.Uuid
+  visitor_id   String         @db.VarChar(100)
+  session_id   String         @db.VarChar(100)
+  url          String         @db.VarChar(1000)
+  path         String         @db.VarChar(500)
+  title        String?        @db.VarChar(500)
+  referrer     String?        @db.VarChar(1000)
+  duration_sec Int            @default(0)
+  created_at   DateTime       @default(now())
+
+  visitor      Visitor        @relation(fields: [visitor_id], references: [visitor_id], onDelete: Cascade)
+  session      VisitorSession @relation(fields: [session_id], references: [session_id], onDelete: Cascade)
+
+  @@index([visitor_id])
+  @@index([session_id])
+  @@index([path])
+  @@index([created_at])
+  @@map("visitor_page_views")
+}
+
+model VisitorActivity {
+  id            String          @id @default(uuid()) @db.Uuid
+  visitor_id    String          @db.VarChar(100)
+  session_id    String          @db.VarChar(100)
+  user_id       String?         @db.Uuid
+  activity_type String          @db.VarChar(100)
+  activity_name String          @db.VarChar(255)
+  page_path     String          @db.VarChar(500)
+  metadata      Json?
+  created_at    DateTime        @default(now())
+
+  visitor       Visitor         @relation(fields: [visitor_id], references: [visitor_id], onDelete: Cascade)
+  session       VisitorSession  @relation(fields: [session_id], references: [session_id], onDelete: Cascade)
+  users         User?           @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([visitor_id])
+  @@index([session_id])
+  @@index([user_id])
+  @@index([activity_type])
+  @@index([created_at])
+  @@map("visitor_activities")
+}
+

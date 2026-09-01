@@ -24,6 +24,7 @@ export async function GET() {
       totalRevenue,
       pendingWithdrawals,
       pendingMisiSubmissions,
+      liveVisitorsCount,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { role: "USER" } }),
@@ -48,6 +49,11 @@ export async function GET() {
       prisma.withdrawals.count({ where: { status: "PENDING" } }),
       prisma.misi_submissions.count({ where: { status: "SUBMITTED" } }),
       prisma.audit_logs.count({ where: { action: "CV_DOWNLOAD" } }),
+      (prisma as any).visitor.count({
+        where: {
+          last_seen: { gte: new Date(Date.now() - 2 * 60 * 1000) },
+        },
+      }),
     ]);
 
     // Query top downloaded templates
@@ -145,6 +151,7 @@ export async function GET() {
           successful: successfulTransactions,
           totalRevenue: totalRevenue._sum.amount || 0,
         },
+        liveVisitors: liveVisitorsCount,
         withdrawals: {
           pending: pendingWithdrawals,
         },

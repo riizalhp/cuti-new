@@ -1,0 +1,943 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                                          String              @id @default(uuid()) @db.Uuid
+  email                                       String              @unique
+  email_verified                              Boolean             @default(false)
+  name                                        String
+  phone                                       String?
+  avatar_url                                  String?
+  referral_code                               String?             @unique
+  role                                        Role                @default(USER)
+  weekly_target                               Int                 @default(10)
+  bank_name                                   String?
+  bank_account_number                         String?
+  bank_account_name                           String?
+  created_at                                  DateTime            @default(now())
+  updated_at                                  DateTime
+  onboarded                                   Boolean?            @default(false)
+  education                                   String?             @db.VarChar(255)
+  major                                       String?             @db.VarChar(255)
+  last_company                                String?             @db.VarChar(255)
+  experience_year                             Int?                @default(0)
+  skills                                      String[]
+  target_job                                  String?             @db.VarChar(255)
+  accounts                                    accounts[]
+  ai_prompts                                  ai_prompts[]
+  application_notes                           application_notes[]
+  applications                                applications[]
+  audit_logs                                  audit_logs[]
+  cv_projects                                 cv_projects[]
+  memberships                                 Membership?
+  misi_submissions                            misi_submissions[]
+  notifications                               notifications[]
+  orders                                      orders[]
+  referrals_referrals_referred_idTousers      referrals[]         @relation("referrals_referred_idTousers")
+  referrals_referrals_referrer_idTousers      referrals[]         @relation("referrals_referrer_idTousers")
+  reminders                                   reminders[]
+  sessions                                    sessions[]
+  system_settings                             system_settings[]
+  transactions                                transactions[]
+  smtp_accounts                               SmtpAccount[]
+  email_batch_jobs                            EmailBatchJob[]
+  withdrawals_withdrawals_processed_byTousers withdrawals[]       @relation("withdrawals_processed_byTousers")
+  withdrawals_withdrawals_user_idTousers      withdrawals[]       @relation("withdrawals_user_idTousers")
+  visitors                                    Visitor[]
+  visitor_activities                          VisitorActivity[]
+
+  @@map("users")
+}
+
+model Membership {
+  id           String         @id @default(uuid()) @db.Uuid
+  user_id      String         @unique @db.Uuid
+  tier         MembershipTier @default(FREE)
+  package_name String?
+  order_id     String?        @db.Uuid
+  is_lifetime  Boolean        @default(true)
+  is_active    Boolean        @default(true)
+  activated_at DateTime?
+  users        User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("memberships")
+}
+
+model accounts {
+  id            String    @id @db.Uuid
+  account_id    String
+  provider_id   String
+  user_id       String    @db.Uuid
+  access_token  String?
+  refresh_token String?
+  id_token      String?
+  expires_at    DateTime?
+  password      String?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime
+  users         User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model ai_prompts {
+  id         String   @id @db.Uuid
+  name       String
+  version    Int
+  prompt     String
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  created_by String?  @db.Uuid
+  users      User?    @relation(fields: [created_by], references: [id])
+}
+
+model ai_providers {
+  id               String                @id @db.Uuid
+  name             String
+  label            String
+  base_url         String                @default("https://api.openai.com/v1")
+  api_key          String
+  model            String                @default("gpt-4o-mini")
+  priority         Int                   @default(0)
+  is_active        Boolean               @default(true)
+  cooldown_until   DateTime?
+  created_at       DateTime              @default(now())
+  updated_at       DateTime
+  alias            String?
+  auth_type        String                @default("apikey")
+  feature_mappings ai_feature_mappings[]
+}
+
+model ai_feature_mappings {
+  id           String        @id @default(uuid()) @db.Uuid
+  feature_key  String        @unique
+  feature_name String
+  provider_id  String?       @db.Uuid
+  provider     ai_providers? @relation(fields: [provider_id], references: [id], onDelete: SetNull)
+  temperature  Float         @default(0.2)
+  max_tokens   Int           @default(2000)
+  is_active    Boolean       @default(true)
+  updated_at   DateTime      @updatedAt
+  created_at   DateTime      @default(now())
+}
+
+model ai_usage_logs {
+  id            String   @id @db.Uuid
+  user_id       String   @db.Uuid
+  order_id      String?  @db.Uuid
+  provider      String   @default("openai")
+  model         String
+  prompt_name   String
+  tokens_input  Int
+  tokens_output Int
+  cost          Decimal  @db.Decimal(10, 4)
+  created_at    DateTime @default(now())
+}
+
+model ai_generation_history {
+  id               String   @id @db.Uuid
+  user_id          String   @db.Uuid
+  section_key      String
+  section_title    String
+  target_job_title String?
+  goal             String?
+  formula          String?
+  input_text       String
+  options          Json
+  created_at       DateTime @default(now())
+
+  @@index([user_id, created_at])
+}
+
+model ai_semantic_cache {
+  id         String   @id @db.Uuid
+  cache_key  String   @unique
+  input_hash String
+  response   String
+  hits       Int      @default(1)
+  created_at DateTime @default(now())
+
+  @@index([cache_key])
+  @@index([input_hash])
+}
+
+model application_notes {
+  id             String       @id @db.Uuid
+  application_id String       @db.Uuid
+  user_id        String       @db.Uuid
+  content        String
+  created_at     DateTime     @default(now())
+  applications   applications @relation(fields: [application_id], references: [id], onDelete: Cascade)
+  users          User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([application_id])
+}
+
+model applications {
+  id                 String              @id @db.Uuid
+  user_id            String              @db.Uuid
+  job_id             String?             @db.Uuid
+  company_name       String
+  position           String
+  job_url            String?
+  status             ApplicationStatus   @default(APPLIED)
+  source             ApplicationSource   @default(MANUAL)
+  applied_at         DateTime            @default(now())
+  match_score        Int?
+  ats_score          Int?
+  interview_chance   InterviewChance?
+  ai_insight         Json?
+  ai_recommendations Json?
+  created_at         DateTime            @default(now())
+  updated_at         DateTime
+  application_notes  application_notes[]
+  jobs               jobs?               @relation(fields: [job_id], references: [id])
+  users              User                @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  reminders          reminders[]
+
+  @@index([user_id, created_at])
+  @@index([user_id, status])
+}
+
+model article_categories {
+  id       String     @id @default(uuid()) @db.Uuid
+  name     String
+  slug     String     @unique
+  articles articles[]
+}
+
+model articles {
+  id                 String              @id @default(uuid()) @db.Uuid
+  title              String
+  slug               String              @unique
+  content            String
+  cover_image_url    String?
+  author             String
+  is_published       Boolean             @default(false)
+  published_at       DateTime?
+  category_id        String?             @db.Uuid
+  article_categories article_categories? @relation(fields: [category_id], references: [id])
+}
+
+model audit_logs {
+  id         String      @id @db.Uuid
+  user_id    String      @db.Uuid
+  action     String
+  entity     String
+  entity_id  String?
+  old_value  Json?
+  new_value  Json?
+  ip_address String?     @db.VarChar(45)
+  user_agent String?     @db.VarChar(512)
+  severity   LogSeverity @default(INFO)
+  created_at DateTime    @default(now())
+  users      User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([entity, action])
+  @@index([created_at])
+  @@index([severity])
+}
+
+model certifications {
+  id              String   @id @default(uuid()) @db.Uuid
+  title           String
+  slug            String   @unique
+  description     String
+  provider        String
+  cover_image_url String?
+  price           Int
+  duration_hours  Int
+  external_url    String
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now())
+}
+
+model companies {
+  id       String  @id @default(uuid()) @db.Uuid
+  name     String
+  slug     String  @unique
+  logo_url String?
+  website  String?
+  industry String?
+  location String?
+  jobs     jobs[]
+}
+
+model courses {
+  id              String   @id @default(uuid()) @db.Uuid
+  title           String
+  slug            String   @unique
+  description     String
+  cover_image_url String?
+  instructor      String
+  duration_hours  Int
+  level           String
+  price           Int      @default(0)
+  external_url    String
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now())
+}
+
+model cv_projects {
+  id              String         @id @db.Uuid
+  user_id         String         @db.Uuid
+  order_id        String?        @unique @db.Uuid
+  title           String
+  template_id     String
+  data            Json
+  target_position String
+  status          CvStatus       @default(DRAFT)
+  processing_type ProcessingType @default(STANDARD)
+  ai_completed_at DateTime?
+  ready_at        DateTime?
+  is_active       Boolean        @default(true)
+  created_at      DateTime       @default(now())
+  updated_at      DateTime
+  expires_at      DateTime?
+  orders          orders?        @relation(fields: [order_id], references: [id])
+  users           User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  cv_sections     cv_sections[]
+}
+
+model cv_sections {
+  id          String        @id @db.Uuid
+  cv_id       String        @db.Uuid
+  type        CvSectionType
+  content     Json
+  sort_order  Int
+  cv_projects cv_projects   @relation(fields: [cv_id], references: [id], onDelete: Cascade)
+}
+
+model cv_templates {
+  id                String   @id @db.Uuid
+  name              String
+  slug              String   @unique
+  description       String?
+  preview_image_url String?
+  target_positions  Json
+  is_active         Boolean  @default(true)
+  sort_order        Int      @default(0)
+  created_at        DateTime @default(now())
+}
+
+model events {
+  id              String   @id @default(uuid()) @db.Uuid
+  title           String
+  slug            String   @unique
+  description     String
+  cover_image_url String?
+  event_date      DateTime
+  location        String
+  type            WorkType @default(ONLINE)
+  external_url    String
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now())
+}
+
+model jobs {
+  id            String         @id @db.Uuid
+  company_id    String         @db.Uuid
+  title         String
+  slug          String         @unique
+  description   String
+  location      String
+  work_type     WorkType
+  salary_min    Int?
+  salary_max    Int?
+  salary_period SalaryPeriod   @default(MONTH)
+  requirements  Json?
+  external_url  String
+  is_active     Boolean        @default(true)
+  deadline      DateTime?
+  created_at    DateTime       @default(now())
+  applications  applications[]
+  companies     companies      @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  @@index([is_active, location])
+}
+
+model misi {
+  id                  String             @id @db.Uuid
+  created_by          String             @db.Uuid
+  title               String
+  description         String
+  instructions        String
+  reward_amount       Int
+  type                MisiType
+  referral_code       String?
+  referral_platform   String?
+  max_submissions     Int
+  current_submissions Int                @default(0)
+  requires_proof      Boolean            @default(true)
+  proof_type          MisiProofType
+  is_active           Boolean            @default(true)
+  deadline            DateTime?
+  created_at          DateTime           @default(now())
+  misi_submissions    misi_submissions[]
+
+  @@index([is_active, deadline])
+}
+
+model misi_submissions {
+  id            String               @id @db.Uuid
+  user_id       String               @db.Uuid
+  misi_id       String               @db.Uuid
+  proof_data    String
+  admin_notes   String?
+  status        MisiSubmissionStatus @default(SUBMITTED)
+  payout_amount Int
+  submitted_at  DateTime             @default(now())
+  reviewed_at   DateTime?
+  paid_at       DateTime?
+  misi          misi                 @relation(fields: [misi_id], references: [id], onDelete: Cascade)
+  users         User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, misi_id])
+}
+
+model notifications {
+  id         String               @id @db.Uuid
+  user_id    String               @db.Uuid
+  title      String
+  message    String
+  category   NotificationCategory
+  priority   NotificationPriority @default(INFORMATIONAL)
+  action_url String?
+  read_at    DateTime?
+  created_at DateTime             @default(now())
+  users      User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, read_at])
+}
+
+model orders {
+  id                    String       @id @db.Uuid
+  user_id               String       @db.Uuid
+  order_number          String       @unique
+  package               PackageType
+  base_price            Int
+  discount              Int          @default(0)
+  total_price           Int
+  has_express           Boolean      @default(false)
+  status                OrderStatus  @default(SUBMITTED)
+  payment_method        String?
+  payment_order_id      String?
+  payment_payload       Json?
+  paid_at               DateTime?
+  processing_started_at DateTime?
+  ready_at              DateTime?
+  completed_at          DateTime?
+  created_at            DateTime     @default(now())
+  cv_projects           cv_projects?
+  users                 User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model referrals {
+  id                                 String         @id @db.Uuid
+  referrer_id                        String         @db.Uuid
+  referred_id                        String?        @db.Uuid
+  code                               String         @unique
+  status                             ReferralStatus @default(PENDING)
+  reward_amount                      Int
+  created_at                         DateTime       @default(now())
+  users_referrals_referred_idTousers User?          @relation("referrals_referred_idTousers", fields: [referred_id], references: [id])
+  users_referrals_referrer_idTousers User           @relation("referrals_referrer_idTousers", fields: [referrer_id], references: [id], onDelete: Cascade)
+}
+
+model reminders {
+  id             String       @id @db.Uuid
+  user_id        String       @db.Uuid
+  application_id String       @db.Uuid
+  title          String
+  remind_at      DateTime
+  is_done        Boolean      @default(false)
+  created_at     DateTime     @default(now())
+  applications   applications @relation(fields: [application_id], references: [id], onDelete: Cascade)
+  users          User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, remind_at, is_done])
+}
+
+model sessions {
+  id         String   @id @db.Uuid
+  expires_at DateTime
+  token      String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime
+  ip_address String?
+  user_agent String?
+  user_id    String   @db.Uuid
+  users      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model security_events {
+  id          String            @id @db.Uuid
+  user_id     String?           @db.Uuid
+  event_type  SecurityEventType
+  ip_address  String?           @db.VarChar(45)
+  user_agent  String?           @db.VarChar(512)
+  email       String?           @db.VarChar(255)
+  details     Json?
+  severity    LogSeverity       @default(WARNING)
+  resolved    Boolean           @default(false)
+  resolved_at DateTime?
+  created_at  DateTime          @default(now())
+
+  @@index([event_type, created_at])
+  @@index([ip_address, created_at])
+  @@index([severity])
+}
+
+model app_logs {
+  id          String       @id @db.Uuid
+  source      AppLogSource
+  level       LogSeverity  @default(INFO)
+  message     String
+  details     Json?
+  user_id     String?      @db.Uuid
+  request_id  String?      @db.VarChar(100)
+  ip_address  String?      @db.VarChar(45)
+  endpoint    String?      @db.VarChar(512)
+  method      String?      @db.VarChar(10)
+  status_code Int?
+  duration_ms Int?
+  created_at  DateTime     @default(now())
+
+  @@index([source, created_at])
+  @@index([level, created_at])
+  @@index([created_at])
+}
+
+model system_settings {
+  id          String   @id @db.Uuid
+  key         String   @unique
+  value       String
+  group       String
+  description String?
+  updated_at  DateTime
+  updated_by  String?  @db.Uuid
+  users       User?    @relation(fields: [updated_by], references: [id])
+}
+
+model transactions {
+  id               String            @id @db.Uuid
+  user_id          String            @db.Uuid
+  type             TransactionType
+  amount           Int
+  status           TransactionStatus @default(PENDING)
+  payment_order_id String?
+  payment_payload  Json?
+  description      String?
+  created_at       DateTime          @default(now())
+  users            User              @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model verifications {
+  id         String   @id @db.Uuid
+  identifier String
+  value      String
+  expires_at DateTime
+  created_at DateTime @default(now())
+  updated_at DateTime
+}
+
+model cv_learning_dictionary {
+  id         String   @id @default(uuid()) @db.Uuid
+  category   String   @db.VarChar(50)
+  value      String   @unique @db.VarChar(255)
+  frequency  Int      @default(1)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model withdrawals {
+  id                                    String           @id @db.Uuid
+  user_id                               String           @db.Uuid
+  amount                                Int
+  bank_name                             String
+  bank_account_number                   String
+  bank_account_name                     String
+  status                                WithdrawalStatus @default(PENDING)
+  rejected_reason                       String?
+  admin_notes                           String?
+  processed_by                          String?          @db.Uuid
+  processed_at                          DateTime?
+  created_at                            DateTime         @default(now())
+  users_withdrawals_processed_byTousers User?            @relation("withdrawals_processed_byTousers", fields: [processed_by], references: [id])
+  users_withdrawals_user_idTousers      User             @relation("withdrawals_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model workshops {
+  id              String   @id @db.Uuid
+  title           String
+  slug            String   @unique
+  description     String
+  cover_image_url String?
+  instructor      String
+  workshop_date   DateTime
+  duration_hours  Int
+  location        String
+  type            WorkType @default(ONLINE)
+  price           Int
+  external_url    String
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now())
+}
+
+enum CvStatus {
+  DRAFT
+  QUEUED
+  PROCESSING
+  AI_DONE
+  READY
+  FAILED
+}
+
+enum ApplicationStatus {
+  APPLIED
+  INTERVIEW
+  OFFERING
+  REJECTED
+  ACCEPTED
+}
+
+enum ApplicationSource {
+  MANUAL
+  EMPLOYR
+}
+
+enum CvSectionType {
+  PERSONAL
+  EXPERIENCE
+  EDUCATION
+  SKILL
+  PROJECT
+  CUSTOM
+}
+
+enum InterviewChance {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum MembershipTier {
+  FREE
+  BASIC
+  PRO
+  PREMIUM
+}
+
+enum MisiProofType {
+  SCREENSHOT
+  LINK
+  TEXT
+}
+
+enum MisiSubmissionStatus {
+  SUBMITTED
+  REVIEWING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+enum MisiType {
+  REGISTER_ACCOUNT
+  SURVEY
+  SOCIAL
+  DOWNLOAD
+  REVIEW
+  OTHER
+}
+
+enum NotificationCategory {
+  ORDER
+  MEMBERSHIP
+  TRACKER
+  CAREER
+  REFERRAL
+  DRAFT
+  OPPORTUNITY
+}
+
+enum NotificationPriority {
+  CRITICAL
+  IMPORTANT
+  INFORMATIONAL
+  SUCCESS
+}
+
+enum OrderStatus {
+  SUBMITTED
+  WAITING_PAYMENT
+  PAID
+  PROCESSING
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+enum PackageType {
+  BASIC
+  PRO
+  PREMIUM
+}
+
+enum ProcessingType {
+  STANDARD
+  EXPRESS
+}
+
+enum ReferralStatus {
+  PENDING
+  REGISTERED
+  REWARDED
+}
+
+enum Role {
+  USER
+  PREMIUM
+  ADMIN
+}
+
+enum LogSeverity {
+  DEBUG
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum SecurityEventType {
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGIN_BRUTE_FORCE
+  LOGOUT
+  PASSWORD_CHANGED
+  ROLE_CHANGED
+  UNAUTHORIZED_ACCESS
+  SESSION_HIJACK_SUSPECTED
+  API_KEY_LEAKED
+  SUSPICIOUS_IP
+  RATE_LIMIT_EXCEEDED
+  DATA_EXPORT
+  ADMIN_ACTION
+}
+
+enum AppLogSource {
+  AUTH
+  API
+  PAYMENT
+  CV_ENGINE
+  AI_GATEWAY
+  SYSTEM
+  ADMIN
+  CRON
+}
+
+enum SalaryPeriod {
+  MONTH
+  YEAR
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum TransactionType {
+  MEMBERSHIP
+  TOPUP
+  ADDON
+  REFERRAL_REWARD
+  MISI_REWARD
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+enum WorkType {
+  ONSITE
+  REMOTE
+  HYBRID
+  ONLINE
+}
+
+model SmtpAccount {
+  id          String   @id @default(uuid()) @db.Uuid
+  user_id     String   @db.Uuid
+  host        String
+  port        Int      @default(587)
+  secure      Boolean  @default(false)
+  username    String
+  password    String
+  from_name   String
+  from_email  String?
+  daily_limit Int      @default(500)
+  sent_today  Int      @default(0)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  users       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("smtp_accounts")
+}
+
+model EmailBatchJob {
+  id           String   @id @default(uuid()) @db.Uuid
+  user_id      String   @db.Uuid
+  title        String   @default("Batch Lamaran")
+  status       String   @default("QUEUED") // QUEUED, RUNNING, PAUSED, COMPLETED, FAILED
+  total_emails Int      @default(0)
+  sent_count   Int      @default(0)
+  failed_count Int      @default(0)
+  payload      Json?
+  logs         Json?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  users        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("email_batch_jobs")
+}
+
+model EarlyTester {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  email        String   @unique
+  phone_number String?
+  role_status  String? // SMA_SMK, MAHASISWA, FRESH_GRAD, JOB_SEEKER
+  status       String   @default("REGISTERED") // REGISTERED, INVITED, ACTIVATED
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  @@map("early_testers")
+}
+
+model Visitor {
+  id                 String   @id @default(uuid()) @db.Uuid
+  visitor_id         String   @unique @db.VarChar(100)
+  user_id            String?  @db.Uuid
+  first_seen         DateTime @default(now())
+  last_seen          DateTime @default(now())
+  is_active          Boolean  @default(true)
+  current_page       String?  @db.VarChar(500)
+  current_title      String?  @db.VarChar(500)
+  total_visits       Int      @default(1)
+  total_pageviews    Int      @default(1)
+  total_duration_sec Int      @default(0)
+  device_type        String?  @db.VarChar(50)
+  browser            String?  @db.VarChar(100)
+  browser_version    String?  @db.VarChar(50)
+  os                 String?  @db.VarChar(100)
+  screen_resolution  String?  @db.VarChar(50)
+  ip_address         String?  @db.VarChar(100)
+  country            String?  @db.VarChar(100)
+  city               String?  @db.VarChar(100)
+  first_referrer     String?  @db.VarChar(1000)
+  traffic_source     String?  @db.VarChar(100)
+  utm_source         String?  @db.VarChar(255)
+  utm_medium         String?  @db.VarChar(255)
+  utm_campaign       String?  @db.VarChar(255)
+  utm_content        String?  @db.VarChar(255)
+  utm_term           String?  @db.VarChar(255)
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  users      User?             @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  sessions   VisitorSession[]
+  page_views VisitorPageView[]
+  activities VisitorActivity[]
+
+  @@index([user_id])
+  @@index([last_seen])
+  @@index([traffic_source])
+  @@index([device_type])
+  @@map("visitors")
+}
+
+model VisitorSession {
+  id              String   @id @default(uuid()) @db.Uuid
+  session_id      String   @unique @db.VarChar(100)
+  visitor_id      String   @db.VarChar(100)
+  user_id         String?  @db.Uuid
+  started_at      DateTime @default(now())
+  last_active_at  DateTime @default(now())
+  duration_sec    Int      @default(0)
+  entry_page      String   @db.VarChar(500)
+  exit_page       String?  @db.VarChar(500)
+  pageviews_count Int      @default(1)
+  referrer        String?  @db.VarChar(1000)
+  traffic_source  String?  @db.VarChar(100)
+  utm_source      String?  @db.VarChar(255)
+  utm_medium      String?  @db.VarChar(255)
+  utm_campaign    String?  @db.VarChar(255)
+  device_type     String?  @db.VarChar(50)
+  browser         String?  @db.VarChar(100)
+  os              String?  @db.VarChar(100)
+  ip_address      String?  @db.VarChar(100)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  visitor    Visitor           @relation(fields: [visitor_id], references: [visitor_id], onDelete: Cascade)
+  page_views VisitorPageView[]
+  activities VisitorActivity[]
+
+  @@index([visitor_id])
+  @@index([started_at])
+  @@map("visitor_sessions")
+}
+
+model VisitorPageView {
+  id           String   @id @default(uuid()) @db.Uuid
+  visitor_id   String   @db.VarChar(100)
+  session_id   String   @db.VarChar(100)
+  url          String   @db.VarChar(1000)
+  path         String   @db.VarChar(500)
+  title        String?  @db.VarChar(500)
+  referrer     String?  @db.VarChar(1000)
+  duration_sec Int      @default(0)
+  created_at   DateTime @default(now())
+
+  visitor Visitor        @relation(fields: [visitor_id], references: [visitor_id], onDelete: Cascade)
+  session VisitorSession @relation(fields: [session_id], references: [session_id], onDelete: Cascade)
+
+  @@index([visitor_id])
+  @@index([session_id])
+  @@index([path])
+  @@index([created_at])
+  @@map("visitor_page_views")
+}
+
+model VisitorActivity {
+  id            String   @id @default(uuid()) @db.Uuid
+  visitor_id    String   @db.VarChar(100)
+  session_id    String   @db.VarChar(100)
+  user_id       String?  @db.Uuid
+  activity_type String   @db.VarChar(100)
+  activity_name String   @db.VarChar(255)
+  page_path     String   @db.VarChar(500)
+  metadata      Json?
+  created_at    DateTime @default(now())
+
+  visitor Visitor        @relation(fields: [visitor_id], references: [visitor_id], onDelete: Cascade)
+  session VisitorSession @relation(fields: [session_id], references: [session_id], onDelete: Cascade)
+  users   User?          @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([visitor_id])
+  @@index([session_id])
+  @@index([user_id])
+  @@index([activity_type])
+  @@index([created_at])
+  @@map("visitor_activities")
+}

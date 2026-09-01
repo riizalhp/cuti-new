@@ -16,7 +16,10 @@ import {
   Sun,
   Moon,
   Activity,
-  Zap
+  UserPlus,
+  Zap,
+  Globe,
+  Radio,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -27,10 +30,13 @@ interface NavItem {
   title: string
   href: string
   icon: React.ElementType
+  badge?: string
 }
 
 const navItems: NavItem[] = [
   { title: "Dashboard", href: "/", icon: LayoutDashboard },
+  { title: "Visitor Live", href: "/visitors", icon: Globe },
+  { title: "Pre-Register", href: "/pre-register", icon: UserPlus },
   { title: "Users", href: "/users", icon: Users },
   { title: "CV Management", href: "/cv", icon: FileText },
   { title: "AI Config & Usage", href: "/ai-config", icon: Cpu },
@@ -54,12 +60,28 @@ function getAdminSession() {
 export function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const [adminName, setAdminName] = useState("")
+  const [liveVisitorCount, setLiveVisitorCount] = useState<number>(0)
   const pathname = usePathname()
   const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
     const session = getAdminSession()
     if (session?.name) setAdminName(session.name)
+
+    // Fetch live visitors count periodically
+    const fetchLiveCount = async () => {
+      try {
+        const res = await fetch("/api/visitors/live")
+        const json = await res.json()
+        if (json.success && typeof json.data?.count === "number") {
+          setLiveVisitorCount(json.data.count)
+        }
+      } catch {}
+    }
+
+    fetchLiveCount()
+    const interval = setInterval(fetchLiveCount, 15000)
+    return () => clearInterval(interval)
   }, [])
 
   return (
@@ -133,12 +155,21 @@ export function AdminSidebar() {
               >
                 <item.icon size={19} className={`flex-shrink-0 ${isActive ? "text-orange-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                 {!collapsed && (
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    {item.title}
-                  </motion.span>
+                  <div className="flex items-center justify-between flex-1 min-w-0">
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="truncate"
+                    >
+                      {item.title}
+                    </motion.span>
+                    {item.href === "/visitors" && liveVisitorCount > 0 && (
+                      <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
+                        <span>{liveVisitorCount}</span>
+                      </span>
+                    )}
+                  </div>
                 )}
               </Link>
             )
