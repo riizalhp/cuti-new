@@ -1,0 +1,6 @@
+---
+import { getAppBaseUrl } from '../utils/env';
+
+const appBaseUrl = getAppBaseUrl(Astro.request.url);
+return Astro.redirect(`${appBaseUrl}/login`, 302);
+---

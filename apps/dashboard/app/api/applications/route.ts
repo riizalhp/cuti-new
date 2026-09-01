@@ -97,8 +97,8 @@ export async function GET(req: NextRequest) {
         notes: firstNote,
         portal: insight.portal || 'Direct',
         portalUrl: app.job_url || insight.portalUrl || '',
-        matchScore: app.match_score ?? 85,
-        atsScore: app.ats_score ?? 88,
+        matchScore: app.match_score ?? 0,
+        atsScore: app.ats_score ?? 0,
         interviewChance: app.interview_chance || 'MEDIUM',
       };
     });
@@ -157,8 +157,8 @@ export async function POST(req: NextRequest) {
         status: dbStatus,
         source: 'MANUAL',
         applied_at: new Date(),
-        match_score: 85,
-        ats_score: 88,
+        match_score: typeof body.matchScore === 'number' ? body.matchScore : null,
+        ats_score: typeof body.atsScore === 'number' ? body.atsScore : null,
         ai_insight: insightPayload,
         updated_at: new Date(),
       },
@@ -186,8 +186,8 @@ export async function POST(req: NextRequest) {
       notes: body.notes || '',
       portal: insightPayload.portal,
       portalUrl: insightPayload.portalUrl,
-      matchScore: 85,
-      atsScore: 88,
+      matchScore: newApplication.match_score ?? 0,
+      atsScore: newApplication.ats_score ?? 0,
     };
 
     return NextResponse.json({ success: true, data: result });

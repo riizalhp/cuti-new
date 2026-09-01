@@ -174,4 +174,11 @@ select option {
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
 }
 
+/* Sembunyikan icon unhide/reveal bawaan browser (seperti Microsoft Edge) */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+
 

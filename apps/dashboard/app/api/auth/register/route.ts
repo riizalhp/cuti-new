@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@cuti/db';
-import { logSecurityEvent, logApp, extractRequestContext } from '@cuti/db/logger';
+import { prisma, logSecurityEvent, logApp, extractRequestContext } from '@cuti/db';
 import crypto from 'crypto';
 
 const corsHeaders = {
@@ -41,110 +40,94 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    try {
-      // Check if email already exists in real database
-      const existingUser = await prisma.user.findUnique({
-        where: { email: cleanEmail },
-      });
+    // Check if email already exists in real database
+    const existingUser = await prisma.user.findUnique({
+      where: { email: cleanEmail },
+    });
 
-      if (existingUser) {
-        return NextResponse.json(
-          { success: false, message: 'Email sudah terdaftar. Silakan gunakan email lain atau langsung masuk.' },
-          { status: 409, headers: corsHeaders }
-        );
-      }
-
-      const hashedPassword = hashPassword(password);
-      const userId = crypto.randomUUID();
-      const accountId = crypto.randomUUID();
-      const membershipId = crypto.randomUUID();
-
-      // Create User, Account, and Membership in PostgreSQL transaction
-      const now = new Date();
-      const [newUser] = await prisma.$transaction([
-        prisma.user.create({
-          data: {
-            id: userId,
-            email: cleanEmail,
-            name: cleanName,
-            role: 'USER',
-            updated_at: now,
-          },
-        }),
-        prisma.accounts.create({
-          data: {
-            id: accountId,
-            user_id: userId,
-            account_id: userId,
-            provider_id: 'credential',
-            password: hashedPassword,
-            updated_at: now,
-          },
-        }),
-        prisma.membership.create({
-          data: {
-            id: membershipId,
-            user_id: userId,
-            tier: 'FREE',
-            is_lifetime: true,
-            is_active: true,
-          },
-        }),
-      ]);
-
-      const userData = {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-      };
-
-      const ctx = extractRequestContext(req);
-      logSecurityEvent({ eventType: 'LOGIN_SUCCESS', ip: ctx.ip, userAgent: ctx.userAgent, email: cleanEmail, userId: newUser.id, severity: 'INFO', details: { action: 'registration' } });
-      logApp({ source: 'AUTH', level: 'INFO', message: `New user registered: ${cleanEmail}`, ip: ctx.ip, endpoint: '/api/auth/register', method: 'POST', statusCode: 201, userId: newUser.id });
-
-      const response = NextResponse.json(
-        {
-          success: true,
-          message: 'Akun berhasil didaftarkan di database.',
-          data: userData,
-        },
-        { status: 201, headers: corsHeaders }
+    if (existingUser) {
+      return NextResponse.json(
+        { success: false, message: 'Email sudah terdaftar. Silakan gunakan email lain atau langsung masuk.' },
+        { status: 409, headers: corsHeaders }
       );
-
-      // Set persistent auto-login cookie (30 days)
-      const thirtyDaysInSeconds = 30 * 24 * 60 * 60;
-      response.cookies.set({
-        name: 'cuti_user_session',
-        value: encodeURIComponent(JSON.stringify(userData)),
-        maxAge: thirtyDaysInSeconds,
-        path: '/',
-        sameSite: 'lax',
-        httpOnly: false,
-      });
-
-      return response;
-    } catch (dbError: any) {
-      console.warn('Database registration warning, falling back to local session:', dbError?.message || dbError);
     }
 
-    // Dev / Resilient Registration Fallback
+    const hashedPassword = hashPassword(password);
+    const userId = crypto.randomUUID();
+    const accountId = crypto.randomUUID();
+    const membershipId = crypto.randomUUID();
+
+    // Create User, Account, and Membership in PostgreSQL transaction
+    const now = new Date();
+    const [newUser] = await prisma.$transaction([
+      prisma.user.create({
+        data: {
+          id: userId,
+          email: cleanEmail,
+          name: cleanName,
+          role: 'USER',
+          updated_at: now,
+        },
+      }),
+      prisma.accounts.create({
+        data: {
+          id: accountId,
+          user_id: userId,
+          account_id: userId,
+          provider_id: 'credential',
+          password: hashedPassword,
+          updated_at: now,
+        },
+      }),
+      prisma.membership.create({
+        data: {
+          id: membershipId,
+          user_id: userId,
+          tier: 'FREE',
+          is_lifetime: true,
+          is_active: true,
+        },
+      }),
+    ]);
+
     const userData = {
-      id: `usr_${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`,
-      name: cleanName,
-      email: cleanEmail,
-      role: 'USER',
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
     };
+
+    const ctx = extractRequestContext(req);
+    logSecurityEvent({
+      eventType: 'LOGIN_SUCCESS',
+      ip: ctx.ip,
+      userAgent: ctx.userAgent,
+      email: cleanEmail,
+      userId: newUser.id,
+      severity: 'INFO',
+      details: { action: 'registration' },
+    });
+    logApp({
+      source: 'AUTH',
+      level: 'INFO',
+      message: `New user registered: ${cleanEmail}`,
+      ip: ctx.ip,
+      endpoint: '/api/auth/register',
+      method: 'POST',
+      statusCode: 201,
+      userId: newUser.id,
+    });
 
     const response = NextResponse.json(
       {
         success: true,
-        message: 'Akun berhasil dibuat.',
+        message: 'Akun berhasil didaftarkan di database.',
         data: userData,
       },
       { status: 201, headers: corsHeaders }
     );
 
+    // Set persistent auto-login cookie (30 days)
     const thirtyDaysInSeconds = 30 * 24 * 60 * 60;
     response.cookies.set({
       name: 'cuti_user_session',

@@ -72,10 +72,6 @@ interface JobMatchTarget {
   analyzedAt: string;
 }
 
-// Data target lowongan contoh TIDAK dipakai lagi — semua dihitung dari data
-// nyata (CV & lowongan dari database). Daftar awal kosong sampai API selesai.
-const defaultSkills = ['TypeScript', 'React', 'Next.js', 'Node.js', 'Tailwind CSS', 'Git', 'REST API'];
-
 const initialJobTargets: JobMatchTarget[] = [] as JobMatchTarget[];
 
 const samplePresets = [
@@ -127,7 +123,7 @@ export const CvMatchAnalysisView: React.FC = () => {
         id: job.id,
         position: job.title || job.position || 'Posisi',
         company: job.company || 'Perusahaan',
-        location: job.location || 'Jakarta',
+        location: job.location || 'Indonesia',
         externalUrl: job.externalUrl || '',
         matchScore,
         atsScore,
@@ -140,10 +136,10 @@ export const CvMatchAnalysisView: React.FC = () => {
           hardSkills: Math.min(95, matchScore + 2),
           softSkills: Math.min(95, matchScore - 2),
           experience: Math.min(95, matchScore - 5),
-          education: 88,
+          education: Math.min(95, Math.max(60, matchScore)),
         },
         matchedKeywords,
-        missingKeywords: missingKeywords.length > 0 ? missingKeywords : ['GraphQL', 'Unit Testing', 'CI/CD Pipeline', 'System Design'],
+        missingKeywords,
         strengths: matchedKeywords.length > 0
           ? [`Skill yang kamu miliki (${matchedKeywords.slice(0, 3).join(', ')}) selaras dengan kualifikasi ${job.company}.`]
           : ['Perbanyak kata kunci relevan di CV agar cocok dengan lowongan ini.'],
@@ -186,7 +182,7 @@ export const CvMatchAnalysisView: React.FC = () => {
           const skillList: string[] =
             Array.isArray(activeSkills) && activeSkills.length > 0
               ? activeSkills.map((s: any) => (typeof s === 'string' ? s : s?.name || String(s)))
-              : defaultSkills;
+              : [];
           const targets = buildTargetsFromJobs(jobs, skillList);
           if (targets.length > 0) {
             setJobTargets(targets);
@@ -260,6 +256,55 @@ export const CvMatchAnalysisView: React.FC = () => {
     setIsAnalyzing(true);
     setAnalysisStep(0);
 
+    // Extract actual missing keywords from Job Description (words in JD that are not in CV skills)
+    const cvSkills = (activeCv.skills || []).map((s) => s.toLowerCase());
+    const haystack = `${newPosition} ${newCompany} ${newDescription}`.toLowerCase();
+    const matchedKeywords = (activeCv.skills || []).filter((s) => haystack.includes(s.toLowerCase()));
+
+    // Simple NLP tokenization of JD to extract candidate requirement terms
+    const jdWords = Array.from(
+      new Set(
+        newDescription
+          .replace(/[^\w\s+#.-]/g, ' ')
+          .split(/\s+/)
+          .filter((w) => w.length >= 3 && !/^(dan|yang|untuk|dengan|dari|pada|atau|kami|anda|bisa|akan|the|and|for|with|from)$/i.test(w))
+      )
+    );
+    const missingKeywords = jdWords
+      .filter((word) => !cvSkills.some((s) => s.includes(word.toLowerCase())))
+      .slice(0, 5);
+
+    const computedScore = Math.min(96, Math.max(40, 40 + matchedKeywords.length * 10));
+    const newTarget: JobMatchTarget = {
+      id: `job-${Date.now()}`,
+      position: newPosition,
+      company: newCompany,
+      matchScore: computedScore,
+      atsScore: Math.min(98, computedScore + 4),
+      stars: computedScore >= 85 ? 5 : computedScore >= 75 ? 4 : computedScore >= 60 ? 3 : 2,
+      statusBadge: computedScore >= 85 ? 'Sangat Layak' : computedScore >= 75 ? 'Layak' : computedScore >= 60 ? 'Perlu Optimasi' : 'Kurang Cocok',
+      statusColor: computedScore >= 85 ? 'emerald' : computedScore >= 75 ? 'blue' : computedScore >= 60 ? 'amber' : 'rose',
+      analyzedAt: 'Baru saja',
+      description: newDescription,
+      breakdown: {
+        hardSkills: Math.min(95, computedScore + 2),
+        softSkills: Math.min(95, computedScore - 2),
+        experience: Math.min(95, computedScore - 5),
+        education: Math.min(95, Math.max(60, computedScore)),
+      },
+      matchedKeywords,
+      missingKeywords,
+      strengths: matchedKeywords.length > 0
+        ? [
+            `Skill yang kamu miliki (${matchedKeywords.slice(0, 3).join(', ')}) selaras dengan kualifikasi ${newPosition} di ${newCompany}.`,
+            'Struktur pengalaman jelas dan relevan dengan posisi.',
+          ]
+        : ['Tidak banyak kata kunci skill kamu yang ditemukan di deskripsi lowongan ini.'],
+      improvements: [
+        'Tambahkan kata kunci dari deskripsi lowongan ke CV kamu untuk menaikkan skor ATS.',
+      ],
+    };
+
     let step = 0;
     const interval = setInterval(() => {
       step += 1;
@@ -268,43 +313,6 @@ export const CvMatchAnalysisView: React.FC = () => {
       } else {
         clearInterval(interval);
         setIsAnalyzing(false);
-
-        // Hitung skor dari kecocokan skill CV nyata dengan teks job description
-        const cvSkills = (activeCv.skills || []).map((s) => s.toLowerCase());
-        const haystack = `${newPosition} ${newCompany} ${newDescription}`.toLowerCase();
-        const matchedKeywords = (activeCv.skills || []).filter((s) => haystack.includes(s.toLowerCase()));
-        const missingKeywords = ['GraphQL', 'Unit Testing', 'CI/CD Pipeline', 'System Design', 'Docker']
-          .filter((k) => !matchedKeywords.some((mk) => k.toLowerCase() === mk.toLowerCase()));
-        const computedScore = Math.min(96, Math.max(40, 40 + matchedKeywords.length * 10));
-        const newTarget: JobMatchTarget = {
-          id: `job-${Date.now()}`,
-          position: newPosition,
-          company: newCompany,
-          matchScore: computedScore,
-          atsScore: Math.min(98, computedScore + 4),
-          stars: computedScore >= 85 ? 5 : computedScore >= 75 ? 4 : computedScore >= 60 ? 3 : 2,
-          statusBadge: computedScore >= 85 ? 'Sangat Layak' : computedScore >= 75 ? 'Layak' : computedScore >= 60 ? 'Perlu Optimasi' : 'Kurang Cocok',
-          statusColor: computedScore >= 85 ? 'emerald' : computedScore >= 75 ? 'blue' : computedScore >= 60 ? 'amber' : 'rose',
-          analyzedAt: 'Baru saja',
-          description: newDescription,
-          breakdown: {
-            hardSkills: Math.min(95, computedScore + 2),
-            softSkills: Math.min(95, computedScore - 2),
-            experience: Math.min(95, computedScore - 5),
-            education: 88,
-          },
-          matchedKeywords: matchedKeywords.length > 0 ? matchedKeywords : ['TypeScript', 'React.js', 'Git', 'REST API'],
-          missingKeywords,
-          strengths: matchedKeywords.length > 0
-            ? [
-                `Skill yang kamu miliki (${matchedKeywords.slice(0, 3).join(', ')}) selaras dengan kualifikasi ${newPosition} di ${newCompany}.`,
-                'Struktur pengalamatan proyek jelas dan mudah dipahami.',
-              ]
-            : ['Tidak banyak kata kunci skill kamu yang ditemukan di deskripsi lowongan ini.'],
-          improvements: [
-            'Tambahkan kata kunci dari deskripsi lowongan ke CV kamu untuk menaikkan skor ATS.',
-          ],
-        };
 
         setJobTargets((prev) => {
           const updated = [newTarget, ...prev];
@@ -317,7 +325,7 @@ export const CvMatchAnalysisView: React.FC = () => {
         setNewCompany('');
         setNewDescription('');
       }
-    }, 450);
+    }, 150);
   };
 
   // Toggle Compare Checkbox

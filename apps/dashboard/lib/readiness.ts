@@ -149,7 +149,7 @@ export function calculateReadinessScore(
     if (Array.isArray(cv.projects)) totalProjects += cv.projects.length;
     if (Array.isArray(cv.internships)) totalInternships += cv.internships.length;
     if (Array.isArray(cv.skills)) totalSkills += cv.skills.length;
-    totalAtsScore += cv.atsScore ?? 85;
+    totalAtsScore += typeof cv.atsScore === 'number' ? cv.atsScore : 0;
   });
 
   const avgAtsScore = Math.round(totalAtsScore / cvs.length);

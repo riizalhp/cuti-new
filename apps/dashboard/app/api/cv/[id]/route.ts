@@ -70,7 +70,7 @@ export async function GET(
     const computedScore = calculateAtsScore(fullData).totalScore;
     const finalAtsScore = (parsedData.atsScore && parsedData.atsScore > 0)
       ? parsedData.atsScore
-      : (computedScore > 0 ? computedScore : 85);
+      : (computedScore > 0 ? computedScore : 0);
 
     const mapped = {
       ...fullData,

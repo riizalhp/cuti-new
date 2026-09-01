@@ -48,28 +48,12 @@ export async function GET(req: NextRequest) {
         applications: true,
       },
       orderBy: { remind_at: 'asc' },
-      take: 5,
-    });
-
-    // 2. Fetch active applications (Interview, Offering, Screening)
-    const activeApps = await prisma.applications.findMany({
-      where: {
-        user_id: user.id,
-        status: { in: [ApplicationStatus.INTERVIEW, ApplicationStatus.OFFERING, ApplicationStatus.APPLIED] },
-      },
-      include: {
-        application_notes: {
-          orderBy: { created_at: 'desc' },
-          take: 1,
-        },
-      },
-      orderBy: { updated_at: 'desc' },
       take: 6,
     });
 
     const schedulesList: any[] = [];
 
-    // Map explicit reminders
+    // Map explicit reminders from user
     for (const rem of dbReminders) {
       const { dayLabel, isToday } = formatDayLabel(rem.remind_at);
       schedulesList.push({
@@ -84,68 +68,6 @@ export async function GET(req: NextRequest) {
         isToday,
         rawDate: rem.remind_at.getTime(),
       });
-    }
-
-    // Map dynamic application schedules if not already in reminders
-    let dayOffset = 0;
-    for (const app of activeApps) {
-      const insight = (typeof app.ai_insight === 'object' && app.ai_insight !== null ? app.ai_insight : {}) as Record<string, any>;
-      const displayStatus = insight.displayStatus || (app.status === ApplicationStatus.INTERVIEW ? 'Interview' : (app.status === ApplicationStatus.OFFERING ? 'Offering' : 'Screening'));
-
-      if (displayStatus === 'Interview' || app.status === ApplicationStatus.INTERVIEW) {
-        // Target: Today or soon
-        const interviewDate = new Date();
-        interviewDate.setHours(14, 0, 0, 0);
-
-        const { dayLabel, isToday } = formatDayLabel(interviewDate);
-        schedulesList.push({
-          id: `sched-${app.id}-int`,
-          dayLabel,
-          timeLabel: '14:00 WIB',
-          title: `Interview ${app.company_name}`,
-          type: `${app.position} (Interview User)`,
-          badgeColor: 'bg-amber-50 text-amber-600 dark:bg-amber-950/80 dark:text-amber-400 border-amber-200 dark:border-amber-800',
-          iconType: 'video',
-          href: '/interview',
-          isToday,
-          rawDate: interviewDate.getTime(),
-        });
-      } else if (displayStatus === 'Offering' || app.status === ApplicationStatus.OFFERING) {
-        const offeringDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
-        offeringDate.setHours(23, 59, 0, 0);
-
-        const { dayLabel, isToday } = formatDayLabel(offeringDate);
-        schedulesList.push({
-          id: `sched-${app.id}-off`,
-          dayLabel,
-          timeLabel: '23:59 WIB',
-          title: `Konfirmasi Offering ${app.company_name}`,
-          type: `Batas Penerimaan Tawaran`,
-          badgeColor: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/80 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
-          iconType: 'alert',
-          href: '/tracker',
-          isToday,
-          rawDate: offeringDate.getTime(),
-        });
-      } else if (displayStatus === 'Screening') {
-        const screeningDate = new Date(Date.now() + (dayOffset === 0 ? 1 : 4) * 24 * 60 * 60 * 1000);
-        screeningDate.setHours(10, 0, 0, 0);
-
-        const { dayLabel, isToday } = formatDayLabel(screeningDate);
-        schedulesList.push({
-          id: `sched-${app.id}-scr`,
-          dayLabel,
-          timeLabel: '10:00 WIB',
-          title: `Follow-up HR ${app.company_name}`,
-          type: `Status Screening & Review CV`,
-          badgeColor: 'bg-blue-50 text-blue-600 dark:bg-blue-950/80 dark:text-blue-400 border-blue-200 dark:border-navy-800',
-          iconType: 'mail',
-          href: '/tracker',
-          isToday,
-          rawDate: screeningDate.getTime(),
-        });
-        dayOffset++;
-      }
     }
 
     // Sort chronologically and take at most 4 items

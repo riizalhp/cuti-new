@@ -183,30 +183,95 @@ export const InterviewView: React.FC = () => {
   const completedCount = checkListItems.filter((item) => item.done).length;
   const progressPercent = Math.round((completedCount / checkListItems.length) * 100);
 
-  // Handle AI Simulation Submit
-  const handleSimulateSubmit = () => {
+  // Handle AI Simulation Submit via /api/ai
+  const handleSimulateSubmit = async () => {
     if (!userAnswer.trim()) return;
     setIsEvaluating(true);
 
-    setTimeout(() => {
-      setIsEvaluating(false);
+    const currentQuestion = mockSimQuestions[simQuestionIndex];
+
+    try {
+      const prompt = `Anda adalah Evaluator Interview AI Profesional untuk platform persiapan karier.
+Evaluasi jawaban kandidat berikut secara objektif dan mendalam.
+
+POSISI TARGET: ${selectedRole}
+JENIS INTERVIEW: ${selectedLevel}
+PERTANYAAN: "${currentQuestion.q}"
+TIPS / PANDUAN: ${currentQuestion.hint}
+JAWABAN KANDIDAT: "${userAnswer}"
+
+Kembalikan HANYA JSON valid tanpa markdown, tanpa teks pengantar, dengan format persis:
+{
+  "score": 85,
+  "feedback": "Penjelasan evaluasi menyeluruh terhadap jawaban kandidat (2-3 kalimat)...",
+  "strengths": [
+    "Poin kelebihan 1...",
+    "Poin kelebihan 2...",
+    "Poin kelebihan 3..."
+  ],
+  "improvements": [
+    "Saran perbaikan 1...",
+    "Saran perbaikan 2..."
+  ],
+  "sampleAnswer": "Contoh jawaban ideal yang ringkas, kuat, menggunakan metode STAR dan relevan untuk posisi ini..."
+}`;
+
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          feature: 'interview_simulator',
+          task: 'interview_simulator',
+          promptName: 'AI Interview Simulation Evaluator',
+          prompt,
+          systemInstruction: 'Anda adalah Senior HR & Technical Hiring Manager. Evaluasi jawaban interview secara profesional, konstruktif, dan kembalikan HANYA format JSON valid.',
+        }),
+      });
+
+      if (!res.ok) throw new Error(`AI API error ${res.status}`);
+
+      const json = await res.json();
+      if (!json.text) throw new Error('Empty AI response');
+
+      const cleaned = json.text.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const parsed = JSON.parse(cleaned);
+
       setEvaluationResult({
-        score: 88,
-        feedback:
-          'Jawaban Anda sangat terstruktur dengan baik. Anda berhasil menyampaikan alur perbaikan teknis secara kronologis dan profesional.',
+        score: typeof parsed.score === 'number' ? parsed.score : 75,
+        feedback: parsed.feedback || 'Jawaban Anda telah dievaluasi.',
+        strengths: Array.isArray(parsed.strengths) && parsed.strengths.length > 0 ? parsed.strengths : ['Struktur penyampaian cukup baik.'],
+        improvements: Array.isArray(parsed.improvements) && parsed.improvements.length > 0 ? parsed.improvements : ['Tingkatkan contoh metrik nyata.'],
+        sampleAnswer: parsed.sampleAnswer || 'Jelaskan situasi spesifik, tindakan Anda, dan hasil terukur yang dicapai.',
+      });
+    } catch (err) {
+      console.warn('[Interview Simulator AI Error, fallback to rule-based analysis]:', err);
+      // Dynamic fallback based on real answer length and STAR keyword detection
+      const text = userAnswer.toLowerCase();
+      const hasMetric = /\d+%|\d+\s*(jt|juta|persen|ribu|user|klien|bulan|hari)/.test(text);
+      const hasAction = /saya\s+(melakukan|mengembangkan|memimpin|menganalisis|membuat|memperbaiki|mengatasi|merancang)/.test(text);
+      const wordCount = userAnswer.trim().split(/\s+/).length;
+
+      let score = 65;
+      if (wordCount >= 40) score += 10;
+      if (hasMetric) score += 15;
+      if (hasAction) score += 10;
+
+      setEvaluationResult({
+        score: Math.min(95, score),
+        feedback: `Jawaban Anda untuk posisi ${selectedRole} (${selectedLevel}) telah dianalisis. ${hasMetric ? 'Bagus! Anda menyertakan metrik/angka konkret.' : 'Catatan: Tambahkan angka atau metrik kuantitatif untuk memperkuat dampak jawaban.'}`,
         strengths: [
-          'Penggunaan alur cerita metode STAR sangat runtut dan jelas.',
-          'Menyoroti dampaknya pada efisiensi sistem dan kenyamanan pengguna.',
-          'Menunjukkan kepemimpinan dan sikap tenang dalam kondisi krisis.',
+          hasAction ? 'Menggunakan kata kerja aksi aktif yang menunjukkan inisiatif.' : 'Topik relevan dengan pertanyaan yang diajukan.',
+          wordCount >= 40 ? 'Penjelasan cukup mendalam dan terstruktur.' : 'Jawaban langsung ke inti poin.',
         ],
         improvements: [
-          'Tambahkan matrik kuantitatif terukur (contoh: persentase penurunan error atau kecepatan pemulihan).',
-          'Sebutkan alat bantu penanganan log/monitoring yang digunakan secara spesifik.',
+          !hasMetric ? 'Sertakan metrik kuantitatif (%) atau data penurunan/peningkatan hasil.' : 'Jelaskan lebih detail peran pribadi dibanding tim.',
+          'Gunakan alur STAR (Situation, Task, Action, Result) secara berurutan.',
         ],
-        sampleAnswer:
-          'Saat terjadi kendala di server produksi, saya mengisolasi modul database yang bermasalah, memulihkan cadangan dalam 15 menit, dan menerapkan unit test otomatis untuk mencegah kejadian serupa.',
+        sampleAnswer: `Pada saat menghadapi tantangan serupa di posisi ${selectedRole}, saya mengidentifikasi akar masalah, berkoordinasi dengan stakeholder terkait, dan mengeksekusi solusi mitigasi sehingga berhasil menyelesaikan kendala dengan cepat.`,
       });
-    }, 1200);
+    } finally {
+      setIsEvaluating(false);
+    }
   };
 
   return (
@@ -214,14 +279,14 @@ export const InterviewView: React.FC = () => {
       {/* Page Header Standardized */}
       <PageHeader
         title="Pusat Persiapan Interview"
-        subtitle="Latih jawaban interview Anda dengan Evaluator Sistem, pelajari bank pertanyaan HR & User, serta taktik pertanyaan jebakan."
+        subtitle="Latih jawaban interview Anda dengan Evaluator AI, pelajari bank pertanyaan HR & User, serta taktik pertanyaan jebakan."
         icon={Mic}
         badge="Interview Prep"
         stats={[
           {
-            label: 'Skor Kesiapan',
-            value: '85 / 100 (Siap)',
-            icon: Sparkles,
+            label: 'Checklist Kesiapan',
+            value: `${completedCount} / ${checkListItems.length} Selesai (${progressPercent}%)`,
+            icon: CheckCircle2,
             colorClass: 'text-indigo-600 dark:text-indigo-400',
           },
         ]}

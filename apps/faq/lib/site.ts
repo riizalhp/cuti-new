@@ -21,9 +21,22 @@ export const FAQ_ENV: EnvName = detectEnv();
 
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://faq.employr.id";
 
-export const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL ||
-  (FAQ_ENV === "production" ? "https://app.employr.id" : "http://localhost:3000");
+export function getAppUrl(path = ''): string {
+  const cleanPath = path ? (path.startsWith('/') ? path : `/${path}`) : '';
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return `${process.env.NEXT_PUBLIC_APP_URL}${cleanPath}`;
+  }
+  if (typeof window !== 'undefined') {
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(window.location.hostname);
+    if (isLocalhost || isIp || FAQ_ENV !== 'production') {
+      return `${window.location.protocol}//${window.location.hostname}:3000${cleanPath}`;
+    }
+  }
+  return FAQ_ENV === 'production' ? `https://app.employr.id${cleanPath}` : `http://localhost:3000${cleanPath}`;
+}
+
+export const APP_URL = getAppUrl();
 
 export const SITE_NAME = "Pusat Bantuan Employr";
 

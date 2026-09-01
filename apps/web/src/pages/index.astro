@@ -17,16 +17,17 @@ import dashboard3 from '../assets/dashboard-3.webp';
 import dashboard4 from '../assets/dashboard-4.webp';
 import dashboard1 from '../assets/dashboard-1.webp';
 import dashboard2 from '../assets/dashboard-2.webp';
+import ReviewsCarousel from '../components/employer/ReviewsCarousel';
+import FooterReveal from '../components/employer/FooterReveal';
 
 const heroImage = '/images/hero-section.webp';
-const commuteVideo = '/vidio/fish-swim.webm';
 const logoMark = '/logo.webp';
 
 const navItems = [
-  ['Produk', '#product'],
-  ['Lowongan', '#jobs'],
-  ['Karier', '#career'],
-  ['Wawasan', '#resources'],
+  ['Product', '#product'],
+  ['Jobs', '#jobs'],
+  ['Career', '#career'],
+  ['Insights', '#resources'],
 ] as const;
 
 const faqSchema = {
@@ -35,18 +36,18 @@ const faqSchema = {
   mainEntity: [
     {
       '@type': 'Question',
-      name: 'Apakah Employr cuma untuk fresh graduate?',
+      name: 'Is Employr only for fresh graduates?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Tidak. Employr dirancang untuk siapa saja berusia 17–30 tahun yang ingin mengelola karier dari CV, job matching, hingga career pivot.',
+        text: 'No. Anyone actively looking for work, making a career switch, or wanting to polish their portfolio and CV can use Employr.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Apakah bisa mengelola banyak versi CV?',
+      name: 'Can I create multiple CV versions in one account?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Ya. Kamu bisa membuat dan menyimpan beberapa versi CV untuk target posisi pekerjaan yang berbeda dalam satu akun.',
+        text: 'Yes. Every role requires a different focus. You can save dedicated versions for UI/UX, marketing, or any other role without overwriting previous drafts.',
       },
     },
   ],
@@ -54,64 +55,80 @@ const faqSchema = {
 ---
 
 <BaseLayout
-  title="Employr — Ruang Kerja Karier untuk Langkah Berikutnya"
-  description="Your career, built around you. Bangun CV, temukan peluang yang lebih tepat, dan sesuaikan pengalamanmu untuk setiap langkah karier."
+  title="Employr: Your CV Workspace & Career Compass"
+  description="Build ATS-friendly CVs, match your skills to job requirements, and track every application without the hassle."
   canonicalUrl="https://employr.id/"
   faqSchema={faqSchema}
 >
   <div id="top" class="site-shell">
     <ScrollAnimations client:load />
-    <!-- Integrated Header Navigation (Moved to top of shell for true page-wide floating sticky navbar) -->
-    <header class="site-header">
-      <div class="header-left">
-        <nav class="desktop-nav" aria-label="Navigasi utama">
-          {navItems.map(([label, href]) => <button data-navigate={href}>{label}</button>)}
-        </nav>
-      </div>
-
-      <a href="#top" class="brand-mark brand-mark--center" aria-label="Beranda Employr">
-        <img src={logoMark} alt="Employr" class="brand-logo-main" />
-      </a>
-
-      <div class="header-actions">
-        <button class="login-link" data-toast="Masuk akan tersedia saat produk diluncurkan.">Masuk</button>
-        <a class="header-cta" href="/register">Mulai sekarang <Icon name="move-up-right" size={14} /></a>
-        <button class="menu-toggle" aria-label="Buka menu" aria-expanded="false" data-menu-button><Icon name="menu" size={22} /></button>
-      </div>
-
-      <nav class="mobile-nav" aria-label="Navigasi seluler" data-menu>
-        {navItems.map(
-          ([label, href]) => (
-            <button data-navigate={href}>
-              {label} <Icon name="chevron-right" size={20} />
-            </button>
-          )
-        )}
-        <a class="mobile-start" href="/register">Mulai sekarang <Icon name="arrow-up-right" size={16} /></a>
-      </nav>
-    </header>
 
     <!-- TOP ANNOUNCEMENT BAR -->
     <div class="top-announcement">
       <div class="announcement-content">
-        <span class="announcement-badge">Employr</span>
-        <span class="announcement-text">Ruang Kerja Karier Generasi Baru untuk Talenta Indonesia</span>
-        <span class="announcement-dot">·</span>
-        <strong class="announcement-stat">14k+ Talenta Terhubung</strong>
-        <a href="#product" class="announcement-link">
-          Eksplorasi Fitur <Icon name="chevron-right" size={13} />
+        <a href="/register" class="announcement-link">
+          Try it Free! <Icon name="chevron-right" size={13} />
         </a>
       </div>
     </div>
 
-    <!-- HERO FRAME CONTAINER (FRAMED CARD CANVAS - GAMBAR 2) -->
-    <div class="hero-frame-container">
+    <main class="site-main">
+      <!-- HERO FRAME CONTAINER (FRAMED CARD CANVAS) -->
+      <div class="hero-frame-container">
       <section class="hero-card" aria-labelledby="hero-title">
         <!-- Background Image & Washes -->
         <HeroCanvas client:only="react" />
-        <img class="hero__image" src={heroImage} alt="Profesional muda melintasi distrik kota surealis dengan jalur masa depan berwarna biru" />
+        <img class="hero__image" src={heroImage} alt="Young professional crossing a surreal city district with a glowing blue career path" />
         <div class="hero__wash"></div>
         <div class="hero__grain"></div>
+
+        <!-- Integrated Header Navigation (Inside Hero Card) -->
+        <header class="site-header">
+          <div class="header-left">
+            <nav class="desktop-nav" aria-label="Main navigation">
+              {navItems.map(([label, href]) => <button data-navigate={href}>{label}</button>)}
+            </nav>
+          </div>
+
+          <a href="#top" class="brand-mark brand-mark--center" aria-label="Employr Home">
+            <img src={logoMark} alt="Employr" class="brand-logo-main" />
+          </a>
+
+          <div class="header-actions">
+            <button class="login-link" data-toast="Sign in will be available at launch.">Sign In</button>
+            <a class="header-cta" href="/register">Get Started <Icon name="move-up-right" size={14} /></a>
+            <button class="menu-toggle" aria-label="Navigation menu" aria-expanded="false" data-menu-button>
+              <span class="menu-toggle__bar menu-toggle__bar--top"></span>
+              <span class="menu-toggle__bar menu-toggle__bar--mid"></span>
+              <span class="menu-toggle__bar menu-toggle__bar--bot"></span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Mobile Nav Backdrop & Glass Sheet Drawer -->
+        <div class="mobile-nav-backdrop" data-menu-backdrop></div>
+        <nav class="mobile-nav" aria-label="Mobile navigation" data-menu>
+          <div class="mobile-nav__header">
+            <span class="mobile-nav__title">Navigation</span>
+            <button class="mobile-nav__close" aria-label="Close menu" data-menu-close>
+              <Icon name="x" size={18} />
+            </button>
+          </div>
+          <div class="mobile-nav__links">
+            {navItems.map(
+              ([label, href]) => (
+                <button data-navigate={href}>
+                  <span>{label}</span>
+                  <Icon name="chevron-right" size={18} />
+                </button>
+              )
+            )}
+          </div>
+          <div class="mobile-nav__footer">
+            <a class="mobile-nav__login" href="/login">Sign In</a>
+            <a class="mobile-start" href="/register">Get Started <Icon name="arrow-up-right" size={16} /></a>
+          </div>
+        </nav>
 
         <!-- Hero Content -->
         <div class="hero__inner">
@@ -123,7 +140,7 @@ const faqSchema = {
           </div>
         </div>
 
-        <div class="hero__scroll"><span>GULIR UNTUK MENJELAJAH</span><i></i></div>
+        <div class="hero__scroll"><span>SCROLL TO EXPLORE</span><i></i></div>
       </section>
     </div>
 
@@ -133,123 +150,123 @@ const faqSchema = {
     <!-- 01 STATEMENT -->
     <section class="statement section-space" id="product">
         <div class="editorial-frame statement__frame">
-          <div class="section-label"><span>01</span><i></i><span>KARIERMU, CARA MU</span></div>
+          <div class="section-label"><span>01</span><i></i><span>YOUR CAREER, YOUR WAY</span></div>
           <div class="statement__body">
-            <h2>Pengalamanmu<br />lebih besar dari <em>satu CV.</em></h2>
-            <p>Satu orang bisa punya banyak keahlian, pengalaman, dan arah karier. Employr membantumu mengubah semuanya menjadi peluang.</p>
+            <h2>Your experience<br />is bigger than <em>one resume.</em></h2>
+            <p>Your skills don't fit neatly into rigid templates. Employr helps you turn every project and achievement into real proof that recruiters notice.</p>
           </div>
           <div class="statement__tick"><span>01</span><i></i><span>07</span></div>
         </div>
       </section>
 
-      <!-- KENAPA EMPLOYR (WHY PARLEY ACCORDION SECTION) -->
+      <!-- WHY EMPLOYR -->
       <WhyEmployr client:visible />
 
-      <!-- 02 BANGUN -->
+      <!-- 02 BUILD -->
       <section class="builder section-space">
         <div class="editorial-frame builder__frame">
           <div class="builder__copy">
-            <div class="section-label"><span>02</span><i></i><span>BANGUN</span></div>
-            <h2>Bangun<br /><em>ceritamu.</em></h2>
-            <p>Ubah pengalamanmu menjadi CV yang benar-benar mewakili arah yang ingin kamu tuju.</p>
-            <button class="action-link" data-toast="Pembuat CV berbasis AI akan segera hadir.">Buat CV-mu <Icon name="arrow-up-right" /></button>
+            <div class="section-label"><span>02</span><i></i><span>BUILD</span></div>
+            <h2>Write proof,<br /><em>not just a to-do list.</em></h2>
+            <p>Turn your work history into measurable wins with real numbers and clear context.</p>
+            <button class="action-link" data-toast="AI-powered CV builder coming soon.">Try CV Builder <Icon name="arrow-up-right" /></button>
           </div>
           <div class="builder__visual">
             <div class="blue-route blue-route--builder"><i></i><span>01</span></div>
             <CvArtifact />
             <div class="ai-suggestion">
               <span class="ai-suggestion__star">✦</span>
-              <div><b>Coba ini</b><p>Buat pencapaian ini<br />lebih terukur.</p></div>
+              <div><b>Quick Tip</b><p>Add results metrics<br />to make it more convincing.</p></div>
               <Icon name="arrow-up-right" size={15} />
             </div>
           </div>
         </div>
       </section>
 
-      <!-- 03 KELOLA -->
+      <!-- 03 MANAGE -->
       <section class="versions section-space" aria-labelledby="versions-title">
         <div class="versions__headline">
-          <div class="section-label section-label--inverse"><span>03</span><i></i><span>KELOLA</span></div>
-          <h2 id="versions-title">Satu karier.<br /><em>Banyak kemungkinan.</em></h2>
-          <p>Simpan setiap versi cerita kariermu di satu tempat.</p>
+          <div class="section-label section-label--inverse"><span>03</span><i></i><span>MANAGE</span></div>
+          <h2 id="versions-title">One profile.<br /><em>Many target roles.</em></h2>
+          <p>Apply as a UI Designer, Product Manager, or Data Analyst without juggling separate files.</p>
         </div>
         <div class="versions__stage">
           <div class="versions__glow"></div>
-          <article class="version-card version-card--rear"><span>01</span><b>Spesialis<br />Pemasaran</b><small>Diperbarui 3 minggu lalu</small></article>
-          <article class="version-card version-card--mid"><span>02</span><b>Desainer<br />UI/UX</b><small>Diperbarui 1 bulan lalu</small></article>
+          <article class="version-card version-card--rear"><span>01</span><b>Growth<br />Marketing</b><small>Updated 3 weeks ago</small></article>
+          <article class="version-card version-card--mid"><span>02</span><b>UI/UX<br />Designer</b><small>Updated 1 month ago</small></article>
           <article class="version-card version-card--front">
-            <span>03</span><b>Desainer<br />Produk</b><small>Diperbarui 2 hari lalu</small>
-            <div><span>CV UTAMA</span><Icon name="arrow-up-right" size={14} /></div>
+            <span>03</span><b>Product<br />Designer</b><small>Updated 2 days ago</small>
+            <div><span>MAIN DRAFT</span><Icon name="arrow-up-right" size={14} /></div>
           </article>
-          <div class="versions__caption"><Icon name="circle-dot" size={15} /> Satu profil, banyak versi karier.</div>
+          <div class="versions__caption"><Icon name="circle-dot" size={15} /> All versions saved, ready to send.</div>
         </div>
       </section>
 
 
-      <!-- 05 COCOKKAN -->
+      <!-- 05 MATCH -->
       <section class="match section-space" aria-labelledby="match-title">
         <div class="match__top editorial-frame">
-          <div class="section-label"><span>05</span><i></i><span>COCOKKAN</span></div>
-          <h2 id="match-title">Jangan sekadar melamar.<br /><em>Pahami kecocokanmu.</em></h2>
+          <div class="section-label"><span>05</span><i></i><span>MATCH</span></div>
+          <h2 id="match-title">Know your match score<br /><em>before you apply.</em></h2>
         </div>
         <div class="match__workstation editorial-frame">
           <div class="match-doc match-doc--cv">
-            <p><Icon name="file-text" size={14} /> CV-MU</p>
-            <b>Maria Syafira</b><span>Desainer Produk</span><i></i>
-            <small>Desain interaksi<br />Pembuatan prototipe<br />Sistem visual</small>
+            <p><Icon name="file-text" size={14} /> YOUR CV</p>
+            <b>Maria Syafira</b><span>Product Designer</span><i></i>
+            <small>UX Interaction<br />Figma & Prototyping<br />Design System</small>
           </div>
           <div class="match-score">
-            <div class="match-score__ring"><div><b>87</b><span>% COCOK</span></div></div>
-            <p>Berdasarkan CV pilihanmu<br />dan deskripsi posisi ini.</p>
+            <div class="match-score__ring"><div><b>87</b><span>% MATCH</span></div></div>
+            <p>Auto analysis between your CV<br />and the job requirements.</p>
           </div>
           <div class="match-doc match-doc--job">
-            <p><Icon name="target" size={14} /> DESKRIPSI PEKERJAAN</p>
-            <b>Desainer Produk</b><span>di Tokopedia</span><i></i>
-            <small>Pemikiran produk<br />Sistem desain<br />Riset pengguna</small>
+            <p><Icon name="target" size={14} /> JOB REQUIREMENTS</p>
+            <b>Product Designer</b><span>at Tech Company</span><i></i>
+            <small>Problem Solving<br />Design Tokens<br />User Research</small>
           </div>
         </div>
         <div class="match__breakdown editorial-frame">
-          <div><span>01</span><p>Keahlian</p><b>92%</b></div>
-          <div><span>02</span><p>Pengalaman</p><b>84%</b></div>
-          <div><span>03</span><p>Pendidikan</p><b>100%</b></div>
-          <div><span>04</span><p>Kata kunci</p><b>78%</b></div>
+          <div><span>01</span><p>Core Skills</p><b>92%</b></div>
+          <div><span>02</span><p>Experience Match</p><b>84%</b></div>
+          <div><span>03</span><p>Background Fit</p><b>100%</b></div>
+          <div><span>04</span><p>ATS Keywords</p><b>78%</b></div>
         </div>
         <div class="match__bottom editorial-frame">
-          <p>Lebih dari sekadar angka: pahami alasan kamu cocok, kekuatan yang sudah kamu bawa, dan cara memulai lamaran yang lebih kuat.</p>
-          <button class="action-link" data-toast="Pencocokan CV akan segera hadir.">Pahami kecocokanmu <Icon name="arrow-up-right" /></button>
+          <p>Check which keywords you're missing, fix weak points, then send your application with confidence.</p>
+          <button class="action-link" data-toast="CV matching coming soon.">Check Your Score <Icon name="arrow-up-right" /></button>
         </div>
       </section>
 
-      <!-- 06 SESUAIKAN -->
+      <!-- 06 ADAPT -->
       <section class="adapt section-space" id="career">
         <div class="adapt__intro editorial-frame">
-          <div class="section-label"><span>06</span><i></i><span>SESUAIKAN</span></div>
-          <h2>CV-mu tidak harus<br /><em>selalu sama.</em></h2>
-          <p>Setiap peluang punya cerita yang berbeda. Sesuaikan ceritamu dengan peran yang kamu tuju.</p>
+          <div class="section-label"><span>06</span><i></i><span>ADAPT</span></div>
+          <h2>One rigid template<br /><em>won't work for every company.</em></h2>
+          <p>Every job looks for specific points. Highlight the experience that matters most for the role you want.</p>
         </div>
         <div class="adapt__flow editorial-frame">
-          <div class="adapt__original"><p>CV-MU</p><CvArtifact variant="mini" /></div>
-          <div class="adapt__scanner"><Icon name="scan-line" size={22} /><span>MENYELARASKAN<br />CERITAMU</span><i></i></div>
-          <div class="adapt__target"><p>CV YANG DISESUAIKAN</p><CvArtifact variant="mini" /></div>
+          <div class="adapt__original"><p>FULL CV</p><CvArtifact variant="mini" /></div>
+          <div class="adapt__scanner"><Icon name="scan-line" size={22} /><span>HIGHLIGHTING<br />KEY POINTS</span><i></i></div>
+          <div class="adapt__target"><p>TAILORED CV</p><CvArtifact variant="mini" /></div>
         </div>
         <div class="adapt__footer editorial-frame">
-          <div><span class="blue-dot"></span> Penyesuaian kata kunci <span class="blue-dot"></span> Prioritas pengalaman <span class="blue-dot"></span> Penyusunan ulang pencapaian</div>
-          <button class="action-link" data-toast="Penyesuaian CV akan segera hadir.">Sesuaikan CV-ku <Icon name="arrow-up-right" /></button>
+          <div><span class="blue-dot"></span> Keyword alignment <span class="blue-dot"></span> Targeted action points <span class="blue-dot"></span> Skill priority</div>
+          <button class="action-link" data-toast="CV adaptation coming soon.">Adapt Your CV Now <Icon name="arrow-up-right" /></button>
         </div>
       </section>
 
 
 
-      <!-- 06 KENAPA Employr (PARLEY 1:1 SPLIT LAYOUT) -->
+      <!-- 06 WHY Employr -->
       <section class="why-employer section-space" aria-labelledby="why-employer-title">
         <div class="editorial-frame">
           <div class="why-employer__top">
             <div class="why-employer__heading">
-              <div class="section-label section-label--inverse"><span>06</span><i></i><span>KENAPA Employr</span></div>
-              <h2 id="why-employer-title">Bukan sekadar<br />tempat <em>melamar.</em></h2>
+              <div class="section-label section-label--inverse"><span>06</span><i></i><span>WHY Employr</span></div>
+              <h2 id="why-employer-title">More than an<br /><em>online form.</em></h2>
             </div>
             <p class="why-employer__lead">
-              Employr membantumu memahami pengalaman yang sudah kamu punya, lalu mengarahkannya ke peluang yang terasa lebih tepat.
+              Employr gives you full visibility: craft strong resume bullets, check job-fit scores, and follow up on interviews.
             </p>
           </div>
 
@@ -259,32 +276,64 @@ const faqSchema = {
               <article class="why-reason why-reason--card is-active" data-dashboard-target="0">
                 <span class="why-reason__num">01</span>
                 <div class="why-reason__content">
-                  <h3>Perjalanan karier terpadu</h3>
-                  <p>Kelola CV, pantau lamaran, dan tingkatkan peluangmu dalam satu ekosistem yang terhubung.</p>
+                  <h3>Your whole job hunt, in one place</h3>
+                  <p>Build your CV, send applications, and track interview calls in one organized dashboard.</p>
+                </div>
+                <div class="why-reason__mobile-preview">
+                  <Image
+                    src={dashboard3}
+                    alt="01 — Organized job search flow"
+                    class="why-reason__mobile-img"
+                    loading="eager"
+                  />
                 </div>
               </article>
 
               <article class="why-reason why-reason--card" data-dashboard-target="1">
                 <span class="why-reason__num">02</span>
                 <div class="why-reason__content">
-                  <h3>Multi-versi CV tanpa batas</h3>
-                  <p>Bangun dan kembangkan beberapa variasi CV sesuai peran spesifik yang ingin kamu tuju.</p>
+                  <h3>Save unlimited CV versions</h3>
+                  <p>Save technical, managerial, or creative versions in one click and tailor the focus whenever you need to.</p>
+                </div>
+                <div class="why-reason__mobile-preview">
+                  <Image
+                    src={dashboard4}
+                    alt="02 — Multiple CV versions"
+                    class="why-reason__mobile-img"
+                    loading="lazy"
+                  />
                 </div>
               </article>
 
               <article class="why-reason why-reason--card" data-dashboard-target="2">
                 <span class="why-reason__num">03</span>
                 <div class="why-reason__content">
-                  <h3>Pencocokan peran cerdas</h3>
-                  <p>Ketahui kecocokan keahlian dan celah yang bisa diperbaiki sebelum melamar.</p>
+                  <h3>Check your fit before applying</h3>
+                  <p>See which parts need work before you send your application to a recruiter.</p>
+                </div>
+                <div class="why-reason__mobile-preview">
+                  <Image
+                    src={dashboard1}
+                    alt="03 — Qualification fit check"
+                    class="why-reason__mobile-img"
+                    loading="lazy"
+                  />
                 </div>
               </article>
 
               <article class="why-reason why-reason--card" data-dashboard-target="3">
                 <span class="why-reason__num">04</span>
                 <div class="why-reason__content">
-                  <h3>Pelacakan lamaran terpusat</h3>
-                  <p>Pantau seluruh proses dari tahap terkirim, interview, hingga offering secara terstruktur.</p>
+                  <h3>Real-time application tracker</h3>
+                  <p>Never forget an interview date again. Track every application from sent to salary negotiation.</p>
+                </div>
+                <div class="why-reason__mobile-preview">
+                  <Image
+                    src={dashboard2}
+                    alt="04 — Centralized application tracker"
+                    class="why-reason__mobile-img"
+                    loading="lazy"
+                  />
                 </div>
               </article>
             </div>
@@ -308,14 +357,14 @@ const faqSchema = {
                 />
                 <Image
                   src={dashboard1}
-                  alt="03 — Pencocokan peran cerdas"
+                  alt="03 — Smart role matching"
                   class="dashboard-preview-img"
                   data-dashboard-img="2"
                   loading="lazy"
                 />
                 <Image
                   src={dashboard2}
-                  alt="04 — Pelacakan lamaran terpusat"
+                  alt="04 — Centralized application tracking"
                   class="dashboard-preview-img"
                   data-dashboard-img="3"
                   loading="lazy"
@@ -326,24 +375,29 @@ const faqSchema = {
         </div>
       </section>
 
-      <!-- CERITA PENGGUNA -->
+      <!-- USER STORIES -->
       <section class="testimonials-ready" aria-labelledby="stories-title">
         <div class="editorial-frame testimonials-ready__frame">
-          <div class="testimonials-ready__eyebrow">
-            <img src={logoMark} alt="" /><span>CERITA PENGGUNA</span><i></i> <span>AKAN HADIR</span>
+          <div class="testimonials-ready__grid">
+            <div class="testimonials-ready__copy">
+              <div class="testimonials-ready__eyebrow">
+                <span>USER STORIES</span><i></i> <span>REAL EXPERIENCES</span>
+              </div>
+              <h2 id="stories-title">Not fake testimonials,<br /><em>real results.</em></h2>
+              <p>Real stories from people who landed interviews and found their dream careers through Employr.</p>
+              <button class="action-link" data-toast="Share your story feature coming soon.">Share Your Story <Icon name="arrow-up-right" /></button>
+            </div>
+
+            <div class="testimonials-ready__carousel-wrap">
+              <ReviewsCarousel client:only="react" />
+            </div>
           </div>
-          <div class="testimonials-ready__copy">
-            <h2 id="stories-title">Yang paling berarti<br />selalu lahir dari <em>cerita nyata.</em></h2>
-            <p>Ruang ini disiapkan untuk pengalaman pengguna yang dibagikan langsung dan disetujui oleh pemiliknya. Tidak ada kutipan buatan di sini.</p>
-            <button class="action-link" data-toast="Ruang untuk membagikan cerita pengguna akan segera hadir.">Bagikan ceritamu nanti <Icon name="arrow-up-right" /></button>
-          </div>
-          <div class="testimonials-ready__stamp"><span>Employr</span><b>OPEN<br />STORY<br />SPACE</b><i>01—</i></div>
         </div>
       </section>
 
 
-      <!-- FIELD NOTE (FULL-BLEED CINEMATIC BACKGROUND VIDEO - FINAL SECTION) -->
-      <section class="career-observation section-space" aria-label="Catatan perjalanan karier">
+      <!-- CAREER OBSERVATION -->
+      <section class="career-observation section-space" aria-label="Career reflection">
         <div class="career-observation__bg">
           <video
             class="career-observation__video"
@@ -363,61 +417,19 @@ const faqSchema = {
 
         <div class="editorial-frame career-observation__frame">
           <div class="career-observation__copy">
-            <div class="career-observation__wordmark"><span>CATATAN PERJALANAN</span></div>
-            <p>Bebas berenang,<br />menemukan arusmu sendiri.</p>
-            <small>Kariermu bukan wadah yang sempit. Kamu punya keleluasaan penuh untuk menjelajahi peluang baru, menyelami potensimu, dan bergerak lincah ke arah mana pun kamu ingin bertumbuh.</small>
+            <div class="career-observation__wordmark"><span>CONTROL IN YOUR HANDS</span></div>
+            <p>Explore your options,<br />find your own rhythm.</p>
+            <small>Your career isn't a one-way route. You're free to explore new opportunities, develop hidden potential, and step confidently toward whatever goal you choose.</small>
           </div>
           <div class="career-observation__footer-label">
-            <span>CATATAN PERJALANAN</span>
+            <span>CAREER REFLECTION</span>
             <b>07 / 07</b>
           </div>
         </div>
       </section>
     </main>
 
-    <footer class="site-footer">
-      <div class="editorial-frame footer__top">
-        <div>
-          <div class="brand-mark">
-            <img src={logoMark} alt="" class="brand-symbol" />
-            <span class="brand-type brand-type--light">Employr</span>
-          </div>
-          <p>Bangun langkah berikutnya.</p>
-        </div>
-        <div class="footer__links">
-          <div>
-            <b>Produk</b>
-            <button data-toast="Pembuat CV akan segera hadir.">Pembuat CV</button>
-            <button data-toast="Pencarian lowongan akan segera hadir.">Cari Lowongan</button>
-            <button data-toast="Pencocokan CV akan segera hadir.">Cocokkan CV</button>
-            <button data-toast="Eksplorasi jalur karier akan segera hadir.">Ubah Arah Karier</button>
-          </div>
-          <div>
-            <b>Wawasan</b>
-            <button data-toast="Panduan karier akan segera hadir.">Panduan Karier</button>
-            <button data-toast="Tips CV akan segera hadir.">Tips CV</button>
-            <button data-toast="Wawasan karier akan segera hadir.">Wawasan Karier</button>
-          </div>
-          <div>
-            <b>Perusahaan</b>
-            <button data-toast="Tentang Employr akan segera hadir.">Tentang</button>
-            <button data-toast="Detail kontak akan segera hadir.">Kontak</button>
-            <button data-toast="Detail privasi akan segera hadir.">Privasi</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- GIGANTIC FULL-WIDTH FOOTER LOGO IMAGE (/logo.webp) -->
-      <div class="footer__giant-wordmark" aria-hidden="true">
-        <img src="/logo.webp" alt="Employr" class="footer__giant-logo-img" loading="lazy" />
-      </div>
-
-      <div class="editorial-frame footer__bottom">
-        <span>© 2026 Employr · Career Operating System</span>
-        <span>KARIER, DIBANGUN UNTUKMU.</span>
-        <span>JAKARTA · INDONESIA</span>
-      </div>
-    </footer>
+    <FooterReveal client:only="react" logoMark={logoMark} />
   </div>
 
   <script>
@@ -459,6 +471,14 @@ const faqSchema = {
       );
     }
 
+    // Listen for events from React components
+    window.addEventListener('show-toast', (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      if (customEvent.detail) {
+        showToast(customEvent.detail);
+      }
+    });
+
     document.querySelectorAll<HTMLButtonElement>('[data-navigate]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const target = document.querySelector(btn.dataset.navigate || '');
@@ -473,18 +493,48 @@ const faqSchema = {
       btn.addEventListener('click', () => showToast(btn.dataset.toast || ''));
     });
 
+    const siteHeader = document.querySelector('.site-header');
     const menuButton = document.querySelector<HTMLButtonElement>('[data-menu-button]');
+    const menuCloseButton = document.querySelector<HTMLButtonElement>('[data-menu-close]');
+    const menuBackdrop = document.querySelector('[data-menu-backdrop]');
     const menu = document.querySelector('[data-menu]');
-    const iconMenu = menuButton?.querySelector('svg');
+
+    const closeMenu = () => {
+      menu?.classList.remove('is-open');
+      menuBackdrop?.classList.remove('is-open');
+      siteHeader?.classList.remove('is-menu-open');
+      menuButton?.setAttribute('aria-expanded', 'false');
+      menuButton?.classList.remove('is-active');
+      document.body.style.overflow = '';
+    };
+
+    const openMenu = () => {
+      menuButton?.setAttribute('aria-expanded', 'true');
+      menuButton?.classList.add('is-active');
+      menu?.classList.add('is-open');
+      menuBackdrop?.classList.add('is-open');
+      siteHeader?.classList.add('is-menu-open');
+      document.body.style.overflow = 'hidden';
+    };
+
     menuButton?.addEventListener('click', () => {
-      const open = menuButton.getAttribute('aria-expanded') === 'true';
-      menuButton.setAttribute('aria-expanded', String(!open));
-      menu?.classList.toggle('is-open');
-      if (iconMenu) {
-        iconMenu.innerHTML = open
-          ? '<path d="M4 12h16"></path><path d="M4 6h16"></path><path d="M4 18h16"></path>'
-          : '<path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>';
+      const isOpen = menuButton.getAttribute('aria-expanded') === 'true';
+      if (isOpen) {
+        closeMenu();
+      } else {
+        openMenu();
       }
+    });
+
+    menuCloseButton?.addEventListener('click', closeMenu);
+    menuBackdrop?.addEventListener('click', closeMenu);
+
+    document.querySelectorAll('[data-menu] [data-navigate]').forEach((btn) => {
+      btn.addEventListener('click', closeMenu);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMenu();
     });
 
     // Auto-init and play career observation video

@@ -3,6 +3,8 @@
   "private": true,
   "scripts": {
     "dev": "turbo run dev",
+    "ip": "node scripts/lan-info.js",
+    "lan": "node scripts/lan-info.js",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",

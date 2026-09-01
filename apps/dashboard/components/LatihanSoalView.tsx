@@ -361,11 +361,27 @@ export const LatihanSoalView: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // User purchased/unlocked quiz package IDs
+  // User purchased/unlocked quiz package IDs (Persisted to localStorage)
   const [unlockedQuizIds, setUnlockedQuizIds] = useState<string[]>(['quiz-react-frontend-1', 'quiz-toefl-structure-1']);
 
-  // User Quiz Attempts History (packageId -> UserQuizAttempt)
+  // User Quiz Attempts History (packageId -> UserQuizAttempt, Persisted)
   const [quizAttempts, setQuizAttempts] = useState<Record<string, UserQuizAttempt>>({});
+
+  // Load persisted quiz state
+  useEffect(() => {
+    try {
+      const storedUnlocked = localStorage.getItem('cuti_unlocked_quiz_ids');
+      if (storedUnlocked) {
+        const parsed = JSON.parse(storedUnlocked);
+        if (Array.isArray(parsed)) setUnlockedQuizIds(parsed);
+      }
+      const storedAttempts = localStorage.getItem('cuti_quiz_attempts');
+      if (storedAttempts) {
+        const parsed = JSON.parse(storedAttempts);
+        if (parsed && typeof parsed === 'object') setQuizAttempts(parsed);
+      }
+    } catch (e) {}
+  }, []);
 
   // Payment Modal State
   const [paymentModalOpen, setPaymentModalOpen] = useState<boolean>(false);
@@ -461,7 +477,7 @@ export const LatihanSoalView: React.FC = () => {
 
     const calculatedScore = Math.round((correctCount / activeQuizPackage.questions.length) * 100);
 
-    // Save Attempt Result
+    // Save Attempt Result to state & localStorage
     const newAttempt: UserQuizAttempt = {
       packageId: activeQuizPackage.id,
       status: 'selesai',
@@ -473,7 +489,13 @@ export const LatihanSoalView: React.FC = () => {
       timeSpentSeconds: activeQuizPackage.durationMinutes * 60 - secondsRemaining,
     };
 
-    setQuizAttempts((prev) => ({ ...prev, [activeQuizPackage.id]: newAttempt }));
+    setQuizAttempts((prev) => {
+      const updated = { ...prev, [activeQuizPackage.id]: newAttempt };
+      try {
+        localStorage.setItem('cuti_quiz_attempts', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
     setIsExamFinished(true);
     setConfirmSubmitModalOpen(false);
   }, [activeQuizPackage, userAnswers, flaggedQuestions, secondsRemaining]);
@@ -512,18 +534,17 @@ export const LatihanSoalView: React.FC = () => {
     if (!selectedQuizForPayment) return;
     setIsProcessingPayment(true);
 
-    setTimeout(() => {
-      setIsProcessingPayment(false);
-      setPaymentSuccess(true);
-      // Unlock quiz
-      setUnlockedQuizIds((prev) => [...prev, selectedQuizForPayment.id]);
+    const targetQuiz = selectedQuizForPayment;
+    const updatedUnlocked = Array.from(new Set([...unlockedQuizIds, targetQuiz.id]));
+    setUnlockedQuizIds(updatedUnlocked);
+    try {
+      localStorage.setItem('cuti_unlocked_quiz_ids', JSON.stringify(updatedUnlocked));
+    } catch (e) {}
 
-      setTimeout(() => {
-        setPaymentModalOpen(false);
-        // Direct start exam
-        handleStartQuiz(selectedQuizForPayment);
-      }, 1200);
-    }, 1500);
+    setIsProcessingPayment(false);
+    setPaymentSuccess(true);
+    setPaymentModalOpen(false);
+    handleStartQuiz(targetQuiz);
   };
 
   // Filtered Quiz Catalog

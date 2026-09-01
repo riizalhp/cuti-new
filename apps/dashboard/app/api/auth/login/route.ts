@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@cuti/db';
-import { logSecurityEvent, logApp, extractRequestContext, detectBruteForce } from '@cuti/db/logger';
+import { prisma, logSecurityEvent, logApp, extractRequestContext, detectBruteForce } from '@cuti/db';
 import crypto from 'crypto';
 
 const corsHeaders = {
@@ -38,121 +37,125 @@ export async function POST(req: NextRequest) {
     }
 
     const cleanEmail = email.trim().toLowerCase();
+    const ctx = extractRequestContext(req);
 
-    try {
-      // Find user in database
-      const user = await prisma.user.findUnique({
-        where: { email: cleanEmail },
-        include: {
-          accounts: {
-            where: { provider_id: 'credential' },
-          },
+    // Find user in database
+    const user = await prisma.user.findUnique({
+      where: { email: cleanEmail },
+      include: {
+        accounts: {
+          where: { provider_id: 'credential' },
         },
+      },
+    });
+
+    if (!user) {
+      logSecurityEvent({
+        eventType: 'LOGIN_FAILED',
+        ip: ctx.ip,
+        userAgent: ctx.userAgent,
+        email: cleanEmail,
+        severity: 'WARNING',
+        details: { reason: 'user_not_found' },
+      });
+      logApp({
+        source: 'AUTH',
+        level: 'WARNING',
+        message: `Login failed: email not registered for ${cleanEmail}`,
+        ip: ctx.ip,
+        endpoint: '/api/auth/login',
+        method: 'POST',
+        statusCode: 401,
       });
 
-      if (user) {
-        const account = user.accounts[0];
-        if (!account || !account.password) {
-          return NextResponse.json(
-            { success: false, message: 'Akun ini terdaftar menggunakan metode lain (seperti Google).' },
-            { status: 401, headers: corsHeaders }
-          );
-        }
-
-        const isValid = verifyPassword(password, account.password);
-        if (!isValid) {
-          const ctx = extractRequestContext(req);
-          // Log failed login attempt
-          logSecurityEvent({
-            eventType: 'LOGIN_FAILED',
-            ip: ctx.ip,
-            userAgent: ctx.userAgent,
-            email: cleanEmail,
-            userId: user.id,
-            severity: 'WARNING',
-            details: { reason: 'invalid_password' },
-          });
-          logApp({ source: 'AUTH', level: 'WARNING', message: `Login failed: invalid password for ${cleanEmail}`, ip: ctx.ip, endpoint: '/api/auth/login', method: 'POST', statusCode: 401 });
-
-          // Check for brute force
-          if (ctx.ip) {
-            await detectBruteForce(ctx.ip, cleanEmail);
-          }
-
-          return NextResponse.json(
-            { success: false, message: 'Email atau kata sandi salah.' },
-            { status: 401, headers: corsHeaders }
-          );
-        }
-
-        const userData = {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        };
-
-        const ctx = extractRequestContext(req);
-        // Log successful login
-        logSecurityEvent({
-          eventType: 'LOGIN_SUCCESS',
-          ip: ctx.ip,
-          userAgent: ctx.userAgent,
-          email: cleanEmail,
-          userId: user.id,
-          severity: 'INFO',
-        });
-        logApp({ source: 'AUTH', level: 'INFO', message: `Login success: ${cleanEmail} (${user.role})`, ip: ctx.ip, endpoint: '/api/auth/login', method: 'POST', statusCode: 200, userId: user.id });
-
-        const response = NextResponse.json(
-          {
-            success: true,
-            message: 'Login berhasil.',
-            data: userData,
-          },
-          { status: 200, headers: corsHeaders }
-        );
-
-        // Set persistent auto-login cookie (30 days)
-        const thirtyDaysInSeconds = 30 * 24 * 60 * 60;
-        response.cookies.set({
-          name: 'cuti_user_session',
-          value: encodeURIComponent(JSON.stringify(userData)),
-          maxAge: thirtyDaysInSeconds,
-          path: '/',
-          sameSite: 'lax',
-          httpOnly: false,
-        });
-
-        return response;
+      if (ctx.ip) {
+        await detectBruteForce(ctx.ip, cleanEmail);
       }
-    } catch (dbError: any) {
-      console.warn('Database connection warning during login, falling back to resilient local session:', dbError?.message || dbError);
+
+      return NextResponse.json(
+        { success: false, message: 'Email atau kata sandi salah.' },
+        { status: 401, headers: corsHeaders }
+      );
     }
 
-    // Dev/Resilient fallback — log the fallback as well
-    const ctx = extractRequestContext(req);
-    logApp({ source: 'AUTH', level: 'WARNING', message: `Login dev fallback: ${cleanEmail} (DB offline)`, ip: ctx.ip, endpoint: '/api/auth/login', method: 'POST', statusCode: 200 });
+    const account = user.accounts[0];
+    if (!account || !account.password) {
+      return NextResponse.json(
+        { success: false, message: 'Akun ini terdaftar menggunakan metode lain (seperti Google).' },
+        { status: 401, headers: corsHeaders }
+      );
+    }
 
-    const nameFromEmail = cleanEmail.split('@')[0];
-    const formattedName = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1);
-    
+    const isValid = verifyPassword(password, account.password);
+    if (!isValid) {
+      // Log failed login attempt
+      logSecurityEvent({
+        eventType: 'LOGIN_FAILED',
+        ip: ctx.ip,
+        userAgent: ctx.userAgent,
+        email: cleanEmail,
+        userId: user.id,
+        severity: 'WARNING',
+        details: { reason: 'invalid_password' },
+      });
+      logApp({
+        source: 'AUTH',
+        level: 'WARNING',
+        message: `Login failed: invalid password for ${cleanEmail}`,
+        ip: ctx.ip,
+        endpoint: '/api/auth/login',
+        method: 'POST',
+        statusCode: 401,
+      });
+
+      // Check for brute force
+      if (ctx.ip) {
+        await detectBruteForce(ctx.ip, cleanEmail);
+      }
+
+      return NextResponse.json(
+        { success: false, message: 'Email atau kata sandi salah.' },
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
     const userData = {
-      id: `usr_${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`,
-      name: formattedName || 'Pengguna CUTI',
-      email: cleanEmail,
-      role: cleanEmail.includes('admin') ? 'ADMIN' : 'USER',
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
     };
+
+    // Log successful login
+    logSecurityEvent({
+      eventType: 'LOGIN_SUCCESS',
+      ip: ctx.ip,
+      userAgent: ctx.userAgent,
+      email: cleanEmail,
+      userId: user.id,
+      severity: 'INFO',
+    });
+    logApp({
+      source: 'AUTH',
+      level: 'INFO',
+      message: `Login success: ${cleanEmail} (${user.role})`,
+      ip: ctx.ip,
+      endpoint: '/api/auth/login',
+      method: 'POST',
+      statusCode: 200,
+      userId: user.id,
+    });
 
     const response = NextResponse.json(
       {
         success: true,
-        message: 'Login berhasil (mode dev/resilient).',
+        message: 'Login berhasil.',
         data: userData,
       },
       { status: 200, headers: corsHeaders }
     );
 
+    // Set persistent auto-login cookie (30 days)
     const thirtyDaysInSeconds = 30 * 24 * 60 * 60;
     response.cookies.set({
       name: 'cuti_user_session',

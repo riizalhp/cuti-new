@@ -130,6 +130,48 @@ export default function ScrollAnimations() {
       );
     }
 
+    // 8. Section Headings & Frames Scroll Reveal (inside main)
+    const sectionFrames = document.querySelectorAll('main .editorial-frame, .statement__body, .builder__copy');
+    sectionFrames.forEach((frame) => {
+      gsap.fromTo(
+        frame,
+        { opacity: 0, y: 35 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: frame,
+            start: 'top 85%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
+    });
+
+    // 9. Footer Reveal Smooth Fade In & Subtle Parallax Lift
+    const footerInner = document.querySelector('.footer-reveal-inner');
+    const footerSpacer = document.querySelector('.footer-reveal-spacer');
+    if (footerInner && footerSpacer) {
+      gsap.fromTo(
+        footerInner,
+        { opacity: 0, y: 40, filter: 'blur(4px)' },
+        {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: footerSpacer,
+            start: 'top 95%',
+            end: 'bottom 100%',
+            scrub: 0.6,
+          },
+        }
+      );
+    }
+
     return () => {
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };

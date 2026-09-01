@@ -36,6 +36,7 @@ import {
   Save,
   Briefcase,
   GraduationCap,
+  BookOpen,
   User,
   Wrench,
   Search,
@@ -88,7 +89,11 @@ import {
   AlignLeft,
   AlignRight,
   Image as ImageIcon,
+  FileCheck,
+  Target,
 } from 'lucide-react';
+import { CvPurpose, CV_PURPOSE_PROFILES } from '@/lib/cv-purpose-scoring-engine';
+import { generateStarterCvPreset } from '@/lib/cv-starter-presets';
 
 export const renderSocialIcon = (platform?: string, className = 'w-3.5 h-3.5 text-slate-700 shrink-0') => {
   const p = (platform || 'github').toLowerCase();
@@ -738,6 +743,8 @@ export interface CVData {
   updatedAt: string;
   atsScore: number;
   sectionOrder?: string[];
+  purpose?: CvPurpose;
+  targetRole?: string;
 
   // 1. Informasi Pribadi
   firstName?: string;
@@ -1183,7 +1190,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       if (Array.isArray(remoteCvs)) {
         const enriched = remoteCvs.map((c) => {
           const computed = calculateAtsScore(c).totalScore;
-          const score = (c.atsScore && c.atsScore > 0) ? c.atsScore : (computed > 0 ? computed : 85);
+          const score = (c.atsScore && c.atsScore > 0) ? c.atsScore : (computed > 0 ? computed : 0);
           return { ...c, atsScore: score };
         });
         setCvList(enriched);
@@ -1260,29 +1267,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       const onboardingProfile = onboardingStr ? JSON.parse(onboardingStr) : null;
       const profileSource = importedData || onboardingProfile;
 
-      const isPlaceholderSummary = !cv.summary || cv.summary.toLowerCase().includes('hasil impor') || cv.summary.toLowerCase().includes('.pdf');
-      const isPlaceholderExp = !cv.experience || cv.experience.length === 0 || cv.experience[0]?.company === 'Perusahaan Terakhir (Diimpor)';
-
       const resolvedFullName = cv.fullName || profileSource?.fullName || '';
       const resolvedFirst = cv.firstName || (resolvedFullName ? resolvedFullName.split(' ')[0] : '');
       const resolvedLast = cv.lastName || (resolvedFullName ? resolvedFullName.split(' ').slice(1).join(' ') : '');
       const resolvedEmail = cv.email || profileSource?.contactInfo || '';
       const resolvedPhone = cv.phone || profileSource?.phone || '';
-      const resolvedLocation = cv.location || profileSource?.location || 'Yogyakarta, Indonesia';
-      const isPlaceholderSkills = !cv.skills || cv.skills.length === 0 || cv.skills.some((s: string) => typeof s === 'string' && (s.toLowerCase().includes('impor') || s.toLowerCase().includes('autorecovered')));
-      const rawCleanProfileSkills = (profileSource?.skills || []).filter((s: string) => typeof s === 'string' && !s.toLowerCase().includes('impor') && !s.toLowerCase().includes('autorecovered'));
-      const rawCleanCvSkills = (cv.skills || []).filter((s: string) => typeof s === 'string' && !s.toLowerCase().includes('impor') && !s.toLowerCase().includes('autorecovered'));
+      const resolvedLocation = cv.location || profileSource?.location || '';
 
-      const resolvedSkills = (!isPlaceholderSkills && rawCleanCvSkills.length > 0)
-        ? rawCleanCvSkills
-        : (rawCleanProfileSkills.length > 0)
-        ? rawCleanProfileSkills
-        : ['Project Management', 'Agile & Scrum', 'Scrum Master', 'Web Development', 'System Development', 'IoT', 'UI/UX', 'Continuous Improvement', 'User Acceptance Testing (UAT)', 'Git'];
-      const resolvedSummary = (profileSource?.summary && !profileSource.summary.toLowerCase().includes('hasil impor') && !profileSource.summary.toLowerCase().includes('.pdf'))
-        ? profileSource.summary
-        : (!isPlaceholderSummary && cv.summary)
-        ? cv.summary
-        : `${resolvedFullName ? resolvedFullName : 'Professional'} berdedikasi dengan latar belakang ${profileSource?.major ? `pendidikan ${profileSource.major}` : 'keilmuan yang kuat'} dan keahlian di bidang ${resolvedSkills.slice(0, 4).join(', ') || 'manajemen operasional'}. Memiliki kemampuan analisis yang baik, terbiasa bekerja dalam tim lintas divisi, dan berorientasi pada hasil kerja optimal.`;
       const isSentenceFragmentTitle = (title: string): boolean => {
         if (!title) return false;
         const t = title.trim();
@@ -1307,26 +1298,32 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         return result;
       };
 
-      const rawExp: ExperienceItem[] = (!isPlaceholderExp && cv.experience && cv.experience.length > 0)
+      const resolvedSkills = Array.isArray(cv.skills)
+        ? cv.skills
+        : (profileSource?.skills || []);
+      const resolvedSummary = cv.summary !== undefined && cv.summary !== null
+        ? cv.summary
+        : (profileSource?.summary || '');
+      const rawExp: ExperienceItem[] = Array.isArray(cv.experience)
         ? cv.experience
         : (profileSource?.experience || []);
       const resolvedExp: ExperienceItem[] = mergeFragmentItems<ExperienceItem>(rawExp);
 
-      const resolvedEdu: EducationItem[] = (cv.education && cv.education.length > 0)
+      const resolvedEdu: EducationItem[] = Array.isArray(cv.education)
         ? cv.education
         : (profileSource?.education || []);
 
-      const rawProjects: ProjectItem[] = (cv.projects && cv.projects.length > 0)
+      const rawProjects: ProjectItem[] = Array.isArray(cv.projects)
         ? cv.projects
         : (profileSource?.projects || []);
       const resolvedProjects: ProjectItem[] = mergeFragmentItems<ProjectItem>(rawProjects);
 
-      const rawOrgs: OrganizationItem[] = (cv.organizations && cv.organizations.length > 0)
+      const rawOrgs: OrganizationItem[] = Array.isArray(cv.organizations)
         ? cv.organizations
         : (profileSource?.organizations || []);
       const resolvedOrgs: OrganizationItem[] = mergeFragmentItems<OrganizationItem>(rawOrgs);
 
-      const rawCerts: CertificationItem[] = (cv.certifications && cv.certifications.length > 0)
+      const rawCerts: CertificationItem[] = Array.isArray(cv.certifications)
         ? cv.certifications
         : (profileSource?.certifications || []);
       const resolvedCerts: CertificationItem[] = rawCerts.map((cert) => {
@@ -1347,7 +1344,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           issueDate,
         };
       });
-      const resolvedReferences = (cv.references && cv.references.length > 0)
+      const resolvedReferences = Array.isArray(cv.references)
         ? cv.references
         : (profileSource?.references || []);
 
@@ -1444,8 +1441,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       const profileSource = importedData || onboardingProfile;
 
       const fallbackName = profileSource?.fullName || storedSession?.name || '';
-      const fallbackLocation = profileSource?.location || 'Yogyakarta, Indonesia';
-      const fallbackHeadline = profileSource?.targetPositions?.[0] || profileSource?.experienceTitle || 'Project Manager';
+      const fallbackLocation = profileSource?.location || '';
+      const fallbackHeadline = profileSource?.targetPositions?.[0] || profileSource?.experienceTitle || '';
       const fallbackEmail = profileSource?.contactInfo || storedSession?.email || '';
       const fallbackPhone = profileSource?.phone || '';
       const fallbackSkills = profileSource?.skills || [];
@@ -1455,7 +1452,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         ? [{
             id: `exp-${Date.now()}`,
             company: profileSource.experienceCompany,
-            role: profileSource.experienceTitle || fallbackHeadline || 'Software Engineer',
+            role: profileSource.experienceTitle || fallbackHeadline || '',
             period: 'Sekarang',
             location: fallbackLocation,
             isCurrent: true,
@@ -1468,10 +1465,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         ? [{
             id: `edu-${Date.now()}`,
             institution: profileSource.institutionName,
-            degree: `${profileSource.educationLevel || ''} ${profileSource.major || ''}`.trim() || 'Sarjana',
-            year: '2021 - 2025',
+            degree: `${profileSource.educationLevel || ''} ${profileSource.major || ''}`.trim(),
+            year: '',
             location: fallbackLocation,
-            gpa: '3.52 / 4.00',
+            gpa: '',
             description: '',
           }]
         : [];
@@ -1483,9 +1480,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       const fallbackCv: CVData = {
         id: cvId,
         templateId: 'ats-modern',
-        title: fallbackName ? `CV ATS - ${fallbackName}` : 'CV ATS - Modern Standard',
+        title: fallbackName ? `CV ATS - ${fallbackName}` : 'CV ATS',
         updatedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-        atsScore: 85,
+        atsScore: 0,
         firstName: '',
         lastName: '',
         fullName: fallbackName,
@@ -1564,10 +1561,17 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const [showTemplateModal, setShowTemplateModal] = useState<boolean>(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('ats-modern');
   const [templateModalStep, setTemplateModalStep] = useState<number>(1);
+  const [newCvPurpose, setNewCvPurpose] = useState<CvPurpose>('job');
+  const [purposeCategoryFilterInModal, setPurposeCategoryFilterInModal] = useState<'all' | 'career' | 'entry' | 'flexible' | 'academic'>('all');
   const [newCvTitle, setNewCvTitle] = useState<string>('');
   const [newCvJobTitle, setNewCvJobTitle] = useState<string>('');
   const [newCvStartMode, setNewCvStartMode] = useState<'example' | 'empty' | 'import'>('example');
   const [newCvFile, setNewCvFile] = useState<File | null>(null);
+  const [isImportScanning, setIsImportScanning] = useState<boolean>(false);
+  const [importScanProgress, setImportScanProgress] = useState<number>(0);
+  const [importScanCompleted, setImportScanCompleted] = useState<boolean>(false);
+  const [importScanError, setImportScanError] = useState<string | null>(null);
+  const [importedCvData, setImportedCvData] = useState<any | null>(null);
   const [templateFormSubmitted, setTemplateFormSubmitted] = useState<boolean>(false);
 
   // Document Layout & Formatting Settings State
@@ -1767,8 +1771,65 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   // Template Form Validation
   const isNewCvTitleValid = newCvTitle.trim().length > 0;
   const isNewCvJobTitleValid = newCvJobTitle.trim().length > 0;
-  const isNewCvFileValid = newCvStartMode !== 'import' || newCvFile !== null;
+  const isNewCvFileValid = newCvStartMode !== 'import' || (newCvFile !== null && importScanCompleted);
   const isTemplateFormValid = isNewCvTitleValid && isNewCvJobTitleValid && isNewCvFileValid;
+
+  const handleImportFileUploadAndScan = async (file: File) => {
+    if (!file) return;
+    setNewCvFile(file);
+    setIsImportScanning(true);
+    setImportScanProgress(20);
+    setImportScanError(null);
+
+    try {
+      const bodyData = new FormData();
+      bodyData.append('file', file);
+
+      setImportScanProgress(45);
+      const res = await fetch('/api/cv/parse', {
+        method: 'POST',
+        body: bodyData,
+      });
+
+      setImportScanProgress(80);
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        setImportScanError(result.error || 'Berkas yang kamu unggah tampaknya bukan dokumen CV atau Resume. Pastikan berkas memuat informasi pendidikan, pengalaman, atau keahlian kamu.');
+        setImportScanCompleted(false);
+        setNewCvFile(null);
+        setImportedCvData(null);
+        return;
+      }
+
+      const data = result.data || {};
+      setImportedCvData(data);
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cuti_imported_cv_data', JSON.stringify(data));
+      }
+
+      // Auto populate newCvTitle and newCvJobTitle if empty or default
+      if (!newCvTitle || newCvTitle.trim() === '' || newCvTitle.startsWith('CV -')) {
+        const suggestedName = data.fullName ? `CV - ${data.fullName}` : (data.targetPositions?.[0] ? `CV - ${data.targetPositions[0]}` : `CV Baru ATS`);
+        setNewCvTitle(suggestedName);
+      }
+      if (!newCvJobTitle || newCvJobTitle.trim() === '') {
+        const suggestedPos = data.targetPositions?.[0] || data.experienceTitle || (data.experience?.[0]?.role) || '';
+        if (suggestedPos) setNewCvJobTitle(suggestedPos);
+      }
+
+      setImportScanProgress(100);
+      setImportScanCompleted(true);
+    } catch (err: any) {
+      setImportScanError(err.message || 'Terjadi kendala saat membaca berkas. Silakan tinjau dan sesuaikan data.');
+      setImportScanCompleted(false);
+      setNewCvFile(null);
+      setImportedCvData(null);
+    } finally {
+      setIsImportScanning(false);
+    }
+  };
 
   const readUploadedFileText = (file: File): Promise<string> => {
     return new Promise((resolve) => {
@@ -1792,43 +1853,24 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     const templateName = cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS';
 
     let initialData: Partial<CVData> = {};
+    const currentSession = getStoredSession();
+    const onboardingProfileStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_onboarding_profile') : null;
+    const onboardingProfile = onboardingProfileStr ? JSON.parse(onboardingProfileStr) : null;
+
     if (newCvStartMode === 'example') {
-      initialData = {
-        fullName: '',
-        headline: newCvJobTitle || 'Software Engineer',
-        email: '',
-        phone: '',
-        location: '',
-        summary: 'Software Engineer berpengalaman dalam membangun aplikasi web berkinerja tinggi, scalable, dan ATS friendly.',
-        skills: ['TypeScript', 'React', 'Next.js', 'Node.js', 'Tailwind CSS', 'PostgreSQL', 'Git', 'REST API'],
-        experience: [
-          {
-            id: 'exp-1',
-            company: 'Nama Perusahaan',
-            role: newCvJobTitle || 'Senior Software Engineer',
-            period: '2023 - Sekarang',
-            description: 'Memimpin pengembangan fitur frontend & backend, mengoptimalkan kecepatan load hingga 45%, dan mengimplementasikan CI/CD.',
-          },
-          {
-            id: 'exp-2',
-            company: 'Nama Perusahaan Sebelumnya',
-            role: 'Software Engineer',
-            period: '2021 - 2023',
-            description: 'Mengembangkan API mikroservis dan sistem otentikasi aman untuk 100.000+ pengguna aktif bulanan.',
-          },
-        ],
-        education: [
-          {
-            id: 'edu-1',
-            institution: 'Nama Universitas',
-            degree: 'S1 Teknik Informatika / Ilmu Komputer',
-            year: '2017 - 2021',
-          },
-        ],
-      };
+      const presetData = generateStarterCvPreset({
+        purpose: newCvPurpose,
+        targetRole: newCvJobTitle || 'Professional',
+        templateId: selectedTemplateId || 'ats-modern',
+        userName: currentSession?.name || onboardingProfile?.fullName || '',
+        userEmail: currentSession?.email || onboardingProfile?.contactInfo || '',
+        userPhone: (currentSession as any)?.phone || onboardingProfile?.phone || '',
+        userLocation: onboardingProfile?.location || 'Indonesia',
+      });
+      initialData = { ...presetData };
     } else if (newCvStartMode === 'import') {
-      let parsedImportData: any = null;
-      if (newCvFile) {
+      let parsedImportData: any = importedCvData;
+      if (!parsedImportData && newCvFile) {
         try {
           const bodyData = new FormData();
           bodyData.append('file', newCvFile);
@@ -1836,9 +1878,6 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           const jsonRes = await res.json();
           if (jsonRes.success && jsonRes.data) {
             parsedImportData = jsonRes.data;
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('cuti_imported_cv_data', JSON.stringify(parsedImportData));
-            }
           }
         } catch (err) {
           console.warn('Gagal parse file di handleCreateNewCV:', err);
@@ -1847,10 +1886,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
       if (parsedImportData) {
         initialData = {
-          fullName: parsedImportData.fullName || '',
+          fullName: parsedImportData.fullName || currentSession?.name || '',
           headline: newCvJobTitle || parsedImportData.targetPositions?.[0] || parsedImportData.experienceTitle || 'Professional',
-          email: parsedImportData.contactInfo || '',
-          phone: parsedImportData.phone || '',
+          email: parsedImportData.contactInfo || parsedImportData.email || currentSession?.email || '',
+          phone: parsedImportData.phone || (currentSession as any)?.phone || '',
           location: parsedImportData.location || '',
           summary: parsedImportData.summary || '',
           skills: parsedImportData.skills || [],
@@ -1866,11 +1905,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         if (newCvFile) {
           fileExtractedText = await readUploadedFileText(newCvFile);
         }
-        const extractedEmail = fileExtractedText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)?.[0] || '';
-        const extractedPhone = fileExtractedText.match(/(\+62|08)[0-9\s-]{8,13}/)?.[0] || '';
+        const extractedEmail = fileExtractedText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)?.[0] || currentSession?.email || '';
+        const extractedPhone = fileExtractedText.match(/(\+62|08)[0-9\s-]{8,13}/)?.[0] || (currentSession as any)?.phone || '';
 
         initialData = {
-          fullName: '',
+          fullName: currentSession?.name || '',
           headline: newCvJobTitle || 'Professional',
           email: extractedEmail,
           phone: extractedPhone,
@@ -1881,73 +1920,48 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           education: [],
         };
       }
+
+      // Bersihkan cache file impor sementara setelah dipakai
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('cuti_imported_cv_data');
+      }
     } else {
+      // newCvStartMode === 'empty' (Lembar Kerja Kosong Bersih)
       initialData = {
-        fullName: '',
+        fullName: currentSession?.name || '',
         headline: newCvJobTitle || '',
-        email: '',
-        phone: '',
+        email: currentSession?.email || '',
+        phone: (currentSession as any)?.phone || '',
         location: '',
         summary: '',
         skills: [],
+        skillsList: [],
         experience: [],
         education: [],
+        projects: [],
+        organizations: [],
+        certifications: [],
+        languages: [],
+        courses: [],
+        scholarships: [],
+        volunteers: [],
+        references: [],
       };
     }
 
-    const currentSession = getStoredSession();
-    const importedStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_imported_cv_data') : null;
-    const importedData = importedStr ? JSON.parse(importedStr) : null;
-    const onboardingProfileStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_onboarding_profile') : null;
-    const onboardingProfile = onboardingProfileStr ? JSON.parse(onboardingProfileStr) : null;
-
-    const profileSource = importedData || onboardingProfile;
-
-    const defaultName = initialData?.fullName || currentSession?.name || profileSource?.fullName || '';
-    const defaultLocation = initialData?.location || profileSource?.location || 'Yogyakarta, Indonesia';
-    const defaultHeadline = newCvJobTitle || initialData?.headline || (profileSource?.targetPositions?.[0]) || profileSource?.experienceTitle || 'Project Manager';
-    const defaultSkills = (initialData?.skills && initialData.skills.length > 0) ? initialData.skills : (profileSource?.skills || []);
-    const defaultPhone = initialData?.phone || profileSource?.phone || '';
-    const defaultEmail = initialData?.email || profileSource?.contactInfo || currentSession?.email || '';
-    const defaultSummary = initialData?.summary || profileSource?.summary || '';
-    const defaultEdu: EducationItem[] = (initialData?.education && initialData.education.length > 0)
-      ? initialData.education
-      : (profileSource?.education && profileSource.education.length > 0)
-      ? profileSource.education
-      : profileSource?.institutionName
-      ? [
-          {
-            id: `edu-${Date.now()}`,
-            institution: profileSource.institutionName,
-            degree: `${profileSource.educationLevel || ''} ${profileSource.major || ''}`.trim() || 'Sarjana',
-            year: '2021 - 2025',
-            location: defaultLocation,
-            gpa: '3.52 / 4.00',
-            description: '',
-          },
-        ]
-      : [];
-    const defaultExp: ExperienceItem[] = (initialData?.experience && initialData.experience.length > 0)
-      ? initialData.experience
-      : (profileSource?.experience && profileSource.experience.length > 0)
-      ? profileSource.experience
-      : profileSource?.hasWorkExperience && profileSource?.experienceCompany
-      ? [
-          {
-            id: `exp-${Date.now()}`,
-            company: profileSource.experienceCompany,
-            role: profileSource.experienceTitle || defaultHeadline || 'Software Engineer',
-            period: 'Sekarang',
-            location: defaultLocation,
-            isCurrent: true,
-            description: '',
-          },
-        ]
-      : [];
-    const defaultProjects: ProjectItem[] = (initialData?.projects && initialData.projects.length > 0) ? initialData.projects : (profileSource?.projects || []);
-    const defaultOrgs: OrganizationItem[] = (initialData?.organizations && initialData.organizations.length > 0) ? initialData.organizations : (profileSource?.organizations || []);
-    const defaultCerts: CertificationItem[] = (initialData?.certifications && initialData.certifications.length > 0) ? initialData.certifications : (profileSource?.certifications || []);
-    const defaultReferences: ReferenceItem[] = (initialData?.references && initialData.references.length > 0) ? initialData.references : (profileSource?.references || []);
+    const defaultName = initialData.fullName || currentSession?.name || '';
+    const defaultHeadline = newCvJobTitle || initialData.headline || '';
+    const defaultEmail = initialData.email || currentSession?.email || '';
+    const defaultPhone = initialData.phone || (currentSession as any)?.phone || '';
+    const defaultLocation = initialData.location || '';
+    const defaultSummary = initialData.summary ?? '';
+    const defaultSkills = initialData.skills ?? [];
+    const defaultExp = initialData.experience ?? [];
+    const defaultEdu = initialData.education ?? [];
+    const defaultProjects = initialData.projects ?? [];
+    const defaultOrgs = initialData.organizations ?? [];
+    const defaultCerts = initialData.certifications ?? [];
+    const defaultReferences = initialData.references ?? [];
 
     const atsScoreFromContent = calculateAtsScore({
       fullName: defaultName,
@@ -1959,7 +1973,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       id: newId,
       title: newCvTitle || (defaultName ? `CV ATS - ${defaultName}` : `CV ATS - ${templateName}`),
       updatedAt: 'Hari ini',
-      atsScore: atsScoreFromContent || 85,
+      atsScore: atsScoreFromContent || 0,
+      purpose: newCvPurpose,
+      targetRole: newCvJobTitle || defaultHeadline,
       fullName: defaultName,
       headline: defaultHeadline,
       email: defaultEmail,
@@ -2005,6 +2021,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     router.push(`/cv/${newId}`);
   };
 
+  const handleSelectPurposeAndNext = () => {
+    setTemplateModalStep(2);
+  };
+
   const handleSelectTemplateAndNext = () => {
     const templateName = cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS';
     setNewCvTitle(`CV ATS - ${templateName}`);
@@ -2012,13 +2032,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     setNewCvStartMode('example');
     setNewCvFile(null);
     setTemplateFormSubmitted(false);
-    setTemplateModalStep(2);
+    setTemplateModalStep(3);
   };
 
   useEffect(() => {
     if (!showTemplateModal) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (templateModalStep === 1) {
+      if (templateModalStep === 2) {
         const availableTemplates = cvTemplates.filter((tpl) => !tpl.hidden);
         const currentIndex = availableTemplates.findIndex((t) => t.id === selectedTemplateId);
 
@@ -2961,7 +2981,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         ...formData,
       }).totalScore;
 
-      const finalAtsScore = liveAtsScore > 0 ? liveAtsScore : (selectedCV?.atsScore && selectedCV.atsScore > 0 ? selectedCV.atsScore : 85);
+      const finalAtsScore = liveAtsScore > 0 ? liveAtsScore : (selectedCV?.atsScore && selectedCV.atsScore > 0 ? selectedCV.atsScore : 0);
 
       const updatedCV: CVData = {
         ...(selectedCV || {}),
@@ -3221,29 +3241,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     const onboardingProfile = onboardingStr ? JSON.parse(onboardingStr) : null;
     const profileSource = importedData || onboardingProfile;
 
-    const isPlaceholderSummary = !cv.summary || cv.summary.toLowerCase().includes('hasil impor') || cv.summary.toLowerCase().includes('.pdf');
-    const isPlaceholderExp = !cv.experience || cv.experience.length === 0 || cv.experience[0]?.company === 'Perusahaan Terakhir (Diimpor)';
-
     const resolvedFullName = cv.fullName || profileSource?.fullName || '';
     const resolvedFirst = cv.firstName || (resolvedFullName ? resolvedFullName.split(' ')[0] : '');
     const resolvedLast = cv.lastName || (resolvedFullName ? resolvedFullName.split(' ').slice(1).join(' ') : '');
     const resolvedEmail = cv.email || profileSource?.contactInfo || '';
     const resolvedPhone = cv.phone || profileSource?.phone || '';
-    const resolvedLocation = cv.location || profileSource?.location || 'Yogyakarta, Indonesia';
-    const isPlaceholderSkills = !cv.skills || cv.skills.length === 0 || cv.skills.some((s: string) => typeof s === 'string' && (s.toLowerCase().includes('impor') || s.toLowerCase().includes('autorecovered')));
-    const rawCleanProfileSkills = (profileSource?.skills || []).filter((s: string) => typeof s === 'string' && !s.toLowerCase().includes('impor') && !s.toLowerCase().includes('autorecovered'));
-    const rawCleanCvSkills = (cv.skills || []).filter((s: string) => typeof s === 'string' && !s.toLowerCase().includes('impor') && !s.toLowerCase().includes('autorecovered'));
+    const resolvedLocation = cv.location || profileSource?.location || '';
 
-    const resolvedSkills = (!isPlaceholderSkills && rawCleanCvSkills.length > 0)
-      ? rawCleanCvSkills
-      : (rawCleanProfileSkills.length > 0)
-      ? rawCleanProfileSkills
-      : ['Project Management', 'Agile & Scrum', 'Scrum Master', 'Web Development', 'System Development', 'IoT', 'UI/UX', 'Continuous Improvement', 'User Acceptance Testing (UAT)', 'Git'];
-    const resolvedSummary = (profileSource?.summary && !profileSource.summary.toLowerCase().includes('hasil impor') && !profileSource.summary.toLowerCase().includes('.pdf'))
-      ? profileSource.summary
-      : (!isPlaceholderSummary && cv.summary)
-      ? cv.summary
-      : `${resolvedFullName ? resolvedFullName : 'Professional'} berdedikasi dengan latar belakang ${profileSource?.major ? `pendidikan ${profileSource.major}` : 'keilmuan yang kuat'} dan keahlian di bidang ${resolvedSkills.slice(0, 4).join(', ') || 'manajemen operasional'}. Memiliki kemampuan analisis yang baik, terbiasa bekerja dalam tim lintas divisi, dan berorientasi pada hasil kerja optimal.`;
     const isSentenceFragmentTitle = (title: string): boolean => {
       if (!title) return false;
       const t = title.trim();
@@ -3268,26 +3272,32 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       return result;
     };
 
-    const rawExp: ExperienceItem[] = (!isPlaceholderExp && cv.experience && cv.experience.length > 0)
+    const resolvedSkills = Array.isArray(cv.skills)
+      ? cv.skills
+      : (profileSource?.skills || []);
+    const resolvedSummary = cv.summary !== undefined && cv.summary !== null
+      ? cv.summary
+      : (profileSource?.summary || '');
+    const rawExp: ExperienceItem[] = Array.isArray(cv.experience)
       ? cv.experience
       : (profileSource?.experience || []);
     const resolvedExp: ExperienceItem[] = mergeFragmentItems<ExperienceItem>(rawExp);
 
-    const resolvedEdu: EducationItem[] = (cv.education && cv.education.length > 0)
+    const resolvedEdu: EducationItem[] = Array.isArray(cv.education)
       ? cv.education
       : (profileSource?.education || []);
 
-    const rawProjects: ProjectItem[] = (cv.projects && cv.projects.length > 0)
+    const rawProjects: ProjectItem[] = Array.isArray(cv.projects)
       ? cv.projects
       : (profileSource?.projects || []);
     const resolvedProjects: ProjectItem[] = mergeFragmentItems<ProjectItem>(rawProjects);
 
-    const rawOrgs: OrganizationItem[] = (cv.organizations && cv.organizations.length > 0)
+    const rawOrgs: OrganizationItem[] = Array.isArray(cv.organizations)
       ? cv.organizations
       : (profileSource?.organizations || []);
     const resolvedOrgs: OrganizationItem[] = mergeFragmentItems<OrganizationItem>(rawOrgs);
 
-    const rawCerts: CertificationItem[] = (cv.certifications && cv.certifications.length > 0)
+    const rawCerts: CertificationItem[] = Array.isArray(cv.certifications)
       ? cv.certifications
       : (profileSource?.certifications || []);
     const resolvedCerts: CertificationItem[] = rawCerts.map((cert) => {
@@ -3308,7 +3318,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         issueDate,
       };
     });
-    const resolvedReferences = (cv.references && cv.references.length > 0)
+    const resolvedReferences = Array.isArray(cv.references)
       ? cv.references
       : (profileSource?.references || []);
 
@@ -3540,7 +3550,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 cvList.length > 0
                   ? Math.round(
                       cvList.reduce((acc, c) => {
-                        const s = (c.atsScore && c.atsScore > 0) ? c.atsScore : calculateAtsScore(c).totalScore || 85;
+                        const s = (c.atsScore && c.atsScore > 0) ? c.atsScore : calculateAtsScore(c).totalScore || 0;
                         return acc + s;
                       }, 0) / cvList.length
                     )
@@ -3686,7 +3696,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     </div>
                     <span className="px-2.5 py-1 rounded-[10px] text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 flex items-center gap-1 shrink-0">
                       <Award className="w-3.5 h-3.5" />
-                      <span>ATS {(cv.atsScore && cv.atsScore > 0) ? cv.atsScore : (calculateAtsScore(cv).totalScore || 85)}%</span>
+                      <span>ATS {(cv.atsScore && cv.atsScore > 0) ? cv.atsScore : (calculateAtsScore(cv).totalScore || 0)}%</span>
                     </span>
                   </div>
 
@@ -8032,7 +8042,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 </p>
               </div>
               <span className="px-2.5 py-1 rounded-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[10px]">
-                Skor ATS: {deletingCvTarget.atsScore ?? 85}
+                Skor ATS: {deletingCvTarget.atsScore ?? 0}
               </span>
             </div>
 
@@ -8075,18 +8085,25 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-blue-300 text-xs font-bold">
                   <LayoutGrid className="w-4 h-4 text-amber-400" />
-                  <span>Koleksi Templat CV ATS CUTI</span>
+                  <span>
+                    {templateModalStep === 1 && 'Langkah 1 dari 3: Tujuan Pembuatan CV'}
+                    {templateModalStep === 2 && 'Langkah 2 dari 3: Pilih Desain Template'}
+                    {templateModalStep === 3 && 'Langkah 3 dari 3: Konfigurasi CV Baru'}
+                  </span>
                 </div>
                 <h3 className="text-lg md:text-xl font-extrabold text-white">
-                  {templateModalStep === 1 ? 'Pilih Template CV Mandiri' : 'Konfigurasi CV Baru'}
+                  {templateModalStep === 1 && 'Tujuan Pembuatan CV'}
+                  {templateModalStep === 2 && 'Pilih Template CV Mandiri'}
+                  {templateModalStep === 3 && 'Konfigurasi CV Baru'}
                 </h3>
                 <p className="text-xs text-blue-100/90">
-                  {templateModalStep === 1
-                    ? 'Klik template untuk melihat preview A4 dengan data contoh. Pilih yang paling sesuai dengan target pekerjaan kamu.'
-                    : `Template terpilih: ${cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS Standard'}`}
+                  {templateModalStep === 1 && 'Pilih tujuan yang paling sesuai untuk menyesuaikan matriks bobot scoring dan fokus evaluasi CV kamu.'}
+                  {templateModalStep === 2 && 'Klik template untuk melihat preview A4 dengan data contoh. Pilih yang paling sesuai dengan target pekerjaan kamu.'}
+                  {templateModalStep === 3 && `Template terpilih: ${cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS Standard'} • Tujuan: ${CV_PURPOSE_PROFILES[newCvPurpose]?.title || 'Lamar Kerja'}`}
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => {
                   setShowTemplateModal(false);
                   setTemplateModalStep(1);
@@ -8097,9 +8114,126 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               </button>
             </div>
 
-            {templateModalStep === 1 ? (
+            {/* STEP 1: TUJUAN PEMBUATAN CV (Dedicated Section Page) */}
+            {templateModalStep === 1 && (
               <>
-                {/* STEP 1: Modal Body - 2 Column: Template List + A4 Preview */}
+                <div className="p-5 md:p-6 overflow-y-auto bg-slate-50 dark:bg-slate-950 flex-1 space-y-4">
+                  {/* Category Filter */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <div className="flex items-center gap-2">
+                      <Target className="w-4 h-4 text-orange-500" />
+                      <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                        Katalog Profil Tujuan CV (10 Pilihan Adaptif)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
+                      {[
+                        { id: 'all', label: 'Semua (10)' },
+                        { id: 'career', label: 'Karier' },
+                        { id: 'entry', label: 'Pemula / Mahasiswa' },
+                        { id: 'flexible', label: 'Fleksibel' },
+                        { id: 'academic', label: 'Akademik' },
+                      ].map((tab) => (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setPurposeCategoryFilterInModal(tab.id as any)}
+                          className={`px-2.5 py-1 rounded-[10px] text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
+                            purposeCategoryFilterInModal === tab.id
+                              ? 'bg-[#1738D1] text-white shadow-xs'
+                              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+                          }`}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Grid 10 Purpose Profiles */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {Object.values(CV_PURPOSE_PROFILES)
+                      .filter((p) => purposeCategoryFilterInModal === 'all' || p.category === purposeCategoryFilterInModal)
+                      .map((prof) => {
+                        const isSelected = newCvPurpose === prof.id;
+                        return (
+                          <div
+                            key={prof.id}
+                            onClick={() => setNewCvPurpose(prof.id)}
+                            className={`p-4 rounded-[10px] border text-left transition-all cursor-pointer flex flex-col justify-between relative ${
+                              isSelected
+                                ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] ring-2 ring-[#1738D1]/25 shadow-sm'
+                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-slate-700'
+                            }`}
+                          >
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <h4 className="text-sm font-black text-slate-900 dark:text-white">
+                                  {prof.title}
+                                </h4>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <span className="px-2 py-0.5 rounded-[6px] text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                    {prof.badge}
+                                  </span>
+                                  {isSelected && (
+                                    <span className="w-5 h-5 rounded-full bg-[#1738D1] text-white flex items-center justify-center">
+                                      <Check className="w-3.5 h-3.5 text-white" />
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                                {prof.evaluationFocusText}
+                              </p>
+                            </div>
+
+                            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
+                              <span className="text-slate-500 dark:text-slate-400 font-bold truncate pr-2">
+                                Komponen: {prof.requiredComponents.slice(0, 3).join(', ')}
+                              </span>
+                              <span className={`font-bold shrink-0 ${isSelected ? 'text-[#1738D1] dark:text-blue-400' : 'text-slate-400'}`}>
+                                {isSelected ? 'Terpilih' : 'Klik untuk Pilih'}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+
+                {/* Footer Step 1 */}
+                <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                    Tujuan aktif: <strong className="text-slate-900 dark:text-white">{CV_PURPOSE_PROFILES[newCvPurpose]?.title}</strong>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowTemplateModal(false);
+                        setTemplateModalStep(1);
+                      }}
+                      className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSelectPurposeAndNext}
+                      className="px-6 py-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+                    >
+                      <span>Lanjut: Pilih Template</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* STEP 2: PILIH TEMPLATE CV MANDIRI (Dedicated Section Page) */}
+            {templateModalStep === 2 && (
+              <>
                 <div className="flex flex-1 overflow-hidden">
                   {/* Left: Template List */}
                   <div className="w-80 border-r border-slate-200 dark:border-slate-800 overflow-y-auto bg-slate-50 dark:bg-slate-950/60 p-4 space-y-3">
@@ -8149,13 +8283,20 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   </div>
                 </div>
 
-                {/* Modal Footer Step 1 */}
+                {/* Footer Step 2 */}
                 <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                    Preview dengan data contoh. Semua templat 100% kompatibel dengan sistem ATS.
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setTemplateModalStep(1)}
+                    className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Kembali ke Tujuan CV</span>
+                  </button>
+
                   <div className="flex items-center gap-2">
                     <button
+                      type="button"
                       onClick={() => {
                         setShowTemplateModal(false);
                         setTemplateModalStep(1);
@@ -8165,6 +8306,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       Batal
                     </button>
                     <button
+                      type="button"
                       onClick={handleSelectTemplateAndNext}
                       className="px-6 py-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
                     >
@@ -8174,37 +8316,51 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   </div>
                 </div>
               </>
-            ) : (
+            )}
+
+            {/* STEP 3: KONFIGURASI CV BARU (Dedicated Section Page) */}
+            {templateModalStep === 3 && (
               <>
-                {/* STEP 2: Modal Body - 2 Column Layout (Left: Title & Job Target, Right: Start Mode) */}
                 <div className="p-6 md:p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 space-y-6 flex-1">
                   <div className="w-full bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-sm">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                      {/* Sisi Kiri: Template Info + Nama & Lowongan Target */}
-                      <div className="space-y-5">
-                        {/* Info Template Terpilih */}
-                        {(() => {
-                          const tpl = cvTemplates.find((t) => t.id === selectedTemplateId) || cvTemplates[0];
-                          return (
-                            <div className="p-4 rounded-[10px] bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-navy-800/60 flex items-center justify-between">
-                              <div className="space-y-1">
-                                <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-                                  Template Terpilih
-                                </span>
-                                <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                                  <span>{tpl.name}</span>
-                                </h4>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => setTemplateModalStep(1)}
-                                className="text-xs font-bold text-blue-600 hover:text-orange-600 dark:text-blue-400 hover:underline cursor-pointer"
-                              >
-                                Ubah
-                              </button>
+                      {/* Sisi Kiri: Ringkasan Template & Tujuan + Input Judul & Posisi */}
+                      <div className="space-y-4">
+                        {/* Info Template & Tujuan Terpilih */}
+                        <div className="p-4 rounded-[10px] bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-navy-800/60 flex items-center justify-between">
+                          <div className="space-y-1">
+                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                              Ringkasan Pilihan
+                            </span>
+                            <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">
+                              {cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS Standard'}
+                            </h4>
+                            <div className="flex items-center gap-1.5 pt-0.5">
+                              <span className="px-2 py-0.5 rounded-[6px] text-[10px] font-bold bg-[#1738D1] text-white">
+                                {CV_PURPOSE_PROFILES[newCvPurpose]?.title}
+                              </span>
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                                {CV_PURPOSE_PROFILES[newCvPurpose]?.badge}
+                              </span>
                             </div>
-                          );
-                        })()}
+                          </div>
+                          <div className="flex flex-col gap-1 items-end">
+                            <button
+                              type="button"
+                              onClick={() => setTemplateModalStep(1)}
+                              className="text-[11px] font-bold text-blue-600 hover:text-orange-600 dark:text-blue-400 hover:underline cursor-pointer"
+                            >
+                              Ubah Tujuan
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setTemplateModalStep(2)}
+                              className="text-[11px] font-bold text-blue-600 hover:text-orange-600 dark:text-blue-400 hover:underline cursor-pointer"
+                            >
+                              Ubah Template
+                            </button>
+                          </div>
+                        </div>
 
                         {/* Input Nama CV */}
                         <div>
@@ -8316,15 +8472,15 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             }`}
                           >
                             <div className="flex items-center gap-3">
-                              <div className="p-2.5 rounded-[10px] bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300 shrink-0">
-                                <Plus className="w-5 h-5" />
+                              <div className="p-2.5 rounded-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shrink-0">
+                                <FileUp className="w-5 h-5" />
                               </div>
                               <div>
                                 <h5 className="font-extrabold text-xs text-slate-900 dark:text-white">
-                                  Kosongkan (Nol)
+                                  Kosongkan Lembar Kerja
                                 </h5>
                                 <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">
-                                  Form CV bersih tanpa isi untuk mengetik manual.
+                                  Mulai dari lembar kerja kosong dan ketik dari awal.
                                 </p>
                               </div>
                             </div>
@@ -8357,41 +8513,99 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               {newCvStartMode === 'import' && <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />}
                             </div>
 
-                            {/* Extra file input if Impor File selected */}
+                            {/* Onboarding-style Rich Upload & Auto-Scan Feature */}
                             {newCvStartMode === 'import' && (
-                              <div className="pt-2 border-t border-slate-200 dark:border-slate-700/60 text-center space-y-2">
-                                <input
-                                  type="file"
-                                  id="cv-import-file"
-                                  accept=".pdf,.doc,.docx,.txt"
-                                  onChange={(e) => {
-                                    if (e.target.files && e.target.files[0]) {
-                                      setNewCvFile(e.target.files[0]);
-                                    }
-                                  }}
-                                  className="hidden"
-                                />
-                                <label
-                                  htmlFor="cv-import-file"
-                                  className="inline-flex items-center gap-2 px-4 py-2 rounded-[10px] bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs cursor-pointer transition shadow-xs"
-                                >
-                                  <Upload className="w-4 h-4" />
-                                  <span>{newCvFile ? 'Ganti File' : 'Pilih File CV'}</span>
-                                </label>
-                                {newCvFile ? (
-                                  <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                                    File terpilih: {newCvFile.name} ({(newCvFile.size / 1024).toFixed(1)} KB)
-                                  </p>
+                              <div className="pt-3 border-t border-slate-200 dark:border-slate-700/60 space-y-3" onClick={(e) => e.stopPropagation()}>
+                                {!importScanCompleted ? (
+                                  <div className="space-y-3">
+                                    {/* Upload Dropzone */}
+                                    <label className="w-full p-6 border-2 border-dashed border-[#1738D1]/50 hover:border-[#1738D1] dark:border-blue-800 rounded-[10px] bg-blue-50/30 dark:bg-blue-950/20 transition flex flex-col items-center justify-center gap-2.5 cursor-pointer group">
+                                      <div className="w-12 h-12 rounded-[10px] bg-blue-100 dark:bg-blue-900/60 text-[#1738D1] dark:text-blue-400 flex items-center justify-center group-hover:scale-105 transition shadow-xs">
+                                        <FileUp className="w-6 h-6" />
+                                      </div>
+                                      <div className="text-center space-y-0.5">
+                                        <p className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
+                                          Klik untuk pilih file atau tarik berkas ke sini
+                                        </p>
+                                        <p className="text-[10px] font-medium text-slate-400">
+                                          Mendukung PDF, DOCX, DOC, TXT, dan JSON (Maksimal 10MB)
+                                        </p>
+                                      </div>
+                                      <input
+                                        type="file"
+                                        accept=".pdf,.docx,.doc,.txt,.json"
+                                        onChange={(e) => {
+                                          const file = e.target.files?.[0];
+                                          if (file) handleImportFileUploadAndScan(file);
+                                        }}
+                                        className="hidden"
+                                      />
+                                    </label>
+
+                                    {/* Scanning Progress State */}
+                                    {isImportScanning && (
+                                      <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                                        <div className="flex items-center justify-between text-xs font-bold">
+                                          <span className="flex items-center gap-2 text-[#1738D1]">
+                                            <span className="w-2 h-2 rounded-full bg-[#1738D1] animate-ping" />
+                                            Memindai &amp; mengekstrak struktur CV...
+                                          </span>
+                                          <span className="text-slate-500">{importScanProgress}%</span>
+                                        </div>
+                                        <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                                          <div
+                                            className="h-full bg-[#1738D1] transition-all duration-300"
+                                            style={{ width: `${importScanProgress}%` }}
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Scan Error */}
+                                    {importScanError && (
+                                      <div className="p-3 rounded-[10px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-start gap-2.5 text-xs text-amber-700 dark:text-amber-400">
+                                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                                        <span className="text-[11px] leading-relaxed">{importScanError}</span>
+                                      </div>
+                                    )}
+
+                                    {templateFormSubmitted && !isNewCvFileValid && !isImportScanning && !importScanError && (
+                                      <p className="text-[11px] font-bold text-rose-500 flex items-center justify-center gap-1">
+                                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                        <span>Wajib memilih dan memindai file CV untuk diimpor.</span>
+                                      </p>
+                                    )}
+                                  </div>
                                 ) : (
-                                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                                    Format didukung: PDF, DOCX, DOC, TXT (Maks. 5MB)
-                                  </p>
-                                )}
-                                {templateFormSubmitted && !isNewCvFileValid && (
-                                  <p className="text-[11px] font-bold text-rose-500 mt-1 flex items-center justify-center gap-1">
-                                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                                    <span>Wajib memilih file CV untuk diimpor.</span>
-                                  </p>
+                                  /* Clean Scanned Success State */
+                                  <div className="p-3 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-3 text-xs text-emerald-700 dark:text-emerald-400">
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                      <div className="w-8 h-8 rounded-[8px] bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                                        <FileCheck className="w-4 h-4" />
+                                      </div>
+                                      <div className="min-w-0">
+                                        <p className="truncate text-xs font-bold text-emerald-800 dark:text-emerald-200">
+                                          {newCvFile?.name}
+                                        </p>
+                                        <p className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                                          {newCvFile ? `${(newCvFile.size / 1024).toFixed(1)} KB • ` : ''}Berhasil dipindai &amp; data siap dimuat ke CV
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setImportScanCompleted(false);
+                                        setNewCvFile(null);
+                                        setImportedCvData(null);
+                                        setImportScanError(null);
+                                      }}
+                                      className="px-2.5 py-1.5 rounded-[6px] border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold hover:bg-emerald-100 dark:hover:bg-slate-700 transition flex items-center gap-1 shrink-0 cursor-pointer shadow-2xs"
+                                    >
+                                      <RotateCcw className="w-3 h-3" />
+                                      <span>Ganti File</span>
+                                    </button>
+                                  </div>
                                 )}
                               </div>
                             )}
@@ -8402,15 +8616,15 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   </div>
                 </div>
 
-                {/* Modal Footer Step 2 */}
+                {/* Footer Step 3 */}
                 <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
                   <button
                     type="button"
-                    onClick={() => setTemplateModalStep(1)}
-                    className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer flex items-center gap-1"
+                    onClick={() => setTemplateModalStep(2)}
+                    className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
                   >
                     <ArrowLeft className="w-4 h-4" />
-                    <span>Kembali ke Templat</span>
+                    <span>Kembali ke Pilih Template</span>
                   </button>
 
                   <div className="flex items-center gap-3">
@@ -8423,15 +8637,15 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     <button
                       type="button"
                       onClick={handleCreateCvFromTemplate}
-                      className="px-6 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md"
+                      className="px-6 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md shadow-[#1738D1]/20"
                     >
                       <span>Buat &amp; Edit CV</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
+                  </div>
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
           </div>
         </div>
       )}

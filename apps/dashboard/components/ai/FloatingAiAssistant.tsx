@@ -7,6 +7,8 @@ import {
   Loader2,
   Bot,
 } from 'lucide-react';
+import { AIConversation } from '@/components/smoothui/ai-conversation';
+import { getFaqUrl } from '@/lib/urls';
 
 export interface FloatingAiAssistantProps {
   atsScore?: number;
@@ -33,7 +35,6 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
   const [isDismissed, setIsDismissed] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const chatScrollRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [inputText, setInputText] = useState('');
@@ -54,10 +55,8 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
     'Panduan Misi dan Referral',
   ];
 
-  // Base URL situs FAQ (faq.employr.id). Bisa di-override lewat env untuk staging/dev.
-  const faqBaseUrl =
-    process.env.NEXT_PUBLIC_FAQ_URL ||
-    (process.env.NODE_ENV === 'production' ? 'https://faq.employr.id' : 'http://localhost:3005');
+  // Dynamic Base URL situs FAQ
+  const faqBaseUrl = getFaqUrl();
 
   // Click outside listener to auto-close chat room when clicking outside area
   useEffect(() => {
@@ -110,13 +109,6 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
       }
     };
   }, []);
-
-  // Auto scroll chat to bottom when messages update
-  useEffect(() => {
-    if (isExpanded && chatScrollRef.current) {
-      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
-    }
-  }, [messages, isTyping, isExpanded]);
 
   const handleSendMessage = async (customPrompt?: string) => {
     const query = customPrompt || inputText;
@@ -184,6 +176,10 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
 
   const isBubbleVisible = !isScrolling && !isExpanded;
 
+  // Key perubahan konten untuk AIConversation auto-scroll logic
+  const conversationContentKey =
+    messages.length + (isTyping ? 1 : 0) + (messages[messages.length - 1]?.text?.length || 0);
+
   return (
     <div ref={containerRef} className="fixed z-40 right-2 bottom-18 md:right-4 md:bottom-5 pointer-events-auto select-none">
       {isExpanded ? (
@@ -231,74 +227,76 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
             </button>
           </div>
 
-          {/* Mini Chat Messages Body */}
-          <div
-            ref={chatScrollRef}
-            className="flex-1 p-3.5 overflow-y-auto space-y-3 bg-slate-50/50 dark:bg-slate-950/50 text-xs no-scrollbar"
+          {/* Mini Chat Messages Body with SmoothUI AIConversation */}
+          <AIConversation
+            className="flex-1 min-h-0 bg-slate-50/50 dark:bg-slate-950/50"
+            contentKey={conversationContentKey}
           >
-            {messages.map((msg) => {
-              const isBot = msg.sender === 'bot';
-              return (
-                <div
-                  key={msg.id}
-                  className={`flex gap-2 ${isBot ? 'justify-start' : 'justify-end'}`}
-                >
-                  {isBot && (
-                    <div className="w-6 h-6 rounded-full bg-navy-100 text-navy-700 dark:bg-navy-950 dark:text-navy-300 border border-navy-200 dark:border-navy-800 flex items-center justify-center shrink-0 mt-0.5">
-                      <Bot className="w-3.5 h-3.5" />
-                    </div>
-                  )}
-
+            <div className="p-3.5 space-y-3 text-xs">
+              {messages.map((msg) => {
+                const isBot = msg.sender === 'bot';
+                return (
                   <div
-                    className={`max-w-[82%] p-2.5 rounded-[10px] space-y-1 shadow-xs ${
-                      isBot
-                        ? 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none'
-                        : 'bg-[#1738D1] text-white rounded-tr-none font-medium'
-                    }`}
+                    key={msg.id}
+                    className={`flex gap-2 ${isBot ? 'justify-start' : 'justify-end'}`}
                   >
-                    {isBot ? (
-                      <p
-                        className="whitespace-pre-wrap leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: renderBotText(msg.text) }}
-                      />
-                    ) : (
-                      <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                    {isBot && (
+                      <div className="w-6 h-6 rounded-full bg-navy-100 text-navy-700 dark:bg-navy-950 dark:text-navy-300 border border-navy-200 dark:border-navy-800 flex items-center justify-center shrink-0 mt-0.5">
+                        <Bot className="w-3.5 h-3.5" />
+                      </div>
                     )}
-                    <span
-                      className={`block text-[9px] ${
-                        isBot ? 'text-slate-400 dark:text-slate-500' : 'text-orange-100'
-                      } text-right`}
+
+                    <div
+                      className={`max-w-[82%] p-2.5 rounded-[10px] space-y-1 shadow-xs ${
+                        isBot
+                          ? 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none'
+                          : 'bg-[#1738D1] text-white rounded-tr-none font-medium'
+                      }`}
                     >
-                      {msg.timestamp}
+                      {isBot ? (
+                        <p
+                          className="whitespace-pre-wrap leading-relaxed"
+                          dangerouslySetInnerHTML={{ __html: renderBotText(msg.text) }}
+                        />
+                      ) : (
+                        <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                      )}
+                      <span
+                        className={`block text-[9px] ${
+                          isBot ? 'text-slate-400 dark:text-slate-500' : 'text-orange-100'
+                        } text-right`}
+                      >
+                        {msg.timestamp}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {isTyping && (
+                <div className="flex gap-2 items-center text-slate-400">
+                  <div className="w-6 h-6 rounded-full bg-navy-100 text-navy-700 dark:bg-navy-950 dark:text-navy-300 border border-navy-200 dark:border-navy-800 flex items-center justify-center shrink-0">
+                    <Bot className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="px-3 py-2.5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
+                    {/* Animasi mengetik: 3 titik memantul bergantian */}
+                    <div className="flex items-center gap-1">
+                      {[0, 1, 2].map((i) => (
+                        <span
+                          key={i}
+                          className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce"
+                          style={{ animationDelay: `${-i * 150}ms` }}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                      Herdi sedang mengetik...
                     </span>
                   </div>
                 </div>
-              );
-            })}
-
-            {isTyping && (
-              <div className="flex gap-2 items-center text-slate-400">
-                <div className="w-6 h-6 rounded-full bg-navy-100 text-navy-700 dark:bg-navy-950 dark:text-navy-300 border border-navy-200 dark:border-navy-800 flex items-center justify-center shrink-0">
-                  <Bot className="w-3.5 h-3.5" />
-                </div>
-                <div className="px-3 py-2.5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
-                  {/* Animasi mengetik: 3 titik memantul bergantian */}
-                  <div className="flex items-center gap-1">
-                    {[0, 1, 2].map((i) => (
-                      <span
-                        key={i}
-                        className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce"
-                        style={{ animationDelay: `${-i * 150}ms` }}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                    Herdi sedang mengetik...
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          </AIConversation>
 
           {/* Quick Suggestion Chips (statis + dinamis dari jawaban bot) */}
           <div className="px-3 py-1.5 bg-slate-100/70 dark:bg-slate-900/70 border-t border-slate-200/80 dark:border-slate-800 flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">

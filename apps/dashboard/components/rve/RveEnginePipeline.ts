@@ -90,6 +90,13 @@ export interface RecruiterPersona {
   strictness: string;
 }
 
+import {
+  CvPurpose,
+  ComprehensiveCvScoreResult,
+  evaluateCvComprehensive,
+  CV_PURPOSE_PROFILES,
+} from '@/lib/cv-purpose-scoring-engine';
+
 export interface RveReportResult {
   parsedData: CvParsedData;
   boundingBoxes: BoundingBox[];
@@ -133,6 +140,9 @@ export interface RveReportResult {
     }>;
   };
   highPriorityRecommendations: string[];
+  // 10 Purpose Profiles & 5 Diagnostic Dimensions Engine
+  purposeScore: ComprehensiveCvScoreResult;
+  activePurpose: CvPurpose;
 }
 
 /**
@@ -143,9 +153,53 @@ export function parseCvDocument(
   sourceMode: 'saved' | 'upload' | 'text',
   savedData?: Partial<CvParsedData>,
   uploadedFile?: File | null,
-  rawText?: string
+  rawText?: string,
+  uploadedParsedData?: any
 ): CvParsedData {
-  if (sourceMode === 'saved' && savedData) {
+  if (sourceMode === 'saved' || !sourceMode) {
+    if (!savedData) {
+      savedData = {
+        id: 'default-cv-template',
+        candidateName: 'Kandidat Pelamar',
+        roleTitle: 'Professional Specialist',
+        email: 'kandidat@email.com',
+        phone: '+62 812-3456-7890',
+        location: 'Indonesia',
+        summary:
+          'Professional berdedikasi tinggi dengan fokus pada hasil kerja nyata, efisiensi sistem, dan kolaborasi tim yang solid.',
+        experience: [
+          {
+            id: 'exp-1',
+            role: 'Professional Specialist',
+            company: 'Perusahaan Terkemuka',
+            period: '2023 - Sekarang',
+            achievements: [
+              'Memimpin penyelesaian target kerja dan inisiatif proyek dengan efisiensi 30%+ lebih cepat.',
+              'Mengoordinasikan alur kerja tim dan memastikan kualitas hasil sesuai standar industri.',
+            ],
+            metricsCount: 2,
+          },
+        ],
+        education: [
+          {
+            id: 'edu-1',
+            degree: 'S1 Sarjana / Pendidikan Terakhir',
+            institution: 'Perguruan Tinggi Terkemuka',
+            period: '2018 - 2022',
+            gpa: 'IPK 3.75 / 4.00',
+          },
+        ],
+        skills: [
+          'Komunikasi Profesional',
+          'Problem Solving',
+          'Manajemen Waktu',
+          'Kerja Sama Tim',
+          'Analisis Data & Eksekusi',
+        ],
+        hobbiesAndMisc: 'Bahasa Indonesia (Native), Bahasa Inggris (Proficient).',
+      };
+    }
+
     const normalizeAchievements = (exp: any): string[] => {
       if (Array.isArray(exp?.achievements) && exp.achievements.length > 0) {
         return exp.achievements.map((a: any) => (typeof a === 'string' ? a : String(a))).filter(Boolean);
@@ -164,27 +218,16 @@ export function parseCvDocument(
 
     const normalizeExperience = (list: any[] | undefined): CvParsedData['experience'] => {
       if (!Array.isArray(list) || list.length === 0) {
+        const defaultRole = savedData?.roleTitle || (savedData as any)?.headline || 'Professional Specialist';
         return [
           {
             id: 'exp-1',
-            role: 'Senior Fullstack Engineer',
-            company: 'PT Solusi Teknologi Nusantara',
+            role: defaultRole,
+            company: 'Perusahaan Terkemuka',
             period: '2023 - Sekarang',
             achievements: [
-              'Mengembangkan 12+ modul web berbasis React & TypeScript, mempercepat render 35%.',
-              'Memimpin tim 5 engineer dan memangkas bug rilis hingga 40% dalam 6 bulan.',
-              'Merancang arsitektur microservices yang menangani 50.000+ pengguna harian secara stabil.',
-            ],
-            metricsCount: 3,
-          },
-          {
-            id: 'exp-2',
-            role: 'Frontend Developer',
-            company: 'PT Digital Inovasi Kreatif',
-            period: '2021 - 2023',
-            achievements: [
-              'Membangun dashboard internal dengan React & Tailwind CSS untuk 1.200 karyawan.',
-              'Mengoptimalkan bundle size sebesar 28% dan efisiensi loading halaman utama.',
+              'Memimpin penyelesaian target kerja dan inisiatif proyek dengan efisiensi tinggi.',
+              'Mengoordinasikan alur kerja tim dan memastikan kualitas hasil sesuai standar industri.',
             ],
             metricsCount: 2,
           },
@@ -195,8 +238,8 @@ export function parseCvDocument(
         const achs = normalizeAchievements(item);
         return {
           id: item?.id || `exp-${idx + 1}`,
-          role: item?.role || item?.position || item?.jobTitle || 'Pengalaman Kerja',
-          company: item?.company || item?.companyName || 'Perusahaan',
+          role: item?.role || item?.position || item?.jobTitle || item?.title || 'Pengalaman Kerja',
+          company: item?.company || item?.companyName || item?.institution || 'Perusahaan',
           period: item?.period || (item?.startDate && item?.endDate ? `${item.startDate} - ${item.endDate}` : '') || item?.year || '2022 - Sekarang',
           achievements: achs,
           metricsCount: item?.metricsCount || achs.length || 1,
@@ -209,10 +252,10 @@ export function parseCvDocument(
         return [
           {
             id: 'edu-1',
-            degree: 'S1 Teknik Informatika',
-            institution: 'Universitas Indonesia',
-            period: '2017 - 2021',
-            gpa: 'IPK 3.82 / 4.00 (Cumlaude)',
+            degree: 'S1 Sarjana / Pendidikan Terakhir',
+            institution: 'Perguruan Tinggi Terkemuka',
+            period: '2018 - 2022',
+            gpa: 'IPK 3.75 / 4.00',
           },
         ];
       }
@@ -234,35 +277,135 @@ export function parseCvDocument(
         return skills.split(',').map((s) => s.trim()).filter(Boolean);
       }
       return [
-        'React.js',
-        'Next.js',
-        'TypeScript',
-        'Node.js',
-        'PostgreSQL',
-        'Tailwind CSS',
-        'Docker',
-        'REST API',
+        'Komunikasi Profesional',
+        'Problem Solving',
+        'Manajemen Waktu',
+        'Kerja Sama Tim',
+        'Analisis Data & Eksekusi',
       ];
     };
 
+    const candName =
+      savedData.candidateName ||
+      (savedData as any).fullName ||
+      (savedData as any).name ||
+      'Kandidat Pelamar';
+
+    const roleTitle =
+      savedData.roleTitle ||
+      (savedData as any).headline ||
+      (savedData as any).targetRole ||
+      (savedData as any).targetPosition ||
+      'Professional Specialist';
+
+    const email = savedData.email || 'kandidat@email.com';
+    const phone = savedData.phone || '+62 812-3456-7890';
+    const location = savedData.location || 'Indonesia';
+    const summary =
+      savedData.summary ||
+      (savedData as any).about ||
+      (savedData as any).profileSummary ||
+      'Professional berdedikasi tinggi dengan fokus pada hasil kerja nyata, efisiensi sistem, dan kolaborasi tim yang solid.';
+
     return {
       id: savedData.id || 'saved-cv',
-      candidateName: savedData.candidateName || 'Rizky Ramadhan, S.Kom',
-      roleTitle: savedData.roleTitle || 'Senior Fullstack Engineer',
-      email: savedData.email || 'rizky.dev@email.com',
-      phone: savedData.phone || '+62 812-3456-7890',
-      location: savedData.location || 'Jakarta, Indonesia',
-      summary:
-        savedData.summary ||
-        'Software Engineer berpengalaman 3+ tahun memimpin pengembangan aplikasi web performa tinggi dengan React, Next.js, & Node.js. Berhasil meningkatkan kecepatan render 35% dan efisiensi tim.',
-      experience: normalizeExperience(savedData.experience),
-      education: normalizeEducation(savedData.education),
+      candidateName: candName,
+      roleTitle: roleTitle,
+      email: email,
+      phone: phone,
+      location: location,
+      summary: summary,
+      experience: normalizeExperience(savedData.experience || (savedData as any).workExperience),
+      education: normalizeEducation(savedData.education || (savedData as any).educations),
       skills: normalizeSkills(savedData.skills),
-      hobbiesAndMisc: savedData.hobbiesAndMisc || 'Bahasa Indonesia (Native), Bahasa Inggris (Profisient). Hobi: Catur & Futsal.',
+      hobbiesAndMisc: savedData.hobbiesAndMisc || 'Bahasa Indonesia (Native), Bahasa Inggris (Proficient).',
     };
   }
 
-  if (sourceMode === 'upload' && uploadedFile) {
+  if (sourceMode === 'upload' && uploadedParsedData) {
+    const cleanName = uploadedParsedData.fullName
+      || uploadedParsedData.candidateName
+      || uploadedFile?.name?.replace(/\.[^/.]+$/, '').replace(/[-_]/g, '')
+      || 'KANDIDAT CV UPLOAD';
+
+    const role = uploadedParsedData.experienceTitle
+      || uploadedParsedData.roleTitle
+      || uploadedParsedData.headline
+      || 'Professional Specialist';
+
+    const skills = Array.isArray(uploadedParsedData.skills)
+      ? uploadedParsedData.skills.filter(Boolean)
+      : typeof uploadedParsedData.skills === 'string'
+        ? uploadedParsedData.skills.split(',').map((s: string) => s.trim()).filter(Boolean)
+        : [];
+
+    const expList = (() => {
+      if (Array.isArray(uploadedParsedData.experience) && uploadedParsedData.experience.length > 0) {
+        return uploadedParsedData.experience.map((e: any, i: number) => ({
+          id: `exp-u-${i}`,
+          role: e.role || e.position || e.jobTitle || e.title || role,
+          company: e.company || e.companyName || uploadedParsedData.experienceCompany || 'Perusahaan',
+          period: e.period || (e.startDate && e.endDate ? `${e.startDate} - ${e.endDate}` : '') || '2022 - Sekarang',
+          achievements: Array.isArray(e.achievements)
+            ? e.achievements
+            : Array.isArray(e.bullets)
+              ? e.bullets
+              : e.description
+                ? [e.description]
+                : ['Belum ada deskripsi detail.'],
+          metricsCount: e.metricsCount || 0,
+        }));
+      }
+      return [{
+        id: 'exp-u1',
+        role: role,
+        company: uploadedParsedData.experienceCompany || 'Perusahaan',
+        period: '2022 - Sekarang',
+        achievements: ['Pengalaman kerja sedang diproses.'],
+        metricsCount: 0,
+      }];
+    })();
+
+    const eduList = (() => {
+      if (Array.isArray(uploadedParsedData.education) && uploadedParsedData.education.length > 0) {
+        return uploadedParsedData.education.map((e: any, i: number) => ({
+          id: `edu-u-${i}`,
+          degree: e.degree || e.major || e.fieldOfStudy || uploadedParsedData.educationLevel || 'Sarjana',
+          institution: e.institution || e.school || e.university || uploadedParsedData.institutionName || 'Institusi Pendidikan',
+          period: e.period || (e.startDate && e.endDate ? `${e.startDate} - ${e.endDate}` : '') || '2018 - 2022',
+          gpa: e.gpa || e.score || e.grade || uploadedParsedData.gpa || 'IPK -',
+        }));
+      }
+      return [{
+        id: 'edu-u1',
+        degree: uploadedParsedData.educationLevel || 'Sarjana',
+        institution: uploadedParsedData.institutionName || 'Institusi Pendidikan',
+        period: '2018 - 2022',
+        gpa: uploadedParsedData.gpa || 'IPK -',
+      }];
+    })();
+
+    const targetPositions = Array.isArray(uploadedParsedData.targetPositions)
+      ? uploadedParsedData.targetPositions
+      : [];
+
+    return {
+      id: 'upload-cv',
+      candidateName: typeof cleanName === 'string' ? cleanName : 'Kandidat',
+      roleTitle: role,
+      email: uploadedParsedData.contactInfo || uploadedParsedData.email || 'kandidat@email.com',
+      phone: uploadedParsedData.phone || '+62 812-3456-7890',
+      location: uploadedParsedData.location || 'Indonesia',
+      summary: uploadedParsedData.summary || `${role} dengan pengalaman di bidang terkait, fokus pada hasil kerja nyata dan kolaborasi tim.`,
+      experience: expList,
+      education: eduList,
+      skills: skills.length > 0 ? skills : ['Kompetensi Teknis', 'Kolaborasi Tim', 'Problem Solving'],
+      hobbiesAndMisc: uploadedParsedData.hobbiesAndMisc || 'Bahasa Indonesia (Native), Bahasa Inggris (Proficient).',
+    };
+  }
+
+  // Upload file exists but no parsed data yet — fallback to text mode
+  if (sourceMode === 'upload' && uploadedFile && !uploadedParsedData) {
     const cleanName = uploadedFile.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
     return {
       id: 'upload-cv',
@@ -271,30 +414,23 @@ export function parseCvDocument(
       email: 'kandidat.upload@email.com',
       phone: '+62 811-0000-1111',
       location: 'Indonesia',
-      summary: `Hasil ekstraksi dari dokumen ${uploadedFile.name}. Memiliki latar belakang teknis yang relevan dengan kualifikasi ATS terkini.`,
-      experience: [
-        {
-          id: 'exp-u1',
-          role: 'Professional Lead / Developer',
-          company: 'Perusahaan Teknologi Utama',
-          period: '2022 - Sekarang',
-          achievements: [
-            `Pengalaman kerja diekstrak secara otomatis dari file ${uploadedFile.name}.`,
-            'Mengimplementasikan proyek sistem skala besar dan efisiensi alur kerja operasional.',
-          ],
-          metricsCount: 1,
-        },
-      ],
-      education: [
-        {
-          id: 'edu-u1',
-          degree: 'S1 Sarjana Komputer / Teknik',
-          institution: 'Perguruan Tinggi Terkemuka',
-          period: '2018 - 2022',
-          gpa: 'IPK 3.65 / 4.00',
-        },
-      ],
-      skills: ['Document Parsed', 'ATS Ready', 'Technical Competency', 'Project Management'],
+      summary: `Menunggu hasil parsing dari file ${uploadedFile.name}...`,
+      experience: [{
+        id: 'exp-u1',
+        role: 'Professional Lead / Developer',
+        company: 'Perusahaan Teknologi Utama',
+        period: '2022 - Sekarang',
+        achievements: ['Menunggu hasil parsing dokumen CV.'],
+        metricsCount: 0,
+      }],
+      education: [{
+        id: 'edu-u1',
+        degree: 'S1 Sarjana Komputer / Teknik',
+        institution: 'Perguruan Tinggi Terkemuka',
+        period: '2018 - 2022',
+        gpa: 'IPK 3.65 / 4.00',
+      }],
+      skills: ['Document Parsed', 'ATS Ready'],
       hobbiesAndMisc: `Sumber Berkas: ${uploadedFile.name}`,
     };
   }
@@ -638,15 +774,19 @@ export function runFullRvePipeline(
   uploadedFile?: File | null,
   rawText?: string,
   targetRole: string = '',
-  appliedFixIds: string[] = []
+  appliedFixIds: string[] = [],
+  uploadedParsedData?: any,
+  activePurpose: CvPurpose = 'job'
 ): RveReportResult {
-  const parsedData = parseCvDocument(sourceMode, savedData, uploadedFile, rawText);
+  const parsedData = parseCvDocument(sourceMode, savedData, uploadedFile, rawText, uploadedParsedData);
   const resolvedTargetRole = (targetRole || parsedData.roleTitle || 'Professional').trim();
   const boundingBoxes = calculateLayoutAndHierarchy(parsedData);
   const fixationPoints = predictEyeTrackingAndHeatmap(parsedData, boundingBoxes);
   const atsCorrelations = analyzeAtsCorrelation(parsedData, fixationPoints, resolvedTargetRole);
 
-  // 1. Analisis Kuantitatif & Sinyal CV
+  // 1. Analisis Kuantitatif & Scoring Multi-Purpose 5 Dimensi
+  const purposeScore = evaluateCvComprehensive(parsedData, activePurpose, resolvedTargetRole);
+
   const allExpText = parsedData.experience
     .map((e) => (Array.isArray(e.achievements) ? e.achievements.join(' ') : ''))
     .join(' ');
@@ -656,24 +796,18 @@ export function runFullRvePipeline(
   const hasSummary = parsedData.summary.length > 50;
   const hasExperience = parsedData.experience.length > 0;
 
-  // 2. Perhitungan Skor Dinamis
-  let baseScore = 68;
-  if (hasStrongMetrics) baseScore += 10;
-  else if (metricsFound > 0) baseScore += 5;
-  if (hasSkills) baseScore += 6;
-  if (hasSummary) baseScore += 5;
-  if (hasExperience) baseScore += 5;
-
+  // 2. Perhitungan Skor Dinamis Terintegrasi Purpose
   const bonusFromFixes = appliedFixIds.length * 5;
-  const initialBaseScore = Math.min(95, baseScore);
-  const overallAttentionScore = Math.min(98, initialBaseScore + 5 + bonusFromFixes);
+  const basePurposeScore = purposeScore.overallScore;
+  const overallAttentionScore = Math.min(98, basePurposeScore + 2 + bonusFromFixes);
   const fPatternScore = Math.min(99, (hasSummary && hasExperience ? 86 : 74) + bonusFromFixes);
-  const atsScore = Math.min(98, (hasSkills ? 76 : 60) + bonusFromFixes + (appliedFixIds.length > 0 ? 12 : 0));
+  const atsScore = Math.min(98, purposeScore.dimensions.atsCompatibility.score + (appliedFixIds.length > 0 ? 8 : 0));
 
   const screenerVisualScore = Math.min(98, fPatternScore);
   const screenerAtsScore = Math.min(98, atsScore);
-  const screenerImpactScore = Math.min(98, initialBaseScore + bonusFromFixes + (hasStrongMetrics ? 4 : 0));
-  const consensusScore = Math.round((screenerVisualScore + screenerAtsScore + screenerImpactScore) / 3);
+  const screenerImpactScore = Math.min(98, basePurposeScore + bonusFromFixes);
+  const consensusScore = Math.min(99, Math.max(50, Math.round(basePurposeScore + bonusFromFixes)));
+
 
   const verdictStatus = consensusScore >= 85 ? 'interview' : consensusScore >= 70 ? 'maybe' : 'reject';
 
@@ -847,6 +981,8 @@ export function runFullRvePipeline(
       ],
     },
     highPriorityRecommendations,
+    purposeScore,
+    activePurpose,
   };
 }
 

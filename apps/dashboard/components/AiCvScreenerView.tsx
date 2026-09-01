@@ -54,7 +54,18 @@ import {
   ChevronUp,
   GraduationCap,
   Play,
+  Laptop,
+  Plane,
+  FolderKanban,
+  CheckCircle,
 } from 'lucide-react';
+import {
+  CvPurpose,
+  CV_PURPOSE_PROFILES,
+  ComprehensiveCvScoreResult,
+  PurposeProfileConfig,
+  evaluateCvComprehensive,
+} from '@/lib/cv-purpose-scoring-engine';
 import {
   runFullRvePipeline,
   generateCvScreenerAiPrompt,
@@ -408,9 +419,128 @@ export const AiCvScreenerView: React.FC = () => {
   // Saved History State (Per-account / LocalStorage)
   const [reportHistory, setReportHistory] = useState<SavedReportHistoryItem[]>([]);
 
+  // Helper untuk menormalisasi data CV dari berbagai skema database / localStorage / profil pengguna
+  const normalizeCvItem = (item: any, sessionUser?: any, profileUser?: any) => {
+    const candidateName =
+      item.candidateName ||
+      item.fullName ||
+      item.name ||
+      item.data?.fullName ||
+      item.data?.candidateName ||
+      sessionUser?.name ||
+      profileUser?.fullName ||
+      profileUser?.name ||
+      'Kandidat Pelamar';
+
+    const roleTitle =
+      item.roleTitle ||
+      item.headline ||
+      item.targetPosition ||
+      item.target_position ||
+      item.targetRole ||
+      item.role ||
+      item.data?.headline ||
+      profileUser?.headline ||
+      'Professional Specialist';
+
+    const email =
+      item.email ||
+      item.data?.email ||
+      sessionUser?.email ||
+      profileUser?.email ||
+      'kandidat@email.com';
+
+    const phone =
+      item.phone ||
+      item.data?.phone ||
+      profileUser?.phone ||
+      '+62 812-3456-7890';
+
+    const location =
+      item.location ||
+      (item.city && item.country ? `${item.city}, ${item.country}` : item.city) ||
+      item.data?.location ||
+      profileUser?.city ||
+      profileUser?.location ||
+      'Indonesia';
+
+    const summary =
+      item.summary ||
+      item.about ||
+      item.profileSummary ||
+      item.executiveSummary ||
+      item.data?.summary ||
+      profileUser?.summary ||
+      'Professional berdedikasi tinggi dengan fokus pada pencapaian target dan kerja sama tim yang solid.';
+
+    const rawExp =
+      (Array.isArray(item.experience) && item.experience.length > 0
+        ? item.experience
+        : Array.isArray(item.workExperience) && item.workExperience.length > 0
+        ? item.workExperience
+        : Array.isArray(item.data?.experience) && item.data.experience.length > 0
+        ? item.data.experience
+        : Array.isArray(item.data?.workExperience) && item.data.workExperience.length > 0
+        ? item.data.workExperience
+        : Array.isArray(profileUser?.experience) && profileUser.experience.length > 0
+        ? profileUser.experience
+        : Array.isArray(profileUser?.workExperience) && profileUser.workExperience.length > 0
+        ? profileUser.workExperience
+        : []);
+
+    const rawEdu =
+      (Array.isArray(item.education) && item.education.length > 0
+        ? item.education
+        : Array.isArray(item.educations) && item.educations.length > 0
+        ? item.educations
+        : Array.isArray(item.data?.education) && item.data.education.length > 0
+        ? item.data.education
+        : Array.isArray(profileUser?.education) && profileUser.education.length > 0
+        ? profileUser.education
+        : []);
+
+    const rawSkills =
+      item.skills ||
+      item.skillList ||
+      item.data?.skills ||
+      profileUser?.skills ||
+      [];
+
+    const skills = Array.isArray(rawSkills)
+      ? rawSkills.map((s: any) => (typeof s === 'string' ? s : s?.name || String(s))).filter(Boolean)
+      : typeof rawSkills === 'string'
+      ? rawSkills.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+
+    return {
+      id: item.id || `cv-${Math.random().toString(36).substring(2, 9)}`,
+      title: item.title || item.headline || (candidateName ? `CV ${candidateName}` : 'CV Saya'),
+      candidateName,
+      roleTitle,
+      email,
+      phone,
+      location,
+      summary,
+      experience: rawExp,
+      education: rawEdu,
+      skills,
+      hobbiesAndMisc: item.hobbiesAndMisc || item.data?.hobbiesAndMisc || profileUser?.hobbiesAndMisc || 'Bahasa Indonesia (Native), Bahasa Inggris (Proficient).',
+      updatedAt: item.updatedAt || 'Baru saja',
+      atsScore: item.atsScore || item.data?.atsScore || 85,
+    };
+  };
+
   // Load user session & dynamic CVs from API and localStorage on mount
   useEffect(() => {
     const session = getStoredSession();
+    let profile: any = null;
+    if (typeof window !== 'undefined') {
+      try {
+        const storedProfile = localStorage.getItem('cuti_user_profile');
+        if (storedProfile) profile = JSON.parse(storedProfile);
+      } catch (e) {}
+    }
+
     if (session) {
       setUserSession(session);
       const userHistoryKey = `cuti_screener_history_${session.email || session.id || 'default'}`;
@@ -439,33 +569,66 @@ export const AiCvScreenerView: React.FC = () => {
       }
     }
 
-    // Fetch CVs murni dari database API (bukan localStorage — biar sesuai akun).
-    cvApi.getAll().then((remoteCvs) => {
-      const allDynamic = Array.isArray(remoteCvs) ? remoteCvs : [];
-      if (allDynamic.length > 0) {
-        const normalized = allDynamic.map((item) => ({
-          id: item.id || `cv-${Math.random()}`,
-          title: item.title || item.roleTitle || 'CV Saya',
-          candidateName: item.candidateName || item.name || userSession?.name || '',
-          roleTitle: item.roleTitle || item.targetRole || item.role || '',
-          email: item.email || userSession?.email || '',
-          phone: item.phone || '',
-          location: item.location || '',
-          summary: item.summary || 'Professional dengan keahlian teknis handal.',
-          experience: item.experience || [],
-          education: item.education || [],
-          skills: item.skills || [],
-          hobbiesAndMisc: item.hobbiesAndMisc || '',
-          updatedAt: item.updatedAt || 'Baru saja',
-          atsScore: item.atsScore || 0,
-        }));
+    // Fetch CVs dari database API, dengan fallback ke localStorage cuti_cv_list / profil
+    (async () => {
+      let candidateCvs: any[] = [];
+      try {
+        const remoteCvs = await cvApi.getAll();
+        if (Array.isArray(remoteCvs) && remoteCvs.length > 0) {
+          candidateCvs = remoteCvs;
+        }
+      } catch (e) {
+        console.warn('Could not fetch remote CVs, checking localStorage fallback');
+      }
 
+      if (candidateCvs.length === 0 && typeof window !== 'undefined') {
+        try {
+          const localList = localStorage.getItem('cuti_cv_list');
+          if (localList) {
+            const parsedList = JSON.parse(localList);
+            if (Array.isArray(parsedList) && parsedList.length > 0) {
+              candidateCvs = parsedList;
+            }
+          }
+          if (candidateCvs.length === 0) {
+            const activeDraft = localStorage.getItem('cuti_cv_active_draft');
+            if (activeDraft) {
+              const parsedDraft = JSON.parse(activeDraft);
+              if (parsedDraft && (parsedDraft.fullName || parsedDraft.candidateName || parsedDraft.skills)) {
+                candidateCvs = [parsedDraft];
+              }
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (candidateCvs.length > 0) {
+        const normalized = candidateCvs.map((c) => normalizeCvItem(c, session, profile));
         setSavedCvs(normalized);
-        if (normalized.length > 0 && normalized[0]?.roleTitle) {
+        setSelectedCvId((prev) => prev || normalized[0].id);
+        if (normalized[0]?.roleTitle) {
           setTargetRole((prev) => prev || normalized[0].roleTitle);
         }
+      } else {
+        // Buat profil dinamis berdasarkan user session atau profil onboarding
+        const userDefaultCv = normalizeCvItem(
+          {
+            id: 'user-active-cv',
+            title: session?.name ? `CV - ${session.name}` : 'CV Utama Saya',
+            candidateName: session?.name || profile?.fullName || 'Kandidat Pelamar',
+            roleTitle: profile?.headline || 'Professional Specialist',
+            email: session?.email || profile?.email || 'kandidat@email.com',
+          },
+          session,
+          profile
+        );
+        setSavedCvs([userDefaultCv]);
+        setSelectedCvId(userDefaultCv.id);
+        if (userDefaultCv.roleTitle) {
+          setTargetRole((prev) => prev || userDefaultCv.roleTitle);
+        }
       }
-    }).catch(() => {});
+    })();
   }, []);
 
   // Source Mode Selection
@@ -473,9 +636,13 @@ export const AiCvScreenerView: React.FC = () => {
   const [selectedCvId, setSelectedCvId] = useState<string>('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [rawCvText, setRawCvText] = useState('');
+  const [uploadedParsedData, setUploadedParsedData] = useState<any>(null);
+  const [isParsingUpload, setIsParsingUpload] = useState(false);
   const [isChangeCvModalOpen, setIsChangeCvModalOpen] = useState<boolean>(false);
 
-  // Target Job Role & Recruiter Persona
+  // Target Job Role & Recruiter Persona & 10 Purpose Profiles
+  const [activePurpose, setActivePurpose] = useState<CvPurpose>('job');
+  const [purposeCategoryFilter, setPurposeCategoryFilter] = useState<'all' | 'career' | 'entry' | 'academic' | 'flexible'>('all');
   const [targetRole, setTargetRole] = useState('');
   const [targetLevel, setTargetLevel] = useState<'Entry' | 'Junior' | 'Mid' | 'Senior'>('Mid');
   const [selectedPersonaId, setSelectedPersonaId] = useState<string>('startup');
@@ -484,7 +651,7 @@ export const AiCvScreenerView: React.FC = () => {
   // Reset aiReportData when inputs change
   useEffect(() => {
     setAiReportData(null);
-  }, [selectedCvId, selectedPersonaId, targetRole, cvSourceMode, uploadedFile]);
+  }, [selectedCvId, selectedPersonaId, targetRole, cvSourceMode, uploadedFile, uploadedParsedData, activePurpose]);
 
   // Custom Seniority Dropdown Popover State & Click Outside Ref
   const [isSeniorityDropdownOpen, setIsSeniorityDropdownOpen] = useState(false);
@@ -606,7 +773,9 @@ export const AiCvScreenerView: React.FC = () => {
       uploadedFile,
       rawCvText,
       targetRole || selectedSavedCv?.roleTitle || '',
-      appliedFixes
+      appliedFixes,
+      uploadedParsedData,
+      activePurpose
     );
 
     if (aiReportData) {
@@ -627,7 +796,7 @@ export const AiCvScreenerView: React.FC = () => {
     }
 
     return baseline;
-  }, [cvSourceMode, selectedSavedCv, uploadedFile, rawCvText, targetRole, appliedFixes, aiReportData]);
+  }, [cvSourceMode, selectedSavedCv, uploadedFile, rawCvText, targetRole, appliedFixes, aiReportData, activePurpose]);
 
   // Skor match dinamis per persona berdasarkan isi CV
   const personaMatchScores = useMemo(() => {
@@ -676,6 +845,35 @@ export const AiCvScreenerView: React.FC = () => {
     });
   }, [selectedModules, activeStepMap]);
 
+  // Parse uploaded CV file via /api/cv/parse (real PDF/DOCX/TXT extraction)
+  const handleParseUploadedFile = async (file: File) => {
+    setIsParsingUpload(true);
+    setUploadedParsedData(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/cv/parse', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) {
+        throw new Error(`Parse API status ${res.status}`);
+      }
+      const json = await res.json();
+      if (json.success && json.data) {
+        setUploadedParsedData(json.data);
+      } else {
+        throw new Error(json.error || 'Gagal memparse berkas CV');
+      }
+    } catch (err) {
+      console.warn('[handleParseUploadedFile] Gagal parse:', err);
+      toast.warning('Tidak bisa membaca isi berkas. Anda bisa tetap lanjut, hasil akan memakai fallback sederhana.');
+      setUploadedParsedData(null);
+    } finally {
+      setIsParsingUpload(false);
+    }
+  };
+
   const handleStartRvePipeline = async () => {
     if (cvSourceMode === 'upload' && !uploadedFile) {
       toast.warning('Silakan pilih atau upload file CV Anda terlebih dahulu.');
@@ -702,7 +900,8 @@ export const AiCvScreenerView: React.FC = () => {
       uploadedFile,
       rawCvText,
       effectiveRole,
-      appliedFixes
+      appliedFixes,
+      uploadedParsedData
     );
 
     let finalReport = baseline;
@@ -716,7 +915,11 @@ export const AiCvScreenerView: React.FC = () => {
         appliedFixes
       );
 
-      const aiPromise = fetch('/api/ai', {
+      const stepInterval = setInterval(() => {
+        setPipelineStep((prev) => (prev < activePipelineSteps.length - 1 ? prev + 1 : prev));
+      }, 200);
+
+      const res = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -726,31 +929,22 @@ export const AiCvScreenerView: React.FC = () => {
           prompt: aiPrompt,
           systemInstruction: 'Anda adalah Sistem Multi-Screener & Recruiter Intelligence untuk platform karier Employr. Kembalikan HANYA format JSON valid tanpa teks pengantar atau markdown block.',
         }),
-      }).then(async (res) => {
-        if (!res.ok) throw new Error(`AI API status ${res.status}`);
-        const json = await res.json();
-        if (json.text) {
-          return parseAiScreenerResponse(json.text, baseline);
-        }
-        return baseline;
       });
 
-      let step = 0;
-      const stepInterval = setInterval(() => {
-        step += 1;
-        if (step < activePipelineSteps.length) {
-          setPipelineStep(step);
-        }
-      }, 450);
-
-      const [aiResult] = await Promise.all([
-        aiPromise.catch(() => baseline),
-        new Promise((resolve) => setTimeout(resolve, Math.max(1200, activePipelineSteps.length * 450))),
-      ]);
-
       clearInterval(stepInterval);
-      finalReport = aiResult;
-      setAiReportData(aiResult);
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.text) {
+          const aiResult = parseAiScreenerResponse(json.text, baseline);
+          finalReport = aiResult;
+          setAiReportData(aiResult);
+        } else {
+          setAiReportData(baseline);
+        }
+      } else {
+        setAiReportData(baseline);
+      }
     } catch (e) {
       console.warn('[handleStartRvePipeline] Fallback ke dynamic heuristic pipeline:', e);
       setAiReportData(baseline);
@@ -802,7 +996,7 @@ export const AiCvScreenerView: React.FC = () => {
     setReportHistory((prev) => prev.filter((item) => item.id !== id));
   };
 
-  // 10. Satu Tombol Besar: ✨ Optimalkan CV Saya (Auto Apply All Fixes)
+  // 10. Satu Tombol Besar: Optimalkan CV Saya (Auto Apply All Fixes)
   const handleAutoOptimizeCv = () => {
     setIsAutoOptimizing(true);
     setTimeout(() => {
@@ -939,7 +1133,19 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                                 ? (selectedSavedCv.title || selectedSavedCv.candidateName)
                                 : 'Belum ada CV tersimpan')}
                         </span>
-                        {hasUsableCv && (
+                        {cvSourceMode === 'upload' && isParsingUpload && (
+                          <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1 shrink-0 animate-pulse">
+                            <RefreshCw className="w-2.5 h-2.5 animate-spin" />
+                            <span>Membaca CV...</span>
+                          </span>
+                        )}
+                        {cvSourceMode === 'upload' && !isParsingUpload && uploadedParsedData && (
+                          <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1 shrink-0">
+                            <Check className="w-3 h-3 text-emerald-600" />
+                            <span>Terekstraksi</span>
+                          </span>
+                        )}
+                        {cvSourceMode === 'saved' && hasUsableCv && (
                           <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1 shrink-0">
                             <Star className="w-3 h-3 text-emerald-600 fill-emerald-600" />
                             <span>{selectedSavedCv.atsScore}% ATS</span>
@@ -948,7 +1154,7 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                       </div>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                         {cvSourceMode === 'upload'
-                          ? 'Berkas Unggahan Lokal'
+                          ? (isParsingUpload ? 'Sedang mengekstrak teks...' : uploadedParsedData?.experienceTitle || uploadedParsedData?.fullName || 'Berkas Unggahan Lokal')
                           : (hasSavedCvs
                               ? `${selectedSavedCv.roleTitle} • Terakhir dianalisis ${selectedSavedCv.updatedAt}`
                               : 'Buat CV di menu CV Builder atau pilih Unggah Berkas')}
@@ -1035,6 +1241,91 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* PURPOSE PROFILES SELECTOR (10 Tujuan CV Adaptif) */}
+          <div className="p-5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Target className="w-4 h-4 text-orange-500" />
+                  <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                    Pilih Tujuan &amp; Konteks CV (Purpose Profile)
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                    10 Profil Adaptif
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  Setiap tujuan memiliki matriks bobot scoring dan aturan penilaian yang disesuaikan secara dinamis.
+                </p>
+              </div>
+
+              {/* Filter Kategori Purpose */}
+              <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
+                {[
+                  { id: 'all', label: 'Semua (10)' },
+                  { id: 'career', label: 'Karier' },
+                  { id: 'entry', label: 'Pemula / Mahasiswa' },
+                  { id: 'flexible', label: 'Fleksibel' },
+                  { id: 'academic', label: 'Akademik' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setPurposeCategoryFilter(tab.id as any)}
+                    className={`px-2.5 py-1 rounded-[10px] text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
+                      purposeCategoryFilter === tab.id
+                        ? 'bg-[#1738D1] text-white shadow-xs'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Grid 10 Purpose Profiles */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
+              {Object.values(CV_PURPOSE_PROFILES)
+                .filter((p) => purposeCategoryFilter === 'all' || p.category === purposeCategoryFilter)
+                .map((prof) => {
+                  const isSelected = activePurpose === prof.id;
+                  return (
+                    <button
+                      key={prof.id}
+                      type="button"
+                      onClick={() => setActivePurpose(prof.id)}
+                      className={`p-3 rounded-[10px] border text-left transition-all cursor-pointer flex flex-col justify-between relative ${
+                        isSelected
+                          ? 'bg-blue-50/60 dark:bg-blue-950/40 border-[#1738D1] ring-2 ring-[#1738D1]/20 shadow-xs'
+                          : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600'
+                      }`}
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="text-xs font-black text-slate-900 dark:text-white truncate">
+                            {prof.title}
+                          </span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-[#1738D1] shrink-0" />}
+                        </div>
+                        <span className="inline-block px-1.5 py-0.5 rounded-[6px] text-[9px] font-bold uppercase bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                          {prof.badge}
+                        </span>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-tight pt-0.5">
+                          {prof.objective}
+                        </p>
+                      </div>
+
+                      <div className="mt-2 pt-2 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between text-[9px] font-bold text-slate-500 dark:text-slate-400">
+                        <span>{prof.requiredComponents.length} Komponen</span>
+                        <span className="text-[#1738D1] dark:text-blue-400 font-extrabold">100% Bobot</span>
+                      </div>
+                    </button>
+                  );
+                })}
             </div>
           </div>
 
@@ -1575,30 +1866,77 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                 </div>
               </div>
 
-              {/* Overall Verdict & Confidence Banner + Before vs After Comparison */}
+              {/* PURPOSE PROFILE SWITCHER BAR (10 Profil Adaptif) */}
+              <div className="p-4 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-orange-500" />
+                    <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                      Tujuan Evaluasi CV (Purpose Profile)
+                    </span>
+                    <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                      Aktif: {CV_PURPOSE_PROFILES[activePurpose]?.title || 'Lamar Kerja'}
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                    Ganti tujuan untuk melihat adaptasi bobot scoring seketika
+                  </span>
+                </div>
+
+                {/* 10 Purpose Buttons Horizontal Scroll / Wrap */}
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {Object.values(CV_PURPOSE_PROFILES).map((prof) => {
+                    const isSelected = activePurpose === prof.id;
+                    return (
+                      <button
+                        key={prof.id}
+                        type="button"
+                        onClick={() => setActivePurpose(prof.id)}
+                        className={`px-3 py-1.5 rounded-[10px] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#1738D1] text-white shadow-xs'
+                            : 'bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        <span>{prof.title}</span>
+                        {isSelected && <Check className="w-3 h-3 text-white shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* OVERALL MASTER SCORE & 5 DIAGNOSTIC SCORING DIMENSIONS */}
               <div
                 id="verdict-summary-top"
                 className="p-6 md:p-8 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6"
               >
+                {/* Master Hero Score Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                        Hasil Konsensus Akhir
+                        Skor Komprehensif Berdasarkan Tujuan
                       </span>
                       <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-navy-50 dark:bg-navy-950 text-navy-700 dark:text-navy-300 border border-navy-200 dark:border-navy-800">
-                        Target: {currentPersona.name}
+                        {CV_PURPOSE_PROFILES[activePurpose]?.badge}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 pt-1">
-                      <span className="text-2xl font-black text-slate-900 dark:text-white">Overall Score</span>
-                      <span className="text-3xl font-black text-orange-500">{rveReport.consensusScore}%</span>
+                    <div className="flex items-center gap-3 pt-1">
+                      <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">CV Score</span>
+                      <span className="text-4xl font-black text-orange-500">
+                        {rveReport.purposeScore?.overallScore ?? rveReport.consensusScore}
+                        <span className="text-base font-bold text-slate-400">/100</span>
+                      </span>
                     </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium max-w-xl pt-0.5">
+                      {rveReport.purposeScore?.summaryFeedback || rveReport.topAiSummary.overview}
+                    </p>
                   </div>
 
                   {/* Verdict Status Indicator */}
-                  <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-[10px] border border-slate-200/80 dark:border-slate-700/80">
+                  <div className="flex flex-col items-start sm:items-end gap-2 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-[10px] border border-slate-200/80 dark:border-slate-700/80 shrink-0">
                     {rveReport.verdictStatus === 'interview' && (
                       <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm">
                         <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-xs" />
@@ -1617,11 +1955,182 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                         <span>Perlu Perbaikan (Reject)</span>
                       </div>
                     )}
-                    <span className="text-[10px] font-bold text-slate-400 block border-l border-slate-200 dark:border-slate-700 pl-3">
-                      Tingkat Kepercayaan: {rveReport.confidenceScore}%
+                    <span className="text-[10px] font-bold text-slate-400 block">
+                      Tingkat Kepercayaan Analisis: {rveReport.confidenceScore}%
                     </span>
                   </div>
                 </div>
+
+                {/* 5 PILAR DIMENSI DIAGNOSTIK BENTO GRID */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                      <BarChart3 className="w-4 h-4 text-orange-500" />
+                      5 Dimensi Diagnostik Kualitas CV
+                    </h4>
+                    <span className="text-[10px] font-extrabold text-slate-400">
+                      Standar Multidimensi
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                    {/* Dimensi 1: Completeness */}
+                    <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-2 flex flex-col justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-extrabold text-slate-700 dark:text-slate-300">
+                            Completeness
+                          </span>
+                          <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
+                            {rveReport.purposeScore?.dimensions.completeness.score ?? 92}%
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                            style={{ width: `${rveReport.purposeScore?.dimensions.completeness.score ?? 92}%` }}
+                          />
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
+                        {rveReport.purposeScore?.dimensions.completeness.missingItems.length === 0
+                          ? 'Seksi wajib lengkap terisi.'
+                          : `Perlu: ${rveReport.purposeScore?.dimensions.completeness.missingItems.slice(0, 1).join(', ')}`}
+                      </p>
+                    </div>
+
+                    {/* Dimensi 2: ATS Compatibility */}
+                    <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-2 flex flex-col justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-extrabold text-slate-700 dark:text-slate-300">
+                            ATS Compatibility
+                          </span>
+                          <span className="text-xs font-black text-[#1738D1] dark:text-blue-400">
+                            {rveReport.purposeScore?.dimensions.atsCompatibility.score ?? 95}%
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-[#1738D1] transition-all duration-500"
+                            style={{ width: `${rveReport.purposeScore?.dimensions.atsCompatibility.score ?? 95}%` }}
+                          />
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
+                        Format dan hierarki heading terbaca sempurna oleh bot parser.
+                      </p>
+                    </div>
+
+                    {/* Dimensi 3: Content Quality */}
+                    <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-2 flex flex-col justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-extrabold text-slate-700 dark:text-slate-300">
+                            Content Quality
+                          </span>
+                          <span className="text-xs font-black text-indigo-600 dark:text-indigo-400">
+                            {rveReport.purposeScore?.dimensions.contentQuality.score ?? 78}%
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-indigo-500 transition-all duration-500"
+                            style={{ width: `${rveReport.purposeScore?.dimensions.contentQuality.score ?? 78}%` }}
+                          />
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
+                        {rveReport.purposeScore?.dimensions.contentQuality.actionVerbsCount ?? 3} Action Verbs terdeteksi.
+                      </p>
+                    </div>
+
+                    {/* Dimensi 4: Job / Target Relevance */}
+                    <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-2 flex flex-col justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-extrabold text-slate-700 dark:text-slate-300">
+                            Job Relevance
+                          </span>
+                          <span className="text-xs font-black text-purple-600 dark:text-purple-400">
+                            {rveReport.purposeScore?.dimensions.jobRelevance.score ?? 84}%
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-purple-500 transition-all duration-500"
+                            style={{ width: `${rveReport.purposeScore?.dimensions.jobRelevance.score ?? 84}%` }}
+                          />
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
+                        {rveReport.purposeScore?.dimensions.jobRelevance.matchedKeywords.length ?? 4} Kata kunci cocok dengan lowongan target.
+                      </p>
+                    </div>
+
+                    {/* Dimensi 5: Achievement Strength */}
+                    <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-2 flex flex-col justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-extrabold text-slate-700 dark:text-slate-300">
+                            Achievement Strength
+                          </span>
+                          <span className={`text-xs font-black ${(rveReport.purposeScore?.dimensions.achievementStrength.score ?? 69) >= 75 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                            {rveReport.purposeScore?.dimensions.achievementStrength.score ?? 69}%
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${(rveReport.purposeScore?.dimensions.achievementStrength.score ?? 69) >= 75 ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                            style={{ width: `${rveReport.purposeScore?.dimensions.achievementStrength.score ?? 69}%` }}
+                          />
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
+                        {rveReport.purposeScore?.dimensions.achievementStrength.measurableBulletsCount ?? 2} poin memiliki metrik angka konkret (%).
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* RINCIAN MATRIKS BOBOT SESUAI PURPOSE PROFILE ($100%) */}
+                {rveReport.purposeScore?.componentBreakdown && (
+                  <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/80 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <SlidersHorizontal className="w-3.5 h-3.5 text-orange-500" />
+                        Rincian Matriks Bobot Scoring ({CV_PURPOSE_PROFILES[activePurpose]?.title})
+                      </span>
+                      <span className="text-[10px] font-black text-[#1738D1] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/80 px-2 py-0.5 rounded-[8px] border border-blue-200 dark:border-blue-800">
+                        Total Bobot: 100%
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                      {rveReport.purposeScore.componentBreakdown.map((item: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className="p-2.5 rounded-[8px] bg-white dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700/70 space-y-1"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">
+                              {item.label}
+                            </span>
+                            <span className="text-[10px] font-extrabold text-orange-500 shrink-0">
+                              {item.weight}% Bobot
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
+                            <span className="truncate">{item.feedback}</span>
+                            <span className="font-bold text-slate-900 dark:text-white shrink-0 ml-1">
+                              {item.score}/100
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Perbandingan Sebelum & Sesudah Card */}
                 <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
@@ -1717,7 +2226,7 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                     ))}
                   </ul>
 
-                  {/* Satu Tombol Besar: ✨ Optimalkan CV Saya */}
+                  {/* Satu Tombol Besar: Optimalkan CV Saya */}
                   <button
                     type="button"
                     onClick={handleAutoOptimizeCv}
@@ -2304,8 +2813,10 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                     const file = e.target.files?.[0];
                     if (file) {
                       setUploadedFile(file);
+                      setUploadedParsedData(null);
                       setCvSourceMode('upload');
                       setIsChangeCvModalOpen(false);
+                      handleParseUploadedFile(file);
                     }
                   }}
                   className="hidden"

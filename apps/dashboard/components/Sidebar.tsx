@@ -33,6 +33,7 @@ import {
 import { cn } from '@/lib/utils';
 import { trackerApi } from '@/lib/api';
 import { useCareerReadiness } from '@/hooks/useCareerReadiness';
+import { getLearningUrl } from '@/lib/urls';
 
 interface SidebarProps {
   onOpenUpgradeModal: () => void;
@@ -116,7 +117,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Target,
       items: [
         { id: 'interview', label: 'Panduan Interview', href: '/interview', icon: Mic },
-        { id: 'kursus', label: 'Kursus & Sertifikasi', href: 'http://localhost:3004', icon: BookOpen, badge: 'Baru' },
+        { id: 'kursus', label: 'Kursus & Sertifikasi', href: getLearningUrl(), icon: BookOpen, badge: 'Baru' },
       ],
     },
     {

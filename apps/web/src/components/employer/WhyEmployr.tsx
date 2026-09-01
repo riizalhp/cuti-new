@@ -13,37 +13,37 @@ const cards: CardData[] = [
   {
     id: 1,
     number: '01',
-    title: 'Satu CV.',
-    italicWord: 'Banyak peluang.',
+    title: 'One data source.',
+    italicWord: 'Many directions.',
     description:
-      'Susun profilmu sekali dan buka berbagai kesempatan karier yang sesuai dengan potensi, keahlian, serta minat terbaikmu.',
+      'Fill in your profile once, then create as many CV versions as you need for every role you target.',
     bgImage: '/images/image-1.webp',
   },
   {
     id: 2,
     number: '02',
-    title: 'Nggak perlu',
-    italicWord: 'bikin CV ulang.',
+    title: 'No need to',
+    italicWord: 'start from scratch.',
     description:
-      'Duplikasi dan sesuaikan variasi CV untuk tiap lowongan incaran dalam hitungan detik tanpa harus mulai dari nol lagi.',
+      'Duplicate your favorite draft and tweak it for each target role in seconds.',
     bgImage: '/images/image-2.webp',
   },
   {
     id: 3,
     number: '03',
-    title: 'Semua lamaran,',
-    italicWord: 'satu tempat.',
+    title: 'All applications,',
+    italicWord: 'one dashboard.',
     description:
-      'Pantau perkembangan setiap berkas lamaran, jadwal interview, hingga penawaran kerja di Tracker terpadu tanpa ada yang terlewat.',
+      'Track every application status, interview schedule, and job offer without messy spreadsheets.',
     bgImage: '/images/image-3.webp',
   },
   {
     id: 4,
     number: '04',
-    title: 'AI di',
-    italicWord: 'setiap langkah.',
+    title: 'AI-powered',
+    italicWord: 'every step of the way.',
     description:
-      'Dapatkan optimasi format ATS, rekomendasi kalimat aksi berdampak tinggi, dan panduan cerdas untuk memikat rekruter.',
+      'ATS optimization, high-impact action verbs, and smart recommendations to make your CV stand out.',
     bgImage: '/images/image-4.webp',
   },
 ];
@@ -56,7 +56,7 @@ export default function WhyEmployr() {
   };
 
   return (
-    <section className="why-employr why-employr--dark section-space" id="why-employr" aria-label="Kenapa Employr">
+    <section className="why-employr why-employr--dark section-space" id="why-employr" aria-label="Why Employr">
       <div className="editorial-frame why-employr__container">
         {/* TOP EDITORIAL HEADER */}
         <div className="why-employr__top">
@@ -64,16 +64,16 @@ export default function WhyEmployr() {
             <div className="section-label section-label--inverse">
               <span>01.5</span>
               <i className="section-label__line"></i>
-              <span>KENAPA EMPLOYR</span>
+              <span>WHY EMPLOYR</span>
             </div>
             <h2 className="why-employr__headline">
-              Partner nyata,<br />
-              bukan sekadar <em>alat bantu biasa.</em>
+              A real partner,<br />
+              not just a <em>form to fill.</em>
             </h2>
           </div>
           <div className="why-employr__header-right">
             <p className="why-employr__supporting">
-              Bukan hanya tempat membuat dokumen. Employr adalah ekosistem karier cerdas — mulai dari penyusunan CV multi-versi, penyesuaian untuk tiap lowongan, pelacakan proses rekrutmen di Tracker, hingga bantuan AI di setiap langkah.
+              More than just a CV editor. Employr organizes your whole job hunt: build multi-version resumes, tailor each one to the job, track everything in Tracker, and get AI help at every stage.
             </p>
           </div>
         </div>
@@ -119,9 +119,9 @@ export default function WhyEmployr() {
                   <div className="why-employr__glossy-glass-box">
                     <div className="why-employr__glass-top-shine"></div>
                     <div className="why-employr__glass-glare"></div>
-                    
+
                     <div className="why-employr__glass-content">
-                      {/* CARD 01: EDITORIAL CV ARTIFACT (LANDING PAGE STYLE) */}
+                      {/* CARD 01: EDITORIAL CV ARTIFACT */}
                       {card.id === 1 && (
                         <article className="lp-artifact-card">
                           <div className="lp-artifact-top">
@@ -129,7 +129,7 @@ export default function WhyEmployr() {
                               <span className="lp-avatar">MS</span>
                               <div>
                                 <b className="lp-name">Maria Syafira</b>
-                                <small className="lp-sub">Desainer Produk</small>
+                                <small className="lp-sub">Product Designer</small>
                               </div>
                             </div>
                             <div className="lp-meta-box">
@@ -137,12 +137,12 @@ export default function WhyEmployr() {
                               <b>ATS 92%</b>
                             </div>
                           </div>
-                          
+
                           <div className="lp-rule"></div>
-                          
+
                           <div className="lp-artifact-body">
-                            <p className="lp-kicker">PROFIL & KEAHLIAN</p>
-                            <p className="lp-summary">Merancang pengalaman digital dan antarmuka produk yang terukur.</p>
+                            <p className="lp-kicker">PROFILE & SKILLS</p>
+                            <p className="lp-summary">Designing measurable digital experiences and clear product interfaces.</p>
                             <div className="lp-tags">
                               <span>UI/UX</span>
                               <span>Figma</span>
@@ -150,38 +150,38 @@ export default function WhyEmployr() {
                               <span>React</span>
                             </div>
                           </div>
-                          
+
                           <div className="lp-artifact-footer">
-                            <span className="lp-note">Standar ATS Modern</span>
-                            <span className="lp-action-badge">Siap Dilamar</span>
+                            <span className="lp-note">Modern ATS Standard</span>
+                            <span className="lp-action-badge">Ready to Apply</span>
                           </div>
                         </article>
                       )}
 
-                      {/* CARD 02: KECOCOKAN LOWONGAN (LANDING PAGE STYLE) */}
+                      {/* CARD 02: KECOCOKAN LOWONGAN */}
                       {card.id === 2 && (
                         <article className="lp-artifact-card">
                           <div className="lp-artifact-top">
                             <div>
-                              <p className="lp-kicker">KECELARASAN PERAN</p>
+                              <p className="lp-kicker">ROLE ALIGNMENT</p>
                               <b className="lp-name">Frontend Engineer</b>
-                              <small className="lp-sub">di GoTo Jakarta</small>
+                              <small className="lp-sub">at GoTo Jakarta</small>
                             </div>
                             <div className="lp-score-box">
                               <b>95</b>
-                              <small>% COCOK</small>
+                              <small>% MATCH</small>
                             </div>
                           </div>
-                          
+
                           <div className="lp-rule"></div>
-                          
+
                           <div className="lp-artifact-body">
                             <div className="lp-stat-row">
-                              <span>Keahlian Teknis</span>
+                              <span>Technical Skills</span>
                               <b>96%</b>
                             </div>
                             <div className="lp-stat-row">
-                              <span>Pengalaman Relevan</span>
+                              <span>Relevant Experience</span>
                               <b>94%</b>
                             </div>
                             <div className="lp-tags">
@@ -190,81 +190,81 @@ export default function WhyEmployr() {
                               <span className="lp-tag-matched">Tailwind</span>
                             </div>
                           </div>
-                          
+
                           <div className="lp-artifact-footer">
-                            <span className="lp-note">CV diselaraskan khusus</span>
-                            <span className="lp-action-badge">Peluang Tinggi</span>
+                            <span className="lp-note">CV tailored for this role</span>
+                            <span className="lp-action-badge">High Match</span>
                           </div>
                         </article>
                       )}
 
-                      {/* CARD 03: KANBAN TRACKER (LANDING PAGE STYLE) */}
+                      {/* CARD 03: KANBAN TRACKER */}
                       {card.id === 3 && (
                         <article className="lp-artifact-card">
                           <div className="lp-artifact-top">
                             <div>
-                              <p className="lp-kicker">PELACAKAN LAMARAN</p>
-                              <b className="lp-name">Tracker Karier</b>
-                              <small className="lp-sub">6 Lamaran Aktif</small>
+                              <p className="lp-kicker">APPLICATION TRACKING</p>
+                              <b className="lp-name">Career Tracker</b>
+                              <small className="lp-sub">6 Active Applications</small>
                             </div>
-                            <span className="lp-pill-blue">Terpantau</span>
+                            <span className="lp-pill-blue">Active</span>
                           </div>
-                          
+
                           <div className="lp-rule"></div>
-                          
+
                           <div className="lp-kanban-cols">
                             <div className="lp-kanban-col">
-                              <span className="lp-col-head">TERKIRIM</span>
+                              <span className="lp-col-head">SENT</span>
                               <b>Traveloka</b>
                               <small>Frontend</small>
                             </div>
                             <div className="lp-kanban-col lp-col--active">
                               <span className="lp-col-head">INTERVIEW</span>
                               <b>Tokopedia</b>
-                              <small>Besok 14:00</small>
+                              <small>Tomorrow 2 PM</small>
                             </div>
                             <div className="lp-kanban-col lp-col--success">
                               <span className="lp-col-head">OFFERING</span>
                               <b>Astra Tech</b>
-                              <small>Tahap Akhir</small>
+                              <small>Final Stage</small>
                             </div>
                           </div>
-                          
+
                           <div className="lp-artifact-footer">
-                            <span className="lp-note">Jadwal tersinkron</span>
-                            <span className="lp-action-badge">Update Real-Time</span>
+                            <span className="lp-note">Schedule synced</span>
+                            <span className="lp-action-badge">Real-Time Update</span>
                           </div>
                         </article>
                       )}
 
-                      {/* CARD 04: OPTIMASI AI (LANDING PAGE STYLE) */}
+                      {/* CARD 04: OPTIMASI AI */}
                       {card.id === 4 && (
                         <article className="lp-artifact-card">
                           <div className="lp-artifact-top">
                             <div>
-                              <p className="lp-kicker">OPTIMASI KALIMAT</p>
-                              <b className="lp-name">Pencapaian Berdampak</b>
-                              <small className="lp-sub">Asistensi Cerdas</small>
+                              <p className="lp-kicker">PHRASE OPTIMIZATION</p>
+                              <b className="lp-name">High-Impact Wins</b>
+                              <small className="lp-sub">Smart Assist</small>
                             </div>
-                            <span className="lp-pill-lime">+38% Skor</span>
+                            <span className="lp-pill-lime">+38% Score</span>
                           </div>
-                          
+
                           <div className="lp-rule"></div>
-                          
+
                           <div className="lp-diff-box">
                             <div className="lp-diff-item">
-                              <span className="lp-diff-kicker">DRAF AWAL</span>
-                              <p>"Membuat website dan memperbaiki error bug."</p>
+                              <span className="lp-diff-kicker">FIRST DRAFT</span>
+                              <p>"Built websites and fixed bugs."</p>
                             </div>
                             <div className="lp-diff-item lp-diff-item--ai">
-                              <span className="lp-diff-kicker lp-diff-kicker--ai">DIOPTIMALKAN</span>
-                              <p>"Mengembangkan 12 modul React, percepat load 40% dan konversi 25%."</p>
+                              <span className="lp-diff-kicker lp-diff-kicker--ai">OPTIMIZED</span>
+                              <p>"Developed 12 React modules, improved load speed by 40% and conversion by 25%."</p>
                             </div>
                           </div>
-                          
+
                           <div className="lp-artifact-footer">
-                            <span className="lp-note">Kata kerja aksi terukur</span>
-                            <span className="lp-action-badge">Siap Salin</span>
+                            <span className="lp-note">Measurable action verbs</span>
+                            <span className="lp-action-badge">Ready to Copy</span>
                           </div>
                         </article>
                       )}
@@ -514,7 +514,7 @@ export default function WhyEmployr() {
           opacity: 1;
         }
 
-        /* GLOSSY FROSTED GLASS INNER BOX (REVEAL ONLY ON HOVER) */
+        /* GLOSSY FROSTED GLASS INNER BOX */
         .why-employr__glossy-glass-box {
           position: relative;
           width: 100%;
@@ -593,7 +593,7 @@ export default function WhyEmployr() {
         }
 
         /* ------------------------------------------------------------------ */
-        /* LANDING PAGE ARTIFACT CARD DESIGN SYSTEM (WARM PAPER & INK TYPOGRAPHY) */
+        /* LANDING PAGE ARTIFACT CARD DESIGN SYSTEM */
         /* ------------------------------------------------------------------ */
         .lp-artifact-card {
           background: #F5F6F2;
@@ -793,7 +793,7 @@ export default function WhyEmployr() {
           color: #101114;
         }
 
-        /* MINI KANBAN (LANDING PAGE STYLE) */
+        /* MINI KANBAN */
         .lp-kanban-cols {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
@@ -852,7 +852,7 @@ export default function WhyEmployr() {
           color: #059669;
         }
 
-        /* DIFF AI (LANDING PAGE STYLE) */
+        /* DIFF AI */
         .lp-diff-box {
           display: flex;
           flex-direction: column;

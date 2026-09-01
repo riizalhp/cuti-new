@@ -1,4 +1,6 @@
 ---
-// Redirect to dashboard register page
-return Astro.redirect('http://localhost:3000/register', 301);
+import { getAppBaseUrl } from '../utils/env';
+
+const appBaseUrl = getAppBaseUrl(Astro.request.url);
+return Astro.redirect(`${appBaseUrl}/register`, 302);
 ---

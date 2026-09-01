@@ -15,4 +15,12 @@ export default defineConfig({
   build: {
     inlineStylesheets: 'auto',
   },
+  vite: {
+    server: {
+      watch: {
+        usePolling: true,
+        interval: 500,
+      },
+    },
+  },
 });

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Compass, BookOpen, GraduationCap, Sparkles, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getAppUrl } from '@/lib/urls';
 
 export const BottomNav: React.FC = () => {
   const pathname = usePathname();
@@ -32,7 +33,7 @@ export const BottomNav: React.FC = () => {
     {
       id: 'dashboard',
       label: 'Karier',
-      href: 'http://localhost:3000/beranda',
+      href: getAppUrl('/beranda'),
       icon: User,
     },
   ];

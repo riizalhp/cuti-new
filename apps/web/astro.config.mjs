@@ -19,6 +19,12 @@ export default defineConfig({
     inlineStylesheets: 'auto',
   },
   vite: {
+    server: {
+      watch: {
+        usePolling: true,
+        interval: 500,
+      },
+    },
     build: {
       cssMinify: 'lightningcss',
     },

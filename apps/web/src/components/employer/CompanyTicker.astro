@@ -1,289 +1,205 @@
 ---
 /**
  * CompanyTicker.astro
- * Ticker marquee logo perusahaan yang bergerak otomatis, looping tanpa jeda,
- * grayscale secara default dan berubah ke warna asli saat kursor diarahkan (hover).
+ * Ticker marquee logo perusahaan dalam 2 baris:
+ * - Baris 1 (Atas): Bergerak ke KIRI
+ * - Baris 2 (Bawah): Bergerak ke KANAN
+ * Menggunakan 20 logo dari folder public/testimoni/ dengan loop mulus tanpa jeda.
  */
 
 interface CompanyLogo {
   name: string;
-  svg?: string;
-  src?: string; // Bisa gunakan file gambar langsung misal '/logos/tokopedia.svg'
+  src: string;
 }
 
-const companies: CompanyLogo[] = [
-  {
-    name: 'GoTo / Gojek',
-    svg: `<svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="company-logo-svg">
-      <g>
-        <circle cx="20" cy="20" r="14" fill="#00AA13"/>
-        <circle cx="20" cy="20" r="7" fill="#FFFFFF"/>
-        <circle cx="20" cy="20" r="3" fill="#00AA13"/>
-        <text x="44" y="27" font-family="'DM Sans', 'Inter', sans-serif" font-size="20" font-weight="800" fill="#00AA13" letter-spacing="-0.04em">gojek</text>
-      </g>
-    </svg>`,
-  },
-  {
-    name: 'Tokopedia',
-    svg: `<svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="company-logo-svg">
-      <g>
-        <rect x="6" y="7" width="26" height="26" rx="6" fill="#03AC0E"/>
-        <path d="M14 15C14 12.5 16 10.5 19 10.5C22 10.5 24 12.5 24 15" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/>
-        <circle cx="15" cy="19" r="2.3" fill="#FFFFFF"/>
-        <circle cx="23" cy="19" r="2.3" fill="#FFFFFF"/>
-        <circle cx="15" cy="19" r="1" fill="#03AC0E"/>
-        <circle cx="23" cy="19" r="1" fill="#03AC0E"/>
-        <text x="38" y="26" font-family="'DM Sans', 'Inter', sans-serif" font-size="17.5" font-weight="800" fill="#03AC0E" letter-spacing="-0.04em">tokopedia</text>
-      </g>
-    </svg>`,
-  },
-  {
-    name: 'Shopee',
-    svg: `<svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="company-logo-svg">
-      <g>
-        <path d="M10 12C10 9.79 11.79 8 14 8H28C30.2 8 32 9.79 32 12V28C32 30.2 30.2 32 28 32H14C11.79 32 10 30.2 10 28V12Z" fill="#EE4D2D"/>
-        <path d="M16 10V7C16 4.5 18 3 21 3C24 3 26 4.5 26 7V10" stroke="#EE4D2D" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M24 16C23.5 14.5 22 14 20.8 14C19 14 17.8 15 17.8 16.5C17.8 18.5 24.2 18.5 24.2 22C24.2 24.5 22 26 20 26C18 26 16.8 24.8 16.5 23.5" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/>
-        <text x="40" y="27" font-family="'DM Sans', 'Inter', sans-serif" font-size="19.5" font-weight="800" fill="#EE4D2D" letter-spacing="-0.03em">Shopee</text>
-      </g>
-    </svg>`,
-  },
-  {
-    name: 'BCA',
-    svg: `<svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="company-logo-svg">
-      <g>
-        <rect x="12" y="8" width="30" height="24" rx="4" fill="#005FAA"/>
-        <path d="M19 14H28C30 14 31.5 15 31.5 16.5C31.5 17.5 30.8 18.2 29.8 18.5C31 18.8 32 19.8 32 21.2C32 23 30.2 24 28 24H19V14Z" fill="#FFFFFF"/>
-        <text x="50" y="28" font-family="'DM Sans', 'Inter', sans-serif" font-size="22" font-weight="900" fill="#005FAA" letter-spacing="0.04em">BCA</text>
-      </g>
-    </svg>`,
-  },
-  {
-    name: 'Bank Mandiri',
-    svg: `<svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="company-logo-svg">
-      <g>
-        <path d="M4 14C8 10 16 10 20 14C24 18 32 18 36 14" stroke="#F3AC10" stroke-width="4.5" stroke-linecap="round"/>
-        <text x="44" y="27" font-family="'DM Sans', 'Inter', sans-serif" font-size="18.5" font-weight="800" fill="#003876" letter-spacing="-0.03em">mandırı</text>
-      </g>
-    </svg>`,
-  },
-  {
-    name: 'Telkomsel',
-    svg: `<svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="company-logo-svg">
-      <g>
-        <circle cx="15" cy="20" r="11" fill="#ED0226"/>
-        <path d="M11 13L20 20L11 27V13Z" fill="#FFFFFF"/>
-        <text x="34" y="26.5" font-family="'DM Sans', 'Inter', sans-serif" font-size="18" font-weight="800" fill="#ED0226" letter-spacing="-0.03em">Telkomsel</text>
-      </g>
-    </svg>`,
-  },
-  {
-    name: 'Traveloka',
-    svg: `<svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="company-logo-svg">
-      <g>
-        <path d="M6 24C10 24 16 18 20 12C21 16 26 22 30 22C24 23 20 28 17 32C14 28 10 25 6 24Z" fill="#0194F3"/>
-        <circle cx="23" cy="11" r="2.5" fill="#0194F3"/>
-        <text x="35" y="26.5" font-family="'DM Sans', 'Inter', sans-serif" font-size="18" font-weight="800" fill="#0194F3" letter-spacing="-0.03em">traveloka</text>
-      </g>
-    </svg>`,
-  },
-  {
-    name: 'Grab',
-    svg: `<svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="company-logo-svg">
-      <g>
-        <text x="16" y="28" font-family="'DM Sans', 'Inter', sans-serif" font-size="25" font-weight="900" fill="#00B14F" letter-spacing="-0.05em">Grab</text>
-        <circle cx="98" cy="13" r="3.5" fill="#00B14F"/>
-      </g>
-    </svg>`,
-  },
-  {
-    name: 'Blibli',
-    svg: `<svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="company-logo-svg">
-      <g>
-        <rect x="10" y="8" width="24" height="24" rx="6" fill="#0095DC"/>
-        <path d="M16 18C18 22 26 22 28 18" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
-        <text x="42" y="27" font-family="'DM Sans', 'Inter', sans-serif" font-size="20" font-weight="800" fill="#0095DC" letter-spacing="-0.04em">blibli</text>
-      </g>
-    </svg>`,
-  },
-  {
-    name: 'Astra',
-    svg: `<svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="company-logo-svg">
-      <g>
-        <polygon points="20,7 24,15 33,15 26,21 29,30 20,24 12,30 14,21 7,15 17,15" fill="#003399"/>
-        <text x="42" y="26" font-family="'DM Sans', 'Inter', sans-serif" font-size="18.5" font-weight="900" fill="#003399" letter-spacing="0.06em">ASTRA</text>
-      </g>
-    </svg>`,
-  },
-  {
-    name: 'Indofood',
-    svg: `<svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="company-logo-svg">
-      <g>
-        <rect x="6" y="8" width="28" height="24" rx="4" fill="#005BAC"/>
-        <path d="M6 8H20L16 32H6V8Z" fill="#E30613"/>
-        <text x="40" y="27" font-family="'DM Sans', 'Inter', sans-serif" font-size="18.5" font-weight="900" font-style="italic" fill="#005BAC" letter-spacing="-0.02em">Indofood</text>
-      </g>
-    </svg>`,
-  },
-  {
-    name: 'Bukalapak',
-    svg: `<svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="company-logo-svg">
-      <g>
-        <rect x="6" y="7" width="24" height="26" rx="5" fill="#E31F52"/>
-        <text x="12" y="25" font-family="'DM Sans', 'Inter', sans-serif" font-size="17" font-weight="900" fill="#FFFFFF">b</text>
-        <text x="36" y="26.5" font-family="'DM Sans', 'Inter', sans-serif" font-size="18" font-weight="800" fill="#E31F52" letter-spacing="-0.04em">bukalapak</text>
-      </g>
-    </svg>`,
-  },
+const row1Companies: CompanyLogo[] = [
+  { name: 'Alfamart', src: '/testimoni/alfamart.webp' },
+  { name: 'Astra International', src: '/testimoni/astra.webp' },
+  { name: 'Bank Mandiri', src: '/testimoni/mandiri.webp' },
+  { name: 'Deloitte', src: '/testimoni/deloitte.webp' },
+  { name: 'Denso', src: '/testimoni/denso.webp' },
+  { name: 'Fore Coffee', src: '/testimoni/fore.webp' },
+  { name: 'Gojek', src: '/testimoni/gojek.webp' },
+  { name: 'Indofood', src: '/testimoni/indofood.webp' },
+  { name: 'Indomaret', src: '/testimoni/indomaret.webp' },
 ];
+
+const row2Companies: CompanyLogo[] = [
+  { name: 'MR.DIY', src: '/testimoni/mrdiy.webp' },
+  { name: 'Shopee', src: '/testimoni/shopee.webp' },
+  { name: 'Sinar Mas', src: '/testimoni/sinarmas.webp' },
+  { name: 'Solaria', src: '/testimoni/solaria.webp' },
+  { name: 'Suzuki', src: '/testimoni/suzuki.webp' },
+  { name: 'Telkom Indonesia', src: '/testimoni/telkom.webp' },
+  { name: 'Trans TV', src: '/testimoni/transtv.webp' },
+  { name: 'Unilever', src: '/testimoni/unilever.webp' },
+  { name: 'Wings Group', src: '/testimoni/wings.webp' },
+];
+
 interface Props {
   variant?: 'dark' | 'light';
 }
 
-const { variant = 'dark' } = Astro.props;
+const { variant = 'light' } = Astro.props;
 ---
 
-<section class:list={['company-ticker', `company-ticker--${variant}`]} aria-label="Perusahaan tempat pengguna menyiapkan langkah karier berikutnya">
-  <div class="editorial-frame company-ticker__header">
+<section class:list={['company-ticker', `company-ticker--${variant}`]} aria-label="Companies where users prepare their next career move">
+  <div class="company-ticker__header">
     <div class="company-ticker__title-wrapper">
       <span class="company-ticker__dot"></span>
-      <p class="company-ticker__title">Dipakai untuk menyiapkan langkah berikutnya di</p>
+      <p class="company-ticker__title">Used to prepare their next steps at</p>
       <span class="company-ticker__dot"></span>
     </div>
   </div>
 
-  <div class="company-ticker__slider" tabindex="0" role="region" aria-label="Daftar logo perusahaan">
-    <div class="company-ticker__track">
-      <!-- Set 1 (Original) -->
-      {companies.map((company) => (
-        <div class="company-ticker__item" title={company.name} aria-label={company.name}>
-          {company.src ? (
-            <img src={company.src} alt={company.name} class="company-logo-img" />
-          ) : (
-            <Fragment set:html={company.svg} />
-          )}
+  <div class="company-ticker__sliders-container">
+    <!-- ROW 1: MOVES LEFT -->
+    <div class="company-ticker__slider" tabindex="0" role="region" aria-label="Company logos row 1">
+      <div class="company-ticker__track company-ticker__track--left">
+        <div class="company-ticker__group">
+          {row1Companies.map((company) => (
+            <div class="company-ticker__item" title={company.name} aria-label={company.name}>
+              <img src={company.src} alt={company.name} class="company-logo-img" loading="lazy" />
+            </div>
+          ))}
         </div>
-      ))}
-      <!-- Set 2 (Duplicate for smooth infinite seamless loop) -->
-      {companies.map((company) => (
-        <div class="company-ticker__item" title={company.name} aria-label={company.name} aria-hidden="true">
-          {company.src ? (
-            <img src={company.src} alt={company.name} class="company-logo-img" />
-          ) : (
-            <Fragment set:html={company.svg} />
-          )}
+        <div class="company-ticker__group" aria-hidden="true">
+          {row1Companies.map((company) => (
+            <div class="company-ticker__item" title={company.name} aria-label={company.name}>
+              <img src={company.src} alt={company.name} class="company-logo-img" loading="lazy" />
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
+    </div>
+
+    <!-- ROW 2: MOVES RIGHT -->
+    <div class="company-ticker__slider" tabindex="0" role="region" aria-label="Company logos row 2">
+      <div class="company-ticker__track company-ticker__track--right">
+        <div class="company-ticker__group">
+          {row2Companies.map((company) => (
+            <div class="company-ticker__item" title={company.name} aria-label={company.name}>
+              <img src={company.src} alt={company.name} class="company-logo-img" loading="lazy" />
+            </div>
+          ))}
+        </div>
+        <div class="company-ticker__group" aria-hidden="true">
+          {row2Companies.map((company) => (
+            <div class="company-ticker__item" title={company.name} aria-label={company.name}>
+              <img src={company.src} alt={company.name} class="company-logo-img" loading="lazy" />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
 <style>
   .company-ticker {
-    padding: 24px 0 28px;
-    position: relative;
-    overflow: hidden;
-    width: 100%;
+    width: 100% !important;
+    overflow: hidden !important;
+    position: relative !important;
+    padding: 24px 0 10px !important;
     z-index: 5;
+    box-sizing: border-box;
   }
 
-  /* DARK VARIANT (Untuk di dalam Hero Card / background gelap) */
+  /* DARK VARIANT */
   .company-ticker--dark {
-    background: rgba(12, 12, 14, 0.58);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    background: transparent !important;
   }
 
   .company-ticker--dark .company-ticker__title {
-    color: rgba(255, 255, 255, 0.72);
+    color: rgba(255, 255, 255, 0.7) !important;
   }
 
   .company-ticker--dark .company-ticker__dot {
-    background: #5078ff;
+    background: #5078ff !important;
     box-shadow: 0 0 8px rgba(80, 120, 255, 0.6);
   }
 
-  .company-ticker--dark .company-ticker__item :global(svg) {
-    filter: brightness(0) invert(1) opacity(0.48);
+  .company-ticker--dark .company-ticker__item img {
+    filter: grayscale(100%) brightness(1.2) opacity(0.48) !important;
   }
 
-  .company-ticker--dark .company-ticker__item:hover {
-    background: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  .company-ticker--dark .company-ticker__item:hover img {
+    filter: grayscale(0%) brightness(1) opacity(1) !important;
   }
 
-  .company-ticker--dark .company-ticker__item:hover :global(svg) {
-    filter: none;
-    opacity: 1;
-  }
-
-  /* LIGHT VARIANT (Untuk di background paper terang) */
+  /* LIGHT VARIANT (Default) */
   .company-ticker--light {
-    background: var(--paper, #f4f3ee);
-    padding: 32px 0 48px;
+    background: var(--paper) !important;
   }
 
   .company-ticker--light .company-ticker__title {
-    color: #6b6a65;
+    color: #6b6a65 !important;
   }
 
   .company-ticker--light .company-ticker__dot {
-    background: var(--blue, #0000ff);
+    background: var(--blue, #1738D1) !important;
     opacity: 0.75;
   }
 
-  .company-ticker--light .company-ticker__item :global(svg) {
-    filter: grayscale(100%) contrast(0.85);
-    opacity: 0.46;
+  .company-ticker--light .company-ticker__item img {
+    filter: grayscale(100%) contrast(0.85) opacity(0.55) !important;
   }
 
-  .company-ticker--light .company-ticker__item:hover {
-    background: rgba(255, 255, 255, 0.65);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  .company-ticker--light .company-ticker__item:hover img {
+    filter: grayscale(0%) contrast(1) opacity(1) !important;
   }
 
-  .company-ticker--light .company-ticker__item:hover :global(svg) {
-    filter: grayscale(0%) contrast(1);
-    opacity: 1;
-  }
-
+  /* HEADER */
   .company-ticker__header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px;
-    text-align: center;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin-bottom: 24px !important;
+    text-align: center !important;
+    width: 100% !important;
   }
 
   .company-ticker__title-wrapper {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
   }
 
   .company-ticker__dot {
-    display: inline-block;
-    width: 5px;
-    height: 5px;
-    border-radius: 999px;
+    display: inline-block !important;
+    width: 5px !important;
+    height: 5px !important;
+    border-radius: 999px !important;
+    flex-shrink: 0 !important;
   }
 
   .company-ticker__title {
-    font-family: "Manrope", Arial, sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    margin: 0;
+    font-family: "Inter Tight", "Inter", sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    margin: 0 !important;
+  }
+
+  /* SLIDERS CONTAINER (2 BARIS) */
+  .company-ticker__sliders-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 22px !important;
+    width: 100% !important;
+    overflow: hidden !important;
   }
 
   .company-ticker__slider {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-    padding: 6px 0;
-    /* Efek fade transparan di sisi kiri & kanan */
+    width: 100% !important;
+    overflow: hidden !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: row !important;
+    padding: 6px 0 !important;
+    /* Efek fade gradasi halus di sisi kiri & kanan */
     mask-image: linear-gradient(
       90deg,
       transparent 0%,
@@ -305,114 +221,134 @@ const { variant = 'dark' } = Astro.props;
   }
 
   .company-ticker__track {
-    display: flex;
-    align-items: center;
-    gap: 48px;
-    width: max-content;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    width: max-content !important;
     will-change: transform;
-    animation: ticker-slide 34s linear infinite;
   }
 
-  /* Saat kursor diarahkan ke slider, slider berhenti agar nyaman dilihat */
+  .company-ticker__group {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 52px !important;
+    padding-right: 52px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Baris 1: jalan ke KIRI */
+  .company-ticker__track--left {
+    animation: ticker-slide-left 32s linear infinite !important;
+  }
+
+  /* Baris 2: jalan ke KANAN */
+  .company-ticker__track--right {
+    animation: ticker-slide-right 32s linear infinite !important;
+  }
+
+  /* Saat kursor diarahkan ke slider, gerakan dijeda agar nyaman dilihat */
   .company-ticker__slider:hover .company-ticker__track {
-    animation-play-state: paused;
+    animation-play-state: paused !important;
   }
 
   .company-ticker__item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 140px;
-    height: 40px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    background: transparent;
-    cursor: pointer;
-    user-select: none;
-    flex-shrink: 0;
-    transition: transform 0.28s cubic-bezier(0.23, 1, 0.32, 1),
-                background-color 0.28s ease;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 170px !important;
+    height: 56px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.24s cubic-bezier(0.23, 1, 0.32, 1) !important;
   }
 
-  /* Default: grayscale dan opacity lembut dengan aspect ratio standar 4:1 */
-  .company-ticker__item :global(svg),
-  .company-ticker__item :global(img) {
-    display: block;
-    max-height: 28px;
-    max-width: 124px;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    filter: grayscale(100%) contrast(0.85);
-    opacity: 0.46;
-    transition: filter 0.32s cubic-bezier(0.23, 1, 0.32, 1),
-                opacity 0.32s cubic-bezier(0.23, 1, 0.32, 1),
-                transform 0.32s cubic-bezier(0.23, 1, 0.32, 1);
+  .company-ticker__item img {
+    display: block !important;
+    max-height: 44px !important;
+    max-width: 145px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    transition: filter 0.28s cubic-bezier(0.23, 1, 0.32, 1),
+                opacity 0.28s cubic-bezier(0.23, 1, 0.32, 1),
+                transform 0.28s cubic-bezier(0.23, 1, 0.32, 1) !important;
   }
 
-  /* Saat kursor diarahkan (hover): kembali ke warna asli dan sedikit membesar */
   .company-ticker__item:hover {
-    transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.65);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px) !important;
   }
 
-  .company-ticker__item:hover :global(svg),
-  .company-ticker__item:hover :global(img) {
-    filter: grayscale(0%) contrast(1);
-    opacity: 1;
-    transform: scale(1.05);
+  .company-ticker__item:hover img {
+    transform: scale(1.1) !important;
   }
 
-  @keyframes ticker-slide {
-    0% {
+  @keyframes ticker-slide-left {
+    from {
       transform: translateX(0);
     }
-    100% {
-      /* Bergerak tepat setengah panjang track (set 1) lalu loop tanpa jeda */
-      transform: translateX(calc(-50% - 24px));
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes ticker-slide-right {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(0);
     }
   }
 
   @media (max-width: 700px) {
     .company-ticker {
-      padding: 20px 0 48px;
+      padding: 16px 0 6px !important;
     }
     .company-ticker__header {
-      margin-bottom: 22px;
+      margin-bottom: 16px !important;
     }
     .company-ticker__title {
-      font-size: 10px;
-      letter-spacing: 0.1em;
+      font-size: 10px !important;
+      letter-spacing: 0.1em !important;
     }
-    .company-ticker__track {
-      gap: 28px;
-      animation-duration: 26s;
+    .company-ticker__sliders-container {
+      gap: 16px !important;
+    }
+    .company-ticker__group {
+      gap: 32px !important;
+      padding-right: 32px !important;
     }
     .company-ticker__item {
-      padding: 6px 10px;
+      width: 130px !important;
+      height: 44px !important;
     }
-    .company-ticker__item :global(svg) {
-      max-height: 22px;
+    .company-ticker__item img {
+      max-height: 32px !important;
+      max-width: 105px !important;
     }
-    @keyframes ticker-slide {
-      0% {
-        transform: translateX(0);
-      }
-      100% {
-        transform: translateX(calc(-50% - 14px));
-      }
+    .company-ticker__track--left {
+      animation-duration: 24s !important;
+    }
+    .company-ticker__track--right {
+      animation-duration: 24s !important;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .company-ticker__track {
-      animation: none;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
+      animation: none !important;
+      overflow-x: auto !important;
+      scroll-snap-type: x mandatory !important;
     }
     .company-ticker__item {
-      scroll-snap-align: center;
+      scroll-snap-align: center !important;
     }
   }
 </style>

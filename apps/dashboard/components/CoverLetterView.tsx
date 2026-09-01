@@ -54,56 +54,94 @@ export const CoverLetterView: React.FC = () => {
         setUserEmail(profile.email || '');
       }
     }).catch(() => {});
+
+    try {
+      const stored = localStorage.getItem('cuti_saved_cover_letters');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) setSavedLetters(parsed);
+      }
+    } catch (e) {}
   }, []);
 
-  const handleGenerate = (e: React.FormEvent) => {
+  const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!targetCompany || !targetPosition) return;
 
     setIsGenerating(true);
-    setTimeout(() => {
-      let resultText = '';
+    try {
+      const languageInstruction = tone === 'Professional (English)'
+        ? 'Tulis dalam Bahasa Inggris profesional tingkat native.'
+        : tone === 'Persuasif & Antusias'
+          ? 'Tulis dalam Bahasa Indonesia dengan gaya persuasif, energik, dan antusias namun tetap sopan dan profesional.'
+          : 'Tulis dalam Bahasa Indonesia formal, elegan, dan profesional.';
 
+      const prompt = `Buatlah Surat Lamaran Kerja (Cover Letter) yang memikat, berbobot, dan siap kirim berdasarkan data berikut:
+
+DATA LAMARAN:
+- Nama Pelamar: ${userName || 'Kandidat'}
+- Email: ${userEmail || 'email@email.com'}
+- Perusahaan Tujuan: ${targetCompany}
+- Posisi yang Dilamar: ${targetPosition}
+- Nama Recruiter / Hiring Manager: ${recruiterName || 'Tim Rekrutmen / Hiring Manager'}
+- Highlight Pengalaman / Keahlian: ${experienceHighlights || 'Pengalaman kerja relevan, keterampilan utama, dan rekam jejak pencapaian di bidang terkait.'}
+- Gaya / Nada Bahasa: ${tone}
+
+PANDUAN PENULISAN:
+1. ${languageInstruction}
+2. Surat terdiri dari 3-4 paragraf yang padat dan jelas: pembuka yang menarik, paragraf kompetensi & bukti hasil kerja nyata, serta penutup dengan Call-to-Action (CTA) wawancara.
+3. JANGAN mengasumsikan tech stack (React/Node.js/dsb) kecuali disebutkan pada highlight pengalaman. Sesuaikan narasi dengan posisi "${targetPosition}".
+4. Kembalikan HANYA teks isi surat lamaran lengkap, tanpa markdown code block, tanpa penjelasan pembuka atau penutup.`;
+
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          feature: 'cover_letter',
+          task: 'cover_letter',
+          promptName: 'Cover Letter AI Generator',
+          prompt,
+          systemInstruction: 'Anda adalah Konsultan Karier & Penulis Surat Lamaran Profesional. Tulis surat lamaran kerja yang elegan, persuasif, dan relevan dengan posisi target.',
+        }),
+      });
+
+      if (!res.ok) throw new Error(`AI API error ${res.status}`);
+      const json = await res.json();
+      if (!json.text) throw new Error('Empty AI response');
+
+      const cleanedText = json.text.replace(/^```[a-z]*\n/i, '').replace(/```$/g, '').trim();
+      setGeneratedLetter(cleanedText);
+    } catch (err) {
+      console.warn('[CoverLetterView AI error, fallback]:', err);
+      // Clean dynamic fallback without hardcoded React/IT stack
       if (tone === 'Professional (English)') {
-        resultText = `Dear Hiring Team at ${targetCompany},
+        setGeneratedLetter(`Dear ${recruiterName || 'Hiring Team'} at ${targetCompany},
 
-I am writing to express my strong interest in the ${targetPosition} role at ${targetCompany}. With over 4 years of hands-on experience in building scalable web applications using React, TypeScript, and modern web tech stacks, I am confident in my ability to add immediate value to your engineering team.
+I am writing to express my strong interest in the ${targetPosition} role at ${targetCompany}. With a proven track record in ${experienceHighlights || 'delivering high-quality results, optimizing team workflows, and achieving operational excellence'}, I am confident in my ability to bring meaningful impact to your team.
 
-In my previous roles, I successfully ${experienceHighlights || 'led frontend optimization initiatives that improved page load speed by 40% and enhanced user engagement'}. My background aligns closely with the technical and collaborative requirements of ${targetCompany}.
+Throughout my career, I have consistently focused on driving value, continuous improvement, and effective collaboration across cross-functional teams. My background and core competencies align closely with the strategic needs of ${targetCompany}.
 
-Thank you for your time and consideration. I welcome the opportunity to discuss my application further in an interview.
+Thank you for your time and consideration. I would welcome the opportunity to discuss my qualifications and enthusiasm for this role in an interview.
 
 Sincerely,
 ${userName || 'Kandidat'}
-${userEmail || 'email@email.com'}`;
-      } else if (tone === 'Persuasif & Antusias') {
-        resultText = `Halo ${recruiterName || 'Tim Rekrutmen'} ${targetCompany},
-
-Saya sangat antusias untuk mengajukan lamaran posisi ${targetPosition} di ${targetCompany}! Sebagai seorang profesional yang berfokus pada hasil, saya telah lama mengagumi inovasi dan dampak produk yang dihadirkan oleh ${targetCompany}.
-
-Keahlian utama saya mencakup ${experienceHighlights || 'pengembangan aplikasi skala besar, pengoptimalan performa koding, dan arsitektur UI/UX yang responsif'}. Saya yakin kombinasi keterampilan teknis dan semangat kolaborasi saya akan membantu ${targetCompany} mencapai target strategisnya.
-
-Terima kasih atas perhatian Anda. Saya sangat senang jika diberi kesempatan untuk berdiskusi lebih lanjut.
-
-Salam hangat,
-${userName || 'Kandidat'}`;
+${userEmail || 'email@email.com'}`);
       } else {
-        resultText = `Yth. ${recruiterName || 'Tim Rekrutmen'} ${targetCompany},
+        setGeneratedLetter(`Yth. ${recruiterName || 'Tim Rekrutmen'} ${targetCompany},
 
-Melalui surat lamaran ini, saya menyampaikan minat yang besar untuk bergabung dengan ${targetCompany} sebagai ${targetPosition}. Berdasarkan latar belakang profesional saya dalam industri teknologi, saya memiliki kompetensi yang selaras dengan kualifikasi yang Anda butuhkan.
+Melalui surat lamaran ini, saya bermaksud menyampaikan minat profesional saya untuk bergabung bersama ${targetCompany} pada posisi ${targetPosition}. Berdasarkan pengalaman kerja dan kompetensi yang saya miliki, saya siap memberikan kontribusi nyata bagi pencapaian target dan pertumbuhan perusahaan.
 
-Secara khusus, pengalaman saya meliputi ${experienceHighlights || 'pengembangan aplikasi web performa tinggi dengan React dan Node.js, serta pengalaman memimpin kolaborasi tim teknis'}. Saya siap membawa dedikasi dan kemampuan ini untuk mendukung visi ${targetCompany}.
+Secara khusus, pengalaman saya meliputi ${experienceHighlights || 'pelaksanaan tanggung jawab strategis, pemecahan masalah secara terstruktur, dan kolaborasi aktif dalam tim'}. Saya berkomitmen membawa etos kerja tinggi dan dedikasi penuh untuk mendukung visi ${targetCompany}.
 
-Terima kasih atas kesempatan dan waktu yang Bapak/Ibu berikan. Saya berharap dapat berdiskusi dalam sesi wawancara.
+Besar harapan saya untuk mendapatkan kesempatan menghadiri sesi wawancara guna mendiskusikan kualifikasi saya lebih mendalam. Atas perhatian dan kesempatan yang Bapak/Ibu berikan, saya ucapkan terima kasih.
 
 Hormat saya,
 ${userName || 'Kandidat'}
-${userEmail || 'email@email.com'}`;
+${userEmail || 'email@email.com'}`);
       }
-
-      setGeneratedLetter(resultText);
+    } finally {
       setIsGenerating(false);
-    }, 800);
+    }
   };
 
   const handleCopy = () => {
@@ -117,18 +155,26 @@ ${userEmail || 'email@email.com'}`;
   const handleSaveToLibrary = () => {
     if (!generatedLetter) return;
     const newLetter: SavedCoverLetter = {
-      id: `cl-${savedLetters.length + 1}`,
+      id: `cl-${Date.now()}`,
       company: targetCompany || 'Perusahaan Target',
       position: targetPosition || 'Posisi Pekerjaan',
-      date: 'Hari ini',
+      date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
       content: generatedLetter,
     };
-    setSavedLetters([newLetter, ...savedLetters]);
+    const updated = [newLetter, ...savedLetters];
+    setSavedLetters(updated);
+    try {
+      localStorage.setItem('cuti_saved_cover_letters', JSON.stringify(updated));
+    } catch (e) {}
     toast.success('Surat Lamaran Tersimpan', 'Surat lamaran berhasil disimpan ke daftar dokumen kamu.');
   };
 
   const handleDeleteSaved = (id: string) => {
-    setSavedLetters((prev) => prev.filter((l) => l.id !== id));
+    const updated = savedLetters.filter((l) => l.id !== id);
+    setSavedLetters(updated);
+    try {
+      localStorage.setItem('cuti_saved_cover_letters', JSON.stringify(updated));
+    } catch (e) {}
   };
 
   return (

@@ -264,10 +264,8 @@ Write-Host "   - Press Ctrl+C in a window to stop that service" -ForegroundColor
 Write-Host "   - Run 'docker stop cuti-postgres' to stop PostgreSQL" -ForegroundColor Gray
 Write-Host "   - Run '.\dev.ps1 -SkipMigrations -SkipSeeds' to skip setup steps" -ForegroundColor Gray
 
-Write-Host "`nQuick Links:" -ForegroundColor Cyan
-Write-Host "   Documentation:  D:\cuti\docs\" -ForegroundColor Gray
-Write-Host "   Prisma Studio:  Run 'pnpm db:studio' for database GUI" -ForegroundColor Gray
-Write-Host "   Test Auth:      POST http://localhost:3001/v1/auth/register" -ForegroundColor Gray
+# LAN Access Information
+node D:\cuti\scripts\lan-info.js
 
-Write-Host "`nHappy coding!" -ForegroundColor Green
+Write-Host "Happy coding!" -ForegroundColor Green
 Write-Host ""
