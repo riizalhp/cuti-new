@@ -1,6 +1,3 @@
 ---
-import { getAppBaseUrl } from '../utils/env';
-
-const appBaseUrl = getAppBaseUrl(Astro.request.url);
-return Astro.redirect(`${appBaseUrl}/register`, 302);
+return Astro.redirect('/pre-register', 302);
 ---

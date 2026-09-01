@@ -807,3 +807,16 @@ model EmailBatchJob {
 
   @@map("email_batch_jobs")
 }
+
+model EarlyTester {
+  id           String    @id @default(uuid()) @db.Uuid
+  name         String
+  email        String    @unique
+  phone_number String?
+  role_status  String?   // SMA_SMK, MAHASISWA, FRESH_GRAD, JOB_SEEKER
+  status       String    @default("REGISTERED") // REGISTERED, INVITED, ACTIVATED
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  @@map("early_testers")
+}

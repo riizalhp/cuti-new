@@ -115,7 +115,7 @@ export default function WhyEmployr() {
         <div className="why-employr__top">
           <div className="why-employr__header-left">
             <div className="section-label section-label--inverse">
-              <span>01.5</span>
+              <span>02</span>
               <i className="section-label__line"></i>
               <span>WHY EMPLOYR</span>
             </div>

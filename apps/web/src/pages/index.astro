@@ -66,8 +66,8 @@ const faqSchema = {
     <!-- TOP ANNOUNCEMENT BAR -->
     <div class="top-announcement">
       <div class="announcement-content">
-        <a href="/register" class="announcement-link">
-          Try it Free! <Icon name="chevron-right" size={13} />
+        <a href="/pre-register" class="announcement-link">
+          Join the Early Access Waitlist <Icon name="chevron-right" size={13} />
         </a>
       </div>
     </div>
@@ -96,7 +96,7 @@ const faqSchema = {
 
           <div class="header-actions">
             <button class="login-link" data-toast="Sign in will be available at launch.">Sign In</button>
-            <a class="header-cta" href="/register">Get Started <Icon name="move-up-right" size={14} /></a>
+            <a class="header-cta" href="/pre-register">Early Access <Icon name="move-up-right" size={14} /></a>
             <button class="menu-toggle" aria-label="Navigation menu" aria-expanded="false" data-menu-button>
               <span class="menu-toggle__bar menu-toggle__bar--top"></span>
               <span class="menu-toggle__bar menu-toggle__bar--mid"></span>
@@ -108,12 +108,9 @@ const faqSchema = {
         <!-- Mobile Nav Backdrop & Glass Sheet Drawer -->
         <div class="mobile-nav-backdrop" data-menu-backdrop></div>
         <nav class="mobile-nav" aria-label="Mobile navigation" data-menu>
-          <div class="mobile-nav__header">
-            <span class="mobile-nav__title">Navigation</span>
-            <button class="mobile-nav__close" aria-label="Close menu" data-menu-close>
-              <Icon name="x" size={18} />
-            </button>
-          </div>
+          <button class="mobile-nav__close" aria-label="Close menu" data-menu-close>
+            <Icon name="x" size={18} />
+          </button>
           <div class="mobile-nav__links">
             {navItems.map(
               ([label, href]) => (
@@ -126,7 +123,7 @@ const faqSchema = {
           </div>
           <div class="mobile-nav__footer">
             <a class="mobile-nav__login" href="/login">Sign In</a>
-            <a class="mobile-start" href="/register">Get Started <Icon name="arrow-up-right" size={16} /></a>
+            <a class="mobile-start" href="/pre-register">Early Access <Icon name="arrow-up-right" size={16} /></a>
           </div>
         </nav>
 
@@ -162,31 +159,28 @@ const faqSchema = {
       <!-- WHY EMPLOYR -->
       <WhyEmployr client:load />
 
-      <!-- 02 BUILD -->
-      <section class="builder section-space">
-        <div class="editorial-frame builder__frame">
-          <div class="builder__copy">
-            <div class="section-label"><span>02</span><i></i><span>BUILD</span></div>
-            <h2>Write proof,<br /><em>not just a to-do list.</em></h2>
-            <p>Turn your work history into measurable wins with real numbers and clear context.</p>
-            <button class="action-link" data-toast="AI-powered CV builder coming soon.">Try CV Builder <Icon name="arrow-up-right" /></button>
-          </div>
-          <div class="builder__visual">
-            <div class="blue-route blue-route--builder"><i></i><span>01</span></div>
-            <CvArtifact />
-            <div class="ai-suggestion">
-              <span class="ai-suggestion__star">✦</span>
-              <div><b>Quick Tip</b><p>Add results metrics<br />to make it more convincing.</p></div>
-              <Icon name="arrow-up-right" size={15} />
-            </div>
-          </div>
+      <!-- 03 ADAPT -->
+      <section class="adapt section-space" id="career">
+        <div class="adapt__intro editorial-frame">
+          <div class="section-label"><span>03</span><i></i><span>ADAPT</span></div>
+          <h2>One rigid template<br /><em>won't work for every company.</em></h2>
+          <p>Every job looks for specific points. Highlight the experience that matters most for the role you want.</p>
+        </div>
+        <div class="adapt__flow editorial-frame">
+          <div class="adapt__original"><p>FULL CV</p><CvArtifact variant="mini" /></div>
+          <div class="adapt__scanner"><Icon name="scan-line" size={22} /><span>HIGHLIGHTING<br />KEY POINTS</span><i></i></div>
+          <div class="adapt__target"><p>TAILORED CV</p><CvArtifact variant="mini" /></div>
+        </div>
+        <div class="adapt__footer editorial-frame">
+          <div><span class="blue-dot"></span> Keyword alignment <span class="blue-dot"></span> Targeted action points <span class="blue-dot"></span> Skill priority</div>
+          <button class="action-link" data-toast="CV adaptation coming soon.">Adapt Your CV Now <Icon name="arrow-up-right" /></button>
         </div>
       </section>
 
-      <!-- 03 MANAGE -->
+      <!-- 04 MANAGE -->
       <section class="versions section-space" aria-labelledby="versions-title">
         <div class="versions__headline">
-          <div class="section-label section-label--inverse"><span>03</span><i></i><span>MANAGE</span></div>
+          <div class="section-label section-label--inverse"><span>04</span><i></i><span>MANAGE</span></div>
           <h2 id="versions-title">One profile.<br /><em>Many target roles.</em></h2>
           <p>Apply as a UI Designer, Product Manager, or Data Analyst without juggling separate files.</p>
         </div>
@@ -202,67 +196,12 @@ const faqSchema = {
         </div>
       </section>
 
-
-      <!-- 05 MATCH -->
-      <section class="match section-space" aria-labelledby="match-title">
-        <div class="match__top editorial-frame">
-          <div class="section-label"><span>05</span><i></i><span>MATCH</span></div>
-          <h2 id="match-title">Know your match score<br /><em>before you apply.</em></h2>
-        </div>
-        <div class="match__workstation editorial-frame">
-          <div class="match-doc match-doc--cv">
-            <p><Icon name="file-text" size={14} /> YOUR CV</p>
-            <b>Maria Syafira</b><span>Product Designer</span><i></i>
-            <small>UX Interaction<br />Figma & Prototyping<br />Design System</small>
-          </div>
-          <div class="match-score">
-            <div class="match-score__ring"><div><b>87</b><span>% MATCH</span></div></div>
-            <p>Auto analysis between your CV<br />and the job requirements.</p>
-          </div>
-          <div class="match-doc match-doc--job">
-            <p><Icon name="target" size={14} /> JOB REQUIREMENTS</p>
-            <b>Product Designer</b><span>at Tech Company</span><i></i>
-            <small>Problem Solving<br />Design Tokens<br />User Research</small>
-          </div>
-        </div>
-        <div class="match__breakdown editorial-frame">
-          <div><span>01</span><p>Core Skills</p><b>92%</b></div>
-          <div><span>02</span><p>Experience Match</p><b>84%</b></div>
-          <div><span>03</span><p>Background Fit</p><b>100%</b></div>
-          <div><span>04</span><p>ATS Keywords</p><b>78%</b></div>
-        </div>
-        <div class="match__bottom editorial-frame">
-          <p>Check which keywords you're missing, fix weak points, then send your application with confidence.</p>
-          <button class="action-link" data-toast="CV matching coming soon.">Check Your Score <Icon name="arrow-up-right" /></button>
-        </div>
-      </section>
-
-      <!-- 06 ADAPT -->
-      <section class="adapt section-space" id="career">
-        <div class="adapt__intro editorial-frame">
-          <div class="section-label"><span>06</span><i></i><span>ADAPT</span></div>
-          <h2>One rigid template<br /><em>won't work for every company.</em></h2>
-          <p>Every job looks for specific points. Highlight the experience that matters most for the role you want.</p>
-        </div>
-        <div class="adapt__flow editorial-frame">
-          <div class="adapt__original"><p>FULL CV</p><CvArtifact variant="mini" /></div>
-          <div class="adapt__scanner"><Icon name="scan-line" size={22} /><span>HIGHLIGHTING<br />KEY POINTS</span><i></i></div>
-          <div class="adapt__target"><p>TAILORED CV</p><CvArtifact variant="mini" /></div>
-        </div>
-        <div class="adapt__footer editorial-frame">
-          <div><span class="blue-dot"></span> Keyword alignment <span class="blue-dot"></span> Targeted action points <span class="blue-dot"></span> Skill priority</div>
-          <button class="action-link" data-toast="CV adaptation coming soon.">Adapt Your CV Now <Icon name="arrow-up-right" /></button>
-        </div>
-      </section>
-
-
-
-      <!-- 06 WHY Employr -->
+      <!-- 05 WHY Employr -->
       <section class="why-employer section-space" aria-labelledby="why-employer-title">
         <div class="editorial-frame">
           <div class="why-employer__top">
             <div class="why-employer__heading">
-              <div class="section-label section-label--inverse"><span>06</span><i></i><span>WHY Employr</span></div>
+              <div class="section-label section-label--inverse"><span>05</span><i></i><span>WHY Employr</span></div>
               <h2 id="why-employer-title">More than an<br /><em>online form.</em></h2>
             </div>
             <p class="why-employer__lead">
@@ -419,7 +358,7 @@ const faqSchema = {
           <div class="career-observation__copy">
             <div class="career-observation__wordmark"><span>CONTROL IN YOUR HANDS</span></div>
             <p>Explore your options,<br />find your own rhythm.</p>
-            <small>Your career isn't a one-way route. You're free to explore new opportunities, develop hidden potential, and step confidently toward whatever goal you choose.</small>
+            <small></small>
           </div>
           <div class="career-observation__footer-label">
             <span>CAREER REFLECTION</span>

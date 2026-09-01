@@ -475,7 +475,7 @@ h2 em, h1 em {
   right: 0;
   top: 76px;
 }
-.mobile-nav button {
+.mobile-nav__links button {
   align-items: center;
   border-bottom: 1px solid var(--line);
   display: flex;
