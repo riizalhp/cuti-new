@@ -32,34 +32,32 @@ const breadcrumbSchema = {
   canonicalUrl="https://employr.id/404"
   breadcrumbSchema={breadcrumbSchema}
 >
-  <div class="h-screen h-[100dvh] max-h-screen overflow-hidden bg-[#F5F6F2] text-[#101114] font-sans selection:bg-[#1738D1] selection:text-white flex flex-col justify-between">
-    <!-- Header -->
-    <header class="w-full border-b border-black/[0.08] bg-[#F5F6F2]/80 backdrop-blur-md shrink-0">
-      <div class="max-w-6xl mx-auto px-4 sm:px-8 h-16 sm:h-20 flex items-center justify-between">
-        <a href="/" class="flex items-center gap-2 hover:opacity-85 transition" aria-label="Beranda Employr">
-          <img src={logoMark} alt="Employr" class="h-7 sm:h-8 w-auto object-contain" />
-        </a>
+  <div class="h-screen h-[100dvh] max-h-screen overflow-hidden w-full bg-[#F5F6F2] text-[#101114] font-sans selection:bg-[#1738D1] selection:text-white flex flex-col justify-between">
+    <!-- Header — Full Width Edge to Edge -->
+    <header class="w-full border-b border-black/[0.08] bg-[#F5F6F2]/80 backdrop-blur-md shrink-0 px-6 sm:px-12 py-4 sm:py-5 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2 hover:opacity-85 transition" aria-label="Beranda Employr">
+        <img src={logoMark} alt="Employr" class="h-7 sm:h-8 w-auto object-contain" />
+      </a>
 
-        <div class="flex items-center gap-3">
-          <a
-            href="/"
-            class="text-xs font-bold text-gray-600 hover:text-black transition hidden sm:inline-flex items-center gap-1 py-2 px-3"
-          >
-            Beranda
-          </a>
-          <a
-            href={`${appBaseUrl}/register`}
-            class="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold uppercase tracking-wider transition shadow-md shadow-[#1738D1]/20 active:scale-95"
-          >
-            <span>Mulai Gratis</span>
-            <Icon name="move-up-right" size={12} />
-          </a>
-        </div>
+      <div class="flex items-center gap-3">
+        <a
+          href="/"
+          class="text-xs font-bold text-gray-600 hover:text-black transition hidden sm:inline-flex items-center gap-1 py-2 px-3"
+        >
+          Beranda
+        </a>
+        <a
+          href={`${appBaseUrl}/register`}
+          class="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold uppercase tracking-wider transition shadow-md shadow-[#1738D1]/20 active:scale-95"
+        >
+          <span>Mulai Gratis</span>
+          <Icon name="move-up-right" size={12} />
+        </a>
       </div>
     </header>
 
     <!-- Main 404 Hero Frame (One Screen Center) -->
-    <main class="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-8 flex flex-col justify-center items-center text-center my-auto py-4">
+    <main class="flex-1 w-full px-6 sm:px-12 flex flex-col justify-center items-center text-center my-auto py-4 relative">
       <!-- Status Badge -->
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-black/10 bg-white shadow-2xs mb-4 sm:mb-6">
         <span class="w-2 h-2 rounded-full bg-[#1738D1] animate-pulse"></span>
@@ -69,12 +67,12 @@ const breadcrumbSchema = {
       </div>
 
       <!-- Giant Editorial Number -->
-      <div class="relative mb-2 sm:mb-3 select-none">
-        <span class="text-[clamp(5rem,12vw,9rem)] font-black leading-none tracking-tighter text-[#101114]/10 select-none block">
+      <div class="relative mb-2 sm:mb-3 select-none w-full flex items-center justify-center">
+        <span class="text-[clamp(6rem,18vw,13rem)] font-black leading-none tracking-tighter text-[#101114]/10 select-none block">
           404
         </span>
         <div class="absolute inset-0 flex items-center justify-center">
-          <span class="text-[clamp(3.5rem,8vw,6rem)] font-extrabold leading-none tracking-tight text-[#101114]">
+          <span class="text-[clamp(4rem,12vw,8.5rem)] font-extrabold leading-none tracking-tight text-[#101114]">
             404
           </span>
         </div>
@@ -91,17 +89,17 @@ const breadcrumbSchema = {
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-xs mx-auto">
+      <div class="flex items-center justify-center gap-3 w-full max-w-xs mx-auto">
         <a
           href="/"
-          class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs uppercase tracking-wider transition shadow-md shadow-[#1738D1]/20 active:scale-95"
+          class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs uppercase tracking-wider transition shadow-md shadow-[#1738D1]/20 active:scale-95 text-center"
         >
           <Icon name="arrow-left" size={13} />
           <span>Beranda</span>
         </a>
         <a
           href={`${appBaseUrl}/register`}
-          class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-white border border-black/15 text-[#101114] font-bold text-xs uppercase tracking-wider hover:bg-black/5 transition active:scale-95 shadow-2xs"
+          class="flex-1 inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-white border border-black/15 text-[#101114] font-bold text-xs uppercase tracking-wider hover:bg-black/5 transition active:scale-95 shadow-2xs text-center"
         >
           <span>Daftar</span>
           <Icon name="move-up-right" size={12} />
@@ -109,14 +107,12 @@ const breadcrumbSchema = {
       </div>
     </main>
 
-    <!-- Footer (One Liner) -->
-    <footer class="w-full border-t border-black/[0.08] py-4 px-4 sm:px-8 text-center text-xs text-gray-500 shrink-0">
-      <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-        <p>© {new Date().getFullYear()} Employr. Career Operating System.</p>
-        <div class="flex items-center gap-5 text-gray-500">
-          <a href="/" class="hover:text-black transition">Beranda</a>
-          <a href={`${appBaseUrl}/login`} class="hover:text-black transition">Masuk</a>
-        </div>
+    <!-- Footer (One Liner) — Full Width Edge to Edge -->
+    <footer class="w-full border-t border-black/[0.08] py-4 px-6 sm:px-12 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 shrink-0">
+      <p>© {new Date().getFullYear()} Employr. Career Operating System.</p>
+      <div class="flex items-center gap-5 text-gray-500">
+        <a href="/" class="hover:text-black transition">Beranda</a>
+        <a href={`${appBaseUrl}/login`} class="hover:text-black transition">Masuk</a>
       </div>
     </footer>
   </div>

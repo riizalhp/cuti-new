@@ -9,6 +9,7 @@ interface Props {
   ogType?: string;
   canonicalUrl?: string;
   faqSchema?: Record<string, any>;
+  breadcrumbSchema?: Record<string, any>;
 }
 
 const {
@@ -18,26 +19,58 @@ const {
   ogType = 'website',
   canonicalUrl = 'https://employr.id/',
   faqSchema,
+  breadcrumbSchema,
 } = Astro.props;
 
 const siteSchema = {
   '@context': 'https://schema.org',
-  '@type': 'WebApplication',
-  name: 'Employr',
-  alternateName: 'Employr',
-  url: 'https://employr.id/',
-  description: 'Your career workspace for the next step: build CVs, find your fit, and tailor your experience for every role.',
-  applicationCategory: 'BusinessApplication',
-  operatingSystem: 'All',
-  publisher: {
-    '@type': 'Organization',
-    name: 'Employr',
-    url: 'https://employr.id/',
-    logo: {
-      '@type': 'ImageObject',
-      url: 'https://employr.id/images/cuti-hero.png',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://employr.id/#organization',
+      name: 'Employr',
+      alternateName: 'Employr — Career Operating System',
+      url: 'https://employr.id/',
+      logo: {
+        '@type': 'ImageObject',
+        '@id': 'https://employr.id/#logo',
+        url: 'https://employr.id/logo.webp',
+        width: 512,
+        height: 512,
+      },
+      description:
+        'Your career workspace for the next step: build CVs, find your fit, and tailor your experience for every role.',
+      sameAs: [
+        'https://www.instagram.com/employr.id',
+        'https://www.linkedin.com/company/employr-id',
+        'https://www.tiktok.com/@employr.id',
+      ],
     },
-  },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://employr.id/#website',
+      url: 'https://employr.id/',
+      name: 'Employr',
+      publisher: { '@id': 'https://employr.id/#organization' },
+    },
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://employr.id/#webapp',
+      name: 'Employr',
+      url: 'https://employr.id/',
+      description:
+        'Build ATS-friendly CVs, match your skills to job requirements, and track every application without the hassle.',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'All',
+      publisher: { '@id': 'https://employr.id/#organization' },
+      offers: {
+        '@type': 'Offer',
+        price: '19000',
+        priceCurrency: 'IDR',
+        description: 'Lifetime Membership access.',
+      },
+    },
+  ],
 };
 ---
 
@@ -52,12 +85,20 @@ const siteSchema = {
     <link rel="canonical" href={canonicalUrl} />
     <meta name="theme-color" content="#f4f3ee" />
 
+    <!-- Favicons & Icons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content={ogType} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content="Employr: Career Operating System" />
     <meta property="og:site_name" content="Employr" />
     <meta property="og:locale" content="en_US" />
 
@@ -67,6 +108,7 @@ const siteSchema = {
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content="Employr: Career Operating System" />
 
     <!-- Preconnect & Google Fonts (DM Sans · Instrument Sans · Instrument Serif · Inter Tight · Manrope) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -79,6 +121,7 @@ const siteSchema = {
     <!-- JSON-LD Structured Data -->
     <script is:inline type="application/ld+json" set:html={JSON.stringify(siteSchema)} />
     {faqSchema && <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
+    {breadcrumbSchema && <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />}
   </head>
   <body>
     <slot />

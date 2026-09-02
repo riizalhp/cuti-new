@@ -1,0 +1,36 @@
+# ─────────────────────────────
+# Employr — robots.txt
+# Optimasi SEO & GEO (Generative Engine Optimization)
+# ─────────────────────────────
+
+User-agent: *
+Allow: /
+
+# AI Search Engine Crawlers — wajib diizinkan agar konten dikutip AI
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+# Googlebot (indexing standar)
+User-agent: Googlebot
+Allow: /
+
+# Sitemap
+Sitemap: https://employr.id/sitemap.xml
