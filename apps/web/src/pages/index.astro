@@ -19,6 +19,7 @@ import dashboard1 from '../assets/dashboard-1.webp';
 import dashboard2 from '../assets/dashboard-2.webp';
 import ReviewsCarousel from '../components/employer/ReviewsCarousel';
 import FooterReveal from '../components/employer/FooterReveal';
+import BentoMoreThanForm from '../components/employer/BentoMoreThanForm';
 
 const heroImage = '/images/hero-section.webp';
 const logoMark = '/logo.webp';
@@ -220,123 +221,8 @@ const faqSchema = {
         </div>
       </section>
 
-      <!-- 05 WHY Employr -->
-      <section class="why-employer section-space" aria-labelledby="why-employer-title">
-        <div class="editorial-frame">
-          <div class="why-employer__top">
-            <div class="why-employer__heading">
-              <div class="section-label"><span>05</span><i></i><span>WHY EMPLOYR</span></div>
-              <h2 id="why-employer-title">More than an<br /><em>online form.</em></h2>
-            </div>
-            <p class="why-employer__lead">
-              Employr gives you full visibility: craft strong resume bullets, check job-fit scores, and follow up on interviews.
-            </p>
-          </div>
-
-          <div class="why-employer__grid">
-            <!-- Left: Feature List Items with interactive switching -->
-            <div class="why-employer__nav">
-              <article class="why-reason why-reason--card is-active" data-dashboard-target="0">
-                <span class="why-reason__num">01</span>
-                <div class="why-reason__content">
-                  <h3>Your whole job hunt, in one place</h3>
-                  <p>Build your CV, send applications, and track interview calls in one organized dashboard.</p>
-                </div>
-                <div class="why-reason__mobile-preview">
-                  <Image
-                    src={dashboard3}
-                    alt="01 — Organized job search flow"
-                    class="why-reason__mobile-img"
-                    loading="eager"
-                  />
-                </div>
-              </article>
-
-              <article class="why-reason why-reason--card" data-dashboard-target="1">
-                <span class="why-reason__num">02</span>
-                <div class="why-reason__content">
-                  <h3>Save unlimited CV versions</h3>
-                  <p>Save technical, managerial, or creative versions in one click and tailor the focus whenever you need to.</p>
-                </div>
-                <div class="why-reason__mobile-preview">
-                  <Image
-                    src={dashboard4}
-                    alt="02 — Multiple CV versions"
-                    class="why-reason__mobile-img"
-                    loading="lazy"
-                  />
-                </div>
-              </article>
-
-              <article class="why-reason why-reason--card" data-dashboard-target="2">
-                <span class="why-reason__num">03</span>
-                <div class="why-reason__content">
-                  <h3>Check your fit before applying</h3>
-                  <p>See which parts need work before you send your application to a recruiter.</p>
-                </div>
-                <div class="why-reason__mobile-preview">
-                  <Image
-                    src={dashboard1}
-                    alt="03 — Qualification fit check"
-                    class="why-reason__mobile-img"
-                    loading="lazy"
-                  />
-                </div>
-              </article>
-
-              <article class="why-reason why-reason--card" data-dashboard-target="3">
-                <span class="why-reason__num">04</span>
-                <div class="why-reason__content">
-                  <h3>Real-time application tracker</h3>
-                  <p>Never forget an interview date again. Track every application from sent to salary negotiation.</p>
-                </div>
-                <div class="why-reason__mobile-preview">
-                  <Image
-                    src={dashboard2}
-                    alt="04 — Centralized application tracker"
-                    class="why-reason__mobile-img"
-                    loading="lazy"
-                  />
-                </div>
-              </article>
-            </div>
-
-            <!-- Right: Pure Image Showcase with all 4 images -->
-            <div class="why-employer__dashboard-wrap">
-              <div class="why-employer__image-stage">
-                <Image
-                  src={dashboard3}
-                  alt="01 — Perjalanan karier terpadu"
-                  class="dashboard-preview-img is-active"
-                  data-dashboard-img="0"
-                  loading="eager"
-                />
-                <Image
-                  src={dashboard4}
-                  alt="02 — Multi-versi CV tanpa batas"
-                  class="dashboard-preview-img"
-                  data-dashboard-img="1"
-                  loading="lazy"
-                />
-                <Image
-                  src={dashboard1}
-                  alt="03 — Smart role matching"
-                  class="dashboard-preview-img"
-                  data-dashboard-img="2"
-                  loading="lazy"
-                />
-                <Image
-                  src={dashboard2}
-                  alt="04 — Centralized application tracking"
-                  class="dashboard-preview-img"
-                  data-dashboard-img="3"
-                  loading="lazy"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <!-- 05 WHY Employr (Bento Grid) -->
+      <BentoMoreThanForm client:visible />
 
       <!-- 06 FAQ -->
       <section class="faq-section section-space" id="faq" aria-labelledby="faq-title">
