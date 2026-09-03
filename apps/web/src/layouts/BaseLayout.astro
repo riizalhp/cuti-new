@@ -216,15 +216,10 @@ const siteSchema = {
       // ---------- Motion (hormati prefers-reduced-motion) ----------
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (!prefersReducedMotion) {
-        // Parallax halus hanya pada foto & artefak visual (bukan teks utama)
+        // Parallax halus hanya pada artefak visual yang ada di DOM
         const parallaxLayers: Array<[string, number]> = [
           ['.hero__product', -13],
-          ['.builder__visual', -9],
-          ['.career-observation__image img', 8],
-          ['.pricing__scene img', 7],
           ['.versions__stage', 9],
-          ['.pivot__photo img', 10],
-          ['.final-cta > img', -8],
         ];
 
         parallaxLayers.forEach(([selector, yPercent]) => {
@@ -241,28 +236,6 @@ const siteSchema = {
             },
           });
         });
-
-        // Horizontal job rail — dipin di desktop, native scroll di mobile
-        const jobs = document.querySelector<HTMLElement>('.jobs');
-        const rail = document.querySelector<HTMLElement>('.job-rail');
-        const desktopMotion = window.matchMedia('(min-width: 701px)');
-
-        if (jobs && rail && desktopMotion.matches) {
-          const getDistance = () => Math.max(0, rail.scrollWidth - window.innerWidth + 92);
-          gsap.to(rail, {
-            x: () => -getDistance(),
-            ease: 'none',
-            scrollTrigger: {
-              trigger: jobs,
-              start: 'top top+=90',
-              end: () => `+=${getDistance()}`,
-              pin: true,
-              pinSpacing: true,
-              scrub: 0.9,
-              invalidateOnRefresh: true,
-            },
-          });
-        }
 
         ScrollTrigger.refresh();
       }

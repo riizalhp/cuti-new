@@ -4,18 +4,12 @@
  * Cinematic Surrealism: metafora karier puitis, warm paper, film grain,
  * tipografi editorial, dan Employr Blue sebagai sinyal yang presisi.
  */
-import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from '../components/employer/Icon.astro';
 import CvArtifact from '../components/employer/CvArtifact.astro';
 import CompanyTicker from '../components/employer/CompanyTicker.astro';
 import ScrollAnimations from '../components/employer/ScrollAnimations';
 import WhyEmployr from '../components/employer/WhyEmployr';
-
-import dashboard3 from '../assets/dashboard-3.webp';
-import dashboard4 from '../assets/dashboard-4.webp';
-import dashboard1 from '../assets/dashboard-1.webp';
-import dashboard2 from '../assets/dashboard-2.webp';
 import FooterReveal from '../components/employer/FooterReveal';
 import BentoMoreThanForm from '../components/employer/BentoMoreThanForm';
 
@@ -496,29 +490,6 @@ const faqSchema = {
         });
       }
     }
-
-    // Dashboard 1:1 image switcher on hover / click
-    const whyCards = document.querySelectorAll<HTMLElement>('.why-reason--card');
-    const dashboardImages = document.querySelectorAll<HTMLElement>('.dashboard-preview-img');
-
-    whyCards.forEach((card) => {
-      const activate = () => {
-        const targetIndex = card.dataset.dashboardTarget;
-        if (!targetIndex) return;
-
-        whyCards.forEach((c) => c.classList.remove('is-active'));
-        dashboardImages.forEach((img) => img.classList.remove('is-active'));
-
-        card.classList.add('is-active');
-        const activeImg = document.querySelector<HTMLElement>(`.dashboard-preview-img[data-dashboard-img="${targetIndex}"]`);
-        if (activeImg) {
-          activeImg.classList.add('is-active');
-        }
-      };
-
-      card.addEventListener('mouseenter', activate);
-      card.addEventListener('click', activate);
-    });
 
     // Exclusive Accordion for FAQ (close others when one opens)
     const faqItems = document.querySelectorAll<HTMLDetailsElement>('.faq-item');

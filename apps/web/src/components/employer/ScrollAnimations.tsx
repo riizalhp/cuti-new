@@ -40,54 +40,7 @@ export default function ScrollAnimations() {
       });
     }
 
-    // 2. Mouse Move / Cursor Parallax on Hero Text & Card disabled as requested
-
-    // 3. Parallax Hero Image disabled as requested
-
-    // 4. Job Cards Staggered Entry Animation
-    const jobCards = document.querySelectorAll('.job-card');
-    if (jobCards.length > 0) {
-      gsap.fromTo(
-        jobCards,
-        { opacity: 0, y: 80, scale: 0.9 },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.9,
-          ease: 'back.out(1.7)',
-          stagger: 0.2,
-          scrollTrigger: {
-            trigger: '.job-rail',
-            start: 'top 85%',
-            toggleActions: 'play none none reverse',
-          },
-        }
-      );
-    }
-
-    // 5. Journey Steps Reveal Sequence
-    const journeyItems = document.querySelectorAll('.journey__item');
-    if (journeyItems.length > 0) {
-      gsap.fromTo(
-        journeyItems,
-        { opacity: 0, x: -30 },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 0.6,
-          ease: 'power2.out',
-          stagger: 0.1,
-          scrollTrigger: {
-            trigger: '.journey__list',
-            start: 'top 75%',
-            toggleActions: 'play none none reverse',
-          },
-        }
-      );
-    }
-
-    // 6. Version Cards Staggered Layering Effect
+    // 2. Version Cards Staggered Layering Effect (Chapter 04 Manage)
     const versionCards = document.querySelectorAll('.version-card');
     if (versionCards.length > 0) {
       gsap.fromTo(
@@ -109,29 +62,8 @@ export default function ScrollAnimations() {
       );
     }
 
-    // 7. Why Reasons Cards Stagger
-    const whyCards = document.querySelectorAll('.why-reason');
-    if (whyCards.length > 0) {
-      gsap.fromTo(
-        whyCards,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          ease: 'power2.out',
-          stagger: 0.15,
-          scrollTrigger: {
-            trigger: '.why-employer__reasons',
-            start: 'top 80%',
-            toggleActions: 'play none none reverse',
-          },
-        }
-      );
-    }
-
-    // 8. Section Headings & Frames Scroll Reveal (inside main)
-    const sectionFrames = document.querySelectorAll('main .editorial-frame, .statement__body, .builder__copy');
+    // 3. Section Headings & Frames Scroll Reveal
+    const sectionFrames = document.querySelectorAll('main .editorial-frame, .statement__body');
     sectionFrames.forEach((frame) => {
       gsap.fromTo(
         frame,
