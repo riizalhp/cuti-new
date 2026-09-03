@@ -1,17 +1,15 @@
 'use client';
 
-import { PaymentView } from '@/components/PaymentView';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function StandalonePembayaranPage() {
   const router = useRouter();
 
-  return (
-    <PaymentView
-      onBackToDashboard={() => router.push('/beranda')}
-      onPaymentSuccess={() => {
-        // Callback after successful transaction
-      }}
-    />
-  );
+  // Hidden / Locked: redirect directly to beranda
+  useEffect(() => {
+    router.replace('/beranda');
+  }, [router]);
+
+  return null;
 }

@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useModals } from '@/context/ModalContext';
 import { ActionCenterCard } from '@/components/ActionCenterCard';
 import { ContextualMarketingCard } from '@/components/ContextualMarketingCard';
 import { ApplicationSummaryCard } from '@/components/ApplicationSummaryCard';
@@ -17,21 +16,9 @@ import { CareerDevelopmentTabs } from '@/components/CareerDevelopmentTabs';
 
 export default function BerandaPage() {
   const router = useRouter();
-  const { openUpgrade, openPromo } = useModals();
-
-  useEffect(() => {
-    // Check if promo dismissed today
-    const dismissedUntil = localStorage.getItem('promo_dismissed_until');
-    if (!dismissedUntil || Date.now() > Number(dismissedUntil)) {
-      const timer = setTimeout(() => {
-        openPromo();
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, []); // Run ONCE on mount
 
   return (
-    <div className="space-y-6 pb-8 max-w-7xl mx-auto">
+    <div className="w-full space-y-6 pb-8">
       {/* 1. Action Center: Top Priority Hub */}
       <section id="section-action-center" className="w-full">
         <ActionCenterCard

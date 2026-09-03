@@ -150,54 +150,6 @@ export default function ScrollAnimations() {
       );
     });
 
-    // 9. Footer Reveal — scrub fade + stagger children on entrance
-    const footerInner = document.querySelector('.footer-reveal-inner');
-    const footerSpacer = document.querySelector('.footer-reveal-spacer');
-    if (footerInner && footerSpacer) {
-      // Scrub: ties overall opacity+blur to scroll position
-      gsap.fromTo(
-        footerInner,
-        { opacity: 0, y: 40, filter: 'blur(4px)' },
-        {
-          opacity: 1,
-          y: 0,
-          filter: 'blur(0px)',
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: footerSpacer,
-            start: 'top 95%',
-            end: 'bottom 100%',
-            scrub: 0.6,
-          },
-        }
-      );
-
-      // Stagger children: brand mark, tagline, link columns, bottom bar
-      const footerChildren = [
-        ...Array.from(document.querySelectorAll('.footer__top .brand-mark, .footer__top > div > p')),
-        ...Array.from(document.querySelectorAll('.footer__links > div')),
-        document.querySelector('.footer__bottom'),
-      ].filter(Boolean) as Element[];
-
-      if (footerChildren.length > 0) {
-        gsap.set(footerChildren, { opacity: 0, y: 22 });
-        ScrollTrigger.create({
-          trigger: footerSpacer,
-          start: 'top 75%',
-          onEnter: () => {
-            gsap.to(footerChildren, {
-              opacity: 1,
-              y: 0,
-              duration: 0.7,
-              ease: 'power2.out',
-              stagger: 0.09,
-            });
-          },
-          once: true,
-        });
-      }
-    }
-
     return () => {
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };

@@ -109,14 +109,48 @@ const {
         var utm_campaign = params.get('utm_campaign') || undefined;
 
         var source = 'Direct';
-        if (utm_source) source = 'Campaign (' + utm_source + (utm_medium ? ' / ' + utm_medium : '') + ')';
-        else if (ref.includes('google.')) source = 'Google Organic';
-        else if (ref.includes('instagram.com')) source = 'Instagram';
-        else if (ref.includes('tiktok.com')) source = 'TikTok';
-        else if (ref.includes('facebook.com')) source = 'Facebook';
-        else if (ref.includes('linkedin.com')) source = 'LinkedIn';
-        else if (ref.includes('whatsapp.com')) source = 'WhatsApp';
-        else if (ref && !ref.includes(window.location.hostname)) source = 'Referral';
+        if (utm_source) {
+          source = 'Campaign (' + utm_source + (utm_medium ? ' / ' + utm_medium : '') + ')';
+        } else if (ref) {
+          try {
+            var refHost = new URL(ref).hostname.toLowerCase();
+            var currHost = window.location.hostname.toLowerCase();
+            if (refHost === currHost || refHost.endsWith('.' + currHost) || (currHost.includes('employr.id') && refHost.includes('employr.id'))) {
+              source = 'Internal Navigation';
+            } else if (refHost.includes('google.')) {
+              source = 'Google Organic';
+            } else if (refHost.includes('bing.') || refHost.includes('yahoo.') || refHost.includes('duckduckgo.') || refHost.includes('ecosia.')) {
+              source = 'Search Engine';
+            } else if (refHost.includes('instagram.com') || refHost.includes('l.instagram.com')) {
+              source = 'Instagram';
+            } else if (refHost.includes('tiktok.com')) {
+              source = 'TikTok';
+            } else if (refHost.includes('threads.net')) {
+              source = 'Threads';
+            } else if (refHost.includes('facebook.com') || refHost.includes('fb.com')) {
+              source = 'Facebook';
+            } else if (refHost.includes('twitter.com') || refHost.includes('t.co') || refHost.includes('x.com')) {
+              source = 'Twitter / X';
+            } else if (refHost.includes('linkedin.com') || refHost.includes('lnkd.in')) {
+              source = 'LinkedIn';
+            } else if (refHost.includes('whatsapp.com') || refHost.includes('wa.me')) {
+              source = 'WhatsApp';
+            } else if (refHost.includes('youtube.com') || refHost.includes('youtu.be')) {
+              source = 'YouTube';
+            } else if (refHost.includes('telegram.org') || refHost.includes('t.me')) {
+              source = 'Telegram';
+            } else {
+              source = 'Referral (' + refHost.replace(/^www\./, '') + ')';
+            }
+          } catch(e) {
+            source = 'Referral (External)';
+          }
+        }
+
+        var isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || /^(\d{1,3}\.){3}\d{1,3}$/.test(window.location.hostname);
+        var trackEndpoint = isDev
+          ? window.location.protocol + '//' + window.location.hostname + ':3002/api/track'
+          : 'https://masterdata.employr.id/api/track';
 
         function send(action, dur) {
           var payload = {
@@ -126,15 +160,17 @@ const {
             url: window.location.href,
             path: window.location.pathname,
             title: document.title || 'Portal Loker AmbilCUTI',
+            hostname: window.location.hostname,
+            domain: window.location.hostname.replace(/:\d+$/, ''),
             device: { device_type: device_type, browser: browser, browser_version: browser_version, os: os, screen_resolution: window.screen.width + 'x' + window.screen.height },
             traffic: { traffic_source: source, referrer: ref, utm_source: utm_source, utm_medium: utm_medium, utm_campaign: utm_campaign },
             duration_increment_sec: dur || 25
           };
           var blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
           if (navigator.sendBeacon) {
-            navigator.sendBeacon('http://localhost:3002/api/track', blob);
+            navigator.sendBeacon(trackEndpoint, blob);
           } else {
-            fetch('http://localhost:3002/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), keepalive: true }).catch(function() {});
+            fetch(trackEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), keepalive: true }).catch(function() {});
           }
         }
 

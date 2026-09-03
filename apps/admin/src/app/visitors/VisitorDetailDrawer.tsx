@@ -31,6 +31,7 @@ import {
   Tag,
   Laptop
 } from "lucide-react"
+import { getDomainInfo, getTrafficSourceInfo } from "@/lib/visitor-helpers"
 
 interface VisitorDetailDrawerProps {
   visitorId: string | null
@@ -276,12 +277,32 @@ export function VisitorDetailDrawer({ visitorId, onClose }: VisitorDetailDrawerP
                   <div className="p-4 rounded-xl bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800 space-y-2.5">
                     <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                       <Compass size={16} className="text-orange-500" />
-                      Sumber Lalu Lintas & Lokasi
+                      Domain, Traffic & Lokasi
                     </h4>
                     <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
                       <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800/80">
+                        <span className="text-slate-400">Domain Target:</span>
+                        {(() => {
+                          const domainMeta = getDomainInfo(data.domain || data.hostname)
+                          return (
+                            <span className={`inline-flex items-center gap-1 font-bold ${domainMeta.badgeText}`}>
+                              {domainMeta.icon}
+                              {domainMeta.label} ({data.domain || data.hostname || "employr.id"})
+                            </span>
+                          )
+                        })()}
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800/80">
                         <span className="text-slate-400">Kanal Traffic:</span>
-                        <span className="font-bold text-orange-600 dark:text-orange-400">{data.trafficSource}</span>
+                        {(() => {
+                          const tsMeta = getTrafficSourceInfo(data.trafficSource)
+                          return (
+                            <span className={`inline-flex items-center gap-1 font-bold ${tsMeta.badgeText}`}>
+                              {tsMeta.icon}
+                              {data.trafficSource}
+                            </span>
+                          )
+                        })()}
                       </div>
                       <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800/80">
                         <span className="text-slate-400">Alamat IP:</span>

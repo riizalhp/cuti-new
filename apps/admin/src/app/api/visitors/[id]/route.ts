@@ -67,6 +67,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       isOnline,
       currentPage: visitor.current_page || '/',
       currentTitle: visitor.current_title || 'Home',
+      domain: visitor.domain || 'employr.id',
+      hostname: visitor.hostname || 'employr.id',
       totalVisits: visitor.total_visits,
       totalPageviews: visitor.total_pageviews,
       totalDurationSec: visitor.total_duration_sec,

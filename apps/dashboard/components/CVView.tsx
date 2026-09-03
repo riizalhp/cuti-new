@@ -2089,17 +2089,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   // Active Order State - dynamically loaded from database per user
   const [activeOrder, setActiveOrder] = useState<OrderInfo | null>(null);
 
-  // Promo Modal State & Auto-Open check
+  // Promo Modal State (Hidden for now)
   const [showCvPromoModal, setShowCvPromoModal] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const dismissed = localStorage.getItem('cuti_cv_promo_dismissed');
-      if (!dismissed) {
-        setShowCvPromoModal(true);
-      }
-    }
-  }, []);
 
   // Modal States
   const [showDraftModal, setShowDraftModal] = useState<boolean>(false);
@@ -3562,6 +3553,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           ]}
           actions={
             <div className="flex flex-col gap-2 w-full sm:w-auto">
+              {/* Hidden for now: Layanan AI & HR (paid wizard) */}
+              {/*
               <button
                 onClick={() => {
                   setAiWizardStep(1);
@@ -3572,6 +3565,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 <Sparkles className="w-4 h-4 text-white" />
                 <span>Layanan AI & HR</span>
               </button>
+              */}
               <button
                 onClick={() => {
                   setShowTemplateModal(true);
@@ -3773,6 +3767,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 </p>
               </div>
               <div className="flex flex-col items-center gap-2.5 w-full max-w-xs">
+                {/*
                 <button
                   onClick={() => {
                     setAiWizardStep(1);
@@ -3783,6 +3778,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   <Sparkles className="w-4 h-4" />
                   <span>Layanan AI & HR</span>
                 </button>
+                */}
                 <button
                   onClick={() => setShowTemplateModal(true)}
                   className="w-full px-4 py-2.5 rounded-[10px] bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-xs border border-slate-700 dark:border-transparent transition flex items-center justify-center gap-1.5 cursor-pointer"
@@ -4754,7 +4750,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
       {/* VIEW MODE 4: MANUAL CREATION & EDIT VIEW */}
       {(viewMode === 'create' || viewMode === 'preview') && (
-        <div className="cv-print-area-wrapper flex flex-col space-y-4 max-w-7xl mx-auto w-full print:space-y-0 print:max-w-none print:w-[210mm] print:m-0 print:p-0">
+        <div className="cv-print-area-wrapper flex flex-col space-y-4 w-full print:space-y-0 print:max-w-none print:w-[210mm] print:m-0 print:p-0">
           {/* CONTROL TOOLBAR FOR LAYOUT & DOCUMENT SETTINGS */}
           <div className="w-full bg-white dark:bg-slate-900 p-3.5 rounded-[10px] border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-2xs no-print">
             {/* Left: Back to List & Active Layout Indicator */}
@@ -7729,9 +7725,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       </div>
                     </div>
 
-                    {/* INLINE CARD: CV DIBUATKAN HRD (SECONDARY CONVERSION BEFORE DOWNLOAD) */}
+                    {/* INLINE CARD: CV DIBUATKAN HRD (Hidden for now) */}
+                    {/*
                     <div className="my-3.5 bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700/80 rounded-[10px] p-4 space-y-3 shadow-xs">
-                      {/* Badge / Eyebrow */}
                       <div className="flex items-center justify-between">
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] bg-navy-50 dark:bg-navy-950/80 text-navy-700 dark:text-navy-300 border border-navy-200/80 dark:border-navy-800 text-[11px] font-bold">
                           <Sparkles className="w-3.5 h-3.5 text-amber-500" />
@@ -7742,7 +7738,6 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         </span>
                       </div>
 
-                      {/* Headline & Description */}
                       <div className="space-y-1">
                         <h5 className="font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white leading-snug">
                           Mau CV kamu lebih siap dilirik HRD?
@@ -7752,7 +7747,6 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         </p>
                       </div>
 
-                      {/* Value & Action Button */}
                       <div className="pt-2.5 flex items-center justify-between gap-3 border-t border-slate-200/60 dark:border-slate-700/50">
                         <div className="flex flex-col">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
@@ -7773,6 +7767,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         </button>
                       </div>
                     </div>
+                    */}
 
                     {/* Button Unduh */}
                     <button
@@ -8866,23 +8861,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         }}
       />
 
-      {/* FLOATING CTA: CV DIBUATKAN HRD */}
-      <CvHrdFloatingCta
-        onSelectService={() => {
-          setAiWizardStep(1);
-          setViewMode('ai-wizard');
-        }}
-      />
-
-      {/* MODAL: DETAIL LAYANAN CV DIBUATKAN HRD */}
-      <CvHrdModal
-        isOpen={isHrdModalOpen}
-        onClose={() => setIsHrdModalOpen(false)}
-        onSelectService={() => {
-          setAiWizardStep(1);
-          setViewMode('ai-wizard');
-        }}
-      />
+      {/* Hidden for now: Floating CTA & Modal layanan CV by HRD */}
+      {/* <CvHrdFloatingCta /> */}
 
       {/* Toast Feedback Success AI */}
       {aiToastMessage && (

@@ -22,7 +22,10 @@ export const CvHrdModal: React.FC<CvHrdModalProps> = ({
   onClose,
   onSelectService,
 }) => {
-  if (!isOpen) return null;
+  // Hidden for now per user request
+  const HIDDEN = true;
+
+  if (HIDDEN || !isOpen) return null;
 
   const handlePrimaryClick = () => {
     if (onSelectService) {

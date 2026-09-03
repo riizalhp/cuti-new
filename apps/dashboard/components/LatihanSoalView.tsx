@@ -410,15 +410,16 @@ export const LatihanSoalView: React.FC = () => {
 
   // Start a quiz test
   const handleStartQuiz = (quiz: QuizPackage) => {
-    // Check if user owns it or if it is free
+    // All quizzes free / unlocked
+    /*
     if (quiz.isPremium && !unlockedQuizIds.includes(quiz.id)) {
-      // Prompt payment checkout modal
       setSelectedQuizForPayment(quiz);
       setAppliedDiscount(0);
       setPaymentSuccess(false);
       setPaymentModalOpen(true);
       return;
     }
+    */
 
     // Initialize Exam State
     setActiveQuizPackage(quiz);
@@ -611,7 +612,7 @@ export const LatihanSoalView: React.FC = () => {
         </header>
 
         {/* Exam Body Layout */}
-        <div className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="flex-1 w-full p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Question Box (Left - 3 Cols) */}
           <div className="lg:col-span-3 flex flex-col justify-between bg-slate-950/70 rounded-[10px] border border-slate-800 p-6 md:p-8 shadow-2xl relative">
             <div className="space-y-6">
@@ -899,7 +900,7 @@ export const LatihanSoalView: React.FC = () => {
     const isPassed = score >= activeQuizPackage.passingScore;
 
     return (
-      <div className="space-y-6 max-w-5xl mx-auto pb-12 animate-in fade-in duration-300">
+      <div className="w-full space-y-6 pb-12 animate-in fade-in duration-300">
         {/* Score Header Card */}
         <div
           className={`p-6 md:p-8 rounded-[10px] border shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden ${
@@ -1071,7 +1072,7 @@ export const LatihanSoalView: React.FC = () => {
 
   // --- RENDER MAIN LATIHAN SOAL DASHBOARD (CATALOG & MY QUIZZES) ---
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+    <div className="space-y-6 w-full pb-12">
       {/* Top Banner Header */}
       <div className="relative overflow-hidden rounded-[10px] bg-navy-700 p-6 md:p-8 text-white shadow-xl border border-navy-800">
         <div className="absolute top-0 right-0 -mr-10 -mt-10 w-48 h-48 bg-[#1738D1]/20 rounded-full blur-3xl pointer-events-none" />
@@ -1178,17 +1179,10 @@ export const LatihanSoalView: React.FC = () => {
                         {quiz.category}
                       </span>
 
-                      {quiz.isPremium ? (
-                        <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 flex items-center gap-1">
-                          <Lock className="w-3 h-3 text-amber-600" />
-                          <span>Rp {quiz.price.toLocaleString('id-ID')}</span>
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 flex items-center gap-1">
-                          <Unlock className="w-3 h-3 text-emerald-600" />
-                          <span>GRATIS</span>
-                        </span>
-                      )}
+                      <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 flex items-center gap-1">
+                        <Unlock className="w-3 h-3 text-emerald-600" />
+                        <span>GRATIS</span>
+                      </span>
                     </div>
 
                     {/* Title & Description */}
@@ -1231,23 +1225,10 @@ export const LatihanSoalView: React.FC = () => {
                   {/* CTA Action Button */}
                   <Button
                     onClick={() => handleStartQuiz(quiz)}
-                    className={`w-full py-2.5 rounded-[10px] font-extrabold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                      isUnlocked
-                        ? 'bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-xs'
-                        : 'bg-amber-400 hover:bg-amber-500 text-slate-950 shadow-xs'
-                    }`}
+                    className="w-full py-2.5 rounded-[10px] font-extrabold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-xs"
                   >
-                    {isUnlocked ? (
-                      <>
-                        <Play className="w-3.5 h-3.5 fill-current" />
-                        <span>Mulai Kerjakan Soal</span>
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard className="w-3.5 h-3.5" />
-                        <span>Beli &amp; Buka Akses (Rp {quiz.price.toLocaleString('id-ID')})</span>
-                      </>
-                    )}
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>Mulai Kerjakan Soal</span>
                   </Button>
                 </div>
               );

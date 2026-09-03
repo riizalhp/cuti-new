@@ -7,6 +7,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search') || '';
+    const domainFilter = searchParams.get('domain') || 'all'; // all, employr.id, app.employr.id, loker.employr.id, localhost
     const status = searchParams.get('status') || 'all'; // all, online, offline
     const device = searchParams.get('device') || 'all'; // all, desktop, mobile, tablet
     const source = searchParams.get('source') || 'all'; // all, direct, google, social, referral, campaign
@@ -17,6 +18,14 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     const where: any = {};
+
+    // 0. Domain / Hostname Filter
+    if (domainFilter !== 'all') {
+      where.OR = [
+        { domain: { contains: domainFilter, mode: 'insensitive' } },
+        { hostname: { contains: domainFilter, mode: 'insensitive' } },
+      ];
+    }
 
     // 1. Search Query (Visitor ID, Linked User name/email, IP address, current page)
     if (search.trim()) {
@@ -128,6 +137,8 @@ export async function GET(req: NextRequest) {
         isOnline,
         currentPage: v.current_page || '/',
         currentTitle: v.current_title || 'Home',
+        domain: v.domain || 'employr.id',
+        hostname: v.hostname || 'employr.id',
         totalVisits: v.total_visits || v._count.sessions,
         totalPageviews: v.total_pageviews || v._count.page_views,
         totalDurationSec: v.total_duration_sec,

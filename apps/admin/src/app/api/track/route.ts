@@ -33,6 +33,8 @@ export async function POST(req: NextRequest) {
       url,
       path,
       title,
+      hostname: payloadHostname,
+      domain: payloadDomain,
       device,
       traffic,
       activity_type,
@@ -47,6 +49,15 @@ export async function POST(req: NextRequest) {
         { status: 400, headers }
       );
     }
+
+    // Extract hostname / domain cleanly
+    let detectedHostname = payloadHostname || '';
+    if (!detectedHostname && url) {
+      try {
+        detectedHostname = new URL(url).hostname;
+      } catch {}
+    }
+    const detectedDomain = payloadDomain || (detectedHostname ? detectedHostname.replace(/:\d+$/, '') : null);
 
     const forwardedFor = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || req.headers.get('x-real-ip');
     const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : '127.0.0.1';
@@ -69,6 +80,8 @@ export async function POST(req: NextRequest) {
             is_active: true,
             current_page: path || '/',
             current_title: title || 'Home',
+            domain: detectedDomain,
+            hostname: detectedHostname || null,
             total_visits: 1,
             total_pageviews: 1,
             device_type: device?.device_type || 'Desktop',
@@ -94,6 +107,8 @@ export async function POST(req: NextRequest) {
             is_active: true,
             current_page: path || existingVisitor.current_page,
             current_title: title || existingVisitor.current_title,
+            domain: detectedDomain || (existingVisitor as any).domain,
+            hostname: detectedHostname || (existingVisitor as any).hostname,
             total_pageviews: { increment: 1 },
             user_id: user_id || existingVisitor.user_id,
             device_type: device?.device_type || existingVisitor.device_type,
@@ -121,6 +136,8 @@ export async function POST(req: NextRequest) {
             entry_page: path || '/',
             exit_page: path || '/',
             pageviews_count: 1,
+            domain: detectedDomain,
+            hostname: detectedHostname || null,
             referrer: traffic?.referrer || null,
             traffic_source: traffic?.traffic_source || 'Direct',
             utm_source: traffic?.utm_source || null,
@@ -145,6 +162,8 @@ export async function POST(req: NextRequest) {
           data: {
             last_active_at: now,
             exit_page: path || existingSession.exit_page,
+            domain: detectedDomain || (existingSession as any).domain,
+            hostname: detectedHostname || (existingSession as any).hostname,
             pageviews_count: { increment: 1 },
             user_id: user_id || existingSession.user_id,
           },
@@ -159,6 +178,8 @@ export async function POST(req: NextRequest) {
           url: url || path || '/',
           path: path || '/',
           title: title || 'Untitled',
+          domain: detectedDomain,
+          hostname: detectedHostname || null,
           referrer: traffic?.referrer || null,
           created_at: now,
         },
@@ -195,6 +216,8 @@ export async function POST(req: NextRequest) {
           is_active: true,
           current_page: path || undefined,
           current_title: title || undefined,
+          ...(detectedDomain ? { domain: detectedDomain } : {}),
+          ...(detectedHostname ? { hostname: detectedHostname } : {}),
           total_duration_sec: { increment: incrementSec },
           ...(user_id ? { user_id } : {}),
         },
@@ -205,6 +228,8 @@ export async function POST(req: NextRequest) {
         data: {
           last_active_at: now,
           exit_page: path || undefined,
+          ...(detectedDomain ? { domain: detectedDomain } : {}),
+          ...(detectedHostname ? { hostname: detectedHostname } : {}),
           duration_sec: { increment: incrementSec },
           ...(user_id ? { user_id } : {}),
         },
@@ -232,6 +257,8 @@ export async function POST(req: NextRequest) {
         data: {
           last_seen: now,
           is_active: true,
+          ...(detectedDomain ? { domain: detectedDomain } : {}),
+          ...(detectedHostname ? { hostname: detectedHostname } : {}),
           ...(user_id ? { user_id } : {}),
         },
       });

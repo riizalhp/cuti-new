@@ -672,6 +672,8 @@ exports.Prisma.VisitorScalarFieldEnum = {
   city: 'city',
   first_referrer: 'first_referrer',
   traffic_source: 'traffic_source',
+  domain: 'domain',
+  hostname: 'hostname',
   utm_source: 'utm_source',
   utm_medium: 'utm_medium',
   utm_campaign: 'utm_campaign',
@@ -694,6 +696,8 @@ exports.Prisma.VisitorSessionScalarFieldEnum = {
   pageviews_count: 'pageviews_count',
   referrer: 'referrer',
   traffic_source: 'traffic_source',
+  domain: 'domain',
+  hostname: 'hostname',
   utm_source: 'utm_source',
   utm_medium: 'utm_medium',
   utm_campaign: 'utm_campaign',
@@ -713,6 +717,8 @@ exports.Prisma.VisitorPageViewScalarFieldEnum = {
   path: 'path',
   title: 'title',
   referrer: 'referrer',
+  domain: 'domain',
+  hostname: 'hostname',
   duration_sec: 'duration_sec',
   created_at: 'created_at'
 };

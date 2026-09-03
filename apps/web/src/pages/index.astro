@@ -9,7 +9,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from '../components/employer/Icon.astro';
 import CvArtifact from '../components/employer/CvArtifact.astro';
 import CompanyTicker from '../components/employer/CompanyTicker.astro';
-import HeroCanvas from '../components/employer/HeroCanvas';
 import ScrollAnimations from '../components/employer/ScrollAnimations';
 import WhyEmployr from '../components/employer/WhyEmployr';
 
@@ -17,7 +16,6 @@ import dashboard3 from '../assets/dashboard-3.webp';
 import dashboard4 from '../assets/dashboard-4.webp';
 import dashboard1 from '../assets/dashboard-1.webp';
 import dashboard2 from '../assets/dashboard-2.webp';
-import ReviewsCarousel from '../components/employer/ReviewsCarousel';
 import FooterReveal from '../components/employer/FooterReveal';
 import BentoMoreThanForm from '../components/employer/BentoMoreThanForm';
 
@@ -26,9 +24,6 @@ const logoMark = '/logo.webp';
 
 const navItems = [
   ['Product', '#product'],
-  ['Jobs', '#jobs'],
-  ['Career', '#career'],
-  ['Insights', '#resources'],
 ] as const;
 
 const faqSchema = {
@@ -61,10 +56,10 @@ const faqSchema = {
     },
     {
       '@type': 'Question',
-      name: 'Is there a monthly or recurring subscription?',
+      name: 'Will my CV pass Applicant Tracking Systems (ATS)?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No recurring subscription. Employr provides lifetime access with a single payment, giving you permanent access to all your CV versions and future dashboard updates.',
+        text: 'Yes. Employr structures your CV with clean formatting, standard industry headers, and optimized readability so your qualifications are parsed accurately by ATS software.',
       },
     },
     {
@@ -102,7 +97,6 @@ const faqSchema = {
       <div class="hero-frame-container">
       <section class="hero-card" aria-labelledby="hero-title">
         <!-- Background Image & Washes -->
-        <HeroCanvas client:only="react" />
         <img class="hero__image" src={heroImage} alt="Young professional crossing a surreal city district with a glowing blue career path" />
         <div class="hero__wash"></div>
         <div class="hero__grain"></div>
@@ -120,7 +114,7 @@ const faqSchema = {
           </a>
 
           <div class="header-actions">
-            <button class="login-link" data-toast="Sign in will be available at launch.">Sign In</button>
+            <!-- <button class="login-link" data-toast="Sign in will be available at launch.">Sign In</button> -->
             <a class="header-cta" href="/pre-register">Early Access <Icon name="move-up-right" size={14} /></a>
             <button class="menu-toggle" aria-label="Navigation menu" aria-expanded="false" data-menu-button>
               <span class="menu-toggle__bar menu-toggle__bar--top"></span>
@@ -147,7 +141,7 @@ const faqSchema = {
             )}
           </div>
           <div class="mobile-nav__footer">
-            <a class="mobile-nav__login" href="/login">Sign In</a>
+            <!-- <a class="mobile-nav__login" href="/login">Sign In</a> -->
             <a class="mobile-start" href="/pre-register">Early Access <Icon name="arrow-up-right" size={16} /></a>
           </div>
         </nav>
@@ -166,8 +160,8 @@ const faqSchema = {
       </section>
     </div>
 
-    <!-- COMPANY TICKER / MARQUEE (UNIFIED LIGHT PAPER THEME) -->
-    <CompanyTicker variant="light" />
+    <!-- COMPANY TICKER / SHOWCASE (LIGHT PAPER THEME) -->
+    <CompanyTicker />
 
     <!-- 01 STATEMENT -->
     <section class="statement section-space" id="product">
@@ -221,8 +215,8 @@ const faqSchema = {
         </div>
       </section>
 
-      <!-- 05 WHY Employr (Bento Grid) -->
-      <BentoMoreThanForm client:visible />
+      <!-- 05 CAPABILITIES (Full-bleed Scroll-driven Showcase) -->
+      <BentoMoreThanForm client:only="react" />
 
       <!-- 06 FAQ -->
       <section class="faq-section section-space" id="faq" aria-labelledby="faq-title">
@@ -233,7 +227,7 @@ const faqSchema = {
               <h2 id="faq-title">Questions &amp; answers,<br /><em>everything you need to know.</em></h2>
             </div>
             <p class="faq-section__lead">
-              Got questions about our CV workspace, smart role alignment, or lifetime membership? We have answers.
+              Got questions about our CV workspace, smart role alignment, or application tools? We have answers.
             </p>
           </div>
 
@@ -270,11 +264,11 @@ const faqSchema = {
 
             <details class="faq-item" name="faq-accordion">
               <summary class="faq-item__question">
-                <span>Is there a monthly or recurring subscription?</span>
+                <span>Will my CV pass Applicant Tracking Systems (ATS)?</span>
                 <span class="faq-item__icon"><Icon name="plus" size={18} /></span>
               </summary>
               <div class="faq-item__answer">
-                <p>No recurring subscription. Employr provides lifetime access with a single payment, giving you permanent access to all your CV versions and future dashboard updates.</p>
+                <p>Yes. Employr structures your CV with clean formatting, standard industry headers, and optimized readability so your qualifications are parsed accurately by ATS software.</p>
               </div>
             </details>
 
@@ -301,11 +295,46 @@ const faqSchema = {
               </div>
               <h2 id="stories-title">Not fake testimonials,<br /><em>real results.</em></h2>
               <p>Real stories from people who landed interviews and found their dream careers through Employr.</p>
-              <button class="action-link" data-toast="Share your story feature coming soon.">Share Your Story <Icon name="arrow-up-right" /></button>
+              <a href="/pre-register" class="action-link">Be the First to Share <Icon name="arrow-up-right" /></a>
             </div>
 
-            <div class="testimonials-ready__carousel-wrap">
-              <ReviewsCarousel client:only="react" />
+            <div class="testimonials-ready__carousel-wrap" style="padding-top: clamp(32px, 9vw, 116px);">
+              <div class="reviews-carousel-stage">
+                <!-- Stacked background cards for 3D depth matching original style -->
+                <div
+                  class="reviews-card is-stacked"
+                  style="transform: translateX(-50%) translateY(28px) scale(0.92); opacity: 0.45; z-index: 1;"
+                  aria-hidden="true"
+                ></div>
+                <div
+                  class="reviews-card is-stacked"
+                  style="transform: translateX(-50%) translateY(14px) scale(0.96); opacity: 0.75; z-index: 2;"
+                  aria-hidden="true"
+                ></div>
+
+                <!-- Main active card with identical original reviews-card style -->
+                <figure
+                  class="reviews-card is-active"
+                  style="transform: translateX(-50%) translateY(0) scale(1); z-index: 3;"
+                >
+                  <blockquote class="reviews-card__quote">
+                    <div class="reviews-card__quote-mark">“</div>
+                    <p class="reviews-card__text">
+                      We don’t publish fake reviews. Land your next interview callback with Employr, and let your first offer letter be the story featured right here.
+                    </p>
+                  </blockquote>
+
+                  <figcaption class="reviews-card__footer">
+                    <div class="reviews-card__author-wrap">
+                      <div class="reviews-card__avatar">★</div>
+                      <div class="reviews-card__meta">
+                        <span class="reviews-card__author">Your Story Here</span>
+                        <span class="reviews-card__title">Next Interview Callback · Reserved</span>
+                      </div>
+                    </div>
+                  </figcaption>
+                </figure>
+              </div>
             </div>
           </div>
         </div>
@@ -345,7 +374,7 @@ const faqSchema = {
       </section>
     </main>
 
-    <FooterReveal client:only="react" logoMark={logoMark} />
+    <FooterReveal client:load logoMark={logoMark} />
   </div>
 
   <script>

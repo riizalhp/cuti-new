@@ -1,398 +1,420 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-interface BentoItem {
+gsap.registerPlugin(ScrollTrigger);
+
+interface FeatureItem {
   id: string;
   number: string;
-  kicker?: string;
+  tag: string;
   title: string;
-  italicWord?: string;
+  italicWord: string;
+  lead: string;
   description: string;
-  colSpan: string;
-  bgImage: string;
+  desktopImg: string;
+  mobileImg: string;
 }
 
-export default function BentoMoreThanForm() {
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
+const features: FeatureItem[] = [
+  {
+    id: 'generate-cv',
+    number: '01',
+    tag: 'CV GENERATION',
+    title: 'Unlimited resume generation,',
+    italicWord: 'ready whenever you need it.',
+    lead: 'Instant ATS-ready resumes structured to global industry benchmarks.',
+    description:
+      'Generate high-impact CV variations tailored for distinct roles without limits.',
+    desktopImg: '/images/dekstop-cv.webp',
+    mobileImg: '/images/mobile-cv.webp',
+  },
+  {
+    id: 'eval-cv',
+    number: '02',
+    tag: 'RESUME AUDIT & SCORE',
+    title: 'Comprehensive resume audit,',
+    italicWord: 'uncover hidden blind spots.',
+    lead: 'Instant actionable feedback and scoring before you submit your application.',
+    description:
+      'Deep analysis on sentence impact, power words, and structure to maximize interview callbacks.',
+    desktopImg: '/images/dekstop-eval.webp',
+    mobileImg: '/images/mobile-eval.webp',
+  },
+  {
+    id: 'job-matcher',
+    number: '03',
+    tag: 'ROLE ALIGNMENT',
+    title: 'Match your resume to,',
+    italicWord: 'the job description.',
+    lead: 'Mathematical precision in keyword alignment and required qualifications.',
+    description:
+      'Identify missing keywords and align your experience in seconds to pass ATS screening.',
+    desktopImg: '/images/dekstop-matcher.webp',
+    mobileImg: '/images/mobile-matcher.webp',
+  },
+  {
+    id: 'kanban-tracker',
+    number: '04',
+    tag: 'APPLICATION PIPELINE',
+    title: 'Track every opportunity,',
+    italicWord: 'never lose momentum.',
+    lead: 'Visual recruitment pipeline from initial wishlist to final job offer.',
+    description:
+      'Manage your entire job search workflow in an integrated kanban command center.',
+    desktopImg: '/images/dekstop-kanban.webp',
+    mobileImg: '/images/mobile-kanban.webp',
+  },
+  {
+    id: 'linkedin-opt',
+    number: '05',
+    tag: 'PERSONAL BRANDING',
+    title: 'Optimize your LinkedIn,',
+    italicWord: 'stand out to recruiters.',
+    lead: 'High-impact headlines, storytelling summaries, and targeted industry keywords.',
+    description:
+      'Transform your profile into a magnet for inbound recruiter outreach.',
+    desktopImg: '/images/dekstop-linkedin.webp',
+    mobileImg: '/images/mobile-linkedin.webp',
+  },
+  {
+    id: 'auto-mailer',
+    number: '06',
+    tag: 'OUTREACH & FOLLOW-UP',
+    title: 'Smart outreach emails,',
+    italicWord: 'automated & professional.',
+    lead: 'Reach hiring managers with polished, high-converting outreach copy.',
+    description:
+      'Schedule periodic follow-up messages seamlessly with open-rate tracking.',
+    desktopImg: '/images/dekstop-mailer.webp',
+    mobileImg: '/images/mobile-mailer.webp',
+  },
+  {
+    id: 'manage-cv',
+    number: '07',
+    tag: 'VERSION REPOSITORY',
+    title: 'Centralized CV repository,',
+    italicWord: 'always ready to send.',
+    lead: 'One unified profile tailored for multiple target career tracks.',
+    description:
+      'Store and organize customized CV versions for UI/UX, Product, or Marketing in one hub.',
+    desktopImg: '/images/dekstop-manage.webp',
+    mobileImg: '/images/mobile-manage.webp',
+  },
+];
 
-  const bentoItems: BentoItem[] = [
-    {
-      id: 'bento-1',
-      number: '01',
-      kicker: 'PROFILE VISIBILITY',
-      title: 'Stand out from the crowd,',
-      italicWord: 'before you even apply.',
-      description:
-        'Susun headline tajam, ringkasan pengalaman yang menjual, dan kata kunci relevan agar recruiter menemukan profilmu sebelum kamu melamar.',
-      colSpan: 'lg:col-span-2 col-span-1',
-      bgImage: '/images/image-1.webp',
-    },
-    {
-      id: 'bento-2',
-      number: '02',
-      kicker: 'ATS & QUALITY AUDIT',
-      title: 'ATS-ready,',
-      italicWord: 'every time.',
-      description:
-        'Analisis otomatis untuk action verbs terukur, struktur ATS-friendly, dan skor keterbacaan sebelum dokumen dikirim ke HRD.',
-      colSpan: 'lg:col-span-1 col-span-1',
-      bgImage: '/images/image-2.webp',
-    },
-    {
-      id: 'bento-3',
-      number: '03',
-      kicker: 'CONFIDENCE & PREPARATION',
-      title: 'Walk into interviews',
-      italicWord: 'fully prepared.',
-      description:
-        'Simulasi tanya-jawab sesuai peran, metode STAR untuk menjawab studi kasus, serta panduan taktis negosiasi gaji.',
-      colSpan: 'lg:col-span-1 col-span-1',
-      bgImage: '/images/image-3.webp',
-    },
-    {
-      id: 'bento-4',
-      number: '04',
-      kicker: 'SMART OUTREACH',
-      title: 'Automated follow-ups,',
-      italicWord: 'zero missed steps.',
-      description:
-        'Kirim email lamaran dan jadwal follow-up berkala secara otomatis dengan tone sopan dan profesional agar tidak terlewat.',
-      colSpan: 'lg:col-span-2 col-span-1',
-      bgImage: '/images/image-4.webp',
-    },
-    {
-      id: 'bento-5',
-      number: '05',
-      kicker: 'ROLE ALIGNMENT',
-      title: 'One master profile,',
-      italicWord: 'tailored for every role.',
-      description:
-        'Komparasi langsung antara dua atau lebih lowongan kerja untuk melihat irisan skill, poin perbedaan, dan keyword prioritas yang harus ditonjolkan.',
-      colSpan: 'lg:col-span-3 col-span-1',
-      bgImage: '/images/hero-section.webp',
-    },
-  ];
+export default function BentoMoreThanForm() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState<'down' | 'up'>('down');
+  const frameRef = useRef<HTMLElement>(null);
+  const storyRef = useRef<HTMLDivElement>(null);
+  const indexRef = useRef(0);
+
+  // Preload all desktop & mobile images so swapping is instant and calibrate trigger offsets
+  useEffect(() => {
+    const srcs = features.flatMap((f) => [f.desktopImg, f.mobileImg]);
+    let loaded = 0;
+    srcs.forEach((src) => {
+      const img = new Image();
+      img.onload = img.onerror = () => {
+        loaded++;
+        if (loaded === srcs.length) {
+          ScrollTrigger.sort();
+          ScrollTrigger.refresh();
+        }
+      };
+      img.src = src;
+    });
+  }, []);
+
+  // Scroll-driven storytelling: pin section cleanly at comfortable top position, scrub through features
+  useEffect(() => {
+    const frame = frameRef.current;
+    const story = storyRef.current;
+    if (!frame || !story) return;
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReduced) {
+      setActiveIndex(0);
+      return;
+    }
+
+    const getHeaderOffset = () => {
+      const header = document.querySelector('.site-header') as HTMLElement | null;
+      return header ? header.offsetHeight : window.innerWidth <= 900 ? 68 : 84;
+    };
+
+    const STEP_PX = 130;
+    const totalDistance = (features.length - 1) * STEP_PX;
+
+    const st = ScrollTrigger.create({
+      trigger: frame,
+      pin: story,
+      start: () => `top ${getHeaderOffset()}px`,
+      end: () => `+=${totalDistance}`,
+      pinSpacing: true,
+      anticipatePin: 1,
+      refreshPriority: 1,
+      scrub: 0.2,
+      snap: {
+        snapTo: 1 / (features.length - 1),
+        duration: { min: 0.2, max: 0.35 },
+        ease: 'power2.out',
+      },
+      invalidateOnRefresh: true,
+      onUpdate: (self) => {
+        const rawIdx = Math.round(self.progress * (features.length - 1));
+        const idx = Math.min(features.length - 1, Math.max(0, rawIdx));
+        if (idx !== indexRef.current) {
+          const dir = self.direction === -1 || idx < indexRef.current ? 'up' : 'down';
+          indexRef.current = idx;
+          setDirection(dir);
+          setActiveIndex(idx);
+        }
+      },
+    });
+
+    const handleLoad = () => {
+      ScrollTrigger.sort();
+      ScrollTrigger.refresh();
+    };
+
+    window.addEventListener('load', handleLoad);
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(() => {
+        ScrollTrigger.sort();
+        ScrollTrigger.refresh();
+      });
+    }
+
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.sort();
+      ScrollTrigger.refresh();
+    }, 280);
+
+    return () => {
+      clearTimeout(refreshTimer);
+      window.removeEventListener('load', handleLoad);
+      st.kill();
+    };
+  }, []);
+
+  const activeFeature = features[activeIndex];
 
   return (
-    <section className="why-bento-section section-space" aria-labelledby="why-employer-title">
-      <div className="editorial-frame">
-        {/* SECTION EDITORIAL HEADER */}
-        <div className="why-bento__top">
-          <div className="why-bento__heading">
-            <div className="section-label">
-              <span>05</span>
-              <i></i>
-              <span>WHY EMPLOYR</span>
-            </div>
-            <h2 id="why-employer-title" className="why-bento__title">
-              More than an<br />
-              <em>online form.</em>
-            </h2>
-          </div>
-          <div className="why-bento__lead-wrap">
-            <p className="why-bento__lead">
-              Employr memberi visibilitas penuh pada kariermu: dari optimasi LinkedIn, auto mailer, panduan interview, evaluasi CV, hingga komparasi job description.
-            </p>
-          </div>
+    <section ref={frameRef} className="scroll-story-frame" aria-label="Employr capabilities showcase">
+      <div ref={storyRef} className="scroll-story">
+        {/* FULL-BLEED CINEMATIC MEDIA - CLEAN WITHOUT BLACK OVERLAYS */}
+        <div
+          className={`scroll-story__media scroll-story__media--${direction}`}
+          key={`media-${activeFeature.id}`}
+        >
+          <img
+            src={activeFeature.desktopImg}
+            alt={`${activeFeature.tag} - Desktop view`}
+            className="scroll-story__img scroll-story__img--desktop"
+            draggable={false}
+          />
+          <img
+            src={activeFeature.mobileImg}
+            alt={`${activeFeature.tag} - Mobile view`}
+            className="scroll-story__img scroll-story__img--mobile"
+            draggable={false}
+          />
         </div>
 
-        {/* BENTO GRID */}
-        <div className="why-bento__grid">
-          {bentoItems.map((item) => {
-            const isHovered = hoveredId === item.id;
-
-            return (
-              <div
-                key={item.id}
-                className={`why-bento__card ${item.colSpan} ${isHovered ? 'is-hovered' : ''}`}
-                onMouseEnter={() => setHoveredId(item.id)}
-                onMouseLeave={() => setHoveredId(null)}
-              >
-                {/* PHOTO BACKGROUND */}
-                <div className="why-bento__bg-wrap">
-                  <img
-                    src={item.bgImage}
-                    alt={item.kicker || item.number}
-                    className="why-bento__bg-img"
-                    loading="lazy"
-                  />
-                  <div className="why-bento__shade"></div>
-                  <div className="why-bento__radial-glow"></div>
-                </div>
-
-                {/* SPOTLIGHT SHEEN ON TOP EDGE */}
-                <div className="why-bento__top-sheen"></div>
-
-                {/* CARD CONTENT LAYER */}
-                <div className="why-bento__content">
-                  {/* TOP ROW: NUMBER ONLY */}
-                  <div className="why-bento__card-top">
-                    <span className="why-bento__num">{item.number}</span>
-                  </div>
-
-                  {/* BOTTOM: KICKER, TITLE & DESCRIPTION */}
-                  <div className="why-bento__card-bottom">
-                    {item.kicker && <span className="why-bento__kicker">{item.kicker}</span>}
-                    <h3 className="why-bento__card-title">
-                      {item.title} {item.italicWord && <em>{item.italicWord}</em>}
-                    </h3>
-                    <p className="why-bento__card-desc">{item.description}</p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        {/* STORY CONTENT DIRECTLY OVER BACKGROUND */}
+        <div
+          className={`scroll-story__content scroll-story__content--${direction}`}
+          key={`story-${activeFeature.id}`}
+        >
+          <div className="scroll-story__head">
+            <span className="scroll-story__tag">{activeFeature.tag}</span>
+            <span className="scroll-story__num">{activeFeature.number} / 07</span>
+          </div>
+          <h3 className="scroll-story__title">
+            {activeFeature.title} <em>{activeFeature.italicWord}</em>
+          </h3>
+          <p className="scroll-story__lead">{activeFeature.lead}</p>
         </div>
       </div>
 
       <style>{`
-        .why-bento-section {
-          background: #f8f7f4;
-          color: #111111;
-          padding: 120px 0 110px;
+        /* FRAMED CONTAINER (matches hero-frame-container: paper gutter + rounded card) */
+        .scroll-story-frame {
           position: relative;
-          overflow: hidden;
-          border-top: 1px solid rgba(0, 0, 0, 0.06);
-        }
-
-        .why-bento-section::before {
-          content: "";
-          position: absolute;
-          top: -150px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 900px;
-          height: 350px;
-          background: radial-gradient(circle, rgba(0, 0, 255, 0.06) 0%, rgba(0, 0, 0, 0) 70%);
-          pointer-events: none;
-          z-index: 0;
-        }
-
-        .why-bento__top {
-          display: grid;
-          grid-template-columns: 1.25fr 0.75fr;
-          align-items: flex-end;
-          gap: 6vw;
-          margin-bottom: 48px;
-          position: relative;
-          z-index: 2;
-        }
-
-        .why-bento__title {
-          font-family: "DM Sans", Arial, sans-serif;
-          font-size: clamp(2.6rem, 4.4vw, 4.4rem);
-          font-weight: 600;
-          letter-spacing: -.085em;
-          line-height: .92;
-          color: #111111;
-          margin: 0;
-        }
-
-        .why-bento__title em {
-          font-family: "Instrument Serif", Georgia, serif;
-          font-style: italic;
-          font-weight: 400;
-          color: #0000ff;
-        }
-
-        .why-bento__lead-wrap {
-          padding-bottom: 6px;
-        }
-
-        .why-bento__lead {
-          font-family: "DM Sans", Arial, sans-serif;
-          font-size: 14.5px;
-          line-height: 1.6;
-          color: #6e6d68;
-          margin: 0;
-          max-width: 420px;
-        }
-
-        /* BENTO GRID */
-        .why-bento__grid {
-          display: grid;
-          grid-template-columns: repeat(1, minmax(0, 1fr));
-          gap: 20px;
-          position: relative;
-          z-index: 2;
-        }
-
-        @media (min-width: 900px) {
-          .why-bento__grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 20px;
-          }
-        }
-
-        /* BENTO CARD */
-        .why-bento__card {
-          position: relative;
-          border-radius: 18px;
-          overflow: hidden;
-          background: #ffffff;
-          border: 1px solid rgba(0, 0, 0, 0.08);
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-          min-height: 320px;
-          display: flex;
-          flex-direction: column;
-          box-sizing: border-box;
-          transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .why-bento__card:hover {
-          border-color: rgba(0, 0, 0, 0.16);
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), 0 0 30px rgba(0, 0, 255, 0.06);
-          transform: translateY(-3px);
-        }
-
-        /* PHOTO BACKGROUND */
-        .why-bento__bg-wrap {
-          position: absolute;
-          inset: 0;
-          z-index: 0;
-          overflow: hidden;
-        }
-
-        .why-bento__bg-img {
+          max-width: 1680px;
+          margin: 0 auto;
+          padding: 10px clamp(12px, 2.5vw, 36px) 28px;
           width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center;
-          transition: transform 0.85s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease;
-          opacity: 0.1;
-          filter: saturate(110%) contrast(105%);
+          box-sizing: border-box;
+          background: var(--paper);
         }
 
-        .why-bento__card:hover .why-bento__bg-img {
-          transform: scale(1.06);
-          opacity: 0.18;
-        }
-
-        .why-bento__shade {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            180deg,
-            rgba(255, 255, 255, 0.5) 0%,
-            rgba(255, 255, 255, 0.8) 45%,
-            rgba(248, 247, 244, 0.98) 100%
-          );
-        }
-
-        .why-bento__radial-glow {
-          position: absolute;
-          top: -25%;
-          left: 20%;
-          width: 240px;
-          height: 240px;
-          background: radial-gradient(circle, rgba(0, 0, 255, 0.08) 0%, transparent 70%);
-          pointer-events: none;
-          opacity: 0;
-          transition: opacity 0.45s ease;
-        }
-
-        .why-bento__card:hover .why-bento__radial-glow {
-          opacity: 1;
-        }
-
-        /* TOP EDGE SPOTLIGHT SHEEN */
-        .why-bento__top-sheen {
-          position: absolute;
-          top: 0;
-          left: 8%;
-          right: 8%;
-          height: 1.5px;
-          background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.08) 50%, transparent 100%);
-          z-index: 3;
-          pointer-events: none;
-        }
-
-        /* CONTENT WRAPPER */
-        .why-bento__content {
+        /* Match hero-card dimensions identically */
+        .scroll-story {
           position: relative;
-          z-index: 2;
-          padding: 30px 28px;
+          width: 100%;
+          min-height: clamp(520px, 72vh, 840px);
+          max-height: calc(100vh - 96px);
+          height: auto;
+          overflow: hidden;
+          background: #0d0d0f;
+          color: #fff;
+          border-radius: clamp(20px, 2.2vw, 32px);
+          border: 1px solid rgba(16, 16, 16, 0.08);
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+          box-sizing: border-box;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          height: 100%;
-          min-height: 320px;
-          box-sizing: border-box;
-          gap: 40px;
         }
 
-        .why-bento__card-top {
+        @media (max-width: 700px) {
+          .scroll-story {
+            height: clamp(540px, calc(100vh - 84px), 740px);
+            min-height: 540px;
+            max-height: calc(100vh - 84px);
+          }
+        }
+
+        /* FULL-BLEED MEDIA WITH DIRECTIONAL SWIPE */
+        .scroll-story__media {
+          position: absolute;
+          inset: 0;
+        }
+
+        .scroll-story__media--down {
+          animation: swipeUpMedia .55s cubic-bezier(.16,1,.3,1) both;
+        }
+
+        .scroll-story__media--up {
+          animation: swipeDownMedia .55s cubic-bezier(.16,1,.3,1) both;
+        }
+
+        @keyframes swipeUpMedia {
+          from { opacity: 0; transform: translateY(24px) scale(1.02); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes swipeDownMedia {
+          from { opacity: 0; transform: translateY(-24px) scale(1.02); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .scroll-story__img {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          filter: saturate(106%) contrast(104%);
+          user-select: none;
+          -webkit-user-drag: none;
+        }
+
+        .scroll-story__img--desktop { display: block; }
+        .scroll-story__img--mobile { display: none; }
+
+
+        /* STORY CONTENT DIRECTLY OVER BACKGROUND WITH DIRECTIONAL SWIPE */
+        .scroll-story__content {
+          position: absolute;
+          left: clamp(28px, 4.5vw, 72px);
+          bottom: clamp(32px, 5vh, 64px);
+          z-index: 3;
+          max-width: 440px;
+          pointer-events: none;
+        }
+
+        .scroll-story__content--down {
+          animation: swipeUpText .48s cubic-bezier(.16,1,.3,1) both;
+        }
+
+        .scroll-story__content--up {
+          animation: swipeDownText .48s cubic-bezier(.16,1,.3,1) both;
+        }
+
+        @keyframes swipeUpText {
+          from { opacity: 0; transform: translateY(32px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes swipeDownText {
+          from { opacity: 0; transform: translateY(-32px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .scroll-story__head {
           display: flex;
           align-items: center;
-          justify-content: flex-end;
+          gap: 12px;
+          margin-bottom: 8px;
         }
 
-        .why-bento__num {
+        .scroll-story__tag {
           font-family: "Manrope", Arial, sans-serif;
-          font-size: 11px;
+          font-size: 8.5px;
           font-weight: 800;
-          letter-spacing: 0.14em;
-          color: rgba(0, 0, 0, 0.2);
-        }
-
-        /* BOTTOM TEXT */
-        .why-bento__card-bottom {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .why-bento__kicker {
-          font-family: "Manrope", Arial, sans-serif;
-          font-size: 9.5px;
-          font-weight: 800;
-          letter-spacing: 0.14em;
-          color: #0000ff;
+          letter-spacing: .16em;
+          color: #93c5fd;
           text-transform: uppercase;
+          text-shadow: 0 1px 4px rgba(0,0,0,.9);
         }
 
-        .why-bento__card-title {
-          font-family: "DM Sans", Arial, sans-serif;
-          font-size: clamp(19px, 1.8vw, 24px);
+        .scroll-story__num {
+          font-family: "Manrope", Arial, sans-serif;
+          font-size: 9px;
           font-weight: 700;
-          letter-spacing: -.06em;
-          line-height: 1.15;
-          color: #111111;
-          margin: 0;
+          letter-spacing: .08em;
+          color: rgba(255,255,255,.55);
+          text-shadow: 0 1px 4px rgba(0,0,0,.9);
         }
 
-        .why-bento__card-title em {
+        .scroll-story__title {
+          font-family: "DM Sans", Arial, sans-serif;
+          font-size: clamp(18px, 1.9vw, 24px);
+          font-weight: 700;
+          letter-spacing: -.05em;
+          line-height: 1.15;
+          color: #fff;
+          margin: 0 0 8px;
+          text-shadow: 0 2px 8px rgba(0,0,0,.85), 0 1px 3px rgba(0,0,0,.95);
+        }
+
+        .scroll-story__title em {
           font-family: "Instrument Serif", Georgia, serif;
           font-style: italic;
           font-weight: 400;
-          color: #0000ff;
+          color: #93c5fd;
+          letter-spacing: -.01em;
         }
 
-        .why-bento__card-desc {
+        .scroll-story__lead {
           font-family: "DM Sans", Arial, sans-serif;
-          font-size: 13.5px;
-          line-height: 1.58;
-          color: #6e6d68;
+          font-size: 12.5px;
+          line-height: 1.5;
+          color: rgba(255,255,255,.92);
           margin: 0;
-          max-width: 540px;
+          font-weight: 500;
+          text-shadow: 0 1px 5px rgba(0,0,0,.85);
         }
 
-        @media (max-width: 800px) {
-          .why-bento-section {
-            padding: 85px 0 70px;
+        /* MOBILE ADAPTATION */
+        @media (max-width: 900px) {
+          .scroll-story__img--desktop { display: none; }
+          .scroll-story__img--mobile { display: block; object-position: center top; }
+
+          .scroll-story__content {
+            left: 18px;
+            right: 18px;
+            bottom: 22px;
+            max-width: none;
           }
-          .why-bento__top {
-            grid-template-columns: 1fr;
-            gap: 20px;
-            margin-bottom: 32px;
-          }
-          .why-bento__card {
-            min-height: 280px;
-          }
-          .why-bento__content {
-            padding: 22px 20px;
-            min-height: 280px;
-            gap: 24px;
-          }
+
+          .scroll-story__title { font-size: 18px; line-height: 1.2; margin: 0 0 6px; }
+          .scroll-story__lead { font-size: 12px; line-height: 1.45; }
         }
       `}</style>
     </section>

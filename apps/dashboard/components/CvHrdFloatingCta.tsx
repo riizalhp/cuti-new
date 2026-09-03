@@ -11,6 +11,9 @@ interface CvHrdFloatingCtaProps {
 export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
   onSelectService,
 }) => {
+  // Hidden for now per user request
+  const HIDDEN = true;
+
   // State System: 'default' (compact card), 'collapsed' (pill), 'hover' (expanded), 'hidden' (modal open)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -35,17 +38,13 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
 
   // Helper to handle user editing/scrolling activity
   const handleUserActivity = useCallback(() => {
-    // Immediately collapse CTA on edit/type/scroll
     setIsCollapsed(true);
 
-    // Clear existing idle timer
     if (idleTimerRef.current) {
       clearTimeout(idleTimerRef.current);
     }
 
-    // Set idle timer for 6 seconds of silence
     idleTimerRef.current = setTimeout(() => {
-      // Check if input/textarea is currently focused
       const activeEl = document.activeElement;
       const isEditingInput =
         activeEl &&
@@ -54,7 +53,6 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
           activeEl.tagName === 'SELECT' ||
           activeEl.getAttribute('contenteditable') === 'true');
 
-      // If user is not currently focusing an input and modal was not dismissed in this session, return to default compact card
       try {
         const dismissed = sessionStorage.getItem('cuti_cv_hrd_modal_dismissed') === 'true';
         if (!dismissed && !isEditingInput) {
@@ -68,7 +66,6 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
     }, 6000);
   }, []);
 
-  // Set up event listeners for input, keydown, focus, scroll
   useEffect(() => {
     const events = ['input', 'keydown', 'focusin', 'scroll', 'touchmove'];
 
@@ -90,7 +87,6 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
     };
   }, [handleUserActivity]);
 
-  // Handle Mobile Virtual Keyboard detection
   useEffect(() => {
     const handleFocusIn = (e: FocusEvent) => {
       const target = e.target as HTMLElement | null;
@@ -151,9 +147,8 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
     }
   };
 
-  // Determine current visual state
-  // Modal open -> Hidden
-  // Mobile keyboard active -> Hidden or highly minimal collapsed
+  if (HIDDEN) return null;
+
   const isHidden = isModalOpen || isKeyboardOpen;
   const showCompactCard = (!isCollapsed || isHovered) && !isSessionDismissed;
 
@@ -169,7 +164,6 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
 
   return (
     <>
-      {/* Floating CTA Container */}
       <div
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -178,7 +172,6 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
           minWidth: 'fit-content',
         }}
       >
-        {/* COMPACT CARD STATE (Default or Hover Expanded) */}
         {showCompactCard ? (
           <div className="relative w-[200px] md:w-[220px] p-3.5 rounded-[10px] bg-slate-900/95 dark:bg-slate-900/95 text-white border border-slate-800 shadow-xl shadow-slate-950/25 backdrop-blur-md transition-all duration-200 ease-out animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between gap-1 mb-1">
@@ -223,14 +216,12 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
             </button>
           </div>
         ) : (
-          /* COLLAPSED PILL STATE WITH CIRCULAR AVATAR IN CORNER */
           <button
             type="button"
             onClick={handleOpenModal}
             className="group relative flex items-center gap-2 pl-1.5 pr-4 py-1.5 rounded-[10px] bg-slate-900/95 dark:bg-slate-900/95 text-white border border-slate-800 hover:border-[#1738D1]/50 shadow-lg shadow-slate-950/20 backdrop-blur-md text-xs font-bold transition-all duration-200 ease-out cursor-pointer active:scale-95"
             title="Klik untuk info layanan CV by HRD"
           >
-            {/* Gambar Lingkaran Avatar HRD */}
             <div className="relative w-8 h-8 rounded-full border-2 border-[#1738D1] overflow-hidden shrink-0 group-hover:scale-105 transition-transform shadow-xs">
               <img
                 src="/images/mascot-1.webp"
@@ -245,7 +236,6 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
         )}
       </div>
 
-      {/* Modal Dialog */}
       <CvHrdModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}

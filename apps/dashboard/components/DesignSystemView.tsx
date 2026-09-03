@@ -45,7 +45,7 @@ export const DesignSystemView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-16 font-sans">
+    <div className="w-full space-y-8 pb-16 font-sans">
       {/* Page Header */}
       <div className="bg-white dark:bg-slate-900 rounded-[10px] p-6 lg:p-8 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
         <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-[#1738D1]/10 rounded-full blur-3xl pointer-events-none" />

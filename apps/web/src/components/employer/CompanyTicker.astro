@@ -1,10 +1,12 @@
 ---
 /**
  * CompanyTicker.astro
- * Ticker marquee logo perusahaan dalam 2 baris:
- * - Baris 1 (Atas): Bergerak ke KIRI
- * - Baris 2 (Bawah): Bergerak ke KANAN
- * Menggunakan 20 logo dari folder public/testimoni/ dengan loop mulus tanpa jeda.
+ * Section editorial dengan tema cerah / light paper (var(--paper))
+ * Headline:
+ * "Where future
+ * careers find their
+ * [ C ] starting point." (logo berdampingan dengan 'starting point.')
+ * Subtext dibawahnya: "Discover opportunities from 1,000+ companies."
  */
 
 interface CompanyLogo {
@@ -12,7 +14,7 @@ interface CompanyLogo {
   src: string;
 }
 
-const row1Companies: CompanyLogo[] = [
+const companies: CompanyLogo[] = [
   { name: 'Alfamart', src: '/testimoni/alfamart.webp' },
   { name: 'Astra International', src: '/testimoni/astra.webp' },
   { name: 'Bank Mandiri', src: '/testimoni/mandiri.webp' },
@@ -22,9 +24,6 @@ const row1Companies: CompanyLogo[] = [
   { name: 'Gojek', src: '/testimoni/gojek.webp' },
   { name: 'Indofood', src: '/testimoni/indofood.webp' },
   { name: 'Indomaret', src: '/testimoni/indomaret.webp' },
-];
-
-const row2Companies: CompanyLogo[] = [
   { name: 'MR.DIY', src: '/testimoni/mrdiy.webp' },
   { name: 'Shopee', src: '/testimoni/shopee.webp' },
   { name: 'Sinar Mas', src: '/testimoni/sinarmas.webp' },
@@ -35,326 +34,206 @@ const row2Companies: CompanyLogo[] = [
   { name: 'Unilever', src: '/testimoni/unilever.webp' },
   { name: 'Wings Group', src: '/testimoni/wings.webp' },
 ];
-
-interface Props {
-  variant?: 'dark' | 'light';
-}
-
-const { variant = 'light' } = Astro.props;
 ---
 
-<section class:list={['company-ticker', `company-ticker--${variant}`]} aria-label="Companies where users prepare their next career move">
-  <div class="company-ticker__header">
-    <div class="company-ticker__title-wrapper">
-      <span class="company-ticker__dot"></span>
-      <p class="company-ticker__title">Used to prepare their next steps at</p>
-      <span class="company-ticker__dot"></span>
-    </div>
-  </div>
+<section class="company-ticker company-ticker--light" aria-label="Where future careers find their starting point">
+  <div class="company-ticker__container">
+    <div class="company-ticker__content">
+      <h2 class="company-ticker__headline">
+        Where future<br />
+        careers find their<br />
+        <span class="company-ticker__last-line">
+          <span class="company-ticker__logo-slot" id="ticker-logo-rotator" aria-live="polite">
+            {companies.map((company, index) => (
+              <span
+                class:list={['company-ticker__logo-item', { 'is-active': index === 0 }]}
+                data-index={index}
+                title={company.name}
+                aria-label={company.name}
+              >
+                <img
+                  src={company.src}
+                  alt={company.name}
+                  class="company-logo-img"
+                  loading={index === 0 ? "eager" : "lazy"}
+                />
+              </span>
+            ))}
+          </span>
+          <em>starting point.</em>
+        </span>
+      </h2>
 
-  <div class="company-ticker__sliders-container">
-    <!-- ROW 1: MOVES LEFT -->
-    <div class="company-ticker__slider" tabindex="0" role="region" aria-label="Company logos row 1">
-      <div class="company-ticker__track company-ticker__track--left">
-        <div class="company-ticker__group">
-          {row1Companies.map((company) => (
-            <div class="company-ticker__item" title={company.name} aria-label={company.name}>
-              <img src={company.src} alt={company.name} class="company-logo-img" loading="lazy" />
-            </div>
-          ))}
-        </div>
-        <div class="company-ticker__group" aria-hidden="true">
-          {row1Companies.map((company) => (
-            <div class="company-ticker__item" title={company.name} aria-label={company.name}>
-              <img src={company.src} alt={company.name} class="company-logo-img" loading="lazy" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-
-    <!-- ROW 2: MOVES RIGHT -->
-    <div class="company-ticker__slider" tabindex="0" role="region" aria-label="Company logos row 2">
-      <div class="company-ticker__track company-ticker__track--right">
-        <div class="company-ticker__group">
-          {row2Companies.map((company) => (
-            <div class="company-ticker__item" title={company.name} aria-label={company.name}>
-              <img src={company.src} alt={company.name} class="company-logo-img" loading="lazy" />
-            </div>
-          ))}
-        </div>
-        <div class="company-ticker__group" aria-hidden="true">
-          {row2Companies.map((company) => (
-            <div class="company-ticker__item" title={company.name} aria-label={company.name}>
-              <img src={company.src} alt={company.name} class="company-logo-img" loading="lazy" />
-            </div>
-          ))}
-        </div>
-      </div>
+      <p class="company-ticker__supporting">
+        Discover opportunities from 1,000+ companies.
+      </p>
     </div>
   </div>
 </section>
 
+<script is:inline>
+  function setupTickerRotator() {
+    const slot = document.getElementById('ticker-logo-rotator');
+    if (!slot) return;
+    const items = slot.querySelectorAll('.company-ticker__logo-item');
+    if (items.length <= 1) return;
+
+    if (window._tickerRotatorInterval) {
+      clearInterval(window._tickerRotatorInterval);
+    }
+
+    let current = 0;
+    // Transisi rileks: berganti setiap 3.8 detik
+    window._tickerRotatorInterval = setInterval(() => {
+      items[current].classList.remove('is-active');
+      current = (current + 1) % items.length;
+      items[current].classList.add('is-active');
+    }, 3800);
+  }
+
+  setupTickerRotator();
+  document.addEventListener('astro:page-load', setupTickerRotator);
+</script>
+
 <style>
   .company-ticker {
     width: 100% !important;
-    overflow: hidden !important;
+    background: var(--paper, #f4f3ee) !important;
+    color: var(--ink, #101114) !important;
+    padding: clamp(80px, 8vw, 110px) 0 !important;
     position: relative !important;
-    padding: 24px 0 10px !important;
+    border-top: 1px solid rgba(16, 17, 20, 0.08) !important;
+    border-bottom: 1px solid rgba(16, 17, 20, 0.08) !important;
     z-index: 5;
+    box-sizing: border-box;
+    overflow: hidden !important;
+  }
+
+  .company-ticker__container {
+    width: min(1380px, calc(100% - 64px));
+    margin: 0 auto;
     box-sizing: border-box;
   }
 
-  /* DARK VARIANT */
-  .company-ticker--dark {
-    background: transparent !important;
+  .company-ticker__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .company-ticker--dark .company-ticker__title {
-    color: rgba(255, 255, 255, 0.7) !important;
+  .company-ticker__headline {
+    font-family: "DM Sans", Arial, sans-serif;
+    font-size: clamp(2.6rem, 4.4vw, 4.4rem);
+    font-weight: 600;
+    letter-spacing: -.085em;
+    line-height: .96;
+    color: var(--ink, #101114);
+    margin: 0;
   }
 
-  .company-ticker--dark .company-ticker__dot {
-    background: #5078ff !important;
-    box-shadow: 0 0 8px rgba(80, 120, 255, 0.6);
+  .company-ticker__headline em {
+    font-family: "Instrument Serif", Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--blue, #1738D1);
   }
 
-  .company-ticker--dark .company-ticker__item img {
-    filter: grayscale(100%) brightness(1.2) opacity(0.48) !important;
+  .company-ticker__last-line {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(16px, 2.2vw, 32px);
+    vertical-align: middle;
+    flex-wrap: wrap;
+    margin-top: 6px;
   }
 
-  .company-ticker--dark .company-ticker__item:hover img {
-    filter: grayscale(0%) brightness(1) opacity(1) !important;
-  }
-
-  /* LIGHT VARIANT (Default) */
-  .company-ticker--light {
-    background: var(--paper) !important;
-  }
-
-  .company-ticker--light .company-ticker__title {
-    color: #6b6a65 !important;
-  }
-
-  .company-ticker--light .company-ticker__dot {
-    background: var(--blue, #1738D1) !important;
-    opacity: 0.75;
-  }
-
-  .company-ticker--light .company-ticker__item img {
-    filter: grayscale(100%) contrast(0.85) opacity(0.55) !important;
-  }
-
-  .company-ticker--light .company-ticker__item:hover img {
-    filter: grayscale(0%) contrast(1) opacity(1) !important;
-  }
-
-  /* HEADER */
-  .company-ticker__header {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    margin-bottom: 24px !important;
-    text-align: center !important;
-    width: 100% !important;
-  }
-
-  .company-ticker__title-wrapper {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 12px !important;
-  }
-
-  .company-ticker__dot {
-    display: inline-block !important;
-    width: 5px !important;
-    height: 5px !important;
-    border-radius: 999px !important;
-    flex-shrink: 0 !important;
-  }
-
-  .company-ticker__title {
-    font-family: "Inter Tight", "Inter", sans-serif !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.14em !important;
-    text-transform: uppercase !important;
-    margin: 0 !important;
-  }
-
-  /* SLIDERS CONTAINER (2 BARIS) */
-  .company-ticker__sliders-container {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 22px !important;
-    width: 100% !important;
-    overflow: hidden !important;
-  }
-
-  .company-ticker__slider {
-    width: 100% !important;
-    overflow: hidden !important;
-    position: relative !important;
-    display: flex !important;
-    flex-direction: row !important;
-    padding: 6px 0 !important;
-    background: transparent !important;
-  }
-
-  .company-ticker--light .company-ticker__slider::before {
-    content: "" !important;
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    bottom: 0 !important;
-    width: clamp(36px, 8vw, 120px) !important;
-    background: linear-gradient(90deg, var(--paper, #f4f3ee) 0%, transparent 100%) !important;
-    z-index: 3 !important;
-    pointer-events: none !important;
-  }
-
-  .company-ticker--light .company-ticker__slider::after {
-    content: "" !important;
-    position: absolute !important;
-    right: 0 !important;
-    top: 0 !important;
-    bottom: 0 !important;
-    width: clamp(36px, 8vw, 120px) !important;
-    background: linear-gradient(270deg, var(--paper, #f4f3ee) 0%, transparent 100%) !important;
-    z-index: 3 !important;
-    pointer-events: none !important;
-  }
-
-  .company-ticker__track {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    width: max-content !important;
-    will-change: transform;
-  }
-
-  .company-ticker__group {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-    gap: 52px !important;
-    padding-right: 52px !important;
-    flex-shrink: 0 !important;
-  }
-
-  /* Baris 1: jalan ke KIRI */
-  .company-ticker__track--left {
-    animation: ticker-slide-left 32s linear infinite !important;
-  }
-
-  /* Baris 2: jalan ke KANAN */
-  .company-ticker__track--right {
-    animation: ticker-slide-right 32s linear infinite !important;
-  }
-
-  /* Saat kursor diarahkan ke slider, gerakan dijeda agar nyaman dilihat */
-  .company-ticker__slider:hover .company-ticker__track {
-    animation-play-state: paused !important;
-  }
-
-  .company-ticker__item {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 170px !important;
-    height: 56px !important;
-    padding: 0 !important;
+  /* LOGO SLOT [ C ] - DISAMPING 'starting point.', NO CARD, FULL COLOR */
+  .company-ticker__logo-slot {
+    position: relative;
+    width: clamp(140px, 16vw, 220px);
+    height: clamp(44px, 5.2vw, 68px);
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    cursor: pointer !important;
-    user-select: none !important;
-    flex-shrink: 0 !important;
-    transition: transform 0.24s cubic-bezier(0.23, 1, 0.32, 1) !important;
+    padding: 0 !important;
+    flex-shrink: 0;
   }
 
-  .company-ticker__item img {
-    display: block !important;
-    max-height: 44px !important;
-    max-width: 145px !important;
-    width: auto !important;
-    height: auto !important;
-    object-fit: contain !important;
-    transition: filter 0.28s cubic-bezier(0.23, 1, 0.32, 1),
-                opacity 0.28s cubic-bezier(0.23, 1, 0.32, 1),
-                transform 0.28s cubic-bezier(0.23, 1, 0.32, 1) !important;
+  .company-ticker__logo-item {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+    /* Transisi lembut dan tidak terburu-buru (0.85s) */
+    transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.85s;
+    pointer-events: none;
   }
 
-  .company-ticker__item:hover {
-    transform: translateY(-2px) !important;
+  .company-ticker__logo-item.is-active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
   }
 
-  .company-ticker__item:hover img {
-    transform: scale(1.1) !important;
+  .company-ticker__logo-item img {
+    display: block;
+    max-height: clamp(38px, 4.8vw, 58px);
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    filter: none !important; /* ORIGINAL FULL COLOR - TIDAK DI-GRAYSCALE */
+    user-select: none;
   }
 
-  @keyframes ticker-slide-left {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(-50%);
-    }
+  /* SUBTEXT PERSIS DIBAWAH HEADLINE */
+  .company-ticker__supporting {
+    font-family: "DM Sans", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #686762;
+    margin: 26px 0 0;
+    max-width: 460px;
   }
 
-  @keyframes ticker-slide-right {
-    from {
-      transform: translateX(-50%);
-    }
-    to {
-      transform: translateX(0);
-    }
-  }
-
-  @media (max-width: 700px) {
+  @media (max-width: 900px) {
     .company-ticker {
-      padding: 16px 0 6px !important;
+      padding: 64px 0 54px !important;
     }
-    .company-ticker__header {
-      margin-bottom: 16px !important;
+    .company-ticker__container {
+      width: calc(100% - 40px);
     }
-    .company-ticker__title {
-      font-size: 10px !important;
-      letter-spacing: 0.1em !important;
+    .company-ticker__logo-slot {
+      height: 44px;
+      width: clamp(120px, 35vw, 170px);
     }
-    .company-ticker__sliders-container {
-      gap: 16px !important;
+    .company-ticker__logo-item img {
+      max-height: 36px;
     }
-    .company-ticker__group {
-      gap: 32px !important;
-      padding-right: 32px !important;
-    }
-    .company-ticker__item {
-      width: 130px !important;
-      height: 44px !important;
-    }
-    .company-ticker__item img {
-      max-height: 32px !important;
-      max-width: 105px !important;
-    }
-    .company-ticker__track--left {
-      animation-duration: 24s !important;
-    }
-    .company-ticker__track--right {
-      animation-duration: 24s !important;
+    .company-ticker__supporting {
+      font-size: 14px;
+      margin-top: 20px;
+      max-width: 100%;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .company-ticker__track {
-      animation: none !important;
-      overflow-x: auto !important;
-      scroll-snap-type: x mandatory !important;
-    }
-    .company-ticker__item {
-      scroll-snap-align: center !important;
+    .company-ticker__logo-item {
+      transition: none !important;
+      transform: none !important;
     }
   }
 </style>

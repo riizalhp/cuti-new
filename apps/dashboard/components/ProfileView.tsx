@@ -170,7 +170,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="w-full space-y-6">
       {/* Toast Notification */}
       {isSavedToast && (
         <div className="fixed bottom-6 right-6 z-50 p-4 rounded-[10px] bg-emerald-600 text-white shadow-xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300">
@@ -249,6 +249,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <span className="text-lg font-black text-amber-300">85% (Job Ready)</span>
             </div>
 
+            {/* Hidden for now: Lihat Fitur Pro (upgrade modal) */}
+            {/*
             {onOpenUpgradeModal && (
               <button
                 onClick={onOpenUpgradeModal}
@@ -258,6 +260,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 <span>Lihat Fitur Pro</span>
               </button>
             )}
+            */}
           </div>
         </div>
 
@@ -299,6 +302,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <span>Keamanan & Akun</span>
           </button>
 
+          {/* Hidden for now: Keanggotaan (premium membership tab) */}
+          {/*
           <button
             onClick={() => setActiveSubTab('langganan')}
             className={`px-4 py-2.5 rounded-[10px] transition flex items-center gap-2 ${
@@ -310,6 +315,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <CreditCard className="w-4 h-4" />
             <span>Keanggotaan</span>
           </button>
+          */}
 
           <button
             onClick={() => setActiveSubTab('pengaturan')}

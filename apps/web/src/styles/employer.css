@@ -6,8 +6,8 @@ html { scroll-behavior:smooth; background:var(--paper); }
 body { margin:0; background:var(--paper); color:var(--ink); font-family:"Manrope", Arial, sans-serif; font-weight:500; overflow-x:hidden; }
 button, a { font:inherit; } button { cursor:pointer; } button:focus-visible, a:focus-visible { outline:2px solid var(--blue); outline-offset:4px; }
 
-.site-shell { overflow-x:clip; position:relative; background:#101010; }
-main, .site-main { position:relative; z-index:10; background:transparent; width:100%; }
+.site-shell { overflow-x:clip; position:relative; background:var(--paper); }
+main, .site-main { position:relative; z-index:10; background:var(--paper); width:100%; }
 .editorial-frame { width:min(1380px,calc(100% - 64px)); margin:0 auto; }
 .section-space { position:relative; }
 .section-label { align-items:center; color:#75746e; display:flex; font-size:10px; font-weight:800; gap:9px; letter-spacing:.145em; line-height:1; text-transform:uppercase; }
@@ -297,11 +297,18 @@ h2 { font-size:clamp(3.45rem,6vw,6.8rem); font-weight:600; letter-spacing:-.07em
   position: fixed !important;
   right: auto !important;
   top: 16px !important;
-  transform: translateX(-50%) !important;
+  transform: translate(-50%, 0) !important;
   width: min(880px, calc(100% - 36px)) !important;
   z-index: 999 !important;
   overflow: hidden;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: transform 0.68s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.58s cubic-bezier(0.22, 1, 0.36, 1), background 0.35s ease !important;
+}
+
+.site-header--solid.site-header--hidden {
+  transform: translate(-50%, -150%) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: transform 0.55s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.45s ease-in !important;
 }
 
 .site-header--solid::before {
@@ -658,7 +665,7 @@ h2 { font-size:clamp(3.45rem,6vw,6.8rem); font-weight:600; letter-spacing:-.07em
   .statement__body { gap:28px; margin:53px 0 0; }
   .statement__body p { font-size:14px; }
   .statement__tick { bottom:-49px; }
-  .career-observation { min-height:460px; padding:76px 0 54px; border-bottom-left-radius:20px; border-bottom-right-radius:20px; }
+  .career-observation { min-height:460px; padding:76px 0 54px; border-radius:0; }
   .career-observation__copy>p { font-size:clamp(2rem,7.5vw,2.8rem); margin-bottom:16px; }
   .career-observation__footer-label { margin-top:36px; }
   .builder { padding:90px 0 66px; }
@@ -743,7 +750,7 @@ h2 { font-size:clamp(3.45rem,6vw,6.8rem); font-weight:600; letter-spacing:-.07em
 /* Employr motion system: one deliberate horizontal chapter, quiet depth, and a navigation capsule that settles into the story. */
 .pivot__photo img,.final-cta>img { scale:1.08; }
 .job-card--route { background:#dad8d0; color:var(--ink); }.job-card--route:before { border:1px solid var(--blue); content:""; height:68%; left:24px; position:absolute; top:24px; width:68%; }.job-card--route .job-card__match b { color:var(--blue); }
-.career-observation { background:#0a0a0a; color:#fff; overflow:hidden; position:relative; min-height:560px; display:flex; align-items:center; padding:120px 0 90px; border-bottom-left-radius:36px; border-bottom-right-radius:36px; box-shadow:0 35px 80px -10px rgba(0,0,0,.95); z-index:10; }.career-observation__bg { position:absolute; inset:0; width:100%; height:100%; overflow:hidden; z-index:1; }.career-observation__video { position:absolute !important; inset:0 !important; width:100% !important; height:100% !important; object-fit:cover !important; object-position:center !important; z-index:1; display:block !important; }.career-observation__wash { position:absolute; inset:0; background:linear-gradient(90deg,rgba(8,8,8,.88) 0%,rgba(8,8,8,.65) 45%,rgba(8,8,8,.25) 85%,rgba(8,8,8,.55) 100%),linear-gradient(180deg,rgba(8,8,8,.4) 0%,transparent 40%,rgba(8,8,8,.6) 100%); z-index:2; pointer-events:none; }.career-observation__frame { position:relative; z-index:3; width:min(1380px,calc(100% - 64px)); margin:0 auto; padding:0 36px; display:flex; flex-direction:column; justify-content:space-between; min-height:360px; }.career-observation__copy { display:flex; flex-direction:column; max-width:720px; margin-left:clamp(16px,4vw,64px); }.career-observation__wordmark { align-items:center; color:#fff; display:flex; font-family:"DM Sans",Arial,sans-serif; font-size:17px; font-weight:800; gap:9px; letter-spacing:-.1em; margin-bottom:34px; }.career-observation__wordmark span { color:#a5a5a0; font-family:"Manrope",Arial,sans-serif; font-size:10px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; margin-left:0; }.career-observation__copy>p { font-family:"DM Sans",Arial,sans-serif; font-size:clamp(2.4rem,4.4vw,4.6rem); font-weight:600; letter-spacing:-.085em; line-height:.96; color:#fff; margin:0 0 24px 0; text-shadow:0 2px 24px rgba(0,0,0,.6); }.career-observation__copy>small { color:#d1d1cc; font-size:14px; line-height:1.64; max-width:460px; text-shadow:0 2px 14px rgba(0,0,0,.7); }.career-observation__footer-label { align-items:center; display:flex; font-size:9px; font-weight:800; justify-content:space-between; letter-spacing:.14em; margin-top:60px; margin-left:clamp(16px,4vw,64px); color:#a5a5a0; border-top:1px solid rgba(255,255,255,.15); padding-top:18px; }.career-observation__footer-label b { color:#fff; font-size:10px; }
+.career-observation { background:#0a0a0a; color:#fff; overflow:hidden; position:relative; min-height:560px; display:flex; align-items:center; padding:120px 0 90px; border-radius:0; box-shadow:0 35px 80px -10px rgba(0,0,0,.95); z-index:10; }.career-observation__bg { position:absolute; inset:0; width:100%; height:100%; overflow:hidden; z-index:1; }.career-observation__video { position:absolute !important; inset:0 !important; width:100% !important; height:100% !important; object-fit:cover !important; object-position:center !important; z-index:1; display:block !important; }.career-observation__wash { position:absolute; inset:0; background:linear-gradient(90deg,rgba(8,8,8,.88) 0%,rgba(8,8,8,.65) 45%,rgba(8,8,8,.25) 85%,rgba(8,8,8,.55) 100%),linear-gradient(180deg,rgba(8,8,8,.4) 0%,transparent 40%,rgba(8,8,8,.6) 100%); z-index:2; pointer-events:none; }.career-observation__frame { position:relative; z-index:3; width:min(1380px,calc(100% - 64px)); margin:0 auto; padding:0 36px; display:flex; flex-direction:column; justify-content:space-between; min-height:360px; }.career-observation__copy { display:flex; flex-direction:column; max-width:720px; margin-left:clamp(16px,4vw,64px); }.career-observation__wordmark { align-items:center; color:#fff; display:flex; font-family:"DM Sans",Arial,sans-serif; font-size:17px; font-weight:800; gap:9px; letter-spacing:-.1em; margin-bottom:34px; }.career-observation__wordmark span { color:#a5a5a0; font-family:"Manrope",Arial,sans-serif; font-size:10px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; margin-left:0; }.career-observation__copy>p { font-family:"DM Sans",Arial,sans-serif; font-size:clamp(2.4rem,4.4vw,4.6rem); font-weight:600; letter-spacing:-.085em; line-height:.96; color:#fff; margin:0 0 24px 0; text-shadow:0 2px 24px rgba(0,0,0,.6); }.career-observation__copy>small { color:#d1d1cc; font-size:14px; line-height:1.64; max-width:460px; text-shadow:0 2px 14px rgba(0,0,0,.7); }.career-observation__footer-label { align-items:center; display:flex; font-size:9px; font-weight:800; justify-content:space-between; letter-spacing:.14em; margin-top:60px; margin-left:clamp(16px,4vw,64px); color:#a5a5a0; border-top:1px solid rgba(255,255,255,.15); padding-top:18px; }.career-observation__footer-label b { color:#fff; font-size:10px; }
 
 /* Employr value narrative: a dark editorial proof chapter followed by an intentionally empty, authentic-story space. */
 /* Employr value narrative: light editorial proof chapter */
@@ -927,7 +934,7 @@ h2 { font-size:clamp(3.45rem,6vw,6.8rem); font-weight:600; letter-spacing:-.07em
 
 /* Cinematic Surrealism refinement: quiet image metaphors and a breathing editorial type rhythm. */
 .hero h1 { font-size:clamp(4.25rem,7.7vw,8.2rem); letter-spacing:-.082em; line-height:.89; }.hero__image { object-position:70% center; }.career-observation__image img { object-position:right center; }.pivot__photo img { object-position:left center; }.pricing__scene>img { object-position:center 55%; }.final-cta>img { object-position:center 54%; }.builder h2 em,.adapt h2 em,.pricing h2 em { color:var(--ink); }.why-employer:after { background:center / contain no-repeat url("/route-mark.svg"); content:""; height:310px; opacity:.12; pointer-events:none; position:absolute; right:5%; top:50%; transform:translateY(-50%) rotate(90deg); width:310px; }.why-employer .editorial-frame { position:relative; z-index:1; }.pricing-card:first-child { margin-top:38px; }.pricing-card:last-child { margin-top:74px; }
-@media (max-width:700px) { .hero__image { object-position:50% center; }.career-observation { border-bottom-left-radius:20px; border-bottom-right-radius:20px; }.career-observation__image img { object-position:62% center; }.pivot__photo img { object-position:33% center; }.pricing__scene>img { object-position:center; }.final-cta>img { object-position:45% center; }.why-employer:after { display:none; }.pricing-card:first-child,.pricing-card:last-child { margin-top:0; } }
+@media (max-width:700px) { .hero__image { object-position:50% center; }.career-observation { border-radius:0; }.career-observation__image img { object-position:62% center; }.pivot__photo img { object-position:33% center; }.pricing__scene>img { object-position:center; }.final-cta>img { object-position:45% center; }.why-employer:after { display:none; }.pricing-card:first-child,.pricing-card:last-child { margin-top:0; } }
 
 /* Cinematic Surrealism image treatment: grounded faces and tactile surfaces meet one quiet impossible metaphor per frame. */
 .hero__image { object-position:70% center; }.career-observation__image img { object-position:right center; }.pivot__photo img { object-position:left center; }.pricing__scene>img { object-position:center 55%; }.final-cta>img { object-position:center 54%; }

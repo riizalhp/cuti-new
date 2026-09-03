@@ -28,6 +28,7 @@ import {
 import { VisitorDetailDrawer } from "./VisitorDetailDrawer"
 import { LiveVisitorsTab } from "./LiveVisitorsTab"
 import { AnalyticsTab } from "./AnalyticsTab"
+import { getDomainInfo, getTrafficSourceInfo } from "@/lib/visitor-helpers"
 
 interface VisitorItem {
   id: string
@@ -35,6 +36,8 @@ interface VisitorItem {
   isOnline: boolean
   currentPage: string
   currentTitle: string
+  domain?: string
+  hostname?: string
   totalVisits: number
   totalPageviews: number
   totalDurationSec: number
@@ -67,6 +70,7 @@ export default function VisitorManagementPage() {
 
   // Filters & Pagination
   const [search, setSearch] = useState("")
+  const [domainFilter, setDomainFilter] = useState("all") // all, employr.id, app.employr.id, loker.employr.id
   const [statusFilter, setStatusFilter] = useState("all") // all, online, offline
   const [userFilter, setUserFilter] = useState("all") // all, linked, anonymous
   const [deviceFilter, setDeviceFilter] = useState("all") // all, desktop, mobile, tablet
@@ -83,6 +87,7 @@ export default function VisitorManagementPage() {
       params.set("page", String(page))
       params.set("limit", "15")
       if (search.trim()) params.set("search", search.trim())
+      if (domainFilter !== "all") params.set("domain", domainFilter)
       if (statusFilter !== "all") params.set("status", statusFilter)
       if (userFilter !== "all") params.set("user", userFilter)
       if (deviceFilter !== "all") params.set("device", deviceFilter)
@@ -107,7 +112,7 @@ export default function VisitorManagementPage() {
     if (activeTab === "directory") {
       fetchVisitors()
     }
-  }, [activeTab, page, statusFilter, userFilter, deviceFilter, sourceFilter, dateRangeFilter])
+  }, [activeTab, page, domainFilter, statusFilter, userFilter, deviceFilter, sourceFilter, dateRangeFilter])
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -242,6 +247,24 @@ export default function VisitorManagementPage() {
                 Filter:
               </div>
 
+              {/* Domain / Subdomain Filter */}
+              <select
+                value={domainFilter}
+                onChange={(e) => {
+                  setDomainFilter(e.target.value)
+                  setPage(1)
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/60 text-xs text-orange-900 dark:text-orange-200 font-bold focus:outline-none"
+              >
+                <option value="all">🌐 Semua Domain</option>
+                <option value="employr.id">🏠 employr.id (Landing)</option>
+                <option value="app.employr.id">💼 app.employr.id (Dashboard)</option>
+                <option value="loker.employr.id">🎯 loker.employr.id (Portal)</option>
+                <option value="learning.employr.id">📚 learning.employr.id</option>
+                <option value="faq.employr.id">❓ faq.employr.id</option>
+                <option value="localhost">💻 Localhost (Dev)</option>
+              </select>
+
               {/* Status Filter */}
               <select
                 value={statusFilter}
@@ -328,6 +351,7 @@ export default function VisitorManagementPage() {
                     <th className="p-4">Visitor ID / Status</th>
                     <th className="p-4">Akun Terhubung</th>
                     <th className="p-4">Halaman Terakhir</th>
+                    <th className="p-4">Domain</th>
                     <th className="p-4">Perangkat / OS</th>
                     <th className="p-4">Sumber Traffic</th>
                     <th className="p-4 text-center">Sesi / Views</th>
@@ -338,14 +362,14 @@ export default function VisitorManagementPage() {
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
                   {loading ? (
                     <tr>
-                      <td colSpan={8} className="py-16 text-center text-slate-400">
+                      <td colSpan={9} className="py-16 text-center text-slate-400">
                         <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
                         Memuat data pengunjung...
                       </td>
                     </tr>
                   ) : visitors.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-16 text-center text-slate-400">
+                      <td colSpan={9} className="py-16 text-center text-slate-400">
                         Tidak ada data visitor yang cocok dengan kriteria pencarian.
                       </td>
                     </tr>
@@ -407,6 +431,21 @@ export default function VisitorManagementPage() {
                           </span>
                         </td>
 
+                        {/* Domain Badge */}
+                        <td className="p-4">
+                          {(() => {
+                            const domainMeta = getDomainInfo(v.domain || v.hostname)
+                            return (
+                              <span
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold border ${domainMeta.badgeBg} ${domainMeta.badgeText} ${domainMeta.badgeBorder} max-w-[130px]`}
+                              >
+                                {domainMeta.icon}
+                                <span className="truncate">{domainMeta.label}</span>
+                              </span>
+                            )
+                          })()}
+                        </td>
+
                         {/* Device / OS */}
                         <td className="p-4">
                           <div className="flex items-center gap-1.5">
@@ -420,9 +459,18 @@ export default function VisitorManagementPage() {
 
                         {/* Traffic Source */}
                         <td className="p-4">
-                          <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium text-[11px] border border-slate-200 dark:border-slate-700 inline-block truncate max-w-[120px]">
-                            {v.trafficSource}
-                          </span>
+                          {(() => {
+                            const tsMeta = getTrafficSourceInfo(v.trafficSource)
+                            return (
+                              <span
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border ${tsMeta.badgeBg} ${tsMeta.badgeText} ${tsMeta.badgeBorder} max-w-[140px]`}
+                                title={v.trafficSource}
+                              >
+                                {tsMeta.icon}
+                                <span className="truncate">{tsMeta.label}</span>
+                              </span>
+                            )
+                          })()}
                         </td>
 
                         {/* Sessions & Views */}

@@ -21,6 +21,21 @@ export interface TrafficSourceInfo {
   utm_term?: string;
 }
 
+export const APP_DOMAIN_LABELS: Record<string, string> = {
+  'employr.id': 'Landing Page',
+  'www.employr.id': 'Landing Page',
+  'app.employr.id': 'User Dashboard',
+  'loker.employr.id': 'Portal Loker',
+  'learning.employr.id': 'Learning',
+  'faq.employr.id': 'FAQ',
+  'masterdata.employr.id': 'Admin Panel',
+  'localhost': 'Local Development',
+};
+
+export function getAppDomainLabel(hostname: string): string {
+  return APP_DOMAIN_LABELS[hostname] || hostname;
+}
+
 export interface TrackingPayload {
   action: 'page_view' | 'heartbeat' | 'activity' | 'link_user';
   visitor_id: string;
@@ -29,6 +44,8 @@ export interface TrackingPayload {
   url: string;
   path: string;
   title: string;
+  hostname?: string;
+  domain?: string;
   device?: VisitorDeviceInfo;
   traffic?: TrafficSourceInfo;
   activity_type?: string;
@@ -170,28 +187,32 @@ export function parseTrafficSource(): TrafficSourceInfo {
       const host = refUrl.hostname.toLowerCase();
       const currentHost = window.location.hostname.toLowerCase();
 
-      if (host === currentHost || host.endsWith('.' + currentHost)) {
+      if (host === currentHost || host.endsWith('.' + currentHost) || (currentHost.includes('employr.id') && host.includes('employr.id'))) {
         traffic_source = 'Internal Navigation';
       } else if (host.includes('google.')) {
         traffic_source = 'Google Organic';
-      } else if (host.includes('bing.') || host.includes('yahoo.') || host.includes('duckduckgo.')) {
+      } else if (host.includes('bing.') || host.includes('yahoo.') || host.includes('duckduckgo.') || host.includes('ecosia.')) {
         traffic_source = 'Search Engine';
-      } else if (host.includes('instagram.com')) {
+      } else if (host.includes('instagram.com') || host.includes('l.instagram.com')) {
         traffic_source = 'Instagram';
       } else if (host.includes('tiktok.com')) {
         traffic_source = 'TikTok';
-      } else if (host.includes('facebook.com') || host.includes('fb.com')) {
+      } else if (host.includes('threads.net')) {
+        traffic_source = 'Threads';
+      } else if (host.includes('facebook.com') || host.includes('fb.com') || host.includes('m.facebook.com')) {
         traffic_source = 'Facebook';
       } else if (host.includes('twitter.com') || host.includes('t.co') || host.includes('x.com')) {
         traffic_source = 'Twitter / X';
       } else if (host.includes('linkedin.com') || host.includes('lnkd.in')) {
         traffic_source = 'LinkedIn';
-      } else if (host.includes('whatsapp.com') || host.includes('wa.me')) {
+      } else if (host.includes('whatsapp.com') || host.includes('wa.me') || host.includes('api.whatsapp.com')) {
         traffic_source = 'WhatsApp';
-      } else if (host.includes('youtube.com')) {
+      } else if (host.includes('youtube.com') || host.includes('youtu.be')) {
         traffic_source = 'YouTube';
+      } else if (host.includes('telegram.org') || host.includes('t.me')) {
+        traffic_source = 'Telegram';
       } else {
-        traffic_source = `Referral (${host})`;
+        traffic_source = `Referral (${host.replace(/^www\./, '')})`;
       }
     } catch {
       traffic_source = 'Referral (External)';
@@ -247,6 +268,8 @@ export function trackPageView(customTitle?: string, userId?: string | null) {
   const { sessionId } = getOrCreateSessionId();
   const device = parseDeviceInfo();
   const traffic = parseTrafficSource();
+  const hostname = window.location.hostname;
+  const domain = hostname.replace(/:\d+$/, '');
 
   sendTrackingBeacon({
     action: 'page_view',
@@ -256,6 +279,8 @@ export function trackPageView(customTitle?: string, userId?: string | null) {
     url: window.location.href,
     path: window.location.pathname,
     title: customTitle || document.title || window.location.pathname,
+    hostname,
+    domain,
     device,
     traffic,
   });
@@ -265,6 +290,8 @@ export function trackHeartbeat(durationSec = 25, userId?: string | null) {
   if (typeof window === 'undefined') return;
   const visitor_id = getOrCreateVisitorId();
   const { sessionId } = getOrCreateSessionId();
+  const hostname = window.location.hostname;
+  const domain = hostname.replace(/:\d+$/, '');
 
   sendTrackingBeacon({
     action: 'heartbeat',
@@ -274,6 +301,8 @@ export function trackHeartbeat(durationSec = 25, userId?: string | null) {
     url: window.location.href,
     path: window.location.pathname,
     title: document.title || window.location.pathname,
+    hostname,
+    domain,
     duration_increment_sec: durationSec,
   });
 }
@@ -287,6 +316,8 @@ export function trackActivity(
   if (typeof window === 'undefined') return;
   const visitor_id = getOrCreateVisitorId();
   const { sessionId } = getOrCreateSessionId();
+  const hostname = window.location.hostname;
+  const domain = hostname.replace(/:\d+$/, '');
 
   sendTrackingBeacon({
     action: 'activity',
@@ -296,6 +327,8 @@ export function trackActivity(
     url: window.location.href,
     path: window.location.pathname,
     title: document.title || window.location.pathname,
+    hostname,
+    domain,
     activity_type,
     activity_name,
     metadata,
@@ -306,6 +339,8 @@ export function trackLinkUser(userId: string) {
   if (typeof window === 'undefined' || !userId) return;
   const visitor_id = getOrCreateVisitorId();
   const { sessionId } = getOrCreateSessionId();
+  const hostname = window.location.hostname;
+  const domain = hostname.replace(/:\d+$/, '');
 
   sendTrackingBeacon({
     action: 'link_user',
@@ -315,5 +350,7 @@ export function trackLinkUser(userId: string) {
     url: window.location.href,
     path: window.location.pathname,
     title: document.title || window.location.pathname,
+    hostname,
+    domain,
   });
 }

@@ -365,8 +365,8 @@ export const CvMatchAnalysisView: React.FC = () => {
   const compareJobsData = sortedJobs.filter((j) => compareJobIds.includes(j.id)).slice(0, 2);
 
   return (
-    <div className="space-y-5 w-full max-w-7xl mx-auto pb-12">
-      {/* 2. COMPACT HERO SECTION Standardized */}
+    <div className="space-y-5 w-full pb-12">
+      {/* 1. Header Standardized */}
       <PageHeader
         title="Perbandingan Lowongan Kerja"
         subtitle="Bandingkan kecocokan CV kamu dengan beberapa lowongan kerja sekaligus untuk menentukan prioritas terbaik."

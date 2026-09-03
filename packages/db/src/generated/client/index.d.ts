@@ -51703,6 +51703,8 @@ export namespace Prisma {
     city: string | null
     first_referrer: string | null
     traffic_source: string | null
+    domain: string | null
+    hostname: string | null
     utm_source: string | null
     utm_medium: string | null
     utm_campaign: string | null
@@ -51734,6 +51736,8 @@ export namespace Prisma {
     city: string | null
     first_referrer: string | null
     traffic_source: string | null
+    domain: string | null
+    hostname: string | null
     utm_source: string | null
     utm_medium: string | null
     utm_campaign: string | null
@@ -51765,6 +51769,8 @@ export namespace Prisma {
     city: number
     first_referrer: number
     traffic_source: number
+    domain: number
+    hostname: number
     utm_source: number
     utm_medium: number
     utm_campaign: number
@@ -51810,6 +51816,8 @@ export namespace Prisma {
     city?: true
     first_referrer?: true
     traffic_source?: true
+    domain?: true
+    hostname?: true
     utm_source?: true
     utm_medium?: true
     utm_campaign?: true
@@ -51841,6 +51849,8 @@ export namespace Prisma {
     city?: true
     first_referrer?: true
     traffic_source?: true
+    domain?: true
+    hostname?: true
     utm_source?: true
     utm_medium?: true
     utm_campaign?: true
@@ -51872,6 +51882,8 @@ export namespace Prisma {
     city?: true
     first_referrer?: true
     traffic_source?: true
+    domain?: true
+    hostname?: true
     utm_source?: true
     utm_medium?: true
     utm_campaign?: true
@@ -51990,6 +52002,8 @@ export namespace Prisma {
     city: string | null
     first_referrer: string | null
     traffic_source: string | null
+    domain: string | null
+    hostname: string | null
     utm_source: string | null
     utm_medium: string | null
     utm_campaign: string | null
@@ -52040,6 +52054,8 @@ export namespace Prisma {
     city?: boolean
     first_referrer?: boolean
     traffic_source?: boolean
+    domain?: boolean
+    hostname?: boolean
     utm_source?: boolean
     utm_medium?: boolean
     utm_campaign?: boolean
@@ -52076,6 +52092,8 @@ export namespace Prisma {
     city?: boolean
     first_referrer?: boolean
     traffic_source?: boolean
+    domain?: boolean
+    hostname?: boolean
     utm_source?: boolean
     utm_medium?: boolean
     utm_campaign?: boolean
@@ -52108,6 +52126,8 @@ export namespace Prisma {
     city?: boolean
     first_referrer?: boolean
     traffic_source?: boolean
+    domain?: boolean
+    hostname?: boolean
     utm_source?: boolean
     utm_medium?: boolean
     utm_campaign?: boolean
@@ -52140,6 +52160,8 @@ export namespace Prisma {
     city?: boolean
     first_referrer?: boolean
     traffic_source?: boolean
+    domain?: boolean
+    hostname?: boolean
     utm_source?: boolean
     utm_medium?: boolean
     utm_campaign?: boolean
@@ -52149,7 +52171,7 @@ export namespace Prisma {
     updated_at?: boolean
   }
 
-  export type VisitorOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "visitor_id" | "user_id" | "first_seen" | "last_seen" | "is_active" | "current_page" | "current_title" | "total_visits" | "total_pageviews" | "total_duration_sec" | "device_type" | "browser" | "browser_version" | "os" | "screen_resolution" | "ip_address" | "country" | "city" | "first_referrer" | "traffic_source" | "utm_source" | "utm_medium" | "utm_campaign" | "utm_content" | "utm_term" | "created_at" | "updated_at", ExtArgs["result"]["visitor"]>
+  export type VisitorOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "visitor_id" | "user_id" | "first_seen" | "last_seen" | "is_active" | "current_page" | "current_title" | "total_visits" | "total_pageviews" | "total_duration_sec" | "device_type" | "browser" | "browser_version" | "os" | "screen_resolution" | "ip_address" | "country" | "city" | "first_referrer" | "traffic_source" | "domain" | "hostname" | "utm_source" | "utm_medium" | "utm_campaign" | "utm_content" | "utm_term" | "created_at" | "updated_at", ExtArgs["result"]["visitor"]>
   export type VisitorInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     users?: boolean | Visitor$usersArgs<ExtArgs>
     sessions?: boolean | Visitor$sessionsArgs<ExtArgs>
@@ -52194,6 +52216,8 @@ export namespace Prisma {
       city: string | null
       first_referrer: string | null
       traffic_source: string | null
+      domain: string | null
+      hostname: string | null
       utm_source: string | null
       utm_medium: string | null
       utm_campaign: string | null
@@ -52649,6 +52673,8 @@ export namespace Prisma {
     readonly city: FieldRef<"Visitor", 'String'>
     readonly first_referrer: FieldRef<"Visitor", 'String'>
     readonly traffic_source: FieldRef<"Visitor", 'String'>
+    readonly domain: FieldRef<"Visitor", 'String'>
+    readonly hostname: FieldRef<"Visitor", 'String'>
     readonly utm_source: FieldRef<"Visitor", 'String'>
     readonly utm_medium: FieldRef<"Visitor", 'String'>
     readonly utm_campaign: FieldRef<"Visitor", 'String'>
@@ -53196,6 +53222,8 @@ export namespace Prisma {
     pageviews_count: number | null
     referrer: string | null
     traffic_source: string | null
+    domain: string | null
+    hostname: string | null
     utm_source: string | null
     utm_medium: string | null
     utm_campaign: string | null
@@ -53220,6 +53248,8 @@ export namespace Prisma {
     pageviews_count: number | null
     referrer: string | null
     traffic_source: string | null
+    domain: string | null
+    hostname: string | null
     utm_source: string | null
     utm_medium: string | null
     utm_campaign: string | null
@@ -53244,6 +53274,8 @@ export namespace Prisma {
     pageviews_count: number
     referrer: number
     traffic_source: number
+    domain: number
+    hostname: number
     utm_source: number
     utm_medium: number
     utm_campaign: number
@@ -53280,6 +53312,8 @@ export namespace Prisma {
     pageviews_count?: true
     referrer?: true
     traffic_source?: true
+    domain?: true
+    hostname?: true
     utm_source?: true
     utm_medium?: true
     utm_campaign?: true
@@ -53304,6 +53338,8 @@ export namespace Prisma {
     pageviews_count?: true
     referrer?: true
     traffic_source?: true
+    domain?: true
+    hostname?: true
     utm_source?: true
     utm_medium?: true
     utm_campaign?: true
@@ -53328,6 +53364,8 @@ export namespace Prisma {
     pageviews_count?: true
     referrer?: true
     traffic_source?: true
+    domain?: true
+    hostname?: true
     utm_source?: true
     utm_medium?: true
     utm_campaign?: true
@@ -53439,6 +53477,8 @@ export namespace Prisma {
     pageviews_count: number
     referrer: string | null
     traffic_source: string | null
+    domain: string | null
+    hostname: string | null
     utm_source: string | null
     utm_medium: string | null
     utm_campaign: string | null
@@ -53482,6 +53522,8 @@ export namespace Prisma {
     pageviews_count?: boolean
     referrer?: boolean
     traffic_source?: boolean
+    domain?: boolean
+    hostname?: boolean
     utm_source?: boolean
     utm_medium?: boolean
     utm_campaign?: boolean
@@ -53510,6 +53552,8 @@ export namespace Prisma {
     pageviews_count?: boolean
     referrer?: boolean
     traffic_source?: boolean
+    domain?: boolean
+    hostname?: boolean
     utm_source?: boolean
     utm_medium?: boolean
     utm_campaign?: boolean
@@ -53535,6 +53579,8 @@ export namespace Prisma {
     pageviews_count?: boolean
     referrer?: boolean
     traffic_source?: boolean
+    domain?: boolean
+    hostname?: boolean
     utm_source?: boolean
     utm_medium?: boolean
     utm_campaign?: boolean
@@ -53560,6 +53606,8 @@ export namespace Prisma {
     pageviews_count?: boolean
     referrer?: boolean
     traffic_source?: boolean
+    domain?: boolean
+    hostname?: boolean
     utm_source?: boolean
     utm_medium?: boolean
     utm_campaign?: boolean
@@ -53571,7 +53619,7 @@ export namespace Prisma {
     updated_at?: boolean
   }
 
-  export type VisitorSessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "session_id" | "visitor_id" | "user_id" | "started_at" | "last_active_at" | "duration_sec" | "entry_page" | "exit_page" | "pageviews_count" | "referrer" | "traffic_source" | "utm_source" | "utm_medium" | "utm_campaign" | "device_type" | "browser" | "os" | "ip_address" | "created_at" | "updated_at", ExtArgs["result"]["visitorSession"]>
+  export type VisitorSessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "session_id" | "visitor_id" | "user_id" | "started_at" | "last_active_at" | "duration_sec" | "entry_page" | "exit_page" | "pageviews_count" | "referrer" | "traffic_source" | "domain" | "hostname" | "utm_source" | "utm_medium" | "utm_campaign" | "device_type" | "browser" | "os" | "ip_address" | "created_at" | "updated_at", ExtArgs["result"]["visitorSession"]>
   export type VisitorSessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     visitor?: boolean | VisitorDefaultArgs<ExtArgs>
     page_views?: boolean | VisitorSession$page_viewsArgs<ExtArgs>
@@ -53605,6 +53653,8 @@ export namespace Prisma {
       pageviews_count: number
       referrer: string | null
       traffic_source: string | null
+      domain: string | null
+      hostname: string | null
       utm_source: string | null
       utm_medium: string | null
       utm_campaign: string | null
@@ -54052,6 +54102,8 @@ export namespace Prisma {
     readonly pageviews_count: FieldRef<"VisitorSession", 'Int'>
     readonly referrer: FieldRef<"VisitorSession", 'String'>
     readonly traffic_source: FieldRef<"VisitorSession", 'String'>
+    readonly domain: FieldRef<"VisitorSession", 'String'>
+    readonly hostname: FieldRef<"VisitorSession", 'String'>
     readonly utm_source: FieldRef<"VisitorSession", 'String'>
     readonly utm_medium: FieldRef<"VisitorSession", 'String'>
     readonly utm_campaign: FieldRef<"VisitorSession", 'String'>
@@ -54551,6 +54603,8 @@ export namespace Prisma {
     path: string | null
     title: string | null
     referrer: string | null
+    domain: string | null
+    hostname: string | null
     duration_sec: number | null
     created_at: Date | null
   }
@@ -54563,6 +54617,8 @@ export namespace Prisma {
     path: string | null
     title: string | null
     referrer: string | null
+    domain: string | null
+    hostname: string | null
     duration_sec: number | null
     created_at: Date | null
   }
@@ -54575,6 +54631,8 @@ export namespace Prisma {
     path: number
     title: number
     referrer: number
+    domain: number
+    hostname: number
     duration_sec: number
     created_at: number
     _all: number
@@ -54597,6 +54655,8 @@ export namespace Prisma {
     path?: true
     title?: true
     referrer?: true
+    domain?: true
+    hostname?: true
     duration_sec?: true
     created_at?: true
   }
@@ -54609,6 +54669,8 @@ export namespace Prisma {
     path?: true
     title?: true
     referrer?: true
+    domain?: true
+    hostname?: true
     duration_sec?: true
     created_at?: true
   }
@@ -54621,6 +54683,8 @@ export namespace Prisma {
     path?: true
     title?: true
     referrer?: true
+    domain?: true
+    hostname?: true
     duration_sec?: true
     created_at?: true
     _all?: true
@@ -54720,6 +54784,8 @@ export namespace Prisma {
     path: string
     title: string | null
     referrer: string | null
+    domain: string | null
+    hostname: string | null
     duration_sec: number
     created_at: Date
     _count: VisitorPageViewCountAggregateOutputType | null
@@ -54751,6 +54817,8 @@ export namespace Prisma {
     path?: boolean
     title?: boolean
     referrer?: boolean
+    domain?: boolean
+    hostname?: boolean
     duration_sec?: boolean
     created_at?: boolean
     visitor?: boolean | VisitorDefaultArgs<ExtArgs>
@@ -54765,6 +54833,8 @@ export namespace Prisma {
     path?: boolean
     title?: boolean
     referrer?: boolean
+    domain?: boolean
+    hostname?: boolean
     duration_sec?: boolean
     created_at?: boolean
     visitor?: boolean | VisitorDefaultArgs<ExtArgs>
@@ -54779,6 +54849,8 @@ export namespace Prisma {
     path?: boolean
     title?: boolean
     referrer?: boolean
+    domain?: boolean
+    hostname?: boolean
     duration_sec?: boolean
     created_at?: boolean
     visitor?: boolean | VisitorDefaultArgs<ExtArgs>
@@ -54793,11 +54865,13 @@ export namespace Prisma {
     path?: boolean
     title?: boolean
     referrer?: boolean
+    domain?: boolean
+    hostname?: boolean
     duration_sec?: boolean
     created_at?: boolean
   }
 
-  export type VisitorPageViewOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "visitor_id" | "session_id" | "url" | "path" | "title" | "referrer" | "duration_sec" | "created_at", ExtArgs["result"]["visitorPageView"]>
+  export type VisitorPageViewOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "visitor_id" | "session_id" | "url" | "path" | "title" | "referrer" | "domain" | "hostname" | "duration_sec" | "created_at", ExtArgs["result"]["visitorPageView"]>
   export type VisitorPageViewInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     visitor?: boolean | VisitorDefaultArgs<ExtArgs>
     session?: boolean | VisitorSessionDefaultArgs<ExtArgs>
@@ -54825,6 +54899,8 @@ export namespace Prisma {
       path: string
       title: string | null
       referrer: string | null
+      domain: string | null
+      hostname: string | null
       duration_sec: number
       created_at: Date
     }, ExtArgs["result"]["visitorPageView"]>
@@ -55259,6 +55335,8 @@ export namespace Prisma {
     readonly path: FieldRef<"VisitorPageView", 'String'>
     readonly title: FieldRef<"VisitorPageView", 'String'>
     readonly referrer: FieldRef<"VisitorPageView", 'String'>
+    readonly domain: FieldRef<"VisitorPageView", 'String'>
+    readonly hostname: FieldRef<"VisitorPageView", 'String'>
     readonly duration_sec: FieldRef<"VisitorPageView", 'Int'>
     readonly created_at: FieldRef<"VisitorPageView", 'DateTime'>
   }
@@ -57501,6 +57579,8 @@ export namespace Prisma {
     city: 'city',
     first_referrer: 'first_referrer',
     traffic_source: 'traffic_source',
+    domain: 'domain',
+    hostname: 'hostname',
     utm_source: 'utm_source',
     utm_medium: 'utm_medium',
     utm_campaign: 'utm_campaign',
@@ -57526,6 +57606,8 @@ export namespace Prisma {
     pageviews_count: 'pageviews_count',
     referrer: 'referrer',
     traffic_source: 'traffic_source',
+    domain: 'domain',
+    hostname: 'hostname',
     utm_source: 'utm_source',
     utm_medium: 'utm_medium',
     utm_campaign: 'utm_campaign',
@@ -57548,6 +57630,8 @@ export namespace Prisma {
     path: 'path',
     title: 'title',
     referrer: 'referrer',
+    domain: 'domain',
+    hostname: 'hostname',
     duration_sec: 'duration_sec',
     created_at: 'created_at'
   };
@@ -61430,6 +61514,8 @@ export namespace Prisma {
     city?: StringNullableFilter<"Visitor"> | string | null
     first_referrer?: StringNullableFilter<"Visitor"> | string | null
     traffic_source?: StringNullableFilter<"Visitor"> | string | null
+    domain?: StringNullableFilter<"Visitor"> | string | null
+    hostname?: StringNullableFilter<"Visitor"> | string | null
     utm_source?: StringNullableFilter<"Visitor"> | string | null
     utm_medium?: StringNullableFilter<"Visitor"> | string | null
     utm_campaign?: StringNullableFilter<"Visitor"> | string | null
@@ -61465,6 +61551,8 @@ export namespace Prisma {
     city?: SortOrderInput | SortOrder
     first_referrer?: SortOrderInput | SortOrder
     traffic_source?: SortOrderInput | SortOrder
+    domain?: SortOrderInput | SortOrder
+    hostname?: SortOrderInput | SortOrder
     utm_source?: SortOrderInput | SortOrder
     utm_medium?: SortOrderInput | SortOrder
     utm_campaign?: SortOrderInput | SortOrder
@@ -61503,6 +61591,8 @@ export namespace Prisma {
     city?: StringNullableFilter<"Visitor"> | string | null
     first_referrer?: StringNullableFilter<"Visitor"> | string | null
     traffic_source?: StringNullableFilter<"Visitor"> | string | null
+    domain?: StringNullableFilter<"Visitor"> | string | null
+    hostname?: StringNullableFilter<"Visitor"> | string | null
     utm_source?: StringNullableFilter<"Visitor"> | string | null
     utm_medium?: StringNullableFilter<"Visitor"> | string | null
     utm_campaign?: StringNullableFilter<"Visitor"> | string | null
@@ -61538,6 +61628,8 @@ export namespace Prisma {
     city?: SortOrderInput | SortOrder
     first_referrer?: SortOrderInput | SortOrder
     traffic_source?: SortOrderInput | SortOrder
+    domain?: SortOrderInput | SortOrder
+    hostname?: SortOrderInput | SortOrder
     utm_source?: SortOrderInput | SortOrder
     utm_medium?: SortOrderInput | SortOrder
     utm_campaign?: SortOrderInput | SortOrder
@@ -61577,6 +61669,8 @@ export namespace Prisma {
     city?: StringNullableWithAggregatesFilter<"Visitor"> | string | null
     first_referrer?: StringNullableWithAggregatesFilter<"Visitor"> | string | null
     traffic_source?: StringNullableWithAggregatesFilter<"Visitor"> | string | null
+    domain?: StringNullableWithAggregatesFilter<"Visitor"> | string | null
+    hostname?: StringNullableWithAggregatesFilter<"Visitor"> | string | null
     utm_source?: StringNullableWithAggregatesFilter<"Visitor"> | string | null
     utm_medium?: StringNullableWithAggregatesFilter<"Visitor"> | string | null
     utm_campaign?: StringNullableWithAggregatesFilter<"Visitor"> | string | null
@@ -61602,6 +61696,8 @@ export namespace Prisma {
     pageviews_count?: IntFilter<"VisitorSession"> | number
     referrer?: StringNullableFilter<"VisitorSession"> | string | null
     traffic_source?: StringNullableFilter<"VisitorSession"> | string | null
+    domain?: StringNullableFilter<"VisitorSession"> | string | null
+    hostname?: StringNullableFilter<"VisitorSession"> | string | null
     utm_source?: StringNullableFilter<"VisitorSession"> | string | null
     utm_medium?: StringNullableFilter<"VisitorSession"> | string | null
     utm_campaign?: StringNullableFilter<"VisitorSession"> | string | null
@@ -61629,6 +61725,8 @@ export namespace Prisma {
     pageviews_count?: SortOrder
     referrer?: SortOrderInput | SortOrder
     traffic_source?: SortOrderInput | SortOrder
+    domain?: SortOrderInput | SortOrder
+    hostname?: SortOrderInput | SortOrder
     utm_source?: SortOrderInput | SortOrder
     utm_medium?: SortOrderInput | SortOrder
     utm_campaign?: SortOrderInput | SortOrder
@@ -61659,6 +61757,8 @@ export namespace Prisma {
     pageviews_count?: IntFilter<"VisitorSession"> | number
     referrer?: StringNullableFilter<"VisitorSession"> | string | null
     traffic_source?: StringNullableFilter<"VisitorSession"> | string | null
+    domain?: StringNullableFilter<"VisitorSession"> | string | null
+    hostname?: StringNullableFilter<"VisitorSession"> | string | null
     utm_source?: StringNullableFilter<"VisitorSession"> | string | null
     utm_medium?: StringNullableFilter<"VisitorSession"> | string | null
     utm_campaign?: StringNullableFilter<"VisitorSession"> | string | null
@@ -61686,6 +61786,8 @@ export namespace Prisma {
     pageviews_count?: SortOrder
     referrer?: SortOrderInput | SortOrder
     traffic_source?: SortOrderInput | SortOrder
+    domain?: SortOrderInput | SortOrder
+    hostname?: SortOrderInput | SortOrder
     utm_source?: SortOrderInput | SortOrder
     utm_medium?: SortOrderInput | SortOrder
     utm_campaign?: SortOrderInput | SortOrder
@@ -61718,6 +61820,8 @@ export namespace Prisma {
     pageviews_count?: IntWithAggregatesFilter<"VisitorSession"> | number
     referrer?: StringNullableWithAggregatesFilter<"VisitorSession"> | string | null
     traffic_source?: StringNullableWithAggregatesFilter<"VisitorSession"> | string | null
+    domain?: StringNullableWithAggregatesFilter<"VisitorSession"> | string | null
+    hostname?: StringNullableWithAggregatesFilter<"VisitorSession"> | string | null
     utm_source?: StringNullableWithAggregatesFilter<"VisitorSession"> | string | null
     utm_medium?: StringNullableWithAggregatesFilter<"VisitorSession"> | string | null
     utm_campaign?: StringNullableWithAggregatesFilter<"VisitorSession"> | string | null
@@ -61740,6 +61844,8 @@ export namespace Prisma {
     path?: StringFilter<"VisitorPageView"> | string
     title?: StringNullableFilter<"VisitorPageView"> | string | null
     referrer?: StringNullableFilter<"VisitorPageView"> | string | null
+    domain?: StringNullableFilter<"VisitorPageView"> | string | null
+    hostname?: StringNullableFilter<"VisitorPageView"> | string | null
     duration_sec?: IntFilter<"VisitorPageView"> | number
     created_at?: DateTimeFilter<"VisitorPageView"> | Date | string
     visitor?: XOR<VisitorScalarRelationFilter, VisitorWhereInput>
@@ -61754,6 +61860,8 @@ export namespace Prisma {
     path?: SortOrder
     title?: SortOrderInput | SortOrder
     referrer?: SortOrderInput | SortOrder
+    domain?: SortOrderInput | SortOrder
+    hostname?: SortOrderInput | SortOrder
     duration_sec?: SortOrder
     created_at?: SortOrder
     visitor?: VisitorOrderByWithRelationInput
@@ -61771,6 +61879,8 @@ export namespace Prisma {
     path?: StringFilter<"VisitorPageView"> | string
     title?: StringNullableFilter<"VisitorPageView"> | string | null
     referrer?: StringNullableFilter<"VisitorPageView"> | string | null
+    domain?: StringNullableFilter<"VisitorPageView"> | string | null
+    hostname?: StringNullableFilter<"VisitorPageView"> | string | null
     duration_sec?: IntFilter<"VisitorPageView"> | number
     created_at?: DateTimeFilter<"VisitorPageView"> | Date | string
     visitor?: XOR<VisitorScalarRelationFilter, VisitorWhereInput>
@@ -61785,6 +61895,8 @@ export namespace Prisma {
     path?: SortOrder
     title?: SortOrderInput | SortOrder
     referrer?: SortOrderInput | SortOrder
+    domain?: SortOrderInput | SortOrder
+    hostname?: SortOrderInput | SortOrder
     duration_sec?: SortOrder
     created_at?: SortOrder
     _count?: VisitorPageViewCountOrderByAggregateInput
@@ -61805,6 +61917,8 @@ export namespace Prisma {
     path?: StringWithAggregatesFilter<"VisitorPageView"> | string
     title?: StringNullableWithAggregatesFilter<"VisitorPageView"> | string | null
     referrer?: StringNullableWithAggregatesFilter<"VisitorPageView"> | string | null
+    domain?: StringNullableWithAggregatesFilter<"VisitorPageView"> | string | null
+    hostname?: StringNullableWithAggregatesFilter<"VisitorPageView"> | string | null
     duration_sec?: IntWithAggregatesFilter<"VisitorPageView"> | number
     created_at?: DateTimeWithAggregatesFilter<"VisitorPageView"> | Date | string
   }
@@ -65709,6 +65823,8 @@ export namespace Prisma {
     city?: string | null
     first_referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -65744,6 +65860,8 @@ export namespace Prisma {
     city?: string | null
     first_referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -65777,6 +65895,8 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     first_referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65812,6 +65932,8 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     first_referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65846,6 +65968,8 @@ export namespace Prisma {
     city?: string | null
     first_referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -65876,6 +66000,8 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     first_referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65907,6 +66033,8 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     first_referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65928,6 +66056,8 @@ export namespace Prisma {
     pageviews_count?: number
     referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -65955,6 +66085,8 @@ export namespace Prisma {
     pageviews_count?: number
     referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -65980,6 +66112,8 @@ export namespace Prisma {
     pageviews_count?: IntFieldUpdateOperationsInput | number
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66007,6 +66141,8 @@ export namespace Prisma {
     pageviews_count?: IntFieldUpdateOperationsInput | number
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66033,6 +66169,8 @@ export namespace Prisma {
     pageviews_count?: number
     referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -66056,6 +66194,8 @@ export namespace Prisma {
     pageviews_count?: IntFieldUpdateOperationsInput | number
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66080,6 +66220,8 @@ export namespace Prisma {
     pageviews_count?: IntFieldUpdateOperationsInput | number
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66097,6 +66239,8 @@ export namespace Prisma {
     path: string
     title?: string | null
     referrer?: string | null
+    domain?: string | null
+    hostname?: string | null
     duration_sec?: number
     created_at?: Date | string
     visitor: VisitorCreateNestedOneWithoutPage_viewsInput
@@ -66111,6 +66255,8 @@ export namespace Prisma {
     path: string
     title?: string | null
     referrer?: string | null
+    domain?: string | null
+    hostname?: string | null
     duration_sec?: number
     created_at?: Date | string
   }
@@ -66121,6 +66267,8 @@ export namespace Prisma {
     path?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     duration_sec?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     visitor?: VisitorUpdateOneRequiredWithoutPage_viewsNestedInput
@@ -66135,6 +66283,8 @@ export namespace Prisma {
     path?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     duration_sec?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -66147,6 +66297,8 @@ export namespace Prisma {
     path: string
     title?: string | null
     referrer?: string | null
+    domain?: string | null
+    hostname?: string | null
     duration_sec?: number
     created_at?: Date | string
   }
@@ -66157,6 +66309,8 @@ export namespace Prisma {
     path?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     duration_sec?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -66169,6 +66323,8 @@ export namespace Prisma {
     path?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     duration_sec?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -69189,6 +69345,8 @@ export namespace Prisma {
     city?: SortOrder
     first_referrer?: SortOrder
     traffic_source?: SortOrder
+    domain?: SortOrder
+    hostname?: SortOrder
     utm_source?: SortOrder
     utm_medium?: SortOrder
     utm_campaign?: SortOrder
@@ -69226,6 +69384,8 @@ export namespace Prisma {
     city?: SortOrder
     first_referrer?: SortOrder
     traffic_source?: SortOrder
+    domain?: SortOrder
+    hostname?: SortOrder
     utm_source?: SortOrder
     utm_medium?: SortOrder
     utm_campaign?: SortOrder
@@ -69257,6 +69417,8 @@ export namespace Prisma {
     city?: SortOrder
     first_referrer?: SortOrder
     traffic_source?: SortOrder
+    domain?: SortOrder
+    hostname?: SortOrder
     utm_source?: SortOrder
     utm_medium?: SortOrder
     utm_campaign?: SortOrder
@@ -69290,6 +69452,8 @@ export namespace Prisma {
     pageviews_count?: SortOrder
     referrer?: SortOrder
     traffic_source?: SortOrder
+    domain?: SortOrder
+    hostname?: SortOrder
     utm_source?: SortOrder
     utm_medium?: SortOrder
     utm_campaign?: SortOrder
@@ -69319,6 +69483,8 @@ export namespace Prisma {
     pageviews_count?: SortOrder
     referrer?: SortOrder
     traffic_source?: SortOrder
+    domain?: SortOrder
+    hostname?: SortOrder
     utm_source?: SortOrder
     utm_medium?: SortOrder
     utm_campaign?: SortOrder
@@ -69343,6 +69509,8 @@ export namespace Prisma {
     pageviews_count?: SortOrder
     referrer?: SortOrder
     traffic_source?: SortOrder
+    domain?: SortOrder
+    hostname?: SortOrder
     utm_source?: SortOrder
     utm_medium?: SortOrder
     utm_campaign?: SortOrder
@@ -69372,6 +69540,8 @@ export namespace Prisma {
     path?: SortOrder
     title?: SortOrder
     referrer?: SortOrder
+    domain?: SortOrder
+    hostname?: SortOrder
     duration_sec?: SortOrder
     created_at?: SortOrder
   }
@@ -69388,6 +69558,8 @@ export namespace Prisma {
     path?: SortOrder
     title?: SortOrder
     referrer?: SortOrder
+    domain?: SortOrder
+    hostname?: SortOrder
     duration_sec?: SortOrder
     created_at?: SortOrder
   }
@@ -69400,6 +69572,8 @@ export namespace Prisma {
     path?: SortOrder
     title?: SortOrder
     referrer?: SortOrder
+    domain?: SortOrder
+    hostname?: SortOrder
     duration_sec?: SortOrder
     created_at?: SortOrder
   }
@@ -73090,6 +73264,8 @@ export namespace Prisma {
     city?: string | null
     first_referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -73123,6 +73299,8 @@ export namespace Prisma {
     city?: string | null
     first_referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -73831,6 +74009,8 @@ export namespace Prisma {
     city?: StringNullableFilter<"Visitor"> | string | null
     first_referrer?: StringNullableFilter<"Visitor"> | string | null
     traffic_source?: StringNullableFilter<"Visitor"> | string | null
+    domain?: StringNullableFilter<"Visitor"> | string | null
+    hostname?: StringNullableFilter<"Visitor"> | string | null
     utm_source?: StringNullableFilter<"Visitor"> | string | null
     utm_medium?: StringNullableFilter<"Visitor"> | string | null
     utm_campaign?: StringNullableFilter<"Visitor"> | string | null
@@ -79178,6 +79358,8 @@ export namespace Prisma {
     pageviews_count?: number
     referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -79203,6 +79385,8 @@ export namespace Prisma {
     pageviews_count?: number
     referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -79232,6 +79416,8 @@ export namespace Prisma {
     path: string
     title?: string | null
     referrer?: string | null
+    domain?: string | null
+    hostname?: string | null
     duration_sec?: number
     created_at?: Date | string
     session: VisitorSessionCreateNestedOneWithoutPage_viewsInput
@@ -79244,6 +79430,8 @@ export namespace Prisma {
     path: string
     title?: string | null
     referrer?: string | null
+    domain?: string | null
+    hostname?: string | null
     duration_sec?: number
     created_at?: Date | string
   }
@@ -79423,6 +79611,8 @@ export namespace Prisma {
     pageviews_count?: IntFilter<"VisitorSession"> | number
     referrer?: StringNullableFilter<"VisitorSession"> | string | null
     traffic_source?: StringNullableFilter<"VisitorSession"> | string | null
+    domain?: StringNullableFilter<"VisitorSession"> | string | null
+    hostname?: StringNullableFilter<"VisitorSession"> | string | null
     utm_source?: StringNullableFilter<"VisitorSession"> | string | null
     utm_medium?: StringNullableFilter<"VisitorSession"> | string | null
     utm_campaign?: StringNullableFilter<"VisitorSession"> | string | null
@@ -79461,6 +79651,8 @@ export namespace Prisma {
     path?: StringFilter<"VisitorPageView"> | string
     title?: StringNullableFilter<"VisitorPageView"> | string | null
     referrer?: StringNullableFilter<"VisitorPageView"> | string | null
+    domain?: StringNullableFilter<"VisitorPageView"> | string | null
+    hostname?: StringNullableFilter<"VisitorPageView"> | string | null
     duration_sec?: IntFilter<"VisitorPageView"> | number
     created_at?: DateTimeFilter<"VisitorPageView"> | Date | string
   }
@@ -79502,6 +79694,8 @@ export namespace Prisma {
     city?: string | null
     first_referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -79536,6 +79730,8 @@ export namespace Prisma {
     city?: string | null
     first_referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -79558,6 +79754,8 @@ export namespace Prisma {
     path: string
     title?: string | null
     referrer?: string | null
+    domain?: string | null
+    hostname?: string | null
     duration_sec?: number
     created_at?: Date | string
     visitor: VisitorCreateNestedOneWithoutPage_viewsInput
@@ -79570,6 +79768,8 @@ export namespace Prisma {
     path: string
     title?: string | null
     referrer?: string | null
+    domain?: string | null
+    hostname?: string | null
     duration_sec?: number
     created_at?: Date | string
   }
@@ -79648,6 +79848,8 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     first_referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79682,6 +79884,8 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     first_referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79746,6 +79950,8 @@ export namespace Prisma {
     city?: string | null
     first_referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -79780,6 +79986,8 @@ export namespace Prisma {
     city?: string | null
     first_referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -79808,6 +80016,8 @@ export namespace Prisma {
     pageviews_count?: number
     referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -79834,6 +80044,8 @@ export namespace Prisma {
     pageviews_count?: number
     referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -79883,6 +80095,8 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     first_referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79917,6 +80131,8 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     first_referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79951,6 +80167,8 @@ export namespace Prisma {
     pageviews_count?: IntFieldUpdateOperationsInput | number
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79977,6 +80195,8 @@ export namespace Prisma {
     pageviews_count?: IntFieldUpdateOperationsInput | number
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80010,6 +80230,8 @@ export namespace Prisma {
     city?: string | null
     first_referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -80044,6 +80266,8 @@ export namespace Prisma {
     city?: string | null
     first_referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -80072,6 +80296,8 @@ export namespace Prisma {
     pageviews_count?: number
     referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -80098,6 +80324,8 @@ export namespace Prisma {
     pageviews_count?: number
     referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -80242,6 +80470,8 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     first_referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80276,6 +80506,8 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     first_referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80310,6 +80542,8 @@ export namespace Prisma {
     pageviews_count?: IntFieldUpdateOperationsInput | number
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80336,6 +80570,8 @@ export namespace Prisma {
     pageviews_count?: IntFieldUpdateOperationsInput | number
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80703,6 +80939,8 @@ export namespace Prisma {
     city?: string | null
     first_referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -81451,6 +81689,8 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     first_referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81484,6 +81724,8 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     first_referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81517,6 +81759,8 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     first_referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81945,6 +82189,8 @@ export namespace Prisma {
     pageviews_count?: number
     referrer?: string | null
     traffic_source?: string | null
+    domain?: string | null
+    hostname?: string | null
     utm_source?: string | null
     utm_medium?: string | null
     utm_campaign?: string | null
@@ -81963,6 +82209,8 @@ export namespace Prisma {
     path: string
     title?: string | null
     referrer?: string | null
+    domain?: string | null
+    hostname?: string | null
     duration_sec?: number
     created_at?: Date | string
   }
@@ -81990,6 +82238,8 @@ export namespace Prisma {
     pageviews_count?: IntFieldUpdateOperationsInput | number
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82015,6 +82265,8 @@ export namespace Prisma {
     pageviews_count?: IntFieldUpdateOperationsInput | number
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82040,6 +82292,8 @@ export namespace Prisma {
     pageviews_count?: IntFieldUpdateOperationsInput | number
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
     traffic_source?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     utm_source?: NullableStringFieldUpdateOperationsInput | string | null
     utm_medium?: NullableStringFieldUpdateOperationsInput | string | null
     utm_campaign?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82057,6 +82311,8 @@ export namespace Prisma {
     path?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     duration_sec?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     session?: VisitorSessionUpdateOneRequiredWithoutPage_viewsNestedInput
@@ -82069,6 +82325,8 @@ export namespace Prisma {
     path?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     duration_sec?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -82080,6 +82338,8 @@ export namespace Prisma {
     path?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     duration_sec?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -82124,6 +82384,8 @@ export namespace Prisma {
     path: string
     title?: string | null
     referrer?: string | null
+    domain?: string | null
+    hostname?: string | null
     duration_sec?: number
     created_at?: Date | string
   }
@@ -82145,6 +82407,8 @@ export namespace Prisma {
     path?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     duration_sec?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     visitor?: VisitorUpdateOneRequiredWithoutPage_viewsNestedInput
@@ -82157,6 +82421,8 @@ export namespace Prisma {
     path?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     duration_sec?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -82168,6 +82434,8 @@ export namespace Prisma {
     path?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    domain?: NullableStringFieldUpdateOperationsInput | string | null
+    hostname?: NullableStringFieldUpdateOperationsInput | string | null
     duration_sec?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }

@@ -42,7 +42,7 @@ button, a { font: inherit; }
 button { cursor: pointer; background: none; border: 0; padding: 0; color: inherit; }
 button:focus-visible, a:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
 
-.site-shell { overflow: hidden; background: #101010; }
+.site-shell { overflow: hidden; background: var(--paper); }
 main, .site-main { position: relative; z-index: 10; background: var(--paper); width: 100%; }
 .editorial-frame { width: min(1380px, calc(100% - 64px)); margin: 0 auto; }
 .section-space { position: relative; }

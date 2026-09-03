@@ -70,7 +70,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
           id="main-content-scroll"
           className="flex-1 overflow-y-auto p-3.5 sm:p-6 lg:p-8 pb-24 md:pb-8 w-full no-scrollbar print:h-auto print:overflow-visible print:p-0 print:m-0 print:block print:w-[210mm]"
         >
-          <div className="w-full max-w-full xl:max-w-[1500px] 2xl:max-w-[1800px] 3xl:max-w-[2200px] mx-auto space-y-6 lg:space-y-8 print:p-0 print:m-0 print:space-y-0 print:w-[210mm] print:max-w-none">
+          <div className="w-full mx-auto space-y-6 lg:space-y-8 print:p-0 print:m-0 print:space-y-0 print:w-[210mm] print:max-w-none">
             {children}
           </div>
         </main>

@@ -137,40 +137,6 @@ export const ContextualMarketingCard: React.FC = () => {
     );
   }
 
-  // Default Case: Premium Pass Nudge
-  return (
-    <div className="relative overflow-hidden rounded-[10px] bg-gradient-to-r from-slate-900 via-navy-900 to-slate-900 text-white p-5 shadow-lg border border-[#1738D1]/20">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
-        <div className="flex items-start gap-3.5">
-          <div className="w-10 h-10 rounded-[10px] bg-[#1738D1]/20 text-orange-400 border border-[#1738D1]/30 flex items-center justify-center shrink-0">
-            <Rocket className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="text-sm font-extrabold text-white flex items-center gap-1.5">
-              <span>Kamu aktif mencari kerja minggu ini</span>
-            </h4>
-            <p className="text-xs text-slate-300 mt-0.5 max-w-lg leading-relaxed">
-              Premium Pass membantu melacak lamaran &amp; memberikan kata kunci analisis lowongan secara otomatis.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
-          <button
-            onClick={() => router.push('/pembayaran')}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-md shadow-[#1738D1]/25 transition flex items-center justify-center gap-1.5 cursor-pointer"
-          >
-            <span>Coba Premium Pass</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setIsVisible(false)}
-            className="p-2 text-slate-400 hover:text-white transition cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+  // Default Case: Hidden for now
+  return null;
 };

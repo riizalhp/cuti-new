@@ -5,12 +5,24 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const domainFilter = searchParams.get('domain') || 'all';
+
     const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
 
+    const where: any = {
+      last_seen: { gte: twoMinutesAgo },
+    };
+
+    if (domainFilter !== 'all') {
+      where.OR = [
+        { domain: { contains: domainFilter, mode: 'insensitive' } },
+        { hostname: { contains: domainFilter, mode: 'insensitive' } },
+      ];
+    }
+
     const liveVisitors = await (prisma as any).visitor.findMany({
-      where: {
-        last_seen: { gte: twoMinutesAgo },
-      },
+      where,
       orderBy: { last_seen: 'desc' },
       take: 50,
       include: {
@@ -33,6 +45,8 @@ export async function GET(req: NextRequest) {
         visitorId: v.visitor_id,
         currentPage: v.current_page || '/',
         currentTitle: v.current_title || 'Home',
+        domain: v.domain || 'employr.id',
+        hostname: v.hostname || 'employr.id',
         deviceType: v.device_type || 'Desktop',
         browser: v.browser || 'Unknown',
         os: v.os || 'Unknown',

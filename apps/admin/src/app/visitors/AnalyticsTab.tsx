@@ -11,6 +11,10 @@ import {
   ResponsiveContainer,
   AreaChart,
   Area,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from "recharts"
 import {
   TrendingUp,
@@ -26,7 +30,19 @@ import {
   Smartphone,
   Tablet,
   RefreshCw,
+  SlidersHorizontal,
+  LayoutDashboard,
+  Briefcase,
+  BookOpen,
+  HelpCircle,
+  Search,
+  Instagram,
+  Share2,
+  MessageCircle,
+  Video,
+  Send,
 } from "lucide-react"
+import { getDomainInfo, getTrafficSourceInfo } from "@/lib/visitor-helpers"
 
 interface AnalyticsData {
   summary: {
@@ -41,17 +57,25 @@ interface AnalyticsData {
   topPages: Array<{ path: string; views: number }>
   trafficSources: Array<{ source: string; count: number }>
   deviceBreakdown: Array<{ device: string; count: number }>
+  domainBreakdown: Array<{ domain: string; count: number }>
   trend7Days: Array<{ day: string; views: number }>
 }
+
+const DOMAIN_PALETTE_COLORS = ["#F97316", "#3B82F6", "#10B981", "#8B5CF6", "#14B8A6", "#F43F5E", "#94A3B8"];
+
+const TRAFFIC_PALETTE_COLORS = ["#3B82F6", "#EC4899", "#0F172A", "#0284C7", "#10B981", "#EF4444", "#F59E0B", "#8B5CF6", "#64748B"];
 
 export function AnalyticsTab() {
   const [data, setData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [domainFilter, setDomainFilter] = useState("all")
 
   const fetchStats = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/visitors/stats")
+      const params = new URLSearchParams()
+      if (domainFilter !== "all") params.set("domain", domainFilter)
+      const res = await fetch(`/api/visitors/stats?${params.toString()}`)
       const json = await res.json()
       if (json.success && json.data) {
         setData(json.data)
@@ -65,7 +89,7 @@ export function AnalyticsTab() {
 
   useEffect(() => {
     fetchStats()
-  }, [])
+  }, [domainFilter])
 
   const formatDuration = (sec: number) => {
     if (!sec || sec < 60) return `${sec || 0}s`
@@ -94,9 +118,40 @@ export function AnalyticsTab() {
   const maxPageViews = Math.max(...(data.topPages?.map((p) => p.views) || [1]), 1)
   const totalTrafficCount = data.trafficSources?.reduce((acc, curr) => acc + curr.count, 0) || 1
   const totalDeviceCount = data.deviceBreakdown?.reduce((acc, curr) => acc + curr.count, 0) || 1
+  const totalDomainCount = data.domainBreakdown?.reduce((acc, curr) => acc + curr.count, 0) || 1
 
   return (
     <div className="space-y-6">
+      {/* Domain Filter Header */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Globe size={16} className="text-orange-500" />
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Filter Analitik Berdasarkan Domain:</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <select
+            value={domainFilter}
+            onChange={(e) => setDomainFilter(e.target.value)}
+            className="px-3 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/60 text-xs text-orange-900 dark:text-orange-200 font-bold focus:outline-none"
+          >
+            <option value="all">🌐 Semua Domain</option>
+            <option value="employr.id">🏠 employr.id (Landing)</option>
+            <option value="app.employr.id">💼 app.employr.id (Dashboard)</option>
+            <option value="loker.employr.id">🎯 loker.employr.id (Portal)</option>
+            <option value="learning.employr.id">📚 learning.employr.id</option>
+            <option value="faq.employr.id">❓ faq.employr.id</option>
+            <option value="localhost">💻 Localhost (Dev)</option>
+          </select>
+          <button
+            onClick={fetchStats}
+            className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition"
+            title="Refresh"
+          >
+            <RefreshCw size={14} />
+          </button>
+        </div>
+      </div>
+
       {/* 1. Top Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs">
@@ -175,12 +230,6 @@ export function AnalyticsTab() {
               Grafik jumlah tayangan halaman per hari
             </p>
           </div>
-          <button
-            onClick={fetchStats}
-            className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition"
-          >
-            <RefreshCw size={14} />
-          </button>
         </div>
 
         <div className="h-64 w-full">
@@ -227,41 +276,48 @@ export function AnalyticsTab() {
         </div>
       </div>
 
-      {/* 3. Top Pages & Traffic Sources Grid */}
+      {/* 3. Domain Breakdown & Traffic Sources Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top 10 Pages */}
+        {/* Domain Breakdown */}
         <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs">
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-1">
-            <Layers size={16} className="text-blue-500" />
-            10 Halaman Paling Sering Dikunjungi
+            <Globe size={16} className="text-orange-500" />
+            Distribusi Domain & Subdomain
           </h3>
-          <p className="text-xs text-slate-500 mb-4">Urutan halaman berdasarkan total pageviews</p>
+          <p className="text-xs text-slate-500 mb-4">Sebaran pengunjung per domain/subdomain Employr</p>
 
           <div className="space-y-3">
-            {data.topPages?.length === 0 ? (
-              <p className="text-xs text-slate-400 py-6 text-center">Belum ada data halaman.</p>
-            ) : (
-              data.topPages.map((p, idx) => {
-                const percent = Math.round((p.views / maxPageViews) * 100)
+            {(data.domainBreakdown?.length || 0) > 0 ? (
+              data.domainBreakdown.map((d, idx) => {
+                const percent = Math.round((d.count / totalDomainCount) * 100)
+                const domainMeta = getDomainInfo(d.domain)
                 return (
-                  <div key={p.path || idx} className="space-y-1">
+                  <div key={d.domain || idx} className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-mono font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[280px]">
-                        {p.path}
+                      <span className={`inline-flex items-center gap-1.5 font-semibold ${domainMeta.badgeText}`}>
+                        {domainMeta.icon}
+                        <span className="truncate max-w-[180px]">{domainMeta.label}</span>
                       </span>
-                      <span className="font-bold text-slate-600 dark:text-slate-300">
-                        {p.views.toLocaleString("id-ID")} views
+                      <span className="text-slate-500 font-mono">
+                        {d.count} ({percent}%)
                       </span>
                     </div>
                     <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-blue-500 rounded-full transition-all duration-500"
-                        style={{ width: `${percent}%` }}
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${percent}%`,
+                          backgroundColor: DOMAIN_PALETTE_COLORS[idx % DOMAIN_PALETTE_COLORS.length],
+                        }}
                       />
                     </div>
                   </div>
                 )
               })
+            ) : (
+              <p className="text-xs text-slate-400 py-6 text-center">
+                Data domain belum tersedia (data baru akan muncul dari tracking baru).
+              </p>
             )}
           </div>
         </div>
@@ -279,11 +335,13 @@ export function AnalyticsTab() {
             <div className="space-y-3">
               {data.trafficSources?.map((ts, idx) => {
                 const percent = Math.round((ts.count / totalTrafficCount) * 100)
+                const tsMeta = getTrafficSourceInfo(ts.source)
                 return (
                   <div key={ts.source || idx} className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">
-                        {ts.source}
+                      <span className={`inline-flex items-center gap-1.5 font-semibold ${tsMeta.badgeText}`}>
+                        {tsMeta.icon}
+                        <span className="truncate max-w-[180px]">{tsMeta.label}</span>
                       </span>
                       <span className="text-slate-500 font-mono">
                         {ts.count} ({percent}%)
@@ -291,13 +349,19 @@ export function AnalyticsTab() {
                     </div>
                     <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-orange-500 rounded-full transition-all duration-500"
-                        style={{ width: `${percent}%` }}
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${percent}%`,
+                          backgroundColor: TRAFFIC_PALETTE_COLORS[idx % TRAFFIC_PALETTE_COLORS.length],
+                        }}
                       />
                     </div>
                   </div>
                 )
               })}
+              {(!data.trafficSources || data.trafficSources.length === 0) && (
+                <p className="text-xs text-slate-400 py-6 text-center">Belum ada data sumber traffic.</p>
+              )}
             </div>
           </div>
 
@@ -333,6 +397,43 @@ export function AnalyticsTab() {
               })}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* 4. Top Pages */}
+      <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs">
+        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-1">
+          <Layers size={16} className="text-blue-500" />
+          10 Halaman Paling Sering Dikunjungi
+        </h3>
+        <p className="text-xs text-slate-500 mb-4">Urutan halaman berdasarkan total pageviews</p>
+
+        <div className="space-y-3">
+          {data.topPages?.length === 0 ? (
+            <p className="text-xs text-slate-400 py-6 text-center">Belum ada data halaman.</p>
+          ) : (
+            data.topPages.map((p, idx) => {
+              const percent = Math.round((p.views / maxPageViews) * 100)
+              return (
+                <div key={p.path || idx} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-mono font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[280px]">
+                      {p.path}
+                    </span>
+                    <span className="font-bold text-slate-600 dark:text-slate-300">
+                      {p.views.toLocaleString("id-ID")} views
+                    </span>
+                  </div>
+                  <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                      style={{ width: `${percent}%` }}
+                    />
+                  </div>
+                </div>
+              )
+            })
+          )}
         </div>
       </div>
     </div>

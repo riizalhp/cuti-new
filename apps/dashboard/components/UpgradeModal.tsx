@@ -22,10 +22,12 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
   onClose,
   onOpenPayment,
 }) => {
+  // Hidden for now per user request (Free Access Mode)
+  const HIDDEN = true;
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
   const [success, setSuccess] = useState(false);
 
-  if (!isOpen) return null;
+  if (HIDDEN || !isOpen) return null;
 
   const handleActivate = () => {
     if (onOpenPayment) {

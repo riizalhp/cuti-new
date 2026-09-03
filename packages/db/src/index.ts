@@ -1,4 +1,4 @@
-import { PrismaClient } from './generated/client';
+import { PrismaClient } from './generated/client/index.js';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -14,7 +14,7 @@ export const prisma =
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 // Named re-exports to avoid Turbopack CJS `export *` warning
-export { PrismaClient, Prisma, ApplicationStatus, ApplicationSource } from './generated/client';
+export { PrismaClient, Prisma, ApplicationStatus, ApplicationSource } from './generated/client/index.js';
 export type {
   User,
   Prisma as PrismaNamespace,
@@ -22,5 +22,5 @@ export type {
   VisitorSession,
   VisitorPageView,
   VisitorActivity,
-} from './generated/client';
+} from './generated/client/index.js';
 export * from './logger.ts';

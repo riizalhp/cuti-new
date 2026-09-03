@@ -25,6 +25,7 @@ import {
   Flame,
   Gift,
   Loader2,
+  Rocket,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -51,9 +52,9 @@ export const Header: React.FC<HeaderProps> = ({
 
   const isDarkMode = mounted && resolvedTheme === 'dark';
   const toggleDarkMode = () => setTheme(isDarkMode ? 'light' : 'dark');
-  const { openUpgrade, openPromo } = useModals();
+  const { openUpgrade, openWhatsNew } = useModals();
   const onOpenUpgradeModal = openUpgrade;
-  const onOpenPromoModal = openPromo;
+  const onOpenWhatsNewModal = openWhatsNew;
   const onOpenProfile = (tab?: string) => router.push('/pengaturan');
   const onLogout = handleLogout;
   const onSwitchToAdminPortal = () => router.push('/admin');
@@ -242,40 +243,12 @@ export const Header: React.FC<HeaderProps> = ({
               <h1 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Hi, {currentUser.name.split(' ')[0] || 'User'}
               </h1>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 backdrop-blur-xs">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                Lifetime Pass
-              </span>
             </div>
           </div>
         </div>
 
         {/* Right Actions & Profile */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Promo Special Button (Soft Neo-Skeuomorphic Pill with Circular Capsule) */}
-          {onOpenPromoModal && (
-            <button
-              onClick={onOpenPromoModal}
-              className="group btn-neo-skeuo pl-3.5 pr-1.5 py-1.5 text-xs font-bold flex items-center gap-2 cursor-pointer transition-all"
-              title="Lihat Promo Diskon 70%"
-            >
-              <span className="hidden sm:inline">Diskon 70%</span>
-              <span className="w-6 h-6 rounded-full bg-rose-500/90 text-white flex items-center justify-center shadow-inner group-hover:scale-105 transition">
-                <Flame className="w-3.5 h-3.5 fill-white" />
-              </span>
-            </button>
-          )}
-
-          {/* Quick Upgrade CTA Button (Soft Neo-Skeuomorphic Pill with Circular Capsule) */}
-          <button
-            onClick={onOpenUpgradeModal}
-            className="group hidden md:flex btn-neo-skeuo-accent pl-4 pr-1.5 py-1.5 text-xs font-extrabold items-center gap-2 transition cursor-pointer"
-          >
-            <span>Pass Premium</span>
-            <span className="w-6 h-6 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center border border-white/30 shadow-inner group-hover:scale-105 transition">
-              <Sparkles className="w-3.5 h-3.5" />
-            </span>
-          </button>
 
           {/* Dark / Light Mode Toggle Pill */}
           <button

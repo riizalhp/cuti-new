@@ -68,7 +68,12 @@ export default function WhyEmployr() {
 
     // Small delay to ensure all nested artifact images/DOM sizes are measured correctly
     const timer = setTimeout(() => {
-      const getScrollDistance = () => Math.max(0, track.scrollWidth - window.innerWidth + 48);
+      const getScrollDistance = () => {
+        const lastCard = track.lastElementChild as HTMLElement | null;
+        if (!lastCard) return Math.max(0, track.scrollWidth - window.innerWidth);
+        const rightEdge = track.offsetLeft + lastCard.offsetLeft + lastCard.offsetWidth + 20;
+        return Math.max(0, rightEdge - window.innerWidth);
+      };
 
       anim = gsap.to(track, {
         x: () => -getScrollDistance(),
@@ -76,11 +81,13 @@ export default function WhyEmployr() {
         scrollTrigger: {
           trigger: section,
           start: 'top top+=20',
-          end: () => `+=${getScrollDistance() * 1.6}`,
+          end: () => `+=${getScrollDistance()}`,
           pin: true,
           pinSpacing: true,
-          scrub: 0.6,
+          scrub: 0.4,
           invalidateOnRefresh: true,
+          refreshPriority: 2,
+          anticipatePin: 1,
           onUpdate: (self) => {
             const p = self.progress;
             const cardIdx = Math.min(3, Math.floor(p * 4));
