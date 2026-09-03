@@ -150,6 +150,7 @@ const siteSchema = {
           if (isHidden) {
             isHidden = false;
             header.classList.remove('site-header--hidden');
+            header.classList.add('site-header--visible');
           }
         };
 
@@ -158,6 +159,7 @@ const siteSchema = {
           if (header.classList.contains('is-menu-open') || window.scrollY <= 100) return;
           if (!isHidden) {
             isHidden = true;
+            header.classList.remove('site-header--visible');
             header.classList.add('site-header--hidden');
           }
         };

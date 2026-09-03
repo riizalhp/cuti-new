@@ -238,8 +238,17 @@ h2 em, h1 em {
   width: min(880px, calc(100% - 36px)) !important;
   z-index: 999 !important;
   overflow: hidden;
-  animation: floatingHeaderSlideDown 0.68s cubic-bezier(0.22, 1, 0.36, 1) both;
-  transition: transform 0.68s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.58s cubic-bezier(0.22, 1, 0.36, 1), background 0.35s ease !important;
+  will-change: transform, opacity;
+  animation: floatingHeaderSlideDown 0.68s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+}
+
+.site-header--solid.site-header--visible {
+  animation: floatingHeaderSlideDown 0.68s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+}
+
+.site-header--solid.site-header--hidden {
+  pointer-events: none !important;
+  animation: floatingHeaderSlideUp 0.68s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
 }
 
 @keyframes floatingHeaderSlideDown {
@@ -253,12 +262,15 @@ h2 em, h1 em {
   }
 }
 
-.site-header--solid.site-header--hidden {
-  animation: none !important;
-  transform: translateX(-50%) translateY(-150%) !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transition: transform 0.55s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.45s ease-in !important;
+@keyframes floatingHeaderSlideUp {
+  from {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  to {
+    transform: translate(-50%, -150%);
+    opacity: 0;
+  }
 }
 
 .site-header--solid::before {
@@ -741,26 +753,30 @@ h2 em, h1 em {
   .hero__scroll { display: none; }
   .hero__actions { gap: 16px; }
   .hero__secondary { font-size: 10px; }
-  .statement:after { left: 20px; bottom: 6px; height: 68px; width: 68px; }
+  .statement:after { left: 20px; bottom: 6px; height: 68px; width: 68px; z-index: 1; }
 }
 
 /* ---------- Statement (chapter 01) ---------- */
-.statement { background: #f7f6f0; padding: 64px 0 190px; }
-.statement__frame { position: relative; }
+.statement { background: #f7f6f0; padding: 64px 0 190px; position: relative; isolation: isolate; }
+.statement__frame { position: relative; z-index: 2; }
 .statement__body {
   align-items: flex-end;
   display: flex;
   gap: 8vw;
   justify-content: flex-end;
   margin-top: 78px;
+  position: relative;
+  z-index: 2;
 }
-.statement__body h2 { max-width: 850px; }
+.statement__body h2 { max-width: 850px; position: relative; z-index: 2; }
 .statement__body p {
   color: #686762;
   font-size: 15px;
   line-height: 1.65;
   max-width: 295px;
   padding-bottom: 8px;
+  position: relative;
+  z-index: 2;
 }
 .statement__tick {
   align-items: center;
@@ -771,6 +787,7 @@ h2 em, h1 em {
   gap: 8px;
   position: absolute;
   right: 0;
+  z-index: 2;
 }
 .statement__tick i { background: var(--blue); display: block; height: 1px; width: 72px; }
 .statement:after {
@@ -783,6 +800,7 @@ h2 em, h1 em {
   pointer-events: none;
   position: absolute;
   width: 96px;
+  z-index: 1;
 }
 
 /* ---------- Field note / career observation ---------- */
