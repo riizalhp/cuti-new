@@ -66,12 +66,11 @@ export default function WhyEmployr() {
 
     let anim: gsap.core.Tween | undefined;
 
-    // Small delay to ensure all nested artifact images/DOM sizes are measured correctly
     const timer = setTimeout(() => {
       const getScrollDistance = () => {
         const lastCard = track.lastElementChild as HTMLElement | null;
         if (!lastCard) return Math.max(0, track.scrollWidth - window.innerWidth);
-        const rightEdge = track.offsetLeft + lastCard.offsetLeft + lastCard.offsetWidth + 20;
+        const rightEdge = track.offsetLeft + lastCard.offsetLeft + lastCard.offsetWidth + 24;
         return Math.max(0, rightEdge - window.innerWidth);
       };
 
@@ -95,6 +94,7 @@ export default function WhyEmployr() {
           },
         },
       });
+      ScrollTrigger.refresh();
     }, 150);
 
     return () => {
@@ -1039,18 +1039,28 @@ export default function WhyEmployr() {
           margin: 0;
         }
 
-        /* RESPONSIVE: GSAP scroll-pinned horizontal cards */
+        /* RESPONSIVE: GSAP scroll-pinned horizontal auto-slide cards */
         @media (max-width: 900px) {
           .why-employr--dark {
-            padding: 85px 0 75px;
+            padding: 70px 0 54px;
             overflow: hidden !important;
             width: 100% !important;
           }
 
+          .why-employr__container {
+            width: calc(100% - 32px) !important;
+          }
+
           .why-employr__top {
             grid-template-columns: 1fr;
-            gap: 18px;
-            margin-bottom: 30px;
+            gap: 16px;
+            margin-bottom: 24px;
+          }
+
+          .why-employr__headline {
+            font-size: clamp(1.9rem, 7.2vw, 2.5rem);
+            line-height: 1.08;
+            letter-spacing: -0.04em;
           }
 
           .why-employr__cards-track {
@@ -1072,24 +1082,24 @@ export default function WhyEmployr() {
 
           .why-employr__card {
             flex: 0 0 min(82vw, 330px) !important;
-            height: 380px;
+            height: 390px;
             min-height: 0;
+            border-radius: 14px;
             transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
           }
 
-          /* DEFAULT & INACTIVE: dimmed, compact like unhovered desktop */
+          /* DEFAULT & INACTIVE: dimmed slightly, compact */
           .why-employr__card.is-default,
           .why-employr__card.is-inactive {
-            opacity: 0.55;
-            border-color: rgba(255, 255, 255, 0.12);
+            opacity: 0.6;
+            border-color: rgba(255, 255, 255, 0.14);
             box-shadow: none;
           }
 
           .why-employr__card.is-default .why-employr__glossy-glass-box,
           .why-employr__card.is-inactive .why-employr__glossy-glass-box {
-            opacity: 0;
-            transform: translateY(12px) scale(0.95);
-            pointer-events: none;
+            opacity: 0.85;
+            transform: translateY(6px) scale(0.97);
           }
 
           .why-employr__card.is-default .why-employr__desc-wrap,
@@ -1100,23 +1110,23 @@ export default function WhyEmployr() {
 
           /* ACTIVE: highlighted, glass box reveals, description open */
           .why-employr__card.is-active {
-            opacity: 1;
-            border-color: rgba(96, 165, 250, 0.85);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.22);
-            transform: translateY(-2px);
+            opacity: 1 !important;
+            border-color: rgba(96, 165, 250, 0.9) !important;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.25) !important;
+            transform: translateY(-3px);
           }
 
           .why-employr__card.is-active .why-employr__glossy-glass-box {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            pointer-events: auto;
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.4);
+            opacity: 1 !important;
+            transform: translateY(0) scale(1) !important;
+            pointer-events: auto !important;
+            background: rgba(255, 255, 255, 0.18) !important;
+            border-color: rgba(255, 255, 255, 0.4) !important;
           }
 
           .why-employr__card.is-active .why-employr__desc-wrap {
-            max-height: 90px;
-            opacity: 1;
+            max-height: 95px !important;
+            opacity: 1 !important;
           }
         }
       `}</style>

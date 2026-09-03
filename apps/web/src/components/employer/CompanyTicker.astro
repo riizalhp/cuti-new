@@ -211,21 +211,33 @@ const companies: CompanyLogo[] = [
 
   @media (max-width: 900px) {
     .company-ticker {
-      padding: 64px 0 54px !important;
+      padding: 56px 0 46px !important;
     }
     .company-ticker__container {
-      width: calc(100% - 40px);
+      width: calc(100% - 32px);
+    }
+    .company-ticker__headline {
+      font-size: clamp(1.85rem, 6.8vw, 2.5rem);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+    .company-ticker__last-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 14px;
+      margin-top: 8px;
     }
     .company-ticker__logo-slot {
-      height: 44px;
-      width: clamp(120px, 35vw, 170px);
+      height: 38px;
+      width: 140px;
     }
     .company-ticker__logo-item img {
-      max-height: 36px;
+      max-height: 30px;
     }
     .company-ticker__supporting {
-      font-size: 14px;
-      margin-top: 20px;
+      font-size: 13.5px;
+      margin-top: 18px;
       max-width: 100%;
     }
   }

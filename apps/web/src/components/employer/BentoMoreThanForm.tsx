@@ -140,18 +140,21 @@ export default function BentoMoreThanForm() {
       return;
     }
 
-    const getHeaderOffset = () => {
+    const getStartPos = () => {
+      if (window.innerWidth <= 900) {
+        return 'top 16px';
+      }
       const header = document.querySelector('.site-header') as HTMLElement | null;
-      return header ? header.offsetHeight : window.innerWidth <= 900 ? 68 : 84;
+      return `top ${header ? header.offsetHeight : 84}px`;
     };
 
-    const STEP_PX = 130;
+    const STEP_PX = window.innerWidth <= 900 ? 120 : 130;
     const totalDistance = (features.length - 1) * STEP_PX;
 
     const st = ScrollTrigger.create({
       trigger: frame,
       pin: story,
-      start: () => `top ${getHeaderOffset()}px`,
+      start: () => getStartPos(),
       end: () => `+=${totalDistance}`,
       pinSpacing: true,
       anticipatePin: 1,
@@ -159,7 +162,7 @@ export default function BentoMoreThanForm() {
       scrub: 0.2,
       snap: {
         snapTo: 1 / (features.length - 1),
-        duration: { min: 0.2, max: 0.35 },
+        duration: { min: 0.18, max: 0.32 },
         ease: 'power2.out',
       },
       invalidateOnRefresh: true,
@@ -204,7 +207,10 @@ export default function BentoMoreThanForm() {
 
   return (
     <section ref={frameRef} className="scroll-story-frame" aria-label="Employr capabilities showcase">
-      <div ref={storyRef} className="scroll-story">
+      <div
+        ref={storyRef}
+        className="scroll-story"
+      >
         {/* FULL-BLEED CINEMATIC MEDIA - CLEAN WITHOUT BLACK OVERLAYS */}
         <div
           className={`scroll-story__media scroll-story__media--${direction}`}
@@ -223,6 +229,9 @@ export default function BentoMoreThanForm() {
             draggable={false}
           />
         </div>
+
+        {/* READABILITY GRADIENT OVERLAY */}
+        <div className="scroll-story__overlay"></div>
 
         {/* STORY CONTENT DIRECTLY OVER BACKGROUND */}
         <div
@@ -401,15 +410,40 @@ export default function BentoMoreThanForm() {
           text-shadow: 0 1px 5px rgba(0,0,0,.85);
         }
 
+        /* Readability gradient for text */
+        .scroll-story__overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(13, 13, 15, 0.05) 0%, rgba(13, 13, 15, 0.25) 45%, rgba(13, 13, 15, 0.82) 75%, rgba(13, 13, 15, 0.96) 100%);
+          z-index: 2;
+          pointer-events: none;
+        }
+
+        .scroll-story__mobile-controls {
+          display: none;
+        }
+
         /* MOBILE ADAPTATION */
         @media (max-width: 900px) {
+          .scroll-story-frame {
+            padding: 8px 10px 10px !important;
+          }
+
+          .scroll-story {
+            height: calc(100vh - 32px) !important;
+            height: calc(100dvh - 32px) !important;
+            min-height: 580px !important;
+            max-height: calc(100dvh - 32px) !important;
+            border-radius: 20px !important;
+          }
+
           .scroll-story__img--desktop { display: none; }
           .scroll-story__img--mobile { display: block; object-position: center top; }
 
           .scroll-story__content {
-            left: 18px;
-            right: 18px;
-            bottom: 22px;
+            left: 20px;
+            right: 20px;
+            bottom: 24px;
             max-width: none;
           }
 
