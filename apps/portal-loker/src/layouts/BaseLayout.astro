@@ -33,9 +33,16 @@ const {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Lucide Icons — same set as dashboard (port 3000) -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   </head>
   <body>
     <slot />
+    <script is:inline>
+      // lucide — render icons dashboard (port 3000)
+      if (window.lucide) window.lucide.createIcons();
+      document.addEventListener('DOMContentLoaded', function(){ if(window.lucide) window.lucide.createIcons(); });
+    </script>
     <script is:inline>
       const menuButton = document.querySelector('[data-menu-button]');
       const menu = document.querySelector('[data-menu]');

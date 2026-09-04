@@ -1,0 +1,185 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { jobFairList } from '../../data/mock';
+
+export function getStaticPaths(){
+  return jobFairList.map(j=>({params:{slug:j.slug}, props:{fair:j}}))
+}
+const { fair } = Astro.props;
+const canonical = `http://localhost:3003/job-fair/${fair.slug}/`;
+const title = `${fair.title} — ${fair.geo} | ${fair.date} | PortalKerja`;
+const description = `${fair.title} di ${fair.location} pada ${fair.date} ${fair.time}. ${fair.companies} · ${fair.price} · ${fair.highlights.join(', ')}. Daftar gratis.`;
+const related = jobFairList.filter(x=>x.slug!==fair.slug).slice(0,2);
+---
+<BaseLayout title={title} description={description} canonicalUrl={canonical}>
+  <Header />
+  <main>
+    <div class="wrap">
+      <nav class="breadcrumb">
+        <a href="/">Beranda</a><span>›</span>
+        <a href="/#event">Job Fair</a><span>›</span>
+        <a href="/#event">{fair.geo}</a><span>›</span>
+        <span aria-current="page">{fair.title}</span>
+      </nav>
+
+      <div class="detail-head">
+        <div class="date-block" style="width:84px;">
+          <div class="d" style="font-size:32px; padding:10px 0 4px;">{fair.day}</div>
+          <div class="m">{fair.month} 2026</div>
+        </div>
+        <div style="flex:1;">
+          <span class="caps">{fair.geo} · {fair.companies} · {fair.price}</span>
+          <h1 style="font-size:28px; margin-top:6px;">{fair.title}</h1>
+          <div class="meta" style="margin-top:8px;">
+            <span><i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-500"></i> {fair.location}</span>
+            <span><i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i> {fair.time}</span>
+            <span><i data-lucide="ticket" class="w-3.5 h-3.5 text-emerald-600"></i> {fair.price}</span>
+          </div>
+          <div class="chips" style="margin-top:10px;">
+            {fair.highlights.map(h=><span class="chip">{h}</span>)}
+            {fair.badge && <span class="badge lime">{fair.badge}</span>}
+          </div>
+        </div>
+        <div class="head-cta">
+          <a class="btn btn-primary btn-block" href="#daftar"><i data-lucide="ticket" class="w-3.5 h-3.5 text-amber-300"></i> Daftar Hadir — Gratis</a>
+          <a class="btn btn-block" href="#"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> Tambah ke Kalender</a>
+          <span class="tiny" style="text-align:center;">Kuota terbatas · Daftar H-1 tutup</span>
+        </div>
+      </div>
+
+      <div class="layout" style="padding-top:18px;">
+        <div class="stack">
+          <article class="card">
+            <h2 style="font-size:18px;">Tentang Event</h2>
+            <p class="small muted" style="line-height:1.7;"><strong>{fair.title}</strong> hadir di <strong>{fair.location}</strong> — titik temu pencari kerja dan rekruter di <strong>{fair.geo}</strong>. Cocok untuk SMA/SMK, mahasiswa, dan fresh graduate yang cari lowongan, magang, hingga networking langsung.</p>
+            <div class="ph" style="height:220px; margin-top:14px;">Peta Lokasi — {fair.geo} (placeholder)</div>
+            <div class="tiny" style="margin-top:6px;">Alamat lengkap: {fair.location} — buka di Google Maps</div>
+            <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+              <a class="chip" href="#"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Buka Google Maps</a>
+              <a class="chip" href="#"><i data-lucide="train-front" class="w-3.5 h-3.5"></i> Rute KRL/TransJakarta</a>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3>Agenda — {fair.date}</h3>
+            <div class="timeline">
+              {fair.agenda.map(a=>(
+                <div class="tl-row">
+                  <span class="tl-time">{a.time}</span>
+                  <div>
+                    <strong style="font-size:14px;">{a.title}</strong>
+                    <div class="small muted">{a.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article class="card">
+            <h3>Perusahaan Peserta ({fair.companies})</h3>
+            <div class="grid-2" style="margin-top:10px;">
+              {fair.exhibitors.map(e=>(
+                <div class="exhibitor">
+                  <div class="ph ph-logo">Logo</div>
+                  <div>
+                    <strong style="font-size:13px;">{e}</strong>
+                    <div class="tiny">{fair.geo} · Hiring</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p class="tiny" style="margin-top:10px;">+70 perusahaan lainnya akan diumumkan H-3 di Instagram @portalkerja</p>
+          </article>
+
+          <AdSlot type="infeed" />
+
+          <article class="card" id="daftar">
+            <h2 style="font-size:18px;">Cara Daftar & Tips Hadir</h2>
+            <ol class="steps">
+              <li>Daftar online via tombol <strong>Daftar Hadir</strong> — dapat QR tiket gratis.</li>
+              <li>Bawa 3× CV cetak + portofolio (jika ada) dan berpakaian rapi.</li>
+              <li>Datang 30 menit awal — sesi walk-in interview antrean panjang.</li>
+              <li>Follow-up HRD via email 1×24 jam setelah event.</li>
+            </ol>
+            <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+              <a class="btn btn-primary" href="#"><i data-lucide="ticket" class="w-3.5 h-3.5"></i> Daftar Sekarang — Gratis</a>
+              <a class="btn" href="#"><i data-lucide="share-2" class="w-3.5 h-3.5"></i> Bagikan Event</a>
+            </div>
+            <div class="notice" style="margin-top:12px;">
+              <span class="dot"></span>
+              <span><strong>GEO signal:</strong> Event di {fair.geo} — dekat dengan pencari kerja Jabodetabek & Jawa Barat. Transport umum tersedia.</span>
+            </div>
+          </article>
+
+          <section>
+            <h2 style="margin-bottom:12px;">Job fair lainnya</h2>
+            <div class="grid-2">
+              {related.map(r=>(
+                <a class="card card-row" href={`/job-fair/${r.slug}/`}>
+                  <div class="date-block"><div class="d">{r.day}</div><div class="m">{r.month}</div></div>
+                  <div>
+                    <span class="caps">{r.geo}</span>
+                    <h3 style="font-size:15px;">{r.title}</h3>
+                    <span class="tiny">{r.location} · {r.price}</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <aside class="sidebar">
+          <div class="side-box" style="border:1px solid var(--cobalt);">
+            <h4>Info Cepat</h4>
+            <div class="stack" style="gap:10px; font-size:13px;">
+              <div class="kv"><span class="tiny">Lokasi (GEO)</span><strong>{fair.location}</strong></div>
+              <div class="kv"><span class="tiny">Tanggal</span><strong>{fair.date}</strong></div>
+              <div class="kv"><span class="tiny">Jam</span><strong>{fair.time}</strong></div>
+              <div class="kv"><span class="tiny">Tiket</span><strong>{fair.price} — daftar online</strong></div>
+              <div class="kv"><span class="tiny">Peserta</span><strong>{fair.companies}</strong></div>
+              <a class="btn btn-primary btn-block" href="#daftar">Daftar Hadir</a>
+              <span class="tiny" style="text-align:center;">Gratis · Kuota harian 2.000</span>
+            </div>
+          </div>
+          <AdSlot type="mrec" />
+          <div class="side-box">
+            <h4>Tanya Panitia?</h4>
+            <p class="small muted">WA official: 08xx-xxxx-xxxx (09.00–17.00 WIB) · Email: event@portalkerja.id</p>
+            <a class="small" href="#" style="color:var(--cobalt);">Chat WhatsApp →</a>
+          </div>
+          <AdSlot type="skyscraper" />
+        </aside>
+      </div>
+    </div>
+  </main>
+  <Footer />
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context":"https://schema.org",
+    "@type":"Event",
+    "name": fair.title,
+    "description": description,
+    "startDate": "2026-09-12T09:00:00+07:00",
+    "endDate": "2026-09-12T17:00:00+07:00",
+    "location": {"@type":"Place","name": fair.location, "address": fair.geo},
+    "offers": {"@type":"Offer","price":"0","priceCurrency":"IDR","availability":"https://schema.org/InStock"},
+    "url": canonical,
+    "organizer": {"@type":"Organization","name":"PortalKerja"}
+  })} />
+  <style>
+    .breadcrumb{display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:16px 0 8px; font-size:13px; color:var(--muted);}
+    .breadcrumb a:hover{color:var(--cobalt);}
+    .detail-head{background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:18px; display:flex; gap:18px; align-items:flex-start; box-shadow:var(--shadow);}
+    .head-cta{width:220px; flex:none; display:flex; flex-direction:column; gap:8px;}
+    .timeline{display:flex; flex-direction:column; gap:12px; margin-top:12px;}
+    .tl-row{display:flex; gap:14px; align-items:flex-start; border-bottom:1px solid var(--border); padding-bottom:10px;}
+    .tl-row:last-child{border:0;}
+    .tl-time{font-size:12px; font-weight:700; color:var(--cobalt); background:var(--periwinkle-soft); padding:4px 8px; border-radius:var(--r-full); flex:none;}
+    .exhibitor{display:flex; gap:10px; align-items:center; border:1px solid var(--border); border-radius:var(--r-sm); padding:10px; background:var(--surface);}
+    .steps{margin:10px 0 0 18px; color:var(--muted); font-size:14px; line-height:1.9;}
+    .kv{display:flex; flex-direction:column; gap:2px; border-bottom:1px solid var(--border); padding-bottom:8px;}
+    @media(max-width:780px){.detail-head{flex-direction:column;} .head-cta{width:100%;}}
+  </style>
+</BaseLayout>

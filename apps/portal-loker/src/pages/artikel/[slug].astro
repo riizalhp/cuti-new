@@ -1,0 +1,163 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { artikelList } from '../../data/mock';
+
+export function getStaticPaths(){
+  return artikelList.map(a => ({ params:{slug:a.slug}, props:{artikel:a}}))
+}
+const { artikel } = Astro.props;
+const canonical = `http://localhost:3003/artikel/${artikel.slug}/`;
+const title = `${artikel.title} | PortalKerja`;
+const description = artikel.excerpt;
+const related = artikelList.filter(x=>x.slug!==artikel.slug).slice(0,3);
+---
+<BaseLayout title={title} description={description} canonicalUrl={canonical}>
+  <Header />
+  <main>
+    <div class="wrap">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Beranda</a><span>›</span>
+        <a href="/#artikel">Artikel</a><span>›</span>
+        <a href="/#artikel">{artikel.category}</a><span>›</span>
+        <span aria-current="page">{artikel.title.slice(0,32)}…</span>
+      </nav>
+
+      <div class="layout" style="padding-top:12px;">
+        <article class="stack">
+          <!-- Hero artikel -->
+          <div class="card" style="padding:22px;">
+            <span class="caps" style="display:flex; align-items:center; gap:6px;"><i data-lucide="file-text" class="w-3.5 h-3.5"></i> {artikel.category} · {artikel.date} · {artikel.readTime}</span>
+            <h1 style="font-size:32px; margin-top:8px; line-height:1.15;">{artikel.title}</h1>
+            <p class="muted" style="margin-top:10px; font-size:15px; line-height:1.6;">{artikel.excerpt}</p>
+            <div style="display:flex; gap:12px; align-items:center; margin-top:14px; border-top:1px solid var(--border); padding-top:14px;">
+              <div class="ph" style="width:36px; height:36px; border-radius:50%;">PK</div>
+              <div>
+                <div style="font-size:13px; font-weight:600;">Tim PortalKerja</div>
+                <div class="tiny">Kurasi karier · Diverifikasi editor</div>
+              </div>
+              <div style="margin-left:auto; display:flex; gap:8px;">
+                <a class="chip" href="#"><i data-lucide="share-2" class="w-3.5 h-3.5"></i> Bagikan</a>
+                <a class="chip" href="#"><i data-lucide="bookmark" class="w-3.5 h-3.5"></i> Simpan</a>
+              </div>
+            </div>
+            <div class="ph" style="height:280px; margin-top:16px;">Gambar Cover — 800×400</div>
+            <div class="tiny" style="margin-top:6px;">Ilustrasi: arsip PortalKerja — tips karier untuk talenta muda Indonesia</div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 220px; gap:18px; align-items:start;">
+            <!-- Content -->
+            <div class="card prose">
+              <h2>Daftar Isi</h2>
+              <ol class="small muted" style="margin-left:18px; line-height:1.9;">
+                <li><a href="#p1" style="color:var(--cobalt);">Kenapa HRD menolak CV-mu?</a></li>
+                <li><a href="#p2" style="color:var(--cobalt);">Format ATS-friendly</a></li>
+                <li><a href="#p3" style="color:var(--cobalt);">Checklist sebelum kirim</a></li>
+              </ol>
+              <div id="p1">
+                {artikel.content.map((p,i)=>(
+                  <p>{p}</p>
+                ))}
+                <blockquote>“HRD butuh kejelasan, bukan panjang. Satu halaman dengan hasil terukur lebih menarik daripada dua halaman penuh jargon.”</blockquote>
+                <h3>Checklist Cepat</h3>
+                <ul>
+                  <li>Satu halaman untuk 0–2 tahun pengalaman</li>
+                  <li>Gunakan angka: “Meningkatkan penjualan 18%”</li>
+                  <li>Keyword sesuai lowongan + lokasi GEO</li>
+                  <li>Simpan PDF, nama file: Nama-Posisi-Kota.pdf</li>
+                </ul>
+              </div>
+              <div id="p2" style="margin-top:18px;">
+                <h3>Template GEO-friendly</h3>
+                <p class="small muted">Cantumkan domisili (contoh: Bandung, Jawa Barat) di header CV. Membantu HRD filter kandidat lokal dan meningkatkan relevansi SEO lamaran.</p>
+              </div>
+
+              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:18px;">
+                {artikel.tags.map(t=><span class="chip">#{t}</span>)}
+              </div>
+
+              <div class="notice" style="margin-top:16px;">
+                <span class="dot"></span>
+                <span>Butuh review CV gratis? Ikuti <a href={`/job-fair/jakarta-career-expo-2026-jcc-hall-a-jakarta-pusat/`} style="color:var(--cobalt); font-weight:600;">Jakarta Career Expo 2026</a> — ada booth CV review.</span>
+              </div>
+            </div>
+
+            <!-- TOC sticky -->
+            <aside style="position:sticky; top:84px; display:flex; flex-direction:column; gap:14px;">
+              <div class="side-box">
+                <h4 style="font-size:13px;">Dalam artikel ini</h4>
+                <div class="stack" style="gap:6px;">
+                  <a class="small" href="#p1">→ Kenapa ditolak</a>
+                  <a class="small" href="#p2">→ Template GEO</a>
+                  <a class="small" href="#p3">→ Checklist</a>
+                </div>
+              </div>
+              <AdSlot type="mrec" />
+            </aside>
+          </div>
+
+          <AdSlot type="infeed" />
+
+          <!-- Related -->
+          <section>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px;">
+              <h2>Artikel terkait</h2>
+              <a class="small" href="/#artikel">Semua artikel →</a>
+            </div>
+            <div class="grid-3">
+              {related.map(r=>(
+                <a class="card" href={`/artikel/${r.slug}/`}>
+                  <div class="ph" style="height:110px;">Gambar</div>
+                  <span class="caps">{r.category}</span>
+                  <h3 style="font-size:14px; line-height:1.35;">{r.title}</h3>
+                  <span class="tiny">{r.date} · {r.readTime}</span>
+                </a>
+              ))}
+            </div>
+          </section>
+        </article>
+
+        <aside class="sidebar">
+          <div class="side-box">
+            <h4>Artikel Populer</h4>
+            <div class="stack" style="gap:10px;">
+              {artikelList.slice(0,4).map(a=>(
+                <a class="small" href={`/artikel/${a.slug}/`} style="border-bottom:1px solid var(--border); padding-bottom:8px; line-height:1.4;">{a.title}</a>
+              ))}
+            </div>
+          </div>
+          <AdSlot type="mrec" />
+          <div class="side-box" style="background:var(--cobalt); color:#fff; border-color:var(--cobalt);">
+            <h4 style="color:#fff;">Dapat notifikasi lowongan?</h4>
+            <p style="font-size:13px; opacity:.9; margin-top:6px;">Daftar gratis, pilih kota GEO-mu, dan dapatkan kurasi tiap Senin.</p>
+            <a class="btn" style="margin-top:12px; background:#fff; color:var(--cobalt);" href="http://localhost:3000/register">Daftar Gratis</a>
+          </div>
+          <AdSlot type="skyscraper" />
+        </aside>
+      </div>
+    </div>
+  </main>
+  <Footer />
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context":"https://schema.org",
+    "@type":"Article",
+    "headline": artikel.title,
+    "description": artikel.excerpt,
+    "datePublished":"2026-08-18",
+    "author":{"@type":"Organization","name":"PortalKerja"},
+    "mainEntityOfPage": canonical,
+    "keywords": artikel.tags.join(", ")
+  })} />
+  <style>
+    .breadcrumb{display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:16px 0 8px; font-size:13px; color:var(--muted);}
+    .breadcrumb a:hover{color:var(--cobalt);}
+    .prose p{font-size:14.5px; line-height:1.75; color:var(--ink); margin-top:12px;}
+    .prose h2{font-size:20px; margin-top:18px;}
+    .prose h3{font-size:16px; margin-top:14px;}
+    .prose blockquote{border-left:3px solid var(--cobalt); padding:10px 14px; background:var(--periwinkle-soft); border-radius:var(--r-sm); margin-top:14px; font-style:italic; color:var(--muted);}
+    .prose ul{margin:10px 0 0 18px; color:var(--muted); font-size:14px; line-height:1.7;}
+    @media(max-width: 900px){ div[style*="grid-template-columns: 1fr 220px"]{grid-template-columns:1fr !important;} }
+  </style>
+</BaseLayout>

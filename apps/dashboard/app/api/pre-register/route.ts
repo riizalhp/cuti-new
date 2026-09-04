@@ -19,34 +19,54 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { name, email, phone_number, role_status } = body;
 
-    if (!name || !email || !phone_number) {
+    const cleanPhone = phone_number ? String(phone_number).trim() : '';
+    const cleanName = name && String(name).trim() ? String(name).trim() : (cleanPhone || 'Friend');
+    const cleanRole = role_status ? String(role_status).trim() : 'EARLY_TESTER';
+
+    if (!cleanPhone && (!email || !String(email).trim())) {
       return NextResponse.json(
-        { success: false, message: 'Nama, email, dan nomor telepon wajib diisi.' },
+        { success: false, message: 'Please provide your WhatsApp number.' },
         { status: 400, headers: corsHeaders }
       );
     }
 
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanName = name.trim();
-    const cleanPhone = String(phone_number).trim();
-    const cleanRole = role_status ? String(role_status).trim() : null;
+    // Format phone to normalized string (e.g. 0812... or 62812...)
+    const normalizedPhone = cleanPhone.replace(/[^0-9+]/g, '');
 
-    // Simple email regex check
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(cleanEmail)) {
-      return NextResponse.json(
-        { success: false, message: 'Format alamat email tidak valid.' },
-        { status: 400, headers: corsHeaders }
-      );
+    // If email is provided, validate it. Otherwise create a virtual unique placeholder email
+    let cleanEmail = email && String(email).trim() ? String(email).trim().toLowerCase() : '';
+    if (cleanEmail) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(cleanEmail)) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid email address.' },
+          { status: 400, headers: corsHeaders }
+        );
+      }
+    } else {
+      // Synthetic email for database uniqueness
+      const safePhoneKey = normalizedPhone.replace(/\+/g, '') || crypto.randomUUID().slice(0, 8);
+      cleanEmail = `wa_${safePhoneKey}@wa.employr.id`;
     }
 
-    // Check if email is already in early_testers or users
+    // Check if phone or email is already in early_testers
     let existingTester = null;
     try {
       if ((prisma as any).earlyTester) {
-        existingTester = await (prisma as any).earlyTester.findUnique({
-          where: { email: cleanEmail },
-        });
+        if (normalizedPhone) {
+          existingTester = await (prisma as any).earlyTester.findFirst({
+            where: {
+              OR: [
+                { phone_number: normalizedPhone },
+                { email: cleanEmail }
+              ]
+            },
+          });
+        } else {
+          existingTester = await (prisma as any).earlyTester.findUnique({
+            where: { email: cleanEmail },
+          });
+        }
       }
     } catch (e) {
       console.warn('Prisma earlyTester lookup warning:', e);
@@ -57,11 +77,11 @@ export async function POST(req: NextRequest) {
         {
           success: true,
           isExisting: true,
-          message: 'Email kamu sudah terdaftar di daftar Early Tester! Kami akan segera mengirimkan akses saat peluncuran.',
+          message: "You're already on the waitlist! We'll notify you as soon as early access opens.",
           data: {
             id: existingTester.id,
             name: existingTester.name,
-            email: existingTester.email,
+            phone_number: existingTester.phone_number,
           },
         },
         { status: 200, headers: corsHeaders }

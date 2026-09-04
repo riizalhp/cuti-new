@@ -1,0 +1,170 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { sertifikatList } from '../../data/mock';
+
+export function getStaticPaths(){
+  return sertifikatList.map(s=>({params:{slug:s.slug}, props:{sert:s}}))
+}
+const { sert } = Astro.props;
+const canonical = `http://localhost:3003/sertifikat/${sert.slug}/`;
+const title = `${sert.title} — ${sert.issuer} | ${sert.geo} | PortalKerja`;
+const description = `${sert.title} oleh ${sert.issuer}. Biaya ${sert.price} · ${sert.validity} · ${sert.type}. Lokasi: ${sert.geo}. Syarat & jadwal lengkap.`;
+const related = sertifikatList.filter(x=>x.slug!==sert.slug).slice(0,3);
+---
+<BaseLayout title={title} description={description} canonicalUrl={canonical}>
+  <Header />
+  <main>
+    <div class="wrap">
+      <nav class="breadcrumb">
+        <a href="/">Beranda</a><span>›</span>
+        <a href="/#sertifikat">Sertifikat</a><span>›</span>
+        <a href="/#sertifikat">{sert.issuer}</a><span>›</span>
+        <span aria-current="page">{sert.title}</span>
+      </nav>
+
+      <div class="detail-head">
+        <div style="flex:1;">
+          <span class="caps">{sert.issuer} · {sert.geo}</span>
+          <h1 style="font-size:28px; margin-top:6px;">{sert.title}</h1>
+          <div class="meta" style="margin-top:10px;">
+            <span><i data-lucide="wallet" class="w-3.5 h-3.5 text-emerald-600"></i> {sert.price}</span>
+            <span><i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i> {sert.validity}</span>
+            <span><i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-500"></i> {sert.geo}</span>
+            <span><i data-lucide="award" class="w-3.5 h-3.5 text-violet-600"></i> {sert.type}</span>
+          </div>
+          <div class="chips" style="margin-top:10px;">
+            <span class="chip dark">{sert.level}</span>
+            {sert.benefits.slice(0,2).map(b=><span class="chip">{b}</span>)}
+            <span class="badge lime">GEO: {sert.geo.split('·')[0].trim()}</span>
+          </div>
+        </div>
+        <div class="head-cta">
+          <a class="btn btn-primary btn-block" href="#daftar"><i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i> Daftar Ujian</a>
+          <a class="btn btn-block" href="#"><i data-lucide="download" class="w-3.5 h-3.5"></i> Unduh Brosur</a>
+          <span class="tiny" style="text-align:center;">Jadwal: {sert.schedule}</span>
+        </div>
+      </div>
+
+      <div class="layout" style="padding-top:18px;">
+        <div class="stack">
+          <article class="card">
+            <h2 style="font-size:18px;">Ringkasan Skema</h2>
+            <p class="small muted" style="line-height:1.7;">Sertifikasi <strong>{sert.title}</strong> diterbitkan oleh <strong>{sert.issuer}</strong> dan diakui sesuai standar industri. Cocok untuk pelamar di wilayah <strong>{sert.geo}</strong> yang ingin menambah daya saing lamaran kerja.</p>
+            <div class="grid-2" style="margin-top:14px;">
+              <div class="kv-card">
+                <span class="tiny">Penerbit</span><strong>{sert.issuer}</strong>
+              </div>
+              <div class="kv-card">
+                <span class="tiny">Biaya</span><strong>{sert.price}</strong>
+              </div>
+              <div class="kv-card">
+                <span class="tiny">Masa Berlaku</span><strong>{sert.validity}</strong>
+              </div>
+              <div class="kv-card">
+                <span class="tiny">Tipe Ujian</span><strong>{sert.type}</strong>
+              </div>
+            </div>
+          </article>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <article class="card">
+              <h3>Manfaat</h3>
+              <ul class="list">
+                {sert.benefits.map(b=><li>{b}</li>)}
+              </ul>
+            </article>
+            <article class="card">
+              <h3>Syarat Dokumen</h3>
+              <ul class="list">
+                {sert.requirements.map(r=><li>{r}</li>)}
+              </ul>
+            </article>
+          </div>
+
+          <article class="card">
+            <h3>Alur Pendaftaran (GEO: {sert.geo})</h3>
+            <ol class="steps">
+              <li><strong>Daftar online</strong> — pilih TUK terdekat di {sert.geo}</li>
+              <li><strong>Verifikasi berkas</strong> — 1–2 hari kerja</li>
+              <li><strong>Uji kompetensi</strong> — tulis & praktik sesuai skema</li>
+              <li><strong>Sertifikat terbit</strong> — digital + cetak, cek di bnsp.go.id</li>
+            </ol>
+            <div class="notice" style="margin-top:12px;">
+              <span class="dot"></span>
+              <span><strong>Lokasi ujian:</strong> {sert.geo} — pilih Tempat Uji Kompetensi (TUK) terdekat saat mendaftar. Kuota terbatas.</span>
+            </div>
+          </article>
+
+          <AdSlot type="infeed" />
+
+          <article class="card" id="daftar">
+            <h2 style="font-size:18px;">Jadwal & Cara Daftar</h2>
+            <p class="small muted">{sert.schedule} — pendaftaran H-7. Hubungi LSP/TUK di kotamu.</p>
+            <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+              <a class="btn btn-primary" href="#"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> Daftar via LSP Resmi</a>
+              <a class="btn" href="#"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Tanya Admin (WA)</a>
+            </div>
+            <p class="tiny" style="margin-top:8px;">PortalKerja hanya mengkurasi info — pendaftaran & pembayaran langsung ke penerbit resmi.</p>
+          </article>
+
+          <section>
+            <h2 style="margin-bottom:12px;">Sertifikasi lain</h2>
+            <div class="grid-2">
+              {related.map(r=>(
+                <a class="card" href={`/sertifikat/${r.slug}/`}>
+                  <span class="caps">{r.issuer} · {r.geo}</span>
+                  <h3 style="font-size:15px;">{r.title}</h3>
+                  <span class="tiny">{r.price} · {r.validity}</span>
+                  <div class="chips"><span class="chip">{r.type}</span></div>
+                </a>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <aside class="sidebar">
+          <div class="side-box" style="border:1px solid var(--cobalt);">
+            <h4>Info Cepat</h4>
+            <div class="stack" style="gap:10px; font-size:13px;">
+              <div class="kv"><span class="tiny">Penerbit</span><strong>{sert.issuer}</strong></div>
+              <div class="kv"><span class="tiny">Biaya</span><strong>{sert.price}</strong></div>
+              <div class="kv"><span class="tiny">Berlaku</span><strong>{sert.validity}</strong></div>
+              <div class="kv"><span class="tiny">Lokasi (GEO)</span><strong>{sert.geo}</strong></div>
+              <div class="kv"><span class="tiny">Jadwal</span><strong>{sert.schedule}</strong></div>
+              <a class="btn btn-primary btn-block" href="#daftar">Daftar Sekarang</a>
+            </div>
+          </div>
+          <AdSlot type="mrec" />
+          <div class="side-box">
+            <h4>Cek Keaslian</h4>
+            <p class="small muted">Pastikan TUK terdaftar di bnsp.go.id. Waspada calo — biaya resmi sesuai brosur LSP.</p>
+          </div>
+          <AdSlot type="skyscraper" />
+        </aside>
+      </div>
+    </div>
+  </main>
+  <Footer />
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context":"https://schema.org",
+    "@type":"Course",
+    "name": sert.title,
+    "description": description,
+    "provider": {"@type":"Organization","name":sert.issuer},
+    "url": canonical
+  })} />
+  <style>
+    .breadcrumb{display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:16px 0 8px; font-size:13px; color:var(--muted);}
+    .breadcrumb a:hover{color:var(--cobalt);}
+    .detail-head{background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:18px; display:flex; gap:18px; align-items:flex-start; box-shadow:var(--shadow);}
+    .head-cta{width:220px; flex:none; display:flex; flex-direction:column; gap:8px;}
+    .kv-card{border:1px solid var(--border); border-radius:var(--r-sm); padding:12px; background:var(--periwinkle-soft); display:flex; flex-direction:column; gap:2px;}
+    .list{margin:8px 0 0 18px; color:var(--muted); font-size:14px; line-height:1.7;}
+    .steps{margin:10px 0 0 18px; color:var(--muted); font-size:14px; line-height:1.9;}
+    .kv{display:flex; flex-direction:column; gap:2px; border-bottom:1px solid var(--border); padding-bottom:8px;}
+    @media(max-width:780px){.detail-head{flex-direction:column;} .head-cta{width:100%;} div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important;}}
+  </style>
+</BaseLayout>

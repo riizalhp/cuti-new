@@ -2,45 +2,213 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PreRegisterForm from '../components/employer/PreRegisterForm';
 
-const logoMark = '/logo.webp';
+const logoMinimize = '/logo-minimize.webp';
 ---
 
 <BaseLayout
-  title="Daftar Early Tester: Akses Akun Gratis — Employr"
-  description="Dapatkan akses gratis seumur hidup sebagai Early Tester. Buat CV ATS-friendly, pantau lamaran kerja, dan siapkan karier impianmu."
+  title="Waiting List — Employr"
+  description="Join the waitlist and be the first to know when Employr launches. The next chapter starts with you."
   canonicalUrl="https://employr.id/pre-register"
 >
-  <div class="min-h-screen bg-white text-[#101010] font-sans p-6 sm:p-10 flex flex-col justify-between selection:bg-[#0000ff] selection:text-white">
-    <!-- Top Header -->
-    <header class="max-w-lg w-full mx-auto flex items-center justify-between">
-      <a href="/" class="flex items-center gap-2 hover:opacity-80 transition" aria-label="Beranda">
-        <img src={logoMark} alt="Employr" class="h-7 sm:h-8 w-auto object-contain" />
-      </a>
+  <div class="relative h-screen h-[100dvh] w-full flex flex-col justify-between selection:bg-[#1738D1] selection:text-white overflow-hidden bg-slate-950 font-sans">
+    <!-- Ambient Background Video -->
+    <div class="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
+      <video
+        id="bg-video"
+        class="w-full h-full object-cover object-[78%_center] sm:object-center block"
+        autoplay
+        loop
+        muted
+        playsinline
+        webkit-playsinline="true"
+        x5-playsinline="true"
+        preload="auto"
+        aria-hidden="true"
+      >
+        <source src="/waiting-list.mp4" type="video/mp4" />
+        <source src="/waiting-list.webm" type="video/webm" />
+      </video>
+    </div>
 
+    <!-- Deep Cinematic Black Gradient on Left (Responsive: allows person on right to be visible on mobile) -->
+    <div
+      class="fixed inset-0 pointer-events-none z-[1] hidden sm:block"
+      style="background: linear-gradient(to right, #000000 0%, rgba(0,0,0,0.96) 25%, rgba(0,0,0,0.85) 42%, rgba(0,0,0,0.5) 62%, rgba(0,0,0,0.15) 80%, transparent 100%);"
+    ></div>
+    <div
+      class="fixed inset-0 pointer-events-none z-[1] block sm:hidden"
+      style="background: linear-gradient(to right, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.78) 45%, rgba(0,0,0,0.35) 75%, rgba(0,0,0,0.15) 100%);"
+    ></div>
+
+    <!-- Soft Top & Bottom Vignette -->
+    <div
+      class="fixed inset-0 pointer-events-none z-[1]"
+      style="background: linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, transparent 18%, transparent 72%, rgba(0,0,0,0.75) 100%);"
+    ></div>
+
+    <!-- Top Header: Logo on Left -->
+    <header class="w-full shrink-0 flex items-center justify-between relative z-10 px-6 sm:px-12 lg:px-16 pt-5 sm:pt-7 pb-2">
       <a
         href="/"
-        class="text-xs font-bold text-gray-400 hover:text-gray-700 transition flex items-center gap-1.5 py-1.5 px-3 rounded-full hover:bg-black/5"
+        class="flex items-center hover:opacity-90 transition cursor-pointer"
+        aria-label="Employr Home"
       >
-        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-        <span>Tutup</span>
+        <img
+          src="/logo.webp"
+          alt="Employr"
+          class="h-7 w-auto object-contain"
+          style="height: 28px; width: auto; filter: brightness(0) invert(1); -webkit-filter: brightness(0) invert(1);"
+        />
       </a>
     </header>
 
-    <!-- Center Screen Content (Onboarding Cardless Style) -->
-    <main class="max-w-lg w-full mx-auto my-auto py-8 sm:py-12">
-      <PreRegisterForm client:load />
+    <!-- Main Content: Perfectly Centered in 1-screen Viewport -->
+    <main class="w-full flex-1 flex flex-col justify-center max-w-7xl mx-auto px-6 sm:px-12 lg:px-16 py-2 relative z-10 !bg-transparent min-h-0">
+      <div class="max-w-2xl w-full">
+
+        <!-- Hero Headline -->
+        <h1 class="waitlist-heading text-3xl sm:text-5xl lg:text-[4.25rem] xl:text-[4.5rem] font-bold text-white tracking-[-0.035em] leading-[1.05] drop-shadow-sm">
+          The next chapter<br />
+          <span class="waitlist-serif italic font-normal text-white">starts with you</span><span class="text-[#2563EB] waitlist-heading not-italic">.</span>
+        </h1>
+
+        <!-- Lede Subtitle -->
+        <p class="waitlist-body mt-4 sm:mt-5 text-sm sm:text-base text-white/70 max-w-md font-medium leading-relaxed">
+          Join the waitlist and be the first to know when Employr launches.
+        </p>
+
+        <!-- Interactive Form Component -->
+        <div class="mt-6 sm:mt-7">
+          <PreRegisterForm client:load />
+        </div>
+      </div>
     </main>
 
-    <!-- Bottom Footer -->
-    <footer class="max-w-lg w-full mx-auto text-center pt-4">
-      <p class="text-xs font-medium text-gray-400 flex items-center justify-center gap-1.5">
-        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-        </svg>
-        <span>Data kamu aman bersama Employr</span>
-      </p>
+    <!-- Bottom Footer: Logo Mark & Copyright on Left, Social Links on Right -->
+    <footer class="w-full shrink-0 flex flex-col sm:flex-row items-center justify-between px-6 sm:px-12 lg:px-16 py-4 sm:py-5 relative z-10 gap-3 border-t border-white/5">
+      <!-- Left: Logo Glyth & Copyright -->
+      <div class="flex items-center gap-2.5">
+        <img
+          src={logoMinimize}
+          alt="Employr"
+          class="h-5 sm:h-5.5 w-auto object-contain"
+        />
+        <span class="text-xs text-white/50 font-normal">
+          &copy; 2026 Employr. All rights reserved.
+        </span>
+      </div>
+
+      <!-- Right: Social Links -->
+      <div class="flex items-center gap-6 sm:gap-7 text-xs font-medium text-white/60">
+        <a
+          href="https://instagram.com/employr.id"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hover:text-white transition cursor-pointer"
+        >
+          Instagram
+        </a>
+        <a
+          href="https://threads.net/@employr.id"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hover:text-white transition cursor-pointer"
+        >
+          Threads
+        </a>
+      </div>
     </footer>
+
+    <!-- Robust Mobile Video Autoplay & Infinite Loop Enforcement -->
+    <script is:inline>
+      (function() {
+        var vid = document.getElementById('bg-video');
+        if (!vid) return;
+
+        // Force browser muted states required by iOS Safari & Android Chrome
+        vid.muted = true;
+        vid.defaultMuted = true;
+        vid.setAttribute('muted', '');
+        vid.setAttribute('playsinline', '');
+        vid.setAttribute('webkit-playsinline', 'true');
+
+        function startPlayback() {
+          if (!vid) return;
+          vid.muted = true;
+          var p = vid.play();
+          if (p !== undefined) {
+            p.catch(function(err) {
+              console.warn('[Video Autoplay] waiting for user gesture fallback:', err);
+            });
+          }
+        }
+
+        // 1. Initial attempt
+        startPlayback();
+
+        // 2. Guarantee infinite loop even if mobile browser pauses at end
+        vid.addEventListener('ended', function() {
+          vid.currentTime = 0;
+          startPlayback();
+        });
+
+        // 3. Fallback on first touch or scroll (iOS Power Save Mode / Chrome Data Saver)
+        var triggerStarted = false;
+        function onUserInteraction() {
+          if (triggerStarted) return;
+          triggerStarted = true;
+          startPlayback();
+          window.removeEventListener('touchstart', onUserInteraction);
+          window.removeEventListener('scroll', onUserInteraction);
+          window.removeEventListener('click', onUserInteraction);
+        }
+        window.addEventListener('touchstart', onUserInteraction, { passive: true });
+        window.addEventListener('scroll', onUserInteraction, { passive: true });
+        window.addEventListener('click', onUserInteraction, { passive: true });
+
+        // 4. Resume playback if user switches tabs and returns
+        document.addEventListener('visibilitychange', function() {
+          if (!document.hidden && vid.paused) {
+            startPlayback();
+          }
+        });
+      })();
+    </script>
   </div>
 </BaseLayout>
+
+<style is:global>
+  html,
+  body {
+    height: 100% !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+    background-color: #020617 !important;
+    background: #020617 !important;
+  }
+  main,
+  .site-main {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+  .waitlist-heading {
+    font-family: 'Inter Tight', 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .waitlist-serif {
+    font-family: 'Instrument Serif', Georgia, serif;
+  }
+  .waitlist-body {
+    font-family: 'Inter Tight', 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  input[type="email"],
+  input[type="tel"],
+  input[type="text"] {
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+  }
+</style>
+

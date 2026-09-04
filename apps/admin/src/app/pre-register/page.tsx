@@ -346,13 +346,17 @@ export default function AdminPreRegisterPage() {
                         {tester.name}
                       </td>
                       <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-slate-300">
-                        <a
-                          href={`mailto:${tester.email}`}
-                          className="hover:text-blue-600 dark:hover:text-blue-400 inline-flex items-center gap-1"
-                        >
-                          <Mail size={12} className="text-slate-400" />
-                          <span>{tester.email}</span>
-                        </a>
+                        {tester.email && !tester.email.includes("@wa.employr.id") ? (
+                          <a
+                            href={`mailto:${tester.email}`}
+                            className="hover:text-blue-600 dark:hover:text-blue-400 inline-flex items-center gap-1"
+                          >
+                            <Mail size={12} className="text-slate-400" />
+                            <span>{tester.email}</span>
+                          </a>
+                        ) : (
+                          <span className="text-slate-400 italic text-xs">WhatsApp Only</span>
+                        )}
                       </td>
                       <td className="py-3.5 px-4 font-mono">
                         {tester.phone_number ? (

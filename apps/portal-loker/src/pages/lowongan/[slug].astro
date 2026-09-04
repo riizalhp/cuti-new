@@ -1,0 +1,177 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { lowonganList } from '../../data/mock';
+
+export function getStaticPaths() {
+  return lowonganList.map((job) => ({
+    params: { slug: job.slug },
+    props: { job },
+  }));
+}
+
+const { job } = Astro.props;
+const canonical = `http://localhost:3003/lowongan/${job.slug}/`;
+const title = `${job.title} — ${job.company} di ${job.geo} | PortalKerja`;
+const description = `${job.title} di ${job.company}, ${job.location}. ${job.type} · ${job.salary}. ${job.description.slice(0, 140)}`;
+const related = lowonganList.filter((j) => j.slug !== job.slug).slice(0, 3);
+---
+<BaseLayout title={title} description={description} canonicalUrl={canonical}>
+  <Header />
+  <main>
+    <div class="wrap">
+      <!-- Breadcrumb SEO -->
+      <nav aria-label="Breadcrumb" class="breadcrumb">
+        <a href="/">Beranda</a><span>›</span>
+        <a href="/#lowongan">Lowongan</a><span>›</span>
+        <a href={`/#lowongan`}>{job.geo}</a><span>›</span>
+        <span aria-current="page">{job.title}</span>
+      </nav>
+
+      <!-- GEO badge + posted -->
+      <div class="detail-head">
+        <div class="ph ph-logo" aria-hidden="true">Logo</div>
+        <div class="head-main">
+          <div class="caps" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <span>{job.company} · {job.geo}</span>
+            {job.badge && <span class="badge lime">{job.badge}</span>}
+            <span class="tiny" style="font-weight:500;">{job.postedAt} · {job.type}</span>
+          </div>
+          <h1 style="font-size:28px; margin-top:6px;">{job.title} <em>di {job.geo}</em></h1>
+          <div class="meta" style="margin-top:8px;">
+            <span><i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-500"></i> {job.location}</span>
+            <span><i data-lucide="briefcase" class="w-3.5 h-3.5 text-slate-400"></i> {job.type}</span>
+            <span><i data-lucide="dollar-sign" class="w-3.5 h-3.5 text-emerald-600"></i> {job.salary}</span>
+            <span><i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i> Tayang {job.postedAt}</span>
+          </div>
+          <div class="chips" style="margin-top:10px;">
+            {job.skills.map((s) => <span class="chip">{s}</span>)}
+          </div>
+        </div>
+        <div class="head-cta">
+          <a class="btn btn-primary btn-block" href="#lamar"><i data-lucide="send" class="w-3.5 h-3.5"></i> Lamar Sekarang</a>
+          <button class="btn btn-block" type="button"><i data-lucide="heart" class="w-3.5 h-3.5"></i> Simpan</button>
+          <span class="tiny" style="text-align:center; display:block; margin-top:6px;">Dilamar 86 orang · Sisa 12 hari</span>
+        </div>
+      </div>
+
+      <div class="layout" style="padding-top:18px;">
+        <!-- LEFT: MAIN CONTENT -->
+        <div class="stack">
+          <article class="card">
+            <h2 style="font-size:18px;">Deskripsi Pekerjaan</h2>
+            <p class="muted" style="font-size:14px; line-height:1.7;">{job.description}</p>
+            <div class="divider"></div>
+            <h3>Kualifikasi</h3>
+            <ul class="list">
+              {job.qualifications.map((q) => <li>{q}</li>)}
+            </ul>
+            <h3 style="margin-top:16px;">Benefit & Fasilitas</h3>
+            <ul class="list">
+              {job.benefits.map((b) => <li>{b}</li>)}
+            </ul>
+            <div class="notice" style="margin-top:16px;">
+              <span class="dot"></span>
+              <span><strong>Lokasi GEO:</strong> {job.location} — cocok untuk pencari kerja di {job.geo} dan sekitarnya. Waspada penipuan: proses rekrutmen gratis.</span>
+            </div>
+          </article>
+
+          <!-- In-feed Ad GEO targeted -->
+          <AdSlot type="infeed" note={`Iklan relevan untuk ${job.geo}`} />
+
+          <article class="card" id="lamar">
+            <h2 style="font-size:18px;">Cara Melamar</h2>
+            <p class="small">Klik <strong>Lamar Sekarang</strong> untuk mengirim CV via PortalKerja. Kamu akan diarahkan ke dashboard untuk lengkapi profil dan kirim lamaran tercatat.</p>
+            <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+              <a class="btn btn-primary" href={`http://localhost:3000/register`}><i data-lucide="send" class="w-3.5 h-3.5"></i> Lamar via PortalKerja</a>
+              <a class="btn" href="#"><i data-lucide="share-2" class="w-3.5 h-3.5"></i> Bagikan Lowongan</a>
+            </div>
+            <p class="tiny" style="margin-top:10px;">Dengan melamar kamu menyetujui syarat & ketentuan PortalKerja. Lowongan diverifikasi tim kurasi.</p>
+          </article>
+
+          <article class="card">
+            <h3>Tentang {job.company}</h3>
+            <p class="small muted" style="line-height:1.7;">{job.companyAbout}</p>
+            <div class="chips" style="margin-top:10px;">
+              <span class="chip">Terverifikasi</span>
+              <span class="chip">{job.geo}</span>
+              <span class="chip">Aktif merekrut</span>
+            </div>
+          </article>
+
+          <!-- Related -->
+          <section>
+            <h2 style="margin-bottom:12px;">Lowongan serupa di {job.geo}</h2>
+            <div class="grid-2">
+              {related.map((r) => (
+                <a class="card" href={`/lowongan/${r.slug}/`} style="text-decoration:none;">
+                  <span class="caps">{r.company} · {r.geo}</span>
+                  <h3 style="font-size:15px;">{r.title}</h3>
+                  <span class="tiny">{r.location} · {r.salary}</span>
+                  <div class="chips">{r.skills.slice(0,2).map((s)=><span class="chip">{s}</span>)}</div>
+                </a>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <!-- RIGHT: SIDEBAR -->
+        <aside class="sidebar">
+          <div class="side-box" style="border:1px solid var(--cobalt);">
+            <h4>Ringkasan Lowongan</h4>
+            <div class="stack" style="gap:10px; font-size:13px;">
+              <div class="kv"><span class="tiny">Perusahaan</span><strong>{job.company}</strong></div>
+              <div class="kv"><span class="tiny">Lokasi (GEO)</span><strong>{job.location}</strong></div>
+              <div class="kv"><span class="tiny">Tipe</span><strong>{job.type}</strong></div>
+              <div class="kv"><span class="tiny">Gaji</span><strong>{job.salary}</strong></div>
+              <div class="kv"><span class="tiny">Diposting</span><strong>{job.postedAt}</strong></div>
+              <a class="btn btn-primary btn-block" href="#lamar" style="margin-top:6px;">Lamar Sekarang</a>
+              <span class="tiny" style="text-align:center;">Gratis — tanpa pungutan</span>
+            </div>
+          </div>
+
+          <AdSlot type="mrec" />
+
+          <div class="side-box">
+            <h4>Tips Lolos di {job.geo}</h4>
+            <p class="small muted">Update CV dengan keyword <em>{job.skills[0]}</em> dan lokasi {job.geo} agar ATS mudah menemukan lamaranmu.</p>
+            <a class="small" href={`/artikel/7-kesalahan-cv-fresh-graduate-ditolak-hrd-tips-lolos-ats-2026/`} style="color:var(--cobalt); margin-top:8px; display:block;">Baca panduan CV ATS →</a>
+          </div>
+
+          <AdSlot type="skyscraper" />
+        </aside>
+      </div>
+    </div>
+  </main>
+  <Footer />
+
+  <!-- SEO Structured Data -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    "title": job.title,
+    "description": job.description,
+    "datePosted": "2026-08-18",
+    "employmentType": job.type.toUpperCase().replace('-','_'),
+    "hiringOrganization": { "@type": "Organization", "name": job.company },
+    "jobLocation": { "@type": "Place", "address": { "@type": "PostalAddress", "addressLocality": job.geo, "addressRegion": job.location } },
+    "baseSalary": { "@type": "MonetaryAmount", "currency": "IDR", "value": { "@type": "QuantitativeValue", "value": job.salary } },
+    "url": canonical
+  })} />
+
+  <style>
+    .breadcrumb { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:16px 0 8px; font-size:13px; color:var(--muted);}
+    .breadcrumb a:hover{color:var(--cobalt);}
+    .breadcrumb span[aria-current]{color:var(--ink); font-weight:600;}
+    .detail-head { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:18px; display:flex; gap:18px; align-items:flex-start; box-shadow:var(--shadow); }
+    .head-main{flex:1}
+    .head-cta{width:220px; flex:none; display:flex; flex-direction:column; gap:8px;}
+    .divider{height:1px; background:var(--border); margin:14px 0;}
+    .list{margin:8px 0 0 18px; color:var(--muted); font-size:14px; line-height:1.7;}
+    .kv{display:flex; flex-direction:column; gap:2px; border-bottom:1px solid var(--border); padding-bottom:8px;}
+    .kv:last-child{border:0;}
+    @media(max-width: 780px){ .detail-head{flex-direction:column;} .head-cta{width:100%;} }
+  </style>
+</BaseLayout>
