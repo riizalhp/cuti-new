@@ -1,0 +1,35 @@
+services:
+  cuti-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    image: cuti-api:latest
+    container_name: cuti-api
+    restart: unless-stopped
+    # ponytail: share postgres dgn mfood, beda database
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://cuti:${CUTI_DB_PASSWORD}@cwj5rpthgiaz8v9k0gn1x5mu:5432/cuti"
+      JWT_SECRET: "${CUTI_JWT_SECRET}"
+      JWT_EXPIRES_IN: "7d"
+    networks: [coolify]
+
+  cuti-admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: admin
+    image: cuti-admin:latest
+    container_name: cuti-admin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://cuti:${CUTI_DB_PASSWORD}@cwj5rpthgiaz8v9k0gn1x5mu:5432/cuti"
+      JWT_SECRET: "${CUTI_JWT_SECRET}"
+      ADMIN_SESSION_SECRET: "${CUTI_JWT_SECRET}"
+    networks: [coolify]
+
+networks:
+  coolify:
+    external: true
