@@ -10,7 +10,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { AppLogSource, LogSeverity } from "@prisma/client";
+import { AppLogSource, LogSeverity } from "./generated/client/index.js";
 import { logApp, extractRequestContext } from "./logger.ts";
 
 type RouteHandler = (req: NextRequest, context?: any) => Promise<NextResponse>;

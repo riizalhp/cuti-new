@@ -15,12 +15,12 @@ ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
 # regenerate Prisma client utk Linux (yang di-commit = engine Windows)
 RUN pnpm --filter @cuti/db exec prisma generate
 RUN pnpm --filter @cuti/api build
-# overlay compiled JS balik ke packages (runtime resolve via symlink spt di dev) + swap main
+# overlay compiled JS balik ke packages (runtime resolve via symlink spt di dev)
 RUN cp -r apps/api/dist/packages/db/src/. packages/db/src/ \
- && cp -r apps/api/dist/packages/types/src/. packages/types/src/ \
- && sed -i 's|"main": "./src/index.ts"|"main": "./src/index.js"|' packages/db/package.json \
- && sed -i 's|"main": "./dist/index.js"|"main": "./src/index.js"|' packages/types/package.json
+ && cp -r apps/api/dist/packages/types/src/. packages/types/src/
 RUN pnpm --filter @cuti/admin build
+# swap main+exports .ts→.js utk RUNTIME; AFTER admin build (Next transpile TS via exports .ts — jangan diubah jalurnya)
+RUN node -e 'const fs=require("fs");for(const p of["packages/db/package.json","packages/types/package.json"]){const j=JSON.parse(fs.readFileSync(p,"utf8"));const sw=s=>typeof s==="string"?s.replace(/\.ts$/,".js"):s;j.main=sw(j.main);j.types=sw(j.types);if(j.exports)for(const k of Object.keys(j.exports)){const e=j.exports[k];for(const kk of Object.keys(e))e[kk]=sw(e[kk]);}fs.writeFileSync(p,JSON.stringify(j,null,2));}console.log("exports swapped");'
 
 FROM node:20-slim AS api
 ENV NODE_ENV=production

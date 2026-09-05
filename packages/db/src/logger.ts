@@ -8,9 +8,7 @@
  *   3. appLogs     — Application-level logs (errors, API calls, system events)
  */
 
-// ponytail: enum LogSeverity/SecurityEventType/AppLogSource belum di schema, logger gak dipake di apps/api
-// import { PrismaClient, LogSeverity, SecurityEventType, AppLogSource } from "@prisma/client";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, LogSeverity, SecurityEventType, AppLogSource } from "./generated/client/index.js";
 
 // Singleton prisma — import from index.ts in production, or create one here for isolation
 let _prisma: PrismaClient | null = null;
