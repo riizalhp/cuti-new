@@ -2,13 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminSession } from "@/lib/admin-session";
 
 export async function middleware(req: NextRequest) {
+  // Allow CORS preflight requests without authentication
+  if (req.method === "OPTIONS") {
+    const origin = req.headers.get("origin") || "*";
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+        "Access-Control-Allow-Credentials": "true",
+      },
+    });
+  }
+
   const { pathname } = req.nextUrl;
 
-  // Allow login page, login API, public tracking endpoint, and static assets
+  // Allow login page, login API, public tracking endpoint, public pre-register endpoint, and static assets
   if (
     pathname === "/login" ||
     pathname === "/api/auth/login" ||
     pathname === "/api/track" ||
+    pathname === "/api/pre-register" ||
     pathname === "/site.webmanifest" ||
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml" ||

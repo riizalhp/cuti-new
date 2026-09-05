@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, logApp, extractRequestContext } from '@cuti/db';
+import { prisma } from '@cuti/db';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -22,8 +22,7 @@ export async function OPTIONS(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const corsHeaders = getCorsHeaders(req);
-  const reqContext = extractRequestContext(req);
+  const headers = getCorsHeaders(req);
 
   try {
     const body = await req.json();
@@ -35,8 +34,8 @@ export async function POST(req: NextRequest) {
 
     if (!cleanPhone && (!email || !String(email).trim())) {
       return NextResponse.json(
-        { success: false, message: 'Please provide your WhatsApp number.' },
-        { status: 400, headers: corsHeaders }
+        { success: false, message: 'Harap masukkan nomor WhatsApp yang valid.' },
+        { status: 400, headers }
       );
     }
 
@@ -49,8 +48,8 @@ export async function POST(req: NextRequest) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(cleanEmail)) {
         return NextResponse.json(
-          { success: false, message: 'Invalid email address.' },
-          { status: 400, headers: corsHeaders }
+          { success: false, message: 'Alamat email tidak valid.' },
+          { status: 400, headers }
         );
       }
     } else {
@@ -68,8 +67,9 @@ export async function POST(req: NextRequest) {
             where: {
               OR: [
                 { phone_number: normalizedPhone },
-                { email: cleanEmail }
-              ]
+                { phone_number: cleanPhone },
+                { email: cleanEmail },
+              ],
             },
           });
         } else {
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
         }
       }
     } catch (e) {
-      console.warn('Prisma earlyTester lookup warning:', e);
+      console.warn('[Admin Pre-Register] Prisma lookup warning:', e);
     }
 
     if (existingTester) {
@@ -87,85 +87,50 @@ export async function POST(req: NextRequest) {
         {
           success: true,
           isExisting: true,
-          message: "You're already on the waitlist! We'll notify you as soon as early access opens.",
+          message: 'Nomor kamu sudah terdaftar di daftar tunggu! Kami akan segera menghubungimu.',
           data: {
             id: existingTester.id,
             name: existingTester.name,
             phone_number: existingTester.phone_number,
           },
         },
-        { status: 200, headers: corsHeaders }
+        { status: 200, headers }
       );
     }
 
     // Insert new early tester record
     let newTester = null;
-    try {
-      if ((prisma as any).earlyTester) {
-        newTester = await (prisma as any).earlyTester.create({
-          data: {
-            id: crypto.randomUUID(),
-            name: cleanName,
-            email: cleanEmail,
-            phone_number: cleanPhone,
-            role_status: cleanRole,
-            status: 'REGISTERED',
-          },
-        });
-      } else {
-        // Mock fallback if table not yet migrated
-        newTester = {
+    if ((prisma as any).earlyTester) {
+      newTester = await (prisma as any).earlyTester.create({
+        data: {
           id: crypto.randomUUID(),
           name: cleanName,
           email: cleanEmail,
-          phone_number: cleanPhone,
+          phone_number: cleanPhone || normalizedPhone,
           role_status: cleanRole,
           status: 'REGISTERED',
-          created_at: new Date(),
-        };
-      }
-    } catch (dbErr) {
-      console.error('Database error saving early tester:', dbErr);
-      // Fallback response for dev / graceful degradation
-      newTester = {
-        id: crypto.randomUUID(),
-        name: cleanName,
-        email: cleanEmail,
-        phone_number: cleanPhone,
-        role_status: cleanRole,
-        status: 'REGISTERED',
-        created_at: new Date(),
-      };
+        },
+      });
     }
-
-    logApp({
-      source: 'API',
-      level: 'INFO',
-      message: `New early tester pre-registered: ${cleanEmail}`,
-      details: { name: cleanName, email: cleanEmail, role: cleanRole },
-      endpoint: '/api/pre-register',
-      method: 'POST',
-      ip: reqContext.ip,
-    });
 
     return NextResponse.json(
       {
         success: true,
         message: 'Pendaftaran berhasil! Kamu resmi terdaftar sebagai Early Tester.',
         data: {
-          id: newTester.id,
-          name: newTester.name,
-          email: newTester.email,
-          role_status: newTester.role_status,
+          id: newTester?.id,
+          name: newTester?.name || cleanName,
+          email: newTester?.email || cleanEmail,
+          role_status: newTester?.role_status || cleanRole,
         },
       },
-      { status: 201, headers: corsHeaders }
+      { status: 201, headers }
     );
   } catch (err: any) {
-    console.error('Pre-register API error:', err);
+    console.error('[Admin Pre-Register API Error]:', err);
     return NextResponse.json(
       { success: false, message: 'Terjadi kesalahan sistem. Silakan coba beberapa saat lagi.' },
-      { status: 500, headers: corsHeaders }
+      { status: 500, headers }
     );
   }
 }

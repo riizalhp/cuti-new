@@ -33,3 +33,30 @@ export const getGoogleAuthUrl = (requestUrl?: string | URL): string => {
   }
   return `${baseUrl}/api/auth/google`;
 };
+
+export const getAdminBaseUrl = (requestUrl?: string | URL): string => {
+  if (import.meta.env.PUBLIC_ADMIN_URL) {
+    return import.meta.env.PUBLIC_ADMIN_URL;
+  }
+
+  if (requestUrl) {
+    const url = typeof requestUrl === 'string' ? new URL(requestUrl) : requestUrl;
+    if (import.meta.env.DEV) {
+      return `${url.protocol}//${url.hostname}:3002`;
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
+    if (isLocal) {
+      return `${window.location.protocol}//${hostname}:3002`;
+    }
+  }
+
+  if (import.meta.env.DEV) {
+    return 'http://localhost:3002';
+  }
+  return 'https://admin-employr-rahasia.employr.id';
+};
+

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAppBaseUrl } from '../../utils/env';
+import { getAdminBaseUrl } from '../../utils/env';
 
 interface PreRegisterFormProps {
   apiBaseUrl?: string;
@@ -48,7 +48,7 @@ export default function PreRegisterForm({ apiBaseUrl }: PreRegisterFormProps) {
     setStatus('loading');
 
     try {
-      const baseUrl = apiBaseUrl || getAppBaseUrl();
+      const baseUrl = apiBaseUrl || getAdminBaseUrl();
       const endpoint = `${baseUrl}/api/pre-register`;
 
       const response = await fetch(endpoint, {
@@ -76,11 +76,8 @@ export default function PreRegisterForm({ apiBaseUrl }: PreRegisterFormProps) {
       }
     } catch (err) {
       console.error('Error submitting waitlist:', err);
-      // Graceful offline/fallback
-      setRegisteredName(cleanName);
-      setRegisteredPhone(cleanPhone);
-      setIsExisting(false);
-      setStatus('success');
+      setErrorMessage('Terjadi kendala jaringan saat mendaftar. Silakan coba beberapa saat lagi.');
+      setStatus('idle');
     }
   };
 

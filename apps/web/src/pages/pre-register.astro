@@ -1,7 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PreRegisterForm from '../components/employer/PreRegisterForm';
+import { getAdminBaseUrl } from '../utils/env';
 
+const adminBaseUrl = getAdminBaseUrl(Astro.request.url);
 const logoMinimize = '/logo-minimize.webp';
 ---
 
@@ -79,7 +81,7 @@ const logoMinimize = '/logo-minimize.webp';
 
         <!-- Interactive Form Component -->
         <div class="mt-6 sm:mt-7">
-          <PreRegisterForm client:load />
+          <PreRegisterForm apiBaseUrl={adminBaseUrl} client:load />
         </div>
       </div>
     </main>
