@@ -7,11 +7,18 @@ export const getCrossAppUrl = (port: number, prodDomain: string, path = ''): str
   const cleanPath = path ? (path.startsWith('/') ? path : `/${path}`) : '';
 
   if (typeof window !== 'undefined') {
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(window.location.hostname);
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
 
-    if (isLocalhost || isIp || process.env.NODE_ENV !== 'production') {
-      return `${window.location.protocol}//${window.location.hostname}:${port}${cleanPath}`;
+    // If on localhost or LAN IP, route to respective local port
+    if (isLocalhost || isIp) {
+      return `${window.location.protocol}//${hostname}:${port}${cleanPath}`;
+    }
+
+    // If already on production domain (*.employr.id), always route to production domain
+    if (hostname.endsWith('employr.id')) {
+      return `https://${prodDomain}${cleanPath}`;
     }
   }
 
