@@ -107,8 +107,14 @@ export async function POST(req: NextRequest) {
     return response;
   } catch (error: any) {
     console.error("[Admin Login] Error:", error);
+    const detailMsg = error?.message ? `: ${error.message}` : "";
     return NextResponse.json(
-      { success: false, message: "Terjadi kesalahan sistem saat login." },
+      { 
+        success: false, 
+        message: `Terjadi kesalahan sistem saat login${detailMsg}`,
+        error: error?.message,
+        code: error?.code,
+      },
       { status: 500 }
     );
   }

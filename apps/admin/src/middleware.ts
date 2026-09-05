@@ -4,12 +4,17 @@ import { verifyAdminSession } from "@/lib/admin-session";
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Allow login page, login API endpoint, and public tracking/static
+  // Allow login page, login API, public tracking endpoint, and static assets
   if (
     pathname === "/login" ||
     pathname === "/api/auth/login" ||
+    pathname === "/api/track" ||
+    pathname === "/site.webmanifest" ||
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml" ||
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/public")
+    pathname.startsWith("/public") ||
+    /\.(png|jpg|jpeg|gif|webp|svg|ico|webmanifest|txt|xml)$/i.test(pathname)
   ) {
     return NextResponse.next();
   }
@@ -43,5 +48,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|logo.*|logo-minimize.*).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|site.webmanifest|logo.*|logo-minimize.*|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|webmanifest)$).*)",
+  ],
 };
