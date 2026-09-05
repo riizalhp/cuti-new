@@ -6,6 +6,7 @@
     "ip": "node scripts/lan-info.js",
     "lan": "node scripts/lan-info.js",
     "build": "turbo run build",
+    "postinstall": "pnpm --filter @cuti/db exec prisma generate",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "clean": "turbo run clean && rm -rf node_modules"
