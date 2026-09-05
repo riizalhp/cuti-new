@@ -71,10 +71,10 @@ export function getDomainInfo(domain?: string | null): DomainMeta {
     };
   }
 
-  if (d.includes('masterdata.ambilcuti.id') || d.includes('masterdata.employr.id') || d.includes('admin') || d.includes('3002')) {
+  if (d.includes('admin-employr-rahasia.employr.id') || d.includes('masterdata.ambilcuti.id') || d.includes('masterdata.employr.id') || d.includes('admin') || d.includes('3002')) {
     return {
       label: 'Admin Panel',
-      sublabel: 'masterdata.ambilcuti.id',
+      sublabel: 'admin-employr-rahasia.employr.id',
       badgeBg: 'bg-rose-50 dark:bg-rose-950/60',
       badgeText: 'text-rose-700 dark:text-rose-300',
       badgeBorder: 'border-rose-200 dark:border-rose-800',

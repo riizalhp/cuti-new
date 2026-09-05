@@ -36,7 +36,7 @@ export const getFaqUrl = (path = ''): string =>
   process.env.NEXT_PUBLIC_FAQ_URL || getCrossAppUrl(3005, 'faq.employr.id', path);
 
 export const getAdminUrl = (path = ''): string =>
-  process.env.NEXT_PUBLIC_ADMIN_URL || getCrossAppUrl(3002, 'masterdata.employr.id', path);
+  process.env.NEXT_PUBLIC_ADMIN_URL || getCrossAppUrl(3002, 'admin-employr-rahasia.employr.id', path);
 
 export const getWebUrl = (path = ''): string =>
   process.env.NEXT_PUBLIC_WEB_URL || getCrossAppUrl(4321, 'employr.id', path);

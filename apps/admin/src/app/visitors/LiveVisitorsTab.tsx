@@ -121,6 +121,7 @@ export function LiveVisitorsTab({ onSelectVisitor }: LiveVisitorsTabProps) {
             <option value="loker.employr.id">loker.employr.id (Portal)</option>
             <option value="learning.employr.id">learning.employr.id</option>
             <option value="faq.employr.id">faq.employr.id</option>
+            <option value="admin-employr-rahasia.employr.id">admin-employr-rahasia.employr.id (Admin)</option>
             <option value="localhost">Localhost (Dev)</option>
           </select>
 

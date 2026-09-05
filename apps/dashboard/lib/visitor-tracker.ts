@@ -29,6 +29,7 @@ export const APP_DOMAIN_LABELS: Record<string, string> = {
   'learning.employr.id': 'Learning',
   'faq.employr.id': 'FAQ',
   'masterdata.employr.id': 'Admin Panel',
+  'admin-employr-rahasia.employr.id': 'Admin Panel',
   'localhost': 'Local Development',
 };
 
