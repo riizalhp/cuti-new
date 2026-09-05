@@ -1,50 +1,55 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Header from '../components/Header.astro';
-import Hero from '../components/Hero.astro';
-import AdSlot from '../components/AdSlot.astro';
-import LowonganSection from '../components/LowonganSection.astro';
-import ArtikelSection from '../components/ArtikelSection.astro';
-import KursusSection from '../components/KursusSection.astro';
-import SertifikatSection from '../components/SertifikatSection.astro';
-import EventSection from '../components/EventSection.astro';
-import Sidebar from '../components/Sidebar.astro';
-import Footer from '../components/Footer.astro';
+import Navbar from '../components/Navbar.astro';
+import HeroPortal from '../components/HeroPortal.astro';
+import LowonganTerbaruGrid from '../components/LowonganTerbaruGrid.astro';
+import PilihanKamuSection from '../components/PilihanKamuSection.astro';
+import StatsTicker from '../components/StatsTicker.astro';
+import TrendingSection from '../components/TrendingSection.astro';
+import CareerTipsSection from '../components/CareerTipsSection.astro';
+import EventPortalSection from '../components/EventPortalSection.astro';
+import NewsletterBanner from '../components/NewsletterBanner.astro';
+import FooterPortal from '../components/FooterPortal.astro';
+import SearchModal from '../components/SearchModal.astro';
 ---
 
 <BaseLayout
-  title="PortalKerja — Portal Lowongan Kerja Terlengkap untuk Talenta Muda Indonesia"
-  description="Temukan lowongan kerja, event job fair, kursus, dan sertifikasi. Portal karier terlengkap untuk SMA/SMK, mahasiswa, dan fresh graduate."
+  title="Employer Job: Portal Informasi Lowongan Kerja, Sertifikasi & Karier Terlengkap"
+  description="Media informasi dan kurasi lowongan kerja, sertifikasi resmi, kursus skill digital, event job fair, dan tips karier terpercaya untuk generasi muda Indonesia."
   canonicalUrl="http://localhost:3003/"
 >
-  <Header />
-  <main>
-    <div class="wrap">
-      <Hero />
+  <!-- 1. Header & Navigation (Image 1) -->
+  <Navbar />
 
-      <!-- SLOT ADS: LEADERBOARD 728×90 -->
-      <AdSlot type="leaderboard" />
+  <main class="bg-white min-h-screen">
+    <!-- 2. Hero Section with Big Search & Stats Highlights (Image 1) -->
+    <HeroPortal />
 
-      <div class="layout">
-        <div>
-          <LowonganSection />
+    <!-- 3. Lowongan Kerja Terbaru (4 Cards Grid) -->
+    <LowonganTerbaruGrid />
 
-          <!-- SLOT ADS: IN-FEED -->
-          <AdSlot type="infeed" style="margin-top:20px;" />
+    <!-- 4. Pilihan Untuk Kamu (4 Pilar + Google Ads Card) (Image 1) -->
+    <PilihanKamuSection />
 
-          <ArtikelSection />
-          <KursusSection />
+    <!-- 4. Stats Ticker Bar (Image 1) -->
+    <StatsTicker />
 
-          <!-- SLOT ADS: IN-FEED -->
-          <AdSlot type="infeed" style="margin-top:20px;" />
+    <!-- 5. Career News & Paling Banyak Dibaca (Trending) (Image 4) -->
+    <TrendingSection />
 
-          <SertifikatSection />
-          <EventSection />
-        </div>
+    <!-- 6. Career Tips & Articles (Employer Job Insight) (Image 5) -->
+    <CareerTipsSection />
 
-        <Sidebar />
-      </div>
-    </div>
+    <!-- 7. Event & Job Fair dengan Kalender Interaktif (Image 2) -->
+    <EventPortalSection />
+
+    <!-- 8. Newsletter Banner Full Width + 4 Value Pills (Image 3) -->
+    <NewsletterBanner />
   </main>
-  <Footer />
+
+  <!-- 9. Comprehensive 4-Column Footer (Image 3) -->
+  <FooterPortal />
+
+  <!-- 10. Global Search Modal -->
+  <SearchModal />
 </BaseLayout>

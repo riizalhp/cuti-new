@@ -69,8 +69,8 @@ const faqSchema = {
 ---
 
 <BaseLayout
-  title="Employr: Your CV Workspace & Career Compass"
-  description="Build ATS-friendly CVs, match your skills to job requirements, and track every application without the hassle."
+  title="Employr: Your CV Workspace & Career Compass | ATS CV Builder"
+  description="Build ATS-friendly CVs, match your skills to job requirements, and track every application in one seamless workspace. Elevate your career with Employr."
   canonicalUrl="https://employr.id/"
   faqSchema={faqSchema}
 >
@@ -80,7 +80,7 @@ const faqSchema = {
     <!-- TOP ANNOUNCEMENT BAR -->
     <div class="top-announcement">
       <div class="announcement-content">
-        <a href="/pre-register" class="announcement-link">
+        <a href="/pre-register" class="announcement-link" title="Join the Early Access Waitlist">
           Join the Early Access Waitlist <Icon name="chevron-right" size={13} />
         </a>
       </div>
@@ -103,16 +103,23 @@ const faqSchema = {
         )}
       </div>
       <div class="mobile-nav__footer">
-        <a class="mobile-start" href="/pre-register">Early Access <Icon name="arrow-up-right" size={16} /></a>
+        <a class="mobile-start" href="/pre-register" title="Early Access Waitlist">Early Access <Icon name="arrow-up-right" size={16} /></a>
       </div>
     </nav>
 
-    <main class="site-main">
+    <main class="site-main" itemprop="mainContentOfPage">
       <!-- HERO FRAME CONTAINER (FRAMED CARD CANVAS) -->
       <div class="hero-frame-container">
       <section class="hero-card" aria-labelledby="hero-title">
         <!-- Background Image & Washes -->
-        <img class="hero__image" src={heroImage} alt="Young professional crossing a surreal city district with a glowing blue career path" />
+        <img
+          class="hero__image"
+          src={heroImage}
+          alt="Young professional crossing a surreal city district with a glowing blue career path"
+          title="Employr Career Compass - Visual Journey"
+          loading="eager"
+          fetchpriority="high"
+        />
         <div class="hero__wash"></div>
         <div class="hero__grain"></div>
 
@@ -124,13 +131,13 @@ const faqSchema = {
             </nav>
           </div>
 
-          <a href="#top" class="brand-mark brand-mark--center" aria-label="Employr Home">
-            <img src={logoMark} alt="Employr" class="brand-logo-main" />
+          <a href="#top" class="brand-mark brand-mark--center" aria-label="Employr Home" title="Employr - Back to top" rel="home">
+            <img src={logoMark} alt="Employr Logo" title="Employr Logo" class="brand-logo-main" width="140" height="36" />
           </a>
 
           <div class="header-actions">
             <!-- <button class="login-link" data-toast="Sign in will be available at launch.">Sign In</button> -->
-            <a class="header-cta" href="/pre-register">Early Access <Icon name="move-up-right" size={14} /></a>
+            <a class="header-cta" href="/pre-register" title="Get Early Access to Employr">Early Access <Icon name="move-up-right" size={14} /></a>
             <button class="menu-toggle" aria-label="Navigation menu" aria-expanded="false" data-menu-button>
               <span class="menu-toggle__bar menu-toggle__bar--top"></span>
               <span class="menu-toggle__bar menu-toggle__bar--mid"></span>
@@ -288,7 +295,7 @@ const faqSchema = {
               </div>
               <h2 id="stories-title">Not fake testimonials,<br /><em>real results.</em></h2>
               <p>Real stories from people who landed interviews and found their dream careers through Employr.</p>
-              <a href="/pre-register" class="action-link">Be the First to Share <Icon name="arrow-up-right" /></a>
+              <a href="/pre-register" class="action-link" title="Join Employr Early Access and share your story">Be the First to Share <Icon name="arrow-up-right" /></a>
             </div>
 
             <div class="testimonials-ready__carousel-wrap" style="padding-top: clamp(32px, 9vw, 116px);">

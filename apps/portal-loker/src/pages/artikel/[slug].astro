@@ -57,7 +57,7 @@ const related = artikelList.filter(x=>x.slug!==artikel.slug).slice(0,3);
                 <li><a href="#p3" style="color:var(--cobalt);">Checklist sebelum kirim</a></li>
               </ol>
               <div id="p1">
-                {artikel.content.map((p,i)=>(
+                {artikel.content.map((p)=>(
                   <p>{p}</p>
                 ))}
                 <blockquote>“HRD butuh kejelasan, bukan panjang. Satu halaman dengan hasil terukur lebih menarik daripada dua halaman penuh jargon.”</blockquote>

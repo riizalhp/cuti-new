@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@cuti/db";
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await req.json();
     const { title, author, content, categoryId, coverImageUrl, isPublished } = body;
 
-    const existing = await prisma.articles.findUnique({ where: { id: params.id } });
+    const existing = await prisma.articles.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json(
         { success: false, message: "Artikel tidak ditemukan" },
@@ -26,7 +27,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 
     const article = await prisma.articles.update({
-      where: { id: params.id },
+      where: { id },
       data,
       include: { article_categories: true },
     });
@@ -54,9 +55,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const existing = await prisma.articles.findUnique({ where: { id: params.id } });
+    const { id } = await params;
+    const existing = await prisma.articles.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json(
         { success: false, message: "Artikel tidak ditemukan" },
@@ -64,7 +66,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
       );
     }
 
-    await prisma.articles.delete({ where: { id: params.id } });
+    await prisma.articles.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json(

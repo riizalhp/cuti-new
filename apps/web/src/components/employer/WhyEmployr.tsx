@@ -163,7 +163,8 @@ export default function WhyEmployr() {
                 <div className="why-employr__card-bg">
                   <img
                     src={card.bgImage}
-                    alt={`${card.title} ${card.italicWord || ''}`}
+                    alt={`${card.title} ${card.italicWord || ''}`.trim()}
+                    title={`${card.title} ${card.italicWord || ''}`.trim()}
                     className="why-employr__card-img"
                     loading="lazy"
                   />

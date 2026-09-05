@@ -130,7 +130,8 @@ export default function FooterReveal({ logoMark }: FooterRevealProps) {
         <img
           ref={watermarkRef}
           src="/logo.svg"
-          alt=""
+          alt="Employr Logo"
+          title="Employr Watermark Logo"
           aria-hidden="true"
           className="footer-reveal-watermark"
         />
@@ -138,7 +139,7 @@ export default function FooterReveal({ logoMark }: FooterRevealProps) {
           <div className="editorial-frame footer__top">
             <div>
               <div ref={brandRef} className="brand-mark">
-                <img src={logoMark} alt="Employr" className="brand-symbol" />
+                <img src={logoMark} alt="Employr Logo" title="Employr - Career Operating System" className="brand-symbol" />
               </div>
               <p ref={taglineRef}>Start your career journey today.</p>
             </div>

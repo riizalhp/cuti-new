@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@cuti/db";
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await req.json();
     const {
       title,
@@ -15,7 +16,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       isActive,
     } = body;
 
-    const existing = await prisma.events.findUnique({ where: { id: params.id } });
+    const existing = await prisma.events.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json(
         { success: false, message: "Event tidak ditemukan" },
@@ -34,7 +35,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (isActive !== undefined) data.is_active = isActive;
 
     const event = await prisma.events.update({
-      where: { id: params.id },
+      where: { id },
       data,
     });
 
@@ -60,9 +61,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const existing = await prisma.events.findUnique({ where: { id: params.id } });
+    const { id } = await params;
+    const existing = await prisma.events.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json(
         { success: false, message: "Event tidak ditemukan" },
@@ -70,7 +72,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
       );
     }
 
-    await prisma.events.delete({ where: { id: params.id } });
+    await prisma.events.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json(

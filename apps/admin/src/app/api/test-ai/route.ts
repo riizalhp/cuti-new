@@ -1,4 +1,35 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server";
+ 
+function isSafeEndpointUrl(urlStr: string): boolean {
+  try {
+    const parsed = new URL(urlStr)
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      return false
+    }
+    const hostname = parsed.hostname.toLowerCase()
+    if (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "::1" ||
+      hostname === "0.0.0.0" ||
+      hostname === "169.254.169.254"
+    ) {
+      return false
+    }
+    if (/^10\./.test(hostname) || /^192\.168\./.test(hostname)) {
+      return false
+    }
+    if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname)) {
+      return false
+    }
+    if (hostname.endsWith(".internal") || hostname.endsWith(".local")) {
+      return false
+    }
+    return true
+  } catch {
+    return false
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -6,6 +37,17 @@ export async function POST(req: NextRequest) {
     const { action, endpointUrl, apiKey, model, prompt, temperature, maxTokens } = body
 
     const cleanEndpoint = (endpointUrl || "https://api.openai.com/v1").replace(/\/+$/, "")
+
+    if (!isSafeEndpointUrl(cleanEndpoint)) {
+      return NextResponse.json(
+        {
+          ok: false,
+          status: 400,
+          error: "Endpoint URL tidak valid atau merujuk ke alamat jaringan privat/internal yang dilarang.",
+        },
+        { status: 400 }
+      )
+    }
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     }

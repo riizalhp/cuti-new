@@ -27,6 +27,16 @@ export async function POST() {
   });
 
   response.cookies.set({
+    name: 'cuti_auth_session',
+    value: '',
+    maxAge: 0,
+    expires: new Date(0),
+    path: '/',
+    sameSite: 'lax',
+    httpOnly: true,
+  });
+
+  response.cookies.set({
     name: 'cuti_auth_token',
     value: '',
     maxAge: 0,

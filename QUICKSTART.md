@@ -119,7 +119,7 @@ DATABASE_URL="postgresql://postgres:password@localhost:5432/cuti_dev"
 ### D:\cuti\apps\api\.env
 ```env
 DATABASE_URL="postgresql://postgres:password@localhost:5432/cuti_dev"
-JWT_SECRET="fa03b6dbfb8570c3783d07b9bc36876a10c5987356bda31e3a76cca776768b52"
+JWT_SECRET="your-jwt-secret-key-at-least-32-chars-long"
 JWT_EXPIRES_IN="7d"
 PORT=3001
 NODE_ENV=development

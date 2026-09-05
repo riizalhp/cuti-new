@@ -7,9 +7,7 @@ export default defineConfig({
     host: true,
   },
   integrations: [
-    tailwind({
-      applyBaseStyles: false,
-    }),
+    tailwind(),
   ],
   output: 'static',
   build: {

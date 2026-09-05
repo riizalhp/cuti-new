@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import FooterPortal from '../../components/FooterPortal.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import SearchModal from '../../components/SearchModal.astro';
+import { sertifikasiList } from '../../data/mock';
+
+const title = "Direktori Sertifikasi Profesional & Industri | Employer Job";
+const description = "Kurasi sertifikasi standar nasional dan internasional dari Google, Microsoft, BNSP, AWS, dan lembaga terkemuka.";
+---
+
+<BaseLayout title={title} description={description} canonicalUrl="http://localhost:3003/sertifikat">
+  <Navbar />
+
+  <main class="bg-slate-50 min-h-screen pb-16">
+    <div class="bg-white border-b border-slate-200 py-8">
+      <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
+        <nav class="flex items-center gap-2 text-xs text-slate-500 mb-4" aria-label="Breadcrumb">
+          <a href="/" class="hover:text-[#1738d1]">Beranda</a>
+          <span>/</span>
+          <span class="text-slate-900 font-bold">Sertifikasi</span>
+        </nav>
+        <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          Sertifikasi Profesional & Industri Terakreditasi
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
+          Tingkatkan kredibilitas CV dan portofoliomu dengan sertifikasi yang diakui industri global dan nasional.
+        </p>
+      </div>
+    </div>
+
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6">
+      <AdSlot type="leaderboard" />
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
+        {sertifikasiList.map((sert) => (
+          <article class="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg hover:border-blue-300 transition duration-200 flex flex-col justify-between">
+            <div class="p-5">
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="px-2.5 py-1 rounded-full bg-blue-50 text-[#1738d1] text-[11px] font-black">{sert.issuer}</span>
+                <span class="text-[11px] font-bold text-slate-500">{sert.duration}</span>
+              </div>
+              <h2 class="text-base font-black text-slate-900 hover:text-[#1738d1] transition leading-snug">
+                <a href={`/sertifikat/${sert.slug}`}>{sert.title}</a>
+              </h2>
+              <p class="text-xs text-slate-500 line-clamp-3 mt-2 leading-relaxed">{sert.description}</p>
+            </div>
+            <div class="p-5 pt-0 border-t border-slate-100 mt-3">
+              <div class="flex items-center justify-between pt-3">
+                <span class="text-xs font-black text-emerald-600">{sert.price}</span>
+                <a href={`/sertifikat/${sert.slug}`} class="px-3 py-1.5 rounded-lg bg-[#1738d1] hover:bg-[#122ca6] text-white text-xs font-bold transition">
+                  Lihat Detail →
+                </a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </main>
+
+  <FooterPortal />
+  <SearchModal />
+</BaseLayout>

@@ -24,10 +24,12 @@ import {
   BarChart3,
   Calendar,
   SlidersHorizontal,
+  Flame,
 } from "lucide-react"
 import { VisitorDetailDrawer } from "./VisitorDetailDrawer"
 import { LiveVisitorsTab } from "./LiveVisitorsTab"
 import { AnalyticsTab } from "./AnalyticsTab"
+import { TrafficPatternsTab } from "./TrafficPatternsTab"
 import { getDomainInfo, getTrafficSourceInfo } from "@/lib/visitor-helpers"
 
 interface VisitorItem {
@@ -63,7 +65,7 @@ interface VisitorItem {
 }
 
 export default function VisitorManagementPage() {
-  const [activeTab, setActiveTab] = useState<"directory" | "live" | "analytics">("live")
+  const [activeTab, setActiveTab] = useState<"analytics" | "patterns" | "directory" | "live">("analytics")
   const [visitors, setVisitors] = useState<VisitorItem[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedVisitorId, setSelectedVisitorId] = useState<string | null>(null)
@@ -75,7 +77,8 @@ export default function VisitorManagementPage() {
   const [userFilter, setUserFilter] = useState("all") // all, linked, anonymous
   const [deviceFilter, setDeviceFilter] = useState("all") // all, desktop, mobile, tablet
   const [sourceFilter, setSourceFilter] = useState("all") // all, direct, google, social, referral, campaign
-  const [dateRangeFilter, setDateRangeFilter] = useState("all") // all, today, 7d, 30d
+  const [dateRangeFilter, setDateRangeFilter] = useState("all") // all, today, yesterday, 7d, 30d
+  const [specificDate, setSpecificDate] = useState("") // YYYY-MM-DD
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
@@ -92,7 +95,11 @@ export default function VisitorManagementPage() {
       if (userFilter !== "all") params.set("user", userFilter)
       if (deviceFilter !== "all") params.set("device", deviceFilter)
       if (sourceFilter !== "all") params.set("source", sourceFilter)
-      if (dateRangeFilter !== "all") params.set("dateRange", dateRangeFilter)
+      if (specificDate) {
+        params.set("date", specificDate)
+      } else if (dateRangeFilter !== "all") {
+        params.set("dateRange", dateRangeFilter)
+      }
 
       const res = await fetch(`/api/visitors?${params.toString()}`)
       const json = await res.json()
@@ -112,7 +119,7 @@ export default function VisitorManagementPage() {
     if (activeTab === "directory") {
       fetchVisitors()
     }
-  }, [activeTab, page, domainFilter, statusFilter, userFilter, deviceFilter, sourceFilter, dateRangeFilter])
+  }, [activeTab, page, domainFilter, statusFilter, userFilter, deviceFilter, sourceFilter, dateRangeFilter, specificDate])
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -165,17 +172,28 @@ export default function VisitorManagementPage() {
         </div>
 
         {/* Tab Controls */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700">
           <button
-            onClick={() => setActiveTab("live")}
+            onClick={() => setActiveTab("analytics")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              activeTab === "live"
-                ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-xs"
+              activeTab === "analytics"
+                ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
             }`}
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
-            Live Realtime
+            <BarChart3 size={14} />
+            Grafik & Rekap Harian
+          </button>
+          <button
+            onClick={() => setActiveTab("patterns")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              activeTab === "patterns"
+                ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+            }`}
+          >
+            <Flame size={14} className={activeTab === "patterns" ? "text-orange-500" : ""} />
+            Pola & Catatan Trafik
           </button>
           <button
             onClick={() => setActiveTab("directory")}
@@ -189,15 +207,15 @@ export default function VisitorManagementPage() {
             Daftar Visitor
           </button>
           <button
-            onClick={() => setActiveTab("analytics")}
+            onClick={() => setActiveTab("live")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              activeTab === "analytics"
-                ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs"
+              activeTab === "live"
+                ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-xs"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
             }`}
           >
-            <BarChart3 size={14} />
-            Analitik & Traffic
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
+            Live Realtime
           </button>
         </div>
       </div>
@@ -256,13 +274,13 @@ export default function VisitorManagementPage() {
                 }}
                 className="px-2.5 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/60 text-xs text-orange-900 dark:text-orange-200 font-bold focus:outline-none"
               >
-                <option value="all">🌐 Semua Domain</option>
-                <option value="employr.id">🏠 employr.id (Landing)</option>
-                <option value="app.employr.id">💼 app.employr.id (Dashboard)</option>
-                <option value="loker.employr.id">🎯 loker.employr.id (Portal)</option>
-                <option value="learning.employr.id">📚 learning.employr.id</option>
-                <option value="faq.employr.id">❓ faq.employr.id</option>
-                <option value="localhost">💻 Localhost (Dev)</option>
+                <option value="all">Semua Domain</option>
+                <option value="employr.id">employr.id (Landing)</option>
+                <option value="app.employr.id">app.employr.id (Dashboard)</option>
+                <option value="loker.employr.id">loker.employr.id (Portal)</option>
+                <option value="learning.employr.id">learning.employr.id</option>
+                <option value="faq.employr.id">faq.employr.id</option>
+                <option value="localhost">Localhost (Dev)</option>
               </select>
 
               {/* Status Filter */}
@@ -275,8 +293,8 @@ export default function VisitorManagementPage() {
                 className="px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none"
               >
                 <option value="all">Semua Status</option>
-                <option value="online">🟢 Sedang Online</option>
-                <option value="offline">⚪ Offline</option>
+                <option value="online">Sedang Online</option>
+                <option value="offline">Offline</option>
               </select>
 
               {/* User Link Filter */}
@@ -289,8 +307,8 @@ export default function VisitorManagementPage() {
                 className="px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none"
               >
                 <option value="all">Semua Pengunjung</option>
-                <option value="linked">👤 User Terhubung (Login)</option>
-                <option value="anonymous">🕶️ Pengunjung Anonim</option>
+                <option value="linked">User Terhubung (Login)</option>
+                <option value="anonymous">Pengunjung Anonim</option>
               </select>
 
               {/* Device Filter */}
@@ -303,9 +321,9 @@ export default function VisitorManagementPage() {
                 className="px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none"
               >
                 <option value="all">Semua Perangkat</option>
-                <option value="Desktop">💻 Desktop</option>
-                <option value="Mobile">📱 Mobile</option>
-                <option value="Tablet">📟 Tablet</option>
+                <option value="Desktop">Desktop</option>
+                <option value="Mobile">Mobile</option>
+                <option value="Tablet">Tablet</option>
               </select>
 
               {/* Traffic Source Filter */}
@@ -326,20 +344,77 @@ export default function VisitorManagementPage() {
               </select>
 
               {/* Date Filter */}
-              <select
-                value={dateRangeFilter}
-                onChange={(e) => {
-                  setDateRangeFilter(e.target.value)
-                  setPage(1)
-                }}
-                className="px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none"
-              >
-                <option value="all">Semua Waktu</option>
-                <option value="today">Hari Ini</option>
-                <option value="7d">7 Hari Terakhir</option>
-                <option value="30d">30 Hari Terakhir</option>
-              </select>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <select
+                  value={dateRangeFilter}
+                  onChange={(e) => {
+                    setDateRangeFilter(e.target.value)
+                    if (e.target.value !== "custom") setSpecificDate("")
+                    setPage(1)
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none"
+                >
+                  <option value="all">Semua Waktu</option>
+                  <option value="today">Hari Ini</option>
+                  <option value="yesterday">Kemarin</option>
+                  <option value="7d">7 Hari Terakhir</option>
+                  <option value="30d">30 Hari Terakhir</option>
+                  <option value="custom">Pilih Tanggal Spesifik (Hari X)</option>
+                </select>
+
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs">
+                  <Calendar size={13} className="text-orange-500" />
+                  <input
+                    type="date"
+                    value={specificDate}
+                    onChange={(e) => {
+                      setSpecificDate(e.target.value)
+                      setDateRangeFilter(e.target.value ? "custom" : "all")
+                      setPage(1)
+                    }}
+                    className="bg-transparent text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none cursor-pointer"
+                    title="Pilih Hari X tertentu"
+                  />
+                  {specificDate && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSpecificDate("")
+                        setDateRangeFilter("all")
+                        setPage(1)
+                      }}
+                      className="text-[10px] text-slate-400 hover:text-rose-500 font-bold px-1"
+                      title="Reset filter tanggal"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
+
+            {/* Active Filter Indicator */}
+            {specificDate && (
+              <div className="flex items-center justify-between text-xs bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/60 px-3 py-1.5 rounded-xl text-orange-900 dark:text-orange-200">
+                <span className="flex items-center gap-1.5">
+                  <Calendar size={13} className="text-orange-500" />
+                  <span>
+                    Menyaring pengunjung aktif pada tanggal <strong>{specificDate}</strong>: {totalCount} pengunjung ditemukan.
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSpecificDate("")
+                    setDateRangeFilter("all")
+                    setPage(1)
+                  }}
+                  className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline"
+                >
+                  Tampilkan Semua
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Directory Table */}
@@ -539,8 +614,15 @@ export default function VisitorManagementPage() {
         </div>
       )}
 
-      {/* TAB 3: Analytics & Traffic */}
-      {activeTab === "analytics" && <AnalyticsTab />}
+      {/* TAB 3: Analytics & Daily Traffic */}
+      {activeTab === "analytics" && (
+        <AnalyticsTab onSelectVisitor={(id) => setSelectedVisitorId(id)} />
+      )}
+
+      {/* TAB 4: Traffic Patterns & Intelligence */}
+      {activeTab === "patterns" && (
+        <TrafficPatternsTab onSelectVisitor={(id) => setSelectedVisitorId(id)} />
+      )}
 
       {/* Detail Slide-in Drawer */}
       <VisitorDetailDrawer

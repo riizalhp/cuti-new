@@ -66,7 +66,7 @@ const related = jobFairList.filter(x=>x.slug!==fair.slug).slice(0,2);
           <article class="card">
             <h3>Agenda — {fair.date}</h3>
             <div class="timeline">
-              {fair.agenda.map(a=>(
+              {(fair.agenda || []).map(a=>(
                 <div class="tl-row">
                   <span class="tl-time">{a.time}</span>
                   <div>
@@ -81,7 +81,7 @@ const related = jobFairList.filter(x=>x.slug!==fair.slug).slice(0,2);
           <article class="card">
             <h3>Perusahaan Peserta ({fair.companies})</h3>
             <div class="grid-2" style="margin-top:10px;">
-              {fair.exhibitors.map(e=>(
+              {(fair.exhibitors || []).map(e=>(
                 <div class="exhibitor">
                   <div class="ph ph-logo">Logo</div>
                   <div>

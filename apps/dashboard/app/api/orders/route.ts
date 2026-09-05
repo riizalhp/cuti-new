@@ -32,10 +32,34 @@ export async function POST(req: NextRequest) {
       ? 'BASIC'
       : (packageTypeStr === 'EXPERT' || packageTypeStr === 'PREMIUM' ? 'PREMIUM' : 'PRO');
 
+    // Deterministic Server-Side Pricing (Business Rules & PRD)
+    // Never trust client-submitted prices or arbitrary discounts
+    const OFFICIAL_PRICES: Record<string, number> = {
+      BASIC: 19000,
+      PRO: 59000,
+      PREMIUM: 99000,
+    };
+
+    let basePrice = OFFICIAL_PRICES[packageEnum] || 59000;
+
+    // Check dynamic system settings override if exists
+    try {
+      const settingKey = `price_${packageEnum.toLowerCase()}`;
+      const setting = await prisma.system_settings.findFirst({
+        where: { key: settingKey },
+      });
+      if (setting && setting.value) {
+        const parsed = parseInt(String(setting.value), 10);
+        if (!isNaN(parsed) && parsed > 0) basePrice = parsed;
+      }
+    } catch {
+      // Fallback to official price
+    }
+
+    const discount = 0; // Discount calculation must only come from server-verified vouchers
+    const totalPrice = basePrice - discount;
+
     const orderNumber = `ORD-AICV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
-    const basePrice = body.price || (packageEnum === 'BASIC' ? 19000 : (packageEnum === 'PREMIUM' ? 99000 : 59000));
-    const discount = body.discount || 0;
-    const totalPrice = Math.max(0, basePrice - discount);
 
     const newOrder = await prisma.orders.create({
       data: {
@@ -46,11 +70,11 @@ export async function POST(req: NextRequest) {
         base_price: basePrice,
         discount,
         total_price: totalPrice,
-        status: 'PROCESSING',
-        payment_method: body.paymentMethod || 'QRIS Instant',
-        has_express: body.hasExpress || false,
-        paid_at: new Date(),
-        processing_started_at: new Date(),
+        status: 'WAITING_PAYMENT',
+        payment_method: typeof body.paymentMethod === 'string' ? body.paymentMethod : 'QRIS Instant',
+        has_express: Boolean(body.hasExpress),
+        paid_at: null,
+        processing_started_at: null,
       },
     });
 

@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import FooterPortal from '../../components/FooterPortal.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import SearchModal from '../../components/SearchModal.astro';
+import { artikelList } from '../../data/mock';
+
+const title = "Artikel, Tips Karier & Panduan Melamar Kerja | Employer Job";
+const description = "Kumpulan panduan menyusun CV ATS, tips interview, strategi negosiasi gaji, dan tren dunia kerja terkini untuk talenta muda.";
+---
+
+<BaseLayout title={title} description={description} canonicalUrl="http://localhost:3003/artikel">
+  <Navbar />
+
+  <main class="bg-slate-50 min-h-screen pb-16">
+    <div class="bg-white border-b border-slate-200 py-8">
+      <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
+        <nav class="flex items-center gap-2 text-xs text-slate-500 mb-4" aria-label="Breadcrumb">
+          <a href="/" class="hover:text-[#1738d1]">Beranda</a>
+          <span>/</span>
+          <span class="text-slate-900 font-bold">Artikel & Tips Karier</span>
+        </nav>
+        <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          Panduan & Tips Praktis Karier
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
+          Trik lolos screening CV, teknik menjawab pertanyaan wawancara tersulit, dan roadmap skill yang dibutuhkan rekruter.
+        </p>
+      </div>
+    </div>
+
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6">
+      <AdSlot type="leaderboard" />
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        {artikelList.map((art) => (
+          <article class="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg hover:border-blue-300 transition duration-200 flex flex-col justify-between">
+            <div>
+              <div class="h-44 bg-slate-100 overflow-hidden">
+                <img src={art.image} alt={art.title} class="w-full h-full object-cover hover:scale-105 transition duration-300" loading="lazy" />
+              </div>
+              <div class="p-5">
+                <div class="flex items-center gap-2 text-[11px] text-slate-500 mb-2">
+                  <span class="px-2 py-0.5 rounded-full bg-blue-50 text-[#1738d1] font-bold">{art.category}</span>
+                  <span>·</span>
+                  <span>{art.readTime}</span>
+                </div>
+                <h2 class="text-base font-black text-slate-900 hover:text-[#1738d1] transition leading-snug">
+                  <a href={`/artikel/${art.slug}`}>{art.title}</a>
+                </h2>
+                <p class="text-xs text-slate-500 line-clamp-2 mt-2 leading-relaxed">{art.excerpt}</p>
+              </div>
+            </div>
+            <div class="p-5 pt-0">
+              <a href={`/artikel/${art.slug}`} class="inline-block text-xs font-bold text-[#1738d1] hover:underline">
+                Baca Selengkapnya →
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </main>
+
+  <FooterPortal />
+  <SearchModal />
+</BaseLayout>

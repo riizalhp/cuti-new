@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PDFParse } from 'pdf-parse';
 import mammoth from 'mammoth';
 import { prisma } from '@cuti/db';
+import { getAuthUser } from '@/lib/server-auth';
 import { extractCvDataWithNLP, DynamicDictionaries } from '@/lib/smart-cv-parser';
 
 // In-Memory Cache for Learned Dictionaries (Refreshed every 5 minutes)
@@ -99,6 +100,14 @@ async function recordLearnedTokens(data: any): Promise<void> {
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getAuthUser(req);
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Silakan masuk terlebih dahulu untuk mengimpor berkas CV.' },
+        { status: 401 }
+      );
+    }
+
     const formData = await req.formData();
     const file = formData.get('file') as File;
 
@@ -106,16 +115,42 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Berkas tidak ditemukan' }, { status: 400 });
     }
 
+    // Limit maximum file size to 5MB to prevent OOM/DoS
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: 'Ukuran berkas terlalu besar. Maksimal 5MB.' },
+        { status: 400 }
+      );
+    }
+
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+
+    // Validate binary magic bytes to prevent file extension spoofing
+    const isPdfMagic = buffer.length >= 4 && buffer.toString('utf-8', 0, 4) === '%PDF';
+    const isZipMagic = buffer.length >= 2 && buffer[0] === 0x50 && buffer[1] === 0x4b; // PK zip header for docx
+
     let rawText = '';
 
     if (file.name.endsWith('.pdf')) {
+      if (!isPdfMagic) {
+        return NextResponse.json(
+          { error: 'Berkas PDF tidak valid atau rusak.' },
+          { status: 400 }
+        );
+      }
       const parser = new PDFParse({ data: buffer });
       const pdfData = await parser.getText();
       rawText = pdfData.text;
       await parser.destroy();
     } else if (file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
+      if (!isZipMagic && file.name.endsWith('.docx')) {
+        return NextResponse.json(
+          { error: 'Berkas DOCX tidak valid atau rusak.' },
+          { status: 400 }
+        );
+      }
       const docxResult = await mammoth.extractRawText({ buffer });
       rawText = docxResult.value;
     } else if (file.name.endsWith('.txt') || file.name.endsWith('.json')) {

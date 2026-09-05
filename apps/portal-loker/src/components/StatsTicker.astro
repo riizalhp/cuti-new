@@ -1,0 +1,82 @@
+---
+// StatsTicker.astro - Real-time metrics bar across Indonesia
+---
+
+<section class="bg-white border-b border-slate-200 py-6">
+  <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 items-center">
+      <!-- Stat 1 -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#1738d1] flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="text-base font-semibold text-slate-900 leading-none">10.000+</div>
+          <div class="text-xs text-slate-500 font-medium">Info Lowongan</div>
+        </div>
+      </div>
+
+      <!-- Stat 2 -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#1738d1] flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="text-base font-semibold text-slate-900 leading-none">500+</div>
+          <div class="text-xs text-slate-500 font-medium">Sertifikasi & Course</div>
+        </div>
+      </div>
+
+      <!-- Stat 3 -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#1738d1] flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="text-base font-semibold text-slate-900 leading-none">300+</div>
+          <div class="text-xs text-slate-500 font-medium">Event Setiap Tahun</div>
+        </div>
+      </div>
+
+      <!-- Stat 4 -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#1738d1] flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="text-base font-semibold text-slate-900 leading-none">1.000+</div>
+          <div class="text-xs text-slate-500 font-medium">Artikel Karier</div>
+        </div>
+      </div>
+
+      <!-- Stat 5 -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#1738d1] flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="text-base font-semibold text-slate-900 leading-none">500.000+</div>
+          <div class="text-xs text-slate-500 font-medium">Pembaca / Bulan</div>
+        </div>
+      </div>
+
+      <!-- Divider Quote -->
+      <div class="hidden lg:flex items-center pl-4 border-l-2 border-[#1738d1]">
+        <p class="text-xs text-slate-600 font-medium italic">
+          Lebih dari sekadar lowongan, ini tentang masa depanmu.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

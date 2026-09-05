@@ -1,15 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@cuti/db";
+import { getAuthUser } from "@/lib/server-auth";
 import { generateExactCacheKey, FIXED_MINI_SYSTEM_PROMPT } from "@/lib/nlp-pruner";
 import { semanticCache } from "@/lib/semantic-cache";
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getAuthUser(req);
+    if (!user) {
+      return NextResponse.json(
+        { error: "Silakan masuk terlebih dahulu untuk mengakses asisten pintar." },
+        { status: 401 }
+      );
+    }
+
+    // Daily quota enforcement
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const todayUsageCount = await prisma.ai_usage_logs.count({
+      where: {
+        user_id: user.id,
+        created_at: { gte: startOfDay },
+      },
+    });
+
+    const MAX_DAILY_AI_REQUESTS = 50;
+    if (todayUsageCount >= MAX_DAILY_AI_REQUESTS) {
+      return NextResponse.json(
+        { error: "Batas pemakaian asisten harian kamu telah tercapai (maks 50 request/hari). Silakan coba lagi besok." },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
-    const { prompt, systemInstruction, model, promptName = "Custom AI Prompt", contextKey = "general", goal = "auto", role = "Professional", feature, task, temperature } = body;
+    const { prompt, promptName = "Custom AI Prompt", contextKey = "general", goal = "auto", role = "Professional", feature, task, temperature } = body;
     const resolvedFeatureKey = feature || task || (promptName.includes("Bullet") ? "bullet_optimizer" : contextKey === "copilot" ? "copilot" : contextKey === "ats_audit" ? "ats_audit" : contextKey === "cv_screener" ? "cv_screener" : null);
 
-    if (!prompt) {
+    if (!prompt || typeof prompt !== "string" || prompt.trim().length === 0) {
       return NextResponse.json({ error: "Prompt tidak boleh kosong" }, { status: 400 });
     }
 
@@ -32,12 +59,12 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 2. Resolve Provider: Check Feature Mapping first, then highest priority active provider
+    // 2. Resolve Provider: Server-enforced model and prompt guardrails
     let aiEndpoint = (process.env.AI_ENDPOINT || "https://api.openai.com/v1").replace(/\/+$/, "");
     let aiApiKey = process.env.AI_API_KEY || "";
-    let aiModel = model || process.env.AI_MODEL || "gpt-4o-mini";
+    let aiModel = process.env.AI_MODEL || "gpt-4o-mini";
     let providerName = "openai";
-    let resolvedTemperature = typeof temperature === "number" ? temperature : 0.3;
+    let resolvedTemperature = typeof temperature === "number" ? Math.min(Math.max(temperature, 0), 1) : 0.3;
 
     try {
       let resolvedProvider: any = null;
@@ -68,7 +95,7 @@ export async function POST(req: NextRequest) {
       if (resolvedProvider) {
         aiEndpoint = resolvedProvider.base_url.replace(/\/+$/, "");
         aiApiKey = resolvedProvider.api_key;
-        aiModel = model || resolvedProvider.model;
+        aiModel = resolvedProvider.model || aiModel;
         providerName = resolvedProvider.alias || resolvedProvider.name || "custom_proxy";
       }
     } catch (dbErr) {
@@ -89,7 +116,7 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: "system",
-          content: systemInstruction || FIXED_MINI_SYSTEM_PROMPT,
+          content: FIXED_MINI_SYSTEM_PROMPT,
         },
         { role: "user", content: prompt },
       ],
@@ -151,30 +178,29 @@ export async function POST(req: NextRequest) {
       const completionTokens = usage.completion_tokens || Math.ceil(text.length / 4);
       const estCost = ((promptTokens + completionTokens) / 1000) * 100;
 
-      const defaultUser = await prisma.user.findFirst({ select: { id: true } });
-      if (defaultUser) {
-        await prisma.ai_usage_logs.create({
-          data: {
-            id: crypto.randomUUID(),
-            user_id: defaultUser.id,
-            provider: providerName,
-            model: aiModel,
-            prompt_name: promptName,
-            tokens_input: promptTokens,
-            tokens_output: completionTokens,
-            cost: estCost,
-            created_at: new Date(),
-          },
-        });
-      }
+      await prisma.ai_usage_logs.create({
+        data: {
+          id: crypto.randomUUID(),
+          user_id: user.id,
+          provider: providerName,
+          model: aiModel,
+          prompt_name: promptName,
+          tokens_input: promptTokens,
+          tokens_output: completionTokens,
+          cost: estCost,
+          created_at: new Date(),
+        },
+      });
     } catch (logErr) {
       console.warn("[AI Gateway] Gagal mencatat usage log:", logErr);
     }
 
     return NextResponse.json({ text, cached: false, usage: data.usage || null });
   } catch (error: unknown) {
-    const errMessage = error instanceof Error ? error.message : "Terjadi kesalahan pada server AI";
     console.error("AI Route Error:", error);
-    return NextResponse.json({ error: errMessage }, { status: 500 });
+    return NextResponse.json(
+      { error: "Terjadi kendala saat menyusun data. Tim sistem sedang mencoba kembali secara otomatis." },
+      { status: 500 }
+    );
   }
 }

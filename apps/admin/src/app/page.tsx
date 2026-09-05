@@ -272,6 +272,13 @@ export default function AdminDashboard() {
                   <span>Misi Cuan ({stats.misi.active} aktif)</span>
                   <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
+                <Link href="/visitors" className="w-full py-3 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition-all flex items-center justify-between group">
+                  <span className="flex items-center gap-1.5">
+                    <Flame size={14} className="text-orange-500" />
+                    Tracker Jam Ramai & Trafik
+                  </span>
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                </Link>
                 <Link href="/settings" className="w-full py-3 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition-all flex items-center justify-between group">
                   <span>Pengaturan Harga & Sistem</span>
                   <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />

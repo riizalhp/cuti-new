@@ -219,12 +219,14 @@ export default function BentoMoreThanForm() {
           <img
             src={activeFeature.desktopImg}
             alt={`${activeFeature.tag} - Desktop view`}
+            title={`${activeFeature.tag} - Desktop view`}
             className="scroll-story__img scroll-story__img--desktop"
             draggable={false}
           />
           <img
             src={activeFeature.mobileImg}
             alt={`${activeFeature.tag} - Mobile view`}
+            title={`${activeFeature.tag} - Mobile view`}
             className="scroll-story__img scroll-story__img--mobile"
             draggable={false}
           />

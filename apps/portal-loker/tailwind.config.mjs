@@ -30,6 +30,7 @@ export default {
         sans: ['"Inter Tight"', 'sans-serif'],
         display: ['"Instrument Serif"', '"Bodoni Moda"', 'Inter', 'sans-serif'],
         serif: ['"Instrument Serif"', '"Bodoni Moda"', '"Cormorant Garamond"', 'serif'],
+        doodle: ['"Caveat"', 'cursive', 'sans-serif'],
       },
     },
   },

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma, logSecurityEvent, logApp, extractRequestContext } from '@cuti/db';
+import { checkRateLimit } from '@/lib/rate-limit';
 import crypto from 'crypto';
 
 const corsHeaders = {
@@ -37,6 +38,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { success: false, message: 'Kata sandi minimal 6 karakter.' },
         { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // Rate limiting: Max 5 registration attempts per minute per IP
+    const ctx = extractRequestContext(req);
+    const ipIdentifier = ctx.ip || 'global_register';
+    const rateLimit = checkRateLimit(`register_${ipIdentifier}`, { limit: 5, windowMs: 60 * 1000 });
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { success: false, message: 'Terlalu banyak percobaan pendaftaran akun. Silakan tunggu 1 menit sebelum mencoba kembali.' },
+        { status: 429, headers: corsHeaders }
       );
     }
 
@@ -97,7 +109,6 @@ export async function POST(req: NextRequest) {
       role: newUser.role,
     };
 
-    const ctx = extractRequestContext(req);
     logSecurityEvent({
       eventType: 'LOGIN_SUCCESS',
       ip: ctx.ip,
@@ -118,17 +129,47 @@ export async function POST(req: NextRequest) {
       userId: newUser.id,
     });
 
+    // Create secure database session
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+    const thirtyDaysInSeconds = 30 * 24 * 60 * 60;
+    const expiresAt = new Date(Date.now() + thirtyDaysInSeconds * 1000);
+
+    await prisma.sessions.create({
+      data: {
+        id: crypto.randomUUID(),
+        token: sessionToken,
+        user_id: newUser.id,
+        expires_at: expiresAt,
+        ip_address: ctx.ip || null,
+        user_agent: ctx.userAgent || null,
+        updated_at: now,
+      },
+    }).catch((err) => console.warn('[Register] Non-fatal session create err:', err));
+
     const response = NextResponse.json(
       {
         success: true,
         message: 'Akun berhasil didaftarkan di database.',
-        data: userData,
+        data: {
+          ...userData,
+          token: sessionToken,
+        },
       },
       { status: 201, headers: corsHeaders }
     );
 
-    // Set persistent auto-login cookie (30 days)
-    const thirtyDaysInSeconds = 30 * 24 * 60 * 60;
+    // Set secure HttpOnly session cookie
+    response.cookies.set({
+      name: 'cuti_auth_session',
+      value: sessionToken,
+      maxAge: thirtyDaysInSeconds,
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+    });
+
+    // Set non-sensitive UI display cookie for fast header render
     response.cookies.set({
       name: 'cuti_user_session',
       value: encodeURIComponent(JSON.stringify(userData)),

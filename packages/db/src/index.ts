@@ -23,4 +23,4 @@ export type {
   VisitorPageView,
   VisitorActivity,
 } from './generated/client/index.js';
-export * from './logger.ts';
+export * from './logger';

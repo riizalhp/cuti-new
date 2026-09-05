@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import FooterPortal from '../../components/FooterPortal.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import SearchModal from '../../components/SearchModal.astro';
+import { courseList } from '../../data/mock';
+
+const title = "Direktori Kursus & Bootcamp Skill Digital | Employer Job";
+const description = "Daftar kursus, pelatihan, dan bootcamp pilihan untuk menguasai skill digital yang paling dicari perusahaan.";
+---
+
+<BaseLayout title={title} description={description} canonicalUrl="http://localhost:3003/kursus">
+  <Navbar />
+
+  <main class="bg-slate-50 min-h-screen pb-16">
+    <div class="bg-white border-b border-slate-200 py-8">
+      <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
+        <nav class="flex items-center gap-2 text-xs text-slate-500 mb-4" aria-label="Breadcrumb">
+          <a href="/" class="hover:text-[#1738d1]">Beranda</a>
+          <span>/</span>
+          <span class="text-slate-900 font-bold">Kursus & Bootcamp</span>
+        </nav>
+        <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          Kursus & Pelatihan Skill Masa Depan
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
+          Belajar coding, desain, pemasaran digital, data, dan produktivitas dari mentor terpercaya.
+        </p>
+      </div>
+    </div>
+
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6">
+      <AdSlot type="leaderboard" />
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
+        {courseList.map((c) => (
+          <article class="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg hover:border-blue-300 transition duration-200 flex flex-col justify-between">
+            <div>
+              <div class="h-36 bg-slate-100 overflow-hidden relative">
+                <img src={c.image} alt={c.title} class="w-full h-full object-cover" loading="lazy" />
+                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md bg-slate-900/80 text-white text-[10px] font-bold backdrop-blur-sm">
+                  {c.level}
+                </span>
+              </div>
+              <div class="p-5">
+                <div class="flex items-center gap-2 text-[11px] text-slate-500 mb-1.5">
+                  <span class="font-bold text-slate-700">{c.provider}</span>
+                  <span>·</span>
+                  <span>{c.duration}</span>
+                  <span>·</span>
+                  <span class="text-amber-500 font-bold">★ {c.rating}</span>
+                </div>
+                <h2 class="text-base font-black text-slate-900 hover:text-[#1738d1] transition leading-snug">
+                  <a href={`/kursus/${c.slug}`}>{c.title}</a>
+                </h2>
+                <p class="text-xs text-slate-500 line-clamp-2 mt-2 leading-relaxed">{c.description}</p>
+              </div>
+            </div>
+            <div class="p-5 pt-0 border-t border-slate-100">
+              <div class="flex items-center justify-between pt-3">
+                <span class="text-xs font-black text-emerald-600">{c.price}</span>
+                <a href={`/kursus/${c.slug}`} class="px-3 py-1.5 rounded-lg bg-[#1738d1] hover:bg-[#122ca6] text-white text-xs font-bold transition">
+                  Detail Kursus →
+                </a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </main>
+
+  <FooterPortal />
+  <SearchModal />
+</BaseLayout>

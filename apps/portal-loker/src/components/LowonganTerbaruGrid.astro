@@ -1,0 +1,165 @@
+---
+// LowonganTerbaruGrid.astro - 4 Kartu Lowongan Kerja Terbaru
+interface JobCard {
+  company: string;
+  type: string;
+  location: string;
+  position: string;
+  postedTime: string;
+  slug: string;
+  logo: {
+    type: 'mandiri' | 'tokopedia' | 'pertamina' | 'unilever';
+  };
+}
+
+const jobs: JobCard[] = [
+  {
+    company: "PT Bank Mandiri (Persero) Tbk",
+    type: "Full Time",
+    location: "Jakarta",
+    position: "Relationship Manager",
+    postedTime: "Diposting 2 jam yang lalu",
+    slug: "rekrutmen-fresh-graduate-pt-bank-mandiri-jakarta",
+    logo: { type: "mandiri" }
+  },
+  {
+    company: "PT Tokopedia",
+    type: "Full Time",
+    location: "Remote",
+    position: "Product Operations",
+    postedTime: "Diposting 4 jam yang lalu",
+    slug: "product-operations-tokopedia-remote",
+    logo: { type: "tokopedia" }
+  },
+  {
+    company: "PT Pertamina (Persero)",
+    type: "Full Time",
+    location: "Jakarta",
+    position: "Engineer (Various Position)",
+    postedTime: "Diposting 6 jam yang lalu",
+    slug: "pertamina-bumn-career-engineer-jakarta",
+    logo: { type: "pertamina" }
+  },
+  {
+    company: "PT Unilever Indonesia Tbk",
+    type: "Full Time",
+    location: "Tangerang",
+    position: "Marketing Executive",
+    postedTime: "Diposting 8 jam yang lalu",
+    slug: "marketing-executive-unilever-indonesia-tangerang",
+    logo: { type: "unilever" }
+  }
+];
+---
+
+<section class="py-8 sm:py-10 bg-white border-b border-slate-200">
+  <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
+    <!-- Header Section (Konsisten dengan Standar Judul Section) -->
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="w-2 h-2 rounded-full bg-[#1738d1]"></span>
+          <span class="text-[11px] font-medium uppercase tracking-wider text-[#1738d1]">Peluang Karier</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-medium text-slate-900 tracking-tight">Lowongan Kerja Terbaru</h2>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">Informasi lowongan kerja dari berbagai perusahaan terpercaya. Temukan peluang terbaik untuk kariermu.</p>
+      </div>
+      <a 
+        href="/lowongan" 
+        class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#1738d1] hover:text-[#132ea8] transition shrink-0 self-start sm:self-auto group"
+      >
+        <span>Lihat Semua</span>
+        <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      </a>
+    </div>
+
+    <!-- 4 Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {jobs.map((job) => (
+        <a 
+          href="/lowongan"
+          class="group bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-3.5 hover:border-blue-400 hover:shadow-md transition-all relative overflow-hidden"
+        >
+          <!-- Logo Container -->
+          <div class="w-13 h-13 rounded-xl bg-white border border-slate-100 flex items-center justify-center p-1.5 shrink-0 shadow-xs group-hover:border-slate-200 transition">
+            {job.logo.type === 'mandiri' && (
+              <div class="w-full h-full flex flex-col items-center justify-center">
+                <span class="text-[13px] font-medium tracking-tight text-[#002d62] leading-none">mandırı</span>
+                <span class="w-7 h-1 bg-[#f58220] rounded-sm mt-0.5 inline-block"></span>
+              </div>
+            )}
+
+            {job.logo.type === 'tokopedia' && (
+              <div class="w-full h-full flex items-center justify-center">
+                <svg viewBox="0 0 100 100" class="w-9 h-9" fill="none">
+                  <rect x="15" y="30" width="70" height="60" rx="14" fill="#03AC0E" />
+                  <path d="M35 30 V 20 C 35 12 65 12 65 20 V 30" stroke="#03AC0E" stroke-width="7" stroke-linecap="round" fill="none" />
+                  <circle cx="38" cy="52" r="12" fill="#FFFFFF" />
+                  <circle cx="38" cy="52" r="6" fill="#03AC0E" />
+                  <circle cx="40" cy="50" r="2.5" fill="#FFFFFF" />
+                  <circle cx="62" cy="52" r="12" fill="#FFFFFF" />
+                  <circle cx="62" cy="52" r="6" fill="#03AC0E" />
+                  <circle cx="64" cy="50" r="2.5" fill="#FFFFFF" />
+                  <circle cx="50" cy="58" r="3" fill="#F7A21C" />
+                </svg>
+              </div>
+            )}
+
+            {job.logo.type === 'pertamina' && (
+              <div class="w-full h-full flex flex-col items-center justify-center">
+                <svg viewBox="0 0 100 80" class="w-7 h-7" fill="none">
+                  <path d="M50 8 L78 8 L60 38 L32 38 Z" fill="#E31E24" />
+                  <path d="M22 42 L50 42 L32 72 L4 72 Z" fill="#0072CE" />
+                  <path d="M64 42 L92 42 L80 62 L52 62 Z" fill="#80BC00" />
+                </svg>
+                <span class="text-[6.5px] font-medium tracking-tight text-[#002d62] uppercase leading-none mt-0.5">PERTAMINA</span>
+              </div>
+            )}
+
+            {job.logo.type === 'unilever' && (
+              <div class="w-full h-full flex flex-col items-center justify-center">
+                <svg viewBox="0 0 100 90" class="w-7 h-7" fill="#1F36C7">
+                  <path d="M25 15 C 25 55 45 75 50 75 C 55 75 75 55 75 15 C 65 25 60 45 50 45 C 40 45 35 25 25 15 Z" fill-rule="evenodd" />
+                  <circle cx="50" cy="22" r="6" />
+                  <circle cx="34" cy="30" r="4" />
+                  <circle cx="66" cy="30" r="4" />
+                </svg>
+                <span class="text-[7.5px] font-medium text-[#1F36C7] tracking-tight">Unilever</span>
+              </div>
+            )}
+          </div>
+
+          <!-- Info Details -->
+          <div class="min-w-0 flex-1">
+            <!-- Company Name -->
+            <p class="text-xs font-medium text-slate-700 truncate mb-1">
+              {job.company}
+            </p>
+
+            <!-- Badges / Pills -->
+            <div class="flex items-center gap-1.5 mb-1.5 flex-wrap">
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-normal bg-slate-100 text-slate-600">
+                {job.type}
+              </span>
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-normal bg-slate-100 text-slate-600">
+                {job.location}
+              </span>
+            </div>
+
+            <!-- Position / Job Title -->
+            <h3 class="text-[13px] sm:text-sm font-medium text-slate-900 leading-snug truncate group-hover:text-[#1738d1] transition">
+              {job.position}
+            </h3>
+
+            <!-- Time posted -->
+            <p class="text-[11px] font-normal text-slate-400 mt-1">
+              {job.postedTime}
+            </p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>

@@ -5,6 +5,7 @@ import '../styles/employer.css';
 interface Props {
   title: string;
   description: string;
+  keywords?: string;
   ogImage?: string;
   ogType?: string;
   canonicalUrl?: string;
@@ -15,7 +16,8 @@ interface Props {
 const {
   title,
   description,
-  ogImage = 'https://employr.id/images/cuti-hero.png',
+  keywords = 'Employr, CV builder, resume builder, ATS friendly CV, career compass, job application tracker, career workspace, buat CV ATS, career operating system',
+  ogImage = 'https://employr.id/images/hero-section.webp',
   ogType = 'website',
   canonicalUrl = 'https://employr.id/',
   faqSchema,
@@ -54,6 +56,28 @@ const siteSchema = {
       publisher: { '@id': 'https://employr.id/#organization' },
     },
     {
+      '@type': 'WebPage',
+      '@id': 'https://employr.id/#webpage',
+      url: canonicalUrl,
+      name: title,
+      description: description,
+      isPartOf: { '@id': 'https://employr.id/#website' },
+      about: { '@id': 'https://employr.id/#organization' },
+      inLanguage: 'en-US',
+    },
+    {
+      '@type': 'BreadcrumbList',
+      '@id': 'https://employr.id/#breadcrumb',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: 'https://employr.id/',
+        },
+      ],
+    },
+    {
       '@type': 'WebApplication',
       '@id': 'https://employr.id/#webapp',
       name: 'Employr',
@@ -75,15 +99,21 @@ const siteSchema = {
 ---
 
 <!doctype html>
-<html lang="en" class="site-bg">
+<html lang="en" class="site-bg" itemscope itemtype="https://schema.org/WebPage">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="keywords" content={keywords} />
+    <meta name="author" content="Employr" />
+    <meta name="publisher" content="Employr" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <link rel="canonical" href={canonicalUrl} />
     <meta name="theme-color" content="#f4f3ee" />
+
+    <!-- Image Source for legacy parsers / SEO extensions -->
+    <link rel="image_src" href={ogImage} />
 
     <!-- Favicons & Icons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -99,6 +129,8 @@ const siteSchema = {
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:alt" content="Employr: Career Operating System" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:site_name" content="Employr" />
     <meta property="og:locale" content="en_US" />
 

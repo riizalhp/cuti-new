@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma, logSecurityEvent, logApp, extractRequestContext, detectBruteForce } from '@cuti/db';
+import { checkRateLimit } from '@/lib/rate-limit';
 import crypto from 'crypto';
 
 const corsHeaders = {
@@ -38,6 +39,24 @@ export async function POST(req: NextRequest) {
 
     const cleanEmail = email.trim().toLowerCase();
     const ctx = extractRequestContext(req);
+
+    // Rate limiting: Max 10 attempts per minute per IP
+    const ipIdentifier = ctx.ip || 'global_login';
+    const rateLimit = checkRateLimit(`login_${ipIdentifier}`, { limit: 10, windowMs: 60 * 1000 });
+    if (!rateLimit.success) {
+      logSecurityEvent({
+        eventType: 'LOGIN_FAILED',
+        ip: ctx.ip,
+        userAgent: ctx.userAgent,
+        email: cleanEmail,
+        severity: 'WARNING',
+        details: { reason: 'rate_limit_exceeded' },
+      });
+      return NextResponse.json(
+        { success: false, message: 'Terlalu banyak percobaan login. Silakan tunggu 1 menit sebelum mencoba kembali.' },
+        { status: 429, headers: corsHeaders }
+      );
+    }
 
     // Find user in database
     const user = await prisma.user.findUnique({
@@ -146,17 +165,47 @@ export async function POST(req: NextRequest) {
       userId: user.id,
     });
 
+    // Create secure database session
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+    const thirtyDaysInSeconds = 30 * 24 * 60 * 60;
+    const expiresAt = new Date(Date.now() + thirtyDaysInSeconds * 1000);
+
+    await prisma.sessions.create({
+      data: {
+        id: crypto.randomUUID(),
+        token: sessionToken,
+        user_id: user.id,
+        expires_at: expiresAt,
+        ip_address: ctx.ip || null,
+        user_agent: ctx.userAgent || null,
+        updated_at: new Date(),
+      },
+    }).catch((err) => console.warn('[Login] Non-fatal session create err:', err));
+
     const response = NextResponse.json(
       {
         success: true,
         message: 'Login berhasil.',
-        data: userData,
+        data: {
+          ...userData,
+          token: sessionToken,
+        },
       },
       { status: 200, headers: corsHeaders }
     );
 
-    // Set persistent auto-login cookie (30 days)
-    const thirtyDaysInSeconds = 30 * 24 * 60 * 60;
+    // Set secure HttpOnly session cookie
+    response.cookies.set({
+      name: 'cuti_auth_session',
+      value: sessionToken,
+      maxAge: thirtyDaysInSeconds,
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+    });
+
+    // Set non-sensitive UI display cookie for fast header render
     response.cookies.set({
       name: 'cuti_user_session',
       value: encodeURIComponent(JSON.stringify(userData)),

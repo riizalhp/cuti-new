@@ -22,12 +22,23 @@ interface ChatMessage {
   timestamp: string;
 }
 
+const escapeHtml = (str: string): string => {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 /**
- * Render teks balasan bot: ubah penanda **bold** menjadi <strong> sungguhan
- * (tanpa tanda bintang), sehingga judul artikel tampil tebal secara natural.
+ * Render teks balasan bot: escape seluruh HTML berbahaya untuk mencegah XSS,
+ * lalu ubah penanda **bold** menjadi <strong> sungguhan.
  */
 const renderBotText = (text: string): string => {
-  return text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  if (!text) return '';
+  const escaped = escapeHtml(text);
+  return escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 };
 
 export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {

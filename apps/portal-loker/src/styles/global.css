@@ -1,40 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+
 /* ============================================================
    PORTALKERJA — Design System (lihat MASTER.md)
    Palet: landing page (ink/paper/cobalt/periwinkle/lime)
    Sudut: rounded clean 10px · Motion: calm 150-200ms
    ============================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&display=swap');
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; }
 
 :root {
   /* Color — MASTER.md §3 */
-  --ink: #101114;
-  --paper: #f5f6f2;
+  --ink: #0f172a;
+  --paper: #ffffff;
   --surface: #ffffff;
   --cobalt: #1738d1;
   --cobalt-dark: #122ca6;
   --periwinkle: #c9d0ff;
   --periwinkle-soft: #eef0ff;
   --lime: #c8f55b;
-  --muted: #6b7280;
-  --faint: #9ca3af;
-  --border: #e5e7eb;
-  --border-strong: #101114;
+  --muted: #64748b;
+  --faint: #94a3b8;
+  --border: #e2e8f0;
+  --border-strong: #0f172a;
 
   /* Typography — MASTER.md §3 */
-  --sans: 'Inter Tight', system-ui, sans-serif;
+  --sans: 'Inter Tight', system-ui, -apple-system, sans-serif;
   --serif: 'Instrument Serif', serif;
   --bodoni: 'Bodoni Moda', serif;
+  --doodle: 'Caveat', cursive, sans-serif;
 
   /* Radius — MASTER.md §3 */
-  --r: 10px;
-  --r-sm: 6px;
+  --r: 12px;
+  --r-sm: 8px;
   --r-full: 9999px;
 
   /* Elevation — MASTER.md §3 */
-  --shadow: 0 2px 8px -2px rgba(16, 17, 20, 0.06);
-  --shadow-hover: 0 4px 14px -4px rgba(23, 56, 209, 0.14);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+  --shadow-hover: 0 10px 25px -5px rgb(23 56 209 / 0.12), 0 8px 10px -6px rgb(23 56 209 / 0.08);
 
   /* Motion — MASTER.md §2 (calm, 150-200ms) */
   --ease: cubic-bezier(0.2, 0, 0, 1);
@@ -44,12 +49,16 @@
 
 html { scroll-behavior: smooth; }
 body {
-  background: var(--paper);
-  color: var(--ink);
+  background: #ffffff;
+  color: #0f172a;
   font-family: var(--sans);
   font-size: 15px;
   line-height: 1.55;
   overflow-x: hidden;
+}
+
+.font-doodle {
+  font-family: 'Caveat', cursive, sans-serif;
 }
 a { color: inherit; text-decoration: none; }
 a:hover { text-decoration: none; }
@@ -60,15 +69,15 @@ button { font: inherit; }
 .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
 /* ---------- Tipografi ---------- */
-h1, h2, h3, h4 { font-family: var(--sans); line-height: 1.2; letter-spacing: -0.01em; }
-h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.02em; }
+h1, h2, h3, h4 { font-family: var(--sans); line-height: 1.2; letter-spacing: -0.01em; font-weight: 500; }
+h1 { font-size: 36px; font-weight: 500; letter-spacing: -0.02em; }
 h1 em, h2 em, h3 em { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--cobalt); }
-h2 { font-size: 24px; font-weight: 700; }
-h3 { font-size: 18px; font-weight: 600; }
-h4 { font-size: 15px; font-weight: 700; }
-.small { font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: 0.01em; }
-.tiny  { font-size: 11px; font-weight: 600; color: var(--faint); letter-spacing: 0.02em; }
-.caps  { text-transform: uppercase; letter-spacing: 0.1em; font-size: 11px; font-weight: 700; color: var(--cobalt); }
+h2 { font-size: 24px; font-weight: 500; }
+h3 { font-size: 18px; font-weight: 500; }
+h4 { font-size: 15px; font-weight: 500; }
+.small { font-size: 13px; font-weight: 400; color: var(--muted); letter-spacing: 0.01em; }
+.tiny  { font-size: 11px; font-weight: 400; color: var(--faint); letter-spacing: 0.02em; }
+.caps  { text-transform: uppercase; letter-spacing: 0.1em; font-size: 11px; font-weight: 500; color: var(--cobalt); }
 .muted { color: var(--muted); }
 
 /* ---------- Header situs ---------- */
@@ -295,3 +304,6 @@ a.chip:hover { background: var(--periwinkle); border-color: var(--cobalt); }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
+
+@tailwind utilities;
+

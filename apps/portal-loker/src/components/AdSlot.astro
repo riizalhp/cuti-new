@@ -1,34 +1,98 @@
 ---
+// AdSlot.astro - Clean, professional Google Ads placement
 interface Props {
-  type: 'leaderboard' | 'mrec' | 'skyscraper' | 'infeed';
-  note?: string;
+  type?: 'leaderboard' | 'infeed' | 'sidebar' | 'card' | 'mrec' | 'skyscraper' | string;
   style?: string;
+  className?: string;
+  note?: string;
 }
 
-const { type, note, style = '' } = Astro.props;
-
-const config = {
-  leaderboard: {
-    class: 'ad-leaderboard',
-    size: 'Leaderboard — 728 × 90',
-  },
-  mrec: {
-    class: 'ad-mrec',
-    size: 'Medium Rectangle — 300 × 250',
-  },
-  skyscraper: {
-    class: 'ad-skyscraper',
-    size: 'Half-page / Skyscraper — 300 × 600',
-  },
-  infeed: {
-    class: 'ad-infeed',
-    size: 'In-feed — lebar penuh, selip di antara konten',
-  },
-}[type];
+const { type = 'leaderboard', style = '', className = '', note = '' } = Astro.props;
 ---
 
-<div class={`ad ${config.class}`} style={style}>
-  <span class="ad-tag">Iklan · Google Ads</span>
-  <span class="ad-size">{config.size}</span>
-  {note && <span class="ad-note">{note}</span>}
-</div>
+{type === 'leaderboard' && (
+  <div class={"max-w-[1240px] mx-auto px-4 sm:px-6 my-6 " + className} style={style}>
+    <div class="relative bg-white border border-dashed border-slate-300 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm min-h-[90px]">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 shrink-0">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#4285F4]"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-[#EA4335]"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-[#FBBC05]"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-[#34A853]"></span>
+        </div>
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">Google Ads Partner (728×90)</span>
+          <span class="text-sm font-bold text-slate-800">Promosikan Program Pelatihan & Rekrutmen Perusahaan Anda di Sini</span>
+          {note && <p class="text-xs text-slate-500 mt-0.5">{note}</p>}
+        </div>
+      </div>
+      <a href="/tentang#iklan" class="px-5 py-2 rounded-xl bg-[#1738d1] hover:bg-[#122ca6] text-white text-xs font-bold shrink-0 transition">
+        Pasang Iklan →
+      </a>
+      <span class="absolute top-2 right-3 text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Iklan</span>
+    </div>
+  </div>
+)}
+
+{type === 'infeed' && (
+  <div class={"my-6 " + className} style={style}>
+    <div class="relative bg-slate-50 border border-dashed border-slate-300 rounded-2xl p-5 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-100 text-[#1738d1] flex items-center justify-center font-bold text-xs shrink-0">
+          ADS
+        </div>
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rekomendasi Sponsor</span>
+          <h4 class="text-sm font-bold text-slate-900">Beasiswa & Pelatihan Kerja Bersertifikat untuk Talenta Muda</h4>
+          <p class="text-xs text-slate-500">{note || 'Tingkatkan skill digital dengan kurikulum industri terpercaya.'}</p>
+        </div>
+      </div>
+      <a href="/tentang#iklan" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shrink-0 transition">
+        Pelajari →
+      </a>
+      <span class="absolute top-2 right-3 text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Iklan</span>
+    </div>
+  </div>
+)}
+
+{(type === 'mrec' || type === 'sidebar') && (
+  <div class={"my-4 bg-white border border-dashed border-slate-300 rounded-2xl p-4 text-center " + className} style={style}>
+    <div class="flex items-center justify-center gap-1.5 mb-2">
+      <span class="w-2 h-2 rounded-full bg-[#4285F4]"></span>
+      <span class="w-2 h-2 rounded-full bg-[#EA4335]"></span>
+      <span class="w-2 h-2 rounded-full bg-[#FBBC05]"></span>
+      <span class="w-2 h-2 rounded-full bg-[#34A853]"></span>
+      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Google Ads (300×250)</span>
+    </div>
+    <div class="my-4">
+      <h5 class="text-xs font-bold text-slate-800 mb-1">Ruang Iklan Rekrutmen</h5>
+      <p class="text-[11px] text-slate-500">{note || 'Jangkau ribuan pelamar aktif di portal karier terdepan.'}</p>
+    </div>
+    <a href="/tentang#iklan" class="inline-block w-full py-2 rounded-xl bg-blue-50 text-[#1738d1] text-xs font-bold hover:bg-[#1738d1] hover:text-white transition">
+      Pasang Iklan
+    </a>
+  </div>
+)}
+
+{type === 'skyscraper' && (
+  <div class={"my-4 bg-white border border-dashed border-slate-300 rounded-2xl p-4 text-center min-h-[350px] flex flex-col justify-between " + className} style={style}>
+    <div class="flex items-center justify-center gap-1.5 mb-2">
+      <span class="w-2 h-2 rounded-full bg-[#4285F4]"></span>
+      <span class="w-2 h-2 rounded-full bg-[#EA4335]"></span>
+      <span class="w-2 h-2 rounded-full bg-[#FBBC05]"></span>
+      <span class="w-2 h-2 rounded-full bg-[#34A853]"></span>
+      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Google Ads (300×600)</span>
+    </div>
+    <div class="my-auto py-6">
+      <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#1738d1] flex items-center justify-center font-medium mx-auto mb-3">
+        K
+      </div>
+      <h5 class="text-sm font-medium text-slate-800 mb-1">Employer Job Ad Network</h5>
+      <p class="text-xs text-slate-500 max-w-[200px] mx-auto">{note || 'Media promosi lowongan & program karier generasi muda.'}</p>
+    </div>
+    <a href="/tentang#iklan" class="inline-block w-full py-2 rounded-xl bg-[#1738d1] text-white text-xs font-medium hover:bg-[#122ca6] transition">
+      Pasang Iklan
+    </a>
+  </div>
+)}
+

@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import FooterPortal from '../../components/FooterPortal.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import SearchModal from '../../components/SearchModal.astro';
+import { eventList } from '../../data/mock';
+
+const title = "Kalender Event & Job Fair Nasional | Employer Job";
+const description = "Jadwal terlengkap job fair, webinar karier, networking session, dan pameran bursa kerja di seluruh kota besar Indonesia.";
+---
+
+<BaseLayout title={title} description={description} canonicalUrl="http://localhost:3003/job-fair">
+  <Navbar />
+
+  <main class="bg-slate-50 min-h-screen pb-16">
+    <div class="bg-white border-b border-slate-200 py-8">
+      <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
+        <nav class="flex items-center gap-2 text-xs text-slate-500 mb-4" aria-label="Breadcrumb">
+          <a href="/" class="hover:text-[#1738d1]">Beranda</a>
+          <span>/</span>
+          <span class="text-slate-900 font-bold">Event & Job Fair</span>
+        </nav>
+        <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          Jadwal Job Fair & Event Karier
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
+          Temui rekruter dari puluhan perusahaan secara langsung dan ikuti sesi persiapan wawancara.
+        </p>
+      </div>
+    </div>
+
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6">
+      <AdSlot type="leaderboard" />
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
+        {eventList.map((ev) => (
+          <article class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-lg hover:border-blue-300 transition duration-200 flex flex-col sm:flex-row gap-4">
+            <div class="w-16 h-16 rounded-xl bg-blue-50 border border-blue-100 flex flex-col items-center justify-center shrink-0">
+              <span class="text-xs font-bold text-[#1738d1] uppercase">{ev.dateMonth}</span>
+              <span class="text-xl font-black text-[#1738d1] -mt-1">{ev.dateDay}</span>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1 flex-wrap">
+                <span class="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold">{ev.type}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold">{ev.price}</span>
+                <span class="text-[10px] text-slate-500">{ev.format}</span>
+              </div>
+              <h2 class="text-base font-black text-slate-900 hover:text-[#1738d1] transition leading-snug">
+                <a href={`/job-fair/${ev.slug}`}>{ev.title}</a>
+              </h2>
+              <p class="text-xs text-slate-500 line-clamp-2 mt-1.5">{ev.description}</p>
+              <div class="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-slate-100 text-xs">
+                <span class="text-slate-500 font-medium">📍 {ev.location}</span>
+                <a href={`/job-fair/${ev.slug}`} class="font-bold text-[#1738d1] hover:underline">
+                  Info Selengkapnya →
+                </a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </main>
+
+  <FooterPortal />
+  <SearchModal />
+</BaseLayout>

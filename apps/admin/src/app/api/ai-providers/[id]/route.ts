@@ -4,10 +4,10 @@ import { prisma } from "@cuti/db";
 // PUT: Update provider by ID
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const body = await req.json();
     const { name, label, endpointUrl, apiKey, model, priority, isActive, alias, authType } = body;
 
@@ -34,7 +34,12 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json({ success: true, data: updated });
+    const sanitized = {
+      ...updated,
+      api_key: updated.api_key ? `${updated.api_key.slice(0, 3)}••••••••${updated.api_key.slice(-4)}` : "••••••••",
+    };
+
+    return NextResponse.json({ success: true, data: sanitized });
   } catch (error: any) {
     console.error("[AI Providers API] PUT Error:", error);
     return NextResponse.json(
@@ -47,10 +52,10 @@ export async function PUT(
 // DELETE: Delete provider by ID
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     await prisma.ai_providers.delete({ where: { id } });
     return NextResponse.json({ success: true, message: "Provider berhasil dihapus." });
   } catch (error: any) {

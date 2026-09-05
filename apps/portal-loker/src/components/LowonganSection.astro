@@ -1,81 +1,118 @@
-<section id="lowongan" data-od-id="beranda-lowongan">
-  <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px;">
-    <h2>Lowongan Terbaru</h2>
-    <a class="small" href="#lowongan">Lihat semua lowongan →</a>
-  </div>
-  <div class="stack">
-    <article class="card card-row" data-od-id="beranda-job-1">
-      <div class="ph ph-logo">Logo</div>
-      <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
-        <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
-          <h3><a href="/lowongan/frontend-engineer-react-pt-teknologi-nusantara-jakarta-selatan/">Frontend Engineer (React)</a></h3>
-          <span class="badge lime">Baru</span>
-        </div>
-        <div class="meta">
-          <span>PT Teknologi Nusantara</span>
-          <span>Jakarta Selatan</span>
-          <span>Full-time</span>
-          <span>Rp 12–18 jt/bln</span>
-        </div>
-        <div class="chips">
-          <span class="chip">React</span>
-          <span class="chip">TypeScript</span>
-          <span class="chip">Next.js</span>
-        </div>
-      </div>
-    </article>
+---
+// LowonganSection.astro - Lowongan Terbaru with clean editorial cards
+import { lowonganList } from '../data/mock';
+---
 
-    <article class="card card-row" data-od-id="beranda-job-2">
-      <div class="ph ph-logo">Logo</div>
-      <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
-        <h3><a href="/lowongan/digital-marketing-specialist-sinar-media-group-bandung/">Digital Marketing Specialist</a></h3>
-        <div class="meta">
-          <span>Sinar Media Group</span>
-          <span>Bandung</span>
-          <span>Full-time</span>
-          <span>Rp 7–9 jt/bln</span>
+<section id="lowongan-terbaru" class="py-12 bg-white border-b border-slate-200">
+  <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
+    <!-- Header with Filters -->
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="w-2 h-2 rounded-full bg-[#1738d1]"></span>
+          <span class="text-[11px] font-medium uppercase tracking-wider text-[#1738d1]">Peluang Kerja</span>
         </div>
-        <div class="chips">
-          <span class="chip">SEO</span>
-          <span class="chip">Google Ads</span>
-          <span class="chip">Meta Ads</span>
-        </div>
+        <h2 class="text-2xl sm:text-3xl font-medium text-slate-900 tracking-tight">Lowongan Kerja Terbaru</h2>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">
+          Informasi lowongan kerja terverifikasi dari berbagai industri terkemuka di Indonesia.
+        </p>
       </div>
-    </article>
 
-    <article class="card card-row" data-od-id="beranda-job-3">
-      <div class="ph ph-logo">Logo</div>
-      <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
-        <h3><a href="/lowongan/ui-ux-designer-kreasi-digital-studio-remote-indonesia/">UI/UX Designer</a></h3>
-        <div class="meta">
-          <span>Kreasi Digital Studio</span>
-          <span>Remote</span>
-          <span>Kontrak</span>
-          <span>Rp 10–14 jt/bln</span>
-        </div>
-        <div class="chips">
-          <span class="chip">Figma</span>
-          <span class="chip">Design System</span>
-        </div>
-      </div>
-    </article>
+      <a href="/lowongan" class="text-xs font-bold text-[#1738d1] hover:underline flex items-center gap-1 shrink-0">
+        <span>Lihat Semua Lowongan</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+        </svg>
+      </a>
+    </div>
 
-    <article class="card card-row" data-od-id="beranda-job-4">
-      <div class="ph ph-logo">Logo</div>
-      <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
-        <h3><a href="/lowongan/data-analyst-pt-ritel-sejahtera-jakarta-barat/">Data Analyst</a></h3>
-        <div class="meta">
-          <span>PT Ritel Sejahtera</span>
-          <span>Jakarta Barat</span>
-          <span>Full-time</span>
-          <span>Rp 9–13 jt/bln</span>
-        </div>
-        <div class="chips">
-          <span class="chip">SQL</span>
-          <span class="chip">Looker Studio</span>
-          <span class="chip">Excel</span>
-        </div>
-      </div>
-    </article>
+    <!-- Quick Filter Badges -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-2 mb-6 no-scrollbar">
+      <a href="/lowongan" class="px-3.5 py-1.5 rounded-full bg-[#1738d1] text-white text-xs font-bold shrink-0">Semua</a>
+      <a href="/lowongan?exp=fresh" class="px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold shrink-0">Fresh Graduate</a>
+      <a href="/lowongan?type=remote" class="px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold shrink-0">Remote</a>
+      <a href="/lowongan?loc=jakarta" class="px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold shrink-0">Jakarta</a>
+      <a href="/lowongan?loc=bandung" class="px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold shrink-0">Bandung</a>
+      <a href="/lowongan?loc=surabaya" class="px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold shrink-0">Surabaya</a>
+      <a href="/lowongan?cat=it" class="px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold shrink-0">IT & Engineering</a>
+      <a href="/lowongan?cat=design" class="px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold shrink-0">UI/UX Design</a>
+    </div>
+
+    <!-- Grid of Job Cards (2x2) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {lowonganList.map((job) => (
+        <article class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md hover:border-blue-400 transition flex flex-col justify-between group">
+          <div>
+            <!-- Top meta: Company & Badge -->
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center font-bold text-slate-700">
+                  <img src={job.image} alt={job.company} class="w-full h-full object-cover" loading="lazy" />
+                </div>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-500">{job.company}</h4>
+                  <h3 class="text-sm sm:text-base font-medium text-slate-900 group-hover:text-[#1738d1] transition leading-snug">
+                    <a href={"/lowongan/" + job.slug}>{job.title}</a>
+                  </h3>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-medium uppercase tracking-wider bg-blue-50 text-[#1738d1] shrink-0">
+                {job.type}
+              </span>
+            </div>
+
+            <!-- Description -->
+            <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-4">
+              {job.description}
+            </p>
+
+            <!-- Skills Pills -->
+            <div class="flex flex-wrap items-center gap-1.5 mb-4">
+              {job.skills.map((skill) => (
+                <span class="px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-medium">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <!-- Bottom Footer: Location, Salary, Source CTA -->
+          <div class="pt-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div class="flex items-center gap-3 text-slate-500 text-[11px]">
+              <span class="flex items-center gap-1">
+                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                </svg>
+                {job.location}
+              </span>
+              <span class="font-bold text-slate-800">{job.salary}</span>
+            </div>
+
+            <a
+              href={"/lowongan/" + job.slug}
+              class="px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-[#1738d1] text-[#1738d1] hover:text-white text-xs font-bold transition flex items-center gap-1"
+            >
+              <span>Lihat Detail & Sumber Asli</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+              </svg>
+            </a>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <!-- Center View All Button -->
+    <div class="mt-8 text-center">
+      <a
+        href="/lowongan"
+        class="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold shadow-md transition"
+      >
+        <span>Jelajahi Seluruh Lowongan Kerja</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+        </svg>
+      </a>
+    </div>
   </div>
 </section>

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@cuti/db";
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await req.json();
     const {
       title,
@@ -16,7 +17,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       isActive,
     } = body;
 
-    const existing = await prisma.courses.findUnique({ where: { id: params.id } });
+    const existing = await prisma.courses.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json(
         { success: false, message: "Kursus tidak ditemukan" },
@@ -36,7 +37,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (isActive !== undefined) data.is_active = isActive;
 
     const course = await prisma.courses.update({
-      where: { id: params.id },
+      where: { id },
       data,
     });
 
@@ -63,9 +64,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const existing = await prisma.courses.findUnique({ where: { id: params.id } });
+    const { id } = await params;
+    const existing = await prisma.courses.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json(
         { success: false, message: "Kursus tidak ditemukan" },
@@ -73,7 +75,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
       );
     }
 
-    await prisma.courses.delete({ where: { id: params.id } });
+    await prisma.courses.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json(

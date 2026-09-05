@@ -1,0 +1,91 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import FooterPortal from '../../components/FooterPortal.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import SearchModal from '../../components/SearchModal.astro';
+import { lowonganList } from '../../data/mock';
+
+const title = "Direktori Lowongan Kerja Terlengkap | Employer Job";
+const description = "Temukan info lowongan kerja terverifikasi untuk fresh graduate, SMA/SMK, mahasiswa, dan profesional muda di seluruh Indonesia.";
+---
+
+<BaseLayout title={title} description={description} canonicalUrl="http://localhost:3003/lowongan">
+  <Navbar />
+
+  <main class="bg-slate-50 min-h-screen pb-16">
+    <!-- Breadcrumb & Header -->
+    <div class="bg-white border-b border-slate-200 py-8">
+      <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
+        <nav class="flex items-center gap-2 text-xs text-slate-500 mb-4" aria-label="Breadcrumb">
+          <a href="/" class="hover:text-[#1738d1]">Beranda</a>
+          <span>/</span>
+          <span class="text-slate-900 font-bold">Lowongan Kerja</span>
+        </nav>
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              Lowongan Kerja Terbaru di Indonesia
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
+              Kurasi peluang karier terverifikasi dari perusahaan rintisan, BUMN, hingga korporasi multinasional.
+            </p>
+          </div>
+          <span class="px-3 py-1.5 rounded-full bg-blue-50 text-[#1738d1] text-xs font-bold shrink-0 self-start md:self-auto">
+            {lowonganList.length} Lowongan Tersedia
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6">
+      <AdSlot type="leaderboard" />
+
+      <!-- List of Jobs -->
+      <div class="space-y-4 mt-6">
+        {lowonganList.map((job) => (
+          <article class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/5 transition duration-200 flex flex-col md:flex-row md:items-center justify-between gap-5">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 p-1.5 flex items-center justify-center shrink-0">
+                <img src={job.companyLogo} alt={job.company} class="w-full h-full object-contain" loading="lazy" />
+              </div>
+              <div>
+                <div class="flex items-center gap-2 flex-wrap mb-1">
+                  <span class="text-xs font-bold text-slate-900 hover:text-[#1738d1]">{job.company}</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 font-medium text-slate-600">{job.location}</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-md bg-blue-50 text-[#1738d1] font-bold">{job.type}</span>
+                </div>
+                <h2 class="text-base sm:text-lg font-black text-slate-900 hover:text-[#1738d1] transition">
+                  <a href={`/lowongan/${job.slug}`}>{job.title}</a>
+                </h2>
+                <p class="text-xs text-slate-500 line-clamp-2 mt-1 max-w-2xl">{job.description}</p>
+                <div class="flex items-center gap-3 mt-3 text-xs text-slate-500 flex-wrap">
+                  <span class="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">{job.salary}</span>
+                  <span>Pengalaman: {job.experience}</span>
+                  <span>Diposting: {job.postedAt}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex sm:flex-row md:flex-col items-center sm:justify-end gap-2 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+              <a href={`/lowongan/${job.slug}`} class="w-full sm:w-auto text-center px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition">
+                Detail Info
+              </a>
+              <a href={job.sourceUrl} target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto text-center px-4 py-2 rounded-xl bg-[#1738d1] hover:bg-[#122ca6] text-white text-xs font-bold transition flex items-center justify-center gap-1">
+                <span>Sumber Resmi</span>
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div class="mt-8">
+        <AdSlot type="infeed" />
+      </div>
+    </div>
+  </main>
+
+  <FooterPortal />
+  <SearchModal />
+</BaseLayout>

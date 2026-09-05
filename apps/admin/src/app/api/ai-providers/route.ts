@@ -14,7 +14,7 @@ export async function GET() {
       label: p.label,
       provider: p.alias || "openai",
       endpointUrl: p.base_url,
-      apiKey: p.api_key,
+      apiKey: p.api_key ? `${p.api_key.slice(0, 3)}••••••••${p.api_key.slice(-4)}` : "••••••••",
       model: p.model,
       priority: p.priority,
       isActive: p.is_active,

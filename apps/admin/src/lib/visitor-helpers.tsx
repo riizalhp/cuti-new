@@ -27,10 +27,10 @@ export interface DomainMeta {
 export function getDomainInfo(domain?: string | null): DomainMeta {
   const d = (domain || '').toLowerCase();
 
-  if (d.includes('app.employr.id') || d.includes('3000')) {
+  if (d.includes('app.ambilcuti.id') || d.includes('app.employr.id') || d.includes('3000')) {
     return {
       label: 'Dashboard User',
-      sublabel: 'app.employr.id',
+      sublabel: 'app.ambilcuti.id',
       badgeBg: 'bg-blue-50 dark:bg-blue-950/60',
       badgeText: 'text-blue-700 dark:text-blue-300',
       badgeBorder: 'border-blue-200 dark:border-blue-800',
@@ -38,10 +38,10 @@ export function getDomainInfo(domain?: string | null): DomainMeta {
     };
   }
 
-  if (d.includes('loker.employr.id') || d.includes('3003')) {
+  if (d.includes('loker.ambilcuti.id') || d.includes('loker.employr.id') || d.includes('3003')) {
     return {
       label: 'Portal Loker',
-      sublabel: 'loker.employr.id',
+      sublabel: 'loker.ambilcuti.id',
       badgeBg: 'bg-emerald-50 dark:bg-emerald-950/60',
       badgeText: 'text-emerald-700 dark:text-emerald-300',
       badgeBorder: 'border-emerald-200 dark:border-emerald-800',
@@ -49,10 +49,10 @@ export function getDomainInfo(domain?: string | null): DomainMeta {
     };
   }
 
-  if (d.includes('learning.employr.id') || d.includes('3004')) {
+  if (d.includes('learning.ambilcuti.id') || d.includes('learning.employr.id') || d.includes('3004')) {
     return {
       label: 'Learning',
-      sublabel: 'learning.employr.id',
+      sublabel: 'learning.ambilcuti.id',
       badgeBg: 'bg-purple-50 dark:bg-purple-950/60',
       badgeText: 'text-purple-700 dark:text-purple-300',
       badgeBorder: 'border-purple-200 dark:border-purple-800',
@@ -60,10 +60,10 @@ export function getDomainInfo(domain?: string | null): DomainMeta {
     };
   }
 
-  if (d.includes('faq.employr.id') || d.includes('3005')) {
+  if (d.includes('faq.ambilcuti.id') || d.includes('faq.employr.id') || d.includes('3005')) {
     return {
       label: 'FAQ / Bantuan',
-      sublabel: 'faq.employr.id',
+      sublabel: 'faq.ambilcuti.id',
       badgeBg: 'bg-teal-50 dark:bg-teal-950/60',
       badgeText: 'text-teal-700 dark:text-teal-300',
       badgeBorder: 'border-teal-200 dark:border-teal-800',
@@ -71,10 +71,10 @@ export function getDomainInfo(domain?: string | null): DomainMeta {
     };
   }
 
-  if (d.includes('masterdata.employr.id') || d.includes('admin') || d.includes('3002')) {
+  if (d.includes('masterdata.ambilcuti.id') || d.includes('masterdata.employr.id') || d.includes('admin') || d.includes('3002')) {
     return {
       label: 'Admin Panel',
-      sublabel: 'masterdata.employr.id',
+      sublabel: 'masterdata.ambilcuti.id',
       badgeBg: 'bg-rose-50 dark:bg-rose-950/60',
       badgeText: 'text-rose-700 dark:text-rose-300',
       badgeBorder: 'border-rose-200 dark:border-rose-800',
@@ -82,10 +82,10 @@ export function getDomainInfo(domain?: string | null): DomainMeta {
     };
   }
 
-  // Default: Landing Page / employr.id
+  // Default: Landing Page / ambilcuti.id
   return {
     label: 'Landing Page',
-    sublabel: 'employr.id',
+    sublabel: 'ambilcuti.id',
     badgeBg: 'bg-orange-50 dark:bg-orange-950/60',
     badgeText: 'text-orange-700 dark:text-orange-300',
     badgeBorder: 'border-orange-200 dark:border-orange-800',

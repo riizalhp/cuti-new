@@ -115,13 +115,13 @@ export function LiveVisitorsTab({ onSelectVisitor }: LiveVisitorsTabProps) {
             onChange={(e) => setDomainFilter(e.target.value)}
             className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-emerald-500/30 text-xs text-emerald-950 dark:text-emerald-200 font-bold focus:outline-none shadow-xs"
           >
-            <option value="all">🌐 Semua Domain</option>
-            <option value="employr.id">🏠 employr.id (Landing)</option>
-            <option value="app.employr.id">💼 app.employr.id (Dashboard)</option>
-            <option value="loker.employr.id">🎯 loker.employr.id (Portal)</option>
-            <option value="learning.employr.id">📚 learning.employr.id</option>
-            <option value="faq.employr.id">❓ faq.employr.id</option>
-            <option value="localhost">💻 Localhost (Dev)</option>
+            <option value="all">Semua Domain</option>
+            <option value="employr.id">employr.id (Landing)</option>
+            <option value="app.employr.id">app.employr.id (Dashboard)</option>
+            <option value="loker.employr.id">loker.employr.id (Portal)</option>
+            <option value="learning.employr.id">learning.employr.id</option>
+            <option value="faq.employr.id">faq.employr.id</option>
+            <option value="localhost">Localhost (Dev)</option>
           </select>
 
           <button

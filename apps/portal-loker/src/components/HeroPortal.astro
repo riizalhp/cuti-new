@@ -1,0 +1,104 @@
+---
+// HeroPortal.astro - Hero Section Career Information Portal (Pixel-Matched to Reference 1)
+---
+
+<section class="relative bg-white pt-8 sm:pt-10 lg:pt-12 pb-14 sm:pb-20 overflow-hidden border-b border-slate-200/80">
+  <!-- Background Image: Full Hero Section (bukan di dalam div/card) -->
+  <div class="absolute inset-0 z-0 pointer-events-none select-none">
+    <img
+      src="/images/hero-job.webp"
+      alt="Portal Lowongan Kerja dan Karier"
+      class="w-full h-full object-cover object-[80%_center] lg:object-right"
+      loading="eager"
+    />
+    <!-- Gradient Overlays: Pastikan teks di kiri tetap kontras dan tajam, foto di kanan tampak natural -->
+    <div class="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-transparent w-full lg:w-3/5"></div>
+    <div class="absolute inset-0 bg-white/75 sm:bg-transparent"></div>
+  </div>
+
+  <div class="max-w-[1240px] mx-auto px-4 sm:px-6 relative z-10">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start min-h-[420px] lg:min-h-[460px]">
+      
+      <!-- Left Column: Copy & Search -->
+      <div class="lg:col-span-7 flex flex-col items-start">
+        <!-- Kicker Badge -->
+        <div class="inline-block text-[11px] sm:text-xs font-normal tracking-wider uppercase text-[#1738d1] mb-3">
+          Temukan Peluang, Kembangkan Diri, Wujudkan Karier Impian
+        </div>
+
+        <!-- H1 Headline -->
+        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-normal text-slate-900 tracking-tight leading-[1.12] mb-4">
+          Semua Informasi Karier<br class="hidden sm:inline" />
+          Dalam Satu Tempat
+        </h1>
+
+        <!-- Subtitle -->
+        <p class="text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl mb-7">
+          Lowongan kerja, sertifikasi, course, event, tips karier, dan berita dunia kerja terkini: disajikan untuk membantu langkah kariermu lebih jauh.
+        </p>
+
+        <!-- Big Search Bar -->
+        <div class="w-full max-w-xl bg-white border border-slate-200 focus-within:border-[#1738d1] focus-within:ring-4 focus-within:ring-blue-500/10 rounded-xl shadow-lg shadow-blue-500/5 p-1.5 flex items-center gap-2 transition-all mb-4">
+          <div class="pl-3.5 text-slate-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+          <input
+            type="text"
+            id="hero-search-input"
+            placeholder="Cari lowongan, artikel, sertifikasi, course, atau event..."
+            class="flex-1 text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none bg-transparent"
+          />
+          <button
+            type="button"
+            id="hero-search-btn"
+            class="px-6 sm:px-7 py-2.5 rounded-lg bg-[#1738d1] hover:bg-[#122ca6] text-white font-normal text-xs sm:text-sm shadow-md shadow-blue-600/20 transition active:scale-[0.98] cursor-pointer shrink-0"
+          >
+            Cari
+          </button>
+        </div>
+
+        <!-- Popular Tags Row -->
+        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs">
+          <span class="font-normal text-slate-700 mr-1">Populer:</span>
+          <a href="/lowongan?loc=jakarta" class="px-3 py-1 bg-white hover:bg-blue-50 border border-slate-200 rounded-lg font-normal text-slate-600 hover:text-[#1738d1] transition shadow-xs">
+            Lowongan Jakarta
+          </a>
+          <a href="/lowongan?type=remote" class="px-3 py-1 bg-white hover:bg-blue-50 border border-slate-200 rounded-lg font-normal text-slate-600 hover:text-[#1738d1] transition shadow-xs">
+            Remote
+          </a>
+          <a href="/lowongan?exp=fresh" class="px-3 py-1 bg-white hover:bg-blue-50 border border-slate-200 rounded-lg font-normal text-slate-600 hover:text-[#1738d1] transition shadow-xs">
+            Fresh Graduate
+          </a>
+          <a href="/lowongan?type=magang" class="px-3 py-1 bg-white hover:bg-blue-50 border border-slate-200 rounded-lg font-normal text-slate-600 hover:text-[#1738d1] transition shadow-xs">
+            Magang
+          </a>
+          <a href="/job-fair" class="px-3 py-1 bg-white hover:bg-blue-50 border border-slate-200 rounded-lg font-normal text-slate-600 hover:text-[#1738d1] transition shadow-xs">
+            Job Fair
+          </a>
+          <a href="/sertifikat?q=google" class="px-3 py-1 bg-white hover:bg-blue-50 border border-slate-200 rounded-lg font-normal text-slate-600 hover:text-[#1738d1] transition shadow-xs">
+            Sertifikasi Google
+          </a>
+          <a href="/kursus?price=gratis" class="px-3 py-1 bg-white hover:bg-blue-50 border border-slate-200 rounded-lg font-normal text-slate-600 hover:text-[#1738d1] transition shadow-xs">
+            Course Gratis
+          </a>
+        </div>
+      </div>
+
+      <!-- Right Column: Natural Open Space for Hero Background Character -->
+      <div class="hidden lg:flex lg:col-span-5 relative h-full min-h-[360px] items-start justify-start pointer-events-none">
+        <!-- Handwritten Doodle in the sky area next to the subject -->
+        <div class="mt-2 -ml-16 xl:-ml-24">
+          <span class="font-doodle text-3xl xl:text-4xl font-bold text-slate-900 rotate-[-5deg] block leading-tight drop-shadow-sm">
+            Karier Lebih Dekat<br />dari yang Kamu Kira
+          </span>
+          <svg class="w-14 h-8 text-slate-800 ml-16 -mt-1 rotate-6" fill="none" stroke="currentColor" viewBox="0 0 48 32">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8c12 2 24 10 32 16m0 0l-8-1m8 1l-2-7"></path>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>

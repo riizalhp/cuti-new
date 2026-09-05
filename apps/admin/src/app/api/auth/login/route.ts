@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@cuti/db";
 import { logSecurityEvent, logApp, extractRequestContext, detectBruteForce } from "@cuti/db/logger";
+import { signAdminSession } from "@/lib/admin-session";
 import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
@@ -83,21 +84,24 @@ export async function POST(req: NextRequest) {
       role: user.role,
     };
 
+    const token = await signAdminSession(adminData);
+
     const response = NextResponse.json({
       success: true,
       message: "Login berhasil.",
       data: adminData,
     });
 
-    // Set admin session cookie (7 days)
+    // Set signed admin session cookie (7 days)
     const sevenDays = 7 * 24 * 60 * 60;
     response.cookies.set({
       name: "cuti_admin_session",
-      value: encodeURIComponent(JSON.stringify(adminData)),
+      value: token,
       maxAge: sevenDays,
       path: "/",
       sameSite: "lax",
-      httpOnly: false,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
     });
 
     return response;

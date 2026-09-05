@@ -1,0 +1,137 @@
+---
+// NewsletterBanner.astro - Full Width Newsletter + 4 Feature Highlight Pills
+---
+
+<section class="py-12 bg-white">
+  <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
+    <!-- Big Banner -->
+    <div class="relative bg-gradient-to-r from-blue-50/90 via-slate-50 to-indigo-50/70 border border-blue-200/70 rounded-3xl p-6 sm:p-10 lg:p-12 overflow-hidden shadow-sm">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- Left Content -->
+        <div class="lg:col-span-7 z-10">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="w-2 h-2 rounded-full bg-[#1738d1]"></span>
+            <span class="text-[11px] font-medium uppercase tracking-wider text-[#1738d1]">Newsletter</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-medium text-slate-900 tracking-tight leading-tight mb-2">
+            Karier Impianmu Bisa Dimulai dari Sini
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-lg mb-6">
+            Dapatkan update lowongan terbaru, event menarik, tips karier, dan artikel pilihan langsung ke email kamu.
+          </p>
+
+          <!-- Input Email Form -->
+          <form class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 max-w-md mb-3" onsubmit="alert('Terima kasih! Kami telah mengirimkan email konfirmasi.'); return false;">
+            <div class="relative flex-1">
+              <span class="absolute left-3.5 top-3.5 text-slate-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+              </span>
+              <input
+                type="email"
+                placeholder="Masukkan email kamu"
+                required
+                class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#1738d1]"
+              />
+            </div>
+            <button
+              type="submit"
+              class="px-6 py-3 rounded-xl bg-[#1738d1] hover:bg-[#122ca6] text-white text-xs sm:text-sm font-bold transition shadow-md shadow-blue-600/20 shrink-0"
+            >
+              Langganan Gratis →
+            </button>
+          </form>
+
+          <div class="flex items-center gap-1.5 text-[11px] text-slate-500">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span>Kami tidak akan membagikan email kamu ke pihak lain.</span>
+          </div>
+        </div>
+
+        <!-- Right Side: Graphic Photo + Accents -->
+        <div class="lg:col-span-5 relative flex justify-center lg:justify-end">
+          <div class="relative w-64 sm:w-72 aspect-[3/4] rounded-2xl overflow-hidden shadow-xl border-4 border-white bg-slate-100">
+            <img
+              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80"
+              alt="Talenta muda menyongsong masa depan"
+              class="w-full h-full object-cover"
+              loading="lazy"
+            />
+            <!-- Handwriting -->
+            <div class="absolute top-4 left-4 z-20 pointer-events-none">
+              <span class="font-doodle text-2xl sm:text-3xl font-bold text-slate-900 rotate-[-4deg] block leading-tight">
+                Same People<br/>Brighter Opportunities
+              </span>
+            </div>
+          </div>
+
+          <!-- Floating Mail Badge -->
+          <div class="absolute -bottom-3 -left-4 sm:left-4 z-20 bg-white/95 backdrop-blur-md p-3 rounded-xl border border-slate-100 shadow-xl max-w-[200px] flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-[#1738d1] flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+              </svg>
+            </div>
+            <span class="text-[10px] text-slate-700 font-bold leading-tight">
+              Satu email lebih dekat dengan masa depan yang lebih baik.
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Highlight Value Pills Below Banner -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+      <div class="p-4 rounded-2xl bg-white border border-slate-200 flex items-center gap-3.5 shadow-sm">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#1738d1] flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+          </svg>
+        </div>
+        <div>
+          <h4 class="text-xs font-medium text-slate-900">Update Lowongan</h4>
+          <p class="text-[11px] text-slate-500">Lowongan terbaru, langsung di inbox kamu.</p>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-white border border-slate-200 flex items-center gap-3.5 shadow-sm">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#1738d1] flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <h4 class="text-xs font-medium text-slate-900">Info Event</h4>
+          <p class="text-[11px] text-slate-500">Jangan lewatkan job fair, webinar, dan workshop.</p>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-white border border-slate-200 flex items-center gap-3.5 shadow-sm">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#1738d1] flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <h4 class="text-xs font-medium text-slate-900">Tips Karier</h4>
+          <p class="text-[11px] text-slate-500">Insight praktis untuk perkembangan dirimu.</p>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-white border border-slate-200 flex items-center gap-3.5 shadow-sm">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#1738d1] flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+          </svg>
+        </div>
+        <div>
+          <h4 class="text-xs font-medium text-slate-900">Rekomendasi Pilihan</h4>
+          <p class="text-[11px] text-slate-500">Konten terbaik, khusus untuk kamu.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
