@@ -1104,6 +1104,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const toast = useToast();
   const [isMounted, setIsMounted] = useState(false);
 
+  const [isLoadingCvList, setIsLoadingCvList] = useState<boolean>(true);
   const [cvList, setCvList] = useState<CVData[]>(initialCVs);
   const [viewMode, setViewMode] = useState<'list' | 'create' | 'preview' | 'ai-wizard' | 'ai-progress'>(() => {
     if (!cvId) return 'list';
@@ -1177,31 +1178,67 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const lastSavedSnapshotRef = useRef<string>('');
   const prevCvIdRef = useRef<string | undefined | null>(undefined);
 
-  // Set isMounted on mount
+  // Set isMounted on mount and warm cache from localStorage
   useEffect(() => {
     setIsMounted(true);
+
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('cuti_cv_list');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setCvList(parsed);
+            setIsLoadingCvList(false);
+          }
+        }
+      } catch {}
+    }
   }, []);
 
   // Load cvList and activeOrder from API on mount
-  // Sumber utama: database. Draf localStorage lama tidak dipakai agar tidak ada
-  // "CV hantu" dari sesi/browser sebelumnya.
   useEffect(() => {
-    cvApi.getAll<CVData>().then((remoteCvs) => {
-      if (Array.isArray(remoteCvs)) {
-        const enriched = remoteCvs.map((c) => {
-          const computed = calculateAtsScore(c).totalScore;
-          const score = (c.atsScore && c.atsScore > 0) ? c.atsScore : (computed > 0 ? computed : 0);
-          return { ...c, atsScore: score };
-        });
-        setCvList(enriched);
-      }
-    });
+    let isCancelled = false;
 
-    orderApi.getActiveOrder<OrderInfo>().then((order) => {
-      if (order) {
-        setActiveOrder(order);
-      }
-    });
+    cvApi
+      .getAll<CVData>()
+      .then((remoteCvs) => {
+        if (isCancelled) return;
+        if (Array.isArray(remoteCvs)) {
+          const enriched = remoteCvs.map((c) => {
+            const computed = calculateAtsScore(c).totalScore;
+            const score = (c.atsScore && c.atsScore > 0) ? c.atsScore : (computed > 0 ? computed : 0);
+            return { ...c, atsScore: score };
+          });
+          setCvList(enriched);
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('cuti_cv_list', JSON.stringify(enriched));
+            } catch {}
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn('[CVView] Failed to fetch CVs from API:', err);
+      })
+      .finally(() => {
+        if (!isCancelled) {
+          setIsLoadingCvList(false);
+        }
+      });
+
+    orderApi
+      .getActiveOrder<OrderInfo>()
+      .then((order) => {
+        if (!isCancelled && order) {
+          setActiveOrder(order);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   // Sync with cvId prop
@@ -1969,9 +2006,16 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       ...initialData,
     }).totalScore;
 
+    const cleanTemplateName = templateName.replace(/^ATS\s+/i, '');
+    const defaultGeneratedTitle = newCvJobTitle
+      ? `CV ${newCvJobTitle}`
+      : defaultName
+      ? `CV ${defaultName}`
+      : `CV ${cleanTemplateName}`;
+
     const newCV: CVData = {
       id: newId,
-      title: newCvTitle || (defaultName ? `CV ATS - ${defaultName}` : `CV ATS - ${templateName}`),
+      title: newCvTitle || defaultGeneratedTitle,
       updatedAt: 'Hari ini',
       atsScore: atsScoreFromContent || 0,
       purpose: newCvPurpose,
@@ -3476,7 +3520,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     const generatedAtsScore = calculateAtsScore(formData).totalScore;
     const newGeneratedCV: CVData = {
       id: `cv-${Date.now()}`,
-      title: `CV AI Revamp - ${selectedPackage.name}`,
+      title: `CV Profesional - ${selectedPackage.name}`,
       updatedAt: 'Hari ini',
       atsScore: generatedAtsScore,
       fullName: formData.fullName || currentSession?.name || '',
@@ -3530,7 +3574,19 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       {viewMode === 'list' && (
         <PageHeader
           title="Manajemen & Service CV"
-          subtitle="Kelola CV mandiri kamu atau gunakan Jasa Pembuatan CV oleh AI & Tim HR untuk kelolosan ATS."
+          subtitle={
+            <span>
+              Kelola CV mandiri kamu atau gunakan{' '}
+              <button
+                type="button"
+                onClick={() => setShowCvPromoModal(true)}
+                className="text-[#1738D1] dark:text-blue-400 font-bold underline underline-offset-2 hover:opacity-80 transition cursor-pointer inline"
+              >
+                Jasa Pembuatan CV oleh Tim HR
+              </button>{' '}
+              untuk optimasi lolos ATS maksimal.
+            </span>
+          }
           icon={FileText}
           badge="CV Builder"
           stats={[
@@ -3552,25 +3608,21 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             },
           ]}
           actions={
-            <div className="flex flex-col gap-2 w-full sm:w-auto">
-              {/* Hidden for now: Layanan AI & HR (paid wizard) */}
-              {/*
+            <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full sm:w-auto">
               <button
-                onClick={() => {
-                  setAiWizardStep(1);
-                  setViewMode('ai-wizard');
-                }}
-                className="flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm transition-all cursor-pointer border-0 w-full"
+                type="button"
+                onClick={() => setShowCvPromoModal(true)}
+                className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs border border-slate-200 dark:border-slate-700 transition cursor-pointer w-full sm:w-auto"
               >
-                <Sparkles className="w-4 h-4 text-white" />
-                <span>Layanan AI & HR</span>
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                <span>Konsultasi Jasa HR</span>
               </button>
-              */}
               <button
+                type="button"
                 onClick={() => {
                   setShowTemplateModal(true);
                 }}
-                className="flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition cursor-pointer w-full"
+                className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 active:scale-[0.98] transition cursor-pointer w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4" />
                 <span>Buat CV Mandiri</span>
@@ -3665,21 +3717,23 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             {filteredCVs.map((cv) => (
               <div
                 key={cv.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-sm hover:border-orange-300 dark:hover:border-orange-700/60 transition-all flex flex-col justify-between"
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-4 sm:p-5 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group"
               >
                 <div>
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-2.5">
+                  {/* Card Header: Icon, Title & Date, ATS Badge, and Safe Top-Right Trash Button */}
+                  <div className="flex items-start justify-between gap-2.5 mb-3">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <div
                         onClick={() => handleOpenCvDetail(cv)}
-                        className="p-2.5 rounded-[10px] bg-orange-50 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/50 cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-900/60 transition"
+                        className="p-2.5 rounded-[10px] bg-orange-50 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/50 cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-900/60 transition shrink-0"
                       >
                         <FileText className="w-5 h-5" />
                       </div>
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <h3
                           onClick={() => handleOpenCvDetail(cv)}
-                          className="font-bold text-sm text-slate-900 dark:text-white line-clamp-1 cursor-pointer hover:text-orange-500 dark:hover:text-orange-400 transition"
+                          className="font-bold text-sm text-slate-900 dark:text-white truncate cursor-pointer hover:text-orange-500 dark:hover:text-orange-400 transition"
+                          title={cv.title}
                         >
                           {cv.title}
                         </h3>
@@ -3688,61 +3742,55 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                         </p>
                       </div>
                     </div>
-                    <span className="px-2.5 py-1 rounded-[10px] text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 flex items-center gap-1 shrink-0">
-                      <Award className="w-3.5 h-3.5" />
-                      <span>ATS {(cv.atsScore && cv.atsScore > 0) ? cv.atsScore : (calculateAtsScore(cv).totalScore || 0)}%</span>
-                    </span>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="px-2.5 py-1 rounded-[10px] text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 flex items-center gap-1">
+                        <Award className="w-3.5 h-3.5" />
+                        <span>ATS {(cv.atsScore && cv.atsScore > 0) ? cv.atsScore : (calculateAtsScore(cv).totalScore || 0)}%</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteCV(cv)}
+                        className="p-1.5 rounded-[8px] text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/60 dark:hover:text-rose-400 transition cursor-pointer"
+                        title="Hapus CV"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-2 mb-4">
-                    <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                      {cv.fullName} - <span className="text-orange-600 dark:text-orange-400">{cv.headline}</span>
+                  {/* Card Metadata Chunk (Clean, High-Signal, Minimalist) */}
+                  <div className="py-2.5 px-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-1.5 mb-4">
+                    <div className="flex items-center gap-2 text-xs">
+                      <Briefcase className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                        {cv.headline || cv.targetRole || 'Target Posisi belum ditentukan'}
+                      </span>
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
-                      {cv.summary}
-                    </p>
-                    <div className="flex flex-wrap gap-1 pt-1">
-                      {cv.skills.slice(0, 4).map((skill, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2 py-0.5 rounded-[10px] text-[10px] font-medium bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                      {cv.skills.length > 4 && (
-                        <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-medium bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                          +{cv.skills.length - 4} lainnya
-                        </span>
-                      )}
+                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                      <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="truncate">{cv.fullName || 'Nama belum diisi'}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Card Action Buttons */}
-                <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => handleOpenCvDetail(cv)}
-                      className="px-3.5 py-2 rounded-[10px] text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/60 dark:border-slate-700/60 transition flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>Lihat / Edit</span>
-                    </button>
-                    <button
-                      onClick={() => handleDeleteCV(cv)}
-                      className="p-2 rounded-[10px] bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/60 transition flex items-center justify-center cursor-pointer"
-                      title="Hapus CV"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                {/* Card Action Buttons: Balanced Hierarchy (Ghost/Secondary Edit + Outline Download) */}
+                <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenCvDetail(cv)}
+                    className="px-3.5 py-2 rounded-[10px] text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200/60 dark:border-slate-700/60 transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Lihat / Edit</span>
+                  </button>
 
                   <button
+                    type="button"
                     onClick={() => {
                       toast.info('Menyiapkan Berkas PDF', `Mengunduh versi PDF dari ${cv.title}...`);
                     }}
-                    className="px-3.5 py-2 rounded-[10px] text-xs font-bold text-white bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] shadow-md shadow-[#1738D1]/20 transition flex items-center gap-1.5 cursor-pointer border-0"
+                    className="px-3.5 py-2 rounded-[10px] text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Download PDF</span>
@@ -3752,8 +3800,52 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             ))}
           </div>
 
-          {/* Empty State: Belum Ada CV Tersimpan */}
-          {cvList.length === 0 && (
+          {/* Loading Skeleton State: Tampil saat data sedang disinkronisasi */}
+          {isLoadingCvList && cvList.length === 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map((itemKey) => (
+                <div
+                  key={itemKey}
+                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-xs animate-pulse flex flex-col justify-between space-y-4"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-10 h-10 rounded-[10px] bg-slate-200 dark:bg-slate-800 shrink-0" />
+                        <div className="space-y-1.5">
+                          <div className="h-4 w-32 bg-slate-200 dark:bg-slate-800 rounded" />
+                          <div className="h-3 w-20 bg-slate-100 dark:bg-slate-800/60 rounded" />
+                        </div>
+                      </div>
+                      <div className="h-6 w-16 bg-slate-200 dark:bg-slate-800 rounded-[10px]" />
+                    </div>
+
+                    <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 space-y-2 mb-4">
+                      <div className="h-3.5 w-3/4 bg-slate-200 dark:bg-slate-800 rounded" />
+                      <div className="h-3 w-full bg-slate-100 dark:bg-slate-800/60 rounded" />
+                      <div className="h-3 w-5/6 bg-slate-100 dark:bg-slate-800/60 rounded" />
+                      <div className="flex gap-1 pt-1">
+                        <div className="h-4 w-12 bg-slate-200 dark:bg-slate-800 rounded-[10px]" />
+                        <div className="h-4 w-14 bg-slate-200 dark:bg-slate-800 rounded-[10px]" />
+                        <div className="h-4 w-10 bg-slate-200 dark:bg-slate-800 rounded-[10px]" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-8 w-24 bg-slate-200 dark:bg-slate-800 rounded-[10px]" />
+                      <div className="h-8 w-8 bg-slate-200 dark:bg-slate-800 rounded-[10px]" />
+                    </div>
+                    <div className="h-8 w-28 bg-slate-200 dark:bg-slate-800 rounded-[10px]" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Empty State: Belum Ada CV Tersimpan (HANYA tampil setelah selesai loading dan memang kosong) */}
+          {!isLoadingCvList && cvList.length === 0 && (
             <div className="rounded-[10px] border-2 border-dashed border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-10 md:p-14 text-center flex flex-col items-center justify-center gap-4 animate-in fade-in duration-300">
               <div className="w-16 h-16 rounded-[10px] bg-[#1738D1]/10 dark:bg-navy-950 text-[#1738D1] dark:text-blue-400 border border-[#1738D1]/20 dark:border-navy-800 flex items-center justify-center">
                 <FileText className="w-8 h-8" />
@@ -3763,28 +3855,25 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   Belum Ada CV Tersimpan
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
-                  Buat CV pertamamu sekarang — pilih template dan isi datamu, atau gunakan Layanan Pembuatan CV oleh AI &amp; Tim HR untuk hasil 100% lolos screening ATS.
+                  Buat CV pertamamu sekarang — pilih template dan isi datamu, atau gunakan Layanan Pembuatan CV oleh Tim Ahli HR untuk hasil optimasi screening ATS terbaik.
                 </p>
               </div>
-              <div className="flex flex-col items-center gap-2.5 w-full max-w-xs">
-                {/*
+              <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full max-w-sm justify-center">
                 <button
-                  onClick={() => {
-                    setAiWizardStep(1);
-                    setViewMode('ai-wizard');
-                  }}
-                  className="w-full px-4 py-2.5 rounded-[10px] bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-1.5 cursor-pointer border-0"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  <span>Layanan AI & HR</span>
-                </button>
-                */}
-                <button
+                  type="button"
                   onClick={() => setShowTemplateModal(true)}
-                  className="w-full px-4 py-2.5 rounded-[10px] bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-xs border border-slate-700 dark:border-transparent transition flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 active:scale-[0.98] transition flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Buat CV Mandiri</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCvPromoModal(true)}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs border border-slate-200 dark:border-slate-700 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <span>Konsultasi Jasa HR</span>
                 </button>
               </div>
             </div>
@@ -3825,7 +3914,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <div>
                 <h3 className="font-extrabold text-base md:text-lg text-slate-900 dark:text-white flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-orange-500" />
-                  <span>Wizard Layanan Pembuatan CV AI &amp; Tim</span>
+                  <span>Wizard Layanan Pembuatan CV Tim &amp; Konsultan HR</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   Proses mudah 3 langkah untuk mendapatkan CV ATS berstandar multinasional.

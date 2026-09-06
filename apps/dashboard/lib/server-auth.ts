@@ -81,6 +81,17 @@ export async function getAuthUser(req: NextRequest): Promise<AuthUser | null> {
             return verifiedUser;
           }
         }
+
+        // Fallback: verify user by email if ID is missing or mismatched
+        if (parsed?.email) {
+          const verifiedUser = await prisma.user.findFirst({
+            where: { email: parsed.email.toLowerCase().trim() },
+            select: { id: true, name: true, email: true, role: true },
+          });
+          if (verifiedUser) {
+            return verifiedUser;
+          }
+        }
       } catch {
         // Invalid cookie syntax
       }

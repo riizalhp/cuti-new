@@ -15,6 +15,7 @@ import {
   Server,
   Layers,
   FileSpreadsheet,
+  FileText,
   Upload,
   RefreshCw,
   X,
@@ -28,10 +29,15 @@ import {
   Check,
 } from 'lucide-react';
 import Link from 'next/link';
+import { CoverLetterView } from './CoverLetterView';
 
-export const MailerView: React.FC = () => {
+export interface MailerViewProps {
+  initialTab?: 'single' | 'cover-letter' | 'batch' | 'smtp';
+}
+
+export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' }) => {
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState<'single' | 'batch' | 'smtp'>('single');
+  const [activeTab, setActiveTab] = useState<'single' | 'cover-letter' | 'batch' | 'smtp'>(initialTab);
 
   // SMTP Accounts state
   const [smtpAccounts, setSmtpAccounts] = useState<any[]>([]);
@@ -78,22 +84,58 @@ export const MailerView: React.FC = () => {
   const [batchJobs, setBatchJobs] = useState<any[]>([]);
   const [activeBatchResult, setActiveBatchResult] = useState<any>(null);
 
-  // Load user data
+  const [userName, setUserName] = useState('');
+
+  // Load user data & sync query param tab
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const paramTab = new URLSearchParams(window.location.search).get('tab');
+      if (paramTab && ['single', 'cover-letter', 'batch', 'smtp'].includes(paramTab)) {
+        setActiveTab(paramTab as any);
+      }
+    }
+
     loadSmtpAccounts();
     loadBatchJobs();
 
     // Auto prefill sender name from profile
     userApi.getProfile().then((profile: any) => {
       if (profile) {
+        const name = profile.fullName || profile.name || '';
+        setUserName(name);
         setSmtpForm((prev) => ({
           ...prev,
-          from_name: profile.fullName || profile.name || '',
+          from_name: name,
           from_email: profile.email || '',
         }));
       }
     }).catch(() => {});
   }, []);
+
+  const handleUseCoverLetter = (data: {
+    company: string;
+    position: string;
+    recruiterName?: string;
+    content: string;
+  }) => {
+    setSingleForm((prev) => ({
+      ...prev,
+      company: data.company || prev.company,
+      position: data.position || prev.position,
+      to_name: data.recruiterName || prev.to_name,
+      body_content: data.content,
+      custom_subject:
+        data.position && data.company
+          ? `Lamaran Pekerjaan - ${data.position} di ${data.company} - ${userName || 'Kandidat'}`
+          : prev.custom_subject || `Lamaran Pekerjaan - ${data.position || 'Kandidat'}`,
+    }));
+    setActiveTab('single');
+    setIsSingleDrawerOpen(true);
+    toast.success(
+      'Surat Lamaran Dimuat',
+      'Draf surat lamaran telah diisikan ke formulir pengiriman email.'
+    );
+  };
 
   const loadSmtpAccounts = async () => {
     setIsLoadingSmtp(true);
@@ -293,16 +335,17 @@ export const MailerView: React.FC = () => {
     <div className="space-y-6">
       {/* Page Header */}
       <PageHeader
-        title="Auto Mailer Lamaran"
-        subtitle="Kirim email lamaran kerja personal atau massal via SMTP aman dan sinkron otomatis ke Kanban Tracker."
+        title="Email & Cover Letter"
+        subtitle="Susun surat lamaran kerja persuasif dengan AI dan kirimkan email lamaran kerja personal atau massal via SMTP aman yang terhubung langsung ke Tracker."
         icon={Mail}
+        badge="All-in-One Suite"
       />
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3 overflow-x-auto no-scrollbar">
         <button
           onClick={() => setActiveTab('single')}
-          className={`px-4 py-2 rounded-[10px] text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+          className={`px-4 py-2 rounded-[10px] text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
             activeTab === 'single'
               ? 'bg-[#1738D1] text-white shadow-sm'
               : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -312,8 +355,19 @@ export const MailerView: React.FC = () => {
           Kirim Cepat (Single)
         </button>
         <button
+          onClick={() => setActiveTab('cover-letter')}
+          className={`px-4 py-2 rounded-[10px] text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+            activeTab === 'cover-letter'
+              ? 'bg-[#1738D1] text-white shadow-sm'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+          }`}
+        >
+          <FileText className="w-3.5 h-3.5" />
+          Surat Lamaran (AI)
+        </button>
+        <button
           onClick={() => setActiveTab('batch')}
-          className={`px-4 py-2 rounded-[10px] text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+          className={`px-4 py-2 rounded-[10px] text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
             activeTab === 'batch'
               ? 'bg-[#1738D1] text-white shadow-sm'
               : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -324,7 +378,7 @@ export const MailerView: React.FC = () => {
         </button>
         <button
           onClick={() => setActiveTab('smtp')}
-          className={`px-4 py-2 rounded-[10px] text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+          className={`px-4 py-2 rounded-[10px] text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
             activeTab === 'smtp'
               ? 'bg-[#1738D1] text-white shadow-sm'
               : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -417,18 +471,29 @@ export const MailerView: React.FC = () => {
                   Integrasi Surat Lamaran
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-                  Susun cover letter Anda di modul Surat Lamaran lalu kirimkan langsung dengan sekali klik.
+                  Susun cover letter Anda di tab Surat Lamaran lalu kirimkan langsung dengan sekali klik.
                 </p>
               </div>
-              <Link
-                href="/surat-lamaran"
-                className="mt-6 w-full py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition"
+              <button
+                type="button"
+                onClick={() => setActiveTab('cover-letter')}
+                className="mt-6 w-full py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
               >
-                Buat Surat Lamaran
+                Buat Surat Lamaran Sekarang
                 <ChevronRight className="w-3.5 h-3.5" />
-              </Link>
+              </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ================= TAB 2: COVER LETTER ================= */}
+      {activeTab === 'cover-letter' && (
+        <div className="space-y-6">
+          <CoverLetterView
+            hideHeader
+            onUseInMailer={handleUseCoverLetter}
+          />
         </div>
       )}
 
@@ -770,9 +835,22 @@ export const MailerView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Isi Surat Lamaran (Opsional / Otomatis)
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Isi Surat Lamaran (Opsional / Otomatis)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSingleDrawerOpen(false);
+                      setActiveTab('cover-letter');
+                    }}
+                    className="text-[11px] font-bold text-[#1738D1] dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <Sparkles className="w-3 h-3 text-orange-500" />
+                    <span>Susun dengan AI</span>
+                  </button>
+                </div>
                 <textarea
                   rows={6}
                   value={singleForm.body_content}

@@ -28,9 +28,22 @@ interface SavedCoverLetter {
   content: string;
 }
 
+export interface CoverLetterViewProps {
+  hideHeader?: boolean;
+  onUseInMailer?: (data: {
+    company: string;
+    position: string;
+    recruiterName?: string;
+    content: string;
+  }) => void;
+}
+
 const initialSavedLetters: SavedCoverLetter[] = [];
 
-export const CoverLetterView: React.FC = () => {
+export const CoverLetterView: React.FC<CoverLetterViewProps> = ({
+  hideHeader = false,
+  onUseInMailer,
+}) => {
   const toast = useToast();
   const [savedLetters, setSavedLetters] = useState<SavedCoverLetter[]>(initialSavedLetters);
   const [targetCompany, setTargetCompany] = useState('');
@@ -180,15 +193,17 @@ ${userEmail || 'email@email.com'}`);
   return (
     <div className="space-y-6 font-sans">
       {/* Page Header Standardized */}
-      <PageHeader
-        title="Pembuat Surat Lamaran"
-        subtitle="Susun surat lamaran kerja yang persuasif, disesuaikan dengan posisi target dan standar perusahaan multinasional secara instan."
-        icon={Mail}
-        badge="Cover Letter AI"
-        stats={[
-          { label: 'Tersimpan', value: `${savedLetters.length} Draf`, icon: FileText },
-        ]}
-      />
+      {!hideHeader && (
+        <PageHeader
+          title="Pembuat Surat Lamaran"
+          subtitle="Susun surat lamaran kerja yang persuasif, disesuaikan dengan posisi target dan standar perusahaan multinasional secara instan."
+          icon={Mail}
+          badge="Cover Letter AI"
+          stats={[
+            { label: 'Tersimpan', value: `${savedLetters.length} Draf`, icon: FileText },
+          ]}
+        />
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Form Generator Left */}
@@ -315,13 +330,31 @@ ${userEmail || 'email@email.com'}`);
                   >
                     <span>Simpan Dokumen</span>
                   </button>
-                  <a
-                    href="/mailer"
-                    className="px-3 py-1.5 rounded-[10px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] text-white transition flex items-center gap-1.5 cursor-pointer shadow-xs shadow-[#1738D1]/20"
-                  >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>Kirim via Auto Mailer</span>
-                  </a>
+                  {onUseInMailer ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onUseInMailer({
+                          company: targetCompany,
+                          position: targetPosition,
+                          recruiterName,
+                          content: generatedLetter,
+                        })
+                      }
+                      className="px-3 py-1.5 rounded-[10px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] text-white transition flex items-center gap-1.5 cursor-pointer shadow-xs shadow-[#1738D1]/20"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Kirim via Email</span>
+                    </button>
+                  ) : (
+                    <a
+                      href="/mailer"
+                      className="px-3 py-1.5 rounded-[10px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] text-white transition flex items-center gap-1.5 cursor-pointer shadow-xs shadow-[#1738D1]/20"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Kirim via Auto Mailer</span>
+                    </a>
+                  )}
                 </div>
               )}
             </div>
@@ -377,15 +410,33 @@ ${userEmail || 'email@email.com'}`);
 
               <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
                 <span>Diperbarui: {letter.date}</span>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(letter.content);
-                    toast.success('Teks Tersalin', 'Surat lamaran berhasil disalin ke clipboard!');
-                  }}
-                  className="font-semibold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
-                >
-                  Salin Teks Lengkap
-                </button>
+                <div className="flex items-center gap-3">
+                  {onUseInMailer && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onUseInMailer({
+                          company: letter.company,
+                          position: letter.position,
+                          content: letter.content,
+                        })
+                      }
+                      className="font-bold text-[#1738D1] dark:text-blue-400 hover:underline cursor-pointer flex items-center gap-1"
+                    >
+                      <Send className="w-3 h-3" />
+                      <span>Kirim Email</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(letter.content);
+                      toast.success('Teks Tersalin', 'Surat lamaran berhasil disalin ke clipboard!');
+                    }}
+                    className="font-semibold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
+                  >
+                    Salin Teks Lengkap
+                  </button>
+                </div>
               </div>
             </div>
           ))}

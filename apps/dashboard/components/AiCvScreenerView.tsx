@@ -1872,7 +1872,7 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                   <div className="flex items-center gap-2">
                     <Target className="w-4 h-4 text-orange-500" />
                     <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                      Tujuan Evaluasi CV (Purpose Profile)
+                      Tujuan Simulasi Screening (Purpose Profile)
                     </span>
                     <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
                       Aktif: {CV_PURPOSE_PROFILES[activePurpose]?.title || 'Lamar Kerja'}

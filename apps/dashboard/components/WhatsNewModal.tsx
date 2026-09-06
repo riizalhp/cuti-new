@@ -39,7 +39,7 @@ const NEW_FEATURES: FeatureItem[] = [
     id: 'cv-ats',
     tag: 'BARU',
     tagColor: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-    title: 'Evaluasi CV & Skor ATS 2.0',
+    title: 'Simulasi Screening & Skor ATS 2.0',
     description: 'Analisis struktur CV secara mendalam, deteksi kata kunci industri relevan, dan rekomendasi perbaikan instan.',
     icon: FileCheck2,
     iconBg: 'bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-800',

@@ -294,7 +294,7 @@ export const DesignSystemView: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Hanya dipakai pada header halaman audit diagnostik mendalam (seperti Evaluasi CV).
+                Hanya dipakai pada header halaman audit diagnostik mendalam (seperti Simulasi Screening).
               </p>
 
               {/* Demo Radial Score */}

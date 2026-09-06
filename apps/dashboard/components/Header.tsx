@@ -252,6 +252,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Dark / Light Mode Toggle Pill */}
           <button
+            suppressHydrationWarning
             onClick={toggleDarkMode}
             aria-label="Toggle Mode Terang / Gelap"
             className="flex items-center gap-2 p-1.5 px-3 rounded-[10px] text-slate-800 dark:text-slate-200 bg-white/30 dark:bg-slate-900/50 hover:bg-white/50 dark:hover:bg-slate-800/80 border border-white/40 dark:border-white/10 transition-all shadow-xs backdrop-blur-md cursor-pointer"
@@ -273,6 +274,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Notifications Button */}
           <div className="relative">
             <button
+              suppressHydrationWarning
               onClick={() => setShowNotifications(!showNotifications)}
               aria-label="Notifications"
               className={`relative p-2 rounded-full transition cursor-pointer border ${
@@ -352,6 +354,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Profile Badge & Dropdown */}
           <div className="relative">
             <button
+              suppressHydrationWarning
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               title="Lihat & Pengaturan Profil Saya"
               className={`flex items-center gap-2.5 pl-1.5 py-1 pr-2.5 rounded-full transition group cursor-pointer text-left border ${

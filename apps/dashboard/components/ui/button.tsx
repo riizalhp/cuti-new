@@ -46,6 +46,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
+        suppressHydrationWarning
         className={cn(buttonVariants({ variant, size }), className)}
         disabled={disabled || loading}
         style={{

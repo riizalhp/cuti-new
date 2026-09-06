@@ -1,7 +1,7 @@
 'use client';
 
-import { CoverLetterView } from '@/components/CoverLetterView';
+import { MailerView } from '@/components/MailerView';
 
 export default function SuratLamaranPage() {
-  return <CoverLetterView />;
+  return <MailerView initialTab="cover-letter" />;
 }

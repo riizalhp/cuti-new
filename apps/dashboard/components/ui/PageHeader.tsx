@@ -12,7 +12,7 @@ export interface HeaderStat {
 
 export interface PageHeaderProps {
   title: string;
-  subtitle: string;
+  subtitle: React.ReactNode;
   icon: LucideIcon;
   badge?: string;
   stats?: HeaderStat[];

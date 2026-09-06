@@ -46,7 +46,6 @@ export default function CardlessClaudeStyleOnboardingPage() {
   const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showValueMoment, setShowValueMoment] = useState(false);
-  const [showMarketingOffer, setShowMarketingOffer] = useState(false);
 
   // Upload & File Scanning State
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -93,7 +92,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Enter' || e.isComposing) return;
 
-      if (currentStage === 'questions' && !showValueMoment && !showMarketingOffer) {
+      if (currentStage === 'questions' && !showValueMoment) {
         const target = e.target as HTMLElement;
         if (target && (target.tagName === 'BUTTON' || target.tagName === 'A' || target.tagName === 'TEXTAREA')) {
           return;
@@ -106,7 +105,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentStage, currentQuestionIndex, formData, showValueMoment, showMarketingOffer]);
+  }, [currentStage, currentQuestionIndex, formData, showValueMoment]);
 
   // Constants
   const EDUCATION_LEVELS = ['SMA', 'SMK', 'D3', 'D4', 'S1', 'S2', 'Lainnya'];
@@ -179,10 +178,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
 
   const handlePrevQuestion = () => {
     setDirection(-1);
-    if (showMarketingOffer) {
-      setShowMarketingOffer(false);
-      setShowValueMoment(true);
-    } else if (showValueMoment) {
+    if (showValueMoment) {
       setShowValueMoment(false);
     } else if (currentQuestionIndex > 1) {
       setCurrentQuestionIndex((prev) => prev - 1);
@@ -331,7 +327,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans p-6 sm:p-10 flex flex-col justify-between selection:bg-orange-500 selection:text-white">
       {/* 1. Minimalist Top Progress Bar */}
-      {currentStage === 'questions' && !showValueMoment && !showMarketingOffer && (
+      {currentStage === 'questions' && !showValueMoment && (
         <div className="fixed top-0 left-0 right-0 h-[2px] bg-slate-100 dark:bg-slate-900 z-50 overflow-hidden">
           <motion.div
             className="h-full bg-[#1738D1]"
@@ -508,7 +504,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
         {/* ============================================================ */}
         {/* STAGE 3A: UPLOAD & AUTO-SCAN FLOW */}
         {/* ============================================================ */}
-        {currentStage === 'upload_scan' && !showMarketingOffer && (
+        {currentStage === 'upload_scan' && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -783,10 +779,11 @@ export default function CardlessClaudeStyleOnboardingPage() {
 
                   <button
                     type="button"
-                    onClick={() => setShowMarketingOffer(true)}
-                    className="flex-1 py-3.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-white font-bold text-xs shadow-md shadow-[#F97316]/20 transition flex items-center justify-center gap-2 cursor-pointer"
+                    onClick={() => handleFinishAndNavigateTo('/cv')}
+                    disabled={isSubmitting}
+                    className="flex-1 py-3.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-white font-bold text-xs shadow-md shadow-[#F97316]/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
-                    <span>Lanjut ke Penawaran Spesial</span>
+                    <span>{isSubmitting ? 'Memproses...' : 'Lanjut ke CV Builder'}</span>
                     <ArrowRight size={16} />
                   </button>
                 </div>
@@ -798,7 +795,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
         {/* ============================================================ */}
         {/* STAGE 3B: STEP-BY-STEP GUIDED QUESTIONS FLOW */}
         {/* ============================================================ */}
-        {currentStage === 'questions' && !showValueMoment && !showMarketingOffer && currentQuestion && (
+        {currentStage === 'questions' && !showValueMoment && currentQuestion && (
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={currentQuestion.id}
@@ -1124,7 +1121,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
         {/* ============================================================ */}
         {/* VALUE MOMENT SCREEN */}
         {/* ============================================================ */}
-        {showValueMoment && !showMarketingOffer && (
+        {showValueMoment && (
           <motion.div
             initial="hidden"
             animate="visible"
@@ -1175,162 +1172,13 @@ export default function CardlessClaudeStyleOnboardingPage() {
               }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => setShowMarketingOffer(true)}
-              className="w-full py-3.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-white font-bold text-xs shadow-md shadow-[#F97316]/20 transition flex items-center justify-center gap-2 cursor-pointer"
+              onClick={() => handleFinishAndNavigateTo('/cv')}
+              disabled={isSubmitting}
+              className="w-full py-3.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-white font-bold text-xs shadow-md shadow-[#F97316]/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              <span>Lanjutkan</span>
+              <span>{isSubmitting ? 'Menyiapkan CV...' : 'Lanjut ke CV Builder'}</span>
               <ArrowRight size={16} />
             </motion.button>
-          </motion.div>
-        )}
-
-        {/* ============================================================ */}
-        {/* MARKETING OFFER SCREEN */}
-        {/* ============================================================ */}
-        {showMarketingOffer && (
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: {},
-              visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
-            }}
-            className="space-y-6"
-          >
-            {currentStage === 'upload_scan' && (
-              <div className="flex items-center">
-                <button
-                  type="button"
-                  onClick={() => setShowMarketingOffer(false)}
-                  className="text-xs font-bold text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 flex items-center gap-1.5 transition cursor-pointer"
-                >
-                  <ArrowLeft size={14} /> Kembali ke Hasil Pindai
-                </button>
-              </div>
-            )}
-
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 12 },
-                visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } },
-              }}
-              className="space-y-2 text-center sm:text-left"
-            >
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-50">
-                Tingkatkan Peluang Karirmu dengan Paket Spesial
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Dapatkan akses penuh seluruh fitur Employr &amp; opsi pembuatan CV langsung oleh tim spesialis:
-              </p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Premium Pass Card */}
-              <motion.div
-                variants={{
-                  hidden: { opacity: 0, y: 20, scale: 0.97 },
-                  visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 220, damping: 20 } },
-                }}
-                whileHover={{ y: -3 }}
-                className="relative bg-gradient-to-b from-orange-50 to-white dark:from-orange-950/40 dark:to-slate-900 border-2 border-[#1738D1] rounded-2xl p-5 flex flex-col justify-between space-y-5"
-              >
-                <div className="absolute -top-3 left-4">
-                  <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-[#1738D1] text-white shadow-sm shadow-[#1738D1]/30">
-                    Rekomendasi
-                  </span>
-                </div>
-                <div className="space-y-3 pt-1">
-                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">Paket Siap Kerja</h4>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-extrabold text-[#1738D1]">Rp 99.000</span>
-                    <span className="text-xs text-slate-400 line-through">Rp 149.000</span>
-                  </div>
-                  <ul className="space-y-2 text-[11px] text-slate-600 dark:text-slate-400">
-                    <li className="flex items-start gap-2">
-                      <Check size={13} className="text-emerald-500 mt-0.5 shrink-0" />
-                      <span>Akses penuh seluruh fitur & template ATS</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={13} className="text-emerald-500 mt-0.5 shrink-0" />
-                      <span>Analisis kecocokan CV instan</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={13} className="text-emerald-500 mt-0.5 shrink-0" />
-                      <span>Job Application Tracker tanpa batas</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={13} className="text-emerald-500 mt-0.5 shrink-0" />
-                      <span>Bank Soal & Panduan Interview Kerja</span>
-                    </li>
-                  </ul>
-                </div>
-                <motion.button
-                  type="button"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => router.push('/pembayaran?plan=premium')}
-                  className="w-full py-2.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-white font-bold text-xs shadow-md shadow-[#F97316]/20 transition cursor-pointer"
-                >
-                  Pilih Paket (Rp 99rb)
-                </motion.button>
-              </motion.div>
-
-              {/* CV Profesional Plan */}
-              <motion.div
-                variants={{
-                  hidden: { opacity: 0, y: 20, scale: 0.97 },
-                  visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 220, damping: 20 } },
-                }}
-                whileHover={{ y: -3 }}
-                className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-5"
-              >
-                <div className="space-y-3">
-                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">CV Profesional</h4>
-                  <p className="text-xl font-extrabold text-slate-800 dark:text-slate-100">Rp 59.000</p>
-                  <ul className="space-y-2 text-[11px] text-slate-600 dark:text-slate-400">
-                    <li className="flex items-start gap-2">
-                      <Check size={13} className="text-emerald-500 mt-0.5 shrink-0" />
-                      <span>CV disusun rapi standar industri</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={13} className="text-emerald-500 mt-0.5 shrink-0" />
-                      <span>Riset keyword ATS sesuai target posisi</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={13} className="text-emerald-500 mt-0.5 shrink-0" />
-                      <span>Garansi revisi & pengerjaan cepat</span>
-                    </li>
-                  </ul>
-                </div>
-                <motion.button
-                  type="button"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => router.push('/pembayaran?plan=hrd_service')}
-                  className="w-full py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold text-xs transition cursor-pointer"
-                >
-                  Pilih CV Profesional (Rp 59rb)
-                </motion.button>
-              </motion.div>
-            </div>
-
-            <motion.div
-              variants={{
-                hidden: { opacity: 0 },
-                visible: { opacity: 1, transition: { duration: 0.3 } },
-              }}
-              className="pt-1 text-center"
-            >
-              <button
-                type="button"
-                onClick={() => handleFinishAndNavigateTo('/cv')}
-                disabled={isSubmitting}
-                className="text-xs font-bold text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition cursor-pointer flex items-center justify-center gap-1 mx-auto disabled:opacity-50"
-              >
-                <span>{isSubmitting ? 'Memproses...' : 'Lanjut ke CV Builder'}</span>
-                {!isSubmitting && <ArrowRight size={14} />}
-              </button>
-            </motion.div>
           </motion.div>
         )}
       </main>

@@ -96,7 +96,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: User,
       items: [
         { id: 'cv', label: 'CV Saya', href: '/cv', icon: FileText },
-        { id: 'cv-screener', label: 'Evaluasi CV', href: '/cv-screener', icon: Eye },
+        { id: 'cv-screener', label: 'Simulasi Screening', href: '/cv-screener', icon: Eye },
         { id: 'linkedin', label: 'Optimasi LinkedIn', href: '/linkedin', icon: Linkedin },
       ],
     },
@@ -105,11 +105,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Briefcase,
       items: [
         { id: 'tracker', label: 'Tracker Lamaran', href: '/tracker', icon: Briefcase, badge: trackerCount > 0 ? String(trackerCount) : null },
-        { id: 'mailer', label: 'Auto Mailer', href: '/mailer', icon: Send, badge: 'Baru' },
+        { id: 'email-cover-letter', label: 'Email & Cover Letter', href: '/mailer', icon: Mail, badge: 'Baru' },
         { id: 'scrape-jobs', label: 'Scraper Lowongan', href: '/scrape-jobs', icon: Globe, badge: 'Baru' },
         { id: 'cari-lowongan', label: 'Cari Lowongan', href: 'https://loker.employr.id', icon: Compass },
         { id: 'match-cv', label: 'Kecocokan Lowongan', href: '/match-cv', icon: Sparkles },
-        { id: 'surat-lamaran', label: 'Surat Lamaran', href: '/surat-lamaran', icon: Mail },
       ],
     },
     {
@@ -238,7 +237,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <div className="space-y-1">
                     {categoryGroup.items.map((item) => {
                       const Icon = item.icon;
-                      const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+                      const isActive =
+                        pathname === item.href ||
+                        pathname.startsWith(item.href + '/') ||
+                        (item.id === 'email-cover-letter' && (pathname === '/surat-lamaran' || pathname.startsWith('/surat-lamaran/')));
                       const titleAttr = !isExpanded ? item.label : undefined;
 
                       return (
