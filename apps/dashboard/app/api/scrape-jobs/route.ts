@@ -15,20 +15,13 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => null);
     const keyword = typeof body?.keyword === 'string' ? body.keyword.trim() : '';
 
-    if (!keyword) {
-      return NextResponse.json(
-        { success: false, message: 'Kata kunci / posisi pekerjaan wajib diisi.' },
-        { status: 400 }
-      );
-    }
-
     const allowed = [
       'Jobstreet', 'Glints', 'Dealls', 'Talent', 'LinkedIn', 'Kalibrr', 'Jobindo',
       'Jora', 'Jobinaja', 'Lokernas', 'OfficialKarir', 'LogKerja',
       'Indeed', 'Loker.id', 'Jooble', 'CakeResume', 'Karir.com', 'KitaLulus',
       'LokerHeadOffice', 'SejakKemarin', 'LamarLangsung', 'InfoLokerKerja', 'SolusiKerja',
       'BursaKerjaDepnaker', 'LokerAnakMedan', 'InfoLokerJabar', 'InfoLokerBanten',
-      'InfoLokerKarawang', 'LokerMuslim', 'LowkerJogja',
+      'InfoLokerKarawang', 'LokerMuslim', 'LowkerJogja', 'Disnakerja',
     ];
     const portals = Array.isArray(body.portals)
       ? body.portals.filter((p: string) => allowed.includes(p))
@@ -37,7 +30,7 @@ export async function POST(req: NextRequest) {
           'Jora', 'Jobinaja', 'Lokernas', 'OfficialKarir', 'LogKerja',
           'LokerHeadOffice', 'SejakKemarin', 'LamarLangsung', 'InfoLokerKerja', 'SolusiKerja',
           'BursaKerjaDepnaker', 'LokerAnakMedan', 'InfoLokerJabar', 'InfoLokerBanten',
-          'InfoLokerKarawang', 'LokerMuslim', 'LowkerJogja',
+          'InfoLokerKarawang', 'LokerMuslim', 'LowkerJogja', 'Disnakerja',
         ];
 
     const result = await runScrape({ keyword, location: body.location, portals });

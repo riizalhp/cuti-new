@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { DynamicATSResult, ATSIssue } from '@/lib/ats-score-types';
+import { getScoreProgressBarClass, getScoreTextClass } from '@/lib/score-color';
 import {
   X,
   Sparkles,
@@ -131,13 +132,13 @@ export const ATSAnalysisDrawer: React.FC<ATSAnalysisDrawerProps> = ({
                   <span className="font-bold text-slate-900 dark:text-white">
                     Content Quality (Bobot 40%)
                   </span>
-                  <span className="font-mono font-black text-slate-700 dark:text-slate-300">
+                  <span className={`font-mono font-black transition-colors ${getScoreTextClass(engines.contentQuality.score)}`}>
                     {engines.contentQuality.score}%
                   </span>
                 </div>
                 <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#1738D1] rounded-full transition-all"
+                    className={`h-full rounded-full transition-all duration-500 ${getScoreProgressBarClass(engines.contentQuality.score)}`}
                     style={{ width: `${engines.contentQuality.score}%` }}
                   />
                 </div>
@@ -149,13 +150,13 @@ export const ATSAnalysisDrawer: React.FC<ATSAnalysisDrawerProps> = ({
                   <span className="font-bold text-slate-900 dark:text-white">
                     ATS Readability (Bobot 25%)
                   </span>
-                  <span className="font-mono font-black text-slate-700 dark:text-slate-300">
+                  <span className={`font-mono font-black transition-colors ${getScoreTextClass(engines.atsReadability.score)}`}>
                     {engines.atsReadability.score}%
                   </span>
                 </div>
                 <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-blue-500 rounded-full transition-all"
+                    className={`h-full rounded-full transition-all duration-500 ${getScoreProgressBarClass(engines.atsReadability.score)}`}
                     style={{ width: `${engines.atsReadability.score}%` }}
                   />
                 </div>
@@ -167,13 +168,13 @@ export const ATSAnalysisDrawer: React.FC<ATSAnalysisDrawerProps> = ({
                   <span className="font-bold text-slate-900 dark:text-white">
                     Completeness (Bobot 20%)
                   </span>
-                  <span className="font-mono font-black text-slate-700 dark:text-slate-300">
+                  <span className={`font-mono font-black transition-colors ${getScoreTextClass(engines.completeness.score)}`}>
                     {engines.completeness.score}%
                   </span>
                 </div>
                 <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-emerald-500 rounded-full transition-all"
+                    className={`h-full rounded-full transition-all duration-500 ${getScoreProgressBarClass(engines.completeness.score)}`}
                     style={{ width: `${engines.completeness.score}%` }}
                   />
                 </div>
@@ -185,13 +186,13 @@ export const ATSAnalysisDrawer: React.FC<ATSAnalysisDrawerProps> = ({
                   <span className="font-bold text-slate-900 dark:text-white">
                     Content Integrity (Bobot 15%)
                   </span>
-                  <span className="font-mono font-black text-slate-700 dark:text-slate-300">
+                  <span className={`font-mono font-black transition-colors ${getScoreTextClass(engines.contentIntegrity.score)}`}>
                     {engines.contentIntegrity.score}%
                   </span>
                 </div>
                 <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-amber-500 rounded-full transition-all"
+                    className={`h-full rounded-full transition-all duration-500 ${getScoreProgressBarClass(engines.contentIntegrity.score)}`}
                     style={{ width: `${engines.contentIntegrity.score}%` }}
                   />
                 </div>

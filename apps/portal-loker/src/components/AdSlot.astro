@@ -1,5 +1,5 @@
 ---
-// AdSlot.astro - Clean, professional Google Ads placement
+// AdSlot.astro - Contextual B2C Career & Education Sponsorship Placement
 interface Props {
   type?: 'leaderboard' | 'infeed' | 'sidebar' | 'card' | 'mrec' | 'skyscraper' | string;
   style?: string;
@@ -11,88 +11,179 @@ const { type = 'leaderboard', style = '', className = '', note = '' } = Astro.pr
 ---
 
 {type === 'leaderboard' && (
-  <div class={"max-w-[1240px] mx-auto px-4 sm:px-6 my-6 " + className} style={style}>
-    <div class="relative bg-white border border-dashed border-slate-300 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm min-h-[90px]">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-1.5 shrink-0">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#4285F4]"></span>
-          <span class="w-2.5 h-2.5 rounded-full bg-[#EA4335]"></span>
-          <span class="w-2.5 h-2.5 rounded-full bg-[#FBBC05]"></span>
-          <span class="w-2.5 h-2.5 rounded-full bg-[#34A853]"></span>
+  <div class={"max-w-[1240px] mx-auto px-4 sm:px-6 my-8 " + className} style={style}>
+    <div class="relative bg-white border border-dashed border-[#d7d6cf] rounded-2xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-xs">
+      <div class="flex items-start sm:items-center gap-3.5">
+        <div class="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 text-[#0000ff] flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 sm:mt-0">
+          EDU
         </div>
         <div>
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">Google Ads Partner (728×90)</span>
-          <span class="text-sm font-bold text-slate-800">Promosikan Program Pelatihan & Rekrutmen Perusahaan Anda di Sini</span>
-          {note && <p class="text-xs text-slate-500 mt-0.5">{note}</p>}
+          <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span class="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf] px-2.5 py-0.5 rounded-full">
+              IKLAN / SPONSORED
+            </span>
+            <div class="flex items-center gap-1 shrink-0" title="Google Ads Partner">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#4285F4]"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-[#EA4335]"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-[#FBBC05]"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-[#34A853]"></span>
+              <span class="text-[10px] font-bold text-[#a5a5a1] uppercase tracking-wider ml-0.5">Google Partner (728x90)</span>
+            </div>
+          </div>
+          <h4 class="text-sm sm:text-base font-bold text-[#101010] leading-snug">
+            Program Akselerasi Karier: Beasiswa Sertifikasi & Mentoring Fresh Graduate
+          </h4>
+          <p class="text-xs text-[#6e6d68] mt-1 max-w-2xl font-medium">
+            {note || 'Kuasai kompetensi yang dicari HRD dengan kurikulum industri resmi dan simulasi wawancara kerja.'}
+          </p>
         </div>
       </div>
-      <a href="/tentang#iklan" class="px-5 py-2 rounded-xl bg-[#1738d1] hover:bg-[#122ca6] text-white text-xs font-bold shrink-0 transition">
-        Pasang Iklan →
+      <a
+        href="/course"
+        class="min-h-[42px] px-5 py-2 rounded-full bg-[#101010] hover:bg-[#000000] active:scale-[0.98] text-white text-xs font-bold shrink-0 transition flex items-center justify-center gap-1.5 shadow-xs"
+      >
+        <span>Cek Program & Beasiswa</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
       </a>
-      <span class="absolute top-2 right-3 text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Iklan</span>
     </div>
   </div>
 )}
 
 {type === 'infeed' && (
-  <div class={"my-6 " + className} style={style}>
-    <div class="relative bg-slate-50 border border-dashed border-slate-300 rounded-2xl p-5 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-blue-100 text-[#1738d1] flex items-center justify-center font-bold text-xs shrink-0">
-          ADS
+  <div class={"my-8 " + className} style={style}>
+    <div class="relative bg-white border border-dashed border-[#d7d6cf] rounded-2xl p-5 sm:p-6 transition shadow-xs">
+      <!-- Clear Sponsored Header Bar -->
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-[#101010]/8">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf] px-2.5 py-0.5 rounded-full">
+            IKLAN / SPONSORED
+          </span>
+          <span class="text-[11px] font-bold text-[#6e6d68]">Rekomendasi Mitra Pendidikan & Karier</span>
         </div>
-        <div>
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rekomendasi Sponsor</span>
-          <h4 class="text-sm font-bold text-slate-900">Beasiswa & Pelatihan Kerja Bersertifikat untuk Talenta Muda</h4>
-          <p class="text-xs text-slate-500">{note || 'Tingkatkan skill digital dengan kurikulum industri terpercaya.'}</p>
+        <div class="flex items-center gap-1" title="Google Ads Partner">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#4285F4]"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-[#EA4335]"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-[#FBBC05]"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-[#34A853]"></span>
         </div>
       </div>
-      <a href="/tentang#iklan" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shrink-0 transition">
-        Pelajari →
-      </a>
-      <span class="absolute top-2 right-3 text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Iklan</span>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-start gap-3.5">
+          <div class="w-11 h-11 rounded-full bg-purple-50 border border-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs shrink-0">
+            PRO
+          </div>
+          <div>
+            <h4 class="text-sm sm:text-base font-bold text-[#101010] leading-snug">
+              Beasiswa Sertifikasi & Pelatihan Kerja Bersertifikat Industri
+            </h4>
+            <p class="text-xs text-[#6e6d68] mt-1 leading-relaxed font-medium">
+              {note || 'Dapatkan sertifikasi kompetensi resmi untuk melipatgandakan peluang lolos screening HRD.'}
+            </p>
+          </div>
+        </div>
+        <a
+          href="/sertifikasi"
+          class="min-h-[42px] px-5 py-2 rounded-full bg-[#101010] hover:bg-[#000000] active:scale-[0.98] text-white text-xs font-bold shrink-0 transition flex items-center justify-center gap-1.5 self-start sm:self-auto shadow-xs"
+        >
+          <span>Pelajari Persyaratan</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </a>
+      </div>
     </div>
   </div>
 )}
 
 {(type === 'mrec' || type === 'sidebar') && (
-  <div class={"my-4 bg-white border border-dashed border-slate-300 rounded-2xl p-4 text-center " + className} style={style}>
-    <div class="flex items-center justify-center gap-1.5 mb-2">
-      <span class="w-2 h-2 rounded-full bg-[#4285F4]"></span>
-      <span class="w-2 h-2 rounded-full bg-[#EA4335]"></span>
-      <span class="w-2 h-2 rounded-full bg-[#FBBC05]"></span>
-      <span class="w-2 h-2 rounded-full bg-[#34A853]"></span>
-      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Google Ads (300×250)</span>
+  <div class={"my-4 bg-white border border-dashed border-[#d7d6cf] rounded-2xl p-5 text-center shadow-xs " + className} style={style}>
+    <div class="flex items-center justify-between pb-2 mb-3 border-b border-[#101010]/8">
+      <span class="text-[9px] font-bold uppercase tracking-wider bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf] px-2.5 py-0.5 rounded-full">
+        IKLAN SPONSOR
+      </span>
+      <div class="flex items-center gap-1">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#4285F4]"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-[#EA4335]"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-[#FBBC05]"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-[#34A853]"></span>
+        <span class="text-[9px] font-bold text-[#a5a5a1] ml-0.5">300x250</span>
+      </div>
     </div>
-    <div class="my-4">
-      <h5 class="text-xs font-bold text-slate-800 mb-1">Ruang Iklan Rekrutmen</h5>
-      <p class="text-[11px] text-slate-500">{note || 'Jangkau ribuan pelamar aktif di portal karier terdepan.'}</p>
+    <div class="my-3">
+      <div class="w-11 h-11 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center mx-auto mb-2.5">
+        ATS
+      </div>
+      <h5 class="text-sm font-bold text-[#101010] mb-1 leading-snug">Review & Bedah CV Standar ATS</h5>
+      <p class="text-xs text-[#6e6d68] leading-relaxed max-w-[240px] mx-auto font-medium">
+        {note || 'Optimalkan resume lamaranmu agar lolos sistem penyaring otomatis rekruter perusahaan.'}
+      </p>
     </div>
-    <a href="/tentang#iklan" class="inline-block w-full py-2 rounded-xl bg-blue-50 text-[#1738d1] text-xs font-bold hover:bg-[#1738d1] hover:text-white transition">
-      Pasang Iklan
+    <a
+      href="http://localhost:3000/cv"
+      class="min-h-[42px] inline-flex items-center justify-center w-full py-2 rounded-full bg-[#101010] hover:bg-[#000000] text-white text-xs font-bold transition shadow-xs"
+    >
+      Optimalkan Resume Saya
     </a>
   </div>
 )}
 
 {type === 'skyscraper' && (
-  <div class={"my-4 bg-white border border-dashed border-slate-300 rounded-2xl p-4 text-center min-h-[350px] flex flex-col justify-between " + className} style={style}>
-    <div class="flex items-center justify-center gap-1.5 mb-2">
-      <span class="w-2 h-2 rounded-full bg-[#4285F4]"></span>
-      <span class="w-2 h-2 rounded-full bg-[#EA4335]"></span>
-      <span class="w-2 h-2 rounded-full bg-[#FBBC05]"></span>
-      <span class="w-2 h-2 rounded-full bg-[#34A853]"></span>
-      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Google Ads (300×600)</span>
-    </div>
-    <div class="my-auto py-6">
-      <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#1738d1] flex items-center justify-center font-medium mx-auto mb-3">
-        K
+  <div class={"bg-white border border-dashed border-[#d7d6cf] rounded-2xl p-5 text-center shadow-xs flex flex-col justify-between " + className} style={style}>
+    <div>
+      <div class="flex items-center justify-between pb-2 mb-4 border-b border-[#101010]/8">
+        <span class="text-[9px] font-bold uppercase tracking-wider bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf] px-2.5 py-0.5 rounded-full">
+          IKLAN / SPONSORED
+        </span>
+        <div class="flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#4285F4]"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-[#EA4335]"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-[#FBBC05]"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-[#34A853]"></span>
+          <span class="text-[9px] font-bold text-[#a5a5a1] ml-0.5">300x600</span>
+        </div>
       </div>
-      <h5 class="text-sm font-medium text-slate-800 mb-1">Employer Job Ad Network</h5>
-      <p class="text-xs text-slate-500 max-w-[200px] mx-auto">{note || 'Media promosi lowongan & program karier generasi muda.'}</p>
+
+      <div class="py-4">
+        <div class="w-14 h-14 rounded-full bg-blue-50 border border-blue-100 text-[#0000ff] flex items-center justify-center font-bold text-lg mx-auto mb-3 shadow-xs">
+          EJ
+        </div>
+        <span class="text-[11px] font-bold text-[#0000ff] uppercase tracking-wider block mb-1">
+          Mitra Karier Masa Depan
+        </span>
+        <h5 class="text-base font-bold text-[#101010] mb-2 leading-snug">
+          Program Siap Kerja & Penyaluran Karier 2026
+        </h5>
+        <p class="text-xs text-[#6e6d68] leading-relaxed max-w-[230px] mx-auto mb-5 font-medium">
+          {note || 'Kuasai keterampilan digital bergaji tinggi dengan jaminan bimbingan sampai dapat kerja.'}
+        </p>
+
+        <!-- Value Pills -->
+        <div class="space-y-2 text-left text-xs bg-[#f4f3ee] p-3.5 rounded-xl border border-[#d7d6cf] text-[#101010] mb-4">
+          <div class="flex items-center gap-2 font-medium">
+            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span>Kurikulum Berbasis Proyek Nyata</span>
+          </div>
+          <div class="flex items-center gap-2 font-medium">
+            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span>Sertifikat Terverifikasi Industri</span>
+          </div>
+          <div class="flex items-center gap-2 font-medium">
+            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span>Simulasi Wawancara HRD & User</span>
+          </div>
+        </div>
+      </div>
     </div>
-    <a href="/tentang#iklan" class="inline-block w-full py-2 rounded-xl bg-[#1738d1] text-white text-xs font-medium hover:bg-[#122ca6] transition">
-      Pasang Iklan
-    </a>
+
+    <div class="pt-2">
+      <a
+        href="/course"
+        class="min-h-[42px] inline-flex items-center justify-center w-full py-2 rounded-full bg-[#101010] hover:bg-[#000000] text-white text-xs font-bold transition shadow-xs"
+      >
+        Lihat Jalur Pelatihan
+      </a>
+      <span class="text-[10px] text-[#a5a5a1] block mt-2">
+        Kuota beasiswa terbatas untuk pendaftar awal
+      </span>
+    </div>
   </div>
 )}
-

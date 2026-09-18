@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@cuti/db";
-import { logAuditFromReq, logApp, extractRequestContext } from "@cuti/db/logger";
+import { prisma } from "@employr/db";
+import { logAuditFromReq, logApp, extractRequestContext } from "@employr/db/logger";
 import crypto from "crypto";
 
 export async function GET() {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@cuti/db";
-import { logSecurityEvent, logApp, extractRequestContext, detectBruteForce } from "@cuti/db/logger";
+import { prisma } from "@employr/db";
+import { logSecurityEvent, logApp, extractRequestContext, detectBruteForce } from "@employr/db/logger";
 import { signAdminSession } from "@/lib/admin-session";
 import crypto from "crypto";
 
@@ -16,6 +16,17 @@ export async function POST(req: NextRequest) {
     }
 
     const cleanEmail = email.trim().toLowerCase();
+    const ctx = extractRequestContext(req);
+
+    if (ctx.ip) {
+      const isBruteForce = await detectBruteForce(ctx.ip, cleanEmail);
+      if (isBruteForce) {
+        return NextResponse.json(
+          { success: false, message: "Terlalu banyak percobaan. Coba lagi dalam 15 menit." },
+          { status: 429 }
+        );
+      }
+    }
 
     // Find user in database with accounts
     const user = await prisma.user.findUnique({
@@ -27,11 +38,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const ctx = extractRequestContext(req);
     if (!user) {
       logSecurityEvent({ eventType: 'LOGIN_FAILED', ip: ctx.ip, userAgent: ctx.userAgent, email: cleanEmail, severity: 'WARNING', details: { reason: 'user_not_found', portal: 'admin' } });
       return NextResponse.json(
-        { success: false, message: "Email tidak terdaftar." },
+        { success: false, message: "Email atau kata sandi salah." },
         { status: 401 }
       );
     }
@@ -67,9 +77,8 @@ export async function POST(req: NextRequest) {
 
     if (testHash !== originalHash) {
       logSecurityEvent({ eventType: 'LOGIN_FAILED', ip: ctx.ip, userAgent: ctx.userAgent, email: cleanEmail, userId: user.id, severity: 'WARNING', details: { reason: 'invalid_password', portal: 'admin' } });
-      if (ctx.ip) await detectBruteForce(ctx.ip, cleanEmail);
       return NextResponse.json(
-        { success: false, message: "Kata sandi salah." },
+        { success: false, message: "Email atau kata sandi salah." },
         { status: 401 }
       );
     }
@@ -95,6 +104,15 @@ export async function POST(req: NextRequest) {
     // Set signed admin session cookie (7 days)
     const sevenDays = 7 * 24 * 60 * 60;
     response.cookies.set({
+      name: "employr_admin_session",
+      value: token,
+      maxAge: sevenDays,
+      path: "/",
+      sameSite: "lax",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+    });
+    response.cookies.set({
       name: "cuti_admin_session",
       value: token,
       maxAge: sevenDays,
@@ -107,13 +125,10 @@ export async function POST(req: NextRequest) {
     return response;
   } catch (error: any) {
     console.error("[Admin Login] Error:", error);
-    const detailMsg = error?.message ? `: ${error.message}` : "";
     return NextResponse.json(
       { 
         success: false, 
-        message: `Terjadi kesalahan sistem saat login${detailMsg}`,
-        error: error?.message,
-        code: error?.code,
+        message: "Terjadi kesalahan sistem saat login.",
       },
       { status: 500 }
     );

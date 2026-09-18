@@ -17,37 +17,37 @@ const cards: CardData[] = [
   {
     id: 1,
     number: '01',
-    title: 'One data source.',
-    italicWord: 'Many directions.',
+    title: 'Satu profil tersimpan.',
+    italicWord: 'Bebas buat banyak versi.',
     description:
-      'Fill in your profile once, then create as many CV versions as you need for every role you target.',
+      'Cukup isi riwayat pengalaman sekali, lalu susun variasi CV sesuai bidang yang kamu incar.',
     bgImage: '/images/image-1.webp',
   },
   {
     id: 2,
     number: '02',
-    title: 'No need to',
-    italicWord: 'start from scratch.',
+    title: 'Gak perlu mulai',
+    italicWord: 'dari nol lagi.',
     description:
-      'Duplicate your favorite draft and tweak it for each target role in seconds.',
+      'Tinggal duplikasi draf terbaikmu dan sesuaikan poin pengalaman dalam hitungan detik.',
     bgImage: '/images/image-2.webp',
   },
   {
     id: 3,
     number: '03',
-    title: 'All applications,',
-    italicWord: 'one dashboard.',
+    title: 'Semua lamaran kerja,',
+    italicWord: 'terpantau rapi.',
     description:
-      'Track every application status, interview schedule, and job offer without messy spreadsheets.',
+      'Pantau status tiap berkas yang dikirim, jadwal tes, hingga tawaran kerja tanpa pusing.',
     bgImage: '/images/image-3.webp',
   },
   {
     id: 4,
     number: '04',
-    title: 'AI-powered',
-    italicWord: 'every step of the way.',
+    title: 'Pilihan kalimat tepat',
+    italicWord: 'di setiap bagian.',
     description:
-      'ATS optimization, high-impact action verbs, and smart recommendations to make your CV stand out.',
+      'Rekomendasi kata kerja aktif dan susunan kalimat terukur agar pengalaman kerjamu terlihat meyakinkan.',
     bgImage: '/images/image-4.webp',
   },
 ];
@@ -115,7 +115,7 @@ export default function WhyEmployr() {
       ref={sectionRef}
       className="why-employr why-employr--dark section-space"
       id="why-employr"
-      aria-label="Why Employr"
+      aria-label="Kenapa Memilih Employr"
     >
       <div className="editorial-frame why-employr__container">
         {/* TOP EDITORIAL HEADER */}
@@ -124,16 +124,16 @@ export default function WhyEmployr() {
             <div className="section-label section-label--inverse">
               <span>02</span>
               <i className="section-label__line"></i>
-              <span>WHY EMPLOYR</span>
+              <span>KENAPA EMPLOYR</span>
             </div>
             <h2 className="why-employr__headline">
-              A real partner,<br />
-              not just a <em>form to fill.</em>
+              Teman setia<br />
+              menyiapkan setiap <em>lamaran.</em>
             </h2>
           </div>
           <div className="why-employr__header-right">
             <p className="why-employr__supporting">
-              More than just a CV editor. Employr organizes your whole job hunt: build multi-version resumes, tailor each one to the job, track everything in Tracker, and get AI help at every stage.
+              Semua kebutuhan melamar kerja ada di satu tempat: susun beberapa versi CV, sesuaikan kata kunci dengan loker, dan rapikan jadwal interview tanpa tercecer di spreadsheet.
             </p>
           </div>
         </div>
@@ -204,8 +204,8 @@ export default function WhyEmployr() {
                           <div className="lp-rule"></div>
 
                           <div className="lp-artifact-body">
-                            <p className="lp-kicker">PROFILE & SKILLS</p>
-                            <p className="lp-summary">Designing measurable digital experiences and clear product interfaces.</p>
+                            <p className="lp-kicker">PROFIL & KEAHLIAN</p>
+                            <p className="lp-summary">Merancang antarmuka digital yang nyaman dan mudah digunakan pengguna.</p>
                             <div className="lp-tags">
                               <span>UI/UX</span>
                               <span>Figma</span>
@@ -215,8 +215,8 @@ export default function WhyEmployr() {
                           </div>
 
                           <div className="lp-artifact-footer">
-                            <span className="lp-note">Modern ATS Standard</span>
-                            <span className="lp-action-badge">Ready to Apply</span>
+                            <span className="lp-note">Standar Format ATS</span>
+                            <span className="lp-action-badge">Siap Kirim</span>
                           </div>
                         </article>
                       )}
@@ -226,13 +226,13 @@ export default function WhyEmployr() {
                         <article className="lp-artifact-card">
                           <div className="lp-artifact-top">
                             <div>
-                              <p className="lp-kicker">ROLE ALIGNMENT</p>
+                              <p className="lp-kicker">PENCOCOKAN LOKER</p>
                               <b className="lp-name">Frontend Engineer</b>
-                              <small className="lp-sub">at GoTo Jakarta</small>
+                              <small className="lp-sub">di GoTo Jakarta</small>
                             </div>
                             <div className="lp-score-box">
                               <b>95</b>
-                              <small>% MATCH</small>
+                              <small>% COCOK</small>
                             </div>
                           </div>
 
@@ -240,11 +240,11 @@ export default function WhyEmployr() {
 
                           <div className="lp-artifact-body">
                             <div className="lp-stat-row">
-                              <span>Technical Skills</span>
+                              <span>Keahlian Teknis</span>
                               <b>96%</b>
                             </div>
                             <div className="lp-stat-row">
-                              <span>Relevant Experience</span>
+                              <span>Pengalaman Relevan</span>
                               <b>94%</b>
                             </div>
                             <div className="lp-tags">
@@ -255,8 +255,8 @@ export default function WhyEmployr() {
                           </div>
 
                           <div className="lp-artifact-footer">
-                            <span className="lp-note">CV tailored for this role</span>
-                            <span className="lp-action-badge">High Match</span>
+                            <span className="lp-note">CV disesuaikan dengan posisi ini</span>
+                            <span className="lp-action-badge">Kecocokan Tinggi</span>
                           </div>
                         </article>
                       )}
@@ -266,68 +266,68 @@ export default function WhyEmployr() {
                         <article className="lp-artifact-card">
                           <div className="lp-artifact-top">
                             <div>
-                              <p className="lp-kicker">APPLICATION TRACKING</p>
-                              <b className="lp-name">Career Tracker</b>
-                              <small className="lp-sub">6 Active Applications</small>
+                              <p className="lp-kicker">PEMANTAUAN LAMARAN</p>
+                              <b className="lp-name">Tracker Lamaran</b>
+                              <small className="lp-sub">6 Lamaran Berjalan</small>
                             </div>
-                            <span className="lp-pill-blue">Active</span>
+                            <span className="lp-pill-blue">Aktif</span>
                           </div>
 
                           <div className="lp-rule"></div>
 
                           <div className="lp-kanban-cols">
                             <div className="lp-kanban-col">
-                              <span className="lp-col-head">SENT</span>
+                              <span className="lp-col-head">TERKIRIM</span>
                               <b>Traveloka</b>
                               <small>Frontend</small>
                             </div>
                             <div className="lp-kanban-col lp-col--active">
                               <span className="lp-col-head">INTERVIEW</span>
                               <b>Tokopedia</b>
-                              <small>Tomorrow 2 PM</small>
+                              <small>Besok 14:00</small>
                             </div>
                             <div className="lp-kanban-col lp-col--success">
                               <span className="lp-col-head">OFFERING</span>
                               <b>Astra Tech</b>
-                              <small>Final Stage</small>
+                              <small>Tahap Akhir</small>
                             </div>
                           </div>
 
                           <div className="lp-artifact-footer">
-                            <span className="lp-note">Schedule synced</span>
-                            <span className="lp-action-badge">Real-Time Update</span>
+                            <span className="lp-note">Jadwal sinkron</span>
+                            <span className="lp-action-badge">Pembaruan Langsung</span>
                           </div>
                         </article>
                       )}
 
-                      {/* CARD 04: OPTIMASI AI */}
+                      {/* CARD 04: OPTIMASI KALIMAT */}
                       {card.id === 4 && (
                         <article className="lp-artifact-card">
                           <div className="lp-artifact-top">
                             <div>
-                              <p className="lp-kicker">PHRASE OPTIMIZATION</p>
-                              <b className="lp-name">High-Impact Wins</b>
-                              <small className="lp-sub">Smart Assist</small>
+                              <p className="lp-kicker">OPTIMASI KALIMAT</p>
+                              <b className="lp-name">Kalimat Berbobot</b>
+                              <small className="lp-sub">Bantuan Format</small>
                             </div>
-                            <span className="lp-pill-lime">+38% Score</span>
+                            <span className="lp-pill-lime">Skor +38%</span>
                           </div>
 
                           <div className="lp-rule"></div>
 
                           <div className="lp-diff-box">
                             <div className="lp-diff-item">
-                              <span className="lp-diff-kicker">FIRST DRAFT</span>
-                              <p>"Built websites and fixed bugs."</p>
+                              <span className="lp-diff-kicker">DRAF AWAL</span>
+                              <p>"Membuat website dan memperbaiki error."</p>
                             </div>
                             <div className="lp-diff-item lp-diff-item--ai">
-                              <span className="lp-diff-kicker lp-diff-kicker--ai">OPTIMIZED</span>
-                              <p>"Developed 12 React modules, improved load speed by 40% and conversion by 25%."</p>
+                              <span className="lp-diff-kicker lp-diff-kicker--ai">DIOPTIMALKAN</span>
+                              <p>"Mengembangkan 12 modul React, mempercepat loading 40% dan menaikkan konversi 25%."</p>
                             </div>
                           </div>
 
                           <div className="lp-artifact-footer">
-                            <span className="lp-note">Measurable action verbs</span>
-                            <span className="lp-action-badge">Ready to Copy</span>
+                            <span className="lp-note">Kalimat terukur & jelas</span>
+                            <span className="lp-action-badge">Siap Digunakan</span>
                           </div>
                         </article>
                       )}

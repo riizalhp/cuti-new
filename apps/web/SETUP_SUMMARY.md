@@ -152,7 +152,7 @@ Based on `docs/design-system.md`:
 ## Next Steps
 
 1. **Install Dependencies**: `pnpm install` (in progress)
-2. **Run Dev Server**: `pnpm --filter @cuti/web dev`
+2. **Run Dev Server**: `pnpm --filter @employr/web dev`
 3. **Test in Browser**: Visit http://localhost:4321
 4. **Lighthouse Audit**: Verify performance > 90
 5. **Add Real Content**: Replace placeholder text/images
@@ -163,16 +163,16 @@ Based on `docs/design-system.md`:
 
 ```bash
 # Development
-pnpm --filter @cuti/web dev
+pnpm --filter @employr/web dev
 
 # Build
-pnpm --filter @cuti/web build
+pnpm --filter @employr/web build
 
 # Preview production build
-pnpm --filter @cuti/web preview
+pnpm --filter @employr/web preview
 
 # Type check
-pnpm --filter @cuti/web astro check
+pnpm --filter @employr/web astro check
 ```
 
 ## Content Alignment

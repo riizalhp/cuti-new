@@ -3,10 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { cvApi, trackerApi } from '@/lib/api';
 import {
+  calculateHolisticReadiness,
   calculateReadinessScore,
-  getStoredReadinessScore,
-  setStoredReadinessScore,
-  clearStoredReadinessScore,
   ChecklistItem,
   READINESS_EVENT_NAME,
 } from '@/lib/readiness';
@@ -18,7 +16,7 @@ export function useCareerReadiness() {
   const [completedCount, setCompletedCount] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(5);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
-  const [isDiagnosticStored, setIsDiagnosticStored] = useState<boolean>(false);
+  const [diagnosticScore, setDiagnosticScore] = useState<number | null>(null);
 
   const loadData = useCallback(async () => {
     try {
@@ -27,27 +25,23 @@ export function useCareerReadiness() {
         trackerApi.getAll().catch(() => []),
       ]);
 
-      const evalResult = calculateReadinessScore(cvs, apps);
-      setChecklist(evalResult.checklist);
-      setAvgAtsScore(evalResult.avgAtsScore);
-      setCompletedCount(evalResult.completedCount);
-      setTotalItems(evalResult.totalItems);
+      const holistic = calculateHolisticReadiness(cvs, apps);
+      setScore(holistic.score);
+      setChecklist(holistic.checklist);
+      setAvgAtsScore(holistic.avgAtsScore);
+      setCompletedCount(holistic.completedCount);
+      setTotalItems(holistic.totalItems);
 
-      const stored = getStoredReadinessScore();
-      if (stored !== null) {
-        setScore(stored);
-        setIsDiagnosticStored(true);
-      } else {
-        setScore(evalResult.score);
-        setIsDiagnosticStored(false);
+      // Check if diagnostic self-assessment was stored
+      if (typeof window !== 'undefined') {
+        const storedDiag = localStorage.getItem('employr_diagnostic_quiz_score');
+        if (storedDiag !== null && !isNaN(Number(storedDiag))) {
+          setDiagnosticScore(Number(storedDiag));
+        }
       }
     } catch {
-      // Fallback in case of network or API error
-      const stored = getStoredReadinessScore();
-      if (stored !== null) {
-        setScore(stored);
-        setIsDiagnosticStored(true);
-      }
+      // Fallback
+      setScore(0);
     } finally {
       setIsLoaded(true);
     }
@@ -60,43 +54,34 @@ export function useCareerReadiness() {
       const customEvent = e as CustomEvent<{ score: number | null }>;
       if (customEvent.detail && typeof customEvent.detail.score === 'number') {
         setScore(customEvent.detail.score);
-        setIsDiagnosticStored(true);
       } else {
-        // If cleared, recalculate
         loadData();
       }
     };
 
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === 'cuti_career_readiness_score') {
-        if (e.newValue !== null && !isNaN(Number(e.newValue))) {
-          setScore(Number(e.newValue));
-          setIsDiagnosticStored(true);
-        } else {
-          loadData();
-        }
-      }
-    };
-
     window.addEventListener(READINESS_EVENT_NAME, handleReadinessEvent);
-    window.addEventListener('storage', handleStorage);
 
     return () => {
       window.removeEventListener(READINESS_EVENT_NAME, handleReadinessEvent);
-      window.removeEventListener('storage', handleStorage);
     };
   }, [loadData]);
 
-  const updateScore = useCallback((newScore: number) => {
-    setStoredReadinessScore(newScore);
-    setScore(newScore);
-    setIsDiagnosticStored(true);
+  const updateDiagnosticScore = useCallback((newScore: number) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('employr_diagnostic_quiz_score', String(newScore));
+    }
+    setDiagnosticScore(newScore);
   }, []);
 
-  const resetScore = useCallback(() => {
-    clearStoredReadinessScore();
-    loadData();
-  }, [loadData]);
+  const resetDiagnosticScore = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('employr_diagnostic_quiz_score');
+      // Clean legacy keys if any
+      localStorage.removeItem('employr_career_readiness_score');
+      localStorage.removeItem('cuti_career_readiness_score');
+    }
+    setDiagnosticScore(null);
+  }, []);
 
   return {
     score,
@@ -105,9 +90,9 @@ export function useCareerReadiness() {
     completedCount,
     totalItems,
     isLoaded,
-    isDiagnosticStored,
-    updateScore,
-    resetScore,
+    diagnosticScore,
+    updateDiagnosticScore,
+    resetDiagnosticScore,
     reload: loadData,
   };
 }

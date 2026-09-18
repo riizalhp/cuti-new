@@ -1,5 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@cuti/db";
+import { prisma } from "@employr/db";
+
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    const course = await prisma.courses.findUnique({ where: { id } });
+    if (!course) {
+      return NextResponse.json(
+        { success: false, message: "Kursus tidak ditemukan" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        id: course.id,
+        title: course.title,
+        slug: course.slug,
+        description: course.description,
+        instructor: course.instructor,
+        level: course.level,
+        price: course.price,
+        durationHours: course.duration_hours,
+        isActive: course.is_active,
+        externalUrl: course.external_url,
+        coverImageUrl: course.cover_image_url,
+        tags: course.tags ?? [],
+        createdAt: course.created_at.toISOString().split("T")[0],
+      },
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, message: error?.message ?? "Gagal memuat detail kursus" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -14,6 +51,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       durationHours,
       externalUrl,
       coverImageUrl,
+      tags,
       isActive,
     } = body;
 
@@ -34,6 +72,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (durationHours !== undefined) data.duration_hours = durationHours;
     if (externalUrl !== undefined) data.external_url = externalUrl;
     if (coverImageUrl !== undefined) data.cover_image_url = coverImageUrl;
+    if (tags !== undefined) data.tags = Array.isArray(tags) ? tags : [];
     if (isActive !== undefined) data.is_active = isActive;
 
     const course = await prisma.courses.update({

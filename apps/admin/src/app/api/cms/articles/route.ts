@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@cuti/db";
+import { prisma } from "@employr/db";
 
 function slugify(text: string): string {
   return text
@@ -24,6 +24,7 @@ export async function GET() {
       author: a.author,
       category: a.article_categories?.name ?? null,
       categoryId: a.category_id ?? null,
+      tags: a.tags ?? [],
       isPublished: a.is_published,
       publishedAt: a.published_at ? a.published_at.toISOString().split("T")[0] : null,
     }));
@@ -46,6 +47,7 @@ export async function POST(req: NextRequest) {
       content,
       categoryId,
       coverImageUrl,
+      tags,
       isPublished,
     } = body;
 
@@ -71,6 +73,7 @@ export async function POST(req: NextRequest) {
         content,
         category_id: categoryId ?? null,
         cover_image_url: coverImageUrl ?? null,
+        tags: Array.isArray(tags) ? tags : [],
         is_published: isPublished ?? false,
         published_at: isPublished ? new Date() : null,
       },

@@ -1,11 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@cuti/db";
+import { prisma } from "@employr/db";
+
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    const article = await prisma.articles.findUnique({
+      where: { id },
+      include: { article_categories: true },
+    });
+    if (!article) {
+      return NextResponse.json(
+        { success: false, message: "Artikel tidak ditemukan" },
+        { status: 404 }
+      );
+    }
+    return NextResponse.json({
+      success: true,
+      data: {
+        id: article.id,
+        title: article.title,
+        slug: article.slug,
+        author: article.author,
+        content: article.content,
+        category: article.article_categories?.name ?? "",
+        categoryId: article.category_id ?? null,
+        coverImageUrl: article.cover_image_url ?? "",
+        tags: article.tags ?? [],
+        isPublished: article.is_published,
+        publishedAt: article.published_at
+          ? article.published_at.toISOString().split("T")[0]
+          : null,
+      },
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, message: error?.message ?? "Gagal memuat artikel" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const body = await req.json();
-    const { title, author, content, categoryId, coverImageUrl, isPublished } = body;
+    const { title, author, content, categoryId, coverImageUrl, tags, isPublished } = body;
 
     const existing = await prisma.articles.findUnique({ where: { id } });
     if (!existing) {
@@ -21,6 +60,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (content !== undefined) data.content = content;
     if (coverImageUrl !== undefined) data.cover_image_url = coverImageUrl;
     if (categoryId !== undefined) data.category_id = categoryId;
+    if (tags !== undefined) data.tags = Array.isArray(tags) ? tags : [];
     if (isPublished !== undefined) {
       data.is_published = isPublished;
       data.published_at = isPublished ? (existing.published_at ?? new Date()) : null;

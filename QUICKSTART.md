@@ -59,7 +59,7 @@ pnpm db:generate
 ### 4. Start API Server
 ```powershell
 cd D:\cuti
-pnpm --filter @cuti/api dev
+pnpm --filter @employr/api dev
 ```
 
 Expected: `Application is running on: http://localhost:3001`
@@ -204,10 +204,10 @@ After successful setup:
 1. **Start other applications:**
    ```powershell
    # User dashboard
-   pnpm --filter @cuti/user dev    # Port 3000
+   pnpm --filter @employr/user dev    # Port 3000
    
    # Admin dashboard  
-   pnpm --filter @cuti/admin dev   # Port 3002
+   pnpm --filter @employr/admin dev   # Port 3002
    ```
 
 2. **Explore database with Prisma Studio:**
@@ -284,7 +284,7 @@ docker rm cuti-postgres
 1. Start Docker Desktop
 2. Run PostgreSQL container
 3. Run migrations: `pnpm db:migrate dev --name init`
-4. Start API: `pnpm --filter @cuti/api dev`
+4. Start API: `pnpm --filter @employr/api dev`
 5. Test endpoints with curl commands above
 
 **Documentation Created:**

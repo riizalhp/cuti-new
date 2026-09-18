@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@cuti/db';
+import { prisma } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 import { verifySmtpConnection } from '@/lib/mailer/email-service';
 
@@ -50,12 +50,27 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { action, host, port, secure, username, password, from_name, from_email, daily_limit } = body;
 
-    if (!host || !port || !username || !password) {
+    // Bersihkan spasi dari password (misal user copy 'abcd efgh ijkl mnop')
+    const cleanPassword = typeof password === 'string' ? password.replace(/\s+/g, '').trim() : '';
+
+    if (!host || !port || !username || !cleanPassword) {
       return NextResponse.json(
-        { success: false, message: 'Host, port, username, dan password SMTP wajib diisi.' },
+        { success: false, message: 'Host, port, email, dan kata sandi aplikasi wajib diisi.' },
         { status: 400 }
       );
     }
+
+    // Format pesan error agar ramah pengguna
+    const formatErrorMessage = (origMessage: string, hostStr: string) => {
+      const lower = (origMessage || '').toLowerCase();
+      if (lower.includes('invalid login') || lower.includes('badcredentials') || lower.includes('username and password not accepted') || lower.includes('auth')) {
+        if (hostStr.includes('gmail')) {
+          return 'Koneksi ditolak Google. Pastikan kamu menggunakan 16 huruf "Sandi Aplikasi (App Password)" dari akun Google, bukan password login biasa, serta Verifikasi 2 Langkah sudah aktif.';
+        }
+        return 'Email atau kata sandi tidak cocok. Pastikan menggunakan Sandi Aplikasi yang benar dari penyedia email Anda.';
+      }
+      return origMessage;
+    };
 
     // Jika hanya uji koneksi
     if (action === 'test') {
@@ -63,11 +78,15 @@ export async function POST(req: NextRequest) {
         host,
         port: Number(port),
         secure: Boolean(secure),
-        username,
-        password,
+        username: username.trim(),
+        password: cleanPassword,
         fromName: from_name || 'Pelamar',
-        fromEmail: from_email || username,
+        fromEmail: from_email || username.trim(),
       });
+
+      if (!testResult.success) {
+        testResult.message = formatErrorMessage(testResult.message, host);
+      }
 
       return NextResponse.json(testResult, { status: testResult.success ? 200 : 400 });
     }
@@ -77,17 +96,17 @@ export async function POST(req: NextRequest) {
       host,
       port: Number(port),
       secure: Boolean(secure),
-      username,
-      password,
+      username: username.trim(),
+      password: cleanPassword,
       fromName: from_name || user.name || 'Pelamar',
-      fromEmail: from_email || username,
+      fromEmail: from_email || username.trim(),
     });
 
     if (!verifyResult.success) {
       return NextResponse.json(
         {
           success: false,
-          message: `Koneksi SMTP gagal: ${verifyResult.message}`,
+          message: formatErrorMessage(verifyResult.message, host),
         },
         { status: 400 }
       );

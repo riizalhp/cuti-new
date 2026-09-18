@@ -134,7 +134,7 @@ Expected output:
 cd D:\cuti
 
 # Start API in development mode
-pnpm --filter @cuti/api dev
+pnpm --filter @employr/api dev
 ```
 
 Expected output:
@@ -256,10 +256,10 @@ pnpm db:migrate dev --name init
 1. **Start other apps:**
    ```powershell
    # User dashboard (Next.js)
-   pnpm --filter @cuti/user dev
+   pnpm --filter @employr/user dev
    
    # Admin dashboard
-   pnpm --filter @cuti/admin dev
+   pnpm --filter @employr/admin dev
    ```
 
 2. **Access applications:**

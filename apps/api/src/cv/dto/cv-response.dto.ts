@@ -1,4 +1,4 @@
-import { CvResponse } from '@cuti/types';
+import { CvResponse } from '@employr/types';
 
 export type CvResponseDto = CvResponse;
 

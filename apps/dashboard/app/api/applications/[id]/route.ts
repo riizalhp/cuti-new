@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, ApplicationStatus } from '@cuti/db';
+import { prisma, ApplicationStatus } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
-import { mapDbToUiStatus, mapUiToDbStatus } from '../route';
+import { createNotification } from '@/lib/notification-helper';
+import { mapDbToUiStatus, mapUiToDbStatus } from '@/lib/applications-helper';
 import crypto from 'crypto';
 
 function formatIndonesianDate(date: Date): string {
@@ -69,6 +70,18 @@ export async function GET(
       matchScore: app.match_score ?? 85,
       atsScore: app.ats_score ?? 88,
       interviewChance: app.interview_chance || 'MEDIUM',
+      interviewDate: insight.interviewDate || undefined,
+      interviewTime: insight.interviewTime || undefined,
+      interviewTimezone: insight.interviewTimezone || undefined,
+      interviewChecklist: insight.interviewChecklist || undefined,
+      ignoreInterviewReminder: insight.ignoreInterviewReminder ?? false,
+      interviewNotes: insight.interviewNotes || undefined,
+      interviewResult: insight.interviewResult || undefined,
+      offeringChecklist: insight.offeringChecklist || undefined,
+      offerDeadline: insight.offerDeadline || insight.deadlineDate || undefined,
+      deadlineDate: insight.offerDeadline || insight.deadlineDate || undefined,
+      offeringStartDate: insight.offeringStartDate || undefined,
+      offeringNotes: insight.offeringNotes || undefined,
     };
 
     return NextResponse.json({ success: true, data: mapped });
@@ -124,6 +137,18 @@ export async function PATCH(
       ...(body.portalUrl !== undefined ? { portalUrl: body.portalUrl } : {}),
       ...(body.status !== undefined ? { displayStatus: body.status } : {}),
       ...(body.notes !== undefined ? { notes: body.notes } : {}),
+      ...(body.interviewDate !== undefined ? { interviewDate: body.interviewDate } : {}),
+      ...(body.interviewTime !== undefined ? { interviewTime: body.interviewTime } : {}),
+      ...(body.interviewTimezone !== undefined ? { interviewTimezone: body.interviewTimezone } : {}),
+      ...(body.interviewChecklist !== undefined ? { interviewChecklist: body.interviewChecklist } : {}),
+      ...(body.ignoreInterviewReminder !== undefined ? { ignoreInterviewReminder: body.ignoreInterviewReminder } : {}),
+      ...(body.interviewNotes !== undefined ? { interviewNotes: body.interviewNotes } : {}),
+      ...(body.interviewResult !== undefined ? { interviewResult: body.interviewResult } : {}),
+      ...(body.offeringChecklist !== undefined ? { offeringChecklist: body.offeringChecklist } : {}),
+      ...(body.offerDeadline !== undefined ? { offerDeadline: body.offerDeadline } : {}),
+      ...(body.deadlineDate !== undefined ? { deadlineDate: body.deadlineDate } : {}),
+      ...(body.offeringStartDate !== undefined ? { offeringStartDate: body.offeringStartDate } : {}),
+      ...(body.offeringNotes !== undefined ? { offeringNotes: body.offeringNotes } : {}),
     };
 
     const newDbStatus = body.status ? mapUiToDbStatus(body.status) : existing.status;
@@ -142,6 +167,52 @@ export async function PATCH(
         updated_at: new Date(),
       },
     });
+
+    // Notifikasi saat status lamaran berubah (bukan saat sekadar edit detail)
+    if (body.status && body.status !== mapDbToUiStatus(existing.status, currentInsight.displayStatus)) {
+      // Track status change for intelligence pipeline
+      try {
+        const daysSinceApply = Math.floor((Date.now() - new Date(existing.applied_at).getTime()) / (1000 * 60 * 60 * 24));
+        await prisma.visitorActivity.create({
+          data: {
+            visitor_id: `server_${user.id}`,
+            session_id: `api_${Date.now().toString(36)}`,
+            user_id: user.id,
+            activity_type: 'STATUS_CHANGE',
+            activity_name: `Status: ${mapDbToUiStatus(existing.status, currentInsight.displayStatus)} → ${body.status}`,
+            page_path: '/tracker',
+            metadata: {
+              application_id: id,
+              from_status: mapDbToUiStatus(existing.status, currentInsight.displayStatus),
+              to_status: body.status,
+              days_since_apply: daysSinceApply,
+              company: newCompany,
+              position: newPosition,
+            },
+          },
+        });
+      } catch (_trackErr) {
+        // don't fail the status update if tracking fails
+      }
+
+      const statusNotifMap: Record<string, { title: string; message: string; priority: 'IMPORTANT' | 'SUCCESS' | 'INFORMATIONAL' }> = {
+        Screening: { title: 'Lamaran direview HR', message: `Lamaran kamu di ${newCompany} untuk posisi ${newPosition} sedang ditinjau.`, priority: 'INFORMATIONAL' },
+        Interview: { title: 'Lamaran lanjut ke Interview', message: `Selamat! Kamu lanjut ke tahap interview di ${newCompany} untuk posisi ${newPosition}.`, priority: 'IMPORTANT' },
+        Offering: { title: 'Kamu mendapat penawaran kerja', message: `Offering dari ${newCompany} untuk posisi ${newPosition} menunggu respons kamu.`, priority: 'SUCCESS' },
+        Ditolak: { title: 'Lamaran tidak dilanjutkan', message: `${newCompany} menutup proses seleksi untuk posisi ${newPosition}. Jangan menyerah!`, priority: 'INFORMATIONAL' },
+      };
+      const notif = statusNotifMap[body.status];
+      if (notif) {
+        await createNotification({
+          userId: user.id,
+          title: notif.title,
+          message: notif.message,
+          category: 'TRACKER',
+          priority: notif.priority,
+          actionUrl: '/tracker',
+        });
+      }
+    }
 
     if (body.notes !== undefined && typeof body.notes === 'string') {
       const existingNote = existing.application_notes?.[0];
@@ -175,6 +246,11 @@ export async function PATCH(
       portalUrl: updated.job_url || updatedInsight.portalUrl || '',
       matchScore: updated.match_score ?? 85,
       atsScore: updated.ats_score ?? 88,
+      interviewDate: updatedInsight.interviewDate || undefined,
+      interviewTime: updatedInsight.interviewTime || undefined,
+      interviewTimezone: updatedInsight.interviewTimezone || undefined,
+      interviewChecklist: updatedInsight.interviewChecklist || undefined,
+      ignoreInterviewReminder: updatedInsight.ignoreInterviewReminder ?? false,
     };
 
     return NextResponse.json({ success: true, data: mapped });

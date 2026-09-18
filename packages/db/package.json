@@ -1,5 +1,5 @@
 {
-  "name": "@cuti/db",
+  "name": "@employr/db",
   "version": "0.0.0",
   "private": true,
   "main": "./src/index.ts",
@@ -28,7 +28,9 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed:templates": "ts-node prisma/seeds/templates.seed.ts",
-    "db:seed:career": "ts-node prisma/seeds/career.seed.ts"
+    "db:seed:career": "ts-node prisma/seeds/career.seed.ts",
+    "db:seed:ai-prompts": "ts-node prisma/seeds/ai-prompts.seed.ts",
+    "db:seed:scoring": "ts-node prisma/seeds/scoring-weights.seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.0.0"

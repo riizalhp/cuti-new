@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { motion } from "framer-motion"
+import { SidebarToggle } from "@/components/admin/SidebarToggle"
 import {
   Users,
   Search,
@@ -192,13 +193,16 @@ export default function AdminPreRegisterPage() {
     >
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-5">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
-            Manajemen Pre-Register
-          </h1>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Kelola dan pantau daftar pendaftar Early Tester (Free Account Access)
-          </p>
+        <div className="flex items-center gap-3.5">
+          <SidebarToggle />
+          <div>
+            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
+              Manajemen Pre-Register
+            </h1>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
+              Kelola dan pantau daftar pendaftar Early Tester (Free Account Access)
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <button

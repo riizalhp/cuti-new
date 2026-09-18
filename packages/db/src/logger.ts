@@ -183,29 +183,66 @@ export interface SecurityEventInput {
 }
 
 /**
+ * In-memory sliding window counters for brute force detection.
+ * Bridges the gap between logSecurityEvent (buffered, 3s delay) and
+ * detectBruteForce (queries DB immediately). Without this, rapid
+ * login attempts within the flush window go undetected.
+ */
+const _bfCounters = new Map<string, { count: number; resetAt: number }>();
+
+function _bfKey(ip: string, email: string): string {
+  return `${ip}::${email}`;
+}
+
+function incrementBruteForceCounter(ip: string, email: string, windowMs: number): void {
+  const key = _bfKey(ip, email);
+  const now = Date.now();
+  const entry = _bfCounters.get(key);
+  if (!entry || now > entry.resetAt) {
+    _bfCounters.set(key, { count: 1, resetAt: now + windowMs });
+  } else {
+    entry.count++;
+  }
+}
+
+function getBruteForceCount(ip: string, email: string): number {
+  const key = _bfKey(ip, email);
+  const entry = _bfCounters.get(key);
+  if (!entry || Date.now() > entry.resetAt) {
+    _bfCounters.delete(key);
+    return 0;
+  }
+  return entry.count;
+}
+
+/**
  * Log a security event.
  * Used for brute force detection, unauthorized access, suspicious activity.
  */
 export function logSecurityEvent(input: SecurityEventInput): void {
-  BUFFER.push({
-    type: "security",
-    data: {
-      id: crypto.randomUUID(),
-      user_id: input.userId || null,
-      event_type: input.eventType,
-      ip_address: input.ip || null,
-      user_agent: input.userAgent || null,
-      email: input.email || null,
-      details: input.details || null,
-      severity: input.severity || "WARNING",
-      created_at: new Date(),
-    },
-  });
+  const eventData = {
+    id: crypto.randomUUID(),
+    user_id: input.userId || null,
+    event_type: input.eventType,
+    ip_address: input.ip || null,
+    user_agent: input.userAgent || null,
+    email: input.email || null,
+    details: input.details || null,
+    severity: input.severity || "WARNING",
+    created_at: new Date(),
+  };
+  BUFFER.push({ type: "security", data: eventData });
+
+  if (input.eventType === "LOGIN_FAILED" && input.ip && input.email) {
+    incrementBruteForceCounter(input.ip, input.email, 15 * 60_000);
+  }
+
   scheduleFlush();
 }
 
 /**
  * Brute force detector: count failed logins per IP in the last N minutes.
+ * Combines in-memory counter (for recent unflushed events) with DB count.
  * Returns true if threshold is exceeded.
  */
 export async function detectBruteForce(
@@ -215,8 +252,26 @@ export async function detectBruteForce(
   maxAttempts = 5
 ): Promise<boolean> {
   try {
+    const memoryCount = getBruteForceCount(ip, email);
+    if (memoryCount >= maxAttempts) {
+      logSecurityEvent({
+        eventType: "LOGIN_BRUTE_FORCE",
+        ip,
+        email,
+        severity: "CRITICAL",
+        details: {
+          attempts: memoryCount,
+          windowMinutes,
+          threshold: maxAttempts,
+          source: "memory",
+          message: `Brute force detected: ${memoryCount} failed attempts from ${ip} targeting ${email} in ${windowMinutes}min`,
+        },
+      });
+      return true;
+    }
+
     const since = new Date(Date.now() - windowMinutes * 60_000);
-    const count = await getPrisma().security_events.count({
+    const dbCount = await getPrisma().security_events.count({
       where: {
         event_type: "LOGIN_FAILED",
         ip_address: ip,
@@ -225,17 +280,20 @@ export async function detectBruteForce(
       },
     });
 
-    if (count >= maxAttempts) {
+    const totalCount = Math.max(dbCount, memoryCount);
+    if (totalCount >= maxAttempts) {
       logSecurityEvent({
         eventType: "LOGIN_BRUTE_FORCE",
         ip,
         email,
         severity: "CRITICAL",
         details: {
-          attempts: count + 1,
+          attempts: totalCount,
+          dbCount,
+          memoryCount,
           windowMinutes,
           threshold: maxAttempts,
-          message: `Brute force detected: ${count + 1} failed attempts from ${ip} targeting ${email} in ${windowMinutes}min`,
+          message: `Brute force detected: ${totalCount} failed attempts from ${ip} targeting ${email} in ${windowMinutes}min`,
         },
       });
       return true;

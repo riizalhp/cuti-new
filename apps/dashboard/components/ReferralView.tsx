@@ -17,6 +17,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { userApi } from '@/lib/api';
+import { UserAvatar } from './UserAvatar';
 
 export const ReferralView: React.FC = () => {
   const [referralCode, setReferralCode] = useState('');
@@ -83,6 +84,16 @@ export const ReferralView: React.FC = () => {
             colorClass: 'text-indigo-600 dark:text-indigo-400',
           },
         ]}
+        actions={
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            className="px-3.5 py-2 rounded-[10px] bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-black text-xs shadow-md shadow-orange-500/30 transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 border-0"
+          >
+            {isLinkCopied ? <CheckCircle2 className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4" />}
+            <span>{isLinkCopied ? 'Link Tersalin!' : 'Bagikan Link'}</span>
+          </button>
+        }
       />
 
       {/* Referral Code & Share Link Box */}
@@ -191,9 +202,11 @@ export const ReferralView: React.FC = () => {
           {invitedFriends.length > 0 ? invitedFriends.map((friend, idx) => (
             <div key={idx} className="py-3 flex items-center justify-between text-xs gap-2">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex items-center justify-center">
-                  {friend.name.charAt(0)}
-                </div>
+                <UserAvatar
+                  name={friend.name}
+                  size={32}
+                  variant="beam"
+                />
                 <div>
                   <h4 className="font-bold text-slate-900 dark:text-white">{friend.name}</h4>
                   <p className="text-[11px] text-slate-400">Bergabung: {friend.date}</p>

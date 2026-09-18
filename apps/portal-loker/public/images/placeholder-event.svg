@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" fill="none">
+  <defs>
+    <linearGradient id="eventBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#022c22" />
+      <stop offset="50%" stop-color="#064e3b" />
+      <stop offset="100%" stop-color="#0f766e" />
+    </linearGradient>
+    <linearGradient id="emeraldAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+    <pattern id="eventGrid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="rgba(255, 255, 255, 0.05)" stroke-width="1" />
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="500" fill="url(#eventBg)" />
+  <rect width="800" height="500" fill="url(#eventGrid)" />
+
+  <!-- Ambient Glow -->
+  <circle cx="400" cy="210" r="150" fill="#10B981" opacity="0.2" filter="blur(50px)" />
+
+  <!-- Central Calendar / Job Fair Icon -->
+  <g transform="translate(350, 140)">
+    <rect x="0" y="0" width="100" height="92" rx="18" fill="rgba(6, 78, 59, 0.7)" stroke="rgba(255, 255, 255, 0.2)" stroke-width="2" />
+    <path d="M0 26 H100" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5" />
+    <!-- Binder rings -->
+    <rect x="24" y="-6" width="8" height="14" rx="4" fill="url(#emeraldAccent)" />
+    <rect x="68" y="-6" width="8" height="14" rx="4" fill="url(#emeraldAccent)" />
+    <!-- Grid dots -->
+    <circle cx="30" cy="46" r="4" fill="rgba(255, 255, 255, 0.4)" />
+    <circle cx="50" cy="46" r="4" fill="rgba(255, 255, 255, 0.4)" />
+    <circle cx="70" cy="46" r="4" fill="url(#emeraldAccent)" />
+    <circle cx="30" cy="66" r="4" fill="rgba(255, 255, 255, 0.4)" />
+    <circle cx="50" cy="66" r="4" fill="url(#emeraldAccent)" />
+    <circle cx="70" cy="66" r="4" fill="rgba(255, 255, 255, 0.4)" />
+  </g>
+
+  <!-- Label Badge -->
+  <g transform="translate(400, 310)">
+    <rect x="-110" y="0" width="220" height="32" rx="16" fill="rgba(255, 255, 255, 0.12)" stroke="rgba(255, 255, 255, 0.25)" stroke-width="1" />
+    <text x="0" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">EVENT &amp; JOB FAIR</text>
+  </g>
+
+  <text x="400" y="370" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="500" fill="rgba(255, 255, 255, 0.7)" text-anchor="middle">Jejaring Karier &amp; Rekrutmen Terbuka</text>
+</svg>

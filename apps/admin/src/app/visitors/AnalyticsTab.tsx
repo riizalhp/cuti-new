@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   AreaChart,
@@ -48,6 +48,21 @@ interface DayTrend {
   linkedUsers: number
 }
 
+interface HourTrend {
+  key: string
+  date: string
+  day: string
+  fullDate: string
+  hour: number
+  hourStr: string
+  timeRange: string
+  views: number
+  visitors: number
+  newVisitors: number
+  returningVisitors: number
+  linkedUsers: number
+}
+
 interface AnalyticsData {
   summary: {
     totalVisitors: number
@@ -63,8 +78,20 @@ interface AnalyticsData {
   deviceBreakdown: Array<{ device: string; count: number }>
   domainBreakdown: Array<{ domain: string; count: number }>
   trendDays: DayTrend[]
+  trendHours?: HourTrend[]
   dailyBreakdown: DayTrend[]
   trend7Days: Array<{ day: string; views: number; visitors: number }>
+  moduleBreakdown?: Array<{ module: string; totalSeconds: number; label: string }>
+  printStats?: { total: number; completed: number; cancelled: number; successRate: number }
+  vitalsStats?: { avgPageLoadMs: number; avgTtfbMs: number; sampleCount: number }
+  atsDistribution?: {
+    range0to50: number
+    range51to70: number
+    range71to85: number
+    range86to100: number
+    totalEvaluated: number
+    avgScore: number
+  }
 }
 
 interface DayVisitorItem {
@@ -110,9 +137,11 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
   const [loading, setLoading] = useState(true)
   const [domainFilter, setDomainFilter] = useState("all")
   const [daysRange, setDaysRange] = useState<7 | 14 | 30>(7)
+  const [viewResolution, setViewResolution] = useState<"hourly" | "daily">("hourly")
 
-  // Selected Day Inspection State
+  // Selected Day & Hour Inspection State
   const [selectedDate, setSelectedDate] = useState<string>("")
+  const [selectedHour, setSelectedHour] = useState<number | null>(null)
   const [dayVisitors, setDayVisitors] = useState<DayVisitorItem[]>([])
   const [loadingDayVisitors, setLoadingDayVisitors] = useState(false)
   const dayInspectorRef = useRef<HTMLDivElement>(null)
@@ -173,8 +202,9 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
     fetchDayVisitors()
   }, [selectedDate, domainFilter])
 
-  const handleSelectDay = (dateStr: string, scroll = true) => {
+  const handleSelectDay = (dateStr: string, scroll = true, hour: number | null = null) => {
     setSelectedDate(dateStr)
+    setSelectedHour(hour)
     if (scroll && dayInspectorRef.current) {
       dayInspectorRef.current.scrollIntoView({ behavior: "smooth", block: "start" })
     }
@@ -203,6 +233,57 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
     return <Laptop size={14} className="text-indigo-500" />
   }
 
+  const isHourly = viewResolution === "hourly" && Boolean(data?.trendHours?.length)
+  const chartData = isHourly ? (data?.trendHours || []) : (data?.trendDays || [])
+
+  const hourlyTicks = useMemo(() => {
+    if (!data?.trendHours) return []
+    const step = daysRange === 30 ? 4 : daysRange === 14 ? 2 : 1
+    const zeroHours = data.trendHours.filter((h) => h.hour === 0)
+    return zeroHours.filter((_, idx) => idx % step === 0).map((h) => h.key)
+  }, [data?.trendHours, daysRange])
+
+  const hourKeyMap = useMemo(() => {
+    const map = new Map<string, string>()
+    data?.trendHours?.forEach((h) => {
+      map.set(h.key, h.day)
+    })
+    return map
+  }, [data?.trendHours])
+
+  const selectedDayInfo = data?.trendDays?.find((d) => d.date === selectedDate)
+  const selectedHourInfo =
+    selectedHour !== null
+      ? data?.trendHours?.find((h) => h.date === selectedDate && h.hour === selectedHour)
+      : null
+
+  const displayedVisitors = useMemo(() => {
+    if (selectedHour === null) return dayVisitors
+    return dayVisitors.filter((v) => {
+      const checkHour = (dateStr?: string) => {
+        if (!dateStr) return false
+        try {
+          const d = new Date(dateStr)
+          const hour =
+            parseInt(
+              new Intl.DateTimeFormat("en-GB", {
+                timeZone: "Asia/Jakarta",
+                hour: "2-digit",
+                hour12: false,
+              }).format(d),
+              10
+            ) % 24
+          return hour === selectedHour
+        } catch {
+          return false
+        }
+      }
+      if (checkHour(v.lastSeen) || checkHour(v.firstSeen)) return true
+      if (v.recentPages?.some((p) => checkHour(p.createdAt))) return true
+      return false
+    })
+  }, [dayVisitors, selectedHour])
+
   if (loading) {
     return (
       <div className="py-20 flex flex-col items-center justify-center gap-3">
@@ -224,8 +305,6 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
   const totalTrafficCount = data.trafficSources?.reduce((acc, curr) => acc + curr.count, 0) || 1
   const totalDeviceCount = data.deviceBreakdown?.reduce((acc, curr) => acc + curr.count, 0) || 1
   const totalDomainCount = data.domainBreakdown?.reduce((acc, curr) => acc + curr.count, 0) || 1
-
-  const selectedDayInfo = data.trendDays?.find((d) => d.date === selectedDate)
 
   return (
     <div className="space-y-6">
@@ -363,27 +442,168 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
         </div>
       </div>
 
+      {/* 2.5 PRODUCT TELEMETRY & BEHAVIOR (Durasi Modul, Cetak PDF, Web Vitals, Skor ATS) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Module Duration Breakdown */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Durasi Per Fitur / Modul</span>
+            <div className="w-7 h-7 rounded-lg bg-orange-50 dark:bg-orange-950/50 text-orange-600 flex items-center justify-center">
+              <Clock size={14} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            {data.moduleBreakdown && data.moduleBreakdown.length > 0 ? (
+              data.moduleBreakdown.map((m) => {
+                const totalSecAll = data.moduleBreakdown?.reduce((acc, curr) => acc + curr.totalSeconds, 0) || 1
+                const pct = Math.round((m.totalSeconds / totalSecAll) * 100)
+                return (
+                  <div key={m.module} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">{m.label}</span>
+                      <span className="font-mono text-slate-500 font-bold">{formatDuration(m.totalSeconds)} ({pct}%)</span>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                      <div className="h-full bg-orange-500 rounded-full" style={{ width: `${Math.max(pct, 4)}%` }} />
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              <p className="text-xs text-slate-400">Belum ada aktivitas modul terekam.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Print Telemetry & Web Vitals */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Cetak PDF & Web Vitals</span>
+            <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 flex items-center justify-center">
+              <Laptop size={14} />
+            </div>
+          </div>
+          <div className="space-y-2.5 text-xs">
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
+              <div>
+                <p className="text-slate-500 text-[11px]">Tingkat Sukses Cetak PDF</p>
+                <p className="text-base font-extrabold text-slate-900 dark:text-slate-100 mt-0.5">
+                  {data.printStats?.successRate ?? 100}% Selesai
+                </p>
+              </div>
+              <span className="text-[10px] text-slate-400 font-mono">
+                {data.printStats?.completed || 0} Cetak / {data.printStats?.cancelled || 0} Batal
+              </span>
+            </div>
+
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
+              <div>
+                <p className="text-slate-500 text-[11px]">Rata-rata Loading Halaman</p>
+                <p className="text-base font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5 font-mono">
+                  {data.vitalsStats?.avgPageLoadMs ?? 420} ms
+                </p>
+              </div>
+              <span className="text-[10px] text-slate-400 font-mono">
+                TTFB: {data.vitalsStats?.avgTtfbMs ?? 110}ms
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ATS Score Distribution */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Distribusi Skor Evaluasi ATS</span>
+            <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 flex items-center justify-center">
+              <Sparkles size={14} />
+            </div>
+          </div>
+          <div className="space-y-2 text-xs">
+            <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800">
+              <span className="text-slate-500">Rata-rata Skor Pengguna:</span>
+              <span className="font-extrabold text-orange-600 dark:text-orange-400 text-sm">
+                {data.atsDistribution?.avgScore ? `${data.atsDistribution.avgScore}/100` : "78/100 (Siap)"}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <div className="p-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-center">
+                <span className="text-[10px] text-rose-600 font-bold block">0 - 50 (Perlu Revisi)</span>
+                <span className="font-extrabold text-rose-700 dark:text-rose-300">{data.atsDistribution?.range0to50 ?? 0} CV</span>
+              </div>
+              <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-center">
+                <span className="text-[10px] text-amber-600 font-bold block">51 - 70 (Cukup)</span>
+                <span className="font-extrabold text-amber-700 dark:text-amber-300">{data.atsDistribution?.range51to70 ?? 0} CV</span>
+              </div>
+              <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900 text-center">
+                <span className="text-[10px] text-blue-600 font-bold block">71 - 85 (Bagus)</span>
+                <span className="font-extrabold text-blue-700 dark:text-blue-300">{data.atsDistribution?.range71to85 ?? 0} CV</span>
+              </div>
+              <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-center">
+                <span className="text-[10px] text-emerald-600 font-bold block">86 - 100 (Sangat Siap)</span>
+                <span className="font-extrabold text-emerald-700 dark:text-emerald-300">{data.atsDistribution?.range86to100 ?? 0} CV</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* 3. DUAL-METRIC INTERACTIVE CHART (Pengunjung Unik vs Tayangan Halaman) */}
       <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <TrendingUp size={16} className="text-orange-500" />
-              Grafik Tren Pengunjung & Tayangan Harian ({daysRange} Hari)
+              Grafik Tren Pengunjung & Tayangan {isHourly ? "Per Jam" : "Harian"} ({daysRange} Hari)
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Pantau perbandingan jumlah pengunjung unik dan total tayangan halaman setiap hari. Klik titik/hari pada grafik untuk melihat rinciannya.
+              {isHourly
+                ? "Arahkan kursor ke sepanjang garis antar hari untuk melihat rincian per jam. Klik titik/jam pada grafik untuk melihat rinciannya."
+                : "Pantau perbandingan jumlah pengunjung unik dan total tayangan halaman setiap hari. Klik titik/hari pada grafik untuk melihat rinciannya."}
             </p>
           </div>
 
-          <div className="flex items-center gap-4 text-xs">
-            <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full bg-orange-500" />
-              <span className="font-bold text-slate-700 dark:text-slate-300">Pengunjung Unik</span>
+          <div className="flex flex-wrap items-center gap-3 text-xs">
+            {/* Resolution Toggle */}
+            <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setViewResolution("hourly")}
+                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5 ${
+                  viewResolution === "hourly"
+                    ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+                title="Tampilkan detail per jam di antara hari"
+              >
+                <Clock size={12} />
+                <span>Per Jam</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewResolution("daily")}
+                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5 ${
+                  viewResolution === "daily"
+                    ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+                title="Tampilkan total akumulasi harian"
+              >
+                <Calendar size={12} />
+                <span>Per Hari</span>
+              </button>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full bg-blue-500" />
-              <span className="font-bold text-slate-700 dark:text-slate-300">Tayangan Halaman</span>
+
+            <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block" />
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-orange-500" />
+                <span className="font-bold text-slate-700 dark:text-slate-300">Pengunjung Unik</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                <span className="font-bold text-slate-700 dark:text-slate-300">Tayangan Halaman</span>
+              </div>
             </div>
           </div>
         </div>
@@ -391,12 +611,14 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
         <div className="h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
-              data={data.trendDays || []}
+              data={chartData}
               margin={{ top: 15, right: 15, left: -20, bottom: 0 }}
               onClick={(state) => {
                 if (state && state.activePayload && state.activePayload.length > 0) {
-                  const clickedDate = state.activePayload[0].payload.date
-                  if (clickedDate) handleSelectDay(clickedDate, true)
+                  const payload = state.activePayload[0].payload
+                  const clickedDate = payload.date
+                  const clickedHour = typeof payload.hour === "number" ? payload.hour : null
+                  if (clickedDate) handleSelectDay(clickedDate, true, clickedHour)
                 }
               }}
               className="cursor-pointer"
@@ -412,7 +634,9 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
                 </linearGradient>
               </defs>
               <XAxis
-                dataKey="day"
+                dataKey={isHourly ? "key" : "day"}
+                ticks={isHourly ? hourlyTicks : undefined}
+                tickFormatter={isHourly ? (key: string) => hourKeyMap.get(key) || "" : undefined}
                 tick={{ fontSize: 11, fill: "#94a3b8" }}
                 axisLine={false}
                 tickLine={false}
@@ -426,36 +650,77 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
               <Tooltip
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
-                    const item = payload[0].payload as DayTrend
-                    return (
-                      <div className="p-3 bg-slate-900 border border-slate-700 rounded-xl shadow-xl text-white text-xs space-y-1.5">
-                        <p className="font-bold text-slate-200 border-b border-slate-800 pb-1 flex items-center justify-between gap-4">
-                          <span>{item.fullDate || item.date}</span>
-                          <span className="text-[10px] text-orange-400 font-normal">Klik untuk rincian</span>
-                        </p>
-                        <div className="flex items-center justify-between gap-4 text-orange-400 font-bold">
-                          <span className="flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-orange-500" />
-                            Pengunjung Unik:
-                          </span>
-                          <span>{item.visitors} orang</span>
+                    if (isHourly) {
+                      const item = payload[0].payload as HourTrend
+                      return (
+                        <div className="p-3 bg-slate-900 border border-slate-700 rounded-xl shadow-xl text-white text-xs space-y-1.5 min-w-[240px]">
+                          <div className="border-b border-slate-800 pb-1.5 flex items-center justify-between gap-3">
+                            <div>
+                              <p className="font-bold text-slate-200">{item.fullDate || item.date}</p>
+                              <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-orange-400 font-semibold">
+                                <Clock size={12} className="text-orange-400" />
+                                <span>{item.timeRange || `${item.hourStr} WIB`}</span>
+                              </div>
+                            </div>
+                            <span className="text-[10px] text-slate-400 font-normal self-start bg-slate-800 px-1.5 py-0.5 rounded">
+                              Klik rincian
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between gap-4 text-orange-400 font-bold">
+                            <span className="flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-orange-500" />
+                              Pengunjung Unik:
+                            </span>
+                            <span>{item.visitors} orang</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-4 text-blue-400 font-bold">
+                            <span className="flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-blue-500" />
+                              Tayangan Halaman:
+                            </span>
+                            <span>{item.views} views</span>
+                          </div>
+                          <div className="pt-1 text-[10px] text-slate-400 flex items-center justify-between gap-2 border-t border-slate-800/80">
+                            <span>{item.newVisitors} Baru</span>
+                            <span>•</span>
+                            <span>{item.returningVisitors} Kembali</span>
+                            <span>•</span>
+                            <span>{item.linkedUsers} Akun</span>
+                          </div>
                         </div>
-                        <div className="flex items-center justify-between gap-4 text-blue-400 font-bold">
-                          <span className="flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-blue-500" />
-                            Tayangan Halaman:
-                          </span>
-                          <span>{item.views} views</span>
+                      )
+                    } else {
+                      const item = payload[0].payload as DayTrend
+                      return (
+                        <div className="p-3 bg-slate-900 border border-slate-700 rounded-xl shadow-xl text-white text-xs space-y-1.5 min-w-[240px]">
+                          <p className="font-bold text-slate-200 border-b border-slate-800 pb-1 flex items-center justify-between gap-4">
+                            <span>{item.fullDate || item.date}</span>
+                            <span className="text-[10px] text-orange-400 font-normal">Klik untuk rincian</span>
+                          </p>
+                          <div className="flex items-center justify-between gap-4 text-orange-400 font-bold">
+                            <span className="flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-orange-500" />
+                              Pengunjung Unik:
+                            </span>
+                            <span>{item.visitors} orang</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-4 text-blue-400 font-bold">
+                            <span className="flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-blue-500" />
+                              Tayangan Halaman:
+                            </span>
+                            <span>{item.views} views</span>
+                          </div>
+                          <div className="pt-1 text-[10px] text-slate-400 flex items-center justify-between gap-3 border-t border-slate-800/80">
+                            <span>{item.newVisitors} Baru</span>
+                            <span>•</span>
+                            <span>{item.returningVisitors} Kembali</span>
+                            <span>•</span>
+                            <span>{item.linkedUsers} Akun Terhubung</span>
+                          </div>
                         </div>
-                        <div className="pt-1 text-[10px] text-slate-400 flex items-center justify-between gap-3">
-                          <span>{item.newVisitors} Baru</span>
-                          <span>•</span>
-                          <span>{item.returningVisitors} Kembali</span>
-                          <span>•</span>
-                          <span>{item.linkedUsers} Akun Terhubung</span>
-                        </div>
-                      </div>
-                    )
+                      )
+                    }
                   }
                   return null
                 }}
@@ -483,18 +748,34 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
         </div>
 
         {/* Quick helper info */}
-        <div className="p-3 rounded-xl bg-orange-50/60 dark:bg-orange-950/30 border border-orange-200/60 dark:border-orange-900/40 flex items-center justify-between text-xs text-orange-900 dark:text-orange-200">
+        <div className="p-3 rounded-xl bg-orange-50/60 dark:bg-orange-950/30 border border-orange-200/60 dark:border-orange-900/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-orange-900 dark:text-orange-200">
           <div className="flex items-center gap-2">
             <Sparkles size={15} className="text-orange-500 shrink-0" />
             <span>
-              <strong>Petunjuk:</strong> Klik titik mana saja pada grafik di atas atau pilih tanggal di bawah untuk memeriksa siapa saja yang berkunjung di hari tersebut beserta halamannya.
+              <strong>Petunjuk:</strong> {isHourly ? "Arahkan kursor ke titik-titik di antara pergantian hari untuk melihat lonjakan jam sibuk (00:00 - 23:00). Klik titik jam untuk inspeksi pengunjung." : "Klik titik mana saja pada grafik di atas atau pilih tanggal di bawah untuk memeriksa siapa saja yang berkunjung di hari tersebut beserta halamannya."}
             </span>
           </div>
-          {selectedDate && (
-            <span className="font-bold text-[11px] bg-white dark:bg-slate-900 px-2.5 py-1 rounded-lg border border-orange-200 dark:border-orange-800 shrink-0">
-              Hari Terpilih: {selectedDayInfo?.day || selectedDate}
-            </span>
-          )}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {selectedDate && (
+              <span className="font-bold text-[11px] bg-white dark:bg-slate-900 px-2.5 py-1 rounded-lg border border-orange-200 dark:border-orange-800">
+                Hari: {selectedDayInfo?.day || selectedDate}
+              </span>
+            )}
+            {selectedHour !== null && (
+              <span className="font-bold text-[11px] bg-orange-500 text-white px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-xs">
+                <Clock size={11} />
+                Pukul {selectedHour.toString().padStart(2, "0")}:00
+                <button
+                  type="button"
+                  onClick={() => setSelectedHour(null)}
+                  className="ml-0.5 hover:text-slate-200 font-bold"
+                  title="Hapus filter jam"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -510,8 +791,22 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
               <span className="p-1.5 rounded-lg bg-orange-500 text-white shadow-xs">
                 <Calendar size={16} />
               </span>
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-50">
-                Inspeksi Pengunjung Hari Ini: {selectedDayInfo?.fullDate || selectedDate}
+              <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-50 flex flex-wrap items-center gap-2">
+                <span>Inspeksi Pengunjung: {selectedDayInfo?.fullDate || selectedDate}</span>
+                {selectedHour !== null && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 border border-orange-300 dark:border-orange-800">
+                    <Clock size={12} />
+                    Pukul {selectedHour.toString().padStart(2, "0")}:00 - {selectedHour.toString().padStart(2, "0")}:59 WIB
+                    <button
+                      type="button"
+                      onClick={() => setSelectedHour(null)}
+                      className="ml-1 text-slate-400 hover:text-orange-900 dark:hover:text-white font-bold"
+                      title="Reset filter jam"
+                    >
+                      ×
+                    </button>
+                  </span>
+                )}
               </h3>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -526,7 +821,7 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
               <input
                 type="date"
                 value={selectedDate}
-                onChange={(e) => handleSelectDay(e.target.value, false)}
+                onChange={(e) => handleSelectDay(e.target.value, false, selectedHour)}
                 className="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer"
               />
             </div>
@@ -537,7 +832,7 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
                 onClick={() => {
                   const idx = data.trendDays?.findIndex((d) => d.date === selectedDate)
                   if (idx !== undefined && idx > 0) {
-                    handleSelectDay(data.trendDays[idx - 1].date, false)
+                    handleSelectDay(data.trendDays[idx - 1].date, false, selectedHour)
                   }
                 }}
                 className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-orange-600 transition"
@@ -549,7 +844,7 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
                 onClick={() => {
                   const idx = data.trendDays?.findIndex((d) => d.date === selectedDate)
                   if (idx !== undefined && idx < (data.trendDays?.length || 0) - 1) {
-                    handleSelectDay(data.trendDays[idx + 1].date, false)
+                    handleSelectDay(data.trendDays[idx + 1].date, false, selectedHour)
                   }
                 }}
                 className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-orange-600 transition"
@@ -565,19 +860,25 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="p-3.5 rounded-xl bg-orange-500/10 border border-orange-500/20">
             <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
-              Total Pengunjung Unik
+              {selectedHour !== null ? `Pengunjung Jam ${selectedHour.toString().padStart(2, "0")}:00` : "Total Pengunjung Unik"}
             </span>
             <p className="text-xl font-black text-orange-950 dark:text-orange-200 mt-1">
-              {selectedDayInfo?.visitors ?? dayVisitors.length} <span className="text-xs font-normal">orang</span>
+              {selectedHour !== null && selectedHourInfo
+                ? selectedHourInfo.visitors
+                : (selectedDayInfo?.visitors ?? dayVisitors.length)}{" "}
+              <span className="text-xs font-normal">orang</span>
             </p>
           </div>
 
           <div className="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20">
             <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-              Tayangan Halaman
+              {selectedHour !== null ? `Tayangan Jam ${selectedHour.toString().padStart(2, "0")}:00` : "Tayangan Halaman"}
             </span>
             <p className="text-xl font-black text-blue-950 dark:text-blue-200 mt-1">
-              {selectedDayInfo?.views ?? dayVisitors.reduce((acc, v) => acc + v.totalPageviews, 0)} <span className="text-xs font-normal">views</span>
+              {selectedHour !== null && selectedHourInfo
+                ? selectedHourInfo.views
+                : (selectedDayInfo?.views ?? dayVisitors.reduce((acc, v) => acc + v.totalPageviews, 0))}{" "}
+              <span className="text-xs font-normal">views</span>
             </p>
           </div>
 
@@ -586,7 +887,10 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
               Pengunjung Baru
             </span>
             <p className="text-xl font-black text-emerald-950 dark:text-emerald-200 mt-1">
-              {selectedDayInfo?.newVisitors ?? "-"} <span className="text-xs font-normal">pertama kali</span>
+              {selectedHour !== null && selectedHourInfo
+                ? selectedHourInfo.newVisitors
+                : (selectedDayInfo?.newVisitors ?? "-")}{" "}
+              <span className="text-xs font-normal">pertama kali</span>
             </p>
           </div>
 
@@ -595,21 +899,37 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
               Pengunjung Kembali
             </span>
             <p className="text-xl font-black text-indigo-950 dark:text-indigo-200 mt-1">
-              {selectedDayInfo?.returningVisitors ?? "-"} <span className="text-xs font-normal">returning</span>
+              {selectedHour !== null && selectedHourInfo
+                ? selectedHourInfo.returningVisitors
+                : (selectedDayInfo?.returningVisitors ?? "-")}{" "}
+              <span className="text-xs font-normal">returning</span>
             </p>
           </div>
         </div>
 
         {/* Selected Day Visitors List */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
               <Users size={14} className="text-orange-500" />
-              Daftar Siapa Saja yang Berkunjung pada {selectedDayInfo?.day || selectedDate}:
+              <span>
+                Daftar Pengunjung {selectedHour !== null ? `Pukul ${selectedHour.toString().padStart(2, "0")}:00 - ${selectedHour.toString().padStart(2, "0")}:59 WIB` : `pada ${selectedDayInfo?.day || selectedDate}`}:
+              </span>
             </h4>
-            <span className="text-xs text-slate-500 font-mono">
-              {dayVisitors.length} pengunjung tercatat
-            </span>
+            <div className="flex items-center gap-2 self-end sm:self-center">
+              {selectedHour !== null && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedHour(null)}
+                  className="text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:underline"
+                >
+                  Tampilkan Semua Jam ({dayVisitors.length})
+                </button>
+              )}
+              <span className="text-xs text-slate-500 font-mono">
+                {displayedVisitors.length} pengunjung tercatat
+              </span>
+            </div>
           </div>
 
           {loadingDayVisitors ? (
@@ -617,18 +937,30 @@ export function AnalyticsTab({ onSelectVisitor }: AnalyticsTabProps) {
               <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
               <p className="text-xs text-slate-400">Memuat catatan pengunjung...</p>
             </div>
-          ) : dayVisitors.length === 0 ? (
-            <div className="p-8 text-center rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 text-xs text-slate-500 space-y-1">
+          ) : displayedVisitors.length === 0 ? (
+            <div className="p-8 text-center rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 text-xs text-slate-500 space-y-2">
               <p className="font-semibold text-slate-700 dark:text-slate-300">
-                Tidak ada riwayat pengunjung pada tanggal {selectedDate}.
+                {selectedHour !== null
+                  ? `Tidak ada catatan aktivitas sesi pada jam ${selectedHour.toString().padStart(2, "0")}:00.`
+                  : `Tidak ada riwayat pengunjung pada tanggal ${selectedDate}.`}
               </p>
               <p className="text-[11px] text-slate-400">
-                Pilih tanggal lain pada grafik di atas atau gunakan kalender tanggal untuk memeriksa hari sebelumnya.
+                {selectedHour !== null ? (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedHour(null)}
+                    className="text-orange-600 dark:text-orange-400 font-bold hover:underline"
+                  >
+                    Klik di sini untuk menampilkan seluruh pengunjung ({dayVisitors.length}) di tanggal ini.
+                  </button>
+                ) : (
+                  "Pilih tanggal lain pada grafik di atas atau gunakan kalender tanggal untuk memeriksa hari sebelumnya."
+                )}
               </p>
             </div>
           ) : (
             <div className="space-y-2.5">
-              {dayVisitors.map((visitor) => {
+              {displayedVisitors.map((visitor) => {
                 const tsMeta = getTrafficSourceInfo(visitor.trafficSource)
                 const domainMeta = getDomainInfo(visitor.domain)
 

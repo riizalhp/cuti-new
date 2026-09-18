@@ -1,57 +1,70 @@
 ---
 // KursusSection.astro - Course & Pelatihan Karier
-import { courseList } from '../data/mock';
+import { courseList, ensureData } from '../data/mock';
+
+await ensureData();
+const topCourses = [...courseList].slice(0, 3);
 ---
 
-<section id="course" class="py-12 bg-slate-50/50 border-b border-slate-200">
+<section id="course" class="py-12 sm:py-16 bg-[#f4f3ee] border-b border-[#d7d6cf]/80 scroll-mt-24">
   <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
       <div>
-        <div class="flex items-center gap-2 mb-1">
-          <span class="w-2 h-2 rounded-full bg-[#1738d1]"></span>
-          <span class="text-[11px] font-medium uppercase tracking-wider text-[#1738d1]">Pelatihan & Skill</span>
+        <div class="section-label mb-2.5">
+          <span>03</span>
+          <i></i>
+          <span>PELATIHAN & SKILL DIGITAL</span>
         </div>
-        <h2 class="text-2xl sm:text-3xl font-medium text-slate-900 tracking-tight">Course Pilihan</h2>
-        <p class="text-xs sm:text-sm text-slate-500 mt-1">
-          Kuasai skill yang dibutuhkan industri langsung dari instruktur praktisi.
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#101010] tracking-tight">
+          Tingkatkan keahlianmu,<br class="hidden sm:inline" />
+          <em>dengan pelatihan terarah.</em>
+        </h2>
+        <p class="text-xs sm:text-sm text-[#6e6d68] mt-2 leading-relaxed font-medium max-w-2xl">
+          Kuasai keahlian praktis yang dicari industri: data analytics, programming, UI/UX design, dan digital marketing.
         </p>
       </div>
 
-      <a href="/course" class="text-xs font-bold text-[#1738d1] hover:underline flex items-center gap-1 shrink-0">
-        <span>Lihat Semua Course</span>
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+      <a
+        href="/course"
+        class="inline-flex items-center gap-2 px-4.5 py-2 rounded-full border border-[#d7d6cf] bg-white hover:bg-white hover:border-[#101010] text-xs font-bold text-[#101010] shadow-xs transition-all shrink-0 self-start sm:self-auto group"
+      >
+        <span>Lihat Semua Course ({courseList.length})</span>
+        <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
         </svg>
       </a>
     </div>
 
-    <!-- 3 Course Cards Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {courseList.map((course) => (
-        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md hover:border-blue-400 transition flex flex-col justify-between group">
+    <!-- 4 Cards Grid: 3 Top Courses + 1 Native Modular Partner Card -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4.5">
+      {topCourses.map((course) => (
+        <div class="bg-white rounded-2xl border border-[#d7d6cf] overflow-hidden shadow-paper hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:border-[#0000ff]/30 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
           <div>
-            <!-- Image with Price Badge -->
-            <div class="relative aspect-[16/10] overflow-hidden bg-slate-100">
+            <!-- Image with Price Badge & Level -->
+            <div class="relative aspect-[16/10] overflow-hidden bg-[#f4f3ee]">
               <img src={course.image} alt={course.title} class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" />
-              <span class="absolute top-3 left-3 px-3 py-1 rounded-lg text-xs font-medium bg-emerald-600 text-white shadow-sm">
+              <span class="absolute top-3 left-3 px-3 py-0.5 rounded-full text-[9px] font-bold bg-[#101010] text-white shadow-xs">
                 {course.price}
+              </span>
+              <span class="absolute top-3 right-3 px-3 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-white/95 text-[#101010] border border-[#d7d6cf] shadow-xs">
+                {course.level}
               </span>
             </div>
 
             <div class="p-5">
-              <span class="text-xs font-bold text-slate-400 block mb-1">{course.provider}</span>
-              <h3 class="text-base font-medium text-slate-900 group-hover:text-[#1738d1] transition leading-snug mb-2 line-clamp-2">
+              <span class="text-[10px] font-bold text-[#0000ff] bg-blue-50 border border-blue-100 px-2.5 py-0.5 rounded-full inline-block mb-2">{course.provider}</span>
+              <h3 class="text-sm sm:text-base font-bold text-[#101010] group-hover:text-[#0000ff] transition leading-snug mb-2 line-clamp-2">
                 <a href={"/course/" + course.slug}>{course.title}</a>
               </h3>
-              <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-4">
+              <p class="text-xs text-[#6e6d68] line-clamp-2 leading-relaxed mb-4 font-medium">
                 {course.description}
               </p>
 
-              <div class="flex items-center justify-between text-xs text-slate-500 pt-3 border-t border-slate-100">
-                <span>⏱ {course.duration}</span>
-                <span class="font-bold text-amber-500">★ {course.rating}</span>
-                <span>{course.students}</span>
+              <div class="flex items-center justify-between text-xs text-[#6e6d68] pt-3 border-t border-[#101010]/8 font-medium">
+                <span>{course.duration}</span>
+                <span class="font-bold text-[#101010]">Rating {course.rating}</span>
+                <span class="text-[#a5a5a1]">{course.students}</span>
               </div>
             </div>
           </div>
@@ -59,13 +72,61 @@ import { courseList } from '../data/mock';
           <div class="p-5 pt-0">
             <a
               href={"/course/" + course.slug}
-              class="w-full py-2.5 rounded-xl bg-[#1738d1] hover:bg-[#122ca6] text-white text-xs font-bold text-center block transition shadow-sm"
+              class="w-full py-2.5 rounded-full bg-[#f4f3ee] hover:bg-[#101010] text-[#101010] hover:text-white text-xs font-bold text-center block transition border border-[#d7d6cf] hover:border-[#101010] shadow-xs"
             >
-              Lihat Course →
+              Lihat Materi & Kurikulum →
             </a>
           </div>
         </div>
       ))}
+
+      <!-- Card 4: Harmonized Native Partner Card (Kemitraan Resmi / Sponsored) -->
+      <div class="bg-white rounded-2xl border border-[#d7d6cf] overflow-hidden shadow-paper hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:border-[#0000ff]/30 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
+        <div>
+          <!-- Thumbnail with Formal Partnership Badge -->
+          <div class="relative aspect-[16/10] overflow-hidden bg-[#f4f3ee]">
+            <img
+              src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80"
+              alt="Program Fast-Track Beasiswa Karier Digital 2026"
+              class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+              loading="lazy"
+            />
+            <span class="absolute top-3 left-3 px-3 py-0.5 rounded-full text-[9px] font-bold bg-[#0000ff] text-white shadow-xs flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              Kemitraan Resmi
+            </span>
+            <span class="absolute top-3 right-3 px-3 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-white/95 text-[#6e6d68] shadow-xs border border-[#d7d6cf]">
+              Sponsored
+            </span>
+          </div>
+
+          <div class="p-5">
+            <span class="text-[10px] font-bold text-[#0000ff] bg-blue-50 border border-blue-100 px-2.5 py-0.5 rounded-full inline-block mb-2">Google Partner Career</span>
+            <h3 class="text-sm sm:text-base font-bold text-[#101010] group-hover:text-[#0000ff] transition leading-snug mb-2 line-clamp-2">
+              <a href="/course">Program Fast-Track Karier Digital & Sertifikasi 2026</a>
+            </h3>
+            <p class="text-xs text-[#6e6d68] line-clamp-2 leading-relaxed mb-4 font-medium">
+              Pelatihan intensif bersama mentor industri dengan kurikulum terstandarisasi dan beasiswa penuh.
+            </p>
+
+            <div class="flex items-center justify-between text-xs text-[#6e6d68] pt-3 border-t border-[#101010]/8 font-medium">
+              <span>3 Bulan</span>
+              <span class="font-bold text-[#101010]">Rating 4.9</span>
+              <span class="font-bold text-[#0000ff]">Beasiswa 100%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 pt-0">
+          <a
+            href="/course"
+            class="w-full py-2.5 rounded-full bg-[#101010] hover:bg-[#000000] text-white text-xs font-bold text-center block transition shadow-xs"
+          >
+            Pelajari Program Beasiswa →
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </section>
+

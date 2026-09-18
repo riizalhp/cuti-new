@@ -15,53 +15,54 @@ function isPlaceholderText(text?: string): boolean {
 export function isCVEmptyOrDefault(cv: any): boolean {
   if (!cv) return true;
 
-  const fullName = cv.fullName || `${cv.firstName || ''} ${cv.lastName || ''}`.trim();
+  // Mode stub section kosong
+  if (cv.isSectionStub) return true;
+
+  const fullName = (cv.fullName || `${cv.firstName || ''} ${cv.lastName || ''}`).trim();
+  const lowerName = fullName.toLowerCase();
+  const lowerEmail = (cv.email || '').toLowerCase().trim();
+
+  // 1. Cek apakah masih menggunakan identitas contoh bawaan template
+  const isSampleIdentity =
+    lowerName.includes('alexander pratama') ||
+    lowerName.includes('john doe') ||
+    lowerName.includes('jane doe') ||
+    lowerName.includes('nama lengkap') ||
+    lowerEmail.includes('alexander.pratama') ||
+    lowerEmail.includes('email@contoh.com') ||
+    lowerEmail.includes('@example.com');
+
+  if (isSampleIdentity) {
+    return true;
+  }
+
   const hasRealName = Boolean(fullName && fullName.length > 2 && !isPlaceholderText(fullName));
   const hasRealEmail = Boolean(cv.email && cv.email.includes('@') && !isPlaceholderText(cv.email));
   const hasRealPhone = Boolean(cv.phone && cv.phone.trim().length >= 8);
 
-  const skills = Array.isArray(cv.skills)
-    ? cv.skills.filter((s: any) => {
-        const str = typeof s === 'string' ? s : s?.name || '';
-        return Boolean(str && !isPlaceholderText(str));
-      })
-    : [];
-
-  const experiences = Array.isArray(cv.experience)
-    ? cv.experience.filter(
-        (e: any) => !isPlaceholderText(e.company) && !isPlaceholderText(e.role || e.title)
-      )
-    : [];
-
-  const education = Array.isArray(cv.education)
-    ? cv.education.filter(
-        (ed: any) => !isPlaceholderText(ed.institution || ed.school)
-      )
-    : [];
-
-  const projects = Array.isArray(cv.projects)
-    ? cv.projects.filter((p: any) => !isPlaceholderText(p.name || p.title))
-    : [];
-
-  const hasRealSummary = Boolean(
-    cv.summary && cv.summary.trim().length >= 25 && !isPlaceholderText(cv.summary)
-  );
-
-  // 1. Nama Lengkap belum terisi riil
+  // 2. Nama Lengkap belum terisi riil
   if (!hasRealName) {
     return true;
   }
 
-  // 2. Jika seluruh pengalaman kerja (jika ada) masih menggunakan nama perusahaan dummy 'Nama Perusahaan'
+  // 3. Jika seluruh pengalaman kerja (jika ada) masih menggunakan nama perusahaan dummy
   const hasOnlyDummyCompanies = Array.isArray(cv.experience) && cv.experience.length > 0 &&
     cv.experience.every((e: any) => isPlaceholderText(e.company));
 
-  // 3. Jika pendidikan masih menggunakan nama universitas dummy 'Nama Universitas'
+  // 4. Jika pendidikan masih menggunakan nama universitas dummy
   const hasOnlyDummyEducation = Array.isArray(cv.education) && cv.education.length > 0 &&
     cv.education.every((ed: any) => isPlaceholderText(ed.institution || ed.school));
 
   // Jika perusahaan & universitas dua-duanya masih data dummy template
   if (hasOnlyDummyCompanies && hasOnlyDummyEducation) {
+    return true;
+  }
+
+  // 5. Jika tidak ada satupun pengalaman, pendidikan, atau proyek
+  const hasAnyExperience = Array.isArray(cv.experience) && cv.experience.length > 0;
+  const hasAnyEducation = Array.isArray(cv.education) && cv.education.length > 0;
+  const hasAnyProjects = Array.isArray(cv.projects) && cv.projects.length > 0;
+  if (!hasAnyExperience && !hasAnyEducation && !hasAnyProjects) {
     return true;
   }
 
@@ -115,33 +116,55 @@ export function getAtsStateInfo(score: number, isEmpty = false): {
   };
 }
 
-export function calculateDynamicAtsScore(cv: any): DynamicATSResult {
+export function calculateDynamicAtsScore(
+  cv: any,
+  weights?: { contentQuality: number; atsReadability: number; completeness: number; contentIntegrity: number }
+): DynamicATSResult {
+  const w = weights ?? { contentQuality: 0.4, atsReadability: 0.25, completeness: 0.2, contentIntegrity: 0.15 };
   const issues: ATSIssue[] = [];
   const penaltiesApplied: { category: string; amount: number; reason: string }[] = [];
 
   const isEmpty = isCVEmptyOrDefault(cv);
 
   if (!cv || isEmpty) {
-    const stateInfo = getAtsStateInfo(0, true);
+    const fullName = (cv?.fullName || `${cv?.firstName || ''} ${cv?.lastName || ''}`).toLowerCase();
+    const isSamplePreset =
+      fullName.includes('alexander pratama') ||
+      fullName.includes('john doe') ||
+      (cv?.email || '').toLowerCase().includes('alexander.pratama');
+
+    const stateLabel = isSamplePreset ? 'Draft Contoh' : 'Belum Diisi';
+    const stateDescription = isSamplePreset
+      ? 'Data masih menggunakan contoh bawaan template. Masukkan data riwayat aslimu untuk memulai evaluasi ATS.'
+      : 'Isi informasi CV untuk mulai menghitung skor ATS.';
+
+    const issueMessage = isSamplePreset
+      ? 'CV masih menggunakan data contoh bawaan template (Alexander Pratama).'
+      : 'CV masih kosong atau menggunakan template default.';
+
+    const issueRec = isSamplePreset
+      ? 'Ganti identitas, kontak, dan riwayat pengalaman dengan data aslimu agar sistem dapat menganalisis skor ATS secara akurat.'
+      : 'Lengkapi nama, kontak, ringkasan, dan riwayat pengalaman kamu.';
+
     return {
       totalScore: 0,
-      state: stateInfo.state,
-      stateLabel: stateInfo.stateLabel,
-      stateDescription: stateInfo.stateDescription,
+      state: 'critical',
+      stateLabel,
+      stateDescription,
       potentialScore: 85,
       engines: {
-        contentQuality: { score: 0, weight: 0.4, weightedScore: 0, issuesCount: 1 },
-        atsReadability: { score: 0, weight: 0.25, weightedScore: 0, issuesCount: 1 },
-        completeness: { score: 0, weight: 0.2, weightedScore: 0, issuesCount: 1 },
-        contentIntegrity: { score: 0, weight: 0.15, weightedScore: 0, issuesCount: 1 },
+        contentQuality: { score: 0, weight: w.contentQuality, weightedScore: 0, issuesCount: 1 },
+        atsReadability: { score: 0, weight: w.atsReadability, weightedScore: 0, issuesCount: 1 },
+        completeness: { score: 0, weight: w.completeness, weightedScore: 0, issuesCount: 1 },
+        contentIntegrity: { score: 0, weight: w.contentIntegrity, weightedScore: 0, issuesCount: 1 },
       },
       issues: [
         {
-          id: 'cv_empty',
+          id: isSamplePreset ? 'cv_template_sample' : 'cv_empty',
           category: 'completeness',
           severity: 'critical',
-          message: 'CV masih kosong atau menggunakan template default.',
-          recommendation: 'Lengkapi nama, kontak, ringkasan, dan riwayat pengalaman kamu.',
+          message: issueMessage,
+          recommendation: issueRec,
           penalty: 100,
           potentialGain: 85,
         },
@@ -557,10 +580,10 @@ export function calculateDynamicAtsScore(cv: any): DynamicATSResult {
 
   // --- TOTAL SCORE CALCULATION (Weighted) ---
   const weightedScore = Math.round(
-    contentQualityScore * 0.4 +
-      atsReadabilityScore * 0.25 +
-      completenessScore * 0.2 +
-      contentIntegrityScore * 0.15
+    contentQualityScore * w.contentQuality +
+      atsReadabilityScore * w.atsReadability +
+      completenessScore * w.completeness +
+      contentIntegrityScore * w.contentIntegrity
   );
 
   // Hard Cap Boundaries
@@ -581,26 +604,26 @@ export function calculateDynamicAtsScore(cv: any): DynamicATSResult {
     engines: {
       contentQuality: {
         score: contentQualityScore,
-        weight: 0.4,
-        weightedScore: Math.round(contentQualityScore * 0.4),
+        weight: w.contentQuality,
+        weightedScore: Math.round(contentQualityScore * w.contentQuality),
         issuesCount: issues.filter((i) => i.category === 'contentQuality').length,
       },
       atsReadability: {
         score: atsReadabilityScore,
-        weight: 0.25,
-        weightedScore: Math.round(atsReadabilityScore * 0.25),
+        weight: w.atsReadability,
+        weightedScore: Math.round(atsReadabilityScore * w.atsReadability),
         issuesCount: issues.filter((i) => i.category === 'atsReadability').length,
       },
       completeness: {
         score: completenessScore,
-        weight: 0.2,
-        weightedScore: Math.round(completenessScore * 0.2),
+        weight: w.completeness,
+        weightedScore: Math.round(completenessScore * w.completeness),
         issuesCount: issues.filter((i) => i.category === 'completeness').length,
       },
       contentIntegrity: {
         score: contentIntegrityScore,
-        weight: 0.15,
-        weightedScore: Math.round(contentIntegrityScore * 0.15),
+        weight: w.contentIntegrity,
+        weightedScore: Math.round(contentIntegrityScore * w.contentIntegrity),
         issuesCount: issues.filter((i) => i.category === 'contentIntegrity').length,
       },
     },

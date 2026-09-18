@@ -1,7 +1,12 @@
-'use client';
+import type { Metadata } from 'next';
+import { PengaturanClient } from '@/components/PengaturanClient';
 
-import { ProfileView } from '@/components/ProfileView';
+export const metadata: Metadata = {
+  title: 'Pengaturan Akun & Profil',
+  description:
+    'Kelola informasi profil, data karier, keamanan akun, dan preferensi notifikasi kamu di Employr.',
+};
 
 export default function PengaturanPage() {
-  return <ProfileView initialSubTab="pengaturan" />;
+  return <PengaturanClient />;
 }

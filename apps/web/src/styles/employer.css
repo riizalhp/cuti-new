@@ -524,6 +524,8 @@ h2 { font-size:clamp(3.45rem,6vw,6.8rem); font-weight:600; letter-spacing:-.07em
 .footer__links b { color:#fff; font-size:10px; font-weight:800; letter-spacing:.14em; margin-bottom:4px; text-transform:uppercase; }
 .footer__links button { background:none; border:0; color:#a7a7a2; font-size:11px; padding:0; text-align:left; transition:color .18s var(--ease-out); }
 .footer__links button:hover { color:#fff; }
+.footer__links a { color:#a7a7a2; font-size:11px; padding:0; text-align:left; text-decoration:none; transition:color .18s var(--ease-out); }
+.footer__links a:hover { color:#fff; }
 .footer__bottom { border-top:1px solid rgba(255,255,255,.1); color:#9ca3af; display:flex; font-size:8.5px; font-weight:800; justify-content:space-between; letter-spacing:.11em; margin-top:auto; padding-top:20px; position:relative; z-index:3; text-shadow:0 2px 10px rgba(0,0,0,.95); }
 
 @media (prefers-reduced-motion:no-preference) { .hero__content { animation:hero-reveal .75s var(--ease-out) both; } .hero__product { animation:product-float .8s .25s var(--ease-out) both; } .version-card--front { animation:card-settle .9s .18s var(--ease-out) both; } @keyframes hero-reveal { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } } @keyframes product-float { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } } @keyframes card-settle { from { opacity:0; transform:rotate(-8deg) translateY(25px); } to { opacity:1; transform:rotate(-5deg) translateY(0); } } }

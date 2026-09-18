@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@cuti/db';
+import { prisma, learnedRoleService } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 import { calculateAtsScore } from '@/lib/ats-score';
 
@@ -145,6 +145,37 @@ export async function PATCH(
         updated_at: new Date(),
       },
     });
+
+    // ── Self-Learning Engine: Rekam target peran dan keahlian dari CV secara non-blocking ──
+    try {
+      const candidateSkills = Array.isArray(body.skills) ? body.skills : [];
+      const primaryTarget = (body.headline || targetPosition || '').trim();
+      if (primaryTarget && candidateSkills.length > 0) {
+        learnedRoleService.recordEntry({
+          role_name: primaryTarget,
+          skills: candidateSkills,
+          education_level: body.educations?.[0]?.degree || body.educationLevel || null,
+          major: body.educations?.[0]?.major || body.major || null,
+          user_id: user.id,
+        }).catch(() => {});
+      }
+
+      // Rekam juga posisi pengalaman kerja nyata jika ada
+      if (Array.isArray(body.experiences)) {
+        for (const exp of body.experiences) {
+          const expRole = (exp.role || exp.position || '').trim();
+          if (expRole && candidateSkills.length > 0) {
+            learnedRoleService.recordEntry({
+              role_name: expRole,
+              skills: candidateSkills,
+              user_id: user.id,
+            }).catch(() => {});
+          }
+        }
+      }
+    } catch (learnErr) {
+      // Non-blocking, continue CV flow
+    }
 
     return NextResponse.json({
       success: true,

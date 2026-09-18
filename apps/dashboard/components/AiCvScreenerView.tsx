@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';
 import {
   Eye,
@@ -25,6 +26,7 @@ import {
   Lightbulb,
   ChevronRight,
   ArrowRight,
+  ArrowLeftRight,
   TrendingUp,
   Bot,
   Cpu,
@@ -57,8 +59,8 @@ import {
   Laptop,
   Plane,
   FolderKanban,
-  CheckCircle,
 } from 'lucide-react';
+import { getScoreTextClass, getScoreProgressBarClass, getScoreBadgeClass } from '@/lib/score-color';
 import {
   CvPurpose,
   CV_PURPOSE_PROFILES,
@@ -70,6 +72,7 @@ import {
   runFullRvePipeline,
   generateCvScreenerAiPrompt,
   parseAiScreenerResponse,
+  enrichScreenerPoint,
   CvParsedData,
   RecruiterPersona,
   RveReportResult,
@@ -339,7 +342,11 @@ interface SavedReportHistoryItem {
   id: string;
   candidateName: string;
   targetRole: string;
+  targetLevel?: 'Entry' | 'Junior' | 'Mid' | 'Senior';
   personaName: string;
+  personaFocus?: string;
+  activePurpose?: CvPurpose;
+  purposeTitle?: string;
   consensusScore: number;
   verdictStatus: 'interview' | 'maybe' | 'reject';
   timestamp: string;
@@ -347,6 +354,8 @@ interface SavedReportHistoryItem {
   cvSourceMode: 'saved' | 'upload';
   selectedCvId: string;
   selectedPersonaId: string;
+  rveReport?: RveReportResult;
+  selectedSavedCv?: any;
 }
 
 const MODULE_CONFIGS = [
@@ -407,10 +416,11 @@ const MODULE_CONFIGS = [
   },
 ];
 
-export const AiCvScreenerView: React.FC = () => {
+export const AiCvScreenerView: React.FC<{ mode?: 'setup' | 'report' }> = ({ mode = 'setup' }) => {
+  const router = useRouter();
   const toast = useToast();
   // Phase / View State: 'setup' (Form Input & Recruiter Selection) vs 'report' (Full Width Immersive Pipeline)
-  const [activePhase, setActivePhase] = useState<'setup' | 'report'>('setup');
+  const [activePhase, setActivePhase] = useState<'setup' | 'report'>(mode);
 
   // Dynamic Saved CVs from database / localStorage / defaults
   const [savedCvs, setSavedCvs] = useState<any[]>([]);
@@ -536,15 +546,15 @@ export const AiCvScreenerView: React.FC = () => {
     let profile: any = null;
     if (typeof window !== 'undefined') {
       try {
-        const storedProfile = localStorage.getItem('cuti_user_profile');
+        const storedProfile = localStorage.getItem('employr_user_profile');
         if (storedProfile) profile = JSON.parse(storedProfile);
       } catch (e) {}
     }
 
     if (session) {
       setUserSession(session);
-      const userHistoryKey = `cuti_screener_history_${session.email || session.id || 'default'}`;
-      const savedHist = localStorage.getItem(userHistoryKey);
+      const userHistoryKey = `employr_screener_history_${session.email || session.id || 'default'}`;
+      const savedHist = localStorage.getItem(userHistoryKey) || localStorage.getItem('employr_screener_history');
       if (savedHist) {
         try {
           const parsed = JSON.parse(savedHist);
@@ -556,7 +566,7 @@ export const AiCvScreenerView: React.FC = () => {
         }
       }
     } else {
-      const globalHist = localStorage.getItem('cuti_screener_history');
+      const globalHist = localStorage.getItem('employr_screener_history');
       if (globalHist) {
         try {
           const parsed = JSON.parse(globalHist);
@@ -569,7 +579,7 @@ export const AiCvScreenerView: React.FC = () => {
       }
     }
 
-    // Fetch CVs dari database API, dengan fallback ke localStorage cuti_cv_list / profil
+    // Fetch CVs dari database API, dengan fallback ke localStorage employr_cv_list / profil
     (async () => {
       let candidateCvs: any[] = [];
       try {
@@ -583,7 +593,7 @@ export const AiCvScreenerView: React.FC = () => {
 
       if (candidateCvs.length === 0 && typeof window !== 'undefined') {
         try {
-          const localList = localStorage.getItem('cuti_cv_list');
+          const localList = localStorage.getItem('employr_cv_list');
           if (localList) {
             const parsedList = JSON.parse(localList);
             if (Array.isArray(parsedList) && parsedList.length > 0) {
@@ -591,7 +601,7 @@ export const AiCvScreenerView: React.FC = () => {
             }
           }
           if (candidateCvs.length === 0) {
-            const activeDraft = localStorage.getItem('cuti_cv_active_draft');
+            const activeDraft = localStorage.getItem('employr_cv_active_draft');
             if (activeDraft) {
               const parsedDraft = JSON.parse(activeDraft);
               if (parsedDraft && (parsedDraft.fullName || parsedDraft.candidateName || parsedDraft.skills)) {
@@ -608,6 +618,43 @@ export const AiCvScreenerView: React.FC = () => {
         setSelectedCvId((prev) => prev || normalized[0].id);
         if (normalized[0]?.roleTitle) {
           setTargetRole((prev) => prev || normalized[0].roleTitle);
+        }
+
+        // Jika belum ada riwayat sesi screening di localStorage, sediakan sesi awal dari CV aktif
+        const userHistoryKey = session
+          ? `employr_screener_history_${session.email || session.id || 'default'}`
+          : 'employr_screener_history';
+        const existingRaw = localStorage.getItem(userHistoryKey) || localStorage.getItem('employr_screener_history');
+        if (!existingRaw) {
+          const initialSession: SavedReportHistoryItem = {
+            id: `hist-${Date.now()}`,
+            candidateName: normalized[0].candidateName,
+            targetRole: normalized[0].roleTitle,
+            targetLevel: 'Junior',
+            personaName: 'Startup',
+            personaFocus: 'Portofolio & Impact',
+            activePurpose: 'fresh_graduate',
+            purposeTitle: 'Fresh Graduate',
+            consensusScore: normalized[0].atsScore || 76,
+            verdictStatus: (normalized[0].atsScore || 76) >= 75 ? 'interview' : 'maybe',
+            timestamp: new Date().toLocaleString('id-ID', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+            appliedFixes: [],
+            cvSourceMode: 'saved',
+            selectedCvId: normalized[0].id,
+            selectedPersonaId: 'startup',
+            selectedSavedCv: normalized[0],
+          };
+          setReportHistory([initialSession]);
+          try {
+            localStorage.setItem(userHistoryKey, JSON.stringify([initialSession]));
+            localStorage.setItem('employr_screener_history', JSON.stringify([initialSession]));
+          } catch (e) {}
         }
       } else {
         // Buat profil dinamis berdasarkan user session atau profil onboarding
@@ -639,19 +686,77 @@ export const AiCvScreenerView: React.FC = () => {
   const [uploadedParsedData, setUploadedParsedData] = useState<any>(null);
   const [isParsingUpload, setIsParsingUpload] = useState(false);
   const [isChangeCvModalOpen, setIsChangeCvModalOpen] = useState<boolean>(false);
+  const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState<boolean>(false);
+  const [savedCvSearch, setSavedCvSearch] = useState<string>('');
+  const [isDraggingFile, setIsDraggingFile] = useState<boolean>(false);
+  const cvFileInputRef = useRef<HTMLInputElement>(null);
 
-  // Target Job Role & Recruiter Persona & 10 Purpose Profiles
-  const [activePurpose, setActivePurpose] = useState<CvPurpose>('job');
-  const [purposeCategoryFilter, setPurposeCategoryFilter] = useState<'all' | 'career' | 'entry' | 'academic' | 'flexible'>('all');
+  // Target Job Role & Recruiter Persona & 10 Purpose Profiles (Default: Pemula / Mahasiswa - Hick's Law)
+  const [activePurpose, setActivePurpose] = useState<CvPurpose>('fresh_graduate');
+  const [purposeCategoryFilter, setPurposeCategoryFilter] = useState<'all' | 'career' | 'entry' | 'academic' | 'flexible'>('entry');
   const [targetRole, setTargetRole] = useState('');
-  const [targetLevel, setTargetLevel] = useState<'Entry' | 'Junior' | 'Mid' | 'Senior'>('Mid');
+  const [targetLevel, setTargetLevel] = useState<'Entry' | 'Junior' | 'Mid' | 'Senior'>('Entry');
   const [selectedPersonaId, setSelectedPersonaId] = useState<string>('startup');
   const [aiReportData, setAiReportData] = useState<RveReportResult | null>(null);
 
-  // Reset aiReportData when inputs change
+  // Reset aiReportData when inputs change (hanya pada mode setup)
   useEffect(() => {
-    setAiReportData(null);
-  }, [selectedCvId, selectedPersonaId, targetRole, cvSourceMode, uploadedFile, uploadedParsedData, activePurpose]);
+    if (mode !== 'report') {
+      setAiReportData(null);
+    }
+  }, [selectedCvId, selectedPersonaId, targetRole, cvSourceMode, uploadedFile, uploadedParsedData, activePurpose, mode]);
+
+  // Hydrate active report from localStorage when accessing /cv-screener/report
+  useEffect(() => {
+    if (mode === 'report' && typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('employr_active_screener_report');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed.rveReport) {
+            setAiReportData(parsed.rveReport);
+            if (parsed.selectedPersonaId) setSelectedPersonaId(parsed.selectedPersonaId);
+            if (parsed.activePurpose) setActivePurpose(parsed.activePurpose);
+            if (parsed.targetRole) setTargetRole(parsed.targetRole);
+            if (parsed.targetLevel) setTargetLevel(parsed.targetLevel);
+            if (parsed.cvSourceMode) setCvSourceMode(parsed.cvSourceMode);
+            if (parsed.selectedCvId) setSelectedCvId(parsed.selectedCvId);
+            if (parsed.appliedFixes) setAppliedFixes(parsed.appliedFixes);
+            if (parsed.selectedSavedCv) {
+              setSavedCvs((prev) => [parsed.selectedSavedCv, ...prev.filter((c) => c.id !== parsed.selectedSavedCv.id)]);
+            }
+            setHasRunPipeline(true);
+            setActivePhase('report');
+            return;
+          }
+        }
+        const globalHist = localStorage.getItem('employr_screener_history');
+        if (globalHist) {
+          const items = JSON.parse(globalHist);
+          if (Array.isArray(items) && items.length > 0) {
+            const hist = items[0];
+            if (hist.rveReport) setAiReportData(hist.rveReport);
+            setCvSourceMode(hist.cvSourceMode);
+            if (hist.selectedCvId) setSelectedCvId(hist.selectedCvId);
+            setSelectedPersonaId(hist.selectedPersonaId);
+            setTargetRole(hist.targetRole);
+            if (hist.targetLevel) setTargetLevel(hist.targetLevel);
+            if (hist.activePurpose) setActivePurpose(hist.activePurpose);
+            setAppliedFixes(hist.appliedFixes || []);
+            if (hist.selectedSavedCv) {
+              setSavedCvs((prev) => [hist.selectedSavedCv, ...prev.filter((c) => c.id !== hist.selectedSavedCv.id)]);
+            }
+            setHasRunPipeline(true);
+            setActivePhase('report');
+            return;
+          }
+        }
+        router.replace('/cv-screener');
+      } catch (err) {
+        console.warn('Gagal memuat laporan aktif:', err);
+      }
+    }
+  }, [mode, router]);
 
   // Custom Seniority Dropdown Popover State & Click Outside Ref
   const [isSeniorityDropdownOpen, setIsSeniorityDropdownOpen] = useState(false);
@@ -716,7 +821,7 @@ export const AiCvScreenerView: React.FC = () => {
     {
       id: 'msg-1',
       sender: 'ai',
-      text: 'Halo! Saya Tim Recruiter CUTI. Saya telah menganalisis CV Anda secara menyeluruh. Ada yang ingin Anda tanyakan tentang hasil screening atau cara meloloskan CV ini?',
+      text: 'Halo! Saya Tim Recruiter Employr. Saya telah menganalisis CV Anda secara menyeluruh. Ada yang ingin Anda tanyakan tentang hasil screening atau cara meloloskan CV ini?',
       time: 'Baru saja',
     },
   ]);
@@ -760,10 +865,21 @@ export const AiCvScreenerView: React.FC = () => {
   };
 
   const selectedSavedCv = savedCvs.find((c) => c.id === selectedCvId) || savedCvs[0] || undefined;
+  const filteredSavedCvs = useMemo(() => {
+    if (!savedCvSearch.trim()) return savedCvs;
+    const query = savedCvSearch.toLowerCase().trim();
+    return savedCvs.filter(
+      (c) =>
+        (c.candidateName && c.candidateName.toLowerCase().includes(query)) ||
+        (c.title && c.title.toLowerCase().includes(query)) ||
+        (c.roleTitle && c.roleTitle.toLowerCase().includes(query))
+    );
+  }, [savedCvs, savedCvSearch]);
   const currentPersona = recruiterPersonas.find((p) => p.id === selectedPersonaId) || recruiterPersonas[0];
 
   const hasSavedCvs = savedCvs.length > 0;
   const hasUsableCv = cvSourceMode === 'upload' ? Boolean(uploadedFile) : hasSavedCvs;
+  const effectiveRole = targetRole.trim() || selectedSavedCv?.roleTitle || 'Role Impian';
 
   // Execute RVE Pipeline (Dynamic Heuristic or Real AI Result)
   const rveReport = useMemo(() => {
@@ -835,6 +951,23 @@ export const AiCvScreenerView: React.FC = () => {
     return map;
   }, [selectedModules]);
 
+  // Durasi scan mata HRD dan hotspot utama dihitung dinamis dari konten riil CV
+  const scanDuration = useMemo(() => {
+    const text = [
+      rveReport.parsedData.summary,
+      ...rveReport.parsedData.skills,
+      ...rveReport.parsedData.experience.map((e) => (Array.isArray(e.achievements) ? e.achievements.join(' ') : '')),
+    ].join(' ');
+    const words = text.split(/\s+/).filter(Boolean).length;
+    const seconds = Math.max(5.2, Math.min(8.4, (words || 150) / 35));
+    return seconds.toFixed(1);
+  }, [rveReport]);
+
+  const primaryHotspotText = useMemo(() => {
+    const hasMetrics = rveReport.gamification.checklist.some((c) => c.id === 'check-1' && c.isDone);
+    return hasMetrics ? 'Nama & Metrik Angka' : 'Nama & Posisi Jabatan';
+  }, [rveReport]);
+
   const activePipelineSteps = useMemo(() => {
     return MODULE_CONFIGS.filter((mod) => selectedModules[mod.id]).map((mod) => {
       const stepNum = activeStepMap[mod.id];
@@ -857,20 +990,127 @@ export const AiCvScreenerView: React.FC = () => {
         body: formData,
       });
       if (!res.ok) {
-        throw new Error(`Parse API status ${res.status}`);
+        const errorJson = await res.json().catch(() => null);
+        throw new Error(errorJson?.error || `Parse API status ${res.status}`);
       }
       const json = await res.json();
       if (json.success && json.data) {
         setUploadedParsedData(json.data);
+        const detectedRole =
+          json.data.experienceTitle ||
+          (Array.isArray(json.data.targetPositions) && json.data.targetPositions[0]) ||
+          '';
+        if (detectedRole && (!targetRole || targetRole === 'Professional' || targetRole === 'Role Impian')) {
+          setTargetRole(detectedRole);
+        }
+        toast.success(`Berkas "${file.name}" berhasil diekstrak!`);
       } else {
         throw new Error(json.error || 'Gagal memparse berkas CV');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.warn('[handleParseUploadedFile] Gagal parse:', err);
-      toast.warning('Tidak bisa membaca isi berkas. Anda bisa tetap lanjut, hasil akan memakai fallback sederhana.');
+      toast.warning(err.message || 'Teks berkas tidak dapat diekstrak otomatis. Berkas tetap dapat digunakan.');
       setUploadedParsedData(null);
     } finally {
       setIsParsingUpload(false);
+    }
+  };
+
+  const handleFileSelect = (file: File) => {
+    const validExtensions = ['.pdf', '.docx', '.doc', '.txt'];
+    const ext = '.' + (file.name.split('.').pop() || '').toLowerCase();
+    if (!validExtensions.includes(ext)) {
+      toast.error('Format berkas harus berupa PDF, DOCX, DOC, atau TXT.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Ukuran berkas melebihi batas maksimal 5MB.');
+      return;
+    }
+    setUploadedFile(file);
+    setCvSourceMode('upload');
+    handleParseUploadedFile(file);
+  };
+
+  const handleDropFile = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingFile(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDraggingFile) setIsDraggingFile(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingFile(false);
+  };
+
+  const handleSelectSavedCv = (cv: any) => {
+    setSelectedCvId(cv.id);
+    setCvSourceMode('saved');
+    if (cv.roleTitle && (!targetRole || targetRole === 'Professional' || targetRole === 'Role Impian')) {
+      setTargetRole(cv.roleTitle);
+    }
+    toast.success(`Profil "${cv.title || cv.candidateName}" dipilih.`);
+  };
+
+  const handleConfirmCvSelection = () => {
+    if (cvSourceMode === 'upload') {
+      if (!uploadedFile) {
+        toast.warning('Silakan pilih berkas CV terlebih dahulu.');
+        return;
+      }
+      const roleToUse =
+        uploadedParsedData?.experienceTitle ||
+        (Array.isArray(uploadedParsedData?.targetPositions) && uploadedParsedData?.targetPositions[0]);
+      if (roleToUse && (!targetRole || targetRole === 'Professional' || targetRole === 'Role Impian')) {
+        setTargetRole(roleToUse);
+      }
+      toast.success(`Berkas "${uploadedFile.name}" aktif untuk evaluasi.`);
+    } else {
+      const activeCv = selectedSavedCv || savedCvs[0];
+      if (activeCv) {
+        setSelectedCvId(activeCv.id);
+        if (activeCv.roleTitle && (!targetRole || targetRole === 'Professional' || targetRole === 'Role Impian')) {
+          setTargetRole(activeCv.roleTitle);
+        }
+        toast.success(`CV "${activeCv.title || activeCv.candidateName}" aktif.`);
+      }
+    }
+    setIsChangeCvModalOpen(false);
+  };
+
+  const handleCloseCvDrawer = () => {
+    if (cvSourceMode === 'upload' && !uploadedFile && hasSavedCvs) {
+      setCvSourceMode('saved');
+    }
+    setIsChangeCvModalOpen(false);
+  };
+
+  // Helper untuk menyimpan riwayat sesi screening ke state & localStorage secara persisten
+  const persistReportHistory = (items: SavedReportHistoryItem[]) => {
+    setReportHistory(items);
+    if (typeof window !== 'undefined') {
+      try {
+        const session = userSession || getStoredSession();
+        const userHistoryKey = session
+          ? `employr_screener_history_${session.email || session.id || 'default'}`
+          : 'employr_screener_history';
+        const serialized = JSON.stringify(items);
+        localStorage.setItem(userHistoryKey, serialized);
+        localStorage.setItem('employr_screener_history', serialized);
+      } catch (err) {
+        console.warn('Gagal menyimpan riwayat ke localStorage:', err);
+      }
     }
   };
 
@@ -901,7 +1141,8 @@ export const AiCvScreenerView: React.FC = () => {
       rawCvText,
       effectiveRole,
       appliedFixes,
-      uploadedParsedData
+      uploadedParsedData,
+      activePurpose
     );
 
     let finalReport = baseline;
@@ -912,7 +1153,8 @@ export const AiCvScreenerView: React.FC = () => {
         effectiveRole,
         targetLevel,
         currentPersona,
-        appliedFixes
+        appliedFixes,
+        activePurpose
       );
 
       const stepInterval = setInterval(() => {
@@ -927,7 +1169,6 @@ export const AiCvScreenerView: React.FC = () => {
           task: 'cv_screener',
           promptName: 'CV Screener & Recruiter Simulation',
           prompt: aiPrompt,
-          systemInstruction: 'Anda adalah Sistem Multi-Screener & Recruiter Intelligence untuk platform karier Employr. Kembalikan HANYA format JSON valid tanpa teks pengantar atau markdown block.',
         }),
       });
 
@@ -953,6 +1194,25 @@ export const AiCvScreenerView: React.FC = () => {
       setIsProcessing(false);
       setHasRunPipeline(true);
 
+      // Save active report to localStorage for dedicated report page / refresh persistence
+      try {
+        const activeReportPayload = {
+          rveReport: finalReport,
+          selectedPersonaId,
+          activePurpose,
+          targetRole: effectiveRole,
+          targetLevel,
+          cvSourceMode,
+          selectedCvId,
+          appliedFixes,
+          selectedSavedCv,
+          timestamp: Date.now(),
+        };
+        localStorage.setItem('employr_active_screener_report', JSON.stringify(activeReportPayload));
+      } catch (err) {
+        console.warn('Gagal menyimpan active report ke localStorage:', err);
+      }
+
       // Auto Save to Report History
       const newHistItem: SavedReportHistoryItem = {
         id: `hist-${Date.now()}`,
@@ -961,7 +1221,11 @@ export const AiCvScreenerView: React.FC = () => {
             ? (selectedSavedCv?.candidateName || 'Kandidat')
             : (uploadedFile?.name || 'CV Upload'),
         targetRole: effectiveRole,
+        targetLevel,
         personaName: currentPersona.name,
+        personaFocus: currentPersona.focusArea,
+        activePurpose,
+        purposeTitle: CV_PURPOSE_PROFILES[activePurpose]?.title || 'Fresh Graduate',
         consensusScore: finalReport.consensusScore,
         verdictStatus: finalReport.verdictStatus,
         timestamp: new Date().toLocaleString('id-ID', {
@@ -975,43 +1239,258 @@ export const AiCvScreenerView: React.FC = () => {
         cvSourceMode,
         selectedCvId,
         selectedPersonaId,
+        rveReport: finalReport,
+        selectedSavedCv,
       };
 
-      setReportHistory((prev) => [newHistItem, ...prev.filter((h) => h.id !== newHistItem.id)]);
+      // Baca riwayat saat ini dari localStorage agar selalu sinkron dan tidak hilang
+      let currentHist: SavedReportHistoryItem[] = [];
+      try {
+        const session = userSession || getStoredSession();
+        const userHistoryKey = session
+          ? `employr_screener_history_${session.email || session.id || 'default'}`
+          : 'employr_screener_history';
+        const raw = localStorage.getItem(userHistoryKey) || localStorage.getItem('employr_screener_history');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) currentHist = parsed;
+        }
+      } catch {}
+
+      const updatedHistory = [newHistItem, ...currentHist.filter((h) => h.id !== newHistItem.id)];
+      persistReportHistory(updatedHistory);
+
+      // Direct navigation to dedicated /cv-screener/report
+      router.push('/cv-screener/report');
     }
   };
 
   const handleLoadHistoryReport = (hist: SavedReportHistoryItem) => {
+    setIsProcessing(false);
     setCvSourceMode(hist.cvSourceMode);
     if (hist.selectedCvId) setSelectedCvId(hist.selectedCvId);
     setSelectedPersonaId(hist.selectedPersonaId);
     setTargetRole(hist.targetRole);
+    if (hist.targetLevel) setTargetLevel(hist.targetLevel);
+    if (hist.activePurpose) setActivePurpose(hist.activePurpose);
     setAppliedFixes(hist.appliedFixes || []);
+    if (hist.rveReport) {
+      setAiReportData(hist.rveReport);
+    }
+    if (hist.selectedSavedCv) {
+      setSavedCvs((prev) => [hist.selectedSavedCv, ...prev.filter((c) => c.id !== hist.selectedSavedCv.id)]);
+    }
     setHasRunPipeline(true);
     setActivePhase('report');
+
+    try {
+      const activePayload = {
+        rveReport: hist.rveReport,
+        selectedPersonaId: hist.selectedPersonaId,
+        activePurpose: hist.activePurpose || 'fresh_graduate',
+        targetRole: hist.targetRole,
+        targetLevel: hist.targetLevel || 'Entry',
+        cvSourceMode: hist.cvSourceMode,
+        selectedCvId: hist.selectedCvId,
+        appliedFixes: hist.appliedFixes || [],
+        selectedSavedCv: hist.selectedSavedCv,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem('employr_active_screener_report', JSON.stringify(activePayload));
+    } catch {}
+    router.push('/cv-screener/report');
+  };
+
+  // Langsung buka hasil evaluasi CV tanpa menjalankan animasi loading Step 1-5 ulang
+  const handleViewCvReportDirectly = (cv: any) => {
+    setIsHistoryDrawerOpen(false);
+    setSelectedCvId(cv.id);
+    setCvSourceMode('saved');
+    const effectiveRole = cv.roleTitle || targetRole || 'Professional';
+    setTargetRole(effectiveRole);
+
+    // Cek apakah CV ini sudah ada di riwayat sesi screening
+    const existingSession = reportHistory.find(
+      (h) => h.selectedCvId === cv.id || (h.candidateName === cv.candidateName && h.targetRole === effectiveRole)
+    );
+
+    if (existingSession && existingSession.rveReport) {
+      handleLoadHistoryReport(existingSession);
+      return;
+    }
+
+    // Jika belum ada di riwayat atau belum ada rveReport, jalankan kalkulasi instan tanpa animasi loading
+    const baseline = runFullRvePipeline(
+      'saved',
+      cv,
+      null,
+      '',
+      effectiveRole,
+      appliedFixes,
+      null,
+      activePurpose
+    );
+
+    setAiReportData(baseline);
+    setIsProcessing(false);
+    setHasRunPipeline(true);
+    setActivePhase('report');
+
+    const newHistItem: SavedReportHistoryItem = {
+      id: `hist-${Date.now()}`,
+      candidateName: cv.candidateName || 'Kandidat',
+      targetRole: effectiveRole,
+      targetLevel,
+      personaName: currentPersona.name,
+      personaFocus: currentPersona.focusArea,
+      activePurpose,
+      purposeTitle: CV_PURPOSE_PROFILES[activePurpose]?.title || 'Fresh Graduate',
+      consensusScore: baseline.consensusScore,
+      verdictStatus: baseline.verdictStatus,
+      timestamp: new Date().toLocaleString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      appliedFixes: [...appliedFixes],
+      cvSourceMode: 'saved',
+      selectedCvId: cv.id,
+      selectedPersonaId,
+      rveReport: baseline,
+      selectedSavedCv: cv,
+    };
+
+    let currentHist: SavedReportHistoryItem[] = [];
+    try {
+      const session = userSession || getStoredSession();
+      const userHistoryKey = session
+        ? `employr_screener_history_${session.email || session.id || 'default'}`
+        : 'employr_screener_history';
+      const raw = localStorage.getItem(userHistoryKey) || localStorage.getItem('employr_screener_history');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) currentHist = parsed;
+      }
+    } catch {}
+
+    const updatedHistory = [newHistItem, ...currentHist.filter((h) => h.id !== newHistItem.id)];
+    persistReportHistory(updatedHistory);
+
+    try {
+      const activeReportPayload = {
+        rveReport: baseline,
+        selectedPersonaId,
+        activePurpose,
+        targetRole: effectiveRole,
+        targetLevel,
+        cvSourceMode: 'saved',
+        selectedCvId: cv.id,
+        appliedFixes,
+        selectedSavedCv: cv,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem('employr_active_screener_report', JSON.stringify(activeReportPayload));
+    } catch (err) {
+      console.warn('Gagal menyimpan active report:', err);
+    }
+
+    router.push('/cv-screener/report');
   };
 
   const handleDeleteHistory = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setReportHistory((prev) => prev.filter((item) => item.id !== id));
+    const updated = reportHistory.filter((item) => item.id !== id);
+    persistReportHistory(updated);
   };
 
-  // 10. Satu Tombol Besar: Optimalkan CV Saya (Auto Apply All Fixes)
-  const handleAutoOptimizeCv = () => {
+  const handleClearAllHistory = () => {
+    persistReportHistory([]);
+  };
+
+  // 10. Satu Tombol Besar: Optimalkan CV Saya (Auto Apply All Fixes & Nyata Tersimpan)
+  const handleAutoOptimizeCv = async () => {
     setIsAutoOptimizing(true);
-    setTimeout(() => {
-      setAppliedFixes(['fix-1', 'fix-2', 'fix-3']);
+    const fixes = ['fix-1', 'fix-2', 'fix-3'];
+    setAppliedFixes(fixes);
+
+    try {
+      if (selectedSavedCv) {
+        const updatedExp = [...(selectedSavedCv.experience || [])];
+        const firstFix = rveReport.beforeAfterFixes.find((f) => f.id === 'fix-1');
+        if (firstFix && updatedExp[0]) {
+          const achs = Array.isArray(updatedExp[0].achievements) ? [...updatedExp[0].achievements] : [];
+          achs[0] = firstFix.after;
+          updatedExp[0] = { ...updatedExp[0], achievements: achs };
+        }
+
+        const secondFix = rveReport.beforeAfterFixes.find((f) => f.id === 'fix-2');
+        const updatedSummary = secondFix ? secondFix.after : selectedSavedCv.summary;
+
+        const extraSkills = ['Koordinasi Proyek', 'Pelaporan Kegiatan', 'Analisis Data'];
+        const updatedSkills = Array.from(new Set([...(selectedSavedCv.skills || []), ...extraSkills]));
+
+        const updatedCvData = {
+          ...selectedSavedCv,
+          summary: updatedSummary,
+          experience: updatedExp,
+          skills: updatedSkills,
+          updatedAt: 'Baru saja diperbarui',
+        };
+
+        localStorage.setItem('employr_cv_active_draft', JSON.stringify(updatedCvData));
+        setSavedCvs((prev) => prev.map((c) => (c.id === selectedSavedCv.id ? updatedCvData : c)));
+
+        if (selectedSavedCv.id && !selectedSavedCv.id.startsWith('default-')) {
+          await cvApi.update(selectedSavedCv.id, updatedCvData).catch(() => {});
+        }
+      }
+      toast.success('Semua perbaikan kalimat berhasil diterapkan dan disimpan ke draf CV Anda!');
+    } catch (e) {
+      console.warn('Gagal menyimpan otomatis ke CV:', e);
+      toast.info('Perbaikan diterapkan pada simulasi laporan!');
+    } finally {
       setIsAutoOptimizing(false);
       const elem = document.getElementById('verdict-summary-top');
       if (elem) {
         elem.scrollIntoView({ behavior: 'smooth' });
       }
-    }, 500);
+    }
   };
 
-  const handleApplyFix = (fixId: string) => {
+  const handleApplyFix = async (fixId: string) => {
     if (!appliedFixes.includes(fixId)) {
       setAppliedFixes((prev) => [...prev, fixId]);
+      try {
+        if (selectedSavedCv) {
+          const targetFix = rveReport.beforeAfterFixes.find((f) => f.id === fixId);
+          if (targetFix) {
+            let updatedData = { ...selectedSavedCv };
+            if (fixId === 'fix-1' && updatedData.experience?.[0]) {
+              const updatedExp = [...updatedData.experience];
+              const achs = Array.isArray(updatedExp[0].achievements) ? [...updatedExp[0].achievements] : [];
+              achs[0] = targetFix.after;
+              updatedExp[0] = { ...updatedExp[0], achievements: achs };
+              updatedData.experience = updatedExp;
+            } else if (fixId === 'fix-2') {
+              updatedData.summary = targetFix.after;
+            } else if (fixId === 'fix-3') {
+              const extraSkills = ['Koordinasi Proyek', 'Pelaporan Kegiatan'];
+              updatedData.skills = Array.from(new Set([...(updatedData.skills || []), ...extraSkills]));
+            }
+            updatedData.updatedAt = 'Baru saja diperbarui';
+            localStorage.setItem('employr_cv_active_draft', JSON.stringify(updatedData));
+            setSavedCvs((prev) => prev.map((c) => (c.id === selectedSavedCv.id ? updatedData : c)));
+            if (selectedSavedCv.id && !selectedSavedCv.id.startsWith('default-')) {
+              await cvApi.update(selectedSavedCv.id, updatedData).catch(() => {});
+            }
+          }
+        }
+        toast.success('Perbaikan seksi berhasil disimpan ke draf CV!');
+      } catch {
+        toast.info('Perbaikan diterapkan pada simulasi!');
+      }
     }
   };
 
@@ -1052,7 +1531,6 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
           feature: 'cv_screener',
           task: 'cv_screener',
           prompt: aiPrompt,
-          systemInstruction: 'Anda adalah Tim Recruiter Profesional di Indonesia. Jawab secara ringkas, solutif, dan jelas.',
         }),
       });
 
@@ -1091,20 +1569,70 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
   };
 
   return (
-    <div className="space-y-6 md:space-y-8 w-full pb-16 font-sans transition-all duration-300">
+    <div className="space-y-4 sm:space-y-5 w-full pb-12 font-sans transition-all duration-300">
       {/* PHASE 1: SETUP & HISTORY 3-COLUMN LAYOUT VIEW */}
       {activePhase === 'setup' && (
-        <div className="space-y-6 w-full animate-in fade-in duration-300">
-          {/* Header Banner */}
-          <div className="p-5 sm:p-6 rounded-[10px] bg-navy-700 border border-navy-800 text-white shadow-xl relative overflow-hidden">
-            <div className="relative z-10 space-y-2 max-w-3xl">
-              <span className="inline-block px-3 py-1 rounded-[10px] text-xs font-black bg-[#1738D1] text-white shadow-xs">
-                Langkah 1: Konfigurasi CV &amp; Target Perusahaan
-              </span>
-              <h2 className="text-xl sm:text-2xl font-black text-white">Pilih CV &amp; Kriteria Recruiter Target Anda</h2>
-              <p className="text-xs text-slate-200">
-                Sesuaikan posisi impian, berkas CV, dan pilih salah satu persona recruiter di bawah ini untuk mensimulasikan evaluasi HRD, ATS, dan Tim Recruiter.
-              </p>
+        <div className="space-y-4 sm:space-y-5 w-full animate-in fade-in duration-300">
+          {/* Header Status & Action Bar */}
+          <div className="relative overflow-hidden px-4 py-2.5 sm:py-3 rounded-[10px] bg-[#162758] border border-[#20367A] text-white shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-wrap relative z-10">
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="p-1.5 rounded-[8px] bg-white/10 text-white shrink-0">
+                  <Play className="w-4 h-4 fill-white" />
+                </div>
+                <span className="font-extrabold text-xs sm:text-sm text-white tracking-tight uppercase">
+                  CV Screener
+                </span>
+              </div>
+
+              <div className="h-4 w-[1px] bg-white/20 hidden sm:block shrink-0" />
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] bg-white/10 border border-white/15 shadow-2xs">
+                  <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Tahap:</span>
+                  <span className="text-xs font-black text-white leading-none">Konfigurasi Target</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] bg-white/10 border border-white/15 shadow-2xs">
+                  <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Status:</span>
+                  <span className="text-xs font-black text-emerald-400 leading-none">Siaga</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="shrink-0 md:ml-auto w-full sm:w-auto flex items-center justify-end gap-2.5 relative z-10 flex-wrap sm:flex-nowrap">
+              <button
+                type="button"
+                onClick={() => setIsHistoryDrawerOpen(true)}
+                className="px-3.5 py-2 rounded-[10px] bg-white/10 hover:bg-white/20 active:scale-[0.98] text-white font-bold text-xs border border-white/20 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                title="Buka Riwayat Screening & Laporan CV"
+              >
+                <History className="w-3.5 h-3.5 text-orange-400" />
+                <span>Riwayat Screening</span>
+                {reportHistory.length > 0 && (
+                  <span className="px-1.5 py-0.5 text-[10px] font-extrabold bg-orange-500 text-white rounded-[6px] leading-none">
+                    {reportHistory.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleStartRvePipeline}
+                disabled={isProcessing}
+                className="px-4 py-2 rounded-[10px] bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-black text-xs shadow-md shadow-orange-500/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shrink-0 w-full sm:w-auto"
+              >
+                {isProcessing ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Memproses...</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-3.5 h-3.5 fill-white" />
+                    <span>Mulai Screening</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
 
@@ -1146,9 +1674,9 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                           </span>
                         )}
                         {cvSourceMode === 'saved' && hasUsableCv && (
-                          <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1 shrink-0">
-                            <Star className="w-3 h-3 text-emerald-600 fill-emerald-600" />
-                            <span>{selectedSavedCv.atsScore}% ATS</span>
+                          <span className={`px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold border flex items-center gap-1 shrink-0 ${getScoreBadgeClass(selectedSavedCv?.atsScore)}`}>
+                            <Star className="w-3 h-3 fill-current" />
+                            <span>{selectedSavedCv?.atsScore}% ATS</span>
                           </span>
                         )}
                       </div>
@@ -1162,14 +1690,26 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setIsChangeCvModalOpen(true)}
-                    className="px-3 py-1.5 rounded-[10px] bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-[#1F3578] dark:text-blue-300 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-2xs"
-                  >
-                    <SlidersHorizontal className="w-3.5 h-3.5" />
-                    <span>Ganti CV</span>
-                  </button>
+                  {hasUsableCv ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsChangeCvModalOpen(true)}
+                      className="group px-3.5 py-1.5 rounded-[10px] bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 text-[#1F3578] dark:text-blue-300 text-xs font-bold transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer shrink-0 shadow-xs hover:shadow-sm active:scale-[0.97]"
+                      title="Ganti berkas CV yang sedang aktif"
+                    >
+                      <ArrowLeftRight className="w-3.5 h-3.5 text-[#1F3578] dark:text-blue-300 group-hover:rotate-180 transition-transform duration-300 ease-out" />
+                      <span>Ganti CV</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsChangeCvModalOpen(true)}
+                      className="px-3.5 py-1.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-sm"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Pilih Berkas CV</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -1263,13 +1803,13 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
               </div>
 
               {/* Filter Kategori Purpose */}
-              <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
                 {[
-                  { id: 'all', label: 'Semua (10)' },
-                  { id: 'career', label: 'Karier' },
                   { id: 'entry', label: 'Pemula / Mahasiswa' },
+                  { id: 'career', label: 'Karier' },
                   { id: 'flexible', label: 'Fleksibel' },
                   { id: 'academic', label: 'Akademik' },
+                  { id: 'all', label: 'Semua (10)' },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -1329,10 +1869,10 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
             </div>
           </div>
 
-          {/* MAIN 3-COLUMN GRID LAYOUT (Left List, Middle Preview, Right History) */}
+          {/* MAIN 2-COLUMN BALANCED GRID (Left Recruiter List, Right Detailed Preview) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
             {/* COLUMN 1: Recruiter List (Pilih Tipe Recruiter - Left Column) */}
-            <div className="lg:col-span-3 space-y-4">
+            <div className="lg:col-span-5 space-y-4">
               <div className="p-4 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
                 {/* Search Bar */}
                 <div className="relative">
@@ -1425,10 +1965,10 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                         {/* Dynamic Match Score + Selected Indicator */}
                         <div className="flex items-center gap-2 shrink-0">
                           <span
-                            className={`text-[10px] font-black px-2 py-0.5 rounded-[10px] border ${
-                              persona.id === bestMatchPersonaId
-                                ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
-                                : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                            className={`text-[10px] font-black px-2 py-0.5 rounded-[10px] border transition-colors ${
+                              hasUsableCv
+                                ? getScoreBadgeClass(personaMatchScores[persona.id] ?? persona.matchScore)
+                                : 'bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700'
                             }`}
                           >
                             {hasUsableCv ? `${personaMatchScores[persona.id] ?? persona.matchScore}%` : '—'}
@@ -1466,8 +2006,8 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
               </div>
             </div>
 
-            {/* COLUMN 2: Preview Recruiter (Middle Column ~250-350px Card) */}
-            <div className="lg:col-span-5 space-y-4">
+            {/* COLUMN 2: Preview Recruiter & Modul Screening (Right Column) */}
+            <div className="lg:col-span-7 space-y-4">
               <div className="p-5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                 <span className="text-xs font-black text-slate-400 uppercase tracking-wider block">
                   Preview Recruiter
@@ -1501,7 +2041,7 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                     </div>
 
                     <div className="text-right shrink-0">
-                      <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 block">
+                      <span className={`text-2xl font-black block transition-colors ${getScoreTextClass(currentPersonaMatchScore, !hasUsableCv)}`}>
                         {hasUsableCv ? `${currentPersonaMatchScore}%` : '—'}
                       </span>
                       <span className="text-[9px] font-bold text-slate-400 block uppercase">Match</span>
@@ -1615,131 +2155,20 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                     type="button"
                     onClick={handleStartRvePipeline}
                     disabled={isProcessing}
-                    className="w-full py-3.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.99] text-white font-black text-sm shadow-md shadow-[#1738D1]/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 hover:-translate-y-0.5 mt-2"
+                    className="w-full py-3.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-sm shadow-md shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 hover:-translate-y-0.5 mt-2"
                   >
-                    <Play className="w-4 h-4 fill-white" />
-                    <span>Mulai Screening</span>
+                    {isProcessing ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span>Memproses Evaluasi...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-4 h-4 fill-white" />
+                        <span>Mulai Screening</span>
+                      </>
+                    )}
                   </button>
-                </div>
-              </div>
-            </div>
-
-            {/* COLUMN 3: Riwayat Screening CV Saya (Right Column) */}
-            <div className="lg:col-span-4 space-y-4">
-              {/* Riwayat & Hasil Screening Card (Merged into 1 Card) */}
-              <div className="p-4 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
-                  <div className="flex items-center gap-1.5">
-                    <History className="w-4 h-4 text-orange-500" />
-                    <h3 className="text-xs font-black text-slate-900 dark:text-white">
-                      Riwayat &amp; Hasil Screening CV
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-bold text-orange-600 hover:underline cursor-pointer">
-                    Lihat Semua
-                  </span>
-                </div>
-
-                {/* Section 1: Riwayat Sesi Screening Terakhir */}
-                {reportHistory.length > 0 && (
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
-                      Riwayat Sesi Screening:
-                    </span>
-                    <div className="space-y-2">
-                      {reportHistory.slice(0, 2).map((hist) => (
-                        <div
-                          key={hist.id}
-                          onClick={() => handleLoadHistoryReport(hist)}
-                          className="p-3 rounded-[10px] border border-slate-200 dark:border-slate-800 hover:border-[#1738D1]/50 hover:bg-orange-50/40 dark:hover:bg-orange-950/30 transition-all cursor-pointer space-y-1.5 group shadow-2xs"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-black text-xs text-rose-600 dark:text-rose-400 group-hover:text-orange-600 transition">
-                              {hist.candidateName}
-                            </span>
-                            <span className="text-[9px] font-extrabold bg-slate-50 text-navy-700 dark:bg-slate-900 dark:text-navy-300 px-1.5 py-0.5 rounded-[10px] border border-slate-200 dark:border-slate-800">
-                              {hist.personaName}
-                            </span>
-                          </div>
-
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                            {hist.targetRole}
-                          </p>
-
-                          <div className="flex items-center justify-between text-[10px] border-t border-slate-100 dark:border-slate-800/80 pt-1.5 text-slate-400">
-                            <span>{hist.timestamp}</span>
-                            <span className="font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block shrink-0" />
-                              {hist.consensusScore}% ATS
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Section 2: Berkas CV & Skor Terbaru */}
-                <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
-                    Hasil CV Terbaru:
-                  </span>
-
-                  <div className="space-y-2 text-xs">
-                    {savedCvs.slice(0, 3).map((cv) => (
-                      <div
-                        key={cv.id}
-                        onClick={() => {
-                          setSelectedCvId(cv.id);
-                          setCvSourceMode('saved');
-                          handleStartRvePipeline();
-                        }}
-                        className="p-2.5 rounded-[10px] border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
-                      >
-                        <div>
-                          <h5 className="font-bold text-xs text-slate-900 dark:text-white">{cv.candidateName}</h5>
-                          <p className="text-[10px] text-slate-400">{cv.roleTitle}</p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-1.5 py-0.5 rounded-[10px]">
-                            {cv.atsScore}% ATS
-                          </span>
-                          <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Butuh Insight Lebih Dalam? Card */}
-              <div className="p-4 rounded-[10px] bg-gradient-to-br from-slate-50/80 to-slate-50/80 dark:from-navy-950/40 dark:to-slate-900/40 border border-slate-200/80 dark:border-slate-900/60 space-y-3">
-                <div className="flex items-start gap-2.5">
-                  <div className="p-2 rounded-[10px] bg-navy-600 text-white shrink-0">
-                    <Sparkles className="w-4 h-4 fill-white" />
-                  </div>
-                  <div>
-                    <h5 className="font-extrabold text-xs text-slate-900 dark:text-white">
-                      Butuh insight lebih dalam?
-                    </h5>
-                    <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-snug pt-0.5">
-                      Lihat Laporan Intelligence Full-Width untuk analisis lengkap recruiter target.
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setActivePhase('report')}
-                  className="w-full py-2.5 rounded-[10px] bg-white dark:bg-slate-900 hover:bg-navy-50 text-[#1738D1] dark:text-blue-400 text-xs font-bold transition flex items-center justify-center gap-1 border border-slate-200 dark:border-slate-800 cursor-pointer shadow-2xs"
-                >
-                  <span>Lihat Laporan</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-
-                <div className="flex items-center gap-1.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-400 pt-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                  <span>Lihat Laporan dinamis terhubung dengan database dan per akun</span>
                 </div>
               </div>
             </div>
@@ -1755,7 +2184,13 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => setActivePhase('setup')}
+                onClick={() => {
+                  if (mode === 'report') {
+                    router.push('/cv-screener');
+                  } else {
+                    setActivePhase('setup');
+                  }
+                }}
                 className="px-3.5 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <ArrowLeft className="w-4 h-4 text-orange-500" />
@@ -1780,6 +2215,20 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
             </div>
 
             <div className="flex items-center gap-2 self-end sm:self-auto">
+              <button
+                type="button"
+                onClick={() => setIsHistoryDrawerOpen(true)}
+                className="px-3.5 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                title="Buka Riwayat Screening & Laporan CV"
+              >
+                <History className="w-3.5 h-3.5 text-orange-500" />
+                <span>Riwayat Screening</span>
+                {reportHistory.length > 0 && (
+                  <span className="px-1.5 py-0.5 text-[10px] font-extrabold bg-[#1738D1] text-white rounded-[6px] leading-none">
+                    {reportHistory.length}
+                  </span>
+                )}
+              </button>
             </div>
           </div>
 
@@ -2075,13 +2524,13 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                           <span className="text-[11px] font-extrabold text-slate-700 dark:text-slate-300">
                             Achievement Strength
                           </span>
-                          <span className={`text-xs font-black ${(rveReport.purposeScore?.dimensions.achievementStrength.score ?? 69) >= 75 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                          <span className={`text-xs font-black transition-colors ${getScoreTextClass(rveReport.purposeScore?.dimensions.achievementStrength.score ?? 69)}`}>
                             {rveReport.purposeScore?.dimensions.achievementStrength.score ?? 69}%
                           </span>
                         </div>
                         <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
                           <div
-                            className={`h-full rounded-full transition-all duration-500 ${(rveReport.purposeScore?.dimensions.achievementStrength.score ?? 69) >= 75 ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                            className={`h-full rounded-full transition-all duration-500 ${getScoreProgressBarClass(rveReport.purposeScore?.dimensions.achievementStrength.score ?? 69)}`}
                             style={{ width: `${rveReport.purposeScore?.dimensions.achievementStrength.score ?? 69}%` }}
                           />
                         </div>
@@ -2312,7 +2761,7 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                       </span>
                       <div className="flex items-center gap-1.5 font-black text-base text-slate-900 dark:text-white">
                         <Clock className="w-4 h-4 text-orange-500" />
-                        <span>6.4 Detik</span>
+                        <span>{scanDuration} Detik</span>
                       </div>
                       <p className="text-[10px] text-slate-500 dark:text-slate-400">Durasi awal HR memindai halaman.</p>
                     </div>
@@ -2334,7 +2783,7 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                       </span>
                       <div className="flex items-center gap-1.5 font-black text-base text-rose-600 dark:text-rose-400">
                         <Flame className="w-4 h-4 text-rose-500" />
-                        <span>Nama &amp; Metrik Angka</span>
+                        <span>{primaryHotspotText}</span>
                       </div>
                       <p className="text-[10px] text-slate-500 dark:text-slate-400">Daya tarik utama recruiter.</p>
                     </div>
@@ -2379,57 +2828,99 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                 </div>
                 )}
 
-                {/* STEP 2: ATS COMPATIBILITY MATRIX */}
+                {/* STEP 2: REKOMENDASI KATA KUNCI INDUSTRI & CTA MATCH CV */}
                 {selectedModules.ats && (
                 <div
                   id="step-ats"
                   className="p-6 md:p-8 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 scroll-mt-20"
                 >
-                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
                     <div className="space-y-1">
                       <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase bg-blue-50 dark:bg-blue-950/60 text-navy-700 dark:text-blue-300 border border-blue-200 dark:border-navy-900/60 inline-flex items-center gap-1">
                         <BarChart3 className="w-3 h-3 text-blue-600" />
-                        <span>STEP {activeStepMap.ats} — Machine Filter</span>
+                        <span>STEP {activeStepMap.ats} — Rekomendasi Kata Kunci Industri</span>
                       </span>
                       <h3 className="font-black text-xl text-slate-900 dark:text-white">
-                        ATS Compatibility &amp; Keyword Density Matrix
+                        Standar Kata Kunci Kompetensi: {effectiveRole}
                       </h3>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Memetakan visibilitas kata kunci utama terhadap filter otomatis sistem Applicant Tracking System.
+                        Diambil dari data posisi yang dilamar pada profil CV Anda. Menampilkan keahlian standar yang umum dicari rekruter untuk posisi ini.
                       </p>
                     </div>
 
-                    <div className="text-right">
+                    <div className="text-left sm:text-right shrink-0">
                       <span className="text-3xl font-black text-navy-700 dark:text-navy-300">{rveReport.atsScore}%</span>
-                      <span className="text-[10px] text-slate-400 block font-semibold">Skor ATS</span>
+                      <span className="text-[10px] text-slate-400 block font-semibold">Skor Standar ATS</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {rveReport.atsCorrelations.map((item) => (
-                      <div
-                        key={item.id}
-                        className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 space-y-2 text-xs"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-slate-800 dark:text-slate-200">{item.keyword}</span>
-                          <span
-                            className={`px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase ${
-                              item.quadrant === 'gold'
-                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-                                : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
-                            }`}
-                          >
-                            {item.quadrant === 'gold' ? 'Area Emas' : 'Kurang ATS'}
+                    {rveReport.atsCorrelations.map((item) => {
+                      const isFound = item.foundInCv || item.quadrant === 'gold';
+                      return (
+                        <div
+                          key={item.id}
+                          className={`p-4 rounded-[10px] border space-y-2 text-xs transition-all ${
+                            isFound
+                              ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200/80 dark:border-emerald-800/60'
+                              : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200/90 dark:border-slate-700/80'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-800 dark:text-slate-200">{item.keyword}</span>
+                            <span
+                              className={`px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase flex items-center gap-1 ${
+                                isFound
+                                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                                  : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+                              }`}
+                            >
+                              {isFound ? (
+                                <>
+                                  <Check className="w-3 h-3 text-emerald-600" />
+                                  <span>Sudah di CV</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Plus className="w-3 h-3 text-amber-600" />
+                                  <span>Disarankan</span>
+                                </>
+                              )}
+                            </span>
+                          </div>
+                          <span className="text-[10px] font-bold uppercase text-slate-400 block">
+                            {item.category || 'Kompetensi Industri'}
                           </span>
+                          <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">{item.recommendation}</p>
                         </div>
-                        <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">{item.recommendation}</p>
-                        <div className="flex items-center justify-between text-[10px] pt-1 text-slate-500 dark:text-slate-400 border-t border-slate-200/60 dark:border-slate-700/60">
-                          <span>Visibilitas Mata: <strong className="text-slate-800 dark:text-slate-200">{item.visibilityScore}%</strong></span>
-                          <span>Skor ATS: <strong className="text-slate-800 dark:text-slate-200">{item.atsScore}%</strong></span>
-                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* BANNER CTA LANGSUNG KE MATCH CV */}
+                  <div className="p-5 rounded-[10px] bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-slate-800/90 dark:via-blue-950/40 dark:to-slate-800/90 border border-blue-200/90 dark:border-blue-800/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+                    <div className="space-y-1 max-w-xl">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase bg-blue-100 dark:bg-blue-900/80 text-[#1738D1] dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                          Pencocokan Lowongan Spesifik (1-ke-1)
+                        </span>
+                        <span className="text-xs font-bold text-slate-400">• Fitur Match CV</span>
                       </div>
-                    ))}
+                      <h4 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+                        Punya Lowongan Kerja Spesifik yang Ingin Dilamar?
+                      </h4>
+                      <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Uji kecocokan kata kunci dan kualifikasi CV Anda langsung terhadap <strong>Job Description</strong> resmi lowongan incaran di fitur <strong>Match CV</strong> untuk melihat skor kecocokan presisi dan menutup skill gap.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/match-cv?cvId=${selectedCvId || ''}&role=${encodeURIComponent(effectiveRole)}`)}
+                      className="px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 active:scale-[0.98] transition flex items-center gap-2 shrink-0 cursor-pointer"
+                    >
+                      <span>Cocokkan dengan Job Description di Match CV</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
                 )}
@@ -2461,44 +2952,105 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    {rveReport.aiEvaluations.map((ai) => (
-                      <div
-                        key={ai.modelName}
-                        className="p-5 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-4 flex flex-col justify-between"
-                      >
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-700/60 pb-2">
-                            <span className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-1.5">
-                              <Cpu className="w-4 h-4 text-orange-500" />
-                              {ai.modelName}
-                            </span>
-                            <span className="text-sm font-black text-orange-500 bg-orange-50 dark:bg-orange-950 px-2.5 py-0.5 rounded-[10px] border border-orange-200 dark:border-orange-900">
-                              {ai.score}%
-                            </span>
-                          </div>
+                    {rveReport.aiEvaluations.map((ai, idx) => {
+                      const isAts = ai.modelName.toLowerCase().includes('ats') || ai.modelName.toLowerCase().includes('keyword');
+                      const isVisual = ai.modelName.toLowerCase().includes('visual') || ai.modelName.toLowerCase().includes('eye') || ai.modelName.toLowerCase().includes('hrd');
 
-                          <div className="space-y-2 pt-1 text-xs">
-                            <span className="text-[10px] font-bold uppercase text-slate-400 block">Kelebihan Utama:</span>
-                            {ai.pros.map((p, i) => (
-                              <div key={i} className="flex items-start gap-1.5 text-emerald-700 dark:text-emerald-300 text-xs leading-snug">
-                                <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                                <span>{p}</span>
-                              </div>
-                            ))}
-                          </div>
+                      const screenerContext = {
+                        targetRole: rveReport.parsedData.roleTitle || targetRole,
+                        candidateName: rveReport.parsedData.candidateName,
+                        skills: rveReport.parsedData.skills,
+                        company: rveReport.parsedData.experience[0]?.company,
+                        expRole: rveReport.parsedData.experience[0]?.role,
+                      };
 
-                          <div className="space-y-2 pt-1 text-xs">
-                            <span className="text-[10px] font-bold uppercase text-slate-400 block">Catatan Evaluasi:</span>
-                            {ai.cons.map((c, i) => (
-                              <div key={i} className="flex items-start gap-1.5 text-amber-700 dark:text-amber-300 text-xs leading-snug">
-                                <AlertCircle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                                <span>{c}</span>
+                      const screenerIcon = isAts ? (
+                        <Cpu className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      ) : isVisual ? (
+                        <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      ) : (
+                        <Briefcase className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                      );
+
+                      const scoreBadgeStyle = isAts
+                        ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 border-emerald-200 dark:border-emerald-800'
+                        : isVisual
+                        ? 'text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/80 border-blue-200 dark:border-blue-800'
+                        : 'text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/80 border-amber-200 dark:border-amber-800';
+
+                      return (
+                        <div
+                          key={ai.modelName || idx}
+                          className="p-5 rounded-[10px] bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/80 space-y-4 flex flex-col justify-between shadow-xs hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+                        >
+                          <div className="space-y-4">
+                            {/* Card Header */}
+                            <div className="flex items-start justify-between gap-2 border-b border-slate-200/70 dark:border-slate-700/70 pb-3">
+                              <div className="space-y-0.5">
+                                <span className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-1.5 leading-snug">
+                                  {screenerIcon}
+                                  {ai.modelName}
+                                </span>
+                                <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
+                                  {isAts
+                                    ? 'Filter parsing kata kunci & format'
+                                    : isVisual
+                                    ? 'Simulasi F-Pattern 6 detik pertama'
+                                    : 'Evaluasi dampak nyata & kesiapan tim'}
+                                </span>
                               </div>
-                            ))}
+                              <span className={`text-xs font-black px-2.5 py-1 rounded-[10px] border shrink-0 ${scoreBadgeStyle}`}>
+                                {ai.score}%
+                              </span>
+                            </div>
+
+                            {/* Pros / Kelebihan Utama */}
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-[6px] border border-emerald-200/60 dark:border-emerald-900/40 w-fit">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                                <span>Kelebihan Utama (Pros)</span>
+                              </div>
+                              <div className="space-y-2">
+                                {ai.pros.map((p, i) => {
+                                  const enriched = enrichScreenerPoint(p, 'pro', ai.modelName, screenerContext);
+                                  return (
+                                    <div
+                                      key={i}
+                                      className="flex items-start gap-2 text-slate-700 dark:text-slate-200 text-xs leading-relaxed bg-white dark:bg-slate-900/70 p-2.5 rounded-[8px] border border-slate-200/60 dark:border-slate-700/60 shadow-2xs"
+                                    >
+                                      <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                                      <span>{enriched}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+                            {/* Cons / Catatan Evaluasi */}
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded-[6px] border border-amber-200/60 dark:border-amber-900/40 w-fit">
+                                <AlertCircle className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                                <span>Catatan Evaluasi & Rekomendasi</span>
+                              </div>
+                              <div className="space-y-2">
+                                {ai.cons.map((c, i) => {
+                                  const enriched = enrichScreenerPoint(c, 'con', ai.modelName, screenerContext);
+                                  return (
+                                    <div
+                                      key={i}
+                                      className="flex items-start gap-2 text-slate-700 dark:text-slate-200 text-xs leading-relaxed bg-white dark:bg-slate-900/70 p-2.5 rounded-[8px] border border-slate-200/60 dark:border-slate-700/60 shadow-2xs"
+                                    >
+                                      <AlertCircle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                                      <span>{enriched}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
                 )}
@@ -2702,139 +3254,704 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
           )}
         </div>
       )}
-      {/* MODAL: GANTI CV */}
+      {/* RIGHT-HAND SLIDE-IN DRAWER: PILIH PROFIL CV AKTIF / UPLOAD FILE */}
       {isChangeCvModalOpen && (
         <div
-          onClick={() => setIsChangeCvModalOpen(false)}
-          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200 cursor-pointer"
+          onClick={handleCloseCvDrawer}
+          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end transition-opacity cursor-pointer animate-in fade-in duration-200"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-slate-900 rounded-[10px] max-w-lg w-full p-6 space-y-4 shadow-2xl relative border border-slate-200 dark:border-slate-800 cursor-default"
+            className="relative z-10 w-full max-w-md sm:max-w-lg h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300 cursor-default"
           >
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#3B5CC4] dark:text-blue-400" />
-                <span>Pilih Profil CV Aktif / Upload File</span>
-              </h3>
+            {/* Header */}
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-[10px] bg-blue-50 dark:bg-blue-950/60 text-[#1738D1] dark:text-blue-400">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+                    Pilih Profil CV Aktif / Upload File
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Gunakan CV akun atau upload berkas dokumen baru (PDF/DOCX)
+                  </p>
+                </div>
+              </div>
               <button
                 type="button"
-                onClick={() => setIsChangeCvModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1"
+                onClick={handleCloseCvDrawer}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                title="Tutup"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Mode Switcher */}
-            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-[10px] text-xs font-bold">
+            {/* Tab Switcher */}
+            <div className="px-5 pt-4 pb-3 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-[10px] text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => setCvSourceMode('saved')}
+                  className={`flex-1 py-2 rounded-[8px] transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                    cvSourceMode === 'saved'
+                      ? 'bg-white dark:bg-slate-900 text-[#1738D1] dark:text-blue-400 shadow-xs font-black'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <FileCheck className="w-3.5 h-3.5" />
+                  <span>CV Tersimpan ({savedCvs.length})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCvSourceMode('upload')}
+                  className={`flex-1 py-2 rounded-[8px] transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                    cvSourceMode === 'upload'
+                      ? 'bg-white dark:bg-slate-900 text-[#1738D1] dark:text-blue-400 shadow-xs font-black'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Upload Berkas Baru</span>
+                  {uploadedFile && (
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Scrollable Body */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              {cvSourceMode === 'saved' ? (
+                /* TAB 1: CV TERSIMPAN */
+                <div className="space-y-3">
+                  {/* Search Bar if > 1 CV */}
+                  {savedCvs.length > 1 && (
+                    <div className="relative">
+                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={savedCvSearch}
+                        onChange={(e) => setSavedCvSearch(e.target.value)}
+                        placeholder="Cari profil CV tersimpan..."
+                        className="w-full pl-9 pr-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[#1738D1]"
+                      />
+                    </div>
+                  )}
+
+                  {/* Empty State */}
+                  {savedCvs.length === 0 ? (
+                    <div className="py-10 px-4 text-center rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 space-y-3">
+                      <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
+                        <FileText className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                          Belum Ada CV Tersimpan
+                        </h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">
+                          Kamu belum memiliki CV tersimpan di akun ini. Kamu bisa mengunggah file CV (PDF/DOCX) atau membuat CV baru di CV Builder.
+                        </p>
+                      </div>
+                      <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setCvSourceMode('upload')}
+                          className="px-3.5 py-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+                        >
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Upload Berkas CV</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => router.push('/cv')}
+                          className="px-3.5 py-2 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer"
+                        >
+                          Buka CV Builder
+                        </button>
+                      </div>
+                    </div>
+                  ) : filteredSavedCvs.length === 0 ? (
+                    <div className="py-8 text-center text-slate-400 text-xs">
+                      Tidak ada profil CV yang cocok dengan pencarian "{savedCvSearch}".
+                    </div>
+                  ) : (
+                    /* List of Saved CV Cards */
+                    <div className="space-y-2.5">
+                      {filteredSavedCvs.map((cv) => {
+                        const isSelected = selectedCvId === cv.id && cvSourceMode === 'saved';
+                        return (
+                          <div
+                            key={cv.id}
+                            onClick={() => handleSelectSavedCv(cv)}
+                            className={`p-3.5 rounded-[10px] border transition-all cursor-pointer relative group ${
+                              isSelected
+                                ? 'border-[#1738D1] bg-blue-50/50 dark:bg-blue-950/30 ring-2 ring-[#1738D1]/20'
+                                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-2.5">
+                              <div className="flex items-start gap-2.5 min-w-0">
+                                <div
+                                  className={`w-4 h-4 rounded-full border mt-0.5 flex items-center justify-center shrink-0 transition ${
+                                    isSelected
+                                      ? 'border-[#1738D1] bg-[#1738D1] text-white'
+                                      : 'border-slate-300 dark:border-slate-600 group-hover:border-slate-400'
+                                  }`}
+                                >
+                                  {isSelected && <Check className="w-2.5 h-2.5" />}
+                                </div>
+                                <div className="min-w-0">
+                                  <h4 className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                                    {cv.title || cv.candidateName}
+                                  </h4>
+                                  <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 mt-0.5 truncate">
+                                    {cv.roleTitle}
+                                  </p>
+                                  <p className="text-[10px] text-slate-400 mt-1">
+                                    Diperbarui {cv.updatedAt}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex flex-col items-end gap-1.5 shrink-0">
+                                <span
+                                  className={`px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold border flex items-center gap-1 ${getScoreBadgeClass(
+                                    cv.atsScore
+                                  )}`}
+                                >
+                                  <Star className="w-2.5 h-2.5 fill-current" />
+                                  <span>{cv.atsScore}% ATS</span>
+                                </span>
+                                {isSelected ? (
+                                  <span className="px-2 py-0.5 rounded-[10px] text-[9px] font-black bg-[#1738D1] text-white tracking-wider uppercase">
+                                    Aktif
+                                  </span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSelectSavedCv(cv);
+                                    }}
+                                    className="text-[10px] font-bold text-[#1738D1] dark:text-blue-400 hover:underline cursor-pointer"
+                                  >
+                                    Pilih CV
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Skills preview pills */}
+                            {Array.isArray(cv.skills) && cv.skills.length > 0 && (
+                              <div className="flex items-center gap-1 flex-wrap mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+                                {cv.skills.slice(0, 4).map((s: string, idx: number) => (
+                                  <span
+                                    key={idx}
+                                    className="px-1.5 py-0.5 rounded-[6px] text-[9px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 truncate max-w-[110px]"
+                                  >
+                                    {s}
+                                  </span>
+                                ))}
+                                {cv.skills.length > 4 && (
+                                  <span className="text-[9px] font-bold text-slate-400">
+                                    +{cv.skills.length - 4}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* TAB 2: UPLOAD BERKAS */
+                <div className="space-y-4">
+                  {/* Dropzone Area */}
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragEnter={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDropFile}
+                    onClick={() => cvFileInputRef.current?.click()}
+                    className={`p-6 rounded-[10px] border-2 border-dashed transition-all text-center cursor-pointer ${
+                      isDraggingFile
+                        ? 'border-[#1738D1] bg-blue-50/60 dark:bg-blue-950/40 ring-4 ring-[#1738D1]/10 scale-[1.01]'
+                        : 'border-slate-300 dark:border-slate-700 hover:border-[#1738D1] dark:hover:border-blue-500 bg-slate-50/60 dark:bg-slate-800/30'
+                    }`}
+                  >
+                    <input
+                      ref={cvFileInputRef}
+                      type="file"
+                      accept=".pdf,.docx,.doc,.txt"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileSelect(file);
+                        e.target.value = '';
+                      }}
+                      className="hidden"
+                    />
+                    <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-950 text-[#1738D1] dark:text-blue-400 flex items-center justify-center mx-auto mb-3">
+                      <Upload className="w-6 h-6" />
+                    </div>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white">
+                      Tarik &amp; lepas berkas CV ke sini, atau klik untuk memilih
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                      Mendukung format PDF, DOCX, DOC, dan TXT (Maks. 5MB)
+                    </p>
+                    <div className="mt-3">
+                      <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold shadow-xs transition">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Pilih Berkas Komputer</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Upload State & Extracted Results Card */}
+                  {uploadedFile && (
+                    <div className="p-4 rounded-[10px] border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-2.5 min-w-0">
+                          <div className="p-2 rounded-[8px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#1738D1] dark:text-blue-400 shrink-0">
+                            <FileText className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                              {uploadedFile.name}
+                            </p>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                              {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB • Berkas Terpilih
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => cvFileInputRef.current?.click()}
+                            className="p-1.5 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 rounded-[6px] hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition cursor-pointer text-[10px] font-bold"
+                            title="Ganti Berkas"
+                          >
+                            Ganti
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setUploadedFile(null);
+                              setUploadedParsedData(null);
+                            }}
+                            className="p-1.5 text-rose-500 hover:text-rose-700 rounded-[6px] hover:bg-rose-50 dark:hover:bg-rose-950/50 transition cursor-pointer"
+                            title="Hapus Berkas"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Parsing in Progress */}
+                      {isParsingUpload && (
+                        <div className="p-3 rounded-[8px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 flex items-center gap-2 text-xs">
+                          <RefreshCw className="w-4 h-4 animate-spin text-amber-600 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="font-bold">Membaca struktur &amp; konten CV...</p>
+                            <p className="text-[10px] text-amber-700 dark:text-amber-400">
+                              Mengekstrak informasi pengalaman, pendidikan, dan keahlian
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Extraction Successful Preview */}
+                      {!isParsingUpload && uploadedParsedData && (
+                        <div className="p-3 rounded-[8px] bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300 text-xs font-black">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                              <span>Struktur CV Berhasil Diekstrak</span>
+                            </div>
+                            <span className="px-2 py-0.5 rounded-[8px] text-[9px] font-extrabold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200">
+                              NLP Ready
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
+                            <div>
+                              <span className="text-slate-400 block text-[9px] font-bold uppercase">
+                                Nama Kandidat
+                              </span>
+                              <span className="font-bold text-slate-800 dark:text-slate-200 truncate block">
+                                {uploadedParsedData.fullName || 'Terdeteksi dari Dokumen'}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-slate-400 block text-[9px] font-bold uppercase">
+                                Posisi / Headline
+                              </span>
+                              <span className="font-bold text-slate-800 dark:text-slate-200 truncate block">
+                                {uploadedParsedData.experienceTitle ||
+                                  (uploadedParsedData.targetPositions && uploadedParsedData.targetPositions[0]) ||
+                                  'Professional Specialist'}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Quick button to set target role */}
+                          {uploadedParsedData.experienceTitle && (
+                            <div className="pt-1.5 border-t border-emerald-200/60 dark:border-emerald-800/60 flex items-center justify-between">
+                              <span className="text-[10px] text-emerald-700 dark:text-emerald-400">
+                                Gunakan posisi terdeteksi: <strong>{uploadedParsedData.experienceTitle}</strong>
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setTargetRole(uploadedParsedData.experienceTitle);
+                                  toast.success(`Posisi target diset ke: ${uploadedParsedData.experienceTitle}`);
+                                }}
+                                className="px-2 py-0.5 rounded-[6px] bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold transition cursor-pointer"
+                              >
+                                Terapkan Posisi
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Extracted Skills Preview */}
+                          {Array.isArray(uploadedParsedData.skills) && uploadedParsedData.skills.length > 0 && (
+                            <div className="pt-1 flex items-center gap-1 flex-wrap">
+                              <span className="text-[9px] font-bold text-slate-400 mr-1">Skills:</span>
+                              {uploadedParsedData.skills.slice(0, 5).map((s: string, idx: number) => (
+                                <span
+                                  key={idx}
+                                  className="px-1.5 py-0.5 rounded-[6px] text-[9px] font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                                >
+                                  {s}
+                                </span>
+                              ))}
+                              {uploadedParsedData.skills.length > 5 && (
+                                <span className="text-[9px] font-bold text-slate-400">
+                                  +{uploadedParsedData.skills.length - 5}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* If parsing finished but no extracted data */}
+                      {!isParsingUpload && !uploadedParsedData && (
+                        <div className="p-3 rounded-[8px] bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-xs flex items-center gap-2">
+                          <Info className="w-4 h-4 text-blue-600 shrink-0" />
+                          <span>
+                            Berkas siap digunakan. Evaluasi RVE akan mengekstrak teks berkas langsung saat screening berjalan.
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between gap-3">
+              <div className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]">
+                {cvSourceMode === 'saved' ? (
+                  <span>
+                    Aktif:{' '}
+                    <strong className="text-slate-800 dark:text-white">
+                      {selectedSavedCv?.title || selectedSavedCv?.candidateName || 'Belum dipilih'}
+                    </strong>
+                  </span>
+                ) : (
+                  <span>
+                    {uploadedFile ? (
+                      <strong className="text-slate-800 dark:text-white truncate block">
+                        {uploadedFile.name}
+                      </strong>
+                    ) : (
+                      'Belum ada berkas dipilih'
+                    )}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCloseCvDrawer}
+                  className="px-3.5 py-2 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
+                >
+                  Tutup
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmCvSelection}
+                  disabled={cvSourceMode === 'upload' && !uploadedFile}
+                  className={`px-4 py-2 rounded-[10px] text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer ${
+                    cvSourceMode === 'upload' && !uploadedFile
+                      ? 'bg-slate-300 dark:bg-slate-700 cursor-not-allowed opacity-60'
+                      : 'bg-[#1738D1] hover:bg-[#132EA8] shadow-[#1738D1]/20 active:scale-[0.98]'
+                  }`}
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Terapkan CV Ini</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* RIGHT-HAND SLIDE-IN DRAWER: RIWAYAT & HASIL SCREENING CV */}
+      {isHistoryDrawerOpen && (
+        <div
+          onClick={() => setIsHistoryDrawerOpen(false)}
+          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end transition-opacity cursor-pointer animate-in fade-in duration-200"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative z-10 w-full max-w-md sm:max-w-lg h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300 cursor-default"
+          >
+            {/* Header */}
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-[10px] bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
+                  <History className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+                    Riwayat &amp; Hasil Screening CV
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {reportHistory.length} sesi tersimpan di akun Anda
+                  </p>
+                </div>
+              </div>
               <button
                 type="button"
-                onClick={() => setCvSourceMode('saved')}
-                className={`flex-1 py-1.5 rounded-[10px] transition text-center cursor-pointer ${
-                  cvSourceMode === 'saved'
-                    ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                }`}
+                onClick={() => setIsHistoryDrawerOpen(false)}
+                className="p-1.5 rounded-[8px] text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               >
-                CV Tersimpan ({savedCvs.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setCvSourceMode('upload')}
-                className={`flex-1 py-1.5 rounded-[10px] transition text-center cursor-pointer ${
-                  cvSourceMode === 'upload'
-                    ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                }`}
-              >
-                Upload Baru (PDF/DOCX)
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Content based on Mode */}
-            {cvSourceMode === 'saved' ? (
-              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                {savedCvs.map((cv) => {
-                  const isSelected = selectedCvId === cv.id && cvSourceMode === 'saved';
-                  return (
-                    <div
-                      key={cv.id}
-                      onClick={() => {
-                        setSelectedCvId(cv.id);
-                        setCvSourceMode('saved');
-                        setIsChangeCvModalOpen(false);
-                      }}
-                      className={`p-3.5 rounded-[10px] border transition cursor-pointer flex items-start justify-between gap-3 ${
-                        isSelected
-                          ? 'border-[#3B5CC4] bg-blue-50/60 dark:bg-blue-950/40 ring-2 ring-[#3B5CC4]/20'
-                          : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-                      }`}
-                    >
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">
-                          {cv.title || cv.candidateName}
-                        </h4>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                          {cv.roleTitle} • Diperbarui {cv.updatedAt}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-0.5">
-                          <Star className="w-2.5 h-2.5 text-emerald-600 fill-emerald-600" />
-                          <span>{cv.atsScore}% ATS</span>
-                        </span>
-                        {isSelected && (
-                          <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-[#3B5CC4] text-white shrink-0">
-                            Aktif
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="space-y-3 p-4 bg-orange-50/40 dark:bg-orange-950/20 rounded-[10px] border border-dashed border-orange-300 dark:border-orange-800 text-center">
-                <Upload className="w-8 h-8 text-orange-500 mx-auto" />
-                <div>
-                  <p className="text-xs font-bold text-slate-900 dark:text-white">
-                    Upload Berkas CV (PDF, DOCX, TXT)
-                  </p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    Ukuran berkas maksimal 10MB
-                  </p>
+            {/* Scrollable Body */}
+            <div className="p-5 space-y-5 overflow-y-auto flex-1">
+              {/* Laporan Intelligence Dinamis Terhubung Database Card */}
+              <div className="p-4 rounded-[10px] bg-gradient-to-br from-blue-50/80 to-slate-50/80 dark:from-navy-950/40 dark:to-slate-900/40 border border-blue-200/80 dark:border-slate-800 space-y-3">
+                <div className="flex items-start gap-2.5">
+                  <div className="p-2 rounded-[10px] bg-[#1738D1] text-white shrink-0 shadow-xs">
+                    <Sparkles className="w-4 h-4 fill-white" />
+                  </div>
+                  <div>
+                    <h5 className="font-extrabold text-xs text-slate-900 dark:text-white">
+                      Laporan Screening Intelligence
+                    </h5>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug pt-0.5">
+                      Lihat Laporan Intelligence Full-Width untuk analisis lengkap recruiter target.
+                    </p>
+                  </div>
                 </div>
-                <input
-                  type="file"
-                  id="modal-cv-upload"
-                  accept=".pdf,.docx,.doc,.txt"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setUploadedFile(file);
-                      setUploadedParsedData(null);
-                      setCvSourceMode('upload');
-                      setIsChangeCvModalOpen(false);
-                      handleParseUploadedFile(file);
-                    }
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsHistoryDrawerOpen(false);
+                    router.push('/cv-screener/report');
                   }}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="modal-cv-upload"
-                  className="inline-flex items-center justify-center px-4 py-2 rounded-[10px] bg-[#F97316] hover:bg-[#132EA8] text-white font-bold text-xs cursor-pointer shadow-md transition gap-2"
+                  className="w-full py-2.5 rounded-[10px] bg-white dark:bg-slate-900 hover:bg-blue-50/50 text-[#1738D1] dark:text-blue-400 text-xs font-bold transition flex items-center justify-center gap-1 border border-slate-200 dark:border-slate-800 cursor-pointer shadow-2xs"
                 >
-                  <Upload className="w-3.5 h-3.5" />
-                  <span>Pilih Berkas Komputer</span>
-                </label>
-                {uploadedFile && (
-                  <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                    Terpilih: {uploadedFile.name}
-                  </p>
+                  <span>Lihat Laporan</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+
+                <div className="flex items-center gap-1.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-400 pt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <span>Lihat Laporan dinamis terhubung dengan database dan per akun</span>
+                </div>
+              </div>
+
+              {/* Sesi Screening Sebelumnya */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                    Sesi Screening Sebelumnya
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-400">
+                    {reportHistory.length} Sesi
+                  </span>
+                </div>
+
+                {reportHistory.length === 0 ? (
+                  <div className="p-6 rounded-[10px] border border-dashed border-slate-200 dark:border-slate-800 text-center space-y-2">
+                    <History className="w-7 h-7 text-slate-300 dark:text-slate-600 mx-auto" />
+                    <p className="text-xs text-slate-500 font-medium">
+                      Belum ada sesi riwayat screening. Mulai simulasi screening untuk menyimpan sesi di sini.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    {reportHistory.map((hist) => {
+                      const verdictBg =
+                        hist.verdictStatus === 'interview'
+                          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                          : hist.verdictStatus === 'maybe'
+                          ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                          : 'bg-rose-50 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border-rose-200 dark:border-rose-800';
+                      const verdictLabel =
+                        hist.verdictStatus === 'interview'
+                          ? 'Peluang Lolos'
+                          : hist.verdictStatus === 'maybe'
+                          ? 'Peluang Moderat'
+                          : 'Perlu Revisi';
+
+                      return (
+                        <div
+                          key={hist.id}
+                          onClick={() => {
+                            setIsHistoryDrawerOpen(false);
+                            handleLoadHistoryReport(hist);
+                          }}
+                          className="p-3.5 rounded-[10px] border border-slate-200 dark:border-slate-800 hover:border-[#1738D1]/60 hover:bg-blue-50/30 dark:hover:bg-blue-950/20 transition-all cursor-pointer space-y-2.5 group shadow-2xs"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="font-extrabold text-xs text-slate-900 dark:text-white group-hover:text-[#1738D1] transition truncate">
+                                {hist.candidateName}
+                              </span>
+                              <span className="text-[9px] font-extrabold bg-blue-50 text-[#1738D1] dark:bg-blue-950 dark:text-blue-300 px-2 py-0.5 rounded-[10px] border border-blue-200 dark:border-blue-800 shrink-0">
+                                {hist.personaName}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <button
+                                type="button"
+                                onClick={(e) => handleDeleteHistory(hist.id, e)}
+                                className="p-1 text-slate-400 hover:text-rose-500 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                                title="Hapus riwayat sesi ini"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                            <p className="font-medium truncate">
+                              {hist.targetRole} {hist.targetLevel ? `• ${hist.targetLevel}` : ''}
+                            </p>
+                            {hist.purposeTitle && (
+                              <span className="text-[9px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded-[6px] shrink-0">
+                                {hist.purposeTitle}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center justify-between text-[10px] border-t border-slate-100 dark:border-slate-800/80 pt-2 text-slate-400">
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-0.5 rounded-[8px] border text-[9px] font-extrabold ${verdictBg}`}>
+                                {verdictLabel}
+                              </span>
+                              <span>{hist.timestamp}</span>
+                            </div>
+
+                            <div className="flex items-center gap-1 font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-[8px] border border-emerald-200/60 dark:border-emerald-800/60">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block shrink-0" />
+                              <span>{hist.consensusScore}% ATS</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
-            )}
+
+              {/* SECTION 2: Hasil CV Terbaru di Akun */}
+              <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-[#1738D1]" />
+                    <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                      Hasil CV Terbaru di Akun
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400">
+                    {savedCvs.length} Berkas
+                  </span>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  {savedCvs.map((cv) => {
+                    const isSelected = selectedCvId === cv.id && cvSourceMode === 'saved';
+                    return (
+                      <div
+                        key={cv.id}
+                        onClick={() => handleViewCvReportDirectly(cv)}
+                        className={`p-3 rounded-[10px] border transition-all flex items-center justify-between cursor-pointer group ${
+                          isSelected
+                            ? 'border-[#1738D1] bg-blue-50/60 dark:bg-blue-950/40 ring-1 ring-[#1738D1]/30 shadow-2xs'
+                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                        }`}
+                      >
+                        <div className="min-w-0 pr-2">
+                          <div className="flex items-center gap-1.5">
+                            <h5 className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-[#1738D1] transition truncate">
+                              {cv.candidateName}
+                            </h5>
+                            {isSelected && (
+                              <span className="px-1.5 py-0.2 rounded-[6px] text-[8px] font-extrabold bg-[#1738D1] text-white">
+                                Aktif
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                            {cv.roleTitle}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-[8px] border border-emerald-200/60 dark:border-emerald-800/60">
+                            {cv.atsScore}% ATS
+                          </span>
+                          <span className="text-[10px] font-bold text-[#1738D1] dark:text-blue-400 group-hover:underline flex items-center gap-0.5">
+                            <span>Lihat Hasil</span>
+                            <ChevronRight className="w-3 h-3" />
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Sticky Footer */}
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between gap-2.5">
+              {reportHistory.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={handleClearAllHistory}
+                  className="text-[11px] font-bold text-rose-500 hover:text-rose-600 hover:underline cursor-pointer flex items-center gap-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Hapus Semua Riwayat</span>
+                </button>
+              ) : (
+                <div />
+              )}
+              <button
+                type="button"
+                onClick={() => setIsHistoryDrawerOpen(false)}
+                className="px-4 py-2 rounded-[10px] bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-bold text-xs transition cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}

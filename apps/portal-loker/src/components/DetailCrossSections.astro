@@ -1,0 +1,252 @@
+---
+import {
+  lowonganList,
+  sertifikasiList,
+  courseList,
+  eventList,
+  artikelList,
+  ensureData,
+} from '../data/mock';
+import CompanyLogo from './CompanyLogo.astro';
+
+await ensureData();
+
+interface Props {
+  currentType?: 'lowongan' | 'sertifikasi' | 'course' | 'event' | 'career';
+  currentSlug?: string;
+  category?: string;
+  geo?: string;
+}
+
+const { currentType, currentSlug, category, geo } = Astro.props;
+
+// Filter out current item from its respective list and prioritize category/geo match
+const relatedJobs = [...lowonganList]
+  .filter((j) => (currentType === 'lowongan' ? j.slug !== currentSlug : true))
+  .sort((a, _b) => ((geo && a.geo === geo) || (category && a.category === category) ? -1 : 1))
+  .slice(0, 3);
+
+const relatedSertifikasi = [...sertifikasiList]
+  .filter((s) => (currentType === 'sertifikasi' ? s.slug !== currentSlug : true))
+  .slice(0, 3);
+
+const relatedEvents = [...eventList]
+  .filter((e) => (currentType === 'event' ? e.slug !== currentSlug : true))
+  .slice(0, 3);
+
+const relatedCourses = [...courseList]
+  .filter((c) => (currentType === 'course' ? c.slug !== currentSlug : true))
+  .slice(0, 3);
+
+const relatedArticles = [...artikelList]
+  .filter((a) => (currentType === 'career' ? a.slug !== currentSlug : true))
+  .slice(0, 3);
+---
+
+<div class="mt-12 space-y-12 border-t border-[#d7d6cf] pt-10">
+  <!-- 1. Rekomendasi Lowongan Kerja Relevan -->
+  <section aria-labelledby="heading-cross-jobs">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
+      <div>
+        <div class="section-label mb-2"><i></i>PELUANG KARIER PILIHAN</div>
+        <h2 id="heading-cross-jobs" class="text-xl sm:text-2xl font-semibold text-[#101010] tracking-tight">
+          {currentType === 'lowongan' ? 'Lowongan Lain yang Relevan' : 'Lowongan Kerja yang Sedang Membuka Pendaftaran'}
+        </h2>
+      </div>
+      <a href="/lowongan" class="text-xs font-semibold text-[#0000ff] hover:underline shrink-0">
+        Lihat Semua Lowongan →
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {relatedJobs.map((job) => (
+        <article class="bg-white rounded-2xl p-5 border border-[#d7d6cf] hover:border-[#0000ff]/30 hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:-translate-y-1 transition duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-3 mb-3">
+              <CompanyLogo name={job.company} logoUrl={job.companyLogo} size="sm" class="w-10 h-10" />
+              <div class="min-w-0">
+                <p class="text-xs font-semibold text-[#101010] truncate">{job.company}</p>
+                <p class="text-[11px] text-[#6e6d68]">{job.location}</p>
+              </div>
+            </div>
+            <h3 class="text-sm font-semibold text-[#101010] hover:text-[#0000ff] transition line-clamp-2 leading-snug">
+              <a href={`/lowongan/${job.slug}`}>{job.title}</a>
+            </h3>
+            <div class="flex items-center gap-1.5 flex-wrap mt-2.5">
+              <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[#0000ff] font-semibold">{job.type}</span>
+              <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#6e6d68] font-medium">{job.experience}</span>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-[#d7d6cf]/50 flex items-center justify-between">
+            <span class="text-xs font-bold text-emerald-700">{job.salary}</span>
+            <a href={`/lowongan/${job.slug}`} class="px-3 py-1 rounded-full bg-[#0000ff] text-white hover:bg-[#1738d1] text-xs font-semibold transition shadow-xs">
+              Detail →
+            </a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- 2. Sertifikasi yang Sedang Buka -->
+  <section aria-labelledby="heading-cross-sertifikasi">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
+      <div>
+        <div class="section-label mb-2"><i></i>VALIDASI KOMPETENSI RESMI</div>
+        <h2 id="heading-cross-sertifikasi" class="text-xl sm:text-2xl font-semibold text-[#101010] tracking-tight">
+          {currentType === 'sertifikasi' ? 'Sertifikasi Terkait Lainnya' : 'Sertifikasi Terakreditasi yang Sedang Buka'}
+        </h2>
+      </div>
+      <a href="/sertifikasi" class="text-xs font-semibold text-[#0000ff] hover:underline shrink-0">
+        Lihat Semua Sertifikasi →
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {relatedSertifikasi.map((sert) => (
+        <article class="bg-white rounded-2xl p-5 border border-[#d7d6cf] hover:border-[#0000ff]/30 hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:-translate-y-1 transition duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold">{sert.issuer}</span>
+              <span class="text-[10px] text-[#6e6d68] font-medium">{sert.duration}</span>
+            </div>
+            <h3 class="text-sm font-semibold text-[#101010] hover:text-[#0000ff] transition line-clamp-2 leading-snug">
+              <a href={`/sertifikasi/${sert.slug}`}>{sert.title}</a>
+            </h3>
+            <p class="text-xs text-[#6e6d68] line-clamp-2 mt-2 leading-relaxed">
+              {sert.description}
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-[#d7d6cf]/50 flex items-center justify-between">
+            <span class="text-xs font-bold text-[#101010]">{sert.price}</span>
+            <a href={`/sertifikasi/${sert.slug}`} class="px-3 py-1 rounded-full bg-[#0000ff] text-white hover:bg-[#1738d1] text-xs font-semibold transition shadow-xs">
+              Cek Syarat →
+            </a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- 3. Event & Job Fair Terdekat -->
+  <section aria-labelledby="heading-cross-events">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
+      <div>
+        <div class="section-label mb-2"><i></i>NETWORKING &amp; BURSA KERJA</div>
+        <h2 id="heading-cross-events" class="text-xl sm:text-2xl font-semibold text-[#101010] tracking-tight">
+          {currentType === 'event' ? 'Event & Job Fair Lainnya' : 'Event & Job Fair Terdekat'}
+        </h2>
+      </div>
+      <a href="/event" class="text-xs font-semibold text-[#0000ff] hover:underline shrink-0">
+        Lihat Semua Event →
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {relatedEvents.map((evt) => (
+        <article class="bg-white rounded-2xl p-5 border border-[#d7d6cf] hover:border-[#0000ff]/30 hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:-translate-y-1 transition duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 text-[10px] text-[#6e6d68] mb-2">
+              <span class="font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">{evt.day} {evt.month} 2026</span>
+              <span>{evt.format}</span>
+            </div>
+            <h3 class="text-sm font-semibold text-[#101010] hover:text-[#0000ff] transition line-clamp-2 leading-snug">
+              <a href={`/event/${evt.slug}`}>{evt.title}</a>
+            </h3>
+            <p class="text-xs text-[#6e6d68] line-clamp-2 mt-2 leading-relaxed">
+              {evt.location}
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-[#d7d6cf]/50 flex items-center justify-between">
+            <span class="text-xs font-bold text-emerald-700">{evt.price}</span>
+            <a href={`/event/${evt.slug}`} class="px-3 py-1 rounded-full bg-[#0000ff] text-white hover:bg-[#1738d1] text-xs font-semibold transition shadow-xs">
+              Daftar Hadir →
+            </a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- 4. Course & Pelatihan yang Sedang Buka -->
+  <section aria-labelledby="heading-cross-courses">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
+      <div>
+        <div class="section-label mb-2"><i></i>PENINGKATAN SKILL DIGITAL</div>
+        <h2 id="heading-cross-courses" class="text-xl sm:text-2xl font-semibold text-[#101010] tracking-tight">
+          {currentType === 'course' ? 'Pelatihan Terkait Lainnya' : 'Course & Pelatihan yang Sedang Buka'}
+        </h2>
+      </div>
+      <a href="/course" class="text-xs font-semibold text-[#0000ff] hover:underline shrink-0">
+        Lihat Semua Pelatihan →
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {relatedCourses.map((crs) => (
+        <article class="bg-white rounded-2xl border border-[#d7d6cf] overflow-hidden hover:border-[#0000ff]/30 hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:-translate-y-1 transition duration-300 flex flex-col justify-between">
+          <div class="h-28 bg-[#f4f3ee] relative overflow-hidden">
+            <img src={crs.image} alt={crs.title} class="w-full h-full object-cover" loading="lazy" />
+            <span class="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-[#101010]/80 text-white text-[9px] font-bold">
+              {crs.level}
+            </span>
+          </div>
+          <div class="p-5 flex-1 flex flex-col justify-between">
+            <div>
+              <p class="text-[11px] text-[#6e6d68] mb-1">{crs.provider} · {crs.duration}</p>
+              <h3 class="text-sm font-semibold text-[#101010] hover:text-[#0000ff] transition line-clamp-2 leading-snug">
+                <a href={`/course/${crs.slug}`}>{crs.title}</a>
+              </h3>
+            </div>
+            <div class="mt-4 pt-3 border-t border-[#d7d6cf]/50 flex items-center justify-between">
+              <span class="text-xs font-bold text-[#101010]">{crs.price}</span>
+              <a href={`/course/${crs.slug}`} class="px-3 py-1 rounded-full bg-[#0000ff] text-white hover:bg-[#1738d1] text-xs font-semibold transition shadow-xs">
+                Ikuti Kelas →
+              </a>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- 5. Artikel & Tips Karier Terbaru -->
+  <section aria-labelledby="heading-cross-articles">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
+      <div>
+        <div class="section-label mb-2"><i></i>WAWASAN &amp; PANDUAN LOLOS</div>
+        <h2 id="heading-cross-articles" class="text-xl sm:text-2xl font-semibold text-[#101010] tracking-tight">
+          {currentType === 'career' ? 'Artikel Karier Pilihan Lainnya' : 'Artikel & Tips Karier Terbaru'}
+        </h2>
+      </div>
+      <a href="/career" class="text-xs font-semibold text-[#0000ff] hover:underline shrink-0">
+        Lihat Semua Artikel →
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {relatedArticles.map((art) => (
+        <article class="bg-white rounded-2xl p-5 border border-[#d7d6cf] hover:border-[#0000ff]/30 hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:-translate-y-1 transition duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[10px] text-[#6e6d68] mb-2">
+              <span class="font-bold text-[#0000ff] bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">{art.category}</span>
+              <span>{art.readTime}</span>
+            </div>
+            <h3 class="text-sm font-semibold text-[#101010] hover:text-[#0000ff] transition line-clamp-2 leading-snug">
+              <a href={`/career/${art.slug}`}>{art.title}</a>
+            </h3>
+            <p class="text-xs text-[#6e6d68] line-clamp-2 mt-2 leading-relaxed">
+              {art.excerpt}
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-[#d7d6cf]/50 flex items-center justify-between">
+            <span class="text-[11px] text-[#6e6d68]">{art.date}</span>
+            <a href={`/career/${art.slug}`} class="px-3 py-1 rounded-full bg-[#0000ff] text-white hover:bg-[#1738d1] text-xs font-semibold transition shadow-xs">
+              Baca Artikel →
+            </a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+</div>

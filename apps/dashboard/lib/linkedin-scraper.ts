@@ -15,6 +15,7 @@
 import { chromium, type Browser, type Page, type Locator } from 'playwright-core';
 import fs from 'fs';
 import path from 'path';
+import { normalizeLinkedInUrl } from './linkedin-url';
 
 export interface LinkedInExperience {
   role: string;
@@ -145,7 +146,9 @@ async function newAuthenticatedPage(browser: Browser): Promise<Page> {
     viewport: { width: 1440, height: 900 },
     storageState: fs.existsSync(authPath) ? authPath : undefined,
   });
-  return context.newPage();
+  const page = await context.newPage();
+  await page.addInitScript('window.__name = (fn, name) => fn;');
+  return page;
 }
 
 // ---------------------------------------------------------------------------
@@ -402,48 +405,6 @@ export async function checkLinkedInSession(): Promise<LinkedInScrapeResult> {
 // STEP 3: Ekstraksi data profil lengkap dari URL
 // ---------------------------------------------------------------------------
 
-function normalizeLinkedInUrl(input: string): string {
-  const trimmed = input.trim();
-  if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  return 'https://' + trimmed;
-}
-
-/** Ambil teks bersih dari elemen (fallback multiple selector). */
-async function textOf(page: Page, selectors: string[]): Promise<string> {
-  for (const sel of selectors) {
-    const el = page.locator(sel).first();
-    if (await el.count()) {
-      const t = (await el.innerText().catch(() => '')).trim();
-      if (t) return t;
-    }
-  }
-  return '';
-}
-
-async function extractListSection(
-  page: Page,
-  sectionId: string,
-  mapItem: (els: Record<string, string>) => Record<string, any>
-): Promise<any[]> {
-  const section = page.locator(`section#${sectionId}`).first();
-  if (!(await section.count())) return [];
-
-  const items = section.locator('.pvs-entity__parent-container, .pvs-entity');
-  const count = await items.count();
-  const result: any[] = [];
-
-  for (let i = 0; i < Math.min(count, 30); i++) {
-    const item = items.nth(i);
-    const text = (await item.innerText().catch(() => '')).replace(/\n+/g, ' | ').trim();
-    if (!text || text.length < 3) continue;
-
-    const parts = text.split(' | ').map((p) => p.trim()).filter(Boolean);
-    const mapped = mapItem({ parts: parts.join(' | '), first: parts[0] || '', text });
-    if (mapped && Object.values(mapped).some((v) => v)) result.push(mapped);
-  }
-  return result;
-}
-
 export async function scrapeLinkedInProfile(urlInput: string): Promise<LinkedInScrapeResult> {
   if (!hasStoredSession()) {
     return { success: false, error: 'Belum ada sesi login. Klik "Login LinkedIn" terlebih dahulu.' };
@@ -451,7 +412,7 @@ export async function scrapeLinkedInProfile(urlInput: string): Promise<LinkedInS
 
   const profileUrl = normalizeLinkedInUrl(urlInput);
   if (!/linkedin\.com\/in\//i.test(profileUrl)) {
-    return { success: false, error: 'URL tidak valid. Gunakan format https://www.linkedin.com/in/username/' };
+    return { success: false, error: 'URL tidak valid. Masukkan format linkedin.com/in/username atau https://www.linkedin.com/in/username' };
   }
 
   let browser: Browser;
@@ -464,132 +425,573 @@ export async function scrapeLinkedInProfile(urlInput: string): Promise<LinkedInS
   try {
     const page = await newAuthenticatedPage(browser);
     await page.goto(profileUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(4000);
+    await page.evaluate('window.__name = (fn, name) => fn;').catch(() => null);
 
-    // Deteksi authwall/checkpoint
-    const url = page.url();
-    if (url.includes('/authwall') || url.includes('/checkpoint') || url.includes('/login')) {
+    // Deteksi authwall / checkpoint
+    const currentUrl = page.url();
+    if (currentUrl.includes('/authwall') || currentUrl.includes('/checkpoint') || currentUrl.includes('/login')) {
       return {
         success: false,
-        error: 'LinkedIn meminta verifikasi (authwall/CAPTCHA). Selesaikan secara manual lalu coba lagi, atau login ulang.',
+        error: 'LinkedIn meminta verifikasi (authwall/CAPTCHA). Selesaikan secara manual di browser lalu coba lagi, atau login ulang.',
       };
     }
 
-    // Scroll pelan supaya semua section termuat (Lazy Load)
+    // Scroll bertahap di kontainer utama (main / #workspace / window) supaya semua lazy-loaded card termuat
     await page.evaluate(async () => {
-      await new Promise<void>((resolve) => {
-        let y = 0;
-        const step = 500;
-        const timer = setInterval(() => {
-          window.scrollBy(0, step);
-          y += step;
-          if (y > 6000) {
-            clearInterval(timer);
-            window.scrollTo(0, 0);
-            resolve();
+      const scrollable = document.querySelector('main, #workspace, .scaffold-layout__main') || window;
+      for (let step = 0; step < 12; step++) {
+        if (scrollable.scrollBy) {
+          scrollable.scrollBy(0, 600);
+        } else {
+          window.scrollBy(0, 600);
+        }
+        await new Promise((r) => setTimeout(r, 400));
+      }
+    });
+    await page.waitForTimeout(1500);
+
+    // Ekstraksi data menggunakan pendekatan hirarki semantik & leaf section
+    const profileData = await page.evaluate(() => {
+      const clean = (t: string | null | undefined) => (t || '').replace(/\s+/g, ' ').trim();
+      const text = (el: Element | null | undefined) => clean((el as HTMLElement)?.innerText || el?.textContent);
+
+      const allSections = Array.from(document.querySelectorAll('section'));
+      // Leaf sections: section yang tidak memiliki child section (spesifik untuk card isi)
+      const leafSections = allSections.filter((s) => s.querySelectorAll('section').length === 0);
+
+      const findLeafSection = (keywords: string[]) => {
+        return leafSections.find((s) => {
+          const h = s.querySelector('h1, h2, h3, [role="heading"]');
+          if (!h) return false;
+          const ht = text(h).toLowerCase();
+          return keywords.some((k) => ht.includes(k.toLowerCase()));
+        });
+      };
+
+      const sectionText = (sec: Element | null | undefined): string => {
+        if (!sec) return '';
+        return (sec as HTMLElement).innerText || sec.textContent || '';
+      };
+
+      // 1. Profil Utama (Top Card)
+      let name = '';
+      let headline = '';
+      let location = '';
+      let connections = '';
+
+      // Cari section header profil utama
+      const topSection = allSections.find((s) => {
+        const h = s.querySelector('h1, h2');
+        const ht = text(h);
+        const sTxt = sectionText(s);
+        return (
+          ht &&
+          !/notifikasi|iklan|feed|activity|about|experience|education/i.test(ht) &&
+          (sTxt.includes('koneksi') || sTxt.includes('connections') || sTxt.includes('followers'))
+        );
+      }) || allSections[1] || allSections[0];
+
+      if (topSection) {
+        const h = topSection.querySelector('h1, h2');
+        if (h && !/notifikasi|iklan/i.test(text(h))) {
+          name = text(h);
+        }
+
+        const lines = sectionText(topSection).split('\n').map(clean).filter(Boolean);
+        const nameIdx = lines.findIndex((l: string) => l.includes(name) || (name && name.includes(l)));
+        const start = nameIdx !== -1 ? nameIdx + 1 : 0;
+
+        for (let i = start; i < Math.min(lines.length, start + 10); i++) {
+          const l = lines[i];
+          if (/^(he\/him|she\/her|they\/them)$/i.test(l)) continue;
+          if (!headline && l.length > 2 && !/koneksi|connections|pengikut|followers|hubungkan|connect|info kontak|contact info|terbuka untuk bekerja|open to work/i.test(l)) {
+            headline = l;
+            continue;
           }
-        }, 250);
+          if (headline && !location && /(indonesia|jakarta|semarang|bandung|surabaya|yogyakarta|banten|jawa|remote|hybrid|singapore|malaysia)/i.test(l) && !/koneksi|connections|pengikut/i.test(l)) {
+            location = l.split('·')[0].trim();
+            continue;
+          }
+          if (!connections) {
+            if (/\d+\s*(koneksi|connections|pengikut|followers)/i.test(l)) {
+              connections = l;
+            } else if (/^\d+[\d.,]*$/.test(l) && lines[i + 1] && /(koneksi|connections|pengikut|followers)/i.test(lines[i + 1])) {
+              connections = `${l} ${lines[i + 1]}`;
+            }
+          }
+        }
+      }
+
+      // 2. About / Bio
+      const aboutSec = findLeafSection(['about', 'tentang']);
+      let about = '';
+      if (aboutSec) {
+        const raw = sectionText(aboutSec).split('\n').map(clean).filter(Boolean);
+        const filtered = raw.filter((l: string) => !/^(about|tentang)$/i.test(l) && !/^top skills/i.test(l));
+        about = filtered.join('\n\n');
+      } else if (topSection) {
+        const topLines = sectionText(topSection).split('\n').map(clean).filter(Boolean);
+        const aboutIdx = topLines.findIndex((l: string) => /^about$/i.test(l));
+        if (aboutIdx !== -1 && topLines[aboutIdx + 1]) {
+          about = topLines[aboutIdx + 1];
+        }
+      }
+
+      // 3. Pengalaman Kerja (Experience) — Robust State-Machine Parser
+      const expSec = findLeafSection(['experience', 'pengalaman']);
+      const experience: any[] = [];
+      if (expSec) {
+        const raw = sectionText(expSec).split('\n').map(clean).filter(Boolean);
+        const filtered = raw.filter((l: string) => !/^(experience|pengalaman|show all|tampilkan semua)$/i.test(l));
+
+        const isCompanyGroup = (line: string) => {
+          return (
+            !/\d{4}/.test(line) &&
+            /\b(full-time|part-time|freelance|internship|magang|kontrak|contract|self-employed|apprenticeship|pekerja lepas)\b/i.test(line) &&
+            /\d+\s*(?:mos?|yrs?|bln|thn|bulan|tahun)/i.test(line)
+          );
+        };
+
+        const isRoleDateDuration = (line: string) => {
+          return (
+            /\d{4}/.test(line) &&
+            (/(?:present|saat ini)/i.test(line) || /[-–—]/.test(line)) &&
+            (/\d+\s*(?:mos?|yrs?|bln|thn|bulan|tahun)/i.test(line) || /(?:present|saat ini)/i.test(line))
+          );
+        };
+
+        const isEmploymentTypeStandalone = (line: string) => {
+          return (
+            line.includes('·') &&
+            /\b(full-time|part-time|freelance|internship|magang|kontrak|contract|self-employed|apprenticeship|pekerja lepas)\b/i.test(line)
+          );
+        };
+
+        const roleIndices: number[] = [];
+        filtered.forEach((line, idx) => {
+          if (isRoleDateDuration(line)) {
+            roleIndices.push(idx);
+          }
+        });
+
+        let currentGroupCompany = '';
+
+        for (let r = 0; r < roleIndices.length; r++) {
+          const dateIdx = roleIndices[r];
+          const duration = filtered[dateIdx];
+          const nextDateIdx = r + 1 < roleIndices.length ? roleIndices[r + 1] : filtered.length;
+
+          let role = '';
+          let company = '';
+          const descParts: string[] = [];
+
+          const l1 = filtered[dateIdx - 1] || '';
+          const l2 = filtered[dateIdx - 2] || '';
+
+          if (isEmploymentTypeStandalone(l1)) {
+            company = l1.split('·')[0].trim();
+            role = l2;
+            currentGroupCompany = '';
+          } else {
+            const prevDateIdx = r > 0 ? roleIndices[r - 1] : -1;
+            for (let k = Math.max(0, prevDateIdx); k < dateIdx; k++) {
+              if (isCompanyGroup(filtered[k])) {
+                currentGroupCompany = filtered[k - 1] || '';
+              }
+            }
+            role = l1;
+            company = currentGroupCompany;
+          }
+
+          let endIdx = nextDateIdx;
+          if (r + 1 < roleIndices.length) {
+            const nextL1 = filtered[nextDateIdx - 1] || '';
+            if (isEmploymentTypeStandalone(nextL1)) {
+              endIdx = nextDateIdx - 2;
+            } else if (isCompanyGroup(filtered[nextDateIdx - 2])) {
+              endIdx = nextDateIdx - 3;
+            } else {
+              endIdx = nextDateIdx - 1;
+            }
+          }
+
+          for (let j = dateIdx + 1; j < endIdx; j++) {
+            const descLine = filtered[j];
+            if (!isCompanyGroup(descLine) && !/^(show all|tampilkan semua)$/i.test(descLine)) {
+              descParts.push(descLine);
+            }
+          }
+
+          experience.push({
+            role: role || 'Posisi',
+            company: company || currentGroupCompany || 'Perusahaan',
+            duration,
+            description: descParts.join(' • '),
+          });
+        }
+      }
+
+      // 4. Pendidikan (Education)
+      const eduSec = findLeafSection(['education', 'pendidikan']);
+      const education: any[] = [];
+      if (eduSec) {
+        const raw = sectionText(eduSec).split('\n').map(clean).filter(Boolean);
+        const filtered = raw.filter((l: string) => !/^(education|pendidikan|show all|tampilkan semua)/i.test(l));
+
+        const eduDateIndices: number[] = [];
+        filtered.forEach((l, idx) => {
+          if (/\d{4}\s*[-–—]\s*(?:[a-zA-Z]+\s*)?(\d{4}|present|saat ini)/i.test(l) || /^\d{4}$/.test(l)) {
+            eduDateIndices.push(idx);
+          }
+        });
+
+        if (eduDateIndices.length > 0) {
+          eduDateIndices.forEach((dateIdx) => {
+            const year = filtered[dateIdx];
+            const institution = filtered[dateIdx - 2] || filtered[dateIdx - 1] || '';
+            const degree = filtered[dateIdx - 2] ? filtered[dateIdx - 1] : '';
+            education.push({ institution, degree, year });
+          });
+        }
+      }
+
+      // 5. Sertifikasi (Certifications)
+      const certSec = findLeafSection(['license', 'certification', 'lisensi', 'sertifikasi']);
+      const certifications: any[] = [];
+      if (certSec) {
+        const raw = sectionText(certSec).split('\n').map(clean).filter(Boolean);
+        const filtered = raw.filter((l: string) => !/^(licenses & certifications|certifications|licenses|lisensi & sertifikasi|show all|tampilkan semua)/i.test(l));
+
+        const issueIndices: number[] = [];
+        filtered.forEach((l, idx) => {
+          if (/^(issued|diterbitkan)/i.test(l)) {
+            issueIndices.push(idx);
+          }
+        });
+
+        if (issueIndices.length > 0) {
+          issueIndices.forEach((issueIdx) => {
+            const issueDate = filtered[issueIdx];
+            const name = filtered[issueIdx - 2] || '';
+            const issuer = filtered[issueIdx - 1] || '';
+            let credentialId = '';
+            if (filtered[issueIdx + 1] && /credential id/i.test(filtered[issueIdx + 1])) {
+              credentialId = filtered[issueIdx + 1].replace(/credential id/i, '').trim();
+            }
+            certifications.push({ name, issuer, issueDate, credentialId });
+          });
+        }
+      }
+
+      // 6. Proyek (Projects)
+      const projSec = findLeafSection(['projects', 'proyek']);
+      const projects: any[] = [];
+      if (projSec) {
+        const raw = sectionText(projSec).split('\n').map(clean).filter(Boolean);
+        const filtered = raw.filter((l: string) => !/^(projects|proyek|show all|tampilkan semua)/i.test(l));
+
+        const projDateIndices: number[] = [];
+        filtered.forEach((l, idx) => {
+          if (/\d{4}\s*[-–—]\s*(?:[a-zA-Z]+\s*)?(\d{4}|present|saat ini)/i.test(l)) {
+            projDateIndices.push(idx);
+          }
+        });
+
+        if (projDateIndices.length > 0) {
+          projDateIndices.forEach((dateIdx, pIdx) => {
+            const duration = filtered[dateIdx];
+            const title = filtered[dateIdx - 1] || '';
+            const nextDateIdx = pIdx + 1 < projDateIndices.length ? projDateIndices[pIdx + 1] : filtered.length;
+            const desc = filtered.slice(dateIdx + 1, nextDateIdx - 1).join(' ');
+            projects.push({
+              title,
+              role: '',
+              duration,
+              description: desc,
+              techStack: [],
+              url: '',
+            });
+          });
+        }
+      }
+
+      // 7. Skills & Keahlian
+      const skillSec = findLeafSection(['skills', 'keahlian']);
+      const skills: string[] = [];
+      if (skillSec) {
+        const raw = sectionText(skillSec).split('\n').map(clean).filter(Boolean);
+        const filtered = raw.filter((l: string) => !/^(skills|keahlian|show all|tampilkan semua|\d+ skill)/i.test(l));
+        filtered.forEach((s: string) => {
+          if (s.length > 1 && s.length <= 50 && !skills.includes(s) && !/show all|tampilkan semua/i.test(s)) {
+            skills.push(s);
+          }
+        });
+      }
+
+      // Ambil juga Top Skills dari teks bagian About
+      const topSkillsText = sectionText(aboutSec);
+      const topSkillsMatch = topSkillsText.match(/top skills\s*([^\n]+)/i);
+      if (topSkillsMatch && topSkillsMatch[1]) {
+        topSkillsMatch[1].split(/[•·,]/).map(clean).filter(Boolean).forEach((sk: string) => {
+          if (!skills.includes(sk) && sk.length <= 50) skills.push(sk);
+        });
+      }
+
+      // Fallback nama dari document.title jika elemen heading di DOM disamarkan
+      if (!name) {
+        const titleParts = document.title.split('|');
+        if (titleParts.length > 1) {
+          name = clean(titleParts[0]);
+        }
+      }
+
+      return {
+        name: name || 'Tidak terdeteksi',
+        headline: headline || '',
+        about,
+        location: location || '',
+        connections,
+        experience,
+        education,
+        certifications,
+        projects,
+        skills: skills.slice(0, 50),
+        profileUrl: window.location.href,
+        scrapedAt: new Date().toISOString(),
+      };
+    });
+
+    // Deep Extraction untuk menarik seluruh Pengalaman, Sertifikasi & Skills lengkap dari sub-halaman /details/
+    const baseUrl = profileUrl.replace(/\/+$/, '').split('?')[0];
+
+    // 1. Ekstraksi Mendalam: Seluruh Riwayat Pengalaman Kerja (/details/experience/)
+    try {
+      await page.goto(`${baseUrl}/details/experience/`, { waitUntil: 'domcontentloaded', timeout: 25000 });
+      await page.waitForTimeout(1500);
+      await page.evaluate('window.__name = (fn, name) => fn;').catch(() => null);
+      await page.evaluate(async () => {
+        const s = document.querySelector('main, #workspace, .scaffold-layout__main') || window;
+        for (let i = 0; i < 8; i++) {
+          if (s.scrollBy) s.scrollBy(0, 800);
+          else window.scrollBy(0, 800);
+          await new Promise((r) => setTimeout(r, 250));
+        }
       });
-    });
-    await page.waitForTimeout(2000);
+      await page.waitForTimeout(800);
 
-    // --- Ekstraksi data ---
-    const name = await textOf(page, [
-      'h1.text-heading-xlarge',
-      '.text-heading-xlarge',
-      'h1',
-    ]);
-    const headline = await textOf(page, [
-      '.text-body-medium.break-words',
-      'div.text-body-medium',
-      '.top-card__subtitle',
-    ]);
-    const location = await textOf(page, [
-      '.text-body-small.inline.t-black--light.break-words',
-      'span.text-body-small.inline',
-    ]);
-    const about = await textOf(page, [
-      'section#about .inline-show-more-text span[aria-hidden="true"]',
-      'section#about .inline-show-more-text',
-      'section#about',
-    ]);
+      const allExp = await page.evaluate(() => {
+        const clean = (t: string | null | undefined) => (t || '').replace(/\s+/g, ' ').trim();
+        const main = document.querySelector('main .scaffold-layout__main, main') || document.body;
+        const raw = ((main as HTMLElement)?.innerText || main?.textContent || '').split('\n').map(clean).filter(Boolean);
+        const cutIdx = raw.findIndex((l: string) => /^(lebih banyak profil|people also viewed|rekomendasi|tentang|aksesibilitas|linkedin corporation)/i.test(l));
+        const trimmed = cutIdx !== -1 ? raw.slice(0, cutIdx) : raw;
+        const filtered = trimmed.filter((l: string) => !/^(experience|pengalaman|show all|tampilkan semua)$/i.test(l));
 
-    // Connections — ambil dari baris "X koneksi"
-    let connections = '';
-    const connLoc = page.locator('span.t-bold, .t-bold').first();
-    if (await connLoc.count()) {
-      const all = await page.locator('span.t-bold, div.t-bold').allInnerTexts();
-      const found = all.find((t) => /\d/.test(t) && /(koneksi|connections|pengikut|followers)/i.test(t));
-      if (found) connections = found.trim();
-    }
+        const isCompanyGroup = (line: string) => {
+          return (
+            !/\d{4}/.test(line) &&
+            /\b(full-time|part-time|freelance|internship|magang|kontrak|contract|self-employed|apprenticeship|pekerja lepas)\b/i.test(line) &&
+            /\d+\s*(?:mos?|yrs?|bln|thn|bulan|tahun)/i.test(line)
+          );
+        };
 
-    const experience = await extractListSection(page, 'experience', (els) => {
-      const p = els.parts;
-      const role = els.first;
-      const rest = p.replace(els.first, '').trim();
-      const company = rest.split(' | ')[0] || '';
-      const duration = rest.split(' | ')[1] || '';
-      return { role, company, duration, description: rest.split(' | ').slice(2).join(' ') };
-    });
+        const isRoleDateDuration = (line: string) => {
+          return (
+            /\d{4}/.test(line) &&
+            (/(?:present|saat ini)/i.test(line) || /[-–—]/.test(line)) &&
+            (/\d+\s*(?:mos?|yrs?|bln|thn|bulan|tahun)/i.test(line) || /(?:present|saat ini)/i.test(line))
+          );
+        };
 
-    const education = await extractListSection(page, 'education', (els) => {
-      const p = els.parts;
-      const degree = els.first;
-      const institution = p.split(' | ')[1] || '';
-      const year = p.split(' | ')[2] || '';
-      return { degree, institution, year };
-    });
+        const isEmploymentTypeStandalone = (line: string) => {
+          return (
+            line.includes('·') &&
+            /\b(full-time|part-time|freelance|internship|magang|kontrak|contract|self-employed|apprenticeship|pekerja lepas)\b/i.test(line)
+          );
+        };
 
-    const certifications = await extractListSection(page, 'certifications', (els) => {
-      const p = els.parts;
-      return { name: els.first, issuer: p.split(' | ')[1] || '', issueDate: p.split(' | ')[2] || '', credentialId: '' };
-    });
+        const roleIndices: number[] = [];
+        filtered.forEach((line: string, idx: number) => {
+          if (isRoleDateDuration(line)) {
+            roleIndices.push(idx);
+          }
+        });
 
-    const projects = await extractListSection(page, 'projects', (els) => {
-      const p = els.parts;
-      const title = els.first;
-      const rest = p.replace(els.first, '').trim();
-      const role = rest.split(' | ')[0] || '';
-      const duration = rest.split(' | ')[1] || '';
-      return { title, role, duration, description: rest.split(' | ').slice(2).join(' '), techStack: [], url: '' };
-    });
+        const exp: any[] = [];
+        let currentGroupCompany = '';
 
-    // Skills — dari section skills (teks terakhir yang panjang)
-    const skills: string[] = [];
-    const skillsSection = page.locator('section#skills').first();
-    if (await skillsSection.count()) {
-      const skillEls = await skillsSection.locator('.pvs-entity__parent-container, .pvs-entity, .pvs-list__paged-outer-item').allInnerTexts();
-      for (const s of skillEls) {
-        const clean = s.split('\n')[0].trim();
-        if (clean && clean.length <= 60 && !skills.includes(clean)) skills.push(clean);
+        for (let r = 0; r < roleIndices.length; r++) {
+          const dateIdx = roleIndices[r];
+          const duration = filtered[dateIdx];
+          const nextDateIdx = r + 1 < roleIndices.length ? roleIndices[r + 1] : filtered.length;
+
+          let role = '';
+          let company = '';
+          const descParts: string[] = [];
+
+          const l1 = filtered[dateIdx - 1] || '';
+          const l2 = filtered[dateIdx - 2] || '';
+
+          if (isEmploymentTypeStandalone(l1)) {
+            company = l1.split('·')[0].trim();
+            role = l2;
+            currentGroupCompany = '';
+          } else {
+            const prevDateIdx = r > 0 ? roleIndices[r - 1] : -1;
+            for (let k = Math.max(0, prevDateIdx); k < dateIdx; k++) {
+              if (isCompanyGroup(filtered[k])) {
+                currentGroupCompany = filtered[k - 1] || '';
+              }
+            }
+            role = l1;
+            company = currentGroupCompany;
+          }
+
+          let endIdx = nextDateIdx;
+          if (r + 1 < roleIndices.length) {
+            const nextL1 = filtered[nextDateIdx - 1] || '';
+            if (isEmploymentTypeStandalone(nextL1)) {
+              endIdx = nextDateIdx - 2;
+            } else if (isCompanyGroup(filtered[nextDateIdx - 2])) {
+              endIdx = nextDateIdx - 3;
+            } else {
+              endIdx = nextDateIdx - 1;
+            }
+          }
+
+          for (let j = dateIdx + 1; j < endIdx; j++) {
+            const descLine = filtered[j];
+            if (!isCompanyGroup(descLine) && !/^(show all|tampilkan semua)$/i.test(descLine)) {
+              descParts.push(descLine);
+            }
+          }
+
+          exp.push({
+            role: role || 'Posisi',
+            company: company || currentGroupCompany || 'Perusahaan',
+            duration,
+            description: descParts.join(' • '),
+          });
+        }
+
+        return exp;
+      });
+
+      if (allExp && allExp.length > profileData.experience.length) {
+        profileData.experience = allExp;
       }
+    } catch {
+      // jika gagal, tetap gunakan data pengalaman dari halaman utama
     }
-    // Fallback skills: dari tombol "Lihat semua" / badge skill
-    if (skills.length === 0) {
-      const skillItems = await page.locator('section#skills a span, .pvs-entity a span').allInnerTexts();
-      for (const s of skillItems) {
-        const clean = s.trim();
-        if (clean && clean.length <= 60 && !skills.includes(clean)) skills.push(clean);
+
+    // 2. Ekstraksi Mendalam: Seluruh Sertifikasi (/details/certifications/)
+    try {
+      await page.goto(`${baseUrl}/details/certifications/`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+      await page.waitForTimeout(1500);
+      await page.evaluate('window.__name = (fn, name) => fn;').catch(() => null);
+      await page.evaluate(async () => {
+        const s = document.querySelector('main, #workspace, .scaffold-layout__main') || window;
+        for (let i = 0; i < 6; i++) {
+          if (s.scrollBy) s.scrollBy(0, 800);
+          else window.scrollBy(0, 800);
+          await new Promise((r) => setTimeout(r, 200));
+        }
+      });
+      await page.waitForTimeout(800);
+
+      const allCerts = await page.evaluate(() => {
+        const clean = (t: string | null | undefined) => (t || '').replace(/\s+/g, ' ').trim();
+        const main = document.querySelector('main .scaffold-layout__main, main') || document.body;
+        const raw = ((main as HTMLElement)?.innerText || main?.textContent || '').split('\n').map(clean).filter(Boolean);
+        const cutIdx = raw.findIndex((l: string) => /^(lebih banyak profil|people also viewed|rekomendasi|tentang|aksesibilitas|linkedin corporation)/i.test(l));
+        const trimmed = cutIdx !== -1 ? raw.slice(0, cutIdx) : raw;
+        const filtered = trimmed.filter((l: string) => !/^(licenses & certifications|certifications|licenses|lisensi & sertifikasi|show all|tampilkan semua)/i.test(l));
+
+        const issueIndices: number[] = [];
+        filtered.forEach((l: string, idx: number) => {
+          if (/^(issued|diterbitkan)/i.test(l)) issueIndices.push(idx);
+        });
+
+        const certs: any[] = [];
+        issueIndices.forEach((issueIdx) => {
+          const issueDate = filtered[issueIdx];
+          const name = filtered[issueIdx - 2] || '';
+          const issuer = filtered[issueIdx - 1] || '';
+          let credentialId = '';
+          if (filtered[issueIdx + 1] && /credential id/i.test(filtered[issueIdx + 1])) {
+            credentialId = filtered[issueIdx + 1].replace(/credential id/i, '').trim();
+          }
+          if (name && !certs.some((c) => c.name === name)) {
+            certs.push({ name, issuer, issueDate, credentialId });
+          }
+        });
+        return certs;
+      });
+
+      if (allCerts && allCerts.length > profileData.certifications.length) {
+        profileData.certifications = allCerts;
       }
+    } catch {
+      // jika gagal, tetap gunakan sertifikasi dari halaman utama
     }
 
-    const data: LinkedInProfileData = {
-      name: name || 'Tidak terdeteksi',
-      headline: headline || '',
-      about,
-      location: location || '',
-      connections,
-      experience,
-      education,
-      certifications,
-      projects,
-      skills: skills.slice(0, 50),
-      profileUrl,
-      scrapedAt: new Date().toISOString(),
-    };
+    // 3. Ekstraksi Mendalam: Seluruh Skills (/details/skills/)
+    try {
+      await page.goto(`${baseUrl}/details/skills/`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+      await page.waitForTimeout(1500);
+      await page.evaluate('window.__name = (fn, name) => fn;').catch(() => null);
+      await page.evaluate(async () => {
+        const s = document.querySelector('main, #workspace, .scaffold-layout__main') || window;
+        for (let i = 0; i < 8; i++) {
+          if (s.scrollBy) s.scrollBy(0, 800);
+          else window.scrollBy(0, 800);
+          await new Promise((r) => setTimeout(r, 250));
+        }
+      });
+      await page.waitForTimeout(800);
 
-    return { success: true, data };
+      const certNames = (profileData.certifications || []).map((c: any) => (c.name || '').toLowerCase());
+
+      const allSkills = await page.evaluate((certs: string[]) => {
+        const clean = (t: string | null | undefined) => (t || '').replace(/\s+/g, ' ').trim();
+        const main = document.querySelector('main .scaffold-layout__main, main') || document.body;
+        const rawText = (main as HTMLElement)?.innerText || main?.textContent || '';
+        const cutIdx = rawText.indexOf('Lebih banyak profil');
+        const trimmedText = cutIdx !== -1 ? rawText.slice(0, cutIdx) : rawText;
+        const lines = trimmedText.split('\n').map(clean).filter(Boolean);
+
+        const isContext = (line: string) => {
+          if (/^(keahlian|skills|semua|all|pengetahuan|peralatan|interpersonal)/i.test(line)) return true;
+          if (/^(show all|tampilkan semua|\d+\s*endorsement)/i.test(line)) return true;
+          if (/(\bat\b|\bdi\b|experiences?\s+at)/i.test(line)) return true;
+          if (/(\.id|\.fun|\.com|\.org|\.io|dashboard)/i.test(line)) return true;
+          if (/^(head of|staff|intern|manager|lead|co-founder|founder|hustler)/i.test(line)) return true;
+          if (/^(studi independen|magang|freelance)/i.test(line)) return true;
+          if (certs.some((c) => c === line.toLowerCase())) return true;
+          return false;
+        };
+
+        const results: string[] = [];
+        lines.forEach((l: string) => {
+          if (!isContext(l) && l.length > 1 && l.length < 50 && !results.includes(l)) {
+            results.push(l);
+          }
+        });
+
+        return results;
+      }, certNames);
+
+      if (allSkills && allSkills.length > 0) {
+        profileData.skills = Array.from(new Set([...profileData.skills, ...allSkills])).slice(0, 60);
+      }
+    } catch {
+      // jika gagal, tetap gunakan skills dari halaman utama
+    }
+
+    return { success: true, data: profileData };
   } catch (e: any) {
+    console.error('LinkedIn Scraper Error:', e);
     return { success: false, error: toFriendlyError(e, 'Gagal mengekstrak profil LinkedIn. Pastikan link profil valid dan bisa diakses, lalu coba lagi.') };
   } finally {
     await browser.close().catch(() => null);

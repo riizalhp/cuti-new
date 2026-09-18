@@ -3,50 +3,118 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Briefcase,
-  MapPin,
-  DollarSign,
-  Building2,
-  CheckCircle2,
-  Send,
-  X,
-  Sparkles,
-  ArrowUpRight,
-} from 'lucide-react';
-import { jobsApi, cvApi } from '@/lib/api';
+  BriefcaseIcon,
+  MapPinIcon,
+  DollarSignIcon,
+  BuildingIcon,
+  BookmarkIcon,
+  BookmarkCheckIcon,
+  ExternalLinkIcon,
+  CloseIcon,
+} from '@/components/icons/CustomIcons';
+import { jobsApi, cvApi, trackerApi } from '@/lib/api';
 import { calculateJobMatch } from '@/lib/job-matcher';
+import { FeedbackWidget } from '@/components/ui/FeedbackWidget';
+import { getStoredSession } from '@/lib/auth';
+import { useToast } from '@/components/ui/Toast';
+
+interface RecommendedJobItem {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  salary: string;
+  type: string;
+  posted: string;
+  matchScore: string;
+  matchScoreNum: number;
+  desc: string;
+  externalUrl: string;
+}
+
+function getMatchBadgeStyle(score: number): string {
+  if (score >= 75) {
+    return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
+  }
+  if (score >= 50) {
+    return 'bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 border-amber-200 dark:border-amber-800';
+  }
+  return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+}
 
 export const LatestJobsList: React.FC = () => {
   const router = useRouter();
-  const [selectedJob, setSelectedJob] = useState<any | null>(null);
-  const [appliedJobs, setAppliedJobs] = useState<string[]>([]);
-  const [jobs, setJobs] = useState<any[]>([]);
+  const toast = useToast();
+  const [selectedJob, setSelectedJob] = useState<RecommendedJobItem | null>(null);
+  const [savedJobIds, setSavedJobIds] = useState<string[]>([]);
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [jobs, setJobs] = useState<RecommendedJobItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const session = getStoredSession();
+    if (session?.id) setUserId(session.id);
+  }, []);
 
   useEffect(() => {
     const fetchRecommendedJobs = async () => {
       setIsLoading(true);
       try {
-        // Fetch user's CV for matching
+        // Fetch user's CV for matching - pick the most complete CV
         const cvs = await cvApi.getAll();
-        const primaryCv = cvs.find((c: any) => c.isPrimary) || cvs[0];
+        const primaryCv =
+          cvs.find((c: any) => c.isPrimary) ||
+          cvs.find(
+            (c: any) =>
+              (Array.isArray(c.skills) && c.skills.length > 0) ||
+              (Array.isArray(c.skillsList) && c.skillsList.length > 0) ||
+              (Array.isArray(c.experience) && c.experience.length > 0)
+          ) ||
+          cvs[0];
 
-        // Fetch jobs from API
+        // Fetch jobs from API (now already queried intelligently from DB)
         const allJobs = await jobsApi.getRecommended(20);
 
+        // Fetch existing applications to sync tracker state
+        try {
+          const existingApps = await trackerApi.getAll();
+          if (Array.isArray(existingApps)) {
+            const savedUrls = new Set(existingApps.map((a: any) => a.portalUrl).filter(Boolean));
+            const savedCompanyPositions = new Set(
+              existingApps.map((a: any) => `${(a.company || '').toLowerCase()}:::${(a.position || '').toLowerCase()}`)
+            );
+            const initialSaved = allJobs
+              .filter((j: any) =>
+                (j.externalUrl && savedUrls.has(j.externalUrl)) ||
+                savedCompanyPositions.has(`${(j.company || '').toLowerCase()}:::${(j.title || j.position || '').toLowerCase()}`)
+              )
+              .map((j: any) => j.id);
+            setSavedJobIds(initialSaved);
+          }
+        } catch {}
+
         if (primaryCv && allJobs.length > 0) {
-          // Calculate match scores
+          // Calculate realistic match scores
           const jobsWithScores = allJobs.map((job: any) => {
-            const matchResult = calculateJobMatch(primaryCv, job);
+            const matchResult = calculateJobMatch(primaryCv, {
+              ...job,
+              workType: job.workType || job.type,
+            });
             return {
               ...job,
               matchScore: matchResult.matchScore,
+              matchScoreNum: matchResult.matchScore,
             };
           });
 
+          // Only consider jobs with a meaningful minimum match score (>= 25%)
+          // Unrelated jobs (like distant technicians) get filtered out automatically
+          const eligibleJobs = jobsWithScores.filter((j: any) => j.matchScoreNum >= 25);
+
           // Sort by match score and take top 3
-          const topJobs = jobsWithScores
-            .sort((a: any, b: any) => b.matchScore - a.matchScore)
+          const topJobs: RecommendedJobItem[] = eligibleJobs
+            .sort((a: any, b: any) => b.matchScoreNum - a.matchScoreNum)
             .slice(0, 3)
             .map((job: any) => ({
               id: job.id,
@@ -56,13 +124,14 @@ export const LatestJobsList: React.FC = () => {
               salary: job.salary || '-',
               type: job.type || 'Full-time',
               posted: job.postedDate || 'Baru saja',
-              matchScore: `${job.matchScore}%`,
+              matchScore: `${job.matchScoreNum}%`,
+              matchScoreNum: job.matchScoreNum,
               desc: job.description || 'Deskripsi tidak tersedia',
+              externalUrl: job.externalUrl || '',
             }));
 
           setJobs(topJobs);
         } else {
-          // Fallback to empty state
           setJobs([]);
         }
       } catch (error) {
@@ -76,11 +145,31 @@ export const LatestJobsList: React.FC = () => {
     fetchRecommendedJobs();
   }, []);
 
-  const handleApply = (jobId: string) => {
-    if (!appliedJobs.includes(jobId)) {
-      setAppliedJobs([...appliedJobs, jobId]);
+  const handleSaveToTracker = async (job: RecommendedJobItem) => {
+    if (savedJobIds.includes(job.id) || savingId === job.id) return;
+    setSavingId(job.id);
+    try {
+      await trackerApi.create({
+        company: job.company,
+        position: job.title,
+        location: job.location,
+        salary: job.salary,
+        portal: 'Portal Lowongan',
+        portalUrl: job.externalUrl || null,
+        matchScore: job.matchScoreNum,
+        status: 'Tersimpan',
+      });
+      setSavedJobIds((prev) => [...prev, job.id]);
+      toast.success('Disimpan ke Tracker', `${job.title} di ${job.company} berhasil dicatat ke Tracker.`);
+    } catch (err) {
+      console.error('[LatestJobsList] Failed to save to tracker:', err);
+      toast.error('Gagal Menyimpan', 'Terjadi kendala saat menyimpan ke Tracker. Silakan coba lagi.');
+    } finally {
+      setSavingId(null);
     }
   };
+
+  const maxScore = jobs.length > 0 ? Math.max(...jobs.map((j) => j.matchScoreNum || 0)) : 0;
 
   if (isLoading) {
     return (
@@ -109,19 +198,29 @@ export const LatestJobsList: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-[10px] bg-orange-50 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 flex items-center justify-center border border-orange-100 dark:border-orange-900/50">
-            <Briefcase className="w-4 h-4" />
+            <BriefcaseIcon size={16} />
           </div>
           <div>
             <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
               <span>Lowongan Paling Relevan Untukmu</span>
               {jobs.length > 0 && (
-                <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300">
-                  Match &gt;85%
-                </span>
+                maxScore >= 80 ? (
+                  <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                    Match &gt;80%
+                  </span>
+                ) : maxScore >= 60 ? (
+                  <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                    Match &gt;60%
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    Rekomendasi Profil ({maxScore}%)
+                  </span>
+                )
               )}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Rekomendasi teratas berdasarkan kualifikasi CV dan minat kariermu
+              Rekomendasi teratas berdasarkan kualifikasi CV dan preferensi kariermu
             </p>
           </div>
         </div>
@@ -131,28 +230,36 @@ export const LatestJobsList: React.FC = () => {
           className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1 cursor-pointer"
         >
           <span>Cari Semua Lowongan</span>
-          <ArrowUpRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
+      {jobs.length > 0 && userId && (
+        <div className="flex justify-end -mt-2 mb-1">
+          <FeedbackWidget feature="job_recommendation" userId={userId} />
+        </div>
+      )}
+
       {jobs.length === 0 ? (
         <div className="py-12 text-center">
-          <Briefcase className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-700 mb-3" />
-          <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Belum ada lowongan tersedia</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Lowongan yang cocok dengan profilmu akan muncul di sini
+          <BriefcaseIcon size={48} className="mx-auto text-slate-300 dark:text-slate-700 mb-3" />
+          <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Belum ada lowongan yang sesuai kriteria</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
+            Sistem belum menemukan lowongan aktif yang memiliki kecocokan tinggi dengan target profesi dan domisili kamu saat ini.
           </p>
           <button
-            onClick={() => router.push('/scrape-jobs')}
-            className="mt-4 px-4 py-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition cursor-pointer border-0"
+            onClick={() => router.push('/match-cv')}
+            className="mt-4 px-4 py-2 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer border-0 inline-flex items-center gap-1.5"
           >
-            Cari Lowongan Sekarang
+            <span>Jelajahi Semua Lowongan</span>
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {jobs.map((job) => {
-            const isApplied = appliedJobs.includes(job.id);
+            const isSaved = savedJobIds.includes(job.id);
+            const isSaving = savingId === job.id;
+            const badgeStyle = getMatchBadgeStyle(job.matchScoreNum);
+
             return (
               <div
                 key={job.id}
@@ -160,7 +267,7 @@ export const LatestJobsList: React.FC = () => {
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                    <span className={`px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold border ${badgeStyle}`}>
                       Match {job.matchScore}
                     </span>
                     <span className="text-[10px] text-slate-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-[10px] border border-slate-200 dark:border-slate-800">
@@ -174,17 +281,17 @@ export const LatestJobsList: React.FC = () => {
 
                   <div className="space-y-1 my-2 text-xs text-slate-600 dark:text-slate-300">
                     <div className="flex items-center gap-1.5">
-                      <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <BuildingIcon size={14} className="text-slate-400 shrink-0" />
                       <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
                         {job.company}
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <MapPinIcon size={14} className="text-slate-400 shrink-0" />
                       <span className="truncate">{job.location}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <DollarSign className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <DollarSignIcon size={14} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
                       <span className="font-bold text-emerald-600 dark:text-emerald-400 truncate">
                         {job.salary}
                       </span>
@@ -192,35 +299,55 @@ export const LatestJobsList: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-800">
+                <div className="flex items-center gap-1.5 pt-2 border-t border-slate-200/60 dark:border-slate-800">
                   <button
                     onClick={() => setSelectedJob(job)}
-                    className="flex-1 py-2 px-2 rounded-[10px] bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer border-0"
+                    className="py-2 px-2.5 rounded-[10px] bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer border-0"
                   >
                     Detail
                   </button>
 
                   <button
-                    onClick={() => handleApply(job.id)}
-                    disabled={isApplied}
-                    className={`flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-[10px] font-bold text-xs transition shadow-sm cursor-pointer border-0 ${
-                      isApplied
-                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                        : 'bg-[#1738D1] hover:bg-[#132EA8] text-white'
+                    onClick={() => handleSaveToTracker(job)}
+                    disabled={isSaved || isSaving}
+                    title={isSaved ? 'Sudah tersimpan di Tracker' : 'Simpan ke Tracker'}
+                    className={`py-2 px-2.5 rounded-[10px] font-bold text-xs transition flex items-center justify-center gap-1 cursor-pointer border ${
+                      isSaved
+                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                     }`}
                   >
-                    {isApplied ? (
+                    {isSaved ? (
                       <>
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Terkirim</span>
+                        <BookmarkCheckIcon size={14} className="text-emerald-600 dark:text-emerald-400" />
+                        <span className="hidden sm:inline">Tersimpan</span>
                       </>
                     ) : (
                       <>
-                        <Send className="w-3.5 h-3.5" />
-                        <span>Lamar</span>
+                        <BookmarkIcon size={14} />
+                        <span className="hidden sm:inline">+ Tracker</span>
                       </>
                     )}
                   </button>
+
+                  {job.externalUrl ? (
+                    <a
+                      href={job.externalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-[10px] font-bold text-xs transition shadow-xs bg-orange-500 hover:bg-orange-600 text-white no-underline cursor-pointer"
+                    >
+                      <span className="truncate">Lamar</span>
+                      <ExternalLinkIcon size={13} className="shrink-0" />
+                    </a>
+                  ) : (
+                    <button
+                      onClick={() => router.push('/match-cv')}
+                      className="flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-[10px] font-bold text-xs transition shadow-xs bg-[#1738D1] hover:bg-[#132EA8] text-white border-0 cursor-pointer"
+                    >
+                      <span className="truncate">Lihat Sumber</span>
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -228,66 +355,100 @@ export const LatestJobsList: React.FC = () => {
         </div>
       )}
 
-      {/* Job Detail Modal */}
+      {/* Job Detail Slide-in Drawer per Dashboard Pilar 4 */}
       {selectedJob && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg p-6 relative">
-            <button
-              onClick={() => setSelectedJob(null)}
-              className="absolute top-4 right-4 p-1.5 rounded-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <span className="px-2.5 py-0.5 rounded-[10px] text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-              Match Score {selectedJob.matchScore}
-            </span>
-
-            <h3 className="text-base font-extrabold text-slate-900 dark:text-white mt-2">
-              {selectedJob.title}
-            </h3>
-            <p className="text-xs font-semibold text-orange-600 dark:text-orange-400 mb-4">
-              {selectedJob.company} • {selectedJob.location}
-            </p>
-
-            <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-[10px] space-y-2 text-xs mb-4 border border-slate-100 dark:border-slate-700">
-              <p className="text-slate-600 dark:text-slate-300">
-                <strong className="text-slate-900 dark:text-white">Estimasi Gaji:</strong> {selectedJob.salary}
-              </p>
-              <p className="text-slate-600 dark:text-slate-300">
-                <strong className="text-slate-900 dark:text-white">Tipe Pekerjaan:</strong> {selectedJob.type}
-              </p>
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end transition-opacity">
+          <div className="relative z-10 w-full max-w-md sm:max-w-lg h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300">
+            {/* Header */}
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
+              <span className={`px-2.5 py-0.5 rounded-[10px] text-xs font-bold border ${getMatchBadgeStyle(selectedJob.matchScoreNum)}`}>
+                Match Score {selectedJob.matchScore}
+              </span>
+              <button
+                onClick={() => setSelectedJob(null)}
+                className="p-1.5 rounded-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                aria-label="Tutup"
+              >
+                <CloseIcon size={18} />
+              </button>
             </div>
 
-            <div className="space-y-2 mb-6">
-              <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                Deskripsi Pekerjaan:
-              </h4>
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                {selectedJob.desc}
-              </p>
+            {/* Body */}
+            <div className="p-6 overflow-y-auto flex-1 space-y-4">
+              <div>
+                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                  {selectedJob.title}
+                </h3>
+                <p className="text-xs font-semibold text-orange-600 dark:text-orange-400 mt-1">
+                  {selectedJob.company} • {selectedJob.location}
+                </p>
+              </div>
+
+              <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-[10px] space-y-2 text-xs border border-slate-100 dark:border-slate-700">
+                <p className="text-slate-600 dark:text-slate-300">
+                  <strong className="text-slate-900 dark:text-white">Estimasi Gaji:</strong> {selectedJob.salary}
+                </p>
+                <p className="text-slate-600 dark:text-slate-300">
+                  <strong className="text-slate-900 dark:text-white">Tipe Pekerjaan:</strong> {selectedJob.type}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                  Deskripsi Pekerjaan
+                </h4>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+                  {selectedJob.desc}
+                </p>
+              </div>
             </div>
 
-            <button
-              onClick={() => {
-                handleApply(selectedJob.id);
-                setSelectedJob(null);
-              }}
-              disabled={appliedJobs.includes(selectedJob.id)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] disabled:bg-emerald-600 text-white font-bold text-xs shadow-md transition cursor-pointer border-0"
-            >
-              {appliedJobs.includes(selectedJob.id) ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Lamaran Telah Terkirim</span>
-                </>
+            {/* Sticky Footer */}
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex flex-col sm:flex-row items-center gap-2.5">
+              <button
+                onClick={() => handleSaveToTracker(selectedJob)}
+                disabled={savedJobIds.includes(selectedJob.id) || savingId === selectedJob.id}
+                className={`w-full sm:w-auto flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-[10px] font-bold text-xs transition border cursor-pointer ${
+                  savedJobIds.includes(selectedJob.id)
+                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                    : 'bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                {savedJobIds.includes(selectedJob.id) ? (
+                  <>
+                    <BookmarkCheckIcon size={16} className="text-emerald-600" />
+                    <span>Tersimpan di Tracker</span>
+                  </>
+                ) : (
+                  <>
+                    <BookmarkIcon size={16} />
+                    <span>Simpan ke Tracker</span>
+                  </>
+                )}
+              </button>
+
+              {selectedJob.externalUrl ? (
+                <a
+                  href={selectedJob.externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md transition no-underline cursor-pointer"
+                >
+                  <span>Buka Portal Lowongan</span>
+                  <ExternalLinkIcon size={14} />
+                </a>
               ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  <span>Kirim Lamaran Dengan CV ATS</span>
-                </>
+                <button
+                  onClick={() => {
+                    setSelectedJob(null);
+                    router.push('/match-cv');
+                  }}
+                  className="w-full sm:w-auto flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md transition border-0 cursor-pointer"
+                >
+                  <span>Cari Portal Sumber</span>
+                </button>
               )}
-            </button>
+            </div>
           </div>
         </div>
       )}

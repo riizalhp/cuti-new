@@ -42,7 +42,7 @@ Checklist interaktif sesuai jadwal:
 
 - **H-7 s/d H-3** — riset perusahaan, pelajari job description, siapkan 3 cerita STAR.
 - **H-1** — pilih pakaian, cek koneksi & perangkat.
-- **H-0** — sampai 15 menit lebih awal, siapkan dokumen pendukung.
+- **H-0**: sampai 15 menit lebih awal, siapkan dokumen pendukung.
 
 Centang setiap item untuk melacak kesiapanmu.
 
@@ -50,7 +50,7 @@ Centang setiap item untuk melacak kesiapanmu.
 
 - **Gunakan STAR** di setiap jawaban behavioral: Situation → Task → Action → Result.
 - **Sebutkan angka** jika memungkinkan (*"meningkatkan X 30%"*).
-- **Riset perusahaan** sebelum interview — hampir selalu ditanya.
+- **Riset perusahaan** sebelum interview, karena hal ini hampir selalu ditanyakan.
 - **Jangan mengeluh** tentang atasan/perusahaan lama.
 - Latihan **recording** jawabanmu agar terbiasa dengan suara sendiri.
 
@@ -58,6 +58,6 @@ Centang setiap item untuk melacak kesiapanmu.
 
 - **Apakah simulasi memakai voice?** Evaluasi dilakukan lewat jawaban teks yang kamu ketik; fokusnya melatih struktur jawaban.
 - **Soalnya spesifik per bidang?** Ada soal umum dan yang spesifik per peran (misal Software Engineer, Marketing, Data Analyst).
-- **Bisa diakses gratis?** Sebagian fitur bank soal dapat diakses; beberapa modul mungkin memerlukan paket berbayar.
+- **Bisa diakses gratis?** Ya, semua modul latihan dan simulasi interview dapat diakses secara gratis di dashboard.
 
 Lanjut baca: [Career Readiness](/artikel/career-readiness) dan [Tracker Lamaran](/artikel/tracker-lamaran).

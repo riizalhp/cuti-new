@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@cuti/db";
+import { prisma } from "@employr/db";
 
 export async function GET() {
   try {
@@ -17,8 +17,10 @@ export async function GET() {
       processingCvs,
       totalMisi,
       activeMisi,
-      totalApplications,
+      appliedApplications,
       interviewApplications,
+      offeringApplications,
+      rejectedApplications,
       totalTransactions,
       successfulTransactions,
       totalRevenue,
@@ -38,8 +40,13 @@ export async function GET() {
       prisma.cv_projects.count({ where: { status: "PROCESSING" } }),
       prisma.misi.count(),
       prisma.misi.count({ where: { is_active: true } }),
-      prisma.applications.count(),
+      prisma.applications.findMany({
+        where: { status: "APPLIED" },
+        select: { id: true, ai_insight: true },
+      }),
       prisma.applications.count({ where: { status: "INTERVIEW" } }),
+      prisma.applications.count({ where: { status: { in: ["OFFERING", "ACCEPTED"] } } }),
+      prisma.applications.count({ where: { status: "REJECTED" } }),
       prisma.transactions.count(),
       prisma.transactions.count({ where: { status: "SUCCESS" } }),
       prisma.transactions.aggregate({
@@ -56,6 +63,24 @@ export async function GET() {
       }),
     ]);
 
+    // Breakdown status tracker lamaran kerja (Terkirim vs Screening)
+    let terkirimApplications = 0;
+    let screeningApplications = 0;
+    for (const app of appliedApplications) {
+      const insight = (typeof app.ai_insight === "object" && app.ai_insight !== null ? app.ai_insight : {}) as Record<string, any>;
+      if (insight.displayStatus === "Screening") {
+        screeningApplications += 1;
+      } else {
+        terkirimApplications += 1;
+      }
+    }
+    const totalTrackerApplications =
+      terkirimApplications +
+      screeningApplications +
+      interviewApplications +
+      offeringApplications +
+      rejectedApplications;
+
     // Query top downloaded templates
     const downloadLogs = await prisma.audit_logs.findMany({
       where: { action: "CV_DOWNLOAD" },
@@ -66,20 +91,25 @@ export async function GET() {
       select: { template_id: true, data: true },
     });
 
+    const TEMPLATE_NAMES: Record<string, string> = {
+      "ats-modern": "ATS Modern Standard",
+      "ketat-serif": "Ketat Ruled Serif",
+      "luasa-minimal": "Luasa Airy Minimalist",
+      "harvard-modern": "Harvard Modern Grid",
+      "rezi-classic": "Rezi Classic Serif",
+      "minimalist-executive": "Minimalist Executive",
+    };
+
     const templateCounts: Record<string, { used: number; downloaded: number }> = {};
 
     cvTemplateUsage.forEach((c) => {
       const tid = (c.template_id || "ats-modern").trim().toLowerCase();
-      const normId = tid === "ats-modern-standard" || tid === "default" ? "ats-modern" : tid;
+      const normId =
+        tid === "ats-modern-standard" || tid === "default" || !TEMPLATE_NAMES[tid]
+          ? "ats-modern"
+          : tid;
       if (!templateCounts[normId]) templateCounts[normId] = { used: 0, downloaded: 0 };
       templateCounts[normId].used += 1;
-
-      if (c.data && typeof c.data === "object") {
-        const raw = c.data as Record<string, any>;
-        if (typeof raw.download_count === "number") {
-          templateCounts[normId].downloaded += raw.download_count;
-        }
-      }
     });
 
     downloadLogs.forEach((l) => {
@@ -89,7 +119,10 @@ export async function GET() {
         if (val.template_id) tid = val.template_id;
       }
       const normId = (tid || "ats-modern").trim().toLowerCase();
-      const canonical = normId === "ats-modern-standard" || normId === "default" ? "ats-modern" : normId;
+      const canonical =
+        normId === "ats-modern-standard" || normId === "default" || !TEMPLATE_NAMES[normId]
+          ? "ats-modern"
+          : normId;
       if (!templateCounts[canonical]) templateCounts[canonical] = { used: 0, downloaded: 0 };
       templateCounts[canonical].downloaded += 1;
     });
@@ -97,7 +130,7 @@ export async function GET() {
     const topTemplates = Object.entries(templateCounts)
       .map(([id, counts]) => ({
         id,
-        name: id.replace(/-/g, " ").replace(/\b\w/g, (s) => s.toUpperCase()),
+        name: TEMPLATE_NAMES[id] || id.replace(/-/g, " ").replace(/\b\w/g, (s) => s.toUpperCase()),
         used: counts.used,
         downloaded: counts.downloaded,
       }))
@@ -143,8 +176,12 @@ export async function GET() {
           pendingSubmissions: pendingMisiSubmissions,
         },
         applications: {
-          total: totalApplications,
+          total: totalTrackerApplications,
+          terkirim: terkirimApplications,
+          screening: screeningApplications,
           interview: interviewApplications,
+          offering: offeringApplications,
+          ditolak: rejectedApplications,
         },
         transactions: {
           total: totalTransactions,
@@ -168,14 +205,27 @@ export async function GET() {
           userName: o.users?.name,
           createdAt: o.created_at.toISOString(),
         })),
-        recentApplications: recentApplications.map((a) => ({
-          id: a.id,
-          companyName: a.company_name,
-          position: a.position,
-          status: a.status,
-          userName: a.users?.name,
-          createdAt: a.created_at.toISOString(),
-        })),
+        recentApplications: recentApplications.map((a) => {
+          const insight = (typeof a.ai_insight === "object" && a.ai_insight !== null ? a.ai_insight : {}) as Record<string, any>;
+          let displayStatus: "Terkirim" | "Screening" | "Interview" | "Offering" | "Ditolak" = "Terkirim";
+          if (a.status === "INTERVIEW") displayStatus = "Interview";
+          else if (a.status === "OFFERING" || a.status === "ACCEPTED") displayStatus = "Offering";
+          else if (a.status === "REJECTED") displayStatus = "Ditolak";
+          else if (insight.displayStatus === "Screening") displayStatus = "Screening";
+
+          return {
+            id: a.id,
+            companyName: a.company_name,
+            position: a.position,
+            status: displayStatus,
+            rawStatus: a.status,
+            userName: a.users?.name || "Pengguna",
+            createdAt: a.created_at.toISOString(),
+            matchScore: a.match_score,
+            location: insight.location || "Indonesia",
+            portal: insight.portal || "Direct",
+          };
+        }),
       },
     });
   } catch (error: any) {

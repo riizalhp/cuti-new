@@ -6,6 +6,7 @@
 
 export * from './ats-score-types';
 export * from './ats-score-engine';
+export * from './score-color';
 
 import {
   calculateDynamicAtsScore,

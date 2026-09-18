@@ -6,7 +6,7 @@
 const SECRET_KEY_RAW =
   process.env.ADMIN_SESSION_SECRET ||
   process.env.JWT_SECRET ||
-  'cuti_admin_secure_secret_prod_key_2026_signature';
+  'employr_admin_secure_secret_prod_key_2026_signature';
 
 async function getCryptoKey(): Promise<CryptoKey> {
   const enc = new TextEncoder();

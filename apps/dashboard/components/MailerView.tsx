@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/Toast';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { mailerApi, userApi } from '@/lib/api';
 import {
   Mail,
   Send,
@@ -25,19 +25,79 @@ import {
   Sparkles,
   ExternalLink,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Info,
   Check,
+  Eye,
+  EyeOff,
+  Bot,
+  KeyRound,
+  HelpCircle,
+  Copy,
+  FileCheck2,
+  Paperclip,
 } from 'lucide-react';
 import Link from 'next/link';
-import { CoverLetterView } from './CoverLetterView';
+import { CoverLetterView, COVER_LETTER_PRESETS } from './CoverLetterView';
+import { mailerApi, userApi, coverLetterApi, cvApi } from '@/lib/api';
+
+export type ProviderType = 'gmail' | 'outlook' | 'yahoo' | 'custom';
+
+export const PROVIDER_PRESETS: Record<
+  ProviderType,
+  {
+    name: string;
+    subname: string;
+    host: string;
+    port: number;
+    secure: boolean;
+    hint: string;
+  }
+> = {
+  gmail: {
+    name: 'Gmail',
+    subname: 'Rekomendasi (Paling Populer)',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    hint: 'Gunakan Sandi Aplikasi (App Password) 16 huruf dari akun Google kamu.',
+  },
+  outlook: {
+    name: 'Outlook / Hotmail',
+    subname: 'Microsoft',
+    host: 'smtp.office365.com',
+    port: 587,
+    secure: false,
+    hint: 'Gunakan kata sandi akun atau app password dari akun Microsoft kamu.',
+  },
+  yahoo: {
+    name: 'Yahoo Mail',
+    subname: 'Yahoo Indonesia / Global',
+    host: 'smtp.mail.yahoo.com',
+    port: 587,
+    secure: false,
+    hint: 'Gunakan kata sandi aplikasi dari halaman keamanan Yahoo kamu.',
+  },
+  custom: {
+    name: 'Kustom / Lainnya',
+    subname: 'Pengaturan Manual',
+    host: '',
+    port: 587,
+    secure: false,
+    hint: 'Masukkan konfigurasi Host dan Port SMTP secara manual.',
+  },
+};
 
 export interface MailerViewProps {
-  initialTab?: 'single' | 'cover-letter' | 'batch' | 'smtp';
+  initialTab?: 'cover-letter' | 'single' | 'batch' | 'smtp';
 }
 
-export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' }) => {
+export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'cover-letter' }) => {
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState<'single' | 'cover-letter' | 'batch' | 'smtp'>(initialTab);
+  const { confirm } = useConfirm();
+  const [activeTab, setActiveTab] = useState<'cover-letter' | 'single' | 'batch' | 'smtp'>(initialTab);
+  const [savedCoverLetters, setSavedCoverLetters] = useState<any[]>([]);
 
   // SMTP Accounts state
   const [smtpAccounts, setSmtpAccounts] = useState<any[]>([]);
@@ -45,6 +105,7 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
 
   // Single Send State
   const [isSingleDrawerOpen, setIsSingleDrawerOpen] = useState(false);
+  const [userCvs, setUserCvs] = useState<any[]>([]);
   const [singleForm, setSingleForm] = useState({
     to: '',
     to_name: '',
@@ -52,14 +113,18 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
     position: '',
     body_content: '',
     custom_subject: '',
-    design: 'klasik',
+    design: 'standar',
     smtp_id: '',
+    attachment_cv_id: '',
   });
   const [isSendingSingle, setIsSendingSingle] = useState(false);
   const [singleResult, setSingleResult] = useState<{ success: boolean; message: string } | null>(null);
 
   // Add SMTP Drawer State
   const [isSmtpDrawerOpen, setIsSmtpDrawerOpen] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<ProviderType>('gmail');
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [smtpForm, setSmtpForm] = useState({
     host: 'smtp.gmail.com',
     port: 587,
@@ -77,7 +142,7 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
   // Batch Sending State
   const [batchTitle, setBatchTitle] = useState('Batch Lamaran');
   const [batchDelay, setBatchDelay] = useState(2);
-  const [batchDesign, setBatchDesign] = useState('klasik');
+  const [batchDesign, setBatchDesign] = useState('standar');
   const [csvText, setCsvText] = useState('');
   const [parsedCsvItems, setParsedCsvItems] = useState<any[]>([]);
   const [isStartingBatch, setIsStartingBatch] = useState(false);
@@ -89,14 +154,31 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
   // Load user data & sync query param tab
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const paramTab = new URLSearchParams(window.location.search).get('tab');
+      const search = new URLSearchParams(window.location.search);
+      const paramTab = search.get('tab');
       if (paramTab && ['single', 'cover-letter', 'batch', 'smtp'].includes(paramTab)) {
         setActiveTab(paramTab as any);
+      }
+      const paramCvId = search.get('cvId');
+      if (paramCvId) {
+        setSingleForm((prev) => ({ ...prev, attachment_cv_id: paramCvId }));
       }
     }
 
     loadSmtpAccounts();
     loadBatchJobs();
+    loadSavedCoverLetters();
+
+    // Muat CV pengguna untuk lampiran otomatis PDF ATS
+    cvApi.getAll().then((data: any[]) => {
+      if (Array.isArray(data) && data.length > 0) {
+        setUserCvs(data);
+        setSingleForm((prev) => ({
+          ...prev,
+          attachment_cv_id: prev.attachment_cv_id || data[0].id,
+        }));
+      }
+    }).catch(() => {});
 
     // Auto prefill sender name from profile
     userApi.getProfile().then((profile: any) => {
@@ -112,11 +194,23 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
     }).catch(() => {});
   }, []);
 
+  const loadSavedCoverLetters = async () => {
+    try {
+      const data = await coverLetterApi.getAll();
+      if (Array.isArray(data)) {
+        setSavedCoverLetters(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleUseCoverLetter = (data: {
     company: string;
     position: string;
     recruiterName?: string;
     content: string;
+    cvId?: string;
   }) => {
     setSingleForm((prev) => ({
       ...prev,
@@ -124,6 +218,7 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
       position: data.position || prev.position,
       to_name: data.recruiterName || prev.to_name,
       body_content: data.content,
+      attachment_cv_id: data.cvId || prev.attachment_cv_id,
       custom_subject:
         data.position && data.company
           ? `Lamaran Pekerjaan - ${data.position} di ${data.company} - ${userName || 'Kandidat'}`
@@ -133,7 +228,7 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
     setIsSingleDrawerOpen(true);
     toast.success(
       'Surat Lamaran Dimuat',
-      'Draf surat lamaran telah diisikan ke formulir pengiriman email.'
+      'Draf surat lamaran dan lampiran CV telah diisikan ke formulir pengiriman email.'
     );
   };
 
@@ -161,23 +256,48 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
     }
   };
 
+  // Handle Select Provider Preset
+  const handleSelectProvider = (provider: ProviderType) => {
+    setSelectedProvider(provider);
+    const preset = PROVIDER_PRESETS[provider];
+    setSmtpForm((prev) => ({
+      ...prev,
+      host: preset.host || prev.host,
+      port: preset.port || prev.port,
+      secure: preset.secure,
+    }));
+    if (provider === 'custom') {
+      setShowAdvancedSettings(true);
+    }
+  };
+
   // Handle SMTP Test Connection
   const handleTestSmtp = async () => {
-    if (!smtpForm.username || !smtpForm.password) {
-      setSmtpFeedback({ success: false, message: 'Username dan App Password SMTP wajib diisi.' });
+    const cleanPassword = smtpForm.password.replace(/\s+/g, '').trim();
+    if (!smtpForm.username || !cleanPassword) {
+      setSmtpFeedback({
+        success: false,
+        message: 'Alamat email dan Sandi Aplikasi (16 karakter) wajib diisi.',
+      });
       return;
     }
     setIsTestingSmtp(true);
     setSmtpFeedback(null);
     try {
-      const res = await mailerApi.testSmtpConnection(smtpForm);
+      const res = await mailerApi.testSmtpConnection({
+        ...smtpForm,
+        password: cleanPassword,
+      });
       if (res.success) {
-        setSmtpFeedback({ success: true, message: 'Koneksi SMTP Berhasil!' });
+        setSmtpFeedback({
+          success: true,
+          message: 'Koneksi Berhasil! Akun email kamu siap digunakan oleh bot pengirim.',
+        });
       } else {
         setSmtpFeedback({ success: false, message: res.message || 'Koneksi gagal.' });
       }
     } catch (err: any) {
-      setSmtpFeedback({ success: false, message: err.message || 'Gagal menguji koneksi SMTP.' });
+      setSmtpFeedback({ success: false, message: err.message || 'Gagal menguji koneksi.' });
     } finally {
       setIsTestingSmtp(false);
     }
@@ -186,22 +306,37 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
   // Handle Save SMTP
   const handleSaveSmtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanPassword = smtpForm.password.replace(/\s+/g, '').trim();
+    if (!smtpForm.username || !cleanPassword) {
+      setSmtpFeedback({
+        success: false,
+        message: 'Alamat email dan Sandi Aplikasi (16 karakter) wajib diisi.',
+      });
+      return;
+    }
+
     setIsSavingSmtp(true);
     setSmtpFeedback(null);
     try {
-      const res = await mailerApi.createSmtpAccount(smtpForm);
+      const res = await mailerApi.createSmtpAccount({
+        ...smtpForm,
+        password: cleanPassword,
+      });
       if (res.success) {
-        setSmtpFeedback({ success: true, message: 'Akun SMTP berhasil disimpan!' });
+        setSmtpFeedback({
+          success: true,
+          message: 'Bot Pengirim berhasil diaktifkan dan siap mengirim lamaran!',
+        });
         loadSmtpAccounts();
         setTimeout(() => {
           setIsSmtpDrawerOpen(false);
           setSmtpFeedback(null);
         }, 1200);
       } else {
-        setSmtpFeedback({ success: false, message: res.message || 'Gagal menyimpan akun SMTP.' });
+        setSmtpFeedback({ success: false, message: res.message || 'Gagal mengaktifkan bot pengirim.' });
       }
     } catch (err: any) {
-      setSmtpFeedback({ success: false, message: err.message || 'Gagal menyimpan akun SMTP.' });
+      setSmtpFeedback({ success: false, message: err.message || 'Gagal mengaktifkan bot pengirim.' });
     } finally {
       setIsSavingSmtp(false);
     }
@@ -209,7 +344,14 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
 
   // Handle Delete SMTP
   const handleDeleteSmtp = async (id: string) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus akun SMTP ini?')) return;
+    const isConfirmed = await confirm({
+      type: 'danger',
+      title: 'Hapus Akun SMTP?',
+      description: 'Akun SMTP ini akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.',
+      confirmText: 'Hapus Akun',
+      cancelText: 'Batal',
+    });
+    if (!isConfirmed) return;
     try {
       await mailerApi.deleteSmtpAccount(id);
       loadSmtpAccounts();
@@ -331,29 +473,51 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
     }
   };
 
+  const selectedSingleCv = userCvs.find((c) => c.id === singleForm.attachment_cv_id);
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
       <PageHeader
-        title="Email & Cover Letter"
-        subtitle="Susun surat lamaran kerja persuasif dengan AI dan kirimkan email lamaran kerja personal atau massal via SMTP aman yang terhubung langsung ke Tracker."
+        title="Email & Surat Lamaran"
+        subtitle="Siapkan draf surat lamaran dengan template instan atau susun otomatis. Kamu bisa menyalin teks untuk kirim manual, atau kirim otomatis ke HRD via bot pengirim yang terhubung ke Tracker."
         icon={Mail}
-        badge="All-in-One Suite"
+        badge="Email & Mailer"
+        stats={[
+          {
+            label: 'Mode Aktif',
+            value:
+              activeTab === 'cover-letter'
+                ? '1. Siapkan Draf'
+                : activeTab === 'single'
+                ? '2. Kirim Cepat'
+                : activeTab === 'batch'
+                ? '3. Kirim Massal'
+                : '4. Bot Pengirim',
+          },
+          {
+            label: 'Bot Pengirim',
+            value: smtpAccounts.length > 0 ? `${smtpAccounts.length} Akun Aktif` : 'Belum Ada Akun',
+            colorClass: smtpAccounts.length > 0 ? 'text-emerald-400' : 'text-amber-400',
+          },
+        ]}
+        actions={
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('single');
+              setIsSingleDrawerOpen(true);
+            }}
+            className="px-3.5 py-2 rounded-[10px] bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-black text-xs shadow-md shadow-orange-500/30 transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 border-0"
+          >
+            <Send className="w-3.5 h-3.5" />
+            <span>Form Pengiriman Email</span>
+          </button>
+        }
       />
 
       {/* Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3 overflow-x-auto no-scrollbar">
-        <button
-          onClick={() => setActiveTab('single')}
-          className={`px-4 py-2 rounded-[10px] text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
-            activeTab === 'single'
-              ? 'bg-[#1738D1] text-white shadow-sm'
-              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
-        >
-          <Send className="w-3.5 h-3.5" />
-          Kirim Cepat (Single)
-        </button>
         <button
           onClick={() => setActiveTab('cover-letter')}
           className={`px-4 py-2 rounded-[10px] text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
@@ -363,7 +527,18 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
           }`}
         >
           <FileText className="w-3.5 h-3.5" />
-          Surat Lamaran (AI)
+          1. Siapkan Surat Lamaran
+        </button>
+        <button
+          onClick={() => setActiveTab('single')}
+          className={`px-4 py-2 rounded-[10px] text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+            activeTab === 'single'
+              ? 'bg-[#1738D1] text-white shadow-sm'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+          }`}
+        >
+          <Send className="w-3.5 h-3.5" />
+          2. Kirim Email Cepat
         </button>
         <button
           onClick={() => setActiveTab('batch')}
@@ -374,7 +549,7 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
           }`}
         >
           <Layers className="w-3.5 h-3.5" />
-          Kirim Massal (Batch CSV)
+          3. Kirim Massal (CSV)
         </button>
         <button
           onClick={() => setActiveTab('smtp')}
@@ -384,34 +559,41 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
               : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
           }`}
         >
-          <Server className="w-3.5 h-3.5" />
-          Pengaturan SMTP ({smtpAccounts.length})
+          <Bot className="w-3.5 h-3.5" />
+          4. Bot Pengirim ({smtpAccounts.length})
         </button>
       </div>
 
       {/* ================= TAB 1: SINGLE SEND ================= */}
       {activeTab === 'single' && (
         <div className="space-y-6">
-          {/* SMTP Notice Card */}
+          {/* Bot Notice Card */}
           {smtpAccounts.length === 0 && !isLoadingSmtp && (
-            <div className="p-4 rounded-[10px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="p-5 rounded-[10px] bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800/80 dark:to-slate-800/50 border border-blue-200/80 dark:border-slate-700 flex items-start gap-4">
+              <div className="w-9 h-9 rounded-[10px] bg-[#1738D1] text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm shadow-blue-500/20">
+                <Bot className="w-5 h-5" />
+              </div>
               <div className="flex-1">
-                <h4 className="text-xs font-bold text-amber-900 dark:text-amber-200">
-                  Akun SMTP Belum Terkonfigurasi
-                </h4>
-                <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                  Untuk mulai mengirim email lamaran, Anda perlu menambahkan setidaknya satu akun pengirim (misalnya Gmail App Password atau custom SMTP).
+                <div className="flex items-center gap-2">
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                    Bot Pengirim Belum Aktif
+                  </h4>
+                  <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300">
+                    1 Menit Pengaturan
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                  Agar bot bisa mengirim email lamaran secara otomatis langsung dari akun Gmail kamu (100% gratis & aman), hubungkan akun kamu terlebih dahulu.
                 </p>
                 <button
                   onClick={() => {
-                    setActiveTab('smtp');
                     setIsSmtpDrawerOpen(true);
+                    setSmtpFeedback(null);
                   }}
-                  className="mt-3 px-3 py-1.5 rounded-[10px] bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold inline-flex items-center gap-1.5"
+                  className="mt-3.5 px-4 py-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold inline-flex items-center gap-2 shadow-sm transition active:scale-[0.98] cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  Atur Akun SMTP Sekarang
+                  Aktifkan Bot Pengirim Sekarang
                 </button>
               </div>
             </div>
@@ -468,10 +650,10 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  Integrasi Surat Lamaran
+                  Siapkan Draf Surat Lamaran
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-                  Susun cover letter Anda di tab Surat Lamaran lalu kirimkan langsung dengan sekali klik.
+                  Belum punya kata pengantar? Gunakan template cepat atau susun otomatis di tab pertama lalu kirimkan langsung.
                 </p>
               </div>
               <button
@@ -479,7 +661,7 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
                 onClick={() => setActiveTab('cover-letter')}
                 className="mt-6 w-full py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
               >
-                Buat Surat Lamaran Sekarang
+                Buka Tab Surat Lamaran
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -548,10 +730,11 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
                   onChange={(e) => setBatchDesign(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-[10px] text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#1738D1]"
                 >
-                  <option value="klasik">Klasik (Card Navy & Elegan)</option>
+                  <option value="standar">Standar / Polos (Natural seperti Gmail - Direkomendasikan)</option>
                   <option value="minimal">Minimalist (Clean & Spacing Lega)</option>
-                  <option value="dark">Dark Theme (Modern Slate)</option>
+                  <option value="klasik">Klasik (Card Navy & Elegan)</option>
                   <option value="serif">Serif (Editorial Formal)</option>
+                  <option value="dark">Dark Theme (Modern Slate)</option>
                 </select>
               </div>
             </div>
@@ -665,16 +848,17 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
         </div>
       )}
 
-      {/* ================= TAB 3: SMTP SETTINGS ================= */}
+      {/* ================= TAB 3: BOT PENGIRIM ================= */}
       {activeTab === 'smtp' && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                Daftar Akun Pengirim (SMTP)
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Bot className="w-5 h-5 text-[#1738D1]" />
+                Bot Pengirim Email Pribadi
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Dukungan multi-akun: sistem akan otomatis melakukan failover jika salah satu akun limit atau mengalami kendala.
+                Kirim lamaran kerja otomatis langsung dari akun email kamu (Gmail/Outlook) — 100% gratis, aman, dan langsung sampai ke inbox HRD.
               </p>
             </div>
             <button
@@ -682,56 +866,96 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
                 setIsSmtpDrawerOpen(true);
                 setSmtpFeedback(null);
               }}
-              className="px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold flex items-center gap-2 shadow-sm cursor-pointer transition active:scale-[0.98]"
+              className="px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm cursor-pointer transition active:scale-[0.98] shrink-0"
             >
               <Plus className="w-4 h-4" />
-              Tambah Akun SMTP
+              Hubungkan Akun Baru
             </button>
           </div>
 
           {smtpAccounts.length === 0 && !isLoadingSmtp ? (
-            <div className="p-8 text-center rounded-[10px] border border-dashed border-slate-300 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
-              <Server className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-              <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Belum ada akun SMTP</p>
-              <p className="text-xs text-slate-500 mt-1">Klik tombol &ldquo;Tambah Akun SMTP&rdquo; untuk mulai menghubungkan email Anda.</p>
+            <div className="p-8 sm:p-10 text-center rounded-[10px] border-2 border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm max-w-xl mx-auto">
+              <div className="w-12 h-12 rounded-[10px] bg-blue-50 dark:bg-blue-950/60 text-[#1738D1] dark:text-blue-400 flex items-center justify-center mx-auto mb-3">
+                <Bot className="w-6 h-6" />
+              </div>
+              <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                Belum ada bot pengirim yang terhubung
+              </h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed max-w-md mx-auto">
+                Sambungkan akun Gmail kamu dalam 3 langkah mudah. Setelah aktif, bot bisa mengirimkan email lamaran kerja personal maupun massal secara otomatis.
+              </p>
+              <button
+                onClick={() => {
+                  setIsSmtpDrawerOpen(true);
+                  setSmtpFeedback(null);
+                }}
+                className="mt-4 px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold inline-flex items-center gap-2 shadow-md shadow-[#1738D1]/20 transition active:scale-[0.98] cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                Hubungkan Akun Gmail Sekarang
+              </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {smtpAccounts.map((acc) => (
-                <div
-                  key={acc.id}
-                  className="p-5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between"
-                >
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                        <Server className="w-3.5 h-3.5 text-[#1738D1]" />
-                        {acc.from_name}
-                      </span>
-                      <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
-                        Aktif
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-300 font-mono">
-                      {acc.username}
-                    </p>
-                    <div className="text-[11px] text-slate-500 space-y-1">
-                      <div>Server: {acc.host}:{acc.port}</div>
-                      <div>Kuota Harian: {acc.sent_today} / {acc.daily_limit} email terkirim</div>
-                    </div>
-                  </div>
+              {smtpAccounts.map((acc) => {
+                const isGmail = acc.host?.includes('gmail');
+                const providerLabel = isGmail
+                  ? 'Google Gmail'
+                  : acc.host?.includes('office') || acc.host?.includes('outlook')
+                  ? 'Microsoft Outlook'
+                  : acc.host?.includes('yahoo')
+                  ? 'Yahoo Mail'
+                  : 'Kustom SMTP';
 
-                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end">
-                    <button
-                      onClick={() => handleDeleteSmtp(acc.id)}
-                      className="px-3 py-1.5 rounded-[10px] text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-800 transition flex items-center gap-1 cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      Hapus
-                    </button>
+                return (
+                  <div
+                    key={acc.id}
+                    className="p-5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:border-blue-300 dark:hover:border-blue-900 transition"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                          <Bot className="w-4 h-4 text-[#1738D1]" />
+                          {acc.from_name}
+                        </span>
+                        <span className="px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                          <Check className="w-3 h-3" />
+                          Bot Siap Kirim
+                        </span>
+                      </div>
+                      
+                      <div className="p-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-xs">
+                        <div className="text-[11px] text-slate-500 mb-0.5">Email Pengirim:</div>
+                        <div className="font-mono font-bold text-slate-800 dark:text-slate-200 truncate">
+                          {acc.username}
+                        </div>
+                      </div>
+
+                      <div className="text-[11px] text-slate-500 space-y-1">
+                        <div>
+                          <strong className="text-slate-700 dark:text-slate-300">Penyedia:</strong> {providerLabel}
+                        </div>
+                        <div>
+                          <strong className="text-slate-700 dark:text-slate-300">Batas Harian:</strong> {acc.sent_today} / {acc.daily_limit} email terkirim hari ini (Batas gratis Google)
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400">
+                        Otomatis failover jika kuota habis
+                      </span>
+                      <button
+                        onClick={() => handleDeleteSmtp(acc.id)}
+                        className="px-3 py-1.5 rounded-[10px] text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-800 transition flex items-center gap-1 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Hapus
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -818,6 +1042,64 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
                 </div>
               </div>
 
+              {/* Lampiran CV Pelamar (Auto-Attach PDF ATS) */}
+              <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <Paperclip className="w-3.5 h-3.5 text-[#1738D1] dark:text-blue-400" />
+                    <span>Lampiran CV Pelamar (Auto-Attach PDF ATS)</span>
+                  </label>
+                  {userCvs.length > 0 && (
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                      Auto-Generate PDF
+                    </span>
+                  )}
+                </div>
+
+                {userCvs.length > 0 ? (
+                  <select
+                    value={singleForm.attachment_cv_id}
+                    onChange={(e) => setSingleForm({ ...singleForm, attachment_cv_id: e.target.value })}
+                    className="w-full px-3 py-2 rounded-[8px] text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-[#1738D1]"
+                  >
+                    <option value="">-- Tanpa Lampiran CV --</option>
+                    {userCvs.map((cv) => (
+                      <option key={cv.id} value={cv.id}>
+                        {cv.title || 'CV Siap Kerja'} ({cv.target_position || 'Umum'})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="text-[11px] text-slate-500 flex items-center justify-between py-1">
+                    <span>Belum ada CV di akunmu.</span>
+                    <Link href="/cv" className="text-[#1738D1] dark:text-blue-400 font-bold hover:underline flex items-center gap-1">
+                      Buat CV <ExternalLink className="w-3 h-3" />
+                    </Link>
+                  </div>
+                )}
+
+                {selectedSingleCv ? (
+                  <div className="p-2.5 rounded-[8px] bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800 text-[11px] flex items-start gap-2">
+                    <FileCheck2 className="w-4 h-4 text-[#1738D1] dark:text-blue-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-slate-900 dark:text-white">
+                        PDF ATS Resmi akan disertakan otomatis:
+                      </p>
+                      <p className="text-[10px] text-[#1738D1] dark:text-blue-300 font-mono mt-0.5">
+                        📎 CV_{(userName || 'Pelamar').replace(/\s+/g, '_')}_{(singleForm.position || 'Kandidat').replace(/\s+/g, '_')}.pdf
+                      </p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                        Dibuat langsung dari data CV Builder akunmu. Email dikirim dengan lampiran PDF tanpa perlu download & upload manual.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-[10px] text-slate-500">
+                    Pilih CV agar berkas PDF resmi dilampirkan otomatis saat dikirim ke HR.
+                  </p>
+                )}
+              </div>
+
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Desain Template Email
@@ -827,36 +1109,120 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
                   onChange={(e) => setSingleForm({ ...singleForm, design: e.target.value })}
                   className="w-full px-3.5 py-2.5 rounded-[10px] text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#1738D1]"
                 >
-                  <option value="klasik">Klasik (Card Navy & Elegan)</option>
+                  <option value="standar">Standar / Polos (Natural seperti Gmail - Direkomendasikan)</option>
                   <option value="minimal">Minimalist (Clean & Spacing Lega)</option>
-                  <option value="dark">Dark Theme (Modern Slate)</option>
+                  <option value="klasik">Klasik (Card Navy & Elegan)</option>
                   <option value="serif">Serif (Editorial Formal)</option>
+                  <option value="dark">Dark Theme (Modern Slate)</option>
                 </select>
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Isi Surat Lamaran (Opsional / Otomatis)
+                    Isi Surat Lamaran
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsSingleDrawerOpen(false);
-                      setActiveTab('cover-letter');
-                    }}
-                    className="text-[11px] font-bold text-[#1738D1] dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <Sparkles className="w-3 h-3 text-orange-500" />
-                    <span>Susun dengan AI</span>
-                  </button>
+                  {singleForm.body_content && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(singleForm.body_content);
+                        toast.success('Teks Disalin', 'Isi email berhasil disalin ke clipboard.');
+                      }}
+                      className="text-[11px] font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 cursor-pointer"
+                      title="Salin teks jika ingin kirim manual lewat email pribadi kamu tanpa bot"
+                    >
+                      <Copy className="w-3 h-3" />
+                      <span>Salin Teks (Manual)</span>
+                    </button>
+                  )}
                 </div>
+
+                {/* Template Cepat Instan di dalam Drawer */}
+                <div className="mb-2.5 p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+                  <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400">
+                    <span className="font-bold flex items-center gap-1 text-slate-700 dark:text-slate-200">
+                      <Sparkles className="w-3 h-3 text-orange-500" />
+                      Gunakan Template Instan:
+                    </span>
+                    {savedCoverLetters.length > 0 && (
+                      <span className="text-[10px] text-slate-400">
+                        {savedCoverLetters.length} draf tersimpan
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {COVER_LETTER_PRESETS.map((preset) => {
+                      const Icon = preset.icon;
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => {
+                            const text = preset.generate({
+                              userName: userName || 'Pelamar',
+                              company: singleForm.company,
+                              position: singleForm.position,
+                              recruiterName: singleForm.to_name,
+                            });
+                            setSingleForm((prev) => ({
+                              ...prev,
+                              body_content: text,
+                              custom_subject:
+                                prev.company && prev.position
+                                  ? `Lamaran Pekerjaan - ${prev.position} di ${prev.company} - ${userName || 'Kandidat'}`
+                                  : prev.custom_subject,
+                            }));
+                            toast.success('Template Diterapkan', `Template ${preset.name} berhasil diisikan.`);
+                          }}
+                          className="px-2 py-1.5 rounded-[8px] text-[10px] font-bold bg-white dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5 cursor-pointer text-left"
+                        >
+                          <Icon className="w-3 h-3 text-[#1738D1] dark:text-blue-400 shrink-0" />
+                          <span className="truncate">{preset.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {savedCoverLetters.length > 0 && (
+                    <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
+                      <select
+                        defaultValue=""
+                        onChange={(e) => {
+                          const found = savedCoverLetters.find((l) => l.id === e.target.value);
+                          if (found) {
+                            setSingleForm((prev) => ({
+                              ...prev,
+                              company: found.company || prev.company,
+                              position: found.position || prev.position,
+                              body_content: found.content,
+                              custom_subject: `Lamaran Pekerjaan - ${found.position} di ${found.company} - ${userName || 'Kandidat'}`,
+                            }));
+                            toast.success('Draf Dimuat', `Draf untuk ${found.company} berhasil dimuat.`);
+                          }
+                        }}
+                        className="w-full px-2.5 py-1.5 rounded-[8px] text-[11px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-[#1738D1]"
+                      >
+                        <option value="" disabled>
+                          -- Atau Ambil dari Draf Tersimpan ({savedCoverLetters.length}) --
+                        </option>
+                        {savedCoverLetters.map((l) => (
+                          <option key={l.id} value={l.id}>
+                            {l.position} - {l.company}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
                 <textarea
                   rows={6}
                   value={singleForm.body_content}
                   onChange={(e) => setSingleForm({ ...singleForm, body_content: e.target.value })}
-                  placeholder="Kosongkan untuk menggunakan kata pembuka dan pengantar standar yang sudah teruji..."
-                  className="w-full px-3.5 py-2.5 rounded-[10px] text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#1738D1]"
+                  placeholder="Ketik isi email atau pilih salah satu template instan di atas..."
+                  className="w-full px-3.5 py-2.5 rounded-[10px] text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#1738D1] font-sans"
                 />
               </div>
             </form>
@@ -893,17 +1259,24 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
         </div>
       )}
 
-      {/* ================= RIGHT-HAND SLIDE-IN DRAWER: ADD SMTP ================= */}
+      {/* ================= RIGHT-HAND SLIDE-IN DRAWER: CONNECT BOT ================= */}
       {isSmtpDrawerOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end transition-opacity">
           <div className="relative z-10 w-full max-w-md sm:max-w-lg h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300">
             {/* Header */}
             <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
-              <div className="flex items-center gap-2">
-                <Server className="w-4 h-4 text-[#1738D1]" />
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  Tambah Akun SMTP
-                </h3>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-[10px] bg-blue-50 dark:bg-blue-950/60 text-[#1738D1] dark:text-blue-400 flex items-center justify-center">
+                  <Bot className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                    Aktifkan Bot Pengirim Email
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    100% Gratis & Menggunakan Akun Pribadi Kamu
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setIsSmtpDrawerOpen(false)}
@@ -917,108 +1290,258 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
             <form id="smtp-add-form" onSubmit={handleSaveSmtp} className="flex-1 overflow-y-auto p-5 space-y-4">
               {smtpFeedback && (
                 <div
-                  className={`p-3.5 rounded-[10px] text-xs font-bold border flex items-center gap-2 ${
+                  className={`p-3.5 rounded-[10px] text-xs font-bold border flex items-start gap-2.5 ${
                     smtpFeedback.success
                       ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                       : 'bg-rose-50 text-rose-700 border-rose-200'
                   }`}
                 >
-                  {smtpFeedback.success ? <Check className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-                  {smtpFeedback.message}
+                  {smtpFeedback.success ? (
+                    <Check className="w-4 h-4 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  )}
+                  <div className="flex-1 leading-relaxed">{smtpFeedback.message}</div>
                 </div>
               )}
 
-              <div className="p-3.5 rounded-[10px] bg-blue-50/60 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900 text-xs text-blue-800 dark:text-blue-200 space-y-1">
-                <div className="font-bold flex items-center gap-1.5">
-                  <Info className="w-3.5 h-3.5" />
-                  Tips Penggunaan Gmail
+              {/* Provider Selector Cards */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                  Pilih Layanan Email Kamu
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['gmail', 'outlook', 'yahoo', 'custom'] as ProviderType[]).map((key) => {
+                    const preset = PROVIDER_PRESETS[key];
+                    const isSelected = selectedProvider === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => handleSelectProvider(key)}
+                        className={`p-3 rounded-[10px] text-left border transition cursor-pointer flex flex-col justify-between ${
+                          isSelected
+                            ? 'border-[#1738D1] bg-blue-50/70 dark:bg-blue-950/40 ring-1 ring-[#1738D1]'
+                            : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/40 hover:bg-slate-50 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full mb-1">
+                          <span
+                            className={`text-xs font-bold ${
+                              isSelected
+                                ? 'text-[#1738D1] dark:text-blue-400'
+                                : 'text-slate-800 dark:text-slate-200'
+                            }`}
+                          >
+                            {preset.name}
+                          </span>
+                          {isSelected && (
+                            <Check className="w-3.5 h-3.5 text-[#1738D1] dark:text-blue-400 shrink-0" />
+                          )}
+                        </div>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight line-clamp-1">
+                          {preset.subname}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
-                <p className="text-[11px] leading-relaxed">
-                  Gunakan <strong>App Password (Sandi Aplikasi)</strong> 16 digit dari akun Google Anda (Bukan kata sandi login biasa). Host default: <code>smtp.gmail.com</code>, Port: <code>587</code>.
-                </p>
               </div>
 
+              {/* 3 Steps Visual Guide for Gmail */}
+              {selectedProvider === 'gmail' && (
+                <div className="p-4 rounded-[10px] bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/90 dark:border-blue-900 text-xs text-slate-700 dark:text-slate-300 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="font-bold text-blue-900 dark:text-blue-200 flex items-center gap-1.5">
+                      <KeyRound className="w-4 h-4 text-[#1738D1]" />
+                      <span>3 Langkah Mudah Menghubungkan Gmail</span>
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-[10px] bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">
+                      1 Menit Selesai
+                    </span>
+                  </div>
+
+                  <div className="space-y-2.5 text-[11px] leading-relaxed">
+                    <div className="flex items-start gap-2.5">
+                      <span className="w-4 h-4 rounded-full bg-[#1738D1] text-white flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                        1
+                      </span>
+                      <div className="flex-1">
+                        <div>Buka halaman keamanan Sandi Aplikasi Google:</div>
+                        <a
+                          href="https://myaccount.google.com/apppasswords"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 mt-1.5 px-3 py-1.5 rounded-[8px] bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-[11px] shadow-sm transition"
+                        >
+                          <span>Buka Sandi Aplikasi Google</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                          (Pastikan Verifikasi 2 Langkah akun Google kamu sudah aktif).
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-2.5">
+                      <span className="w-4 h-4 rounded-full bg-[#1738D1] text-white flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                        2
+                      </span>
+                      <div className="flex-1">
+                        Ketik nama aplikasi, misalnya:{' '}
+                        <code className="font-bold text-slate-800 dark:text-slate-200 bg-white/80 dark:bg-slate-800 px-1 py-0.5 rounded">
+                          Employr
+                        </code>
+                        , lalu klik tombol <strong>Buat</strong>.
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-2.5">
+                      <span className="w-4 h-4 rounded-full bg-[#1738D1] text-white flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                        3
+                      </span>
+                      <div className="flex-1">
+                        Google akan menampilkan <strong>16 huruf sandi</strong> (contoh:{' '}
+                        <code>abcd efgh ijkl mnop</code>). Salin dan tempelkan ke kolom sandi di bawah.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Sender Full Name */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Nama Pengirim (From Name) *
+                  Nama Lengkap Pengirim *
                 </label>
                 <input
                   type="text"
                   required
                   value={smtpForm.from_name}
                   onChange={(e) => setSmtpForm({ ...smtpForm, from_name: e.target.value })}
-                  placeholder="Nama Lengkap Anda"
+                  placeholder="cth. Budi Pratama (Akan dilihat oleh HRD)"
                   className="w-full px-3.5 py-2.5 rounded-[10px] text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#1738D1]"
                 />
               </div>
 
+              {/* Email Address */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Email / Username SMTP *
+                  Alamat Email {selectedProvider === 'gmail' ? 'Gmail' : ''} *
                 </label>
                 <input
                   type="email"
                   required
                   value={smtpForm.username}
                   onChange={(e) => setSmtpForm({ ...smtpForm, username: e.target.value })}
-                  placeholder="anda@gmail.com"
+                  placeholder={
+                    selectedProvider === 'gmail' ? 'cth. namakamu@gmail.com' : 'cth. anda@domain.com'
+                  }
                   className="w-full px-3.5 py-2.5 rounded-[10px] text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#1738D1]"
                 />
               </div>
 
+              {/* App Password Field */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  App Password / Password SMTP *
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    {selectedProvider === 'gmail'
+                      ? 'Sandi Aplikasi Google (16 Karakter) *'
+                      : 'Kata Sandi Aplikasi / Password *'}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-[11px] font-bold text-[#1738D1] dark:text-blue-400 flex items-center gap-1 hover:underline cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    <span>{showPassword ? 'Sembunyikan' : 'Tampilkan'}</span>
+                  </button>
+                </div>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={smtpForm.password}
-                  onChange={(e) => setSmtpForm({ ...smtpForm, password: e.target.value })}
-                  placeholder="xxxx xxxx xxxx xxxx"
-                  className="w-full px-3.5 py-2.5 rounded-[10px] text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#1738D1]"
+                  onChange={(e) => {
+                    // Auto-strip spaces in real time
+                    const clean = e.target.value.replace(/\s+/g, '');
+                    setSmtpForm({ ...smtpForm, password: clean });
+                  }}
+                  placeholder="cth. abcd efgh ijkl mnop"
+                  className="w-full px-3.5 py-2.5 rounded-[10px] text-xs font-mono bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#1738D1]"
                 />
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                  Bukan kata sandi login biasa. Spasi akan otomatis dibersihkan oleh sistem.
+                </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Host Server
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={smtpForm.host}
-                    onChange={(e) => setSmtpForm({ ...smtpForm, host: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-[10px] text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#1738D1]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Port
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={smtpForm.port}
-                    onChange={(e) => setSmtpForm({ ...smtpForm, port: Number(e.target.value) })}
-                    className="w-full px-3.5 py-2.5 rounded-[10px] text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#1738D1]"
-                  />
-                </div>
-              </div>
+              {/* Collapsible Advanced Server Settings */}
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
+                  className="w-full py-2 px-3 rounded-[10px] bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center justify-between transition cursor-pointer"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Server className="w-3.5 h-3.5 text-slate-400" />
+                    Pengaturan Server Lanjutan (Host & Port)
+                  </span>
+                  {showAdvancedSettings ? (
+                    <ChevronUp className="w-4 h-4 text-slate-400" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                  )}
+                </button>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Batas Kuota Harian (Daily Limit)
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={2000}
-                  value={smtpForm.daily_limit}
-                  onChange={(e) => setSmtpForm({ ...smtpForm, daily_limit: Number(e.target.value) })}
-                  className="w-full px-3.5 py-2.5 rounded-[10px] text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#1738D1]"
-                />
+                {showAdvancedSettings && (
+                  <div className="mt-3 p-4 rounded-[10px] border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 space-y-3 animate-in fade-in duration-200">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                          Host Server
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={smtpForm.host}
+                          onChange={(e) => setSmtpForm({ ...smtpForm, host: e.target.value })}
+                          className="w-full px-3 py-2 rounded-[8px] text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#1738D1]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                          Port
+                        </label>
+                        <input
+                          type="number"
+                          required
+                          value={smtpForm.port}
+                          onChange={(e) => setSmtpForm({ ...smtpForm, port: Number(e.target.value) })}
+                          className="w-full px-3 py-2 rounded-[8px] text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#1738D1]"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                        Batas Harian (Daily Limit)
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={2000}
+                        value={smtpForm.daily_limit}
+                        onChange={(e) =>
+                          setSmtpForm({ ...smtpForm, daily_limit: Number(e.target.value) })
+                        }
+                        className="w-full px-3 py-2 rounded-[8px] text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#1738D1]"
+                      />
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        Batas gratis resmi dari Google adalah 500 email/hari.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </form>
 
@@ -1028,17 +1551,21 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
                 type="button"
                 onClick={handleTestSmtp}
                 disabled={isTestingSmtp}
-                className="px-3.5 py-2 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition disabled:opacity-50"
               >
-                {isTestingSmtp ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
-                Uji Koneksi
+                {isTestingSmtp ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                )}
+                {isTestingSmtp ? 'Menguji...' : 'Uji Koneksi'}
               </button>
 
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setIsSmtpDrawerOpen(false)}
-                  className="px-3 py-2 rounded-[10px] text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 cursor-pointer"
+                  className="px-3.5 py-2.5 rounded-[10px] text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 cursor-pointer"
                 >
                   Batal
                 </button>
@@ -1046,7 +1573,7 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
                   type="submit"
                   form="smtp-add-form"
                   disabled={isSavingSmtp}
-                  className="px-4 py-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold shadow-md shadow-[#1738D1]/20 flex items-center gap-2 cursor-pointer transition disabled:opacity-50"
+                  className="px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold shadow-md shadow-[#1738D1]/20 flex items-center gap-2 cursor-pointer transition disabled:opacity-50 active:scale-[0.98]"
                 >
                   {isSavingSmtp ? (
                     <>
@@ -1056,7 +1583,7 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
                   ) : (
                     <>
                       <Check className="w-3.5 h-3.5" />
-                      Simpan Akun
+                      Aktifkan Bot Pengirim
                     </>
                   )}
                 </button>

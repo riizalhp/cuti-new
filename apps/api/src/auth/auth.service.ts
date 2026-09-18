@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
+import * as jwt from 'jsonwebtoken';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
@@ -129,10 +130,10 @@ export class AuthService {
   }
 
   private generateTokens(userId: string) {
-    // Simplified token generation — use JWT in production
-    const accessToken = Buffer.from(JSON.stringify({ userId, exp: Date.now() + 900000 })).toString('base64');
-    const refreshToken = Buffer.from(JSON.stringify({ userId, exp: Date.now() + 604800000 })).toString('base64');
-
+    const secret = process.env.JWT_SECRET;
+    if (!secret) throw new Error('JWT_SECRET environment variable is not set');
+    const accessToken = jwt.sign({ userId, type: 'access' }, secret, { expiresIn: '15m' });
+    const refreshToken = jwt.sign({ userId, type: 'refresh' }, secret, { expiresIn: '7d' });
     return { accessToken, refreshToken };
   }
 

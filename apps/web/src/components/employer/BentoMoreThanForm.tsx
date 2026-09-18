@@ -20,84 +20,84 @@ const features: FeatureItem[] = [
   {
     id: 'generate-cv',
     number: '01',
-    tag: 'CV GENERATION',
-    title: 'Unlimited resume generation,',
-    italicWord: 'ready whenever you need it.',
-    lead: 'Instant ATS-ready resumes structured to global industry benchmarks.',
+    tag: 'SUSUN CV',
+    title: 'Buat draf CV sepuasnya,',
+    italicWord: 'kapan pun kamu butuh.',
+    lead: 'Format standar ATS yang rapi, mudah dibaca sistem seleksi maupun HR.',
     description:
-      'Generate high-impact CV variations tailored for distinct roles without limits.',
+      'Buat variasi CV berbeda untuk tiap bidang pekerjaan tanpa batasan.',
     desktopImg: '/images/dekstop-cv.webp',
     mobileImg: '/images/mobile-cv.webp',
   },
   {
     id: 'eval-cv',
     number: '02',
-    tag: 'RESUME AUDIT & SCORE',
-    title: 'Comprehensive resume audit,',
-    italicWord: 'uncover hidden blind spots.',
-    lead: 'Instant actionable feedback and scoring before you submit your application.',
+    tag: 'EVALUASI CV',
+    title: 'Cek kelengkapan berkas,',
+    italicWord: 'temukan bagian yang kurang.',
+    lead: 'Masukan praktis untuk memastikan struktur dan kejelasan kalimat sebelum dikirim.',
     description:
-      'Deep analysis on sentence impact, power words, and structure to maximize interview callbacks.',
+      'Periksa bobot kalimat dan susunan bagian penting agar peluang interview makin besar.',
     desktopImg: '/images/dekstop-eval.webp',
     mobileImg: '/images/mobile-eval.webp',
   },
   {
     id: 'job-matcher',
     number: '03',
-    tag: 'ROLE ALIGNMENT',
-    title: 'Match your resume to,',
-    italicWord: 'the job description.',
-    lead: 'Mathematical precision in keyword alignment and required qualifications.',
+    tag: 'PENCOCOKAN LOKER',
+    title: 'Cocokkan isi CV',
+    italicWord: 'dengan kriteria lowongan.',
+    lead: 'Lihat kualifikasi yang belum tercantum dan sesuaikan istilah yang dicari rekruter.',
     description:
-      'Identify missing keywords and align your experience in seconds to pass ATS screening.',
+      'Ketahui kata kunci penting posisi incaranmu agar berkas lamaran tidak terlewat.',
     desktopImg: '/images/dekstop-matcher.webp',
     mobileImg: '/images/mobile-matcher.webp',
   },
   {
     id: 'kanban-tracker',
     number: '04',
-    tag: 'APPLICATION PIPELINE',
-    title: 'Track every opportunity,',
-    italicWord: 'never lose momentum.',
-    lead: 'Visual recruitment pipeline from initial wishlist to final job offer.',
+    tag: 'PANTAU LAMARAN',
+    title: 'Catat setiap proses melamar,',
+    italicWord: 'tanpa ada yang terlewat.',
+    lead: 'Alur visual dari tahap berkas terkirim, tes, interview, hingga tawaran kerja.',
     description:
-      'Manage your entire job search workflow in an integrated kanban command center.',
+      'Kelola seluruh riwayat lamaran kerja dalam satu papan pemantau yang rapi.',
     desktopImg: '/images/dekstop-kanban.webp',
     mobileImg: '/images/mobile-kanban.webp',
   },
   {
     id: 'linkedin-opt',
     number: '05',
-    tag: 'PERSONAL BRANDING',
-    title: 'Optimize your LinkedIn,',
-    italicWord: 'stand out to recruiters.',
-    lead: 'High-impact headlines, storytelling summaries, and targeted industry keywords.',
+    tag: 'PROFIL LINKEDIN',
+    title: 'Rapikan profil LinkedIn,',
+    italicWord: 'mudah ditemukan rekruter.',
+    lead: 'Susun headline jelas, ringkasan pengalaman menarik, dan keahlian utama.',
     description:
-      'Transform your profile into a magnet for inbound recruiter outreach.',
+      'Bantu profilmu terlihat meyakinkan saat rekruter mencari kandidat baru.',
     desktopImg: '/images/dekstop-linkedin.webp',
     mobileImg: '/images/mobile-linkedin.webp',
   },
   {
     id: 'auto-mailer',
     number: '06',
-    tag: 'OUTREACH & FOLLOW-UP',
-    title: 'Smart outreach emails,',
-    italicWord: 'automated & professional.',
-    lead: 'Reach hiring managers with polished, high-converting outreach copy.',
+    tag: 'DRAF EMAIL LAMARAN',
+    title: 'Susun pesan lamaran sopan,',
+    italicWord: 'siap kirim ke tim HR.',
+    lead: 'Format cover letter dan email pembuka yang santun serta enak dibaca.',
     description:
-      'Schedule periodic follow-up messages seamlessly with open-rate tracking.',
+      'Siapkan draf pesan berkala untuk menanyakan kabar proses seleksi secara profesional.',
     desktopImg: '/images/dekstop-mailer.webp',
     mobileImg: '/images/mobile-mailer.webp',
   },
   {
     id: 'manage-cv',
     number: '07',
-    tag: 'VERSION REPOSITORY',
-    title: 'Centralized CV repository,',
-    italicWord: 'always ready to send.',
-    lead: 'One unified profile tailored for multiple target career tracks.',
+    tag: 'ARSIP VERSI CV',
+    title: 'Simpan semua draf,',
+    italicWord: 'siap kirim kapan saja.',
+    lead: 'Satu profil induk yang bisa disesuaikan ke berbagai variasi berkas.',
     description:
-      'Store and organize customized CV versions for UI/UX, Product, or Marketing in one hub.',
+      'Kelompokkan draf CV untuk desain, admin, atau marketing di satu tempat teratur.',
     desktopImg: '/images/dekstop-manage.webp',
     mobileImg: '/images/mobile-manage.webp',
   },
@@ -206,7 +206,7 @@ export default function BentoMoreThanForm() {
   const activeFeature = features[activeIndex];
 
   return (
-    <section ref={frameRef} className="scroll-story-frame" aria-label="Employr capabilities showcase">
+    <section ref={frameRef} className="scroll-story-frame" aria-label="Kemampuan fitur Employr">
       <div
         ref={storyRef}
         className="scroll-story"
@@ -218,15 +218,15 @@ export default function BentoMoreThanForm() {
         >
           <img
             src={activeFeature.desktopImg}
-            alt={`${activeFeature.tag} - Desktop view`}
-            title={`${activeFeature.tag} - Desktop view`}
+            alt={`${activeFeature.tag} - Tampilan desktop`}
+            title={`${activeFeature.tag} - Tampilan desktop`}
             className="scroll-story__img scroll-story__img--desktop"
             draggable={false}
           />
           <img
             src={activeFeature.mobileImg}
-            alt={`${activeFeature.tag} - Mobile view`}
-            title={`${activeFeature.tag} - Mobile view`}
+            alt={`${activeFeature.tag} - Tampilan mobile`}
+            title={`${activeFeature.tag} - Tampilan mobile`}
             className="scroll-story__img scroll-story__img--mobile"
             draggable={false}
           />

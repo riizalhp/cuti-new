@@ -17,7 +17,7 @@ export const LatestCoursesList: React.FC = () => {
     {
       id: 1,
       title: 'Analisis Data Dengan SQL & Python',
-      provider: 'CUTI Academy',
+      provider: 'Employr Academy',
       level: 'Pemula (Beginner)',
       duration: '12 Jam Video',
       type: 'Gratis',
@@ -26,7 +26,7 @@ export const LatestCoursesList: React.FC = () => {
     {
       id: 2,
       title: 'Pemrograman Web Dasar (HTML, CSS, JS)',
-      provider: 'CUTI Academy',
+      provider: 'Employr Academy',
       level: 'Pemula (Beginner)',
       duration: '15 Jam Video',
       type: 'Gratis',
@@ -44,7 +44,7 @@ export const LatestCoursesList: React.FC = () => {
     {
       id: 4,
       title: 'Fullstack Web Development (React & Node.js)',
-      provider: 'CUTI Academy',
+      provider: 'Employr Academy',
       level: 'Lanjutan (Advanced)',
       duration: '35 Jam Video',
       type: 'Premium',

@@ -1,0 +1,396 @@
+<title>Employr: Workspace CV & Kompas Karier</title>
+<meta name="description" content="Bikin CV ramah ATS, cocokkan skill dengan syarat kerja, dan lacak semua lamaran dalam satu workspace.">
+
+<style>
+  /* CSS Variables - Light Theme Default */
+  :root {
+    --bg-main: #FAF9F6;
+    --bg-card: #FFFFFF;
+    --text-primary: #0F1419;
+    --text-secondary: #536471;
+    --text-muted: #8899A6;
+    --accent: #1738D1;
+    --accent-hover: #0F28A8;
+    --border: #E7E9EA;
+    --shadow: rgba(0, 0, 0, 0.08);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg-main: #15202B;
+      --bg-card: #1C2938;
+      --text-primary: #F7F9F9;
+      --text-secondary: #B9CAD3;
+      --text-muted: #8899A6;
+      --accent: #4A90E2;
+      --accent-hover: #6BA5E7;
+      --border: #38444D;
+      --shadow: rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg-main: #15202B;
+    --bg-card: #1C2938;
+    --text-primary: #F7F9F9;
+    --text-secondary: #B9CAD3;
+    --text-muted: #8899A6;
+    --accent: #4A90E2;
+    --accent-hover: #6BA5E7;
+    --border: #38444D;
+    --shadow: rgba(0, 0, 0, 0.3);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: var(--bg-main);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Header */
+  header {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  nav {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+  }
+
+  nav a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 15px;
+  }
+
+  nav a:hover {
+    color: var(--accent);
+  }
+
+  .cta-button {
+    background: var(--accent);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background 0.2s;
+  }
+
+  .cta-button:hover {
+    background: var(--accent-hover);
+  }
+
+  /* Hero Section */
+  .hero {
+    padding: 120px 0 80px;
+    text-align: center;
+  }
+
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    text-wrap: balance;
+  }
+
+  .hero h1 em {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .hero p {
+    font-size: 20px;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto 32px;
+    text-wrap: balance;
+  }
+
+  /* Section */
+  .section {
+    padding: 80px 0;
+  }
+
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .section-label span:first-child {
+    opacity: 0.5;
+  }
+
+  .section-label i {
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.3;
+  }
+
+  .section h2 {
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    text-wrap: balance;
+  }
+
+  .section h2 em {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .section p {
+    font-size: 18px;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin-bottom: 40px;
+    text-wrap: pretty;
+  }
+
+  /* Cards */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 48px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px var(--shadow);
+  }
+
+  .card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .card p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  /* FAQ */
+  .faq {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  details {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  summary {
+    padding: 20px 24px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  details[open] summary {
+    border-bottom: 1px solid var(--border);
+  }
+
+  details p {
+    padding: 20px 24px;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  /* Footer */
+  footer {
+    padding: 60px 0 40px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  @media (max-width: 768px) {
+    nav {
+      display: none;
+    }
+
+    .hero {
+      padding: 60px 0 40px;
+    }
+
+    .section {
+      padding: 48px 0;
+    }
+  }
+</style>
+
+<header>
+  <div class="container">
+    <div class="header-content">
+      <a href="#" class="logo">Employr</a>
+      <nav>
+        <a href="#produk">Produk</a>
+        <a href="#faq">FAQ</a>
+        <a href="#" class="cta-button">Akses Awal</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <h1>Kariermu dimulai<br><em>di sini. Sekarang.</em></h1>
+      <p>Bab berikutnya ada di tanganmu.</p>
+      <a href="#" class="cta-button" style="display: inline-block; padding: 14px 32px; font-size: 16px;">Daftar Akses Awal</a>
+    </div>
+  </section>
+
+  <!-- Statement -->
+  <section class="section" id="produk">
+    <div class="container">
+      <div class="section-label"><span>01</span><i></i><span>KARIERMU, CARAMU</span></div>
+      <h2>Pengalamanmu<br>lebih besar dari <em>satu CV.</em></h2>
+      <p>Keahlianmu nggak pas kalau dipaksa masuk template kaku. Employr bantu kamu ubah setiap proyek dan pencapaian jadi bukti nyata yang dilirik rekruter.</p>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section" style="background: var(--bg-card);">
+    <div class="container">
+      <div class="section-label"><span>02</span><i></i><span>FITUR UTAMA</span></div>
+      <h2>Semua yang kamu butuhkan<br><em>dalam satu workspace.</em></h2>
+
+      <div class="cards">
+        <div class="card">
+          <h3>🎯 Sesuaikan CV</h3>
+          <p>Satu template kaku nggak cocok buat semua perusahaan. Tonjolkan pengalaman yang paling relevan buat posisi yang kamu incar.</p>
+        </div>
+        <div class="card">
+          <h3>📂 Kelola Versi</h3>
+          <p>Satu profil, banyak peran target. Lamar sebagai UI Designer, Product Manager, atau Data Analyst tanpa repot kelola file terpisah.</p>
+        </div>
+        <div class="card">
+          <h3>✅ Lolos ATS</h3>
+          <p>Employr susun CV-mu dengan format rapi, header standar industri, dan keterbacaan optimal supaya kualifikasimu dibaca akurat sama software ATS.</p>
+        </div>
+        <div class="card">
+          <h3>📊 Skor Kecocokan</h3>
+          <p>Employr bandingin pengalamanmu sama syarat kerja, sorot keyword yang kurang, dan bantu optimalkan skor sebelum kirim.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section faq" id="faq">
+    <div class="container">
+      <div class="section-label"><span>06</span><i></i><span>FAQ</span></div>
+      <h2>Tanya jawab,<br><em>semua yang perlu kamu tahu.</em></h2>
+      <p style="text-align: center; margin-bottom: 48px;">Ada pertanyaan soal workspace CV, penyelarasan peran, atau tools lamaran? Kami punya jawabannya.</p>
+
+      <details>
+        <summary>Apakah Employr cuma buat fresh graduate?</summary>
+        <p>Nggak. Siapa aja yang lagi cari kerja, mau ganti karier, atau poles portofolio dan CV bisa pakai Employr buat bikin resume yang pas dan lacak lamarannya.</p>
+      </details>
+
+      <details>
+        <summary>Bisa buat beberapa versi CV dalam satu akun?</summary>
+        <p>Bisa. Tiap peran butuh fokus beda. Kamu bisa simpan versi khusus buat UI/UX, marketing, software engineering, atau peran target lain tanpa timpa draft sebelumnya.</p>
+      </details>
+
+      <details>
+        <summary>Gimana cara kerja skor kecocokan peran?</summary>
+        <p>Employr bandingin pengalamanmu sama syarat kerja, sorot keyword yang kurang, ukur relevansi poin aksi, dan bantu optimalkan skor sebelum kirim.</p>
+      </details>
+
+      <details>
+        <summary>Apakah CV saya lolos Applicant Tracking Systems (ATS)?</summary>
+        <p>Lolos. Employr susun CV-mu dengan format rapi, header standar industri, dan keterbacaan optimal supaya kualifikasimu dibaca akurat sama software ATS.</p>
+      </details>
+
+      <details>
+        <summary>Gimana cara ekspor CV ke PDF?</summary>
+        <p>Kamu bisa ekspor CV PDF yang rapi dan sesuai ATS langsung dari preview dalam satu klik, format sempurna buat sistem parsing HR.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section" style="text-align: center;">
+    <div class="container">
+      <h2>Siap tingkatkan<br><em>pencarian kerjamu?</em></h2>
+      <p style="margin: 24px auto 32px;">Bergabung dengan daftar tunggu akses awal dan jadi yang pertama coba Employr.</p>
+      <a href="#" class="cta-button" style="display: inline-block; padding: 14px 32px; font-size: 16px;">Daftar Akses Awal</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <p>&copy; 2026 Employr. Hak cipta dilindungi.</p>
+    <p style="margin-top: 8px; font-size: 13px;">Kontrol di tanganmu. Jelajahi pilihanmu, temukan ritme sendiri.</p>
+  </div>
+</footer>

@@ -289,10 +289,10 @@ export const MisiCuanView: React.FC = () => {
           <button
             onClick={handleDailyCheckin}
             disabled={isCheckedInToday}
-            className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`px-3.5 py-2 rounded-[10px] font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
               isCheckedInToday
-                ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40 cursor-default'
-                : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm'
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default'
+                : 'bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white shadow-md shadow-orange-500/30 font-black'
             }`}
           >
             <CheckCircle2 className="w-3.5 h-3.5" />

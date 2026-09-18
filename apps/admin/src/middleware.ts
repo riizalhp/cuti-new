@@ -34,8 +34,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check admin session cookie
-  const sessionCookie = req.cookies.get("cuti_admin_session")?.value;
+  // Check admin session cookie (employr + legacy cuti)
+  const sessionCookie = req.cookies.get("employr_admin_session")?.value || req.cookies.get("cuti_admin_session")?.value;
 
   if (!sessionCookie) {
     if (pathname.startsWith("/api")) {

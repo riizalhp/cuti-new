@@ -38,11 +38,11 @@ export default function PembayaranLayout({ children }: { children: React.ReactNo
 
             <Link href="/beranda" className="flex items-center gap-2 group">
               <div className="w-8 h-8 rounded-[10px] bg-[#1738D1] text-white font-black text-sm flex items-center justify-center shadow-md shadow-[#1738D1]/20 group-hover:scale-105 transition-transform">
-                C
+                E
               </div>
               <div className="flex flex-col">
                 <span className="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white leading-none">
-                  Ambil<span className="text-[#1738D1] dark:text-blue-400">CUTI</span>
+                  Employ<span className="text-[#1738D1] dark:text-blue-400">r</span>
                 </span>
                 <span className="text-[10px] font-semibold text-slate-400 leading-tight">
                   Checkout &amp; Aktivasi
@@ -78,7 +78,7 @@ export default function PembayaranLayout({ children }: { children: React.ReactNo
             <div className="space-y-1">
               <p className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-center md:justify-start gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span>Pembayaran Resmi &amp; Terverifikasi AmbilCUTI</span>
+                <span>Pembayaran Resmi &amp; Terverifikasi Employr</span>
               </p>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-lg">
                 Seluruh transaksi diproses secara terenkripsi melalui payment gateway berlisensi Bank Indonesia (Midtrans, QRIS, &amp; Jaringan ATM Bersama).
@@ -98,11 +98,11 @@ export default function PembayaranLayout({ children }: { children: React.ReactNo
           </div>
 
           <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2">
-            <span>&copy; {new Date().getFullYear()} AmbilCUTI. Hak Cipta Dilindungi Undang-Undang.</span>
+            <span>&copy; {new Date().getFullYear()} Employr. Hak Cipta Dilindungi Undang-Undang.</span>
             <div className="flex items-center gap-4">
               <Link href="/beranda" className="hover:text-slate-600 dark:hover:text-slate-300">Dashboard</Link>
               <span>&bull;</span>
-              <span className="text-slate-400">Butuh Bantuan? Hubungi support@ambilcuti.id</span>
+              <span className="text-slate-400">Butuh Bantuan? Hubungi help.employr@outlook.com</span>
             </div>
           </div>
         </div>

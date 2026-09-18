@@ -248,24 +248,29 @@ Gunakan Bahasa Indonesia kasual, ringkas, dan membangun kepercayaan.
 - Hindari rounded cards generik, glow, blob, dan gradient dekoratif.
 - Jangan menambahkan statistik tanpa sumber atau fungsi yang jelas.
 - Pertahankan garis tipis, skala tipografi besar, fotografi editorial, dan satu aksen lime yang bermakna.
-- Elemen baru harus terasa seba## II. Dashboard User Design System (`http://localhost:3000/design-system`)
+- Elemen baru harus terasa sebagai bagian dari satu sistem visual yang utuh.
 
-### 1. 5 Pilar Utama Design System Dashboard User
+---
 
-1. **Strict Lucide Icons Only**:
+## II. Dashboard User Design System (`http://localhost:3000/design-system`)
+
+### 1. 5 Pilar Utama Design System Dashboard User (Harmonisasi Antislop)
+
+1. **Bespoke / Purposeful SVG Icons Only (Anti-Slop R-04)**:
    - Dilarang keras memakai emoji/emoticon kasar pada UI antarmuka dashboard.
-   - Seluruh visual indicator dan status menggunakan ikon SVG terukur dari `lucide-react`.
+   - Dilarang generic Lucide icon-sprawl (menaruh ikon stroke tipis seragam di setiap baris/tombol/badge).
+   - Gunakan ikon SVG kustom lokal (`@/components/icons/CustomIcons`) yang bersih, proporsional, dan benar-benar memiliki makna fungsional esensial. Jika teks sudah cukup jelas, tidak perlu ditambahkan ikon.
 
-2. **Bento Grid Architecture & Rounded 10px**:
+2. **Native Tailwind Components (No Generic shadcn/Radix Templates)**:
+   - Hindari template copy-paste generic shadcn yang menghasilkan UI seragam khas AI.
+   - Utamakan komponen native (native `<dialog>`, `<details>`, dropdown/drawer Tailwind murni) yang ringan, cepat, dan 100% patuh Ponytail Rule.
+
+3. **Bento Grid Architecture & Rounded 10px**:
    - Pengelompokan informasi secara modular menggunakan Tailwind Grid (`grid-cols-12` atau `grid-cols-1 md:grid-cols-3`).
    - Hirarki visual jelas dengan padding proporsional (`p-5`, `p-6`), batas border bersih (`border-slate-200 dark:border-slate-800`), dan sudut terstandarisasi (`rounded-[10px]`).
 
-3. **Standardisasi Skor (Kotak vs Radial Ring)**:
-   - **Format Kotak (`rounded-[10px]`) + Horizontal Bar**: Standar untuk 90% widget Bento Grid, kartu Beranda, list, dan tabel.
-   - **Radial SVG Progress Ring**: Khusus untuk 1 Master Hero Score di header halaman diagnostik mendalam (seperti Evaluasi CV & Career Readiness).
-
 4. **Right-Hand Slide-in Drawer**:
-   - Seluruh formulir interaktif kompleks (misalnya: *Tambah Lamaran*, *Detail ATS*, *Edit Profil*) WAJIB menggunakan slide-in drawer yang meluncur dari kanan layar (`fixed inset-0 z-50 justify-end slide-in-from-right`), BUKAN modal pop-up di tengah.
+   - Seluruh formulir interaktif kompleks (misalnya: *Tambah Lamaran*, *Detail ATS*, *Edit Profil*, *Detail Lowongan*) WAJIB menggunakan slide-in drawer yang meluncur dari kanan layar (`fixed inset-0 z-50 justify-end slide-in-from-right`), BUKAN modal pop-up di tengah.
    - Dilengkapi backdrop blur kustom (`bg-slate-950/60 backdrop-blur-xs`), header bertitel dengan tombol tutup, body dengan scroll independen (`overflow-y-auto`), serta sticky footer action.
 
 5. **Mobile-First Bottom Navigation (5 Tab)**:

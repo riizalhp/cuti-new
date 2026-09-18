@@ -1,16 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, logSecurityEvent, logApp, extractRequestContext, detectBruteForce } from '@cuti/db';
+import { prisma, logSecurityEvent, logApp, extractRequestContext, detectBruteForce } from '@employr/db';
 import { checkRateLimit } from '@/lib/rate-limit';
 import crypto from 'crypto';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+function getCorsHeaders(req: NextRequest) {
+  const origin = req.headers.get('origin') || '';
+  const isAllowed =
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+    /^https:\/\/([\w-]+\.)?(employr\.id|ambilcuti\.id)$/.test(origin);
+  return {
+    'Access-Control-Allow-Origin': isAllowed ? origin : '',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+}
 
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
+export async function OPTIONS(req: NextRequest) {
+  return NextResponse.json({}, { headers: getCorsHeaders(req) });
 }
 
 function verifyPassword(password: string, storedHash: string): boolean {
@@ -33,7 +39,7 @@ export async function POST(req: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { success: false, message: 'Email dan kata sandi wajib diisi.' },
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: getCorsHeaders(req) }
       );
     }
 
@@ -54,7 +60,7 @@ export async function POST(req: NextRequest) {
       });
       return NextResponse.json(
         { success: false, message: 'Terlalu banyak percobaan login. Silakan tunggu 1 menit sebelum mencoba kembali.' },
-        { status: 429, headers: corsHeaders }
+        { status: 429, headers: getCorsHeaders(req) }
       );
     }
 
@@ -93,7 +99,7 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json(
         { success: false, message: 'Email atau kata sandi salah.' },
-        { status: 401, headers: corsHeaders }
+        { status: 401, headers: getCorsHeaders(req) }
       );
     }
 
@@ -101,7 +107,7 @@ export async function POST(req: NextRequest) {
     if (!account || !account.password) {
       return NextResponse.json(
         { success: false, message: 'Akun ini terdaftar menggunakan metode lain (seperti Google).' },
-        { status: 401, headers: corsHeaders }
+        { status: 401, headers: getCorsHeaders(req) }
       );
     }
 
@@ -134,8 +140,23 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json(
         { success: false, message: 'Email atau kata sandi salah.' },
-        { status: 401, headers: corsHeaders }
+        { status: 401, headers: getCorsHeaders(req) }
       );
+    }
+
+    let isOnboarded = Boolean(user.onboarded);
+    if (!isOnboarded) {
+      const hasExistingCv = await prisma.cv_projects.findFirst({
+        where: { user_id: user.id },
+        select: { id: true },
+      });
+      if (hasExistingCv || user.education || user.target_job) {
+        isOnboarded = true;
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { onboarded: true },
+        }).catch(() => {});
+      }
     }
 
     const userData = {
@@ -143,6 +164,7 @@ export async function POST(req: NextRequest) {
       name: user.name,
       email: user.email,
       role: user.role,
+      onboarded: isOnboarded,
     };
 
     // Log successful login
@@ -191,10 +213,19 @@ export async function POST(req: NextRequest) {
           token: sessionToken,
         },
       },
-      { status: 200, headers: corsHeaders }
+      { status: 200, headers: getCorsHeaders(req) }
     );
 
-    // Set secure HttpOnly session cookie
+    // Set secure HttpOnly session cookie (employr + legacy cuti)
+    response.cookies.set({
+      name: 'employr_auth_session',
+      value: sessionToken,
+      maxAge: thirtyDaysInSeconds,
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+    });
     response.cookies.set({
       name: 'cuti_auth_session',
       value: sessionToken,
@@ -206,6 +237,14 @@ export async function POST(req: NextRequest) {
     });
 
     // Set non-sensitive UI display cookie for fast header render
+    response.cookies.set({
+      name: 'employr_user_session',
+      value: encodeURIComponent(JSON.stringify(userData)),
+      maxAge: thirtyDaysInSeconds,
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: false,
+    });
     response.cookies.set({
       name: 'cuti_user_session',
       value: encodeURIComponent(JSON.stringify(userData)),
@@ -223,7 +262,7 @@ export async function POST(req: NextRequest) {
         success: false,
         message: 'Terjadi kesalahan sistem saat memproses login.',
       },
-      { status: 500, headers: corsHeaders }
+      { status: 500, headers: getCorsHeaders(req) }
     );
   }
 }

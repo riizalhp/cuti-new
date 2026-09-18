@@ -6,6 +6,8 @@ import {
   trackPageView,
   trackHeartbeat,
   trackLinkUser,
+  trackModuleDuration,
+  initClientTelemetry,
   getOrCreateVisitorId,
 } from '@/lib/visitor-tracker';
 
@@ -13,11 +15,25 @@ interface VisitorTrackerProps {
   userId?: string | null;
 }
 
+function getModuleName(path: string): string {
+  if (path.includes('cv') || path.includes('builder')) return 'CV_BUILDER';
+  if (path.includes('tracker')) return 'JOB_TRACKER';
+  if (path.includes('misi')) return 'MISI';
+  if (path.includes('loker') || path.includes('karir')) return 'LOKER';
+  if (path.includes('profil') || path.includes('akun')) return 'AKUN';
+  return 'BERANDA';
+}
+
 export function VisitorTracker({ userId }: VisitorTrackerProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastPathRef = useRef<string>('');
+
+  // 0. Global Client Telemetry (Errors, Web Vitals, Print)
+  useEffect(() => {
+    initClientTelemetry(userId);
+  }, [userId]);
 
   // 1. Initial & Route Change Tracking
   useEffect(() => {
@@ -28,7 +44,7 @@ export function VisitorTracker({ userId }: VisitorTrackerProps) {
       trackLinkUser(userId);
     } else {
       try {
-        const storedUser = localStorage.getItem('cuti_user');
+        const storedUser = localStorage.getItem('employr_user');
         if (storedUser) {
           const parsed = JSON.parse(storedUser);
           if (parsed?.id) trackLinkUser(parsed.id);
@@ -49,6 +65,8 @@ export function VisitorTracker({ userId }: VisitorTrackerProps) {
     const runHeartbeat = () => {
       if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
         trackHeartbeat(25, userId);
+        const mod = getModuleName(pathname);
+        trackModuleDuration(mod, 25, userId);
       }
     };
 

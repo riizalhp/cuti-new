@@ -85,8 +85,9 @@ export interface UserQuizAttempt {
   timeSpentSeconds: number;
 }
 
-// --- SAMPLE QUIZ PACKAGES DATA ---
-const sampleQuizPackages: QuizPackage[] = [
+// --- QUIZ PACKAGES: dimuat dari database via /api/quizzes ---
+const sampleQuizPackages: QuizPackage[] = [] as QuizPackage[];
+const _legacyHardcodedData: QuizPackage[] = [
   {
     id: 'quiz-bumn-tkd-1',
     title: 'Simulasi TKD BUMN & Core Values AKHLAK 2026',
@@ -361,32 +362,77 @@ export const LatihanSoalView: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // User purchased/unlocked quiz package IDs (Persisted to localStorage)
-  const [unlockedQuizIds, setUnlockedQuizIds] = useState<string[]>(['quiz-react-frontend-1', 'quiz-toefl-structure-1']);
+  // User purchased/unlocked quiz package IDs (dari DB: semua yang punya attempt)
+  const [unlockedQuizIds, setUnlockedQuizIds] = useState<string[]>([]);
 
-  // User Quiz Attempts History (packageId -> UserQuizAttempt, Persisted)
+  // User Quiz Attempts History (packageId -> UserQuizAttempt, dari DB)
   const [quizAttempts, setQuizAttempts] = useState<Record<string, UserQuizAttempt>>({});
+
+  // Katalog quiz dari database
+  const [quizPackages, setQuizPackages] = useState<QuizPackage[]>(sampleQuizPackages);
+  const [isLoadingQuiz, setIsLoadingQuiz] = useState(true);
+  // Jawaban dari server setelah submit (review pembahasan)
+  const [serverReview, setServerReview] = useState<Array<{ id: number; isCorrect: boolean; correctAnswer: string | string[]; explanation?: string; aiTip?: string }> | null>(null);
 
   // Load persisted quiz state
   useEffect(() => {
-    try {
-      const storedUnlocked = localStorage.getItem('cuti_unlocked_quiz_ids');
-      if (storedUnlocked) {
-        const parsed = JSON.parse(storedUnlocked);
-        if (Array.isArray(parsed)) setUnlockedQuizIds(parsed);
+    const load = async () => {
+      try {
+        const res = await fetch('/api/quizzes');
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          const packages: QuizPackage[] = json.data.map((q: any) => ({
+            id: q.id,
+            title: q.title,
+            category: q.category,
+            description: q.description,
+            durationMinutes: q.durationMinutes,
+            questionCount: q.questionCount,
+            difficulty: q.difficulty,
+            isPremium: q.isPremium,
+            price: q.price,
+            passingScore: q.passingScore,
+            totalAttemptsCount: q.totalAttemptsCount,
+            questions: [], // pertanyaan dimuat saat mulai ujian (agar kunci jawaban tidak bocor)
+          }));
+          setQuizPackages(packages);
+
+          // Rekonstruksi attempts dari data DB
+          const attempts: Record<string, UserQuizAttempt> = {};
+          const unlocked: string[] = [];
+          for (const q of json.data) {
+            if (q.attempt) {
+              attempts[q.id] = {
+                packageId: q.id,
+                status: q.attempt.status,
+                score: q.attempt.score,
+                answers: {},
+                flaggedQuestions: [],
+                startedAt: new Date().toISOString(),
+                completedAt: q.attempt.completedAt,
+                timeSpentSeconds: q.attempt.timeSpentSeconds || 0,
+              };
+              if (q.attempt.status === 'selesai' || !q.isPremium) unlocked.push(q.id);
+            } else if (!q.isPremium) {
+              unlocked.push(q.id);
+            }
+          }
+          setQuizAttempts(attempts);
+          setUnlockedQuizIds(unlocked);
+        }
+      } catch (e) {
+        console.warn('[LatihanSoal] Gagal memuat quiz dari API:', e);
+      } finally {
+        setIsLoadingQuiz(false);
       }
-      const storedAttempts = localStorage.getItem('cuti_quiz_attempts');
-      if (storedAttempts) {
-        const parsed = JSON.parse(storedAttempts);
-        if (parsed && typeof parsed === 'object') setQuizAttempts(parsed);
-      }
-    } catch (e) {}
+    };
+    load();
   }, []);
 
   // Payment Modal State
   const [paymentModalOpen, setPaymentModalOpen] = useState<boolean>(false);
   const [selectedQuizForPayment, setSelectedQuizForPayment] = useState<QuizPackage | null>(null);
-  const [promoCode, setPromoCode] = useState<string>('CUTIPRO70');
+  const [promoCode, setPromoCode] = useState<string>('EMPLOYR70');
   const [appliedDiscount, setAppliedDiscount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<'qris' | 'gopay' | 'bca' | 'mandiri'>('qris');
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
@@ -408,8 +454,8 @@ export const LatihanSoalView: React.FC = () => {
     return `${String(mins).padStart(2, '0')}:${String(remainderSecs).padStart(2, '0')}`;
   };
 
-  // Start a quiz test
-  const handleStartQuiz = (quiz: QuizPackage) => {
+  // Start a quiz test (muat pertanyaan dari API saat mulai)
+  const handleStartQuiz = async (quiz: QuizPackage) => {
     // All quizzes free / unlocked
     /*
     if (quiz.isPremium && !unlockedQuizIds.includes(quiz.id)) {
@@ -421,22 +467,31 @@ export const LatihanSoalView: React.FC = () => {
     }
     */
 
-    // Initialize Exam State
-    setActiveQuizPackage(quiz);
-    setCurrentQuestionIdx(0);
+    try {
+      const res = await fetch(`/api/quizzes/${quiz.id}`);
+      const json = await res.json();
+      if (!json.success || !json.data) {
+        console.warn('[LatihanSoal] Gagal memuat soal quiz:', json.message);
+        return;
+      }
 
-    // Restore previous attempt if existing or reset
-    const existingAttempt = quizAttempts[quiz.id];
-    if (existingAttempt && existingAttempt.status === 'belum_selesai') {
-      setUserAnswers(existingAttempt.answers);
-      setFlaggedQuestions(existingAttempt.flaggedQuestions);
-    } else {
+      const fullQuiz: QuizPackage = {
+        ...quiz,
+        questions: json.data.questions,
+        questionCount: json.data.questions.length,
+      };
+
+      // Initialize Exam State
+      setActiveQuizPackage(fullQuiz);
+      setCurrentQuestionIdx(0);
       setUserAnswers({});
       setFlaggedQuestions([]);
+      setServerReview(null);
+      setSecondsRemaining(fullQuiz.durationMinutes * 60);
+      setIsExamFinished(false);
+    } catch (e) {
+      console.warn('[LatihanSoal] Error memulai quiz:', e);
     }
-
-    setSecondsRemaining(quiz.durationMinutes * 60);
-    setIsExamFinished(false);
   };
 
   // Toggle flag on current question
@@ -451,54 +506,49 @@ export const LatihanSoalView: React.FC = () => {
     setUserAnswers((prev) => ({ ...prev, [qId]: val }));
   };
 
-  // Finish and Calculate Exam Score
-  const handleFinishExam = useCallback(() => {
+  // Finish and submit: skor dihitung server-side, attempt tersimpan di database
+  const handleFinishExam = useCallback(async () => {
     if (!activeQuizPackage) return;
 
-    let correctCount = 0;
-    activeQuizPackage.questions.forEach((q) => {
-      const userAns = userAnswers[q.id];
-      if (!userAns) return;
+    const timeSpentSeconds = Math.max(0, activeQuizPackage.durationMinutes * 60 - secondsRemaining);
 
-      if (q.type === 'multiple-select') {
-        const correctArray = (q.correctAnswer as string[]).sort();
-        const userArray = Array.isArray(userAns) ? userAns.sort() : [];
-        if (JSON.stringify(correctArray) === JSON.stringify(userArray)) {
-          correctCount++;
-        }
+    try {
+      const res = await fetch(`/api/quizzes/${activeQuizPackage.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          answers: userAnswers,
+          flaggedQuestions,
+          timeSpentSeconds,
+        }),
+      });
+      const json = await res.json();
+
+      if (json.success && json.data) {
+        setServerReview(json.data.review || null);
+        setQuizAttempts((prev) => ({
+          ...prev,
+          [activeQuizPackage.id]: {
+            packageId: activeQuizPackage.id,
+            status: 'selesai',
+            score: json.data.score,
+            answers: userAnswers,
+            flaggedQuestions: flaggedQuestions,
+            startedAt: new Date().toISOString(),
+            completedAt: new Date().toISOString(),
+            timeSpentSeconds,
+          },
+        }));
+        setUnlockedQuizIds((prev) => (prev.includes(activeQuizPackage.id) ? prev : [...prev, activeQuizPackage.id]));
       } else {
-        if (
-          String(userAns).trim().toLowerCase() ===
-          String(q.correctAnswer).trim().toLowerCase()
-        ) {
-          correctCount++;
-        }
+        console.warn('[LatihanSoal] Submit gagal:', json.message);
       }
-    });
-
-    const calculatedScore = Math.round((correctCount / activeQuizPackage.questions.length) * 100);
-
-    // Save Attempt Result to state & localStorage
-    const newAttempt: UserQuizAttempt = {
-      packageId: activeQuizPackage.id,
-      status: 'selesai',
-      score: calculatedScore,
-      answers: userAnswers,
-      flaggedQuestions: flaggedQuestions,
-      startedAt: new Date().toISOString(),
-      completedAt: new Date().toISOString(),
-      timeSpentSeconds: activeQuizPackage.durationMinutes * 60 - secondsRemaining,
-    };
-
-    setQuizAttempts((prev) => {
-      const updated = { ...prev, [activeQuizPackage.id]: newAttempt };
-      try {
-        localStorage.setItem('cuti_quiz_attempts', JSON.stringify(updated));
-      } catch (e) {}
-      return updated;
-    });
-    setIsExamFinished(true);
-    setConfirmSubmitModalOpen(false);
+    } catch (e) {
+      console.warn('[LatihanSoal] Error submit quiz:', e);
+    } finally {
+      setIsExamFinished(true);
+      setConfirmSubmitModalOpen(false);
+    }
   }, [activeQuizPackage, userAnswers, flaggedQuestions, secondsRemaining]);
 
   // Timer countdown effect during exam
@@ -522,7 +572,7 @@ export const LatihanSoalView: React.FC = () => {
 
   // Process Checkout Payment
   const handleApplyCoupon = () => {
-    if (promoCode.trim().toUpperCase() === 'CUTIPRO70') {
+    if (promoCode.trim().toUpperCase() === 'EMPLOYR70' || promoCode.trim().toUpperCase() === 'CUTIPRO70') {
       setAppliedDiscount(0.7); // 70% off
     } else if (promoCode.trim().toUpperCase() === 'BUMN2026') {
       setAppliedDiscount(0.5); // 50% off
@@ -539,7 +589,7 @@ export const LatihanSoalView: React.FC = () => {
     const updatedUnlocked = Array.from(new Set([...unlockedQuizIds, targetQuiz.id]));
     setUnlockedQuizIds(updatedUnlocked);
     try {
-      localStorage.setItem('cuti_unlocked_quiz_ids', JSON.stringify(updatedUnlocked));
+      localStorage.setItem('employr_unlocked_quiz_ids', JSON.stringify(updatedUnlocked));
     } catch (e) {}
 
     setIsProcessingPayment(false);
@@ -549,7 +599,7 @@ export const LatihanSoalView: React.FC = () => {
   };
 
   // Filtered Quiz Catalog
-  const filteredCatalog = sampleQuizPackages.filter((quiz) => {
+  const filteredCatalog = quizPackages.filter((quiz) => {
     const matchCategory =
       selectedCategory === 'Semua' || quiz.category === selectedCategory;
     const matchSearch =
@@ -559,7 +609,7 @@ export const LatihanSoalView: React.FC = () => {
   });
 
   // User's My Quizzes List
-  const myQuizzes = sampleQuizPackages.filter((quiz) => {
+  const myQuizzes = quizPackages.filter((quiz) => {
     return unlockedQuizIds.includes(quiz.id) || !quiz.isPremium;
   });
 
@@ -974,17 +1024,12 @@ export const LatihanSoalView: React.FC = () => {
           <div className="space-y-4">
             {activeQuizPackage.questions.map((q, idx) => {
               const userAns = attempt?.answers[q.id];
-              let isUserCorrect = false;
-
-              if (q.type === 'multiple-select') {
-                const correctArr = (q.correctAnswer as string[]).sort();
-                const userArr = Array.isArray(userAns) ? userAns.sort() : [];
-                isUserCorrect = JSON.stringify(correctArr) === JSON.stringify(userArr);
-              } else {
-                isUserCorrect =
-                  String(userAns || '').trim().toLowerCase() ===
-                  String(q.correctAnswer).trim().toLowerCase();
-              }
+              // Penilaian & kunci jawaban berasal dari server (serverReview)
+              const reviewItem = serverReview?.find((r) => r.id === q.id);
+              const isUserCorrect = reviewItem?.isCorrect ?? false;
+              const correctAnswer = reviewItem?.correctAnswer ?? '';
+              const explanation = reviewItem?.explanation ?? '';
+              const aiTip = reviewItem?.aiTip;
 
               return (
                 <div
@@ -1039,7 +1084,7 @@ export const LatihanSoalView: React.FC = () => {
                     <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-700">
                       <span className="font-bold text-slate-500">Kunci Jawaban Benar:</span>
                       <span className="font-mono font-black text-orange-600 dark:text-orange-400">
-                        {Array.isArray(q.correctAnswer) ? q.correctAnswer.join(', ') : q.correctAnswer}
+                        {Array.isArray(correctAnswer) ? correctAnswer.join(', ') : correctAnswer || '-'}
                       </span>
                     </div>
                   </div>
@@ -1051,13 +1096,13 @@ export const LatihanSoalView: React.FC = () => {
                       <span>Pembahasan Soal:</span>
                     </div>
                     <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-                      {q.explanation}
+                      {explanation || 'Pembahasan belum tersedia.'}
                     </p>
 
-                    {q.aiTip && (
+                    {aiTip && (
                       <div className="mt-2 pt-2 border-t border-orange-200/60 dark:border-orange-800/60 flex items-start gap-2 text-amber-900 dark:text-amber-300 font-semibold">
                         <Zap className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                        <span>Saran Strategis: {q.aiTip}</span>
+                        <span>Saran Strategis: {aiTip}</span>
                       </div>
                     )}
                   </div>
@@ -1313,7 +1358,7 @@ export const LatihanSoalView: React.FC = () => {
               <div className="space-y-0.5">
                 <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Pembayaran Aman CUTI</span>
+                  <span>Pembayaran Aman Employr</span>
                 </span>
                 <h3 className="font-extrabold text-lg text-white">Pembelian Paket Soal</h3>
               </div>

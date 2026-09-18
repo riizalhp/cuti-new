@@ -1,5 +1,5 @@
 /**
- * Dynamic cross-app routing helper for AmbilCUTI / Employr
+ * Dynamic cross-app routing helper for Employr
  * Automatically adapts when accessed from mobile/other devices in the same LAN/Wi-Fi.
  */
 

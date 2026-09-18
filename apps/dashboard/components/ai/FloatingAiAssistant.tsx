@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  X,
-  Send,
-  Loader2,
-  Bot,
-} from 'lucide-react';
+  CloseIcon,
+  SendIcon,
+  LoaderIcon,
+  MessageSquareIcon,
+} from '@/components/icons/CustomIcons';
 import { AIConversation } from '@/components/smoothui/ai-conversation';
 import { getFaqUrl } from '@/lib/urls';
 
@@ -185,14 +185,12 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
 
   if (isDismissed) return null;
 
-  const isBubbleVisible = !isScrolling && !isExpanded;
-
   // Key perubahan konten untuk AIConversation auto-scroll logic
   const conversationContentKey =
     messages.length + (isTyping ? 1 : 0) + (messages[messages.length - 1]?.text?.length || 0);
 
   return (
-    <div ref={containerRef} className="fixed z-40 right-2 bottom-18 md:right-4 md:bottom-5 pointer-events-auto select-none">
+    <div ref={containerRef} className="fixed z-40 right-3.5 bottom-16 md:right-5 md:bottom-5 pointer-events-auto select-none">
       {isExpanded ? (
         /* MINI CHAT ROOM POPUP WIDGET */
         <div className="w-[310px] sm:w-[350px] h-[430px] sm:h-[470px] rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -218,24 +216,26 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
                   Customer Service Employr
                 </p>
               </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 shrink-0">
               <a
                 href={`${faqBaseUrl}/`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[10px] font-bold text-blue-200 hover:text-white underline underline-offset-2 transition shrink-0"
+                className="text-[10px] font-bold text-blue-200 hover:text-white underline underline-offset-2 transition"
               >
                 Pusat Bantuan
               </a>
+              <button
+                type="button"
+                onClick={() => setIsExpanded(false)}
+                className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white flex items-center justify-center transition cursor-pointer"
+                title="Tutup Chat Room"
+              >
+                <CloseIcon size={14} />
+              </button>
             </div>
-
-            <button
-              type="button"
-              onClick={() => setIsExpanded(false)}
-              className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0"
-              title="Tutup Chat Room"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
           </div>
 
           {/* Mini Chat Messages Body with SmoothUI AIConversation */}
@@ -249,16 +249,10 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
                 return (
                   <div
                     key={msg.id}
-                    className={`flex gap-2 ${isBot ? 'justify-start' : 'justify-end'}`}
+                    className={`flex ${isBot ? 'justify-start' : 'justify-end'}`}
                   >
-                    {isBot && (
-                      <div className="w-6 h-6 rounded-full bg-navy-100 text-navy-700 dark:bg-navy-950 dark:text-navy-300 border border-navy-200 dark:border-navy-800 flex items-center justify-center shrink-0 mt-0.5">
-                        <Bot className="w-3.5 h-3.5" />
-                      </div>
-                    )}
-
                     <div
-                      className={`max-w-[82%] p-2.5 rounded-[10px] space-y-1 shadow-xs ${
+                      className={`max-w-[85%] p-2.5 rounded-[10px] space-y-1 shadow-xs ${
                         isBot
                           ? 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none'
                           : 'bg-[#1738D1] text-white rounded-tr-none font-medium'
@@ -285,10 +279,7 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
               })}
 
               {isTyping && (
-                <div className="flex gap-2 items-center text-slate-400">
-                  <div className="w-6 h-6 rounded-full bg-navy-100 text-navy-700 dark:bg-navy-950 dark:text-navy-300 border border-navy-200 dark:border-navy-800 flex items-center justify-center shrink-0">
-                    <Bot className="w-3.5 h-3.5" />
-                  </div>
+                <div className="flex items-center text-slate-400 justify-start">
                   <div className="px-3 py-2.5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
                     {/* Animasi mengetik: 3 titik memantul bergantian */}
                     <div className="flex items-center gap-1">
@@ -344,61 +335,27 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
               title="Kirim Pesan"
             >
               {isTyping ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <LoaderIcon size={14} className="animate-spin" />
               ) : (
-                <Send className="w-3.5 h-3.5" />
+                <SendIcon size={14} />
               )}
             </button>
           </div>
         </div>
       ) : (
-        /* FLOATING NATURAL IMAGE WITH TOP-LEFT SPEECH BUBBLE MATCHING USER SKETCH */
-        <div className="relative flex flex-col items-end">
-          {/* CHAT SPEECH BUBBLE WITH SMOOTH SCROLL FADE/SCALE ANIMATION */}
-          <div
-            onClick={() => setIsExpanded(true)}
-            className={`relative cursor-pointer mb-0.5 mr-8 sm:mr-12 max-w-[150px] sm:max-w-[175px] px-3 py-2 rounded-[10px] rounded-br-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl text-slate-800 dark:text-slate-100 transition-all duration-300 ease-out origin-bottom-right group ${
-              isBubbleVisible
-                ? 'opacity-100 scale-100 translate-x-0 translate-y-0 pointer-events-auto'
-                : 'opacity-0 scale-50 translate-x-3 translate-y-4 pointer-events-none'
-            }`}
-          >
-            <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#1738D1] shrink-0 animate-pulse" />
-              <p className="text-xs font-bold leading-tight text-slate-800 dark:text-slate-100">
-                Ada kendala atau pertanyaan?
-              </p>
-            </div>
+        /* FLOATING ACTION BUTTON (FAB) CUSTOMER SERVICE */
+        <button
+          type="button"
+          onClick={() => setIsExpanded(true)}
+          className="group relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-lg shadow-[#1738D1]/30 hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#1738D1]/20 border-2 border-white/20"
+          title="Tanya Customer Service"
+          aria-label="Tanya Customer Service"
+        >
+          <MessageSquareIcon size={20} className="text-white group-hover:scale-110 transition-transform duration-200" />
 
-            {/* Tail pointing down-right towards the character's pointing finger */}
-            <div className="absolute -bottom-2.5 right-4 sm:right-6 w-4 h-3 overflow-hidden pointer-events-none">
-              <div className="w-3 h-3 bg-white dark:bg-slate-900 border-r border-b border-slate-200 dark:border-slate-800 transform rotate-45 translate-x-0 -translate-y-1.5 shadow-xs" />
-            </div>
-          </div>
-
-          {/* NATURAL CHARACTER IMAGE BUTTON */}
-          <button
-            type="button"
-            onClick={() => setIsExpanded(true)}
-            className="group relative focus:outline-none transition-transform duration-200 cursor-pointer hover:scale-105 active:scale-95 flex items-center justify-center shrink-0"
-            title="Herdi Customer Service"
-          >
-            <div className="relative">
-              <img
-                src="/images/mascot-cs.webp"
-                alt="Herdi Customer Service"
-                className="w-16 sm:w-20 md:w-24 h-auto drop-shadow-2xl object-contain relative z-10"
-              />
-
-              {/* Online Status Indicator */}
-              <span className="absolute bottom-1 right-1 z-30 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900 shadow-md" />
-              <span className="absolute bottom-1 right-1 z-30 w-3.5 h-3.5 bg-emerald-400 rounded-full animate-ping opacity-75" />
-
-              {/* BASE PEDESTAL ACCENT LINE IN FRONT OF IMAGE (Z-20 FOREGROUND OVERLAY) */}
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 z-20 w-12 sm:w-16 md:w-18 h-1.5 sm:h-2 rounded-full bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400 shadow-md shadow-[#1738D1]/90 pointer-events-none ring-1 ring-orange-300/60" />
-            </div>
-          </button>
-        </div>
+          {/* Online Status Indicator */}
+          <span className="absolute top-0.5 right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900 shadow-xs" />
+        </button>
       )}
     </div>
   );

@@ -1,5 +1,5 @@
 /**
- * Employr / AmbilCUTI - Client-side Visitor Tracking Engine
+ * Employr - Client-side Visitor Tracking Engine
  * Lightweight, zero-dependency visitor tracking SDK
  */
 
@@ -38,7 +38,17 @@ export function getAppDomainLabel(hostname: string): string {
 }
 
 export interface TrackingPayload {
-  action: 'page_view' | 'heartbeat' | 'activity' | 'link_user';
+  action:
+    | 'page_view'
+    | 'heartbeat'
+    | 'activity'
+    | 'link_user'
+    | 'module_heartbeat'
+    | 'cv_funnel_step'
+    | 'print_telemetry'
+    | 'ats_score_log'
+    | 'client_error'
+    | 'web_vitals';
   visitor_id: string;
   session_id: string;
   user_id?: string | null;
@@ -53,11 +63,28 @@ export interface TrackingPayload {
   activity_name?: string;
   metadata?: Record<string, any>;
   duration_increment_sec?: number;
+  module_name?: string;
+  error_details?: {
+    message: string;
+    stack?: string;
+    source?: string;
+    lineno?: number;
+    colno?: number;
+  };
+  vitals?: {
+    dnsMs?: number;
+    ttfbMs?: number;
+    domContentLoadedMs?: number;
+    pageLoadMs?: number;
+  };
 }
 
-const VISITOR_COOKIE_KEY = 'cuti_visitor_id';
-const SESSION_STORAGE_KEY = 'cuti_session_id';
-const SESSION_TIMESTAMP_KEY = 'cuti_session_last_active';
+const VISITOR_COOKIE_KEY = 'employr_visitor_id';
+const LEGACY_VISITOR_COOKIE_KEY = 'cuti_visitor_id';
+const SESSION_STORAGE_KEY = 'employr_session_id';
+const LEGACY_SESSION_STORAGE_KEY = 'cuti_session_id';
+const SESSION_TIMESTAMP_KEY = 'employr_session_last_active';
+const LEGACY_SESSION_TIMESTAMP_KEY = 'cuti_session_last_active';
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
 function getCookie(name: string): string | null {
@@ -74,7 +101,11 @@ function setCookie(name: string, value: string, days = 365) {
 
 export function getOrCreateVisitorId(): string {
   if (typeof window === 'undefined') return '';
-  let visId = localStorage.getItem(VISITOR_COOKIE_KEY) || getCookie(VISITOR_COOKIE_KEY);
+  let visId =
+    localStorage.getItem(VISITOR_COOKIE_KEY) ||
+    getCookie(VISITOR_COOKIE_KEY) ||
+    localStorage.getItem(LEGACY_VISITOR_COOKIE_KEY) ||
+    getCookie(LEGACY_VISITOR_COOKIE_KEY);
   if (!visId) {
     const rand = Math.random().toString(36).substring(2, 9);
     visId = `vis_${Date.now().toString(36)}_${rand}`;
@@ -87,8 +118,12 @@ export function getOrCreateVisitorId(): string {
 export function getOrCreateSessionId(): { sessionId: string; isNew: boolean } {
   if (typeof window === 'undefined') return { sessionId: '', isNew: false };
   const now = Date.now();
-  const lastActiveStr = sessionStorage.getItem(SESSION_TIMESTAMP_KEY);
-  let sessId = sessionStorage.getItem(SESSION_STORAGE_KEY);
+  const lastActiveStr =
+    sessionStorage.getItem(SESSION_TIMESTAMP_KEY) ||
+    sessionStorage.getItem(LEGACY_SESSION_TIMESTAMP_KEY);
+  let sessId =
+    sessionStorage.getItem(SESSION_STORAGE_KEY) ||
+    sessionStorage.getItem(LEGACY_SESSION_STORAGE_KEY);
   let isNew = false;
 
   if (!sessId || !lastActiveStr || now - parseInt(lastActiveStr, 10) > SESSION_TIMEOUT_MS) {
@@ -355,3 +390,326 @@ export function trackLinkUser(userId: string) {
     domain,
   });
 }
+
+export function trackModuleDuration(moduleName: string, durationSec = 25, userId?: string | null) {
+  if (typeof window === 'undefined') return;
+  const visitor_id = getOrCreateVisitorId();
+  const { sessionId } = getOrCreateSessionId();
+  const hostname = window.location.hostname;
+  const domain = hostname.replace(/:\d+$/, '');
+
+  sendTrackingBeacon({
+    action: 'module_heartbeat',
+    visitor_id,
+    session_id: sessionId,
+    user_id: userId || null,
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title || window.location.pathname,
+    hostname,
+    domain,
+    module_name: moduleName,
+    duration_increment_sec: durationSec,
+  });
+}
+
+export function trackCvFunnelStep(step: string, metadata?: Record<string, any>, userId?: string | null) {
+  if (typeof window === 'undefined') return;
+  const visitor_id = getOrCreateVisitorId();
+  const { sessionId } = getOrCreateSessionId();
+  const hostname = window.location.hostname;
+  const domain = hostname.replace(/:\d+$/, '');
+
+  sendTrackingBeacon({
+    action: 'cv_funnel_step',
+    visitor_id,
+    session_id: sessionId,
+    user_id: userId || null,
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title || window.location.pathname,
+    hostname,
+    domain,
+    activity_name: `CV Step: ${step}`,
+    metadata: { step, ...metadata },
+  });
+}
+
+export function trackPrintExport(status: 'completed' | 'cancelled', format = 'pdf', template = 'default', userId?: string | null) {
+  if (typeof window === 'undefined') return;
+  const visitor_id = getOrCreateVisitorId();
+  const { sessionId } = getOrCreateSessionId();
+  const hostname = window.location.hostname;
+  const domain = hostname.replace(/:\d+$/, '');
+
+  sendTrackingBeacon({
+    action: 'print_telemetry',
+    visitor_id,
+    session_id: sessionId,
+    user_id: userId || null,
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title || window.location.pathname,
+    hostname,
+    domain,
+    metadata: { status, format, template, timestamp: new Date().toISOString() },
+  });
+}
+
+export function trackAtsScore(score: number, details?: Record<string, any>, userId?: string | null) {
+  if (typeof window === 'undefined') return;
+  const visitor_id = getOrCreateVisitorId();
+  const { sessionId } = getOrCreateSessionId();
+  const hostname = window.location.hostname;
+  const domain = hostname.replace(/:\d+$/, '');
+
+  sendTrackingBeacon({
+    action: 'ats_score_log',
+    visitor_id,
+    session_id: sessionId,
+    user_id: userId || null,
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title || window.location.pathname,
+    hostname,
+    domain,
+    metadata: { score, ...details },
+  });
+}
+
+export function trackClientError(message: string, stack?: string, source?: string, userId?: string | null) {
+  if (typeof window === 'undefined') return;
+  const visitor_id = getOrCreateVisitorId();
+  const { sessionId } = getOrCreateSessionId();
+  const hostname = window.location.hostname;
+  const domain = hostname.replace(/:\d+$/, '');
+
+  sendTrackingBeacon({
+    action: 'client_error',
+    visitor_id,
+    session_id: sessionId,
+    user_id: userId || null,
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title || window.location.pathname,
+    hostname,
+    domain,
+    error_details: { message, stack, source },
+  });
+}
+
+export function trackWebVitals(userId?: string | null) {
+  if (typeof window === 'undefined') return;
+  try {
+    const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+    if (navEntries && navEntries.length > 0) {
+      const nav = navEntries[0];
+      const dnsMs = Math.round(nav.domainLookupEnd - nav.domainLookupStart);
+      const ttfbMs = Math.round(nav.responseStart - nav.requestStart);
+      const domContentLoadedMs = Math.round(nav.domContentLoadedEventEnd - nav.startTime);
+      const pageLoadMs = Math.round(nav.loadEventEnd - nav.startTime);
+
+      const visitor_id = getOrCreateVisitorId();
+      const { sessionId } = getOrCreateSessionId();
+      const hostname = window.location.hostname;
+      const domain = hostname.replace(/:\d+$/, '');
+
+      sendTrackingBeacon({
+        action: 'web_vitals',
+        visitor_id,
+        session_id: sessionId,
+        user_id: userId || null,
+        url: window.location.href,
+        path: window.location.pathname,
+        title: document.title || window.location.pathname,
+        hostname,
+        domain,
+        vitals: { dnsMs, ttfbMs, domContentLoadedMs, pageLoadMs },
+      });
+    }
+  } catch {}
+}
+
+let isTelemetryInitialized = false;
+
+export function initClientTelemetry(userId?: string | null) {
+  if (typeof window === 'undefined' || isTelemetryInitialized) return;
+  isTelemetryInitialized = true;
+
+  // 1. Global JS Runtime Error Listener
+  window.addEventListener('error', (event) => {
+    trackClientError(
+      event.message || 'Unknown Error',
+      event.error?.stack,
+      event.filename ? `${event.filename}:${event.lineno}` : undefined,
+      userId
+    );
+  });
+
+  // 2. Unhandled Promise Rejection Listener
+  window.addEventListener('unhandledrejection', (event) => {
+    const reason = event.reason;
+    const msg = typeof reason === 'string' ? reason : reason?.message || 'Unhandled Promise Rejection';
+    const stack = reason?.stack;
+    trackClientError(msg, stack, 'Promise Rejection', userId);
+  });
+
+  // 3. Print / Export Detection
+  let isPrinting = false;
+  window.addEventListener('beforeprint', () => {
+    isPrinting = true;
+  });
+  window.addEventListener('afterprint', () => {
+    if (isPrinting) {
+      trackPrintExport('completed', 'pdf', 'browser_print', userId);
+      isPrinting = false;
+    }
+  });
+
+  // 4. Web Vitals after load
+  if (document.readyState === 'complete') {
+    setTimeout(() => trackWebVitals(userId), 1500);
+  } else {
+    window.addEventListener('load', () => {
+      setTimeout(() => trackWebVitals(userId), 1500);
+    });
+  }
+}
+
+// --- Phase 1: Self-Learning Intelligence Tracking ---
+
+export function trackButtonClick(
+  elementId: string,
+  elementText: string,
+  userId?: string | null
+) {
+  trackActivity('BUTTON_CLICK', `Klik: ${elementText}`, {
+    element_id: elementId,
+    element_text: elementText,
+  }, userId);
+}
+
+export function trackSearchQuery(
+  query: string,
+  resultCount: number,
+  searchType: string = 'job',
+  userId?: string | null
+) {
+  trackActivity('SEARCH_QUERY', `Cari: ${query}`, {
+    query,
+    result_count: resultCount,
+    search_type: searchType,
+  }, userId);
+}
+
+export function trackFeatureUsage(
+  featureName: string,
+  userId?: string | null
+) {
+  trackActivity('FEATURE_USAGE', `Buka Fitur: ${featureName}`, {
+    feature_name: featureName,
+  }, userId);
+}
+
+export function trackSectionEdit(
+  sectionKey: string,
+  durationMs: number,
+  charsAdded: number,
+  userId?: string | null
+) {
+  trackActivity('SECTION_EDIT', `Edit: ${sectionKey}`, {
+    section_key: sectionKey,
+    duration_ms: durationMs,
+    chars_added: charsAdded,
+  }, userId);
+}
+
+export function trackTemplateSwitch(
+  fromTemplate: string,
+  toTemplate: string,
+  userId?: string | null
+) {
+  trackActivity('TEMPLATE_SWITCH', `Ganti Template: ${fromTemplate} → ${toTemplate}`, {
+    from_template: fromTemplate,
+    to_template: toTemplate,
+  }, userId);
+}
+
+export function trackRecommendationImpression(
+  recType: string,
+  recIds: string[],
+  position?: number,
+  userId?: string | null
+) {
+  trackActivity('RECOMMENDATION_IMPRESSION', `Rekomendasi Tampil: ${recType}`, {
+    rec_type: recType,
+    rec_ids: recIds,
+    position,
+  }, userId);
+}
+
+export function trackRecommendationClick(
+  recType: string,
+  recId: string,
+  position?: number,
+  userId?: string | null
+) {
+  trackActivity('RECOMMENDATION_CLICK', `Rekomendasi Diklik: ${recType}`, {
+    rec_type: recType,
+    rec_id: recId,
+    position,
+  }, userId);
+}
+
+export function trackAiFeedback(
+  generationId: string,
+  action: 'applied' | 'modified' | 'rejected' | 'ignored',
+  timeToActionMs?: number,
+  modifiedText?: string,
+  userId?: string | null
+) {
+  trackActivity('AI_FEEDBACK', `AI Saran: ${action}`, {
+    generation_id: generationId,
+    action,
+    time_to_action_ms: timeToActionMs,
+    modified_text: modifiedText,
+  }, userId);
+}
+
+export function trackStatusChange(
+  applicationId: string,
+  fromStatus: string,
+  toStatus: string,
+  daysSinceApply?: number,
+  userId?: string | null
+) {
+  trackActivity('STATUS_CHANGE', `Status: ${fromStatus} → ${toStatus}`, {
+    application_id: applicationId,
+    from_status: fromStatus,
+    to_status: toStatus,
+    days_since_apply: daysSinceApply,
+  }, userId);
+}
+
+export function trackScrollDepth(
+  maxDepthPercent: number,
+  userId?: string | null
+) {
+  trackActivity('SCROLL_DEPTH', `Scroll: ${maxDepthPercent}%`, {
+    max_depth_percent: maxDepthPercent,
+  }, userId);
+}
+
+export function trackFeedbackSubmit(
+  feature: string,
+  rating: number,
+  contextId?: string,
+  userId?: string | null
+) {
+  trackActivity('FEEDBACK_SUBMIT', `Feedback: ${feature} (${rating > 0 ? '👍' : '👎'})`, {
+    feature,
+    rating,
+    context_id: contextId,
+  }, userId);
+}
+

@@ -26,7 +26,7 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
   // Read session dismissal status on mount
   useEffect(() => {
     try {
-      const dismissed = sessionStorage.getItem('cuti_cv_hrd_modal_dismissed') === 'true';
+      const dismissed = sessionStorage.getItem('employr_cv_hrd_modal_dismissed') === 'true';
       if (dismissed) {
         setIsSessionDismissed(true);
         setIsCollapsed(true);
@@ -54,7 +54,7 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
           activeEl.getAttribute('contenteditable') === 'true');
 
       try {
-        const dismissed = sessionStorage.getItem('cuti_cv_hrd_modal_dismissed') === 'true';
+        const dismissed = sessionStorage.getItem('employr_cv_hrd_modal_dismissed') === 'true';
         if (!dismissed && !isEditingInput) {
           setIsCollapsed(false);
         }
@@ -141,7 +141,7 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
     setIsSessionDismissed(true);
     setIsCollapsed(true);
     try {
-      sessionStorage.setItem('cuti_cv_hrd_modal_dismissed', 'true');
+      sessionStorage.setItem('employr_cv_hrd_modal_dismissed', 'true');
     } catch {
       // ignore
     }

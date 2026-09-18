@@ -1,3 +1,74 @@
 ---
-return Astro.redirect('/job-fair');
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import FooterPortal from '../../components/FooterPortal.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import SearchModal from '../../components/SearchModal.astro';
+import PageHero from '../../components/common/PageHero.astro';
+import { eventList, ensureData } from '../../data/mock';
+
+await ensureData();
+const eventListSnapshot = [...eventList];
+
+const title = "Kalender Event & Job Fair Nasional | Employer Job";
+const description = "Jadwal terlengkap job fair, webinar karier, networking session, dan pameran bursa kerja di seluruh kota besar Indonesia.";
 ---
+
+<BaseLayout title={title} description={description} canonicalUrl="http://localhost:3003/event">
+  <Navbar />
+
+  <main class="bg-[#f4f3ee] min-h-screen pb-16">
+    <PageHero
+      eyebrow="Event &amp; Networking"
+      title="Jadwal Job Fair &amp; <em>Agenda Bursa Kerja</em>"
+      description="Temui perwakilan HRD dari puluhan perusahaan secara langsung dan ikuti sesi walk-in interview."
+      badge={{ text: `${eventListSnapshot.length} Agenda Tersedia`, bgColor: 'bg-amber-50', textColor: 'text-amber-800', borderColor: 'border border-amber-200' }}
+    >
+      <nav slot="breadcrumb" class="flex items-center gap-2 text-xs text-[#6e6d68] mb-4" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-[#0000ff]">Beranda</a>
+        <span>/</span>
+        <span class="text-[#101010] font-semibold">Event &amp; Job Fair</span>
+      </nav>
+    </PageHero>
+
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6">
+      <AdSlot type="leaderboard" note="Rekomendasi pendaftaran bursa kerja dan expo karier nasional." />
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
+        {eventListSnapshot.map((ev) => (
+          <article class="bg-white rounded-2xl border border-[#d7d6cf] p-5 hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:border-[#0000ff]/30 hover:-translate-y-1 transition duration-300 flex flex-col sm:flex-row gap-4 justify-between">
+            <div class="flex gap-4">
+              <div class="w-16 h-16 rounded-2xl bg-[#f4f3ee] border border-[#d7d6cf] flex flex-col items-center justify-center shrink-0">
+                <span class="text-xs font-bold text-[#6e6d68] uppercase tracking-wider">{ev.dateMonth || ev.month}</span>
+                <span class="text-xl font-bold text-[#0000ff] -mt-1">{ev.dateDay || ev.day}</span>
+              </div>
+              <div>
+                <div class="flex items-center gap-2 mb-1 flex-wrap">
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[#0000ff] font-semibold">{ev.type}</span>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold">{ev.price}</span>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#6e6d68] font-medium">{ev.format}</span>
+                </div>
+                <h2 class="text-base font-semibold text-[#101010] hover:text-[#0000ff] transition leading-snug">
+                  <a href={`/event/${ev.slug}`}>{ev.title}</a>
+                </h2>
+                <p class="text-xs text-[#6e6d68] line-clamp-2 mt-1.5">{ev.description}</p>
+                <div class="text-xs text-[#6e6d68] mt-2 flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                  <span>{ev.location}</span>
+                </div>
+              </div>
+            </div>
+            <div class="sm:self-end pt-3 sm:pt-0 border-t sm:border-t-0 border-[#d7d6cf]/50 shrink-0">
+              <a href={`/event/${ev.slug}`} class="inline-block px-4 py-2 rounded-full bg-[#0000ff] hover:bg-[#1738d1] text-white text-xs font-semibold transition shadow-xs">
+                Detail Acara →
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </main>
+
+  <FooterPortal />
+  <SearchModal />
+</BaseLayout>

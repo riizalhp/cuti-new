@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
+import { SidebarToggle } from "@/components/admin/SidebarToggle"
 import {
   Globe,
   Radio,
@@ -155,7 +156,8 @@ export default function VisitorManagementPage() {
     >
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-5">
-        <div>
+        <div className="flex items-center gap-3.5">
+          <SidebarToggle />
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-600 dark:text-orange-400">
               <Globe size={20} />

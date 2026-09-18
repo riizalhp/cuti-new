@@ -1,0 +1,80 @@
+'use client';
+
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { ActionCenterCard } from '@/components/ActionCenterCard';
+import { ContextualMarketingCard } from '@/components/ContextualMarketingCard';
+import { ApplicationSummaryCard } from '@/components/ApplicationSummaryCard';
+import { ApplicationChartCard } from '@/components/ApplicationChartCard';
+import { UpcomingScheduleCard } from '@/components/UpcomingScheduleCard';
+import { CareerReadinessCard } from '@/components/CareerReadinessCard';
+import { CVATSScoreCard } from '@/components/CVATSScoreCard';
+import { LatestJobsList } from '@/components/LatestJobsList';
+import { RecentActivityTimeline } from '@/components/RecentActivityTimeline';
+import { WeeklyApplicationSprintCard } from '@/components/WeeklyApplicationSprintCard';
+import { CareerDevelopmentTabs } from '@/components/CareerDevelopmentTabs';
+
+export function BerandaView() {
+  const router = useRouter();
+
+  return (
+    <div className="w-full space-y-6 pb-8">
+      {/* 1. Action Center: Top Priority Hub */}
+      <section id="section-action-center" className="w-full">
+        <ActionCenterCard
+          onPrimaryAction={() => router.push('/scrape-jobs')}
+        />
+      </section>
+
+      {/* 1.5 Contextual Marketing Nudge */}
+      <section id="section-contextual-marketing" className="w-full">
+        <ContextualMarketingCard />
+      </section>
+
+      {/* 2. Ringkasan 4 KPI Utama */}
+      <section id="section-kpi-summary" className="w-full">
+        <ApplicationSummaryCard onViewTracker={() => router.push('/tracker')} />
+      </section>
+
+      {/* 3. Main Focus: Funnel Progress (8 cols) & Upcoming Schedule (4 cols) */}
+      <section id="section-progress-schedule" className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="lg:col-span-8 flex flex-col">
+          <ApplicationChartCard />
+        </div>
+        <div className="lg:col-span-4 flex flex-col">
+          <UpcomingScheduleCard />
+        </div>
+      </section>
+
+      {/* 4. Career Readiness & CV ATS Score (Compact Expandable 6/6 Layout) */}
+      <section id="section-readiness-ats" className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+        <div className="flex flex-col h-full">
+          <CareerReadinessCard onBoostClick={() => router.push('/career-intelligence')} />
+        </div>
+        <div id="section-cv" className="flex flex-col h-full">
+          <CVATSScoreCard onOptimizeClick={() => router.push('/cv')} />
+        </div>
+      </section>
+
+      {/* 5. Recommended Jobs: Top 3 Matching Jobs */}
+      <section id="section-jobs" className="w-full">
+        <LatestJobsList />
+      </section>
+
+      {/* 6. Recent Activity & Weekly Application Sprint (6/6 Layout) */}
+      <section id="section-timeline-sprint" className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="lg:col-span-6 flex flex-col">
+          <RecentActivityTimeline />
+        </div>
+        <div id="section-weekly-sprint" className="lg:col-span-6 flex flex-col">
+          <WeeklyApplicationSprintCard />
+        </div>
+      </section>
+
+      {/* 7. Career Development: Single Tabbed Component */}
+      <section id="section-development" className="w-full">
+        <CareerDevelopmentTabs />
+      </section>
+    </div>
+  );
+}

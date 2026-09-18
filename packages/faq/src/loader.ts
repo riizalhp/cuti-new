@@ -3,7 +3,7 @@ import path from "node:path";
 import type { FaqArticle } from "./types";
 
 /**
- * Mencari direktori konten paket @cuti/faq.
+ * Mencari direktori konten paket @employr/faq.
  * Berjalan dari app manapun di monorepo (apps/*), dan bisa di-override
  * lewat env FAQ_CONTENT_DIR (berguna untuk deployment mandiri).
  */
@@ -110,8 +110,7 @@ function FAQ_CATEGORY_INDEX(slug: string): number {
     "lamaran-kerja": 3,
     "misi-reward": 4,
     "pengembangan-karier": 5,
-    "membership-pembayaran": 6,
-    "akun-bantuan": 7,
+    "akun-bantuan": 6,
   };
   return order[slug] ?? 99;
 }

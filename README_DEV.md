@@ -66,16 +66,16 @@ After first run, skip setup steps:
 
 ```powershell
 # API only
-pnpm --filter @cuti/api dev
+pnpm --filter @employr/api dev
 
 # Landing page only
-pnpm --filter @cuti/web dev
+pnpm --filter @employr/web dev
 
 # Admin panel only
-pnpm --filter @cuti/admin dev
+pnpm --filter @employr/admin dev
 
 # FAQ / Pusat Bantuan only
-pnpm --filter @cuti/faq-site dev
+pnpm --filter @employr/faq-site dev
 
 # All at once (mixed logs)
 pnpm dev
@@ -85,16 +85,16 @@ pnpm dev
 
 ```powershell
 # Open Prisma Studio (GUI for database)
-pnpm --filter @cuti/db db:studio
+pnpm --filter @employr/db db:studio
 
 # Run migrations manually
-pnpm --filter @cuti/db db:migrate dev
+pnpm --filter @employr/db db:migrate dev
 
 # Reset database (WARNING: deletes all data)
-pnpm --filter @cuti/db db:reset
+pnpm --filter @employr/db db:reset
 
 # Seed templates
-pnpm --filter @cuti/db db:seed:templates
+pnpm --filter @employr/db db:seed:templates
 ```
 
 ### Docker Management
@@ -262,7 +262,7 @@ D:\cuti\
 pnpm install
 
 # Run new migrations (if any)
-pnpm --filter @cuti/db db:migrate dev
+pnpm --filter @employr/db db:migrate dev
 
 # Restart services
 .\dev.ps1 -SkipSeeds

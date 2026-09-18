@@ -1,12 +1,13 @@
 {
-  "name": "cuti",
+  "name": "employr",
   "private": true,
   "scripts": {
+    "predev": "node scripts/clean-ports.js",
     "dev": "turbo run dev",
     "ip": "node scripts/lan-info.js",
     "lan": "node scripts/lan-info.js",
     "build": "turbo run build",
-    "postinstall": "pnpm --filter @cuti/db exec prisma generate",
+    "postinstall": "pnpm --filter @employr/db exec prisma generate",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "clean": "turbo run clean && rm -rf node_modules"

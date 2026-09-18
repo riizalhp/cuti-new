@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, ApplicationStatus, ApplicationSource } from '@cuti/db';
+import { prisma, ApplicationStatus, ApplicationSource } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 import { dispatchEmail, SmtpConfig, EmailPayload } from '@/lib/mailer/email-service';
 import crypto from 'crypto';
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title = 'Batch Lamaran', items, delay_sec = 2, design = 'klasik' } = body;
+    const { title = 'Batch Lamaran', items, delay_sec = 2, design = 'standar' } = body;
 
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
         senderEmail: activeSmtp.from_email || activeSmtp.username,
         bodyContent: item.body || item.content,
         customSubject: item.subject,
-        design: design as any,
+        design: (design || 'standar') as any,
       };
 
       const result = await dispatchEmail(smtpConfig, emailPayload);

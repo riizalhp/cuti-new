@@ -1,5 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -16,11 +17,12 @@ export class AuthGuard implements CanActivate {
     const token = authHeader.substring(7);
 
     try {
-      // Simplified token validation — use JWT in production
-      const decoded = JSON.parse(Buffer.from(token, 'base64').toString());
+      const secret = process.env.JWT_SECRET;
+      if (!secret) throw new UnauthorizedException('Server misconfigured');
 
-      if (decoded.exp < Date.now()) {
-        throw new UnauthorizedException('Token expired');
+      const decoded = jwt.verify(token, secret) as { userId: string; type: string };
+      if (decoded.type !== 'access') {
+        throw new UnauthorizedException('Invalid token type');
       }
 
       const user = await this.prisma.user.findUnique({
@@ -34,6 +36,7 @@ export class AuthGuard implements CanActivate {
       request.user = user;
       return true;
     } catch (error) {
+      if (error instanceof UnauthorizedException) throw error;
       throw new UnauthorizedException('Invalid token');
     }
   }

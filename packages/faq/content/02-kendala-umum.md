@@ -48,16 +48,11 @@ Fitur yang memanggil layanan AI (misal menulis ringkasan CV, evaluasi, asisten k
 
 - Nyalakan **Background graphics** dan set **Margin: None** di dialog print. Lihat [Cara Cetak CV ke PDF](/artikel/cara-cetak-cv-pdf).
 
-## 7. Pembayaran sudah bayar tapi akses belum aktif
-
-- Tunggu beberapa menit lalu refresh.
-- Simpan **ID transaksi** (format `TRX-...`) dan hubungi Customer Service.
-
-## 8. Sesi login portal (LinkedIn/scraper) bermasalah
+## 7. Sesi login portal (LinkedIn/scraper) bermasalah
 
 - Login ulang lewat tombol yang tersedia.
 - Hapus sesi lama (logout) lalu hubungkan lagi.
-- Sesi disimpan lokal — jika berganti perangkat, hubungkan ulang.
+- Sesi disimpan lokal (jika berganti perangkat, silakan hubungkan ulang).
 
 ## Jika belum terselesaikan
 

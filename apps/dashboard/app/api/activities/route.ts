@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@cuti/db';
+import { prisma } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 
 function formatRelativeTime(date: Date): string {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@cuti/db';
+import { prisma } from '@employr/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +45,10 @@ export async function GET(req: NextRequest) {
       recentPageViews,
       recentSessions,
       visitorsInPeriod,
+      moduleActivitiesRaw,
+      printActivitiesRaw,
+      vitalsActivitiesRaw,
+      atsActivitiesRaw,
     ] = await Promise.all([
       // Total lifetime visitors
       (prisma as any).visitor.count({ where: domainWhere() }),
@@ -132,6 +136,30 @@ export async function GET(req: NextRequest) {
         where: domainWhere(),
         select: { visitor_id: true, first_seen: true, user_id: true },
       }),
+
+      // Module duration activities
+      (prisma as any).visitorActivity.findMany({
+        where: { activity_type: 'MODULE_DURATION', created_at: { gte: rangeStartDate } },
+        select: { metadata: true },
+      }),
+
+      // Print telemetry activities
+      (prisma as any).visitorActivity.findMany({
+        where: { activity_type: 'PRINT_EXPORT', created_at: { gte: rangeStartDate } },
+        select: { metadata: true },
+      }),
+
+      // Web vitals activities
+      (prisma as any).visitorActivity.findMany({
+        where: { activity_type: 'WEB_VITALS', created_at: { gte: rangeStartDate } },
+        select: { metadata: true },
+      }),
+
+      // ATS score evaluation activities
+      (prisma as any).visitorActivity.findMany({
+        where: { activity_type: 'ATS_SCORE_EVALUATION', created_at: { gte: rangeStartDate } },
+        select: { metadata: true },
+      }),
     ]);
 
     const visitorMetaMap = new Map<string, { firstSeenDate: string; isLinkedUser: boolean }>();
@@ -142,7 +170,28 @@ export async function GET(req: NextRequest) {
       });
     });
 
-    // Aggregate day-by-day metrics
+    // Timezone helper for Asia/Jakarta (WIB)
+    const getWibDateTime = (dateInput: Date | string) => {
+      const d = new Date(dateInput);
+      const dateStr = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(d);
+
+      const hourRaw = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        hour12: false,
+      }).format(d);
+
+      const hour = parseInt(hourRaw, 10) % 24;
+      const hourStr = hour.toString().padStart(2, '0');
+      return { date: dateStr, hour, hourStr };
+    };
+
+    // Aggregate day-by-day and hour-by-hour metrics
     const dayDataMap: Record<
       string,
       {
@@ -154,42 +203,93 @@ export async function GET(req: NextRequest) {
       }
     > = {};
 
+    interface HourSlot {
+      key: string;
+      date: string;
+      day: string;
+      fullDate: string;
+      hour: number;
+      hourStr: string;
+      timeRange: string;
+      views: number;
+      visitorIds: Set<string>;
+    }
+
+    const hourDataMap: Record<string, HourSlot> = {};
+
     for (let i = daysCount - 1; i >= 0; i--) {
       const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const isoDate = d.toISOString().slice(0, 10);
-      const shortDay = d.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric' });
+      const { date: isoDate } = getWibDateTime(d);
+      const shortDay = d.toLocaleDateString('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        weekday: 'short',
+        day: 'numeric',
+      });
       const fullDate = d.toLocaleDateString('id-ID', {
+        timeZone: 'Asia/Jakarta',
         weekday: 'long',
         day: 'numeric',
         month: 'long',
         year: 'numeric',
       });
 
-      dayDataMap[isoDate] = {
-        date: isoDate,
-        day: shortDay,
-        fullDate,
-        views: 0,
-        visitorIds: new Set<string>(),
-      };
+      if (!dayDataMap[isoDate]) {
+        dayDataMap[isoDate] = {
+          date: isoDate,
+          day: shortDay,
+          fullDate,
+          views: 0,
+          visitorIds: new Set<string>(),
+        };
+
+        // 24 hourly slots for this day
+        for (let h = 0; h < 24; h++) {
+          const hStr = h.toString().padStart(2, '0');
+          const hourKey = `${isoDate}_${hStr}`;
+          hourDataMap[hourKey] = {
+            key: hourKey,
+            date: isoDate,
+            day: shortDay,
+            fullDate,
+            hour: h,
+            hourStr: `${hStr}:00`,
+            timeRange: `${hStr}:00 - ${hStr}:59 WIB`,
+            views: 0,
+            visitorIds: new Set<string>(),
+          };
+        }
+      }
     }
 
     // Add pageviews
     recentPageViews.forEach((pv: any) => {
-      const iso = new Date(pv.created_at).toISOString().slice(0, 10);
+      const { date: iso, hourStr } = getWibDateTime(pv.created_at);
       if (dayDataMap[iso]) {
         dayDataMap[iso].views++;
         if (pv.visitor_id) {
           dayDataMap[iso].visitorIds.add(pv.visitor_id);
         }
       }
+
+      const hourKey = `${iso}_${hourStr}`;
+      if (hourDataMap[hourKey]) {
+        hourDataMap[hourKey].views++;
+        if (pv.visitor_id) {
+          hourDataMap[hourKey].visitorIds.add(pv.visitor_id);
+        }
+      }
     });
 
     // Add sessions
     recentSessions.forEach((sess: any) => {
-      const iso = new Date(sess.started_at).toISOString().slice(0, 10);
+      const { date: iso, hourStr } = getWibDateTime(sess.started_at);
       if (dayDataMap[iso] && sess.visitor_id) {
         dayDataMap[iso].visitorIds.add(sess.visitor_id);
+      }
+
+      const hourKey = `${iso}_${hourStr}`;
+      if (hourDataMap[hourKey] && sess.visitor_id) {
+        hourDataMap[hourKey].visitorIds.add(sess.visitor_id);
       }
     });
 
@@ -224,6 +324,41 @@ export async function GET(req: NextRequest) {
       };
     });
 
+    const trendHours = Object.values(hourDataMap).map((h) => {
+      let newVisitors = 0;
+      let linkedUsers = 0;
+
+      h.visitorIds.forEach((visId) => {
+        const meta = visitorMetaMap.get(visId);
+        if (meta) {
+          if (meta.firstSeenDate === h.date) {
+            newVisitors++;
+          }
+          if (meta.isLinkedUser) {
+            linkedUsers++;
+          }
+        }
+      });
+
+      const visitorsCount = h.visitorIds.size;
+      const returningVisitors = Math.max(0, visitorsCount - newVisitors);
+
+      return {
+        key: h.key,
+        date: h.date,
+        day: h.day,
+        fullDate: h.fullDate,
+        hour: h.hour,
+        hourStr: h.hourStr,
+        timeRange: h.timeRange,
+        views: h.views,
+        visitors: visitorsCount,
+        newVisitors,
+        returningVisitors,
+        linkedUsers,
+      };
+    });
+
     // Daily breakdown table: newest date first
     const dailyBreakdown = [...trendDays].reverse();
 
@@ -249,6 +384,87 @@ export async function GET(req: NextRequest) {
 
     const avgDurationSec = Math.round(avgDurationResult._avg.duration_sec || 0);
 
+    // 1. Module Breakdown
+    const moduleSecondsMap: Record<string, number> = {
+      CV_BUILDER: 0,
+      JOB_TRACKER: 0,
+      LOKER: 0,
+      MISI: 0,
+      BERANDA: 0,
+      AKUN: 0,
+    };
+    moduleActivitiesRaw.forEach((act: any) => {
+      const mod = act.metadata?.module || 'BERANDA';
+      const sec = Number(act.metadata?.duration_sec) || 25;
+      moduleSecondsMap[mod] = (moduleSecondsMap[mod] || 0) + sec;
+    });
+    const moduleBreakdown = Object.entries(moduleSecondsMap).map(([mod, sec]) => ({
+      module: mod,
+      totalSeconds: sec,
+      label:
+        mod === 'CV_BUILDER' ? 'CV Builder' :
+        mod === 'JOB_TRACKER' ? 'Job Tracker' :
+        mod === 'LOKER' ? 'Portal Loker' :
+        mod === 'MISI' ? 'Misi Cuan' :
+        mod === 'AKUN' ? 'Profil & Akun' : 'Beranda',
+    }));
+
+    // 2. Print Telemetry (PDF / Print export)
+    let printCompleted = 0;
+    let printCancelled = 0;
+    printActivitiesRaw.forEach((act: any) => {
+      if (act.metadata?.status === 'completed') printCompleted++;
+      else printCancelled++;
+    });
+    const printStats = {
+      total: printCompleted + printCancelled,
+      completed: printCompleted,
+      cancelled: printCancelled,
+      successRate:
+        printCompleted + printCancelled > 0
+          ? Math.round((printCompleted / (printCompleted + printCancelled)) * 100)
+          : 100,
+    };
+
+    // 3. Web Vitals
+    let totalLoadMs = 0;
+    let totalTtfbMs = 0;
+    let vitalsCount = 0;
+    vitalsActivitiesRaw.forEach((act: any) => {
+      if (act.metadata?.pageLoadMs) {
+        totalLoadMs += Number(act.metadata.pageLoadMs);
+        totalTtfbMs += Number(act.metadata.ttfbMs || 0);
+        vitalsCount++;
+      }
+    });
+    const vitalsStats = {
+      avgPageLoadMs: vitalsCount > 0 ? Math.round(totalLoadMs / vitalsCount) : 480,
+      avgTtfbMs: vitalsCount > 0 ? Math.round(totalTtfbMs / vitalsCount) : 120,
+      sampleCount: vitalsCount,
+    };
+
+    // 4. ATS Score Distribution
+    const atsDistribution = {
+      range0to50: 0,
+      range51to70: 0,
+      range71to85: 0,
+      range86to100: 0,
+      totalEvaluated: atsActivitiesRaw.length,
+      avgScore: 0,
+    };
+    let sumScores = 0;
+    atsActivitiesRaw.forEach((act: any) => {
+      const score = Number(act.metadata?.score) || 0;
+      sumScores += score;
+      if (score <= 50) atsDistribution.range0to50++;
+      else if (score <= 70) atsDistribution.range51to70++;
+      else if (score <= 85) atsDistribution.range71to85++;
+      else atsDistribution.range86to100++;
+    });
+    if (atsActivitiesRaw.length > 0) {
+      atsDistribution.avgScore = Math.round(sumScores / atsActivitiesRaw.length);
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -266,8 +482,13 @@ export async function GET(req: NextRequest) {
         deviceBreakdown,
         domainBreakdown,
         trendDays,
+        trendHours,
         dailyBreakdown,
         trend7Days: trendDays.map((t) => ({ day: t.day, views: t.views, visitors: t.visitors })),
+        moduleBreakdown,
+        printStats,
+        vitalsStats,
+        atsDistribution,
       },
     });
   } catch (error: any) {

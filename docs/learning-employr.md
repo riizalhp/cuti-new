@@ -119,7 +119,7 @@ Platform ini menerapkan standar desain yang sama persis dengan Dashboard Penggun
 Untuk menjalankan aplikasi secara mandiri:
 ```bash
 cd d:\cuti
-pnpm --filter @cuti/learning dev
+pnpm --filter @employr/learning dev
 ```
 Atau jalankan seluruh ekosistem sekaligus melalui skrip startup:
 ```powershell

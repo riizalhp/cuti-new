@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { setSessionCookie, getStoredSession } from '@/lib/auth';
-import { Sun, Moon, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Sun, Moon, Loader2, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
 import { AuthReviewsCarousel } from '@/components/AuthReviewsCarousel';
 
@@ -14,10 +14,12 @@ export const LoginView: React.FC<LoginViewProps> = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTarget = searchParams?.get('redirect') || '/beranda';
+  const isRegistered = searchParams?.get('registered') === 'true';
+  const initialEmail = searchParams?.get('email') || '';
 
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -28,10 +30,21 @@ export const LoginView: React.FC<LoginViewProps> = () => {
   const [isShaking, setIsShaking] = useState(false);
 
   useEffect(() => {
+    if (initialEmail) {
+      setEmail(initialEmail);
+    }
+  }, [initialEmail]);
+
+  useEffect(() => {
     setMounted(true);
     const existingSession = getStoredSession();
     if (existingSession && existingSession.email) {
-      router.replace(redirectTarget);
+      const isCompleted = localStorage.getItem('employr_onboarding_completed') === 'true';
+      if (existingSession.onboarded === false && !isCompleted) {
+        router.replace('/onboarding');
+      } else {
+        router.replace(redirectTarget);
+      }
     }
   }, [router, redirectTarget]);
 
@@ -82,10 +95,19 @@ export const LoginView: React.FC<LoginViewProps> = () => {
         name: result.data.name,
         email: result.data.email,
         role: result.data.role,
+        onboarded: Boolean(result.data.onboarded),
       };
 
       setSessionCookie(userData, rememberMe ? 30 : 1);
-      router.push(redirectTarget);
+
+      if (userData.onboarded) {
+        localStorage.setItem('employr_onboarding_completed', 'true');
+      } else {
+        localStorage.removeItem('employr_onboarding_completed');
+      }
+
+      const targetDestination = userData.onboarded ? redirectTarget : '/onboarding';
+      router.push(targetDestination);
     } catch (err) {
       console.error('Login error:', err);
       triggerShake('Terjadi kendala saat menghubungkan ke database server.');
@@ -160,6 +182,19 @@ export const LoginView: React.FC<LoginViewProps> = () => {
               Kelola CV, lamaran kerja, dan pantau progres kariermu.
             </p>
           </div>
+
+          {/* Registration Success Banner */}
+          {isRegistered && (
+            <div className="mb-5 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 text-xs font-medium flex items-start gap-2.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <p className="font-bold">Pendaftaran akun berhasil!</p>
+                <p className="text-[11px] text-emerald-600 dark:text-emerald-400">
+                  Silakan masukkan kata sandi kamu untuk mulai orientasi karier.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Error Alert with Transitions.dev Shake */}
           <div className={`t-input-wrap ${hasError ? 'is-error' : ''}`}>
@@ -300,7 +335,7 @@ export const LoginView: React.FC<LoginViewProps> = () => {
 
         {/* Footer info / copyright */}
         <div className="w-full text-center sm:text-left text-[11px] text-slate-400 dark:text-slate-600">
-          © {new Date().getFullYear()} Employr · Career Operating System
+          © {new Date().getFullYear()} Employr
         </div>
       </div>
 

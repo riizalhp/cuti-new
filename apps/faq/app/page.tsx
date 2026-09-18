@@ -7,7 +7,7 @@ import {
   Search,
   Sparkles,
 } from "lucide-react";
-import { FAQ_CATEGORIES, loadArticles } from "@cuti/faq";
+import { FAQ_CATEGORIES, loadArticles } from "@employr/faq";
 import { SearchBox } from "@/components/SearchBox";
 import { ArticleCard } from "@/components/ArticleCard";
 import { APP_URL } from "@/lib/site";
@@ -36,8 +36,8 @@ export default function HomePage() {
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-200 leading-relaxed max-w-xl">
-              Panduan lengkap penggunaan sistem — dari membuat CV ATS, tracker lamaran,
-              misi & cuan, hingga pembayaran. Cari, baca, dan langsung praktikkan.
+              Panduan lengkap penggunaan sistem: dari membuat CV ATS, tracker lamaran,
+              misi & cuan, hingga persiapan interview. Cari, baca, dan langsung praktikkan.
             </p>
 
             <div className="max-w-xl pt-1">
@@ -51,7 +51,7 @@ export default function HomePage() {
               {[
                 ["Cetak CV PDF", "/artikel/cara-cetak-cv-pdf"],
                 ["Tracker Lamaran", "/artikel/tracker-lamaran"],
-                ["Pembayaran", "/artikel/cara-pembayaran"],
+                ["Evaluasi CV", "/artikel/evaluasi-cv-screener"],
                 ["Misi & Cuan", "/artikel/misi-cuan"],
               ].map(([label, href]) => (
                 <Link
@@ -152,7 +152,7 @@ export default function HomePage() {
               </h2>
               <p className="text-xs text-blue-100 leading-relaxed">
                 Buka dashboard lalu klik karakter Herdi di pojok kanan bawah. Jawaban diambil
-                otomatis dari Pusat Bantuan ini — cepat, konsisten, dan selalu mengarah ke sumbernya.
+                otomatis dari Pusat Bantuan ini: cepat, konsisten, dan selalu mengarah ke sumbernya.
               </p>
             </div>
             <Link

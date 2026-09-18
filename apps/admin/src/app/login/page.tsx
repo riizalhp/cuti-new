@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
   useEffect(() => {
     const session = document.cookie
       .split(";")
-      .find((c) => c.trim().startsWith("cuti_admin_session="))
+      .find((c) => c.trim().startsWith("employr_admin_session=") || c.trim().startsWith("cuti_admin_session="))
     if (session) {
       try {
         const val = JSON.parse(decodeURIComponent(session.split("=")[1]))

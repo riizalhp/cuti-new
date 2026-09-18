@@ -2,6 +2,8 @@
 
 import React, { useRef, useEffect, useCallback } from 'react';
 
+import { cn } from '@/lib/utils';
+
 export interface AutoResizeTextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   minHeight?: number;
@@ -37,11 +39,14 @@ export const AutoResizeTextarea = React.forwardRef<
         el.style.height = 'auto';
         const targetHeight = Math.min(Math.max(el.scrollHeight, minHeight), maxHeight);
         el.style.height = `${targetHeight}px`;
+        el.style.overflowY = el.scrollHeight > maxHeight ? 'auto' : 'hidden';
       }
     }, [ref, minHeight, maxHeight]);
 
     useEffect(() => {
       adjustHeight();
+      const raf = requestAnimationFrame(adjustHeight);
+      return () => cancelAnimationFrame(raf);
     }, [value, adjustHeight]);
 
     return (
@@ -64,7 +69,10 @@ export const AutoResizeTextarea = React.forwardRef<
           adjustHeight();
           if (onInput) onInput(e);
         }}
-        className={`w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1] transition-all leading-relaxed shadow-2xs resize-none overflow-hidden ${className || ''}`}
+        className={cn(
+          'w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1] transition-all leading-relaxed shadow-2xs resize-none overflow-hidden',
+          className
+        )}
         style={{ ...style }}
         {...props}
       />

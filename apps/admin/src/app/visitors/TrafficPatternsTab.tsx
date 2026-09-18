@@ -1037,7 +1037,7 @@ export function TrafficPatternsTab({ onSelectVisitor }: TrafficPatternsTabProps)
               Seberapa Sering Trafik Berkunjung (Frekuensi & Loyalitas)
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Distribusi berapa kali setiap visitor mengunjungi platform AmbilCUTI.
+              Distribusi berapa kali setiap visitor mengunjungi platform Employr.
             </p>
           </div>
           <div className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs font-bold text-amber-900 dark:text-amber-200 shrink-0">

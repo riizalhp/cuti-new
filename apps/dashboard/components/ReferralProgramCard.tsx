@@ -28,7 +28,7 @@ export const ReferralProgramCard: React.FC = () => {
       if (profile) {
         // Generate referral code from user's name
         const firstName = (profile.fullName || profile.name || 'USER').split(' ')[0].toUpperCase();
-        setReferralCode(`${firstName}-CUTI2026`);
+        setReferralCode(`${firstName}-EMPLOYR2026`);
 
         // Load referral stats if available from profile
         if (profile.referralStats) {
@@ -38,7 +38,7 @@ export const ReferralProgramCard: React.FC = () => {
         }
       }
     }).catch(() => {
-      setReferralCode('USER-CUTI2026');
+      setReferralCode('USER-EMPLOYR2026');
     });
   }, []);
 

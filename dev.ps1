@@ -1,4 +1,4 @@
-# CUTI Development Startup Script
+# Employr Development Startup Script
 # Automatically starts all services with one command
 
 param(
@@ -9,7 +9,7 @@ param(
 $ErrorActionPreference = "Continue"
 
 Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host "  CUTI - Career Operating System" -ForegroundColor Cyan
+Write-Host "  EMPLOYR - Career Operating System" -ForegroundColor Cyan
 Write-Host "  Development Environment Startup" -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 
@@ -55,17 +55,17 @@ if ($LASTEXITCODE -ne 0) {
 
 # Step 2: Start PostgreSQL
 Write-Host "`nStep 2: Starting PostgreSQL container..." -ForegroundColor Cyan
-$postgresRunning = docker ps --filter "name=cuti-postgres" --format "{{.Names}}" 2>$null
-if ($postgresRunning -eq "cuti-postgres") {
-    Write-Host "PostgreSQL container already running" -ForegroundColor Green
+$postgresRunning = docker ps --filter "name=employr-postgres" --filter "name=cuti-postgres" --format "{{.Names}}" 2>$null
+if ($postgresRunning) {
+    Write-Host "PostgreSQL container ($postgresRunning) already running" -ForegroundColor Green
 } else {
-    $postgresExists = docker ps -a --filter "name=cuti-postgres" --format "{{.Names}}" 2>$null
-    if ($postgresExists -eq "cuti-postgres") {
-        Write-Host "Starting existing container..." -ForegroundColor Yellow
-        docker start cuti-postgres | Out-Null
+    $postgresExists = docker ps -a --filter "name=employr-postgres" --filter "name=cuti-postgres" --format "{{.Names}}" 2>$null
+    if ($postgresExists) {
+        Write-Host "Starting existing container ($postgresExists)..." -ForegroundColor Yellow
+        docker start $postgresExists | Out-Null
     } else {
         Write-Host "Creating new PostgreSQL container..." -ForegroundColor Yellow
-        docker run --name cuti-postgres `
+        docker run --name employr-postgres `
             -e POSTGRES_PASSWORD=password `
             -e POSTGRES_DB=cuti_dev `
             -p 5432:5432 `
@@ -179,7 +179,7 @@ Write-Host "Starting API Backend..." -ForegroundColor Yellow
 Start-Process powershell -ArgumentList @(
     "-NoExit",
     "-Command",
-    "Write-Host '[API Backend - Port 3001]' -ForegroundColor Cyan; Write-Host ''; cd D:\cuti; pnpm --filter @cuti/api dev"
+    "Write-Host '[API Backend - Port 3001]' -ForegroundColor Cyan; Write-Host ''; cd D:\cuti; pnpm --filter @employr/api dev"
 ) -WindowStyle Normal
 
 Start-Sleep -Seconds 5
@@ -189,7 +189,7 @@ Write-Host "Starting Landing Page..." -ForegroundColor Yellow
 Start-Process powershell -ArgumentList @(
     "-NoExit",
     "-Command",
-    "Write-Host '[Landing Page - Port 4321]' -ForegroundColor Green; Write-Host ''; cd D:\cuti; pnpm --filter @cuti/web dev"
+    "Write-Host '[Landing Page - Port 4321]' -ForegroundColor Green; Write-Host ''; cd D:\cuti; pnpm --filter @employr/web dev"
 ) -WindowStyle Normal
 
 Start-Sleep -Seconds 3
@@ -199,7 +199,7 @@ Write-Host "Starting Dashboard..." -ForegroundColor Yellow
 Start-Process powershell -ArgumentList @(
     "-NoExit",
     "-Command",
-    "Write-Host '[Dashboard - Port 3000]' -ForegroundColor Blue; Write-Host ''; cd D:\cuti; pnpm --filter @cuti/dashboard dev"
+    "Write-Host '[Dashboard - Port 3000]' -ForegroundColor Blue; Write-Host ''; cd D:\cuti; pnpm --filter @employr/dashboard dev"
 ) -WindowStyle Normal
 
 Start-Sleep -Seconds 3
@@ -209,7 +209,7 @@ Write-Host "Starting Learning Academy..." -ForegroundColor Yellow
 Start-Process powershell -ArgumentList @(
     "-NoExit",
     "-Command",
-    "Write-Host '[Learning Academy - Port 3004]' -ForegroundColor Cyan; Write-Host ''; cd D:\cuti; pnpm --filter @cuti/learning dev"
+    "Write-Host '[Learning Academy - Port 3004]' -ForegroundColor Cyan; Write-Host ''; cd D:\cuti; pnpm --filter @employr/learning dev"
 ) -WindowStyle Normal
 
 Start-Sleep -Seconds 3
@@ -219,7 +219,7 @@ Write-Host "Starting Admin Panel..." -ForegroundColor Yellow
 Start-Process powershell -ArgumentList @(
     "-NoExit",
     "-Command",
-    "Write-Host '[Admin Panel - Port 3002]' -ForegroundColor Magenta; Write-Host ''; cd D:\cuti; pnpm --filter @cuti/admin dev"
+    "Write-Host '[Admin Panel - Port 3002]' -ForegroundColor Magenta; Write-Host ''; cd D:\cuti; pnpm --filter @employr/admin dev"
 ) -WindowStyle Normal
 
 Start-Sleep -Seconds 3
@@ -229,7 +229,7 @@ Write-Host "Starting FAQ / Pusat Bantuan..." -ForegroundColor Yellow
 Start-Process powershell -ArgumentList @(
     "-NoExit",
     "-Command",
-    "Write-Host '[FAQ - Port 3005]' -ForegroundColor Green; Write-Host ''; cd D:\cuti; pnpm --filter @cuti/faq-site dev"
+    "Write-Host '[FAQ - Port 3005]' -ForegroundColor Green; Write-Host ''; cd D:\cuti; pnpm --filter @employr/faq-site dev"
 ) -WindowStyle Normal
 
 # Step 7: Monitor startup
@@ -245,7 +245,7 @@ $faqReady = Wait-ForPort -Port 3005 -Service "FAQ / Pusat Bantuan" -TimeoutSecon
 
 # Summary
 Write-Host "`n============================================================" -ForegroundColor Green
-Write-Host "  CUTI Development Environment Ready!" -ForegroundColor Green
+Write-Host "  EMPLOYR Development Environment Ready!" -ForegroundColor Green
 Write-Host "============================================================" -ForegroundColor Green
 
 Write-Host "`nService Status:" -ForegroundColor Cyan
@@ -261,7 +261,7 @@ Write-Host "`nTips:" -ForegroundColor Cyan
 Write-Host "   - Each service runs in a separate PowerShell window" -ForegroundColor Gray
 Write-Host "   - Close the windows to stop services" -ForegroundColor Gray
 Write-Host "   - Press Ctrl+C in a window to stop that service" -ForegroundColor Gray
-Write-Host "   - Run 'docker stop cuti-postgres' to stop PostgreSQL" -ForegroundColor Gray
+Write-Host "   - Run '.\stop.ps1' to stop all services and PostgreSQL" -ForegroundColor Gray
 Write-Host "   - Run '.\dev.ps1 -SkipMigrations -SkipSeeds' to skip setup steps" -ForegroundColor Gray
 
 # LAN Access Information

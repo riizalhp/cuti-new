@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, ApplicationStatus } from '@cuti/db';
+import { prisma, ApplicationStatus } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 import crypto from 'crypto';
 
@@ -25,43 +25,7 @@ function formatIndonesianDate(date: Date): string {
   return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
 }
 
-export function mapDbToUiStatus(status: ApplicationStatus, displayStatus?: string): 'Terkirim' | 'Screening' | 'Interview' | 'Offering' | 'Ditolak' {
-  if (displayStatus && ['Terkirim', 'Screening', 'Interview', 'Offering', 'Ditolak'].includes(displayStatus)) {
-    return displayStatus as any;
-  }
-  switch (status) {
-    case ApplicationStatus.APPLIED:
-      return 'Terkirim';
-    case ApplicationStatus.INTERVIEW:
-      return 'Interview';
-    case ApplicationStatus.OFFERING:
-      return 'Offering';
-    case ApplicationStatus.REJECTED:
-      return 'Ditolak';
-    case ApplicationStatus.ACCEPTED:
-      return 'Offering';
-    default:
-      return 'Terkirim';
-  }
-}
-
-export function mapUiToDbStatus(uiStatus: string): ApplicationStatus {
-  switch (uiStatus) {
-    case 'Screening':
-    case 'Terkirim':
-      return ApplicationStatus.APPLIED;
-    case 'Interview':
-      return ApplicationStatus.INTERVIEW;
-    case 'Offering':
-      return ApplicationStatus.OFFERING;
-    case 'Ditolak':
-      return ApplicationStatus.REJECTED;
-    case 'Diterima':
-      return ApplicationStatus.ACCEPTED;
-    default:
-      return ApplicationStatus.APPLIED;
-  }
-}
+import { mapDbToUiStatus, mapUiToDbStatus } from '@/lib/applications-helper';
 
 export async function GET(req: NextRequest) {
   try {
@@ -100,6 +64,18 @@ export async function GET(req: NextRequest) {
         matchScore: app.match_score ?? 0,
         atsScore: app.ats_score ?? 0,
         interviewChance: app.interview_chance || 'MEDIUM',
+        interviewDate: insight.interviewDate || undefined,
+        interviewTime: insight.interviewTime || undefined,
+        interviewTimezone: insight.interviewTimezone || undefined,
+        interviewChecklist: insight.interviewChecklist || undefined,
+        ignoreInterviewReminder: insight.ignoreInterviewReminder ?? false,
+        interviewNotes: insight.interviewNotes || undefined,
+        interviewResult: insight.interviewResult || undefined,
+        offeringChecklist: insight.offeringChecklist || undefined,
+        offerDeadline: insight.offerDeadline || insight.deadlineDate || undefined,
+        deadlineDate: insight.offerDeadline || insight.deadlineDate || undefined,
+        offeringStartDate: insight.offeringStartDate || undefined,
+        offeringNotes: insight.offeringNotes || undefined,
       };
     });
 
@@ -145,6 +121,11 @@ export async function POST(req: NextRequest) {
       portalUrl: body.portalUrl || body.job_url || '',
       displayStatus: uiStatus,
       notes: body.notes || '',
+      interviewDate: body.interviewDate || undefined,
+      interviewTime: body.interviewTime || undefined,
+      interviewTimezone: body.interviewTimezone || undefined,
+      interviewChecklist: body.interviewChecklist || undefined,
+      ignoreInterviewReminder: body.ignoreInterviewReminder ?? false,
     };
 
     const newApplication = await prisma.applications.create({
@@ -188,6 +169,11 @@ export async function POST(req: NextRequest) {
       portalUrl: insightPayload.portalUrl,
       matchScore: newApplication.match_score ?? 0,
       atsScore: newApplication.ats_score ?? 0,
+      interviewDate: insightPayload.interviewDate,
+      interviewTime: insightPayload.interviewTime,
+      interviewTimezone: insightPayload.interviewTimezone,
+      interviewChecklist: insightPayload.interviewChecklist,
+      ignoreInterviewReminder: insightPayload.ignoreInterviewReminder,
     };
 
     return NextResponse.json({ success: true, data: result });

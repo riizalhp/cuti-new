@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="id">
+<!-- Made with the Bang Motion skill v1.0.0 by Bang Tutorial (https://youtube.com/bangtutorial) - MIT -->
+<head>
+<meta charset="utf-8">
+<title>Employr — Dari CV hingga diterima kerja</title>
+<!--
+  EMPLOYR OPENER — Motion graphic 38 detik untuk waiting list campaign
+
+  =====  STYLE BRIEF  =====
+  Tema: Job hunting chaos → organized clarity (lost → found, forgotten → remembered)
+  Palet: Primary #2563EB (blue - sistem), Accent #8B5CF6 (purple - smart), Alert #EF4444 (red - lupa), Success #10B981 (emerald - goal), Ground #FFFFFF
+  Font display: Bricolage Grotesque 600-700 / Inter 400-500
+  Bahasa latar: Memory/amnesia metaphor - fading dots (lost applications) → organized system
+  Tanda tangan gerak: Highlight marker (purple) menggambar + glow effect
+  Gerak latar: Chaos dots fading → safety net catches → organized grid
+  Transisi: Data wipe (spreadsheet cells fill), push-through, snap-to-grid
+  Momen istimewa: Transformation - scattered fading apps "caught" by system (safety net)
+  ==========================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+}}
+</script>
+<style>
+:root{
+  --primary:#2563EB;
+  --accent:#8B5CF6;
+  --alert:#EF4444;
+  --success:#10B981;
+  --ink:#0F172A;
+  --base:#FFFFFF;
+  --grid:#F1F5F9;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;
+  font-family:"Bricolage Grotesque","Inter",system-ui,sans-serif;color:var(--ink)}
+#filters{position:fixed;width:0;height:0;opacity:0;pointer-events:none}
+
+#stage{position:fixed;left:50%;top:50%;width:1920px;height:1080px;
+  transform:translate(-50%,-50%) scale(1);overflow:hidden;background:var(--base)}
+#world{position:absolute;inset:0;will-change:transform}
+#gl{position:absolute;inset:0;width:1920px;height:1080px;display:block;opacity:0}
+.bgfx{position:absolute;inset:0;pointer-events:none;opacity:0}
+#dom{position:absolute;inset:0}
+
+.scene{position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;opacity:0;visibility:hidden}
+
+.hero{opacity:0}
+.hero-wrap{perspective:1400px}
+.hero.sm{font-size:74px}.hero.md{font-size:92px}.hero.lg{font-size:128px}.hero.xl{font-size:150px}
+.txt2{display:inline-block;opacity:0}
+.hl{position:relative;display:inline-block}
+.hl i{position:absolute;transform:scaleX(0);transform-origin:0 50%}
+.hl-t{position:relative;opacity:0}
+.hl.marker{padding:0 .1em}
+.hl.marker i{left:-.1em;right:-.1em;top:.5em;bottom:-.02em;background:var(--accent);opacity:.55;transform:scaleX(0) rotate(-1.5deg)}
+.hl.pill{padding:.02em .24em .04em;border-radius:.26em}
+.hl.pill i{inset:0;border-radius:inherit;background:var(--accent)}
+.hl.pill .hl-t{color:#fff}
+.hl.alert .hl-t{color:var(--alert)}
+
+.paper{position:absolute;inset:0;opacity:1;visibility:visible;
+  background:linear-gradient(180deg,#FFFFFF 0%,#F8FAFC 100%)}
+#grid-bg{position:absolute;inset:0;opacity:.3;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:60px 60px}
+
+.hero{font-size:110px;font-weight:600;letter-spacing:-.02em;color:var(--ink);
+  white-space:nowrap;text-shadow:none}
+.hero.ink{color:var(--ink)}
+.hero.em{font-style:italic;color:var(--accent);font-weight:500}
+#line-a,#line-b,#line-c,#line-d,#line-e{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.wd{display:inline-block;white-space:nowrap}
+.ch{display:inline-block;will-change:transform,opacity,filter;opacity:0}
+
+/* Particles system - dots yang represent applications */
+#particles{position:absolute;inset:0;pointer-events:none}
+.dot{position:absolute;width:12px;height:12px;border-radius:50%;
+  background:var(--primary);opacity:0}
+.dot.fade{background:var(--alert)}
+
+/* Feature tiles */
+.tiles{position:absolute;left:50%;top:62%;transform:translateX(-50%);
+  display:flex;gap:48px;opacity:0}
+.tile{display:flex;flex-direction:column;align-items:center;gap:16px;
+  padding:32px 28px;background:rgba(37,99,235,.04);border:2px solid rgba(37,99,235,.15);
+  border-radius:20px;width:220px;position:relative;overflow:hidden}
+.tile-icon{width:64px;height:64px;border-radius:16px;background:var(--primary);
+  display:flex;align-items:center;justify-content:center;font-size:32px}
+.tile-label{font-family:"Inter";font-size:19px;font-weight:500;color:var(--ink);text-align:center}
+.tile-glow{position:absolute;left:-100%;top:0;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(139,92,246,.3),transparent);
+  pointer-events:none}
+
+/* CTA Button */
+.cta-btn{position:absolute;left:50%;top:70%;transform:translateX(-50%);
+  padding:22px 48px;background:var(--success);color:#fff;
+  border-radius:16px;font-family:"Inter";font-size:24px;font-weight:600;
+  box-shadow:0 8px 32px rgba(16,185,129,.3);opacity:0}
+
+.leak{position:absolute;left:50%;top:50%;width:2400px;height:2400px;
+  margin:-1200px 0 0 -1200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(139,92,246,.8),rgba(139,92,246,.4) 34%,transparent 74%);
+  filter:blur(64px);mix-blend-mode:screen;opacity:0;pointer-events:none;z-index:40}
+
+#ui{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+  display:flex;align-items:center;gap:14px;padding:11px 18px;border-radius:16px;
+  background:rgba(14,16,22,.9);border:1px solid rgba(255,255,255,.1);
+  font-size:13px;color:#A0A6B4;z-index:50;display:none}
+#ui.on{display:flex}
+#ui button{background:#262A34;color:#fff;border:none;padding:8px 16px;
+  border-radius:9px;font:inherit;cursor:pointer}
+#scrub{width:340px;accent-color:var(--accent)}
+#clock{font-variant-numeric:tabular-nums;min-width:5.2ch;text-align:right}
+</style>
+</head>
+<body>
+
+<svg id="filters"><defs></defs></svg>
+
+<div id="stage">
+  <div id="world">
+    <canvas id="gl"></canvas>
+    <div class="bgfx"></div>
+    <div id="dom">
+      <div class="paper" id="paper">
+        <div id="grid-bg"></div>
+        <div id="particles"></div>
+      </div>
+
+      <!-- Scene 1: CV sama problem -->
+      <section class="scene" id="sc-a"><div class="hero-wrap">
+        <h1 class="hero md ink" id="line-a">
+          <span class="txt">CV yang</span>&nbsp;<span class="hl marker" id="hl-a"><i></i><span class="hl-t">sama</span></span>
+        </h1>
+        <h1 class="hero lg ink" id="line-a2" style="margin-top:20px">
+          <span class="txt">dikirim ke puluhan perusahaan</span><span class="txt2">?</span>
+        </h1>
+      </div></section>
+
+      <!-- Scene 2: Lupa tracking problem -->
+      <section class="scene" id="sc-b"><div class="hero-wrap">
+        <h1 class="hero md ink" id="line-b">
+          <span class="txt">Sudah apply</span><span class="txt2">?</span>
+        </h1>
+        <h1 class="hero lg ink" id="line-b2" style="margin-top:20px">
+          <span class="hl alert"><span class="hl-t">Lupa</span></span>&nbsp;<span class="txt">ke mana.</span>&nbsp;<span class="hl alert"><span class="hl-t">Lupa</span></span>&nbsp;<span class="txt">tanggal.</span>
+        </h1>
+      </div></section>
+
+      <!-- Scene 3: Solution -->
+      <section class="scene" id="sc-c"><div class="hero-wrap">
+        <h1 class="hero sm ink" id="line-c" style="margin-bottom:16px">
+          <span class="txt">Employr</span>
+        </h1>
+        <h1 class="hero md ink" id="line-c2">
+          <span class="txt">Melamar lebih</span>
+        </h1>
+        <h1 class="hero lg ink" id="line-c3" style="margin-top:12px">
+          <span class="hl marker" id="hl-c"><i></i><span class="hl-t">cerdas, terorganisir, relevan</span></span><span class="txt2">.</span>
+        </h1>
+      </div></section>
+
+      <!-- Scene 4: Features -->
+      <section class="scene" id="sc-d">
+        <h1 class="hero sm ink" id="line-d" style="position:absolute;top:18%">
+          <span class="txt">Satu dashboard untuk semua</span>
+        </h1>
+        <div class="tiles" id="tiles">
+          <div class="tile">
+            <div class="tile-icon">📝</div>
+            <div class="tile-label">CV Optimizer</div>
+            <div class="tile-glow"></div>
+          </div>
+          <div class="tile">
+            <div class="tile-icon">📊</div>
+            <div class="tile-label">Job Tracker</div>
+            <div class="tile-glow"></div>
+          </div>
+          <div class="tile">
+            <div class="tile-icon">🔔</div>
+            <div class="tile-label">Reminder</div>
+            <div class="tile-glow"></div>
+          </div>
+          <div class="tile">
+            <div class="tile-icon">💼</div>
+            <div class="tile-label">Lowongan Relevan</div>
+            <div class="tile-glow"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 5: CTA -->
+      <section class="scene" id="sc-e"><div class="hero-wrap">
+        <h1 class="hero lg em" id="line-e">
+          <span class="txt">Dari CV hingga diterima kerja</span><span class="txt2">.</span>
+        </h1>
+        <div class="cta-btn" id="cta">Join Waiting List</div>
+      </div></section>
+
+    </div>
+  </div>
+  <div class="leak" id="leak"></div>
+</div>
+
+<div id="ui">
+  <button id="btn-play">Pause</button><button id="btn-restart">Restart</button>
+  <input id="scrub" type="range" min="0" max="1000" value="0">
+  <span id="clock">0.00s</span>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const defs=$('#filters defs'); let fc=0;
+
+function makeBlur(){
+  const id='mb'+(fc++), NS='http://www.w3.org/2000/svg';
+  const f=document.createElementNS(NS,'filter'); f.id=id;
+  f.setAttribute('x','-70%');f.setAttribute('y','-70%');
+  f.setAttribute('width','240%');f.setAttribute('height','240%');
+  const g=document.createElementNS(NS,'feGaussianBlur');
+  g.setAttribute('stdDeviation','0 0'); f.appendChild(g); defs.appendChild(f);
+  return {url:`url(#${id})`,node:g};
+}
+
+function blurTween(tl,targets,at,from,to,dur,{ease='power3.out',ax=1,ay=.08}={}){
+  const b=makeBlur(),o={v:from};
+  tl.set(targets,{filter:b.url},at);
+  tl.to(o,{v:to,duration:dur,ease,onUpdate(){
+    b.node.setAttribute('stdDeviation',`${(o.v*ax).toFixed(2)} ${(o.v*ay).toFixed(2)}`);}},at);
+  tl.set(targets,{filter:'none'},at+dur);
+}
+
+const VERT={ax:.1,ay:1};
+
+function splitChars(el){
+  const words=(el.textContent||'').split(' '); el.textContent=''; const out=[];
+  words.forEach((w,i)=>{
+    const wr=document.createElement('span'); wr.className='wd';
+    for(const c of w){const s=document.createElement('span');s.className='ch';
+      s.textContent=c;wr.appendChild(s);out.push(s);}
+    el.appendChild(wr);
+    if(i<words.length-1){const sp=document.createElement('span');sp.className='ch';
+      sp.innerHTML='&nbsp;';el.appendChild(sp);out.push(sp);}
+  });
+  return out;
+}
+
+// Particles system
+const particlesCtr=$('#particles');
+const dots=[];
+for(let i=0;i<40;i++){
+  const d=document.createElement('div');
+  d.className='dot';
+  d.style.left=Math.random()*100+'%';
+  d.style.top=Math.random()*100+'%';
+  particlesCtr.appendChild(d);
+  dots.push(d);
+}
+
+const DURATION=38.0;
+const tl=gsap.timeline({paused:true});
+const rig=$('#world'), leak=$('#leak');
+
+const inUp=(ch,el,at,{dur=.8,st=.024}={})=>{
+  tl.fromTo(ch,{opacity:0,yPercent:60,scaleY:1.45},{opacity:1,yPercent:0,scaleY:1,duration:dur,ease:'power4.out',stagger:st,immediateRender:false},at);
+  blurTween(tl,el,at,30,0,dur,VERT);
+};
+const inLeft=(ch,el,at,{dur=.75,st=.02}={})=>{
+  tl.fromTo(ch,{opacity:0,xPercent:-45},{opacity:1,xPercent:0,duration:dur,ease:'power4.out',stagger:st,immediateRender:false},at);
+  blurTween(tl,el,at,50,0,dur,{ease:'power4.out'});
+};
+const outUp=(ch,el,at,{dur=.4,st=.01}={})=>{
+  tl.to(ch,{opacity:0,yPercent:-70,duration:dur,ease:'power2.in',stagger:st},at);
+  blurTween(tl,el,at,0,45,dur+.1,{ease:'power2.in',...VERT});
+};
+const outLeft=(ch,el,at,{dur=.4,st=.01}={})=>{
+  tl.to(ch,{opacity:0,xPercent:-60,duration:dur,ease:'power2.in',stagger:st},at);
+  blurTween(tl,el,at,0,55,dur+.1,{ease:'power2.in'});
+};
+const mark=(hl,at)=>{
+  const i=$('i',hl);
+  if(i)tl.fromTo(i,{scaleX:0},{scaleX:1,duration:.5,ease:'power3.out',immediateRender:false},at);
+  tl.fromTo($('.hl-t',hl),{opacity:0,yPercent:60},{opacity:1,yPercent:0,duration:.7,ease:'power4.out',immediateRender:false},at);
+};
+const popDot=(el,at)=>tl.fromTo(el,{opacity:0,yPercent:60},{opacity:1,yPercent:0,duration:.5,ease:'power4.out',immediateRender:false},at);
+
+let leakSide=1;
+const sweep=(at,dur=1.0)=>{
+  const side=(leakSide*=-1);
+  tl.fromTo(leak,{x:side*1500,y:-240,scale:.85},
+    {x:side*330,y:130,scale:1.12,duration:dur,ease:'sine.out',immediateRender:false},at);
+  tl.fromTo(leak,{opacity:0},{opacity:.85,duration:dur*.4,ease:'sine.in',immediateRender:false},at);
+  tl.to(leak,{opacity:0,duration:dur*.6,ease:'sine.out'},at+dur*.4);
+};
+
+const camThrough=(atCut,{push=2,from=1.5,inDur=.5,outDur=.95,oOut='50% 50%',oIn='50% 50%'}={})=>{
+  tl.set(rig,{transformOrigin:oOut},atCut-inDur);
+  tl.to(rig,{scale:push,duration:inDur,ease:'power2.in'},atCut-inDur);
+  tl.set(rig,{transformOrigin:oIn,scale:from},atCut);
+  tl.to(rig,{scale:1,duration:outDur,ease:'power3.out'},atCut);
+};
+
+// SCENE 1: CV sama problem (0-6s)
+const scA=$('#sc-a'), la=$('#line-a'), la2=$('#line-a2');
+const txtA=$$('.txt',la), txtA2=$$('.txt',la2);
+const aCh=txtA.length>0?txtA.flatMap(el=>splitChars(el)):[];
+const a2Ch=txtA2.length>0?txtA2.flatMap(el=>splitChars(el)):[];
+
+tl.set(scA,{autoAlpha:1},0);
+tl.fromTo(rig,{scale:1.6},{scale:1,duration:1.2,ease:'power3.out',immediateRender:false},0);
+tl.set(la,{autoAlpha:1},0.5);
+tl.set(la2,{autoAlpha:1},0.5);
+
+// Grid fade in
+tl.fromTo('#grid-bg',{opacity:0},{opacity:.3,duration:1.2},0);
+
+// CV sama text
+inUp(aCh,la,0.6);
+mark($('#hl-a'),1.2);
+
+// Second line
+inUp(a2Ch,la2,1.8);
+popDot($('.txt2',la2),2.8);
+
+// Multiple CV papers stacking visual (particles as papers)
+tl.to(dots.slice(0,8),{opacity:.6,scale:1.2,stagger:.08,duration:.4,ease:'power2.out'},2.0);
+tl.to(dots.slice(0,8),{x:'+=20',y:'+=20',stagger:.08,duration:.5},2.2);
+
+// Exit scene 1
+outLeft(aCh,la,5.0);
+outLeft(a2Ch,la2,5.0);
+tl.to(['#hl-a','.txt2'],{opacity:0,x:-60,duration:.4,ease:'power2.in'},5.0);
+tl.to(dots.slice(0,8),{opacity:0,duration:.3},5.0);
+tl.set(scA,{autoAlpha:0},5.6);
+
+// SCENE 2: Lupa tracking (6-13s)
+const scB=$('#sc-b'), lb=$('#line-b'), lb2=$('#line-b2');
+const txtB=$$('.txt',lb), txtB2=$$('.txt',lb2);
+const bCh=txtB.length>0?txtB.flatMap(el=>splitChars(el)):[];
+const b2Ch=txtB2.length>0?txtB2.flatMap(el=>splitChars(el)):[];
+
+sweep(5.5,1.0);
+camThrough(6.0,{push:1.9,from:1.45});
+
+tl.set(scB,{autoAlpha:1},5.98);
+tl.set(lb,{autoAlpha:1},6.0);
+tl.set(lb2,{autoAlpha:1},6.0);
+
+inUp(bCh,lb,6.1);
+popDot($('.txt2',lb),6.8);
+inUp(b2Ch,lb2,7.2);
+
+// Fading dots animation - applications disappearing
+tl.to(dots.slice(10,30),{opacity:.8,className:'+=fade',stagger:.05,duration:.3},7.5);
+tl.to(dots.slice(10,30),{opacity:0,scale:.3,y:'-=80',stagger:.06,duration:.8,ease:'power2.in'},8.0);
+
+// "Lupa" red highlight pulse
+const lupaEls=$$('.hl.alert .hl-t',lb2);
+tl.to(lupaEls,{scale:1.15,duration:.3,yoyo:true,repeat:1,ease:'sine.inOut'},8.5);
+
+outUp(bCh,lb,11.5);
+outUp(b2Ch,lb2,11.5);
+tl.set(scB,{autoAlpha:0},12.2);
+
+// SCENE 3: Solution - Transformation moment (13-20s)
+const scC=$('#sc-c'), lc=$('#line-c'), lc2=$('#line-c2'), lc3=$('#line-c3');
+const txtC=$$('.txt',lc), txtC2=$$('.txt',lc2), txtC3=$$('.txt',lc3);
+const cCh=txtC.length>0?txtC.flatMap(el=>splitChars(el)):[];
+const c2Ch=txtC2.length>0?txtC2.flatMap(el=>splitChars(el)):[];
+const c3Ch=txtC3.length>0?txtC3.flatMap(el=>splitChars(el)):[];
+
+sweep(12.0,1.2);
+camThrough(13.0,{push:2.2,from:1.5});
+
+tl.set(scC,{autoAlpha:1},12.98);
+tl.set(lc,{autoAlpha:1},13.0);
+tl.set(lc2,{autoAlpha:1},13.0);
+tl.set(lc3,{autoAlpha:1},13.0);
+
+// TRANSFORMATION: Scattered dots caught and organized
+tl.to(dots.slice(0,25),{opacity:.5,x:'random(-200,200)',y:'random(-150,150)',duration:.1},13.2);
+// Safety net catches them
+tl.to(dots.slice(0,25),{opacity:.8,scale:1,duration:.4,ease:'back.out(2)'},13.8);
+// Snap to grid
+const gridPositions=[];
+for(let i=0;i<25;i++){
+  const col=i%5;
+  const row=Math.floor(i/5);
+  gridPositions.push({x:(col-2)*240,y:(row-2)*180});
+}
+tl.to(dots.slice(0,25),{
+  opacity:1,
+  x:(i)=>gridPositions[i].x,
+  y:(i)=>gridPositions[i].y,
+  duration:1.2,
+  ease:'elastic.out(1,0.8)',
+  stagger:.04
+},14.4);
+
+inUp(cCh,lc,13.2);
+inLeft(c2Ch,lc2,14.0);
+inUp(c3Ch,lc3,14.8);
+mark($('#hl-c'),15.5);
+popDot($('.txt2',lc3),16.0);
+
+// Grid lines organize
+tl.to('#grid-bg',{opacity:.6,duration:1.0},14.5);
+
+outUp(cCh,lc,18.5);
+outUp(c2Ch,lc2,18.5);
+outUp(c3Ch,lc3,18.5);
+tl.to(dots.slice(0,25),{opacity:0,duration:.4},18.8);
+tl.set(scC,{autoAlpha:0},19.2);
+
+// SCENE 4: Features (20-28s)
+const scD=$('#sc-d'), ld=$('#line-d');
+const txtD=$$('.txt',ld);
+const dCh=txtD.length>0?txtD.flatMap(el=>splitChars(el)):[];
+const tiles=$$('.tile');
+const glows=$$('.tile-glow');
+
+sweep(19.0,1.0);
+camThrough(20.0,{push:1.8,from:1.4});
+
+tl.set(scD,{autoAlpha:1},19.98);
+tl.set(ld,{autoAlpha:1},20.0);
+
+inUp(dCh,ld,20.2);
+
+// Tiles appear with stagger
+tl.fromTo(tiles,{opacity:0,y:60,scale:.9},{
+  opacity:1,
+  y:0,
+  scale:1,
+  duration:.7,
+  stagger:.12,
+  ease:'back.out(1.7)',
+  immediateRender:false
+},21.0);
+
+// Glow trail animation - sequential
+glows.forEach((glow,i)=>{
+  tl.fromTo(glow,{left:'-100%'},{left:'100%',duration:.8,ease:'power2.inOut'},22.0+i*.4);
+});
+
+// Grid dots behind tiles
+tl.to(dots.slice(0,16),{
+  opacity:.4,
+  x:(i)=>(i%4-1.5)*280,
+  y:(i)=>(Math.floor(i/4)-1)*200+200,
+  duration:.8,
+  ease:'power2.out'
+},21.2);
+
+outUp(dCh,ld,26.5);
+tl.to(tiles,{opacity:0,y:-40,duration:.5,stagger:.08},27.0);
+tl.to(dots.slice(0,16),{opacity:0,duration:.4},27.0);
+tl.set(scD,{autoAlpha:0},27.8);
+
+// SCENE 5: CTA + Tagline (28-38s)
+const scE=$('#sc-e'), le=$('#line-e');
+const txtE=$$('.txt',le);
+const eCh=txtE.length>0?txtE.flatMap(el=>splitChars(el)):[];
+const cta=$('#cta');
+
+sweep(27.5,1.2);
+camThrough(28.5,{push:2.0,from:1.6});
+
+tl.set(scE,{autoAlpha:1},28.48);
+tl.set(le,{autoAlpha:1},28.5);
+
+// Complete organized grid
+tl.to(dots,{
+  opacity:.6,
+  x:(i)=>((i%8)-3.5)*220,
+  y:(i)=>(Math.floor(i/8)-2.5)*160,
+  duration:1.2,
+  ease:'power3.out'
+},28.8);
+
+tl.to('#grid-bg',{opacity:.8,duration:1.0},29.0);
+
+inUp(eCh,le,29.5);
+popDot($('.txt2',le),31.0);
+
+// CTA button
+tl.fromTo(cta,{opacity:0,y:60,scale:.9},{
+  opacity:1,
+  y:0,
+  scale:1,
+  duration:.8,
+  ease:'back.out(2)',
+  immediateRender:false
+},31.8);
+
+// Success color pulse
+tl.to(cta,{scale:1.05,duration:.4,yoyo:true,repeat:2,ease:'sine.inOut'},33.0);
+
+// Hold
+tl.to({},{duration:3.5},34.5);
+
+// Fade out for loop
+tl.to([eCh,cta],{opacity:0,duration:.6},37.4);
+tl.to(dots,{opacity:0,duration:.5},37.5);
+
+tl.to({},{duration:.01},DURATION);
+
+// UI & Controls
+const stage=$('#stage');
+const fit=()=>{
+  const s=Math.min(innerWidth/1920,innerHeight/1080);
+  stage.style.transform=`translate(-50%,-50%) scale(${s})`;
+};
+addEventListener('resize',fit); fit();
+
+const clock=$('#clock'),scrub=$('#scrub'),btn=$('#btn-play');
+let scrubbing=false;
+
+(function frame(){
+  const t=tl.time();
+  clock.textContent=t.toFixed(2)+'s';
+  if(!scrubbing)scrub.value=String(t/DURATION*1000);
+  requestAnimationFrame(frame);
+})();
+
+const toggle=()=>{
+  if(tl.paused()||tl.progress()>=1){
+    if(tl.progress()>=1)tl.progress(0);
+    tl.play();
+    btn.textContent='Pause';
+  }else{
+    tl.pause();
+    btn.textContent='Play';
+  }
+};
+
+btn.onclick=toggle;
+$('#btn-restart').onclick=()=>{tl.pause(0);tl.play();btn.textContent='Pause';};
+scrub.addEventListener('pointerdown',()=>{scrubbing=true;tl.pause();btn.textContent='Play';});
+addEventListener('pointerup',()=>scrubbing=false);
+scrub.addEventListener('input',()=>{tl.pause();tl.time(scrub.value/1000*DURATION);});
+addEventListener('keydown',e=>{
+  if(e.code==='Space'){e.preventDefault();toggle();}
+  if(/^[rR]$/.test(e.key)){tl.pause(0);tl.play();}
+  if(/^[hH]$/.test(e.key))$('#ui').classList.toggle('on');
+});
+
+const Q=new URLSearchParams(location.search);
+if(Q.has('debug'))$('#ui').classList.add('on');
+tl.eventCallback('onComplete',()=>{tl.play(0);});
+
+window.OPENER={tl,DURATION,ready:false};
+document.fonts.ready.then(()=>{
+  window.OPENER.ready=true;
+  if(!Q.has('clean'))tl.play(0);
+});
+</script>
+</body>
+</html>

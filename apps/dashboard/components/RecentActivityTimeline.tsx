@@ -1,15 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
-  Clock,
-  Calendar,
-  Eye,
-  Send,
-  Award,
-  ChevronRight,
-  Edit,
-} from 'lucide-react';
+  ClockIcon,
+  CalendarIcon,
+  EyeIcon,
+  SendIcon,
+  AwardIcon,
+  EditIcon,
+} from '@/components/icons/CustomIcons';
 import { activitiesApi } from '@/lib/api';
 
 interface Activity {
@@ -23,6 +23,7 @@ interface Activity {
 }
 
 export const RecentActivityTimeline: React.FC = () => {
+  const router = useRouter();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -38,17 +39,17 @@ export const RecentActivityTimeline: React.FC = () => {
   const getIcon = (type: string) => {
     switch (type) {
       case 'interview':
-        return Calendar;
+        return CalendarIcon;
       case 'viewed':
-        return Eye;
+        return EyeIcon;
       case 'applied':
-        return Send;
+        return SendIcon;
       case 'offering':
-        return Award;
+        return AwardIcon;
       case 'cv_updated':
-        return Edit;
+        return EditIcon;
       default:
-        return Send;
+        return SendIcon;
     }
   };
 
@@ -75,7 +76,7 @@ export const RecentActivityTimeline: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-              <Clock className="w-5 h-5" />
+              <ClockIcon size={20} />
             </div>
             <div>
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">
@@ -103,7 +104,7 @@ export const RecentActivityTimeline: React.FC = () => {
             </div>
           ) : activities.length === 0 ? (
             <div className="py-8 text-center">
-              <Clock className="w-10 h-10 mx-auto text-slate-300 dark:text-slate-700 mb-2" />
+              <ClockIcon size={40} className="mx-auto text-slate-300 dark:text-slate-700 mb-2" />
               <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Belum ada aktivitas</p>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                 Aktivitas lamaran dan interaksi HR akan muncul di sini
@@ -123,7 +124,7 @@ export const RecentActivityTimeline: React.FC = () => {
                     <div
                       className={`relative z-10 w-8 h-8 rounded-full border flex-shrink-0 flex items-center justify-center shadow-xs ${color}`}
                     >
-                      <Icon className="w-4 h-4" />
+                      <Icon size={16} />
                     </div>
 
                     {/* Content Box */}
@@ -156,10 +157,10 @@ export const RecentActivityTimeline: React.FC = () => {
       {/* Footer Link */}
       <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800">
         <button
-          onClick={() => window.location.href = '/tracker'}
+          onClick={() => router.push('/tracker')}
           className="w-full text-center py-2 px-3 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer border-0"
         >
-          Lihat Selengkapnya di Tracker →
+          Lihat Selengkapnya di Tracker
         </button>
       </div>
     </div>

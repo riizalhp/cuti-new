@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, ApplicationStatus, ApplicationSource } from '@cuti/db';
+import { prisma, ApplicationStatus, ApplicationSource } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 import { dispatchEmail, SmtpConfig, EmailPayload } from '@/lib/mailer/email-service';
+import { generateAtsPdfBuffer } from '@/lib/mailer/ats-pdf-generator';
 import crypto from 'crypto';
 
 export async function POST(req: NextRequest) {
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest) {
       position,
       body_content,
       custom_subject,
-      design = 'klasik',
+      design = 'standar',
       smtp_id,
       attachment_cv_id,
       sender_phone,
@@ -74,7 +75,55 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Susun Email Payload
+    // 3. Proses Lampiran Berkas CV (Otomatis dari Akun atau Manual)
+    const attachments: Array<{
+      filename: string;
+      content?: Buffer | string;
+      path?: string;
+      contentType?: string;
+    }> = [];
+
+    if (attachment_cv_id) {
+      const cvRecord = await prisma.cv_projects.findFirst({
+        where: {
+          id: attachment_cv_id,
+          user_id: user.id,
+        },
+      });
+
+      if (cvRecord) {
+        try {
+          const pdfBuffer = generateAtsPdfBuffer({
+            title: cvRecord.title,
+            target_position: cvRecord.target_position,
+            data: cvRecord.data,
+          });
+
+          const rawData = (typeof cvRecord.data === 'object' && cvRecord.data !== null ? cvRecord.data : {}) as any;
+          const candidateName = (rawData.fullName || user.name || 'Pelamar').replace(/[^a-zA-Z0-9]/g, '_');
+          const jobPosition = (position || cvRecord.target_position || 'Posisi').replace(/[^a-zA-Z0-9]/g, '_');
+          const pdfFilename = `CV_${candidateName}_${jobPosition}.pdf`;
+
+          attachments.push({
+            filename: pdfFilename,
+            content: pdfBuffer,
+            contentType: 'application/pdf',
+          });
+        } catch (pdfErr) {
+          console.warn('[PDF Attachment Generation Warning]:', pdfErr);
+        }
+      }
+    }
+
+    if (body.manual_attachment && body.manual_attachment.content && body.manual_attachment.filename) {
+      attachments.push({
+        filename: body.manual_attachment.filename,
+        content: Buffer.from(body.manual_attachment.content, 'base64'),
+        contentType: body.manual_attachment.contentType || 'application/pdf',
+      });
+    }
+
+    // 4. Susun Email Payload
     const emailPayload: EmailPayload = {
       to,
       toName: to_name,
@@ -88,7 +137,8 @@ export async function POST(req: NextRequest) {
       senderPortfolio: sender_portfolio,
       bodyContent: body_content,
       customSubject: custom_subject,
-      design: design as any,
+      design: (design || 'standar') as any,
+      attachments: attachments.length > 0 ? attachments : undefined,
     };
 
     // 4. Kirim Email via SMTP
@@ -170,7 +220,7 @@ export async function POST(req: NextRequest) {
       data: { sent_today: { increment: 1 } },
     });
 
-    // 6. Auto-insert ke Kanban Tracker Cuti
+    // 6. Auto-insert ke Kanban Tracker Employr
     const appId = crypto.randomUUID();
     const newApp = await prisma.applications.create({
       data: {
@@ -185,13 +235,15 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    const attachedNotice = attachments.length > 0 ? ` (dengan lampiran berkas ${attachments[0].filename})` : '';
     return NextResponse.json({
       success: true,
-      message: `Email lamaran berhasil dikirim ke ${to} dan otomatis tercatat di Kanban Tracker!`,
+      message: `Email lamaran${attachedNotice} berhasil dikirim ke ${to} dan otomatis tercatat di Kanban Tracker!`,
       data: {
         applicationId: newApp.id,
         subject: dispatchResult.renderedSubject,
         usedSmtp: selectedSmtp.username,
+        attachmentName: attachments.length > 0 ? attachments[0].filename : undefined,
       },
     });
   } catch (error: any) {

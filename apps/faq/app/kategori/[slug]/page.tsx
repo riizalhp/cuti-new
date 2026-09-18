@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, BookOpen } from "lucide-react";
-import { FAQ_CATEGORIES, getCategory, getArticlesByCategory, loadArticles } from "@cuti/faq";
+import { FAQ_CATEGORIES, getCategory, getArticlesByCategory, loadArticles } from "@employr/faq";
 import { ArticleCard } from "@/components/ArticleCard";
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -16,10 +17,32 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const category = getCategory(slug);
+  const canonicalUrl = `${SITE_URL}/kategori/${slug}`;
+
   return {
-    title: category.label,
+    title: `${category.label} | Panduan`,
     description: category.description,
     alternates: { canonical: `/kategori/${slug}` },
+    openGraph: {
+      title: `${category.label} | Pusat Bantuan Employr`,
+      description: category.description,
+      url: canonicalUrl,
+      type: "website",
+      images: [
+        {
+          url: "/logo.webp",
+          width: 800,
+          height: 600,
+          alt: category.label,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${category.label} | Pusat Bantuan Employr`,
+      description: category.description,
+      images: ["/logo.webp"],
+    },
   };
 }
 
@@ -34,8 +57,31 @@ export default async function CategoryPage({ params }: PageProps) {
   const articles = getArticlesByCategory(slug);
   const allArticles = loadArticles();
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Pusat Bantuan",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: category.label,
+        item: `${SITE_URL}/kategori/${category.slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* Breadcrumb & header */}
       <div className="space-y-3">
         <Link

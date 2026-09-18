@@ -1,0 +1,105 @@
+---
+// CompanyLogo.astro - Smart 3-Tier Company Logo & Fallback Initial Avatar
+interface Props {
+  name: string;
+  logoUrl?: string | null;
+  website?: string | null;
+  size?: 'sm' | 'md' | 'lg';
+  class?: string;
+}
+
+const { name = 'Perusahaan', logoUrl, website, size = 'md', class: className = '' } = Astro.props;
+
+// 1. Ekstrak inisial 2-3 huruf yang representatif
+function getInitials(companyName: string): string {
+  if (!companyName) return 'CO';
+  // Hapus kata umum Indonesia (PT, CV, Tbk, Persero, dsb)
+  const cleaned = companyName
+    .replace(/\b(PT\.?|CV\.?|Tbk\.?|Persero|Indonesia|Group|Holding|Corp|Corporation|Ltd|LLC)\b/gi, '')
+    .trim();
+
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  if (words.length >= 3) {
+    return (words[0][0] + words[1][0] + words[2][0]).toUpperCase();
+  }
+  if (words.length === 2) {
+    return (words[0][0] + words[1][0]).toUpperCase();
+  }
+  if (words.length === 1 && words[0].length >= 3) {
+    return words[0].slice(0, 3).toUpperCase();
+  }
+  if (words.length === 1) {
+    return words[0].toUpperCase();
+  }
+  return companyName.slice(0, 2).toUpperCase();
+}
+
+// 2. Palet warna harmonis berdasar hash string nama perusahaan
+const COLOR_THEMES = [
+  { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-[#1738D1]' },
+  { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700' },
+  { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700' },
+  { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-800' },
+  { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700' },
+  { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700' },
+  { bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-800' },
+  { bg: 'bg-slate-100', border: 'border-slate-300', text: 'text-slate-800' },
+];
+
+function getTheme(str: string) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % COLOR_THEMES.length;
+  return COLOR_THEMES[index];
+}
+
+const theme = getTheme(name);
+const initials = getInitials(name);
+
+// Ukuran container
+const sizeClasses = {
+  sm: 'w-9 h-9 text-xs rounded-lg',
+  md: 'w-12 h-12 text-sm rounded-xl',
+  lg: 'w-14 h-14 text-base rounded-2xl',
+}[size];
+
+// Periksa apakah logo valid (bukan fallback SVG lama)
+const hasValidLogo = Boolean(
+  logoUrl &&
+  logoUrl !== '/employer-job.svg' &&
+  !logoUrl.includes('employer-job.svg')
+);
+
+// Fallback Favicon jika ada domain
+const domainFavicon = website
+  ? `https://www.google.com/s2/favicons?domain=${website.replace(/^https?:\/\//, '').split('/')[0]}&sz=128`
+  : null;
+
+const finalImageUrl = hasValidLogo ? logoUrl : domainFavicon;
+---
+
+<div class={`relative shrink-0 flex items-center justify-center overflow-hidden border shadow-2xs font-extrabold select-none transition-transform group-hover:scale-105 ${sizeClasses} ${className}`}>
+  {finalImageUrl ? (
+    <>
+      <img
+        src={finalImageUrl}
+        alt={name}
+        class="w-full h-full object-contain p-1.5 bg-white"
+        loading="lazy"
+        onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';"
+      />
+      <div
+        class={`w-full h-full flex items-center justify-center font-bold tracking-tight ${theme.bg} ${theme.border} ${theme.text}`}
+        style="display: none;"
+      >
+        {initials}
+      </div>
+    </>
+  ) : (
+    <div class={`w-full h-full flex items-center justify-center font-bold tracking-tight ${theme.bg} ${theme.border} ${theme.text}`}>
+      {initials}
+    </div>
+  )}
+</div>

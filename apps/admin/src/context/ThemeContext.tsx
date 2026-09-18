@@ -16,7 +16,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("light")
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("cuti_admin_theme") as Theme | null
+    const savedTheme = (localStorage.getItem("employr_admin_theme") || localStorage.getItem("cuti_admin_theme")) as Theme | null
     if (savedTheme) {
       setThemeState(savedTheme)
       if (savedTheme === "dark") {
@@ -32,7 +32,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme)
-    localStorage.setItem("cuti_admin_theme", newTheme)
+    localStorage.setItem("employr_admin_theme", newTheme)
     if (newTheme === "dark") {
       document.documentElement.classList.add("dark")
     } else {

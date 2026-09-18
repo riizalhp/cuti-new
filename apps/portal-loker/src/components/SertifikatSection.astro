@@ -1,70 +1,86 @@
 ---
 // SertifikatSection.astro - Sertifikasi Profesional Database Listing
-import { sertifikasiList } from '../data/mock';
+import { sertifikasiList, ensureData } from '../data/mock';
+
+await ensureData();
+const topSertifikasi = [...sertifikasiList].slice(0, 4);
 ---
 
-<section id="sertifikasi" class="py-12 bg-white border-b border-slate-200">
+<section id="sertifikasi" class="py-12 sm:py-16 bg-[#f4f3ee] border-b border-[#d7d6cf]/80 scroll-mt-24">
   <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
       <div>
-        <div class="flex items-center gap-2 mb-1">
-          <span class="w-2 h-2 rounded-full bg-[#1738d1]"></span>
-          <span class="text-[11px] font-medium uppercase tracking-wider text-[#1738d1]">Sertifikasi & Kredensial</span>
+        <div class="section-label mb-2.5">
+          <span>02</span>
+          <i></i>
+          <span>SERTIFIKASI RESMI</span>
         </div>
-        <h2 class="text-2xl sm:text-3xl font-medium text-slate-900 tracking-tight">Sertifikasi Terbaru</h2>
-        <p class="text-xs sm:text-sm text-slate-500 mt-1">
-          Tingkatkan nilai tawar kariermu dengan sertifikasi resmi dari Google, Microsoft, AWS, dan BNSP.
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#101010] tracking-tight">
+          Validasi keahlianmu,<br class="hidden sm:inline" />
+          <em>dengan sertifikasi kredibel.</em>
+        </h2>
+        <p class="text-xs sm:text-sm text-[#6e6d68] mt-2 leading-relaxed font-medium max-w-2xl">
+          Tingkatkan bobot profil kariermu dengan sertifikasi resmi standar nasional BNSP dan global (Google, AWS, Microsoft).
         </p>
       </div>
 
-      <a href="/sertifikasi" class="text-xs font-bold text-[#1738d1] hover:underline flex items-center gap-1 shrink-0">
-        <span>Lihat Semua Sertifikasi</span>
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+      <a
+        href="/sertifikasi"
+        class="inline-flex items-center gap-2 px-4.5 py-2 rounded-full border border-[#d7d6cf] bg-white hover:bg-white hover:border-[#101010] text-xs font-bold text-[#101010] shadow-xs transition-all shrink-0 self-start sm:self-auto group"
+      >
+        <span>Lihat Semua Sertifikasi ({sertifikasiList.length})</span>
+        <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
         </svg>
       </a>
     </div>
 
     <!-- 4 Sertifikasi Cards Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {sertifikasiList.map((cert) => (
-        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md hover:border-amber-400 transition flex flex-col justify-between group">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4.5">
+      {topSertifikasi.map((cert) => (
+        <div class="bg-white rounded-2xl border border-[#d7d6cf] overflow-hidden shadow-paper hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:border-[#0000ff]/30 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
           <div>
             <!-- Image with Provider Pill -->
-            <div class="relative aspect-[16/10] overflow-hidden bg-slate-100">
+            <div class="relative aspect-[16/10] overflow-hidden bg-[#f4f3ee]">
               <img src={cert.image} alt={cert.title} class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" />
-              <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider bg-amber-500 text-white shadow-sm">
+              <span class="absolute top-3 left-3 px-3 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[#101010] text-white shadow-xs">
                 {cert.category}
+              </span>
+              <span class="absolute top-3 right-3 px-3 py-0.5 rounded-full text-[9px] font-bold bg-white/95 text-[#101010] border border-[#d7d6cf] shadow-xs">
+                {cert.issuer}
               </span>
             </div>
 
             <!-- Content -->
-            <div class="p-4">
-              <span class="text-[11px] font-bold text-slate-400 block mb-1">{cert.provider}</span>
-              <h3 class="text-sm font-medium text-slate-900 group-hover:text-[#1738d1] transition leading-snug mb-2 line-clamp-2">
+            <div class="p-5">
+              <div class="flex items-center gap-2 text-[10px] text-[#6e6d68] mb-2 font-bold">
+                <span class="text-[#0000ff] bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">{cert.level}</span>
+                <span>·</span>
+                <span>{cert.format}</span>
+              </div>
+              <h3 class="text-sm sm:text-base font-bold text-[#101010] group-hover:text-[#0000ff] transition leading-snug mb-2 line-clamp-2">
                 <a href={"/sertifikasi/" + cert.slug}>{cert.title}</a>
               </h3>
-              <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-3">
+              <p class="text-xs text-[#6e6d68] line-clamp-2 leading-relaxed mb-4 font-medium">
                 {cert.description}
               </p>
 
               <!-- Meta Format & Duration -->
-              <div class="flex items-center gap-2 text-[11px] text-slate-500">
-                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold">{cert.level}</span>
-                <span>·</span>
-                <span>{cert.format}</span>
+              <div class="flex items-center justify-between text-xs pt-3 border-t border-[#101010]/8">
+                <span class="text-[#6e6d68] font-medium">{cert.duration}</span>
+                <span class="font-bold text-[#101010]">{cert.price}</span>
               </div>
             </div>
           </div>
 
           <!-- Bottom Button -->
-          <div class="p-4 pt-0">
+          <div class="p-5 pt-0">
             <a
               href={"/sertifikasi/" + cert.slug}
-              class="w-full py-2.5 rounded-xl bg-slate-50 hover:bg-[#1738d1] text-slate-700 hover:text-white text-xs font-bold text-center block transition border border-slate-200 hover:border-blue-600"
+              class="w-full py-2.5 rounded-full bg-[#f4f3ee] hover:bg-[#0000ff] text-[#101010] hover:text-white text-xs font-bold text-center block transition border border-[#d7d6cf] hover:border-[#0000ff] shadow-xs"
             >
-              Lihat Detail Sertifikasi →
+              Lihat Detail & Persyaratan →
             </a>
           </div>
         </div>
@@ -72,3 +88,4 @@ import { sertifikasiList } from '../data/mock';
     </div>
   </div>
 </section>
+

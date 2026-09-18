@@ -7,7 +7,8 @@ import {
   getCategory,
   loadArticles,
   renderMarkdown,
-} from "@cuti/faq";
+} from "@employr/faq";
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -22,14 +23,34 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const article = getArticleBySlug(slug);
   if (!article) return { title: "Artikel tidak ditemukan" };
+  const canonicalUrl = `${SITE_URL}/artikel/${article.slug}`;
+
   return {
     title: article.title,
     description: article.description,
+    keywords: article.keywords,
     alternates: { canonical: `/artikel/${article.slug}` },
     openGraph: {
       title: article.title,
       description: article.description,
       type: "article",
+      url: canonicalUrl,
+      publishedTime: article.updatedAt,
+      modifiedTime: article.updatedAt,
+      images: [
+        {
+          url: "/logo.webp",
+          width: 800,
+          height: 600,
+          alt: article.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.description,
+      images: ["/logo.webp"],
     },
   };
 }
@@ -48,8 +69,68 @@ export default async function ArticlePage({ params }: PageProps) {
     .slice(0, 4);
   const html = renderMarkdown(article.body);
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    headline: article.title,
+    description: article.description,
+    datePublished: article.updatedAt,
+    dateModified: article.updatedAt,
+    author: {
+      "@type": "Organization",
+      name: "Employr",
+      url: "https://employr.id",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Employr",
+      url: "https://employr.id",
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/logo.webp`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}/artikel/${article.slug}`,
+    },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Pusat Bantuan",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: category.label,
+        item: `${SITE_URL}/kategori/${category.slug}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: article.title,
+        item: `${SITE_URL}/artikel/${article.slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* MAIN ARTICLE */}
         <article className="lg:col-span-8">

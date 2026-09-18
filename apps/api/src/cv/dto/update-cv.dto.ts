@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { updateCvSchema } from '@cuti/types';
+import { updateCvSchema } from '@employr/types';
 
 export const updateCvDtoSchema = updateCvSchema;
 

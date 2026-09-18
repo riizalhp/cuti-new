@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, logApp, extractRequestContext } from '@cuti/db';
+import { prisma, logApp, extractRequestContext } from '@employr/db';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';

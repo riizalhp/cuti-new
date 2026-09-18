@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@employr/db";
  
 function isSafeEndpointUrl(urlStr: string): boolean {
   try {
@@ -7,6 +8,20 @@ function isSafeEndpointUrl(urlStr: string): boolean {
       return false
     }
     const hostname = parsed.hostname.toLowerCase()
+
+    // Mode development atau jika ALLOW_LOCAL_AI_ENDPOINTS aktif:
+    // Mengizinkan localhost / 127.0.0.1 / private IP untuk koneksi ke AI lokal (seperti Ollama, LM Studio, vLLM)
+    const isDev = process.env.NODE_ENV === "development" || !process.env.NODE_ENV
+    const allowLocalAi = process.env.ALLOW_LOCAL_AI_ENDPOINTS === "true"
+
+    if (isDev || allowLocalAi) {
+      // Tetap blokir AWS/cloud metadata IP demi keamanan
+      if (hostname === "169.254.169.254") {
+        return false
+      }
+      return true
+    }
+
     if (
       hostname === "localhost" ||
       hostname === "127.0.0.1" ||
@@ -34,7 +49,7 @@ function isSafeEndpointUrl(urlStr: string): boolean {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { action, endpointUrl, apiKey, model, prompt, temperature, maxTokens } = body
+    const { action, endpointUrl, apiKey: rawApiKey, providerId, model, prompt, temperature, maxTokens } = body
 
     const cleanEndpoint = (endpointUrl || "https://api.openai.com/v1").replace(/\/+$/, "")
 
@@ -48,13 +63,31 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
+
+    let effectiveApiKey = (rawApiKey || "").trim()
+
+    // Jika API key kosong atau bertanda masking '••••', dan ada providerId, ambil key asli dari database
+    if ((!effectiveApiKey || effectiveApiKey.includes("••••")) && providerId && typeof providerId === "string" && !providerId.startsWith("pkg-")) {
+      try {
+        const storedProvider = await prisma.ai_providers.findUnique({
+          where: { id: providerId },
+          select: { api_key: true },
+        })
+        if (storedProvider?.api_key) {
+          effectiveApiKey = storedProvider.api_key.trim()
+        }
+      } catch (err) {
+        console.warn("[test-ai] Gagal mengambil saved API key dari DB:", err)
+      }
+    }
+
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     }
 
-    if (apiKey && apiKey.trim().length > 0) {
-      headers["Authorization"] = `Bearer ${apiKey.trim()}`
-      headers["api-key"] = apiKey.trim() // Azure OpenAI compatibility
+    if (effectiveApiKey && effectiveApiKey.length > 0) {
+      headers["Authorization"] = `Bearer ${effectiveApiKey}`
+      headers["api-key"] = effectiveApiKey // Azure OpenAI compatibility
     }
 
     const startTime = performance.now()

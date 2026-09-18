@@ -1,4 +1,4 @@
-import { prisma } from "@cuti/db";
+import { prisma } from "@employr/db";
 import crypto from "crypto";
 
 export const semanticCache = {

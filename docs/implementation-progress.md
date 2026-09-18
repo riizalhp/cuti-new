@@ -38,7 +38,7 @@
 - **Commit:** `bb78351`
 - **Date:** 2026-07-31
 - **Deliverables:**
-  - ✅ @cuti/db package created
+  - ✅ @employr/db package created
   - ✅ Prisma schema with all MVP models
   - ✅ PrismaClient wrapper
   - ✅ Enums: UserRole, CvStatus, ApplicationStatus, etc.
@@ -48,7 +48,7 @@
 - **Commit:** `9662cbb`
 - **Date:** 2026-07-31
 - **Deliverables:**
-  - ✅ @cuti/types package
+  - ✅ @employr/types package
   - ✅ Zod validation schemas
   - ✅ API response types
   - ✅ CV & Job types
@@ -253,14 +253,14 @@
 **Prerequisites before Sprint 2:**
 1. Setup PostgreSQL database
    - Create database: `cuti_dev`
-   - Run: `pnpm --filter @cuti/db db:migrate`
+   - Run: `pnpm --filter @employr/db db:migrate`
 2. Configure environment variables:
    - `DATABASE_URL`
    - `JWT_SECRET`
    - `GOOGLE_CLIENT_ID` (for OAuth)
    - `GOOGLE_CLIENT_SECRET`
 3. Test auth endpoints:
-   - Start API: `pnpm --filter @cuti/api dev`
+   - Start API: `pnpm --filter @employr/api dev`
    - Register test user
    - Login test user
    - Verify JWT token
@@ -344,14 +344,14 @@ D:\cuti\
 ```bash
 # Development
 pnpm dev                  # Run all apps in dev mode
-pnpm --filter @cuti/api dev   # Run API only
+pnpm --filter @employr/api dev   # Run API only
 
 # Build
 pnpm build                # Build all apps
 
 # Database
-pnpm --filter @cuti/db db:migrate    # Run migrations
-pnpm --filter @cuti/db db:studio     # Open Prisma Studio
+pnpm --filter @employr/db db:migrate    # Run migrations
+pnpm --filter @employr/db db:studio     # Open Prisma Studio
 
 # Linting
 pnpm lint

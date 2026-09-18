@@ -142,7 +142,8 @@ exports.Prisma.UserScalarFieldEnum = {
   last_company: 'last_company',
   experience_year: 'experience_year',
   skills: 'skills',
-  target_job: 'target_job'
+  target_job: 'target_job',
+  preferences: 'preferences'
 };
 
 exports.Prisma.MembershipScalarFieldEnum = {
@@ -266,6 +267,7 @@ exports.Prisma.ApplicationsScalarFieldEnum = {
   interview_chance: 'interview_chance',
   ai_insight: 'ai_insight',
   ai_recommendations: 'ai_recommendations',
+  application_context: 'application_context',
   created_at: 'created_at',
   updated_at: 'updated_at'
 };
@@ -283,8 +285,12 @@ exports.Prisma.ArticlesScalarFieldEnum = {
   content: 'content',
   cover_image_url: 'cover_image_url',
   author: 'author',
+  tags: 'tags',
   is_published: 'is_published',
   published_at: 'published_at',
+  source: 'source',
+  external_url: 'external_url',
+  last_synced_at: 'last_synced_at',
   category_id: 'category_id'
 };
 
@@ -312,6 +318,9 @@ exports.Prisma.CertificationsScalarFieldEnum = {
   price: 'price',
   duration_hours: 'duration_hours',
   external_url: 'external_url',
+  source: 'source',
+  last_synced_at: 'last_synced_at',
+  tags: 'tags',
   is_active: 'is_active',
   created_at: 'created_at'
 };
@@ -337,6 +346,7 @@ exports.Prisma.CoursesScalarFieldEnum = {
   level: 'level',
   price: 'price',
   external_url: 'external_url',
+  tags: 'tags',
   is_active: 'is_active',
   created_at: 'created_at'
 };
@@ -389,6 +399,9 @@ exports.Prisma.EventsScalarFieldEnum = {
   location: 'location',
   type: 'type',
   external_url: 'external_url',
+  source: 'source',
+  last_synced_at: 'last_synced_at',
+  tags: 'tags',
   is_active: 'is_active',
   created_at: 'created_at'
 };
@@ -406,8 +419,11 @@ exports.Prisma.JobsScalarFieldEnum = {
   salary_period: 'salary_period',
   requirements: 'requirements',
   external_url: 'external_url',
+  tags: 'tags',
   is_active: 'is_active',
   deadline: 'deadline',
+  source: 'source',
+  last_synced_at: 'last_synced_at',
   created_at: 'created_at'
 };
 
@@ -453,6 +469,18 @@ exports.Prisma.NotificationsScalarFieldEnum = {
   action_url: 'action_url',
   read_at: 'read_at',
   created_at: 'created_at'
+};
+
+exports.Prisma.Cover_lettersScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  company: 'company',
+  position: 'position',
+  recruiter: 'recruiter',
+  content: 'content',
+  tone: 'tone',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
 };
 
 exports.Prisma.OrdersScalarFieldEnum = {
@@ -735,17 +763,168 @@ exports.Prisma.VisitorActivityScalarFieldEnum = {
   created_at: 'created_at'
 };
 
+exports.Prisma.Quiz_packagesScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  title: 'title',
+  category: 'category',
+  description: 'description',
+  duration_minutes: 'duration_minutes',
+  difficulty: 'difficulty',
+  is_premium: 'is_premium',
+  price: 'price',
+  passing_score: 'passing_score',
+  is_active: 'is_active',
+  sort_order: 'sort_order',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+};
+
+exports.Prisma.Quiz_questionsScalarFieldEnum = {
+  id: 'id',
+  package_id: 'package_id',
+  sort_order: 'sort_order',
+  type: 'type',
+  question: 'question',
+  code_snippet: 'code_snippet',
+  options: 'options',
+  correct_answer: 'correct_answer',
+  explanation: 'explanation',
+  ai_tip: 'ai_tip'
+};
+
+exports.Prisma.Quiz_attemptsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  package_id: 'package_id',
+  status: 'status',
+  score: 'score',
+  answers: 'answers',
+  flagged_questions: 'flagged_questions',
+  started_at: 'started_at',
+  completed_at: 'completed_at',
+  time_spent_seconds: 'time_spent_seconds'
+};
+
+exports.Prisma.Growth_postsScalarFieldEnum = {
+  id: 'id',
+  account: 'account',
+  platform: 'platform',
+  content_type: 'content_type',
+  hook_type: 'hook_type',
+  cta: 'cta',
+  experiment_id: 'experiment_id',
+  campaign_utm: 'campaign_utm',
+  cta_url: 'cta_url',
+  content: 'content',
+  status: 'status',
+  published_at: 'published_at',
+  impressions: 'impressions',
+  likes: 'likes',
+  comments: 'comments',
+  reposts: 'reposts',
+  profile_visits: 'profile_visits',
+  link_clicks: 'link_clicks',
+  metrics_updated_at: 'metrics_updated_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+};
+
+exports.Prisma.Growth_experimentsScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  hypothesis: 'hypothesis',
+  variable_tested: 'variable_tested',
+  platform: 'platform',
+  kpi: 'kpi',
+  status: 'status',
+  decision: 'decision',
+  result: 'result',
+  learning: 'learning',
+  started_at: 'started_at',
+  ended_at: 'ended_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+};
+
+exports.Prisma.Growth_journalScalarFieldEnum = {
+  id: 'id',
+  week_label: 'week_label',
+  wins: 'wins',
+  failures: 'failures',
+  learnings: 'learnings',
+  next_tests: 'next_tests',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+};
+
+exports.Prisma.UserFeedbackScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  feature: 'feature',
+  context_id: 'context_id',
+  rating: 'rating',
+  comment: 'comment',
+  page_path: 'page_path',
+  created_at: 'created_at'
+};
+
+exports.Prisma.AnalyticsDailySummaryScalarFieldEnum = {
+  id: 'id',
+  date: 'date',
+  metric_name: 'metric_name',
+  metric_value: 'metric_value',
+  dimensions: 'dimensions',
+  created_at: 'created_at'
+};
+
+exports.Prisma.UserBehaviorProfileScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  top_features_used: 'top_features_used',
+  preferred_industries: 'preferred_industries',
+  avg_session_minutes: 'avg_session_minutes',
+  total_applications: 'total_applications',
+  interview_rate: 'interview_rate',
+  lifecycle_stage: 'lifecycle_stage',
+  last_active_at: 'last_active_at',
+  churn_risk: 'churn_risk',
+  updated_at: 'updated_at'
+};
+
+exports.Prisma.LearnedRoleEntryScalarFieldEnum = {
+  id: 'id',
+  role_name: 'role_name',
+  skills: 'skills',
+  education_level: 'education_level',
+  major: 'major',
+  user_id: 'user_id',
+  created_at: 'created_at'
+};
+
+exports.Prisma.LearnedRoleBlueprintScalarFieldEnum = {
+  id: 'id',
+  role_name: 'role_name',
+  entry_count: 'entry_count',
+  top_essential_skills: 'top_essential_skills',
+  top_nicetohave_skills: 'top_nicetohave_skills',
+  category: 'category',
+  is_promoted: 'is_promoted',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
 };
 
-exports.Prisma.JsonNullValueInput = {
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull
 };
 
-exports.Prisma.NullableJsonNullValueInput = {
-  DbNull: Prisma.DbNull,
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
@@ -754,15 +933,15 @@ exports.Prisma.QueryMode = {
   insensitive: 'insensitive'
 };
 
-exports.Prisma.NullsOrder = {
-  first: 'first',
-  last: 'last'
-};
-
 exports.Prisma.JsonNullValueFilter = {
   DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
 };
 exports.Role = exports.$Enums.Role = {
   USER: 'USER',
@@ -975,6 +1154,7 @@ exports.Prisma.ModelName = {
   misi: 'misi',
   misi_submissions: 'misi_submissions',
   notifications: 'notifications',
+  cover_letters: 'cover_letters',
   orders: 'orders',
   referrals: 'referrals',
   reminders: 'reminders',
@@ -993,7 +1173,18 @@ exports.Prisma.ModelName = {
   Visitor: 'Visitor',
   VisitorSession: 'VisitorSession',
   VisitorPageView: 'VisitorPageView',
-  VisitorActivity: 'VisitorActivity'
+  VisitorActivity: 'VisitorActivity',
+  quiz_packages: 'quiz_packages',
+  quiz_questions: 'quiz_questions',
+  quiz_attempts: 'quiz_attempts',
+  growth_posts: 'growth_posts',
+  growth_experiments: 'growth_experiments',
+  growth_journal: 'growth_journal',
+  UserFeedback: 'UserFeedback',
+  AnalyticsDailySummary: 'AnalyticsDailySummary',
+  UserBehaviorProfile: 'UserBehaviorProfile',
+  LearnedRoleEntry: 'LearnedRoleEntry',
+  LearnedRoleBlueprint: 'LearnedRoleBlueprint'
 };
 
 /**

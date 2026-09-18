@@ -8,7 +8,24 @@ export type CvPurpose =
   | 'promotion'
   | 'academic_scholarship'
   | 'overseas'
-  | 'general';
+  | 'general'
+  | 'volunteer_ngo'
+  | 'government'
+  | 'executive'
+  | 'startup_founder'
+  | 'career_break';
+
+/** 8 grup kategori tujuan CV ( dipakai modal pemilihan & filter ). */
+export const CV_PURPOSE_CATEGORIES: Array<{ id: 'career' | 'entry' | 'flexible' | 'academic' | 'social' | 'public' | 'leadership' | 'transition'; title: string; purposes: CvPurpose[] }> = [
+  { id: 'career', title: 'Karier & Profesional', purposes: ['job', 'career_switch', 'promotion', 'overseas'] },
+  { id: 'entry', title: 'Pemula & Mahasiswa', purposes: ['internship', 'fresh_graduate'] },
+  { id: 'flexible', title: 'Format Fleksibel & Mandiri', purposes: ['freelance', 'remote', 'general'] },
+  { id: 'academic', title: 'Akademik & Beasiswa', purposes: ['academic_scholarship'] },
+  { id: 'social', title: 'Sosial & Nonprofit', purposes: ['volunteer_ngo'] },
+  { id: 'public', title: 'Sektor Publik', purposes: ['government'] },
+  { id: 'leadership', title: 'Kepemimpinan & Wirausaha', purposes: ['executive', 'startup_founder'] },
+  { id: 'transition', title: 'Transisi Khusus', purposes: ['career_break'] },
+];
 
 export interface PurposeWeights {
   experience?: number;
@@ -46,7 +63,7 @@ export interface PurposeProfileConfig {
   title: string;
   badge: string;
   iconName: string;
-  category: 'career' | 'entry' | 'academic' | 'flexible';
+  category: 'career' | 'entry' | 'academic' | 'flexible' | 'social' | 'public' | 'leadership' | 'transition';
   objective: string;
   description: string;
   weights: PurposeWeights;
@@ -150,7 +167,7 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
       education: 5,
       atsReadability: 5,
     },
-    requiredComponents: ['Kontak Lengkap', 'Target Posisi', 'Ringkasan Profesional', 'Pengalaman Kerja / Relevan', 'Keahlian (Skills)', 'Pendidikan'],
+    requiredComponents: ['Kontak Lengkap', 'Ringkasan Profesional', 'Target Posisi', 'Pengalaman Kerja / Relevan', 'Keahlian (Skills)', 'Pendidikan'],
     highImpactComponents: ['Keyword Job Description', 'Pencapaian Berangka (Impact %)', 'Proyek Relevan', 'Job Title Relevan'],
     optionalComponents: ['Organisasi', 'Volunteer', 'Sertifikasi', 'Pelatihan', 'Referensi'],
     evaluationFocusText: 'Penekanan pada metrik pencapaian kuantitatif (angka/%) dan kecocokan kata kunci dengan lowongan target.',
@@ -174,7 +191,7 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
       summary: 5,
       keywords: 5,
     },
-    requiredComponents: ['Kontak Lengkap', 'Pendidikan Aktif/Terakhir', 'Keahlian (Skills)', 'Proyek / Tugas Besar', 'Ringkasan Minat Karier'],
+    requiredComponents: ['Kontak Lengkap', 'Ringkasan Minat Karier', 'Pendidikan Aktif/Terakhir', 'Proyek / Tugas Besar', 'Keahlian (Skills)'],
     highImpactComponents: ['Proyek Nyata', 'Pengalaman Magang/Kepanitiaan', 'Organisasi Kampus', 'Sertifikat & Pelatihan', 'Prestasi / Lomba'],
     optionalComponents: ['Volunteer', 'Portfolio Link', 'Aktivitas Ekstrakurikuler'],
     evaluationFocusText: 'Bebas penalti pengalaman kerja profesional; skor berfokus pada proyek nyata, organisasi, dan inisiatif belajar.',
@@ -198,7 +215,7 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
       summary: 5,
       keywords: 5,
     },
-    requiredComponents: ['Pendidikan & IPK', 'Keahlian Teknis & Soft Skills', 'Proyek Portofolio', 'Ringkasan Profesional', 'Kontak'],
+    requiredComponents: ['Kontak Lengkap', 'Ringkasan Profesional', 'Pendidikan & IPK', 'Proyek Portofolio', 'Keahlian Teknis & Soft Skills'],
     highImpactComponents: ['Proyek Akhir / Capstone', 'Pengalaman Magang', 'Peran Kepemimpinan Organisasi', 'Sertifikat Kompetensi'],
     optionalComponents: ['Prestasi Akademik/Non-akademik', 'Aktivitas Sukarela', 'Pelatihan Industri'],
     evaluationFocusText: 'Skor tidak jatuh jika belum punya pengalaman kerja tetap, asalkan proyek, skill, dan pendidikan terdokumentasi kuat.',
@@ -221,7 +238,7 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
       certification: 5,
       contactAvailability: 5,
     },
-    requiredComponents: ['Daftar Keahlian Spesifik', 'Portofolio Proyek', 'Ringkasan Value Proposition', 'Kontak & Link Portofolio'],
+    requiredComponents: ['Kontak & Link Portofolio', 'Ringkasan Value Proposition', 'Portofolio Proyek', 'Daftar Keahlian Spesifik'],
     highImpactComponents: ['Studi Kasus (Problem-Solution-Result)', 'Tools & Software Khusus', 'Hasil Bisnis Klien (e.g. +18% konversi)', 'Ketersediaan Kerja'],
     optionalComponents: ['Testimoni Klien', 'Sertifikasi Keahlian', 'Rate / Paket Layanan'],
     evaluationFocusText: 'Menilai kejelasan solusi dan dampak bisnis yang dihasilkan untuk klien, bukan sekadar daftar tugas teknis.',
@@ -245,7 +262,7 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
       language: 5,
       keywords: 5,
     },
-    requiredComponents: ['Pengalaman Kerja Relevan', 'Keahlian Inti', 'Ringkasan Kesiapan Remote', 'Tools Kolaborasi Jarak Jauh', 'Kontak'],
+    requiredComponents: ['Kontak Lengkap', 'Ringkasan Kesiapan Remote', 'Pengalaman Kerja Relevan', 'Keahlian Inti', 'Tools Kolaborasi Jarak Jauh'],
     highImpactComponents: ['Pengalaman Kerja Remote / Asinkron', 'Collaboration Stack (Slack, Jira, Git, Notion)', 'Komunikasi Tertulis & Bahasa Inggris', 'Manajemen Proyek Mandiri'],
     optionalComponents: ['Zona Waktu & Ketersediaan Jam Kerja', 'Sertifikasi Remote Work'],
     evaluationFocusText: 'Memvalidasi bukti kerja asinkron, kemandirian pemecahan masalah, dan kejelasan komunikasi tertulis.',
@@ -268,7 +285,7 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
       summary: 5,
       keywords: 5,
     },
-    requiredComponents: ['Ringkasan Alasan Transisi', 'Transferable Skills', 'Proyek Relevan di Bidang Baru', 'Target Skills Baru', 'Pengalaman Kerja Sebelumnya'],
+    requiredComponents: ['Kontak Lengkap', 'Ringkasan Alasan Transisi', 'Transferable Skills', 'Proyek Relevan di Bidang Baru', 'Pengalaman Kerja Sebelumnya'],
     highImpactComponents: ['Pemetaan Relevansi Skill Lama ke Baru', 'Proyek Transisi / Portfolio Bidang Baru', 'Sertifikasi / Bootcamp Terverifikasi', 'Pencapaian Terukur'],
     optionalComponents: ['Pengalaman Organisasi', 'Kursus Online / Pelatihan'],
     evaluationFocusText: 'Mengevaluasi bagaimana pengalaman sebelumnya diterjemahkan menjadi nilai tambah untuk bidang baru.',
@@ -291,7 +308,7 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
       education: 5,
       certification: 5,
     },
-    requiredComponents: ['Posisi Saat Ini & Riwayat Peran', 'Pengalaman Relevan', 'Metrik Pencapaian & Dampak', 'Keahlian Kepemimpinan & Teknis'],
+    requiredComponents: ['Kontak Lengkap', 'Ringkasan Eksekutif Promosi', 'Posisi Saat Ini & Riwayat Peran', 'Metrik Pencapaian & Dampak', 'Keahlian Kepemimpinan & Teknis'],
     highImpactComponents: ['Dampak Bisnis (e.g. Sales +32%, Hemat Biaya 15%)', 'Manajemen Tim & Mentoring', 'Inisiatif Lintas Divisi', 'Progresi Tanggung Jawab'],
     optionalComponents: ['Sertifikasi Manajemen', 'Penghargaan Internal Perusahaan'],
     evaluationFocusText: 'Impact & kepemimpinan jauh lebih menentukan daripada sekadar daftar keyword ATS umum.',
@@ -315,7 +332,7 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
       certification: 5,
       summary: 5,
     },
-    requiredComponents: ['Riwayat Pendidikan & IPK', 'Prestasi Akademik / Kejuaraan', 'Proyek Riset / Tugas Ilmiah', 'Ringkasan Akademik & Rencana Studi'],
+    requiredComponents: ['Kontak Lengkap', 'Ringkasan Akademik & Rencana Studi', 'Riwayat Pendidikan & IPK', 'Prestasi Akademik / Kejuaraan', 'Proyek Riset / Tugas Ilmiah'],
     highImpactComponents: ['IPK Tinggi / Skripsi Terbaik', 'Publikasi / Jurnal / Konferensi', 'Hibah Riset & Beasiswa Sebelumnya', 'Dampak Sosial & Kepemimpinan'],
     optionalComponents: ['Pengalaman Mengajar / Asisten Lab', 'Kegiatan Sukarela', 'Sertifikat Bahasa Asing (IELTS/TOEFL)'],
     evaluationFocusText: 'Mengutamakan standar keunggulan akademik, kontribusi riset, dan rekam jejak pengabdian masyarakat.',
@@ -339,7 +356,7 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
       summary: 5,
       atsReadability: 5,
     },
-    requiredComponents: ['Pengalaman Kerja Relevan', 'Kemampuan Bahasa (Inggris/Lokal)', 'Keahlian Global', 'Pendidikan', 'Ringkasan Profil Internasional', 'Kontak'],
+    requiredComponents: ['Kontak Lengkap', 'Ringkasan Profil Internasional', 'Pengalaman Kerja Relevan', 'Kemampuan Bahasa (Inggris/Lokal)', 'Keahlian Global', 'Pendidikan'],
     highImpactComponents: ['Kemahiran Bahasa Asing Terverifikasi', 'Kolaborasi Lintas Budaya / Tim Global', 'Keyword Standar Industri Global', 'Format ATS Internasional (Tanpa Foto/Data Pribadi Sensitif)'],
     optionalComponents: ['Visa Readiness / Ketersediaan Relokasi', 'Sertifikasi Internasional'],
     evaluationFocusText: 'Menilai daya saing global, standar format internasional, dan penguasaan bahasa kerja utama.',
@@ -367,6 +384,121 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
     highImpactComponents: ['Kelengkapan Portofolio Proyek', 'Sertifikat Kompetensi', 'Organisasi & Prestasi', 'Pencapaian Terukur'],
     optionalComponents: ['Bahasa Asing', 'Pelatihan', 'Referensi'],
     evaluationFocusText: 'Menilai kelengkapan data dasar sebagai repositori utama sebelum disesuaikan ke posisi spesifik.',
+  },
+  volunteer_ngo: {
+    id: 'volunteer_ngo',
+    title: 'Volunteer / NGO / Nirlaba',
+    badge: 'Social Impact',
+    iconName: 'HeartHandshake',
+    category: 'social',
+    objective: 'Menunjukkan dampak sosial, pengalaman program komunitas, dan kontribusi non-komersial yang terukur.',
+    description: 'Menilai rekam jejak kegiatan sukarela, pengabdian masyarakat, jangkauan program, dan nilai sosial yang dihasilkan.',
+    weights: {
+      socialImpact: 30,
+      organization: 15,
+      summary: 10,
+      skills: 15,
+      achievement: 10,
+      language: 5,
+      certification: 5,
+      education: 5,
+      keywords: 5,
+    },
+    requiredComponents: ['Kontak Lengkap', 'Ringkasan Motivasi Sosial', 'Pengalaman Volunteer / Pengabdian', 'Organisasi / Komunitas', 'Keahlian Pendukung Program'],
+    highImpactComponents: ['Dampak Program (e.g. 500+ penerima manfaat)', 'Peran Koordinasi Relawan', 'Kemitraan NGO / Komunitas', 'Kemampuan Fundraising & Advocacy'],
+    optionalComponents: ['Penghargaan Sosial', 'Publikasi Kegiatan', 'Referensi Organisasi'],
+    evaluationFocusText: 'Penekanan pada bukti dampak sosial nyata, skala program, dan keberlanjutan kontribusi — bukan profit.',
+  },
+  government: {
+    id: 'government',
+    title: 'Kepemerintahan (CPNS/BUMN)',
+    badge: 'Public Sector',
+    iconName: 'Landmark',
+    category: 'public',
+    objective: 'Memenuhi standar administratif seleksi CPNS/BUMN dengan riwayat pendidikan formal dan sertifikasi resmi.',
+    description: 'Menilai kelengkapan data administratif, pendidikan formal, sertifikasi resmi, dan rekam jejak kerja yang terverifikasi.',
+    weights: {
+      education: 25,
+      experience: 20,
+      certification: 20,
+      summary: 10,
+      organization: 10,
+      achievement: 5,
+      skills: 5,
+      atsReadability: 5,
+    },
+    requiredComponents: ['Kontak Lengkap', 'Ringkasan Profil Diri', 'Data Pendidikan Formal Lengkap', 'Riwayat Pekerjaan / Organisasi', 'Sertifikasi Resmi (TOEFL, AKP, dll)'],
+    highImpactComponents: ['IPK & Tahun Lulus Jelas', 'Sertifikat Kompetensi Resmi', 'NIP / Status Kepegawaian (jika ada)', 'Pengalaman Kepanitiaan Resmi'],
+    optionalComponents: ['Kursus/TOEFL Terstruktur', 'Prestasi', 'Referensi'],
+    evaluationFocusText: 'Kelengkapan administratif dan formalitas dokumen jauh lebih menentukan daripada gaya penulisan kreatif.',
+  },
+  executive: {
+    id: 'executive',
+    title: 'Eksekutif & Kepemimpinan Senior',
+    badge: 'C-Suite Ready',
+    iconName: 'Crown',
+    category: 'leadership',
+    objective: 'Membuktikan strategi tingkat organisasi, dampak lintas divisi, dan pencapaian besar pada level senior.',
+    description: 'Menilai skala tanggung jawab, dampak bisnis strategis, rekam jejak kepemimpinan, dan pengakuan industri.',
+    weights: {
+      leadership: 25,
+      achievement: 25,
+      experience: 20,
+      summary: 10,
+      careerProgression: 10,
+      skills: 5,
+      education: 5,
+    },
+    requiredComponents: ['Kontak Lengkap', 'Ringkasan Eksekutif Strategis', 'Pengalaman Kepemimpinan Senior', 'Penghargaan & Rekam Jejak Besar'],
+    highImpactComponents: ['Skala Tanggung Jawab (anggaran, headcount)', 'Transformasi Bisnis Terukur', 'Board / Stakeholder Management', 'Pengakuan Industri (Award, Speaking)'],
+    optionalComponents: ['Organisasi Profesional', 'Publikasi / Media Coverage', 'Hobi Strategis'],
+    evaluationFocusText: 'Fokus pada dampak lintas fungsi dan skala organisasi — deskripsi tugas harian tidak lagi relevan.',
+  },
+  startup_founder: {
+    id: 'startup_founder',
+    title: 'Wirausaha / Startup Founder',
+    badge: 'Builder & Traction',
+    iconName: 'Rocket',
+    category: 'leadership',
+    objective: 'Menampilkan produk/bisnis yang dibangun, traksi terukur, dan kapabilitas membangun dari nol.',
+    description: 'Menilai traksi bisnis (growth, funding, user), portofolio produk, dan kemampuan eksekusi end-to-end.',
+    weights: {
+      projects: 25,
+      achievement: 20,
+      clientExperience: 15,
+      summary: 10,
+      skills: 10,
+      leadership: 10,
+      organization: 5,
+      keywords: 5,
+    },
+    requiredComponents: ['Kontak Lengkap', 'Ringkasan Value Proposition Bisnis', 'Proyek / Produk yang Dibangun', 'Portofolio & Tautan Produk'],
+    highImpactComponents: ['Traksi Terukur (MRR, MAU, growth %)', 'Funding / Incubation', 'Product-Market Fit Story', 'Tim yang Dibangun'],
+    optionalComponents: ['Penghargaan Kompetisi Startup', 'Media Coverage', 'Pengalaman Kerja Sebelumnya'],
+    evaluationFocusText: 'Produk, traksi, dan cerita membangun bisnis lebih menentukan daripada rekam jejak korporat formal.',
+  },
+  career_break: {
+    id: 'career_break',
+    title: 'Career Break / Kembali Bekerja',
+    badge: 'Comeback Ready',
+    iconName: 'RotateCcw',
+    category: 'transition',
+    objective: 'Menjelaskan jeda karier secara positif, menonjolkan keterampilan yang diperbarui, dan aktivitas produktif selama jeda.',
+    description: 'Menilai justifikasi gap karier, bukti skill yang tetap ter-update, dan aktivitas produktif (kursus, freelance, volunteer).',
+    weights: {
+      summary: 20,
+      certification: 15,
+      experience: 15,
+      transferableSkills: 15,
+      projects: 10,
+      organization: 10,
+      skills: 10,
+      achievement: 5,
+    },
+    requiredComponents: ['Kontak Lengkap', 'Ringkasan Narasi Kembali Bekerja', 'Pelatihan / Kursus Selama Jeda', 'Pengalaman Relevan Lainnya'],
+    highImpactComponents: ['Narasi Gap yang Jujur & Positif', 'Sertifikasi / Upskilling Terbaru', 'Freelance / Volunteer Selama Gap', 'Kesiapan Kembali Full-Time'],
+    optionalComponents: ['Proyek Personal', 'Komunitas Profesional', 'Referensi'],
+    evaluationFocusText: 'Kontinuitas belajar dan narasi transisi positif mengubah gap menjadi kekuatan, bukan kelemahan.',
   },
 };
 
@@ -784,6 +916,28 @@ export function evaluateCvComprehensive(
     const hasGpa = /ipk|gpa|\b3\.[5-9]\b|\b4\.0\b/i.test(allTextCombined);
     const score = hasGpa ? 95 : 70;
     addComponent('academicAchievement', 'Prestasi Akademik & IPK', score, score >= 80 ? 'optimal' : 'good', hasGpa ? 'Capaian akademik / IPK terdata' : 'Cantumkan IPK atau predikat kelulusan');
+  }
+
+  // Career Progression (Promosi / Eksekutif)
+  if (weights.careerProgression) {
+    const hasProgression = /promosi|naik jabatan|kepala|head of|senior|manager|supervisor|direktur|director|avp|vp\b/i.test(allTextCombined);
+    const score = hasProgression ? 90 : 60;
+    addComponent('careerProgression', 'Progresi Tanggung Jawab Karier', score, score >= 80 ? 'optimal' : 'needs_work', hasProgression ? 'Progresi jabatan / tanggung jawab terdeteksi' : 'Tunjukkan progresi peran dari waktu ke waktu (Staff → Lead → Manager)');
+  }
+
+  // Social Impact (Volunteer / NGO / Nirlaba)
+  if (weights.socialImpact) {
+    const hasSocialSignal = /volunteer|relawan|pengabdian|nirlaba|non-?profit|komunitas|yayasan|penerima manfaat|dampak sosial|gerakan sosial/i.test(allTextCombined);
+    const hasScale = /\d+\s*(penerima|beneficiaries|peserta|orang|warga|anak|keluarga|desa)/i.test(allTextCombined);
+    const score = hasSocialSignal && hasScale ? 95 : hasSocialSignal ? 80 : 50;
+    addComponent('socialImpact', 'Dampak Sosial & Pengabdian', score, score >= 80 ? 'optimal' : 'needs_work', hasSocialSignal ? 'Bukti kontribusi sosial terdeteksi' : 'Cantumkan program sosial beserta skala dampaknya (jumlah penerima manfaat)');
+  }
+
+  // Publication (Akademik / Beasiswa)
+  if (weights.publication) {
+    const hasPublication = /publikasi|jurnal|journal|proceeding|konferensi|conference|seminar ilmiah|isbn|issn|doi\b|scopus|sinta/i.test(allTextCombined);
+    const score = hasPublication ? 95 : 50;
+    addComponent('publication', 'Publikasi Ilmiah', score, score >= 80 ? 'optimal' : 'missing', hasPublication ? 'Publikasi ilmiah tercantum' : 'Tambahkan jurnal / prosiding / konferensi (jika ada)');
   }
 
   // -------------------------------------------------------------

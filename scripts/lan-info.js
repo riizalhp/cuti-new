@@ -35,7 +35,7 @@ const apps = [
 ];
 
 console.log('\n' + '='.repeat(58));
-console.log('  📱 AMBILCUTI — AKSES DARI HP / DEVICE LAIN (1 JARINGAN)');
+console.log('  📱 EMPLOYR — AKSES DARI HP / DEVICE LAIN (1 JARINGAN)');
 console.log('='.repeat(58));
 console.log(`\n📡 IP Jaringan Aktif : \x1b[32m\x1b[1m${primaryIp}\x1b[0m`);
 if (ips.length > 0) {

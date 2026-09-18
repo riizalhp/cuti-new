@@ -34,10 +34,10 @@ import { cn } from '@/lib/utils';
 import { trackerApi } from '@/lib/api';
 import { useCareerReadiness } from '@/hooks/useCareerReadiness';
 import { getLearningUrl } from '@/lib/urls';
+import { getScoreProgressBarClass } from '@/lib/score-color';
 
 interface SidebarProps {
   onOpenUpgradeModal: () => void;
-  onSwitchToAdminPortal?: () => void;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
   isMobileOpen?: boolean;
@@ -62,7 +62,6 @@ interface SidebarCategory {
 
 export const Sidebar: React.FC<SidebarProps> = ({
   onOpenUpgradeModal,
-  onSwitchToAdminPortal,
   isCollapsed = false,
   onToggleCollapse,
   isMobileOpen = false,
@@ -101,30 +100,39 @@ export const Sidebar: React.FC<SidebarProps> = ({
       ],
     },
     {
+      category: 'Career Intelligence',
+      icon: Compass,
+      items: [
+        { id: 'career-intelligence', label: 'Career Intelligence', href: '/career-intelligence', icon: Compass },
+      ],
+    },
+    {
       category: 'Lamaran',
       icon: Briefcase,
       items: [
         { id: 'tracker', label: 'Tracker Lamaran', href: '/tracker', icon: Briefcase, badge: trackerCount > 0 ? String(trackerCount) : null },
-        { id: 'email-cover-letter', label: 'Email & Cover Letter', href: '/mailer', icon: Mail, badge: 'Baru' },
-        { id: 'scrape-jobs', label: 'Scraper Lowongan', href: '/scrape-jobs', icon: Globe, badge: 'Baru' },
+        { id: 'email-cover-letter', label: 'Email & Cover Letter', href: '/mailer', icon: Mail },
+        { id: 'scrape-jobs', label: 'Scraper Lowongan', href: '/scrape-jobs', icon: Globe },
         { id: 'cari-lowongan', label: 'Cari Lowongan', href: 'https://loker.employr.id', icon: Compass },
         { id: 'match-cv', label: 'Kecocokan Lowongan', href: '/match-cv', icon: Sparkles },
       ],
     },
-    {
-      category: 'Pengembangan',
-      icon: Target,
-      items: [
-        { id: 'interview', label: 'Panduan Interview', href: '/interview', icon: Mic },
-        { id: 'kursus', label: 'Kursus & Sertifikasi', href: getLearningUrl(), icon: BookOpen, badge: 'Baru' },
-      ],
-    },
+    // Di-hide sementara sesuai permintaan:
+    // {
+    //   category: 'Pengembangan',
+    //   icon: Target,
+    //   items: [
+    //     { id: 'interview', label: 'Panduan Interview', href: '/interview', icon: Mic },
+    //     { id: 'kursus', label: 'Kursus & Sertifikasi', href: getLearningUrl(), icon: BookOpen },
+    //   ],
+    // },
     {
       category: 'Lainnya',
-      icon: Gift,
+      icon: Settings,
       items: [
-        { id: 'misi-cuan', label: 'Misi & Cuan', href: '/misi-cuan', icon: Target, badge: 'Baru' },
-        { id: 'referral', label: 'Referral', href: '/referral', icon: Users },
+        // Di-hide sementara sesuai permintaan:
+        // { id: 'misi-cuan', label: 'Misi & Cuan', href: '/misi-cuan', icon: Target },
+        // { id: 'referral', label: 'Referral', href: '/referral', icon: Users },
         { id: 'pengaturan', label: 'Pengaturan', href: '/pengaturan', icon: Settings },
       ],
     },
@@ -243,24 +251,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         (item.id === 'email-cover-letter' && (pathname === '/surat-lamaran' || pathname.startsWith('/surat-lamaran/')));
                       const titleAttr = !isExpanded ? item.label : undefined;
 
-                      return (
-                        <Link
-                          key={item.id}
-                          href={item.href}
-                          onClick={() => {
-                            if (onCloseMobile) onCloseMobile();
-                          }}
-                          title={titleAttr}
-                          className={cn(
-                            'w-full flex items-center rounded-[10px] text-xs font-bold transition-all duration-200 group relative cursor-pointer',
-                            !isExpanded
-                              ? 'justify-center p-3'
-                              : 'justify-between px-3.5 py-2.5',
-                            isActive
-                              ? 'bg-[#1738D1] text-white shadow-md shadow-[#1738D1]/20'
-                              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
-                          )}
-                        >
+                      const isExternal = item.href.startsWith('http://') || item.href.startsWith('https://');
+                      const linkClasses = cn(
+                        'w-full flex items-center rounded-[10px] text-xs font-bold transition-all duration-200 group relative cursor-pointer',
+                        !isExpanded
+                          ? 'justify-center p-3'
+                          : 'justify-between px-3.5 py-2.5',
+                        isActive
+                          ? 'bg-[#1738D1] text-white shadow-md shadow-[#1738D1]/20'
+                          : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                      );
+
+                      const linkContent = (
+                        <>
                           <div className="flex items-center gap-2.5 overflow-hidden">
                             <Icon
                               className={cn(
@@ -299,6 +302,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
                               {isExpanded && item.badge}
                             </span>
                           )}
+                        </>
+                      );
+
+                      if (isExternal) {
+                        return (
+                          <a
+                            key={item.id}
+                            href={item.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => {
+                              if (onCloseMobile) onCloseMobile();
+                            }}
+                            title={titleAttr}
+                            className={linkClasses}
+                          >
+                            {linkContent}
+                          </a>
+                        );
+                      }
+
+                      return (
+                        <Link
+                          key={item.id}
+                          href={item.href}
+                          onClick={() => {
+                            if (onCloseMobile) onCloseMobile();
+                          }}
+                          title={titleAttr}
+                          className={linkClasses}
+                        >
+                          {linkContent}
                         </Link>
                       );
                     })}
@@ -349,7 +384,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {/* Horizontal Progress Bar */}
               <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden mb-2">
                 <div
-                  className="h-full bg-[#1738D1] rounded-full transition-all duration-500"
+                  className={`h-full rounded-full transition-all duration-500 ${getScoreProgressBarClass(readinessScore)}`}
                   style={{ width: `${readinessScore}%` }}
                 />
               </div>

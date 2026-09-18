@@ -1,5 +1,5 @@
 {
-  "name": "@cuti/faq-site",
+  "name": "@employr/faq-site",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@cuti/faq": "workspace:*",
+    "@employr/faq": "workspace:*",
     "lucide-react": "^0.553.0",
     "next": "16.2.12",
     "next-themes": "^0.4.4",

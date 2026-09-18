@@ -1,0 +1,43 @@
+---
+// SubsectionHeader.astro - Consistent sub-section heading component (Port 4321 Style)
+
+interface Props {
+  title: string;
+  level?: 2 | 3;
+  eyebrow?: string;
+  eyebrowColor?: string;
+  rightContent?: boolean;
+  className?: string;
+}
+
+const {
+  title,
+  level = 2,
+  eyebrow,
+  eyebrowColor = 'text-[#0000ff]',
+  rightContent = false,
+  className = ''
+} = Astro.props;
+
+const HeadingTag = `h${level}` as 'h2' | 'h3';
+const headingSize = level === 2 ? 'text-xl sm:text-2xl font-bold' : 'text-lg sm:text-xl font-bold';
+---
+
+<div class={`subsection-header flex items-center ${rightContent ? 'justify-between' : ''} gap-3 pb-3 ${className}`}>
+  <div class="flex items-center gap-2.5 min-w-0 flex-1">
+    <span class="w-1.5 h-4 bg-[#0000ff] rounded-xs shrink-0"></span>
+    <div class="min-w-0 flex-1">
+      {eyebrow && (
+        <span class={`text-[10px] font-bold uppercase tracking-wider ${eyebrowColor} block mb-0.5`}>
+          {eyebrow}
+        </span>
+      )}
+      <HeadingTag class={`${headingSize} text-[#101010] tracking-tight`} set:html={title} />
+    </div>
+  </div>
+  {rightContent && (
+    <div class="shrink-0">
+      <slot name="right" />
+    </div>
+  )}
+</div>

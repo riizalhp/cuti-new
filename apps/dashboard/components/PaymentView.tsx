@@ -78,7 +78,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
     if (typeof window !== 'undefined') {
       const storedPromo = localStorage.getItem('promo_claimed_code');
       if (storedPromo) {
-        if (storedPromo.toUpperCase() === 'PRO2026' || storedPromo.toUpperCase() === 'CUTI') {
+        if (storedPromo.toUpperCase() === 'PRO2026' || storedPromo.toUpperCase() === 'CUTI' || storedPromo.toUpperCase() === 'EMPLOYR') {
           setAppliedVoucher({
             code: storedPromo.toUpperCase(),
             discount: 20000,
@@ -133,7 +133,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
     setVoucherError('');
     const cleanCode = voucherCode.trim().toUpperCase();
 
-    if (cleanCode === 'PRO2026' || cleanCode === 'CUTI') {
+    if (cleanCode === 'PRO2026' || cleanCode === 'CUTI' || cleanCode === 'EMPLOYR') {
       setAppliedVoucher({
         code: cleanCode,
         discount: 20000,
@@ -156,7 +156,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
   const handleProcessPayment = () => {
     setStepStatus('processing');
     setProcessingStage(1);
-    const randomTrx = 'TRX-CUTI-' + Math.floor(100000 + Math.random() * 900000);
+    const randomTrx = 'TRX-EMPLOYR-' + Math.floor(100000 + Math.random() * 900000);
     setTransactionId(randomTrx);
 
     setTimeout(() => {
@@ -170,8 +170,8 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
     setTimeout(() => {
       setStepStatus('success');
       if (typeof window !== 'undefined') {
-        localStorage.setItem('cuti_is_pro_member', 'true');
-        localStorage.setItem('cuti_membership_plan', selectedPlan);
+        localStorage.setItem('employr_is_pro_member', 'true');
+        localStorage.setItem('employr_membership_plan', selectedPlan);
       }
       if (onPaymentSuccess) {
         onPaymentSuccess();
@@ -215,13 +215,13 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
           <div className="space-y-2.5">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-xs font-black bg-amber-400/20 text-amber-300 border border-amber-400/30">
               <Crown className="w-3.5 h-3.5" />
-              <span>CUTI Premium Pass</span>
+              <span>Employr Premium Pass</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
               Aktivasi Pembayaran Keanggotaan
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Selesaikan pembayaran secara aman dengan enkripsi SSL 256-bit. Dapatkan akses penuh ke fitur AI CV ATS, Simulasi Interview Voice, &amp; Prioritas Lamaran BUMN.
+              Selesaikan pembayaran secara aman dengan enkripsi SSL 256-bit. Dapatkan akses penuh ke fitur CV ATS, Simulasi Interview Voice, &amp; Prioritas Lamaran BUMN.
             </p>
           </div>
 
@@ -253,7 +253,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
               Selamat! Akun Kamu Resmi Menjadi Member
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-              Fitur CUTI Premium Pass telah aktif selamanya di akun kamu. Akses AI CV ATS, Simulasi Interview Voice, dan prioritas lamaran langsung terbuka.
+              Fitur Employr Premium Pass telah aktif selamanya di akun kamu. Akses CV ATS, Simulasi Interview Voice, dan prioritas lamaran langsung terbuka.
             </p>
           </div>
 
@@ -623,7 +623,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                         <li>Buka aplikasi m-Banking atau ATM {selectedVaBank.toUpperCase()}.</li>
                         <li>Pilih menu <strong>Transfer</strong> &gt; <strong>Virtual Account</strong>.</li>
                         <li>Masukkan nomor VA: <strong>{getVaNumber(selectedVaBank)}</strong>.</li>
-                        <li>Pastikan nama penerima tertulis <strong>AmbilCUTI / {planPrices[selectedPlan].name}</strong> dengan nominal <strong>{formatRupiah(totalPrice)}</strong>.</li>
+                        <li>Pastikan nama penerima tertulis <strong>Employr / {planPrices[selectedPlan].name}</strong> dengan nominal <strong>{formatRupiah(totalPrice)}</strong>.</li>
                         <li>Konfirmasi PIN transaksi kamu. Status akan terupdate otomatis.</li>
                       </ol>
                     )}
@@ -709,10 +709,10 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
                       Kode Pembayaran Kasir {selectedRetail.toUpperCase()}
                     </span>
                     <span className="text-lg font-mono font-black text-amber-500 block">
-                      CUTI2026-9921-3341
+                      EMPLOYR2026-9921-3341
                     </span>
                     <p className="text-slate-500 dark:text-slate-400 text-[11px]">
-                      Tunjukkan kode transaksi ini kepada kasir {selectedRetail === 'indomaret' ? 'Indomaret' : 'Alfamart'} terdekat dan sebutkan pembayaran <strong>AmbilCUTI Member</strong>.
+                      Tunjukkan kode transaksi ini kepada kasir {selectedRetail === 'indomaret' ? 'Indomaret' : 'Alfamart'} terdekat dan sebutkan pembayaran <strong>Employr Member</strong>.
                     </p>
                   </div>
                 </div>

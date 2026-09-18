@@ -30,7 +30,7 @@ export function getDomainInfo(domain?: string | null): DomainMeta {
   if (d.includes('app.ambilcuti.id') || d.includes('app.employr.id') || d.includes('3000')) {
     return {
       label: 'Dashboard User',
-      sublabel: 'app.ambilcuti.id',
+      sublabel: 'app.employr.id',
       badgeBg: 'bg-blue-50 dark:bg-blue-950/60',
       badgeText: 'text-blue-700 dark:text-blue-300',
       badgeBorder: 'border-blue-200 dark:border-blue-800',
@@ -41,7 +41,7 @@ export function getDomainInfo(domain?: string | null): DomainMeta {
   if (d.includes('loker.ambilcuti.id') || d.includes('loker.employr.id') || d.includes('3003')) {
     return {
       label: 'Portal Loker',
-      sublabel: 'loker.ambilcuti.id',
+      sublabel: 'loker.employr.id',
       badgeBg: 'bg-emerald-50 dark:bg-emerald-950/60',
       badgeText: 'text-emerald-700 dark:text-emerald-300',
       badgeBorder: 'border-emerald-200 dark:border-emerald-800',
@@ -52,7 +52,7 @@ export function getDomainInfo(domain?: string | null): DomainMeta {
   if (d.includes('learning.ambilcuti.id') || d.includes('learning.employr.id') || d.includes('3004')) {
     return {
       label: 'Learning',
-      sublabel: 'learning.ambilcuti.id',
+      sublabel: 'learning.employr.id',
       badgeBg: 'bg-purple-50 dark:bg-purple-950/60',
       badgeText: 'text-purple-700 dark:text-purple-300',
       badgeBorder: 'border-purple-200 dark:border-purple-800',
@@ -63,7 +63,7 @@ export function getDomainInfo(domain?: string | null): DomainMeta {
   if (d.includes('faq.ambilcuti.id') || d.includes('faq.employr.id') || d.includes('3005')) {
     return {
       label: 'FAQ / Bantuan',
-      sublabel: 'faq.ambilcuti.id',
+      sublabel: 'faq.employr.id',
       badgeBg: 'bg-teal-50 dark:bg-teal-950/60',
       badgeText: 'text-teal-700 dark:text-teal-300',
       badgeBorder: 'border-teal-200 dark:border-teal-800',
@@ -82,10 +82,10 @@ export function getDomainInfo(domain?: string | null): DomainMeta {
     };
   }
 
-  // Default: Landing Page / ambilcuti.id
+  // Default: Landing Page / employr.id
   return {
     label: 'Landing Page',
-    sublabel: 'ambilcuti.id',
+    sublabel: 'employr.id',
     badgeBg: 'bg-orange-50 dark:bg-orange-950/60',
     badgeText: 'text-orange-700 dark:text-orange-300',
     badgeBorder: 'border-orange-200 dark:border-orange-800',

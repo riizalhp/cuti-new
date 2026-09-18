@@ -7,6 +7,7 @@ Workspace `d:\cuti` dilengkapi dengan aturan khusus agent untuk menjaga kualitas
 3. **[Caveman Rule](file:///d:/cuti/.agents/rules/caveman.md)**: Komunikasi ringkas, langsung ke inti teknis, tanpa basa-basi.
 4. **[Motion Design Skill](file:///d:/cuti/.agents/skills/motion-design/SKILL.md)**: Prinsip universal motion design (timing, easing, 3-layer choreography, Disney principles for UI).
 5. **[Antislop Rule](file:///d:/cuti/.agents/rules/antislop.md)**: Filter anti-slop untuk mencegah AI menghasilkan UI, teks, atau kode yang generik dan hambar.
+6. **[Humanizer Skill](file:///d:/cuti/.agents/skills/humanizer/SKILL.md)**: Menghapus pola tulisan khas AI agar teks terdengar natural seperti ditulis manusia.
 
 <!-- antislop:start -->
 ## antislop

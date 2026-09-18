@@ -1,4 +1,5 @@
 import { Controller, Post, Get, Body, UseGuards, UsePipes } from '@nestjs/common';
+import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto, registerSchema } from './dto/register.dto';
 import { LoginDto, loginSchema } from './dto/login.dto';
@@ -11,6 +12,8 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { ttl: 60000, limit: 3 } })
   @UsePipes(new ZodValidationPipe(registerSchema))
   async register(@Body() dto: RegisterDto) {
     const data = await this.authService.register(dto);
@@ -18,6 +21,8 @@ export class AuthController {
   }
 
   @Post('login')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   @UsePipes(new ZodValidationPipe(loginSchema))
   async login(@Body() dto: LoginDto) {
     const data = await this.authService.login(dto);

@@ -17,7 +17,7 @@ const heroImage = '/images/hero-section.webp';
 const logoMark = '/logo.webp';
 
 const navItems = [
-  ['Product', '#product'],
+  ['Produk', '#product'],
 ] as const;
 
 const faqSchema = {
@@ -26,42 +26,42 @@ const faqSchema = {
   mainEntity: [
     {
       '@type': 'Question',
-      name: 'Is Employr only for fresh graduates?',
+      name: 'Apakah Employr hanya untuk lulusan baru?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No. Anyone actively looking for work, making a career switch, or wanting to polish their portfolio and CV can use Employr to tailor resumes and track their applications.',
+        text: 'Tidak. Siapa pun yang sedang aktif mencari kerja, ingin pindah haluan karier, maupun merapikan portofolio dan CV bisa memakai Employr untuk menyiapkan berkas dan memantau status lamaran.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Can I create multiple CV versions in one account?',
+      name: 'Bisakah saya membuat beberapa versi CV di satu akun?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes. Every role requires a different focus. You can save dedicated versions for UI/UX, marketing, software engineering, or any target role without overwriting previous drafts.',
+        text: 'Bisa. Tiap posisi sering memerlukan fokus pengalaman yang berbeda. Kamu bisa menyimpan beberapa versi khusus untuk desain, marketing, administrasi, atau bidang lainnya tanpa menimpa draf yang sudah ada.',
       },
     },
     {
       '@type': 'Question',
-      name: 'How does the role match score work?',
+      name: 'Bagaimana cara kerja skor kecocokan dengan loker?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Employr compares your experience against job requirements, highlighting missing keywords, measuring action point relevance, and helping you optimize your score before sending.',
+        text: 'Employr membandingkan kualifikasi yang tertulis di CV dengan syarat yang dicantumkan pada deskripsi loker. Sistem akan memperlihatkan keahlian atau kata kunci yang belum kamu cantumkan agar bisa kamu lengkapi sebelum mengirim berkas.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Will my CV pass Applicant Tracking Systems (ATS)?',
+      name: 'Apakah CV yang dibuat ramah sistem ATS?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes. Employr structures your CV with clean formatting, standard industry headers, and optimized readability so your qualifications are parsed accurately by ATS software.',
+        text: 'Ya. Format berkas disusun dengan tata letak satu kolom yang bersih, penamaan bagian yang terstandarisasi, dan teks yang mudah dibaca oleh perangkat lunak Applicant Tracking System (ATS).',
       },
     },
     {
       '@type': 'Question',
-      name: 'How do I export my CV to PDF?',
+      name: 'Bagaimana cara mengunduh CV ke format PDF?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'You can export clean, ATS-compliant PDF resumes directly from the client preview in one click, perfectly formatted for HR parsing systems.',
+        text: 'Kamu bisa langsung mengunduh hasil CV berformat PDF yang rapi melalui tombol cetak/unduh di halaman pratinjau. Formatnya langsung siap dikirim ke email HR atau diunggah ke portal loker.',
       },
     },
   ],
@@ -69,8 +69,8 @@ const faqSchema = {
 ---
 
 <BaseLayout
-  title="Employr: Your CV Workspace & Career Compass | ATS CV Builder"
-  description="Build ATS-friendly CVs, match your skills to job requirements, and track every application in one seamless workspace. Elevate your career with Employr."
+  title="Employr: Susun CV ATS & Pantau Lamaran Kerja Jadi Mudah"
+  description="Buat CV ramah ATS, sesuaikan keahlian dengan kriteria loker, dan rapikan status lamaran kerjamu di satu tempat. Praktis dan siap kirim."
   canonicalUrl="https://employr.id/"
   faqSchema={faqSchema}
 >
@@ -80,16 +80,16 @@ const faqSchema = {
     <!-- TOP ANNOUNCEMENT BAR -->
     <div class="top-announcement">
       <div class="announcement-content">
-        <a href="/pre-register" class="announcement-link" title="Join the Early Access Waitlist">
-          Join the Early Access Waitlist <Icon name="chevron-right" size={13} />
+        <a href="/pre-register" class="announcement-link" title="Daftar Akses Awal Sekarang">
+          Daftar Akses Awal Sekarang <Icon name="chevron-right" size={13} />
         </a>
       </div>
     </div>
 
     <!-- Mobile Nav Backdrop & Glass Sheet Drawer (Root Level for Viewport Freedom) -->
     <div class="mobile-nav-backdrop" data-menu-backdrop></div>
-    <nav class="mobile-nav" aria-label="Mobile navigation" data-menu>
-      <button class="mobile-nav__close" aria-label="Close menu" data-menu-close>
+    <nav class="mobile-nav" aria-label="Navigasi mobile" data-menu>
+      <button class="mobile-nav__close" aria-label="Tutup menu" data-menu-close>
         <Icon name="x" size={18} />
       </button>
       <div class="mobile-nav__links">
@@ -103,7 +103,7 @@ const faqSchema = {
         )}
       </div>
       <div class="mobile-nav__footer">
-        <a class="mobile-start" href="/pre-register" title="Early Access Waitlist">Early Access <Icon name="arrow-up-right" size={16} /></a>
+        <a class="mobile-start" href="/pre-register" title="Daftar Akses Awal">Akses Awal <Icon name="arrow-up-right" size={16} /></a>
       </div>
     </nav>
 
@@ -115,8 +115,8 @@ const faqSchema = {
         <img
           class="hero__image"
           src={heroImage}
-          alt="Young professional crossing a surreal city district with a glowing blue career path"
-          title="Employr Career Compass - Visual Journey"
+          alt="Talenta muda melangkah percaya diri menyusuri kota menuju peluang karier impian"
+          title="Employr - Langkah Awal Menuju Karier Impian"
           loading="eager"
           fetchpriority="high"
         />
@@ -126,19 +126,19 @@ const faqSchema = {
         <!-- Integrated Header Navigation (Inside Hero Card) -->
         <header class="site-header">
           <div class="header-left">
-            <nav class="desktop-nav" aria-label="Main navigation">
+            <nav class="desktop-nav" aria-label="Navigasi utama">
               {navItems.map(([label, href]) => <button data-navigate={href}>{label}</button>)}
             </nav>
           </div>
 
-          <a href="#top" class="brand-mark brand-mark--center" aria-label="Employr Home" title="Employr - Back to top" rel="home">
-            <img src={logoMark} alt="Employr Logo" title="Employr Logo" class="brand-logo-main" width="140" height="36" />
+          <a href="#top" class="brand-mark brand-mark--center" aria-label="Beranda Employr" title="Employr - Kembali ke atas" rel="home">
+            <img src={logoMark} alt="Logo Employr" title="Logo Employr" class="brand-logo-main" width="140" height="36" />
           </a>
 
           <div class="header-actions">
-            <!-- <button class="login-link" data-toast="Sign in will be available at launch.">Sign In</button> -->
-            <a class="header-cta" href="/pre-register" title="Get Early Access to Employr">Early Access <Icon name="move-up-right" size={14} /></a>
-            <button class="menu-toggle" aria-label="Navigation menu" aria-expanded="false" data-menu-button>
+            <!-- <button class="login-link" data-toast="Fitur masuk akan tersedia saat peluncuran resmi.">Masuk</button> -->
+            <a class="header-cta" href="/pre-register" title="Dapatkan Akses Awal ke Employr">Akses Awal <Icon name="move-up-right" size={14} /></a>
+            <button class="menu-toggle" aria-label="Menu navigasi" aria-expanded="false" data-menu-button>
               <span class="menu-toggle__bar menu-toggle__bar--top"></span>
               <span class="menu-toggle__bar menu-toggle__bar--mid"></span>
               <span class="menu-toggle__bar menu-toggle__bar--bot"></span>
@@ -149,14 +149,14 @@ const faqSchema = {
         <!-- Hero Content -->
         <div class="hero__inner">
           <div class="hero__content">
-            <h1 id="hero-title">Your career starts<br /><em>right here, right now.</em></h1>
+            <h1 id="hero-title">Langkah pertama kariermu,<br /><em>dimulai dari sini.</em></h1>
           </div>
           <div class="hero__content hero__content--right">
-            <p class="hero__subtitle">Your next chapter<br /><em>starts with you.</em></p>
+            <p class="hero__subtitle">Peluang baru<br /><em>siap kamu jemput.</em></p>
           </div>
         </div>
 
-        <div class="hero__scroll"><span>SCROLL TO EXPLORE</span><i></i></div>
+        <div class="hero__scroll"><span>GULIR KE BAWAH</span><i></i></div>
       </section>
     </div>
 
@@ -166,10 +166,10 @@ const faqSchema = {
     <!-- 01 STATEMENT -->
     <section class="statement section-space" id="product">
         <div class="editorial-frame statement__frame">
-          <div class="section-label"><span>01</span><i></i><span>YOUR CAREER, YOUR WAY</span></div>
+          <div class="section-label"><span>01</span><i></i><span>KARIERMU, PILIHANMU</span></div>
           <div class="statement__body">
-            <h2>Your experience<br />is bigger than <em>one resume.</em></h2>
-            <p>Your skills don't fit neatly into rigid templates. Employr helps you turn every project and achievement into real proof that recruiters notice.</p>
+            <h2>Pengalamanmu terlalu luas<br />untuk <em>satu CV yang kaku.</em></h2>
+            <p>Tiap posisi kerja butuh sorotan yang berbeda. Di Employr, kamu bisa merapikan pencapaian dan keahlianmu jadi bukti nyata yang langsung dilirik rekruter.</p>
           </div>
           <div class="statement__tick"><span>01</span><i></i><span>07</span></div>
         </div>
@@ -181,36 +181,36 @@ const faqSchema = {
       <!-- 03 ADAPT -->
       <section class="adapt section-space" id="career">
         <div class="adapt__intro editorial-frame">
-          <div class="section-label"><span>03</span><i></i><span>ADAPT</span></div>
-          <h2>One rigid template<br /><em>won't work for every company.</em></h2>
-          <p>Every job looks for specific points. Highlight the experience that matters most for the role you want.</p>
+          <div class="section-label"><span>03</span><i></i><span>SESUAIKAN</span></div>
+          <h2>Kriteria rekruter berbeda-beda<br /><em>untuk tiap posisi.</em></h2>
+          <p>Tonjolkan pengalaman dan keahlian yang paling relevan dengan posisi yang kamu lamar agar lolos tahap seleksi.</p>
         </div>
         <div class="adapt__flow editorial-frame">
-          <div class="adapt__original"><p>FULL CV</p><CvArtifact variant="mini" /></div>
-          <div class="adapt__scanner"><Icon name="scan-line" size={22} /><span>HIGHLIGHTING<br />KEY POINTS</span><i></i></div>
-          <div class="adapt__target"><p>TAILORED CV</p><CvArtifact variant="mini" /></div>
+          <div class="adapt__original"><p>CV UTAMA</p><CvArtifact variant="mini" /></div>
+          <div class="adapt__scanner"><Icon name="scan-line" size={22} /><span>MENYOROT<br />POIN UTAMA</span><i></i></div>
+          <div class="adapt__target"><p>CV SPESIFIK</p><CvArtifact variant="mini" /></div>
         </div>
         <div class="adapt__footer editorial-frame">
-          <div><span class="blue-dot"></span> Keyword alignment <span class="blue-dot"></span> Targeted action points <span class="blue-dot"></span> Skill priority</div>
-          <button class="action-link" data-toast="CV adaptation coming soon.">Adapt Your CV Now <Icon name="arrow-up-right" /></button>
+          <div><span class="blue-dot"></span> Kesesuaian kata kunci <span class="blue-dot"></span> Poin pengalaman terarah <span class="blue-dot"></span> Prioritas keahlian</div>
+          <button class="action-link" data-toast="Fitur penyesuaian CV segera hadir.">Sesuaikan CV Sekarang <Icon name="arrow-up-right" /></button>
         </div>
       </section>
 
       <!-- 04 MANAGE -->
       <section class="versions section-space" aria-labelledby="versions-title">
         <div class="versions__headline">
-          <div class="section-label section-label--inverse"><span>04</span><i></i><span>MANAGE</span></div>
-          <h2 id="versions-title">One profile.<br /><em>Many target roles.</em></h2>
-          <p>Apply as a UI Designer, Product Manager, or Data Analyst without juggling separate files.</p>
-          <div class="versions__caption"><Icon name="circle-dot" size={15} /> All versions saved, ready to send.</div>
+          <div class="section-label section-label--inverse"><span>04</span><i></i><span>KELOLA</span></div>
+          <h2 id="versions-title">Satu profil induk.<br /><em>Beragam pilihan posisi.</em></h2>
+          <p>Melamar sebagai UI Designer, Admin, atau Marketing tanpa pusing mengelola banyak berkas terpisah.</p>
+          <div class="versions__caption"><Icon name="circle-dot" size={15} /> Semua draf tersimpan rapi, siap dikirim.</div>
         </div>
         <div class="versions__stage">
           <div class="versions__glow"></div>
-          <article class="version-card version-card--rear"><span>01</span><b>Growth<br />Marketing</b><small>Updated 3 weeks ago</small></article>
-          <article class="version-card version-card--mid"><span>02</span><b>UI/UX<br />Designer</b><small>Updated 1 month ago</small></article>
+          <article class="version-card version-card--rear"><span>01</span><b>Growth<br />Marketing</b><small>Diperbarui 3 minggu lalu</small></article>
+          <article class="version-card version-card--mid"><span>02</span><b>UI/UX<br />Designer</b><small>Diperbarui 1 bulan lalu</small></article>
           <article class="version-card version-card--front">
-            <span>03</span><b>Product<br />Designer</b><small>Updated 2 days ago</small>
-            <div><span>MAIN DRAFT</span><Icon name="arrow-up-right" size={14} /></div>
+            <span>03</span><b>Product<br />Designer</b><small>Diperbarui 2 hari lalu</small>
+            <div><span>DRAF UTAMA</span><Icon name="arrow-up-right" size={14} /></div>
           </article>
         </div>
       </section>
@@ -224,61 +224,61 @@ const faqSchema = {
           <div class="faq-section__top">
             <div class="faq-section__heading">
               <div class="section-label section-label--inverse"><span>06</span><i></i><span>FAQ</span></div>
-              <h2 id="faq-title">Questions &amp; answers,<br /><em>everything you need to know.</em></h2>
+              <h2 id="faq-title">Pertanyaan umum,<br /><em>seputar penggunaan Employr.</em></h2>
             </div>
             <p class="faq-section__lead">
-              Got questions about our CV workspace, smart role alignment, or application tools? We have answers.
+              Hal-hal yang sering ditanyakan mengenai pembuatan CV, penyesuaian kriteria loker, dan fitur pemantau lamaran.
             </p>
           </div>
 
           <div class="faq-section__list">
             <details class="faq-item" name="faq-accordion">
               <summary class="faq-item__question">
-                <span>Is Employr only for fresh graduates?</span>
+                <span>Apakah Employr hanya untuk lulusan baru?</span>
                 <span class="faq-item__icon"><Icon name="plus" size={18} /></span>
               </summary>
               <div class="faq-item__answer">
-                <p>No. Anyone actively looking for work, making a career switch, or wanting to polish their portfolio and CV can use Employr to tailor resumes and track their applications.</p>
+                <p>Tidak. Siapa pun yang sedang aktif mencari kerja, ingin pindah haluan karier, maupun merapikan portofolio dan CV bisa memakai Employr untuk menyiapkan berkas dan memantau status lamaran.</p>
               </div>
             </details>
 
             <details class="faq-item" name="faq-accordion">
               <summary class="faq-item__question">
-                <span>Can I create multiple CV versions in one account?</span>
+                <span>Bisakah saya membuat beberapa versi CV di satu akun?</span>
                 <span class="faq-item__icon"><Icon name="plus" size={18} /></span>
               </summary>
               <div class="faq-item__answer">
-                <p>Yes. Every role requires a different focus. You can save dedicated versions for UI/UX, marketing, software engineering, or any target role without overwriting previous drafts.</p>
+                <p>Bisa. Tiap posisi sering memerlukan fokus pengalaman yang berbeda. Kamu bisa menyimpan beberapa versi khusus untuk desain, marketing, administrasi, atau bidang lainnya tanpa menimpa draf yang sudah ada.</p>
               </div>
             </details>
 
             <details class="faq-item" name="faq-accordion">
               <summary class="faq-item__question">
-                <span>How does the role match score work?</span>
+                <span>Bagaimana cara kerja skor kecocokan dengan loker?</span>
                 <span class="faq-item__icon"><Icon name="plus" size={18} /></span>
               </summary>
               <div class="faq-item__answer">
-                <p>Employr compares your experience against job requirements, highlighting missing keywords, measuring action point relevance, and helping you optimize your score before sending.</p>
+                <p>Employr membandingkan kualifikasi yang tertulis di CV dengan syarat yang dicantumkan pada deskripsi loker. Sistem akan memperlihatkan keahlian atau kata kunci yang belum kamu cantumkan agar bisa kamu lengkapi sebelum mengirim berkas.</p>
               </div>
             </details>
 
             <details class="faq-item" name="faq-accordion">
               <summary class="faq-item__question">
-                <span>Will my CV pass Applicant Tracking Systems (ATS)?</span>
+                <span>Apakah CV yang dibuat ramah sistem ATS?</span>
                 <span class="faq-item__icon"><Icon name="plus" size={18} /></span>
               </summary>
               <div class="faq-item__answer">
-                <p>Yes. Employr structures your CV with clean formatting, standard industry headers, and optimized readability so your qualifications are parsed accurately by ATS software.</p>
+                <p>Ya. Format berkas disusun dengan tata letak satu kolom yang bersih, penamaan bagian yang terstandarisasi, dan teks yang mudah dibaca oleh perangkat lunak Applicant Tracking System (ATS).</p>
               </div>
             </details>
 
             <details class="faq-item" name="faq-accordion">
               <summary class="faq-item__question">
-                <span>How do I export my CV to PDF?</span>
+                <span>Bagaimana cara mengunduh CV ke format PDF?</span>
                 <span class="faq-item__icon"><Icon name="plus" size={18} /></span>
               </summary>
               <div class="faq-item__answer">
-                <p>You can export clean, ATS-compliant PDF resumes directly from the client preview in one click, perfectly formatted for HR parsing systems.</p>
+                <p>Kamu bisa langsung mengunduh hasil CV berformat PDF yang rapi melalui tombol cetak/unduh di halaman pratinjau. Formatnya langsung siap dikirim ke email HR atau diunggah ke portal loker.</p>
               </div>
             </details>
           </div>
@@ -291,11 +291,11 @@ const faqSchema = {
           <div class="testimonials-ready__grid">
             <div class="testimonials-ready__copy">
               <div class="testimonials-ready__eyebrow">
-                <span>USER STORIES</span><i></i> <span>REAL EXPERIENCES</span>
+                <span>CERITA PENGGUNA</span><i></i> <span>PENGALAMAN NYATA</span>
               </div>
-              <h2 id="stories-title">Not fake testimonials,<br /><em>real results.</em></h2>
-              <p>Real stories from people who landed interviews and found their dream careers through Employr.</p>
-              <a href="/pre-register" class="action-link" title="Join Employr Early Access and share your story">Be the First to Share <Icon name="arrow-up-right" /></a>
+              <h2 id="stories-title">Cerita perjalanan<br /><em>menuju karier impian.</em></h2>
+              <p>Pengalaman langsung dari rekan-rekan yang berhasil dapat panggilan interview dan tawaran kerja.</p>
+              <a href="/pre-register" class="action-link" title="Daftar Akses Awal Employr dan bagikan ceritamu">Ceritakan Pengalamanmu <Icon name="arrow-up-right" /></a>
             </div>
 
             <div class="testimonials-ready__carousel-wrap" style="padding-top: clamp(32px, 9vw, 116px);">
@@ -320,7 +320,7 @@ const faqSchema = {
                   <blockquote class="reviews-card__quote">
                     <div class="reviews-card__quote-mark">“</div>
                     <p class="reviews-card__text">
-                      We don’t publish fake reviews. Land your next interview callback with Employr, and let your first offer letter be the story featured right here.
+                      Saat kamu berhasil mendapat panggilan interview atau surat penawaran kerja lewat Employr, bagikan ceritamu agar bisa menginspirasi pencari kerja lainnya di sini.
                     </p>
                   </blockquote>
 
@@ -328,8 +328,8 @@ const faqSchema = {
                     <div class="reviews-card__author-wrap">
                       <div class="reviews-card__avatar">★</div>
                       <div class="reviews-card__meta">
-                        <span class="reviews-card__author">Your Story Here</span>
-                        <span class="reviews-card__title">Next Interview Callback · Reserved</span>
+                        <span class="reviews-card__author">Cerita Kamu di Sini</span>
+                        <span class="reviews-card__title">Panggilan Interview Berikutnya · Disiapkan</span>
                       </div>
                     </div>
                   </figcaption>
@@ -342,7 +342,7 @@ const faqSchema = {
 
 
       <!-- CAREER OBSERVATION -->
-      <section class="career-observation section-space" aria-label="Career reflection">
+      <section class="career-observation section-space" aria-label="Refleksi karier">
         <div class="career-observation__bg">
           <video
             class="career-observation__video"
@@ -362,12 +362,12 @@ const faqSchema = {
 
         <div class="editorial-frame career-observation__frame">
           <div class="career-observation__copy">
-            <div class="career-observation__wordmark"><span>CONTROL IN YOUR HANDS</span></div>
-            <p>Explore your options,<br />find your own rhythm.</p>
+            <div class="career-observation__wordmark"><span>KENDALI DI TANGANMU</span></div>
+            <p>Tentukan langkahmu,<br />temukan ritme terbaikmu.</p>
             <small></small>
           </div>
           <div class="career-observation__footer-label">
-            <span>CAREER REFLECTION</span>
+            <span>REFLEKSI KARIER</span>
             <b>07 / 07</b>
           </div>
         </div>

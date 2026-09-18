@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@cuti/db';
+import { prisma } from '@employr/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +41,9 @@ export async function POST(req: NextRequest) {
       activity_name,
       metadata,
       duration_increment_sec,
+      module_name,
+      error_details,
+      vitals,
     } = payload;
 
     if (!visitor_id || !session_id) {
@@ -299,6 +302,134 @@ export async function POST(req: NextRequest) {
       });
 
       return NextResponse.json({ success: true, action: 'user_linked' }, { headers });
+    }
+
+    if (action === 'module_heartbeat') {
+      const inc = duration_increment_sec || 25;
+      await (prisma as any).visitorActivity.create({
+        data: {
+          visitor_id,
+          session_id,
+          user_id: user_id || null,
+          activity_type: 'MODULE_DURATION',
+          activity_name: `Aktivitas Modul: ${module_name || 'UMUM'}`,
+          page_path: path || '/',
+          metadata: { module: module_name || 'UMUM', duration_sec: inc },
+          created_at: now,
+        },
+      });
+
+      return NextResponse.json({ success: true, action: 'module_heartbeat_recorded' }, { headers });
+    }
+
+    if (action === 'cv_funnel_step') {
+      await (prisma as any).visitorActivity.create({
+        data: {
+          visitor_id,
+          session_id,
+          user_id: user_id || null,
+          activity_type: 'CV_FUNNEL_STEP',
+          activity_name: activity_name || 'CV Funnel Step',
+          page_path: path || '/cv',
+          metadata: metadata || null,
+          created_at: now,
+        },
+      });
+
+      return NextResponse.json({ success: true, action: 'cv_funnel_step_recorded' }, { headers });
+    }
+
+    if (action === 'print_telemetry') {
+      await (prisma as any).visitorActivity.create({
+        data: {
+          visitor_id,
+          session_id,
+          user_id: user_id || null,
+          activity_type: 'PRINT_EXPORT',
+          activity_name: 'Cetak / Unduh CV (PDF/Print)',
+          page_path: path || '/cv',
+          metadata: metadata || null,
+          created_at: now,
+        },
+      });
+
+      return NextResponse.json({ success: true, action: 'print_telemetry_recorded' }, { headers });
+    }
+
+    if (action === 'ats_score_log') {
+      await (prisma as any).visitorActivity.create({
+        data: {
+          visitor_id,
+          session_id,
+          user_id: user_id || null,
+          activity_type: 'ATS_SCORE_EVALUATION',
+          activity_name: `Skor Evaluasi ATS: ${metadata?.score || 0}/100`,
+          page_path: path || '/',
+          metadata: metadata || null,
+          created_at: now,
+        },
+      });
+
+      return NextResponse.json({ success: true, action: 'ats_score_log_recorded' }, { headers });
+    }
+
+    if (action === 'client_error') {
+      const errorMsg = error_details?.message || 'Unknown Client Error';
+
+      await (prisma as any).visitorActivity.create({
+        data: {
+          visitor_id,
+          session_id,
+          user_id: user_id || null,
+          activity_type: 'CLIENT_ERROR',
+          activity_name: `[Error Browser] ${errorMsg.slice(0, 100)}`,
+          page_path: path || '/',
+          metadata: { ...error_details, url },
+          created_at: now,
+        },
+      });
+
+      try {
+        await prisma.app_logs.create({
+          data: {
+            id: (await import('crypto')).randomUUID(),
+            source: 'SYSTEM',
+            level: 'WARNING',
+            message: `[Client Browser Error] ${errorMsg.slice(0, 200)}`,
+            details: {
+              error_details,
+              visitor_id,
+              session_id,
+              user_id,
+              path,
+              url,
+              ip,
+            },
+            created_at: now,
+          },
+        });
+      } catch (logErr: any) {
+        console.error('[Client Error Logging Admin] Failed to write app_logs:', logErr.message);
+      }
+
+      return NextResponse.json({ success: true, action: 'client_error_recorded' }, { headers });
+    }
+
+    if (action === 'web_vitals') {
+      await (prisma as any).visitorActivity.create({
+        data: {
+          visitor_id,
+          session_id,
+          user_id: user_id || null,
+          activity_type: 'WEB_VITALS',
+          activity_name: `Page Speed: ${vitals?.pageLoadMs || 0}ms`,
+          page_path: path || '/',
+          metadata: vitals || null,
+          created_at: now,
+        },
+      });
+
+      return NextResponse.json({ success: true, action: 'web_vitals_recorded' }, { headers });
     }
 
     return NextResponse.json({ success: false, message: 'Invalid action' }, { status: 400, headers });

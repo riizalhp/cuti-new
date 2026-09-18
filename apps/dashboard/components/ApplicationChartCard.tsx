@@ -4,15 +4,13 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { trackerApi } from '@/lib/api';
 import {
-  TrendingUp,
-  ArrowRight,
-  Send,
-  Eye,
-  Video,
-  Award,
-  AlertTriangle,
-  Sparkles,
-} from 'lucide-react';
+  TrendingUpIcon,
+  SendIcon,
+  EyeIcon,
+  VideoIcon,
+  AwardIcon,
+  AlertTriangleIcon,
+} from '@/components/icons/CustomIcons';
 
 export const ApplicationChartCard: React.FC = () => {
   const router = useRouter();
@@ -65,7 +63,7 @@ export const ApplicationChartCard: React.FC = () => {
       rate: sentRate,
       color: 'bg-[#1738D1]',
       badgeColor: 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300',
-      icon: Send,
+      icon: SendIcon,
     },
     {
       id: 'screening',
@@ -75,7 +73,7 @@ export const ApplicationChartCard: React.FC = () => {
       rate: screeningRate,
       color: 'bg-blue-500',
       badgeColor: 'bg-blue-100 text-navy-800 dark:bg-blue-950 dark:text-blue-300',
-      icon: Eye,
+      icon: EyeIcon,
     },
     {
       id: 'interview',
@@ -85,7 +83,7 @@ export const ApplicationChartCard: React.FC = () => {
       rate: interviewRate,
       color: 'bg-amber-500',
       badgeColor: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
-      icon: Video,
+      icon: VideoIcon,
     },
     {
       id: 'offering',
@@ -95,17 +93,17 @@ export const ApplicationChartCard: React.FC = () => {
       rate: offeringRate,
       color: 'bg-emerald-500',
       badgeColor: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
-      icon: Award,
+      icon: AwardIcon,
     },
   ];
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex flex-col justify-between h-full space-y-4">
+    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-xs transition-colors flex flex-col justify-between h-full space-y-4">
       {/* Header Row */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-[10px] bg-orange-50 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 flex items-center justify-center border border-orange-100 dark:border-orange-900/50">
-            <TrendingUp className="w-4 h-4" />
+            <TrendingUpIcon size={16} />
           </div>
           <div>
             <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
@@ -122,10 +120,9 @@ export const ApplicationChartCard: React.FC = () => {
 
         <button
           onClick={() => router.push('/tracker')}
-          className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1 cursor-pointer"
+          className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center cursor-pointer"
         >
           <span>Detail Tracker</span>
-          <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
@@ -142,7 +139,7 @@ export const ApplicationChartCard: React.FC = () => {
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="p-1.5 rounded-[10px] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">
-                    <Icon className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                    <Icon size={14} className="text-orange-600 dark:text-orange-400" />
                   </div>
                   <div className="truncate">
                     <h4 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors truncate">
@@ -179,15 +176,10 @@ export const ApplicationChartCard: React.FC = () => {
       {/* Insight & Action Box */}
       <div className="p-3 rounded-[10px] bg-orange-50/80 dark:bg-orange-950/40 border border-orange-100 dark:border-orange-900/50 space-y-2">
         <div className="flex items-start gap-2 text-xs">
-          <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+          <AlertTriangleIcon size={16} className="text-amber-500 shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-1.5">
-              <span>Insight Konversi Seleksi:</span>
-              {total > 0 && (
-                <span className="px-1.5 py-0.2 rounded bg-orange-100 text-orange-800 dark:bg-orange-900/60 dark:text-orange-300 text-[10px] font-mono">
-                  Live
-                </span>
-              )}
+            <p className="font-bold text-slate-900 dark:text-white text-xs">
+              Insight Konversi Seleksi:
             </p>
             <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
               {total === 0 ? (
@@ -217,7 +209,7 @@ export const ApplicationChartCard: React.FC = () => {
         onClick={() => router.push('/tracker')}
         className="w-full text-center py-2 px-3 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer border-0"
       >
-        Analisis Detail Conversion Rate di Tracker →
+        Analisis Detail Conversion Rate di Tracker
       </button>
     </div>
   );

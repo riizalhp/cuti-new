@@ -1,12 +1,12 @@
 # Employr Dashboard
 
-Next.js 15 dashboard application with CUTI design system.
+Next.js 15 dashboard application with Employr design system.
 
 ## Features
 
 - **Next.js 15** with App Router
 - **TypeScript** for type safety
-- **Tailwind CSS 4** with CUTI design tokens
+- **Tailwind CSS 4** with Employr design tokens
 - **Glassmorphism UI** components
 - **Radix UI** primitives for accessibility
 - **Framer Motion** for animations
@@ -14,7 +14,7 @@ Next.js 15 dashboard application with CUTI design system.
 
 ## Design System
 
-The dashboard implements the CUTI design system with:
+The dashboard implements the Employr design system with:
 
 - **Glassmorphism aesthetic** inspired by Apple VisionOS and Linear.app
 - **Warm gray base** (#D7D6D5) with indigo/violet accents
@@ -41,7 +41,7 @@ pnpm build
 The dev server runs on `http://localhost:3000`
 
 ```bash
-pnpm --filter @cuti/dashboard dev
+pnpm --filter @employr/dashboard dev
 ```
 
 ## Project Structure

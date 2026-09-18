@@ -15,7 +15,7 @@ const {
 ---
 
 <!doctype html>
-<html lang="id">
+<html lang="id" class="bg-[#f4f3ee] text-[#101010]">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -23,21 +23,28 @@ const {
     <meta name="description" content={description} />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href={canonicalUrl} />
-    <meta name="theme-color" content="#1738d1" />
-    <!-- Favicons & Icons -->
+    <meta name="theme-color" content="#f4f3ee" />
+    <!-- Favicons & Icons (Google Search & Multi-device compliance) -->
     <link rel="icon" type="image/svg+xml" href="/employer-job.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+    <!-- Preconnect & Google Fonts (DM Sans · Instrument Sans · Instrument Serif · Inter Tight · Manrope) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,300..800&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:ital,wght@0,300..900;1,300..900&family=Manrope:wght@400..800&display=swap"
+      rel="stylesheet"
+    />
     <!-- Lucide Icons — same set as dashboard (port 3000) -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   </head>
-  <body>
+  <body class="bg-[#f4f3ee] text-[#101010] antialiased selection:bg-[#0000ff] selection:text-white">
     <slot />
     <script is:inline>
       // lucide — render icons dashboard (port 3000)
@@ -61,9 +68,11 @@ const {
     <!-- Visitor Tracker Script -->
     <script is:inline>
       (function() {
-        var VISITOR_KEY = 'cuti_visitor_id';
-        var SESSION_KEY = 'cuti_session_id';
-        var LAST_ACTIVE_KEY = 'cuti_session_last_active';
+        var VISITOR_KEY = 'employr_visitor_id';
+        var LEGACY_VISITOR_KEY = 'cuti_visitor_id';
+        var SESSION_KEY = 'employr_session_id';
+        var LEGACY_SESSION_KEY = 'cuti_session_id';
+        var LAST_ACTIVE_KEY = 'employr_session_last_active';
         var TIMEOUT = 30 * 60 * 1000;
 
         function getCookie(name) {
@@ -75,7 +84,7 @@ const {
           document.cookie = name + '=' + encodeURIComponent(val) + '; expires=' + exp + '; path=/; SameSite=Lax';
         }
 
-        var visId = localStorage.getItem(VISITOR_KEY) || getCookie(VISITOR_KEY);
+        var visId = localStorage.getItem(VISITOR_KEY) || getCookie(VISITOR_KEY) || localStorage.getItem(LEGACY_VISITOR_KEY) || getCookie(LEGACY_VISITOR_KEY);
         if (!visId) {
           visId = 'vis_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 9);
         }
@@ -83,8 +92,8 @@ const {
         setCookie(VISITOR_KEY, visId, 365);
 
         var now = Date.now();
-        var lastActive = sessionStorage.getItem(LAST_ACTIVE_KEY);
-        var sessId = sessionStorage.getItem(SESSION_KEY);
+        var lastActive = sessionStorage.getItem(LAST_ACTIVE_KEY) || sessionStorage.getItem('cuti_session_last_active');
+        var sessId = sessionStorage.getItem(SESSION_KEY) || sessionStorage.getItem(LEGACY_SESSION_KEY);
         if (!sessId || !lastActive || (now - parseInt(lastActive, 10)) > TIMEOUT) {
           sessId = 'sess_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 9);
           sessionStorage.setItem(SESSION_KEY, sessId);
@@ -167,7 +176,7 @@ const {
             session_id: sessId,
             url: window.location.href,
             path: window.location.pathname,
-            title: document.title || 'Portal Loker AmbilCUTI',
+            title: document.title || 'Portal Loker Employr',
             hostname: window.location.hostname,
             domain: window.location.hostname.replace(/:\d+$/, ''),
             device: { device_type: device_type, browser: browser, browser_version: browser_version, os: os, screen_resolution: window.screen.width + 'x' + window.screen.height },

@@ -1,5 +1,5 @@
 {
-  "name": "@cuti/faq",
+  "name": "@employr/faq",
   "version": "0.0.1",
   "private": true,
   "description": "Employr FAQ knowledge base — content, loader, markdown renderer & retrieval search (TF-IDF cosine, non-LLM RAG)",

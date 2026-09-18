@@ -6,11 +6,14 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl) or local network/localhost
-      if (!origin || /^(http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+)(:\d+)?$)/.test(origin)) {
+      if (!origin) return callback(null, true);
+      const isAllowed =
+        /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+)(:\d+)?$/.test(origin) ||
+        /^https:\/\/([\w-]+\.)?(employr\.id|ambilcuti\.id)$/.test(origin);
+      if (isAllowed) {
         callback(null, true);
       } else {
-        callback(null, true); // Permissive in development
+        callback(new Error('Not allowed by CORS'));
       }
     },
     credentials: true,
@@ -21,4 +24,5 @@ async function bootstrap() {
   await app.listen(3001, '0.0.0.0');
   console.log(`Application is running on: http://0.0.0.0:3001 (accessible via LAN IP)`);
 }
+// Server bootstrap
 bootstrap();

@@ -4,11 +4,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: '#101114',
-        paper: '#f5f6f2',
+        ink: '#101010',
+        paper: '#f4f3ee',
+        paperSoft: '#f9f8f5',
+        surface: '#ffffff',
+        blue: '#0000ff',
         cobalt: '#1738d1',
         periwinkle: '#c9d0ff',
         lime: '#c8f55b',
+        borderMuted: '#d7d6cf',
         navy: {
           900: '#0F1A3C',
           800: '#162758',
@@ -27,10 +31,17 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['"Inter Tight"', 'sans-serif'],
-        display: ['"Instrument Serif"', '"Bodoni Moda"', 'Inter', 'sans-serif'],
-        serif: ['"Instrument Serif"', '"Bodoni Moda"', '"Cormorant Garamond"', 'serif'],
+        sans: ['"Inter Tight"', '"Manrope"', '"DM Sans"', 'sans-serif'],
+        display: ['"DM Sans"', '"Inter Tight"', 'sans-serif'],
+        serif: ['"Instrument Serif"', 'Georgia', 'serif'],
+        editorial: ['"Instrument Serif"', 'Georgia', 'serif'],
         doodle: ['"Caveat"', 'cursive', 'sans-serif'],
+      },
+      boxShadow: {
+        'paper-sm': '0 1px 3px 0 rgba(16, 16, 16, 0.04)',
+        'paper-md': '0 4px 16px -2px rgba(16, 16, 16, 0.06)',
+        'paper-lg': '0 12px 32px -4px rgba(16, 16, 16, 0.08)',
+        'blue-pill': '0 4px 14px rgba(0, 0, 255, 0.25)',
       },
     },
   },

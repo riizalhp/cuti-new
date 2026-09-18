@@ -1,0 +1,334 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import FooterPortal from '../../components/FooterPortal.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import SearchModal from '../../components/SearchModal.astro';
+import DetailCrossSections from '../../components/DetailCrossSections.astro';
+import { getPortalCertificationBySlug } from '../../lib/data';
+
+const sert = await getPortalCertificationBySlug(Astro.params.slug || '');
+if (!sert) {
+  return Astro.redirect('/sertifikasi');
+}
+const canonical = `http://localhost:3003/sertifikasi/${sert.slug}`;
+const title = `${sert.title} (${sert.issuer}) | Employer Job`;
+const description = `Informasi lengkap sertifikasi ${sert.title} dari ${sert.issuer}. Biaya: ${sert.price}, Masa berlaku: ${sert.validity}, Format: ${sert.format}. Syarat pendaftaran, skema uji kompetensi, dan jadwal resmi.`;
+---
+
+<BaseLayout title={title} description={description} canonicalUrl={canonical}>
+  <Navbar />
+
+  <main class="bg-[#f4f3ee] min-h-screen pb-20">
+    <!-- Breadcrumbs Navigation -->
+    <div class="bg-white border-b border-[#d7d6cf]">
+      <div class="max-w-[1240px] mx-auto px-4 sm:px-6 py-4">
+        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs text-[#6e6d68] flex-wrap">
+          <a href="/" class="hover:text-[#0000ff] transition">Beranda</a>
+          <span>/</span>
+          <a href="/sertifikasi" class="hover:text-[#0000ff] transition">Sertifikasi</a>
+          <span>/</span>
+          <span class="text-[#6e6d68] font-medium">{sert.issuer}</span>
+          <span>/</span>
+          <span class="text-[#101010] font-semibold truncate max-w-[200px] sm:max-w-xs" aria-current="page">{sert.title}</span>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Sertifikasi Header Card -->
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6">
+      <div class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8 shadow-xs">
+        <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+          <div class="flex items-start gap-4 sm:gap-5">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#f4f3ee] border border-[#d7d6cf] p-2 flex items-center justify-center shrink-0 shadow-2xs text-[#0000ff]">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap mb-1.5">
+                <span class="text-sm font-semibold text-[#101010]">{sert.issuer}</span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold">
+                  Standar Terakreditasi
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[#0000ff] text-[11px] font-semibold">
+                  {sert.level}
+                </span>
+              </div>
+              <h1 class="text-xl sm:text-2xl lg:text-3xl font-semibold text-[#101010] tracking-tight leading-snug">
+                {sert.title}
+              </h1>
+              <div class="flex items-center gap-y-2 gap-x-4 flex-wrap mt-3 text-xs text-[#6e6d68] font-medium">
+                <span class="flex items-center gap-1.5 text-emerald-700 font-bold">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  {sert.price}
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  Masa Berlaku: {sert.validity}
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                  Format: {sert.format}
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                  Rating: {sert.rating} ({sert.students} alumni)
+                </span>
+              </div>
+
+              <!-- Skills tags -->
+              <div class="flex items-center gap-1.5 flex-wrap mt-4">
+                {sert.skills.map((s) => (
+                  <span class="text-xs px-3 py-1 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#101010] font-medium">
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 w-full lg:w-64 pt-4 lg:pt-0 border-t lg:border-t-0 border-[#d7d6cf]/50">
+            <a
+              href="#daftar-sertifikasi"
+              class="w-full min-h-[44px] px-5 py-3 rounded-full bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-semibold text-xs shadow-md shadow-orange-500/20 text-center flex items-center justify-center gap-2 transition cursor-pointer"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+              <span>Daftar Sertifikasi</span>
+            </a>
+            <div class="flex items-center gap-2 w-full">
+              <button
+                type="button"
+                id="btn-bookmark-sert"
+                class="flex-1 min-h-[42px] px-4 py-2 rounded-full border border-[#d7d6cf] hover:bg-[#f4f3ee] text-[#101010] text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+              >
+                <svg class="w-4 h-4 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                <span>Simpan</span>
+              </button>
+              <button
+                type="button"
+                id="btn-share-sert"
+                class="flex-1 min-h-[42px] px-4 py-2 rounded-full border border-[#d7d6cf] hover:bg-[#f4f3ee] text-[#101010] text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+              >
+                <svg class="w-4 h-4 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                <span>Bagikan</span>
+              </button>
+            </div>
+            <span class="text-[11px] text-[#6e6d68] text-center">
+              Jadwal pelaksanaan terdekat: {sert.schedule}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Layout (Left Content + Right Sidebar) -->
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Left: Detail Information -->
+        <div class="lg:col-span-8 space-y-6">
+          <!-- 1. Scheme Summary -->
+          <article class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8">
+            <h2 class="text-lg font-semibold text-[#101010] mb-4 pb-3 border-b border-[#d7d6cf]/50 flex items-center gap-2">
+              <span class="w-1.5 h-4 bg-emerald-600 rounded-full"></span>
+              Ringkasan Skema Kompetensi
+            </h2>
+            <p class="text-sm text-[#101010] leading-relaxed">
+              {sert.description}
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+              <div class="p-4 rounded-xl bg-[#f4f3ee] border border-[#d7d6cf]">
+                <span class="text-xs text-[#6e6d68] block mb-1">Lembaga Penyelenggara</span>
+                <strong class="text-sm font-semibold text-[#101010]">{sert.provider}</strong>
+              </div>
+              <div class="p-4 rounded-xl bg-[#f4f3ee] border border-[#d7d6cf]">
+                <span class="text-xs text-[#6e6d68] block mb-1">Lembaga Penerbit Sertifikat</span>
+                <strong class="text-sm font-semibold text-[#101010]">{sert.issuer}</strong>
+              </div>
+              <div class="p-4 rounded-xl bg-[#f4f3ee] border border-[#d7d6cf]">
+                <span class="text-xs text-[#6e6d68] block mb-1">Durasi dan Pelaksanaan</span>
+                <strong class="text-sm font-semibold text-[#101010]">{sert.duration}</strong>
+              </div>
+              <div class="p-4 rounded-xl bg-[#f4f3ee] border border-[#d7d6cf]">
+                <span class="text-xs text-[#6e6d68] block mb-1">Wilayah / Tempat Uji</span>
+                <strong class="text-sm font-semibold text-[#101010]">{sert.geo}</strong>
+              </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-[#d7d6cf]/50">
+              <h3 class="text-base font-semibold text-[#101010] mb-3">Manfaat Memiliki Sertifikasi Ini:</h3>
+              <ul class="space-y-2.5 text-sm text-[#101010]">
+                {sert.benefits.map((b) => (
+                  <li class="flex items-start gap-2.5">
+                    <svg class="w-4 h-4 text-emerald-600 mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-[#d7d6cf]/50">
+              <h3 class="text-base font-semibold text-[#101010] mb-3">Syarat Dokumen &amp; Prasyarat:</h3>
+              <ul class="space-y-2.5 text-sm text-[#101010]">
+                {sert.requirements.map((r) => (
+                  <li class="flex items-start gap-2.5">
+                    <svg class="w-4 h-4 text-[#0000ff] mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>{r}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </article>
+
+          <!-- 2. Registration Guide -->
+          <article id="daftar-sertifikasi" class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8">
+            <h2 class="text-lg font-semibold text-[#101010] mb-3 flex items-center gap-2">
+              <span class="w-1.5 h-4 bg-orange-500 rounded-full"></span>
+              Jadwal &amp; Prosedur Pendaftaran
+            </h2>
+            <p class="text-sm text-[#6e6d68] leading-relaxed mb-4">
+              Jadwal pelaksanaan: <strong>{sert.schedule}</strong>. Pendaftaran dilakukan langsung ke sistem lembaga penyelenggara resmi. Pastikan seluruh berkas prasyarat sudah disiapkan dalam format digital.
+            </p>
+            <div class="p-5 rounded-2xl bg-[#f4f3ee] border border-[#d7d6cf] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <span class="text-xs font-semibold text-[#101010] block">Penerbit Sertifikat:</span>
+                <span class="text-xs text-[#6e6d68]">{sert.issuer} (Terdaftar Resmi)</span>
+              </div>
+              <a
+                href={sert.officialUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="min-h-[42px] px-5 py-2 rounded-full bg-[#0000ff] hover:bg-[#1738d1] text-white text-xs font-semibold transition flex items-center gap-2 shadow-xs"
+              >
+                <span>Daftar di Lembaga Resmi</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- Google Ads: In-feed Unit (Setelah Alur Pendaftaran Selesai) -->
+          <AdSlot type="infeed" note="Pelajari materi persiapan uji kompetensi dan kursus bersertifikat." />
+        </div>
+
+        <!-- Right: Sidebar Information & Ads -->
+        <aside class="lg:col-span-4 space-y-6">
+          <div class="bg-white rounded-2xl border border-[#d7d6cf] p-5 shadow-xs">
+            <h3 class="text-sm font-semibold text-[#101010] mb-4 pb-2 border-b border-[#d7d6cf]/50">
+              Rincian Sertifikasi
+            </h3>
+            <div class="space-y-3 text-xs">
+              <div class="flex justify-between py-1 border-b border-[#d7d6cf]/50">
+                <span class="text-[#6e6d68]">Penerbit</span>
+                <span class="font-semibold text-[#101010] text-right">{sert.issuer}</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-[#d7d6cf]/50">
+                <span class="text-[#6e6d68]">Biaya Investasi</span>
+                <span class="font-bold text-emerald-700 text-right">{sert.price}</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-[#d7d6cf]/50">
+                <span class="text-[#6e6d68]">Masa Berlaku</span>
+                <span class="font-semibold text-[#101010] text-right">{sert.validity}</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-[#d7d6cf]/50">
+                <span class="text-[#6e6d68]">Tipe Ujian</span>
+                <span class="font-semibold text-[#101010] text-right">{sert.type}</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-[#d7d6cf]/50">
+                <span class="text-[#6e6d68]">Tingkat Kesulitan</span>
+                <span class="font-semibold text-[#101010] text-right">{sert.level}</span>
+              </div>
+              <div class="flex justify-between py-1">
+                <span class="text-[#6e6d68]">Jadwal</span>
+                <span class="font-semibold text-[#101010] text-right">{sert.schedule}</span>
+              </div>
+            </div>
+
+            <a
+              href="#daftar-sertifikasi"
+              class="w-full min-h-[42px] mt-4 px-4 py-2 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-xs"
+            >
+              Daftar Sekarang
+            </a>
+          </div>
+
+          <!-- Verification Tip -->
+          <div class="bg-white rounded-2xl border border-[#d7d6cf] p-5 shadow-xs">
+            <h4 class="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">
+              Verifikasi Keaslian
+            </h4>
+            <p class="text-xs text-[#6e6d68] leading-relaxed mt-2">
+              Sertifikat yang diterbitkan dapat dicek nomor registrasinya di pangkalan data resmi lembaga penerbit terkait. Waspada penipuan calo sertifikasi tanpa ujian resmi.
+            </p>
+          </div>
+
+          <!-- Google Ads: High-Viewability Sticky Sidebar Unit (300x600) -->
+          <div class="sticky top-24">
+            <AdSlot type="skyscraper" note="Jangkau calon profesional bersertifikat di seluruh Indonesia." />
+          </div>
+        </aside>
+      </div>
+
+      <!-- Google Ads: Leaderboard horizontal sebelum rekomendasi -->
+      <AdSlot type="leaderboard" note="Rekomendasi kelas bimbingan dan persiapan sertifikasi industri." />
+
+      <!-- 5 Cross-Section Modules (Rekomendasi Lainnya) -->
+      <DetailCrossSections
+        currentType="sertifikasi"
+        currentSlug={sert.slug}
+        category={sert.category}
+        geo={sert.geo}
+      />
+    </div>
+  </main>
+
+  <FooterPortal />
+  <SearchModal />
+
+  <!-- Script for Toast Feedback -->
+  <script is:inline>
+    const shareBtn = document.getElementById('btn-share-sert');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', async () => {
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: document.title,
+              url: window.location.href,
+            });
+          } catch (err) {}
+        } else {
+          navigator.clipboard.writeText(window.location.href);
+          alert('Tautan sertifikasi berhasil disalin.');
+        }
+      });
+    }
+
+    const bookmarkBtn = document.getElementById('btn-bookmark-sert');
+    if (bookmarkBtn) {
+      bookmarkBtn.addEventListener('click', () => {
+        alert('Sertifikasi telah disimpan ke daftar favorit.');
+      });
+    }
+  </script>
+
+  <!-- Structured Data JSON-LD -->
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Course",
+    "name": sert.title,
+    "description": sert.description,
+    "provider": {
+      "@type": "Organization",
+      "name": sert.issuer
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": sert.price,
+      "priceCurrency": "IDR",
+      "category": "Certification"
+    },
+    "url": canonical
+  })} />
+</BaseLayout>

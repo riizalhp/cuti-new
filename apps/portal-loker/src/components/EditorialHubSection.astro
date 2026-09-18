@@ -1,0 +1,377 @@
+---
+// EditorialHubSection.astro - Konsolidasi Berita Populer & Career Tips ke 1 Editorial Hub
+import { artikelList, ensureData } from '../data/mock';
+
+await ensureData();
+const artikelSnapshot = [...artikelList];
+
+// Filter or select articles for featured and sub-list
+const featured = artikelSnapshot[0] || {
+  title: "Panduan Lengkap Menyusun CV ATS Friendly untuk Fresh Graduate 2026",
+  category: "CV & Interview",
+  author: "Tim Editorial Employer Job",
+  date: "8 Jan 2026",
+  readTime: "6 mnt baca",
+  excerpt: "Langkah demi langkah menyusun curriculum vitae yang lolos screening sistem ATS korporasi dan BUMN dengan struktur standar industri.",
+  slug: "panduan-lengkap-cv-ats-friendly-2026",
+  image: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&w=800&q=80"
+};
+
+const subArticles = artikelList.slice(1, 5);
+
+const popularTags = [
+  { name: "BUMN 2026", count: "1.2k" },
+  { name: "Interview ATS", count: "980" },
+  { name: "Gaji IT", count: "840" },
+  { name: "Remote Work", count: "720" },
+  { name: "Sertifikasi BNSP", count: "650" },
+  { name: "Fresh Graduate", count: "1.5k" },
+];
+---
+
+<section id="editorial-hub" class="py-12 sm:py-16 bg-[#f4f3ee] border-b border-[#d7d6cf]/80 scroll-mt-24">
+  <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
+    
+    <!-- Section Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+      <div>
+        <div class="section-label mb-3"><i></i>05 // EDITORIAL &amp; TIPS KARIER</div>
+        <h2 class="text-2xl sm:text-3xl font-semibold text-[#101010] tracking-tight">
+          Pusat Wawasan &amp; <em>Tips Karier</em>
+        </h2>
+        <p class="text-sm sm:text-base text-[#6e6d68] mt-2 leading-relaxed max-w-2xl">
+          Kurasi artikel mendalam, strategi wawancara kerja, teknik lolos CV ATS, standar gaji industri, dan wawasan dunia profesional.
+        </p>
+      </div>
+
+      <a
+        href="/career"
+        class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#0000ff] hover:underline transition shrink-0 group self-start md:self-auto"
+      >
+        <span>Lihat Semua Artikel ({artikelList.length})</span>
+        <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      </a>
+    </div>
+
+    <!-- Unified Category Filter Tabs -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-8 no-scrollbar" id="editorial-tabs">
+      <button
+        type="button"
+        data-cat="all"
+        class="editorial-tab-btn px-4 py-1.5 rounded-full bg-[#0000ff] text-white text-xs font-semibold shrink-0 shadow-xs transition cursor-pointer"
+      >
+        Semua
+      </button>
+      <button
+        type="button"
+        data-cat="tips"
+        class="editorial-tab-btn px-4 py-1.5 rounded-full bg-white hover:bg-[#eae8e0] text-[#101010] border border-[#d7d6cf] text-xs font-semibold shrink-0 transition cursor-pointer"
+      >
+        Tips Karier
+      </button>
+      <button
+        type="button"
+        data-cat="cv"
+        class="editorial-tab-btn px-4 py-1.5 rounded-full bg-white hover:bg-[#eae8e0] text-[#101010] border border-[#d7d6cf] text-xs font-semibold shrink-0 transition cursor-pointer"
+      >
+        CV &amp; Interview
+      </button>
+      <button
+        type="button"
+        data-cat="kerja"
+        class="editorial-tab-btn px-4 py-1.5 rounded-full bg-white hover:bg-[#eae8e0] text-[#101010] border border-[#d7d6cf] text-xs font-semibold shrink-0 transition cursor-pointer"
+      >
+        Dunia Kerja
+      </button>
+      <button
+        type="button"
+        data-cat="gaji"
+        class="editorial-tab-btn px-4 py-1.5 rounded-full bg-white hover:bg-[#eae8e0] text-[#101010] border border-[#d7d6cf] text-xs font-semibold shrink-0 transition cursor-pointer"
+      >
+        Gaji &amp; Negosiasi
+      </button>
+    </div>
+
+    <!-- 3-Column Balanced Editorial Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- Column 1: Featured In-Depth Guide (5 cols) -->
+      <div class="lg:col-span-5 bg-white rounded-2xl border border-[#d7d6cf] overflow-hidden shadow-sm hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:border-[#0000ff]/30 hover:-translate-y-1 transition duration-300 flex flex-col justify-between h-full group">
+        <div>
+          <!-- Article Image with Badge -->
+          <div class="relative aspect-[16/9] overflow-hidden bg-[#f4f3ee]">
+            <img
+              src={featured.image}
+              alt={featured.title}
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+            />
+            <span class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#0000ff] text-white shadow-sm">
+              {featured.category}
+            </span>
+            <button
+              type="button"
+              aria-label="Simpan panduan"
+              class="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-[#6e6d68] hover:text-[#0000ff] shadow-sm"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Content Details -->
+          <div class="p-6">
+            <div class="flex items-center gap-2 text-xs text-[#6e6d68] mb-2.5">
+              <span class="font-semibold text-[#101010]">{featured.author}</span>
+              <span>·</span>
+              <span>{featured.date}</span>
+              <span>·</span>
+              <span>{featured.readTime}</span>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-bold text-[#101010] leading-tight mb-3 group-hover:text-[#0000ff] transition">
+              <a href={"/career/" + featured.slug}>{featured.title}</a>
+            </h3>
+            <p class="text-sm text-[#6e6d68] leading-relaxed line-clamp-3 mb-4">
+              {featured.excerpt}
+            </p>
+
+            <!-- Key Points Highlight -->
+            <div class="p-3.5 rounded-xl bg-[#f4f3ee] border border-[#d7d6cf] text-xs text-[#6e6d68] space-y-1.5">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Formula Action Verb + Impact yang disukai rekruter</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Format layout satu kolom lolos parsing sistem otomatis</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="px-6 pb-6 pt-3 border-t border-[#d7d6cf]/50 mt-2 flex items-center justify-between text-xs text-[#6e6d68]">
+          <span class="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">Panduan Unggulan</span>
+          <a href={"/career/" + featured.slug} class="font-semibold text-[#0000ff] hover:underline flex items-center gap-1">
+            <span>Baca Selengkapnya</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Column 2: Stacked Sub-Articles (4 cols) -->
+      <div class="lg:col-span-4 flex flex-col gap-3" id="sub-articles-container">
+        {subArticles.map((item) => (
+          <div
+            class="article-item bg-white rounded-2xl border border-[#d7d6cf] overflow-hidden flex items-center gap-3 hover:border-[#0000ff]/40 hover:shadow-md transition shadow-sm group p-2.5"
+            data-category={item.category.toLowerCase()}
+          >
+            <!-- Thumbnail -->
+            <div class="w-28 sm:w-32 h-24 rounded-xl overflow-hidden bg-[#f4f3ee] shrink-0 relative">
+              <img
+                src={item.image}
+                alt={item.title}
+                class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                loading="lazy"
+              />
+              <span class="absolute bottom-1.5 left-1.5 text-[8px] font-bold uppercase tracking-wider text-white bg-[#101010]/80 px-1.5 py-0.5 rounded-full">
+                {item.readTime}
+              </span>
+            </div>
+
+            <!-- Body -->
+            <div class="flex-1 min-w-0 py-0.5 pr-2">
+              <span class="inline-block text-[9px] font-bold uppercase tracking-wider text-[#0000ff] bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full mb-1">
+                {item.category}
+              </span>
+              <h4 class="text-xs sm:text-[13px] font-semibold text-[#101010] group-hover:text-[#0000ff] transition line-clamp-2 leading-snug">
+                <a href={"/career/" + item.slug}>{item.title}</a>
+              </h4>
+              <div class="flex items-center gap-2 text-[10px] text-[#6e6d68] mt-1.5">
+                <span>{item.date}</span>
+                <span>·</span>
+                <span class="truncate">{item.author}</span>
+              </div>
+            </div>
+
+            <!-- Bookmark Button -->
+            <button
+              type="button"
+              aria-label="Simpan artikel"
+              class="text-[#6e6d68] hover:text-[#0000ff] shrink-0 pr-1 self-start pt-1.5"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+              </svg>
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <!-- Column 3: Career Toolset & Tag Cloud (3 cols) -->
+      <div class="lg:col-span-3 flex flex-col gap-4">
+
+        <!-- Toolset Card 1: Cek Skor CV ATS (Interactive Diagnostic Tool) -->
+        <div class="bg-white rounded-2xl border border-[#d7d6cf] p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <span class="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-blue-50 text-[#0000ff] border border-blue-200">
+              ⚡ Evaluasi Instan
+            </span>
+            <span class="text-[10px] text-[#0000ff] font-bold">Skor Rata-rata 85%</span>
+          </div>
+
+          <h3 class="text-sm font-semibold text-[#101010] leading-snug mb-1">
+            Cek Skor &amp; Kata Kunci CV ATS
+          </h3>
+          <p class="text-xs text-[#6e6d68] leading-relaxed mb-3.5">
+            Analisis kecocokan susunan berkas resume kamu dengan sistem pelacak lamaran kerja modern.
+          </p>
+
+          <a
+            href="/career#cek-ats"
+            class="w-full py-2.5 px-3 rounded-full bg-[#0000ff] hover:bg-[#1738d1] text-white text-xs font-semibold text-center transition flex items-center justify-center gap-1.5 shadow-sm"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Uji Skor Resume Sekarang →</span>
+          </a>
+        </div>
+
+        <!-- Toolset Card 2: Kalkulator Gaji & Take-Home Pay 2026 -->
+        <div class="bg-white rounded-2xl border border-[#d7d6cf] p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <span class="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200">
+              💰 Standar UMR 2026
+            </span>
+            <span class="text-[10px] text-emerald-700 font-bold">Akurat &amp; Terbuka</span>
+          </div>
+
+          <h3 class="text-sm font-semibold text-[#101010] leading-snug mb-1">
+            Kalkulator Gaji &amp; Take-Home Pay
+          </h3>
+          <p class="text-xs text-[#6e6d68] leading-relaxed mb-3.5">
+            Hitung estimasi pendapatan bersih, rincian potongan BPJS Ketenagakerjaan, BPJS Kesehatan, dan PPh 21.
+          </p>
+
+          <a
+            href="/career#kalkulator-gaji"
+            class="w-full py-2.5 px-3 rounded-full bg-[#101010] hover:bg-[#222] text-white text-xs font-semibold text-center transition flex items-center justify-center gap-1.5 shadow-sm"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            <span>Hitung Simulasi Gaji Bersih →</span>
+          </a>
+        </div>
+
+        <!-- Tag Cloud Box -->
+        <div class="bg-white rounded-2xl border border-[#d7d6cf] p-4 shadow-sm">
+          <div class="flex items-center gap-1.5 mb-2.5 text-xs font-semibold uppercase tracking-wider text-[#101010]">
+            <svg class="w-3.5 h-3.5 text-[#0000ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+            </svg>
+            <span>Tag Populer</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            {popularTags.map((tag) => (
+              <a
+                href={"/career?tag=" + encodeURIComponent(tag.name)}
+                class="px-3 py-1 rounded-full bg-[#f4f3ee] hover:bg-blue-50 border border-[#d7d6cf] hover:border-[#0000ff]/30 text-[#101010] hover:text-[#0000ff] text-[11px] font-medium transition flex items-center gap-1"
+              >
+                <span>#{tag.name}</span>
+                <span class="text-[9px] text-[#6e6d68]">({tag.count})</span>
+              </a>
+            ))}
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Bottom Popular Topics Row -->
+    <div class="mt-8 pt-6 border-t border-[#d7d6cf]/50 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#0000ff] flex items-center justify-center shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+          </svg>
+        </div>
+        <div>
+          <span class="text-xs font-semibold text-[#101010] block">Jelajahi Berdasarkan Topik</span>
+          <span class="text-[11px] text-[#6e6d68]">Pilih tema sesuai tahapan perjalanan kariermu</span>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 text-xs">
+        <a href="/career?q=interview" class="px-3.5 py-1.5 rounded-full border border-[#d7d6cf] bg-white hover:bg-[#f4f3ee] text-[#101010] font-medium transition">
+          Interview
+        </a>
+        <a href="/career?q=cv" class="px-3.5 py-1.5 rounded-full border border-[#d7d6cf] bg-white hover:bg-[#f4f3ee] text-[#101010] font-medium transition">
+          CV &amp; Portofolio
+        </a>
+        <a href="/career?q=skill" class="px-3.5 py-1.5 rounded-full border border-[#d7d6cf] bg-white hover:bg-[#f4f3ee] text-[#101010] font-medium transition">
+          Skill Development
+        </a>
+        <a href="/career?q=switch" class="px-3.5 py-1.5 rounded-full border border-[#d7d6cf] bg-white hover:bg-[#f4f3ee] text-[#101010] font-medium transition">
+          Career Switch
+        </a>
+        <a href="/career?q=remote" class="px-3.5 py-1.5 rounded-full border border-[#d7d6cf] bg-white hover:bg-[#f4f3ee] text-[#101010] font-medium transition">
+          Remote Work
+        </a>
+        <a href="/career?q=gaji" class="px-3.5 py-1.5 rounded-full border border-[#d7d6cf] bg-white hover:bg-[#f4f3ee] text-[#101010] font-medium transition">
+          Gaji &amp; Negosiasi
+        </a>
+        <a href="/career?q=balance" class="px-3.5 py-1.5 rounded-full border border-[#d7d6cf] bg-white hover:bg-[#f4f3ee] text-[#101010] font-medium transition">
+          Work-Life Balance
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script is:inline>
+  // Client-side tab filter for editorial articles
+  const tabBtns = document.querySelectorAll('.editorial-tab-btn');
+  const articles = document.querySelectorAll('#sub-articles-container .article-item');
+
+  tabBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const cat = btn.getAttribute('data-cat');
+      
+      tabBtns.forEach((b) => {
+        b.classList.remove('bg-[#0000ff]', 'text-white');
+        b.classList.add('bg-white', 'text-[#101010]', 'border', 'border-[#d7d6cf]');
+      });
+      btn.classList.remove('bg-white', 'text-[#101010]', 'border', 'border-[#d7d6cf]');
+      btn.classList.add('bg-[#0000ff]', 'text-white');
+
+      articles.forEach((art) => {
+        const itemCat = art.getAttribute('data-category') || '';
+        if (cat === 'all') {
+          art.style.display = 'flex';
+        } else if (cat === 'tips' && (itemCat.includes('tip') || itemCat.includes('karier'))) {
+          art.style.display = 'flex';
+        } else if (cat === 'cv' && (itemCat.includes('cv') || itemCat.includes('interview'))) {
+          art.style.display = 'flex';
+        } else if (cat === 'kerja' && (itemCat.includes('kerja') || itemCat.includes('industri'))) {
+          art.style.display = 'flex';
+        } else if (cat === 'gaji' && (itemCat.includes('gaji') || itemCat.includes('negosiasi'))) {
+          art.style.display = 'flex';
+        } else {
+          art.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>

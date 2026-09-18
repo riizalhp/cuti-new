@@ -1,9 +1,9 @@
 ---
 title: Kursus & Sertifikasi di learning.employr.id
-description: Akses katalog kursus dan sertifikat terverifikasi QR dari mitra global — filter bidang, level, bookmark, dan raih sertifikat untuk portofolio lamaran.
+description: Akses katalog kursus dan sertifikat terverifikasi QR dari mitra global: filter bidang, level, bookmark, dan raih sertifikat untuk portofolio lamaran.
 category: pengembangan-karier
 order: 2
-updatedAt: 2026-08-18
+updatedAt: 2026-09-15
 keywords: kursus, sertifikasi, kursus online, sertifikat, learning, academy, sertifikat digital, certificate, course, belajar, upskill, mitra universitas
 ---
 
@@ -13,7 +13,7 @@ Employr menghadirkan **katalog kursus & sertifikasi** di **learning.employr.id**
 
 Kursus dikelompokkan per bidang:
 
-- **AI & Machine Learning**
+- **Teknologi & Software**
 - **Data Science & Analytics**
 - **Computer Science & Web**
 - **UI/UX & Desain**
@@ -30,14 +30,14 @@ Setiap kursus menampilkan **partner/instruktur**, **jam belajar**, **rating**, *
 
 ## Keunggulan
 
-- **Sertifikat terverifikasi QR** — bisa ditunjukkan ke recruiter.
-- **Transkrip sinkron & timestamp** — bukti penyelesaian rapi.
-- **Quiz engine & AI Learning Coach** — bimbingan belajar interaktif.
+- **Sertifikat terverifikasi QR**: bisa ditunjukkan ke recruiter.
+- **Transkrip sinkron & timestamp**: bukti penyelesaian rapi.
+- **Quiz engine & Learning Coach**: bimbingan belajar terpandu.
 - Klik **Lihat** pada kartu untuk membuka halaman detail kursus (`/kursus/[slug]`).
 
 ## Pertanyaan umum
 
-- **Apakah semua kursus gratis?** Ada kursus gratis dan berbayar — harga tampil di kartu masing-masing.
+- **Apakah materi kursus bisa diakses gratis?** Ya, kamu dapat menjelajahi dan mempelajari materi pengembangan keterampilan yang tersedia secara gratis.
 - **Apakah sertifikat diakui?** Sertifikat digital terverifikasi dari mitra kursus; relevansinya tergantung perusahaan tujuan.
 - **Bisa diakses dari dashboard?** Ya, lewat menu **Kursus & Sertifikasi** di sidebar atau langsung ke learning.employr.id.
 

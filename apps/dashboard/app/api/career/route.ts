@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@cuti/db';
+import { prisma } from '@employr/db';
 
 function estimateReadTime(content: string | null): string {
   const wordCount = (content || '').trim() ? content!.split(/\s+/).length : 0;
@@ -80,6 +80,7 @@ export async function GET(req: NextRequest) {
           content: a.content || '',
           author: a.author || 'Tim Employr',
           slug: a.slug,
+          externalUrl: a.external_url || null,
           publishedAt: a.published_at?.toISOString() || null,
         })),
         courses: courses.map((c) => ({

@@ -148,7 +148,7 @@
 3. **Start API Server:**
    ```powershell
    cd D:\cuti
-   pnpm --filter @cuti/api dev
+   pnpm --filter @employr/api dev
    ```
    Expected: `Application is running on: http://localhost:3001`
 
@@ -313,13 +313,13 @@ cd D:\cuti
 docker start cuti-postgres
 
 # 2. Start API
-pnpm --filter @cuti/api dev
+pnpm --filter @employr/api dev
 
 # 3. Start user app
-pnpm --filter @cuti/user dev
+pnpm --filter @employr/user dev
 
 # 4. Start admin app
-pnpm --filter @cuti/admin dev
+pnpm --filter @employr/admin dev
 
 # 5. Open Prisma Studio
 cd packages\db && pnpm db:studio

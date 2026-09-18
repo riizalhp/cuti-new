@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@cuti/db";
+import { prisma } from "@employr/db";
 
 export const DEFAULT_AI_FEATURES = [
   {
@@ -43,6 +43,34 @@ export const DEFAULT_AI_FEATURES = [
     description: "Simulasi screening recruiter 6 detik, multi-screener konsensus, ATS matrix, dan perbaikan otomatis.",
     default_temp: 0.3,
     default_max_tokens: 2500,
+  },
+  {
+    feature_key: "growth_content_studio",
+    feature_name: "Growth Content Studio (Threads & LinkedIn Human-Style)",
+    description: "Generator konten Threads & LinkedIn natural gaya manusia, anti-AI slop, dengan verifikasi checklist.",
+    default_temp: 0.75,
+    default_max_tokens: 2000,
+  },
+  {
+    feature_key: "career_intelligence",
+    feature_name: "Career Intelligence Blueprint Synthesis",
+    description: "Merumuskan standar klaster kompetensi & blueprint profesi baru saat dievaluasi kandidat.",
+    default_temp: 0.2,
+    default_max_tokens: 1200,
+  },
+  {
+    feature_key: "cover_letter",
+    feature_name: "Cover Letter & Surat Lamaran Generator",
+    description: "Menyusun surat lamaran kerja terpersonalisasi yang disesuaikan dengan lowongan target.",
+    default_temp: 0.6,
+    default_max_tokens: 1500,
+  },
+  {
+    feature_key: "system_intelligence",
+    feature_name: "System Intelligence Entity Clustering",
+    description: "Clustering sinonim, akronim, dan variasi token kosakata kamus NLP ke entitas kanonikal.",
+    default_temp: 0.1,
+    default_max_tokens: 2000,
   },
 ];
 

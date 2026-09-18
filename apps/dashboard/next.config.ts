@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ["@cuti/ui", "@cuti/auth", "@cuti/config", "@cuti/db", "@cuti/faq"],
-  serverExternalPackages: ["pdf-parse", "mammoth"],
+  outputFileTracingRoot: path.resolve(__dirname, "../../"),
+  transpilePackages: ["@employr/ui", "@employr/config", "@employr/db", "@employr/faq"],
+  serverExternalPackages: ["pdf-parse", "mammoth", "playwright-core", "nodemailer", "node-cron"],
 
   // Enable optimizations
   compiler: {

@@ -47,17 +47,16 @@ offline, dan selalu merujuk ke sumber resmi.
 
 ## 2. Konten Knowledge Base
 
-### 2.1 Kategori & artikel (27 artikel)
+### 2.1 Kategori & artikel (23 artikel)
 
 | Kategori | Slug | Jumlah | Topik |
 |---|---|---|---|
 | Memulai | `memulai` | 4 | Apa itu Employr, daftar & masuk, onboarding, profil & pengaturan |
-| CV & Dokumen | `cv-dokumen` | 5 | CV Builder, cetak PDF, skor ATS, CV by HRD, surat lamaran |
+| CV & Dokumen | `cv-dokumen` | 4 | CV Builder, cetak PDF, skor ATS, surat lamaran |
 | Evaluasi & Optimasi | `evaluasi-optimasi` | 3 | Evaluasi CV (11 persona), kecocokan lowongan, optimasi LinkedIn |
 | Lamaran Kerja | `lamaran-kerja` | 4 | Tracker, scraper lowongan, cari lowongan, panduan interview |
 | Misi, Reward & Referral | `misi-reward` | 2 | Misi & Cuan, referral |
 | Pengembangan Karier | `pengembangan-karier` | 3 | Career Readiness, kursus & sertifikasi, latihan soal |
-| Membership & Pembayaran | `membership-pembayaran` | 3 | Paket & harga, cara pembayaran, voucher & promo |
 | Akun & Bantuan | `akun-bantuan` | 3 | Keamanan akun, kendala umum, hubungi CS |
 
 ### 2.2 Format artikel
@@ -120,17 +119,17 @@ Badge environment tampil di header situs agar tester tidak salah membedakan vers
 
 ```bash
 # Development (lokal)
-pnpm --filter @cuti/faq-site dev          # → http://localhost:3005
+pnpm --filter @employr/faq-site dev          # → http://localhost:3005
 
 # Build per environment
 NEXT_PUBLIC_ENV=production NEXT_PUBLIC_SITE_URL=https://faq.employr.id NEXT_PUBLIC_APP_URL=https://app.employr.id \
-  pnpm --filter @cuti/faq-site build
+  pnpm --filter @employr/faq-site build
 
 NEXT_PUBLIC_ENV=staging NEXT_PUBLIC_SITE_URL=https://staging.faq.employr.id NEXT_PUBLIC_APP_URL=https://staging.app.employr.id \
-  pnpm --filter @cuti/faq-site build
+  pnpm --filter @employr/faq-site build
 
 # Jalankan hasil build
-pnpm --filter @cuti/faq-site start
+pnpm --filter @employr/faq-site start
 ```
 
 ### 3.4 Halaman situs

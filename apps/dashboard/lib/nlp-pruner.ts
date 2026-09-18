@@ -12,9 +12,12 @@ export function generateExactCacheKey(params: {
   role?: string;
   mode?: string;
   language?: string;
+  feature?: string;
+  systemPrompt?: string;
 }): string {
   const normalized = [
-    params.task || 'optimize',
+    params.feature || 'general',
+    params.systemPrompt || 'default',
     (params.role || 'professional').toLowerCase().trim(),
     (params.mode || 'auto').toLowerCase().trim(),
     params.language || 'id',
@@ -32,14 +35,15 @@ export function generateExactCacheKey(params: {
 
 /**
  * Fixed Mini System Rules (Micro-prompt, ~50 tokens only)
+ * Bahasa Indonesia agar konsisten dengan user prompt & persona DB (ai_prompts).
  */
-export const FIXED_MINI_SYSTEM_PROMPT = `You are a professional CV bullet optimization engine.
-Rules:
-- Never fabricate achievements, metrics, tools, or responsibilities.
-- Preserve factual meaning from input.
-- Use strong Indonesian action verbs.
-- Make it concise, impact-driven, and ATS-friendly.
-- Return ONLY the JSON response array format requested without markdown.`;
+export const FIXED_MINI_SYSTEM_PROMPT = `Anda adalah mesin optimasi bullet CV profesional.
+Aturan:
+- Jangan pernah mengarang pencapaian, metrik, tools, atau tanggung jawab.
+- Pertahankan makna faktual dari input.
+- Gunakan kata kerja aksi Indonesia yang kuat.
+- Buat ringkas, berorientasi dampak, dan ramah ATS.
+- Kembalikan HANYA array JSON sesuai format yang diminta, tanpa markdown.`;
 
 /**
  * Build Micro Payload User Prompt (Very small input tokens)
@@ -71,7 +75,9 @@ JSON output schema:
 
 /**
  * Local NLG (Natural Language Generation) Template Engine
- * Generates instant high-quality CV bullets without API calls for simple inputs
+ * Generates instant CV bullet drafts without API calls for simple inputs.
+ * Anti-fabrication: hanya menyusun ulang input user — tidak pernah mengarang
+ * angka, metrik, atau pencapaian. Angka wajib diisi user via placeholder [..].
  */
 export function tryLocalTemplateGeneration(
   inputText: string,
@@ -92,20 +98,20 @@ export function tryLocalTemplateGeneration(
     {
       id: 'opt-local-1',
       label: 'Opsi 1 — CAR (Challenge, Action, Result)',
-      formulaTag: 'CAR + Metrics',
-      text: `• ${verb1} inisiatif ${cleanText.toLowerCase()} untuk meningkatkan efisiensi operasional.\n• Mengarahkan alur kerja tim secara terstruktur dengan kepatuhan deadline 95%.\n• Mengidentifikasi dan menyelesaikan hambatan teknis untuk mencapai hasil berkualitas tinggi.`,
+      formulaTag: 'CAR + Isi metrikmu',
+      text: `• ${verb1} inisiatif ${cleanText.toLowerCase()} untuk meningkatkan efisiensi operasional.\n• Mengidentifikasi hambatan teknis dan menyelesaikannya agar hasil kerja berkualitas tinggi.\n• Hasil: [tambahkan hasil terukur, mis. hemat waktu X% atau selesai X hari lebih cepat].`,
     },
     {
       id: 'opt-local-2',
       label: 'Opsi 2 — XYZ (Result, Measurement, Action)',
-      formulaTag: 'XYZ Formula',
-      text: `• Mencapai peningkatan performa tim melalui eksekusi ${cleanText.toLowerCase()}.\n• Mengimplementasikan metodologi standar industri untuk mempercepat waktu pengerjaan.\n• Memastikan kualitas hasil kerja sesuai ekspektasi pemangku kepentingan (stakeholder).`,
+      formulaTag: 'XYZ + Isi metrikmu',
+      text: `• Hasil: [tambahkan dampak utama dari ${cleanText.toLowerCase()}, mis. kepuasan klien naik X%].\n• ${verb2} ${cleanText.toLowerCase()} secara terstruktur dari perencanaan hingga evaluasi.\n• Skala: [tambahkan skala kerja, mis. tim X orang / X proyek / X klien].`,
     },
     {
       id: 'opt-local-3',
       label: 'Opsi 3 — ATS Optimized',
-      formulaTag: 'ATS Keywords + Metrics',
-      text: `• Mengelola alur kerja ${role.toLowerCase()} dan mengeksekusi strategi ${cleanText.toLowerCase()}.\n• Mengoptimalkan kolaborasi antar-tim untuk mencapai target kuantitatif bulanan.\n• Menerapkan evaluasi berkala guna menjamin akurasi dan efisiensi hasil.`,
+      formulaTag: 'ATS Keywords',
+      text: `• ${verb2} alur kerja ${role.toLowerCase()} terkait ${cleanText.toLowerCase()} sesuai terminologi standar industri.\n• Berkolaborasi dengan tim terkait untuk memastikan eksekusi berjalan sesuai rencana.\n• Hasil: [tambahkan hasil terukur dengan kata kunci posisi target].`,
     },
   ];
 }

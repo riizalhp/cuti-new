@@ -170,7 +170,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 **Interfaces:**
 - Consumes: None
 - Produces: 
-  - `PrismaClient` instance exported from `@cuti/db`
+  - `PrismaClient` instance exported from `@employr/db`
   - Prisma schema with User, CV, Template, JobApplication, Payment, Membership models
 
 - [ ] **Step 1: Write package.json**
@@ -178,7 +178,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 Create `packages/db/package.json`:
 ```json
 {
-  "name": "@cuti/db",
+  "name": "@employr/db",
   "version": "0.0.0",
   "private": true,
   "main": "./src/index.ts",
@@ -546,7 +546,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 Create `packages/types/package.json`:
 ```json
 {
-  "name": "@cuti/types",
+  "name": "@employr/types",
   "version": "0.0.0",
   "private": true,
   "main": "./src/index.ts",
@@ -789,7 +789,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - Create: `apps/api/src/prisma/prisma.service.ts`
 
 **Interfaces:**
-- Consumes: `@cuti/db` (PrismaClient)
+- Consumes: `@employr/db` (PrismaClient)
 - Produces:
   - NestJS app running on port 3001
   - PrismaModule (global) providing PrismaService
@@ -799,7 +799,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 Create `apps/api/package.json`:
 ```json
 {
-  "name": "@cuti/api",
+  "name": "@employr/api",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -814,7 +814,7 @@ Create `apps/api/package.json`:
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
-    "@cuti/db": "workspace:*",
+    "@employr/db": "workspace:*",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.0"
   },
@@ -870,8 +870,8 @@ Create `apps/api/tsconfig.json`:
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
     "paths": {
-      "@cuti/db": ["../../packages/db/src"],
-      "@cuti/types": ["../../packages/types/src"]
+      "@employr/db": ["../../packages/db/src"],
+      "@employr/types": ["../../packages/types/src"]
     }
   },
   "include": ["src/**/*"],
@@ -884,7 +884,7 @@ Create `apps/api/tsconfig.json`:
 Create `apps/api/src/prisma/prisma.service.ts`:
 ```typescript
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '@cuti/db';
+import { PrismaClient } from '@employr/db';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {

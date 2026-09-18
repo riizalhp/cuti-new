@@ -21,8 +21,8 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@cuti/db": ["../../packages/db/src/index.ts"],
-      "@cuti/db/*": ["../../packages/db/src/*"]
+      "@employr/db": ["../../packages/db/src/index.ts"],
+      "@employr/db/*": ["../../packages/db/src/*"]
     }
   },
   "include": [

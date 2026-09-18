@@ -1,165 +1,136 @@
 ---
-// LowonganTerbaruGrid.astro - 4 Kartu Lowongan Kerja Terbaru
+// LowonganTerbaruGrid.astro - Kartu Lowongan Terbaru dari DATABASE
+import { lowonganList, ensureData } from '../data/mock';
+import CompanyLogo from './CompanyLogo.astro';
+
+await ensureData();
+
 interface JobCard {
   company: string;
+  companyLogo?: string;
+  companyWebsite?: string;
   type: string;
   location: string;
   position: string;
   postedTime: string;
+  salary?: string;
+  experience?: string;
+  badge?: string;
+  isPromoted?: boolean;
   slug: string;
-  logo: {
-    type: 'mandiri' | 'tokopedia' | 'pertamina' | 'unilever';
-  };
 }
 
-const jobs: JobCard[] = [
-  {
-    company: "PT Bank Mandiri (Persero) Tbk",
-    type: "Full Time",
-    location: "Jakarta",
-    position: "Relationship Manager",
-    postedTime: "Diposting 2 jam yang lalu",
-    slug: "rekrutmen-fresh-graduate-pt-bank-mandiri-jakarta",
-    logo: { type: "mandiri" }
-  },
-  {
-    company: "PT Tokopedia",
-    type: "Full Time",
-    location: "Remote",
-    position: "Product Operations",
-    postedTime: "Diposting 4 jam yang lalu",
-    slug: "product-operations-tokopedia-remote",
-    logo: { type: "tokopedia" }
-  },
-  {
-    company: "PT Pertamina (Persero)",
-    type: "Full Time",
-    location: "Jakarta",
-    position: "Engineer (Various Position)",
-    postedTime: "Diposting 6 jam yang lalu",
-    slug: "pertamina-bumn-career-engineer-jakarta",
-    logo: { type: "pertamina" }
-  },
-  {
-    company: "PT Unilever Indonesia Tbk",
-    type: "Full Time",
-    location: "Tangerang",
-    position: "Marketing Executive",
-    postedTime: "Diposting 8 jam yang lalu",
-    slug: "marketing-executive-unilever-indonesia-tangerang",
-    logo: { type: "unilever" }
-  }
-];
+// Ambil 8 lowongan terbaru dari DB (fallback list kosong jika DB gagal)
+const dbJobs: JobCard[] = [...lowonganList].slice(0, 8).map((j) => ({
+  company: j.company,
+  companyLogo: j.companyLogo,
+  companyWebsite: j.companyWebsite,
+  type: j.type,
+  location: j.geo,
+  position: j.title,
+  postedTime: j.postedAt,
+  salary: j.salary,
+  experience: j.experience,
+  badge: j.badge,
+  slug: j.slug,
+}));
+
+const jobs: JobCard[] = dbJobs.length ? dbJobs : [];
 ---
 
-<section class="py-8 sm:py-10 bg-white border-b border-slate-200">
+<section id="lowongan" class="py-12 sm:py-16 bg-[#f4f3ee] border-b border-[#d7d6cf]/80 scroll-mt-24">
   <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
-    <!-- Header Section (Konsisten dengan Standar Judul Section) -->
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
       <div>
-        <div class="flex items-center gap-2 mb-1">
-          <span class="w-2 h-2 rounded-full bg-[#1738d1]"></span>
-          <span class="text-[11px] font-medium uppercase tracking-wider text-[#1738d1]">Peluang Karier</span>
+        <div class="section-label mb-2.5">
+          <span>01</span>
+          <i></i>
+          <span>LOWONGAN TERBARU</span>
         </div>
-        <h2 class="text-2xl sm:text-3xl font-medium text-slate-900 tracking-tight">Lowongan Kerja Terbaru</h2>
-        <p class="text-xs sm:text-sm text-slate-500 mt-1">Informasi lowongan kerja dari berbagai perusahaan terpercaya. Temukan peluang terbaik untuk kariermu.</p>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#101010] tracking-tight">
+          Peluang karier terverifikasi,<br class="hidden sm:inline" />
+          <em>siap kamu lamar.</em>
+        </h2>
+        <p class="text-xs sm:text-sm text-[#6e6d68] mt-2 leading-relaxed font-medium">
+          Daftar lowongan kerja aktif dari korporasi terpercaya, BUMN, dan tech company terkemuka di Indonesia.
+        </p>
       </div>
-      <a 
-        href="/lowongan" 
-        class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#1738d1] hover:text-[#132ea8] transition shrink-0 self-start sm:self-auto group"
+      <a
+        href="/lowongan"
+        class="inline-flex items-center gap-2 px-4.5 py-2 rounded-full border border-[#d7d6cf] bg-white hover:bg-white hover:border-[#101010] text-xs font-bold text-[#101010] shadow-xs transition-all shrink-0 self-start sm:self-auto group"
       >
-        <span>Lihat Semua</span>
-        <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        <span>Lihat Semua Lowongan</span>
+        <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
         </svg>
       </a>
     </div>
 
-    <!-- 4 Cards Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {jobs.map((job) => (
-        <a 
-          href="/lowongan"
-          class="group bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-3.5 hover:border-blue-400 hover:shadow-md transition-all relative overflow-hidden"
-        >
-          <!-- Logo Container -->
-          <div class="w-13 h-13 rounded-xl bg-white border border-slate-100 flex items-center justify-center p-1.5 shrink-0 shadow-xs group-hover:border-slate-200 transition">
-            {job.logo.type === 'mandiri' && (
-              <div class="w-full h-full flex flex-col items-center justify-center">
-                <span class="text-[13px] font-medium tracking-tight text-[#002d62] leading-none">mandırı</span>
-                <span class="w-7 h-1 bg-[#f58220] rounded-sm mt-0.5 inline-block"></span>
+    <!-- 4 Cards Grid with Rich Consistent Metadata -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4.5">
+      {jobs.length === 0 ? (
+        <div class="col-span-full text-center py-12 text-sm text-[#6e6d68]">
+          Belum ada lowongan tersinkron. Data diperbarui otomatis setiap malam jam 01.00 WIB.
+        </div>
+      ) : (
+        jobs.map((job) => (
+          <a
+            href={`/lowongan/${job.slug}`}
+            class="group bg-white rounded-2xl border border-[#d7d6cf] p-5 flex flex-col justify-between hover:border-[#0000ff]/30 hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:-translate-y-1 transition-all duration-200 relative overflow-hidden"
+          >
+            <div>
+              <!-- Top Row: Logo Placeholder + Badge -->
+              <div class="flex items-start justify-between gap-3 mb-3.5">
+                <CompanyLogo name={job.company} logoUrl={job.companyLogo} website={job.companyWebsite} size="md" />
+
+                {job.isPromoted ? (
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200/80 flex items-center gap-1 shadow-2xs">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    Promoted
+                  </span>
+                ) : job.badge ? (
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#0000ff] border border-blue-100">
+                    {job.badge}
+                  </span>
+                ) : null}
               </div>
-            )}
 
-            {job.logo.type === 'tokopedia' && (
-              <div class="w-full h-full flex items-center justify-center">
-                <svg viewBox="0 0 100 100" class="w-9 h-9" fill="none">
-                  <rect x="15" y="30" width="70" height="60" rx="14" fill="#03AC0E" />
-                  <path d="M35 30 V 20 C 35 12 65 12 65 20 V 30" stroke="#03AC0E" stroke-width="7" stroke-linecap="round" fill="none" />
-                  <circle cx="38" cy="52" r="12" fill="#FFFFFF" />
-                  <circle cx="38" cy="52" r="6" fill="#03AC0E" />
-                  <circle cx="40" cy="50" r="2.5" fill="#FFFFFF" />
-                  <circle cx="62" cy="52" r="12" fill="#FFFFFF" />
-                  <circle cx="62" cy="52" r="6" fill="#03AC0E" />
-                  <circle cx="64" cy="50" r="2.5" fill="#FFFFFF" />
-                  <circle cx="50" cy="58" r="3" fill="#F7A21C" />
-                </svg>
+              <!-- Company Name -->
+              <p class="text-xs font-bold text-[#6e6d68] truncate mb-1">
+                {job.company}
+              </p>
+
+              <!-- Position / Job Title -->
+              <h3 class="text-sm sm:text-base font-bold text-[#101010] leading-snug line-clamp-2 group-hover:text-[#0000ff] transition mb-3">
+                {job.position}
+              </h3>
+
+              <!-- Location & Type Pills -->
+              <div class="flex items-center gap-1.5 mb-4 flex-wrap">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf]/60">
+                  {job.type}
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf]/60">
+                  {job.location}
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf]/60">
+                  {job.experience}
+                </span>
               </div>
-            )}
-
-            {job.logo.type === 'pertamina' && (
-              <div class="w-full h-full flex flex-col items-center justify-center">
-                <svg viewBox="0 0 100 80" class="w-7 h-7" fill="none">
-                  <path d="M50 8 L78 8 L60 38 L32 38 Z" fill="#E31E24" />
-                  <path d="M22 42 L50 42 L32 72 L4 72 Z" fill="#0072CE" />
-                  <path d="M64 42 L92 42 L80 62 L52 62 Z" fill="#80BC00" />
-                </svg>
-                <span class="text-[6.5px] font-medium tracking-tight text-[#002d62] uppercase leading-none mt-0.5">PERTAMINA</span>
-              </div>
-            )}
-
-            {job.logo.type === 'unilever' && (
-              <div class="w-full h-full flex flex-col items-center justify-center">
-                <svg viewBox="0 0 100 90" class="w-7 h-7" fill="#1F36C7">
-                  <path d="M25 15 C 25 55 45 75 50 75 C 55 75 75 55 75 15 C 65 25 60 45 50 45 C 40 45 35 25 25 15 Z" fill-rule="evenodd" />
-                  <circle cx="50" cy="22" r="6" />
-                  <circle cx="34" cy="30" r="4" />
-                  <circle cx="66" cy="30" r="4" />
-                </svg>
-                <span class="text-[7.5px] font-medium text-[#1F36C7] tracking-tight">Unilever</span>
-              </div>
-            )}
-          </div>
-
-          <!-- Info Details -->
-          <div class="min-w-0 flex-1">
-            <!-- Company Name -->
-            <p class="text-xs font-medium text-slate-700 truncate mb-1">
-              {job.company}
-            </p>
-
-            <!-- Badges / Pills -->
-            <div class="flex items-center gap-1.5 mb-1.5 flex-wrap">
-              <span class="px-2 py-0.5 rounded-md text-[10px] font-normal bg-slate-100 text-slate-600">
-                {job.type}
-              </span>
-              <span class="px-2 py-0.5 rounded-md text-[10px] font-normal bg-slate-100 text-slate-600">
-                {job.location}
-              </span>
             </div>
 
-            <!-- Position / Job Title -->
-            <h3 class="text-[13px] sm:text-sm font-medium text-slate-900 leading-snug truncate group-hover:text-[#1738d1] transition">
-              {job.position}
-            </h3>
-
-            <!-- Time posted -->
-            <p class="text-[11px] font-normal text-slate-400 mt-1">
-              {job.postedTime}
-            </p>
-          </div>
-        </a>
-      ))}
+            <!-- Bottom Row: Salary & Posted Time -->
+            <div class="pt-3 border-t border-[#101010]/8 flex items-center justify-between text-xs">
+              <span class="font-bold text-[#101010] bg-[#f4f3ee] px-2.5 py-0.5 rounded-full border border-[#d7d6cf]/60">
+                {job.salary}
+              </span>
+              <span class="text-[11px] font-medium text-[#a5a5a1]">
+                {job.postedTime}
+              </span>
+            </div>
+          </a>
+        ))
+      )}
     </div>
   </div>
 </section>

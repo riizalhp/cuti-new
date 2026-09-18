@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@cuti/db';
+import { prisma } from '@employr/db';
 
 function formatSalary(salaryMin: number | null, salaryMax: number | null, period: string): string {
   const fmt = (n: number) => `Rp ${n.toLocaleString('id-ID')}`;
@@ -64,7 +64,7 @@ function mapJob(job: any) {
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10) || 50, 100);
+    const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10) || 50, 500);
 
     const jobs = await prisma.jobs.findMany({
       where: { is_active: true },

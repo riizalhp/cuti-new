@@ -1,6 +1,9 @@
 ---
 // LowonganSection.astro - Lowongan Terbaru with clean editorial cards
-import { lowonganList } from '../data/mock';
+import { lowonganList, ensureData } from '../data/mock';
+
+await ensureData();
+const lowonganSnapshot = [...lowonganList];
 ---
 
 <section id="lowongan-terbaru" class="py-12 bg-white border-b border-slate-200">

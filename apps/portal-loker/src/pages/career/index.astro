@@ -1,3 +1,69 @@
 ---
-return Astro.redirect('/artikel');
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import FooterPortal from '../../components/FooterPortal.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import SearchModal from '../../components/SearchModal.astro';
+import PageHero from '../../components/common/PageHero.astro';
+import { artikelList, ensureData } from '../../data/mock';
+
+await ensureData();
+const artikelListSnapshot = [...artikelList];
+
+const title = "Artikel, Tips Karier & Panduan Melamar Kerja | Employer Job";
+const description = "Kumpulan panduan menyusun CV ATS, tips interview, strategi negosiasi gaji, dan tren dunia kerja terkini untuk talenta muda.";
 ---
+
+<BaseLayout title={title} description={description} canonicalUrl="http://localhost:3003/career">
+  <Navbar />
+
+  <main class="bg-[#f4f3ee] min-h-screen pb-16">
+    <PageHero
+      eyebrow="Panduan Karier"
+      title="Artikel &amp; <em>Tips Praktis Karier</em>"
+      description="Trik lolos screening CV, teknik menjawab pertanyaan wawancara tersulit, dan peta jalan keahlian yang dibutuhkan rekruter."
+      badge={{ text: `${artikelListSnapshot.length} Artikel Tersedia`, bgColor: 'bg-rose-50', textColor: 'text-rose-700', borderColor: 'border border-rose-200' }}
+    >
+      <nav slot="breadcrumb" class="flex items-center gap-2 text-xs text-[#6e6d68] mb-4" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-[#0000ff]">Beranda</a>
+        <span>/</span>
+        <span class="text-[#101010] font-semibold">Artikel &amp; Tips Karier</span>
+      </nav>
+    </PageHero>
+
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6">
+      <AdSlot type="leaderboard" note="Rekomendasi bacaan dan panduan karier terpilih." />
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        {artikelListSnapshot.map((art) => (
+          <article class="bg-white rounded-2xl border border-[#d7d6cf] overflow-hidden hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:border-[#0000ff]/30 hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
+            <div>
+              <div class="h-44 bg-[#eae8e0] overflow-hidden">
+                <img src={art.image} alt={art.title} class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" />
+              </div>
+              <div class="p-5">
+                <div class="flex items-center gap-2 text-[11px] text-[#6e6d68] mb-2">
+                  <span class="px-2.5 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 font-semibold">{art.category}</span>
+                  <span>·</span>
+                  <span>{art.readTime}</span>
+                </div>
+                <h2 class="text-base font-semibold text-[#101010] group-hover:text-[#0000ff] transition leading-snug">
+                  <a href={`/career/${art.slug}`}>{art.title}</a>
+                </h2>
+                <p class="text-xs text-[#6e6d68] line-clamp-2 mt-2 leading-relaxed">{art.excerpt}</p>
+              </div>
+            </div>
+            <div class="p-5 pt-0">
+              <a href={`/career/${art.slug}`} class="inline-block px-4 py-2 rounded-full bg-[#0000ff] hover:bg-[#1738d1] text-white text-xs font-semibold transition shadow-xs">
+                Baca Selengkapnya →
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </main>
+
+  <FooterPortal />
+  <SearchModal />
+</BaseLayout>

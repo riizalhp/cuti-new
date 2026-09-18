@@ -28,30 +28,29 @@ Lengkapi agar rekomendasi lowongan dan skor kecocokan semakin akurat:
 
 ## 3. Keamanan & Akun
 
-- **Ubah password** — ganti password akunmu.
-- **Akun terhubung** — lihat metode login (email atau Google).
+- **Ubah password**: ganti password akunmu.
+- **Akun terhubung**: lihat metode login (email atau Google).
 - Pengelolaan sesi dan opsi keamanan akun lainnya.
 
-## 4. Keanggotaan
+## 4. Status Akun
 
-- Lihat status **paket** kamu (Free / Member Pass / Lifetime).
-- Tombol **Upgrade** ke paket berbayar jika ingin membuka semua fitur.
-- Informasi masa aktif keanggotaan.
+- Lihat informasi akun dan kelengkapan profilmu.
+- Seluruh fitur aktif dan dapat digunakan secara gratis untuk mendukung perjalanan kariermu.
 
 ## 5. Tampilan & Notifikasi
 
-- **Mode gelap / terang** — pilih tampilan sesuai selera.
-- **Preferensi notifikasi** — atur notifikasi yang ingin kamu terima.
+- **Mode gelap / terang**: pilih tampilan sesuai kenyamanan mata.
+- **Preferensi notifikasi**: atur notifikasi yang ingin kamu terima.
 
 ## Cara menyimpan perubahan
 
-1. Isi / ubah data di tab yang diinginkan.
+1. Isi atau ubah data di tab yang diinginkan.
 2. Klik **Simpan Perubahan** di bagian bawah form.
-3. Perubahan tersimpan ke akunmu dan langsung digunakan oleh fitur lain (CV, rekomendasi, dll).
+3. Perubahan tersimpan ke akunmu dan langsung digunakan oleh fitur lain (CV, rekomendasi, dan profil).
 
 ## Tips
 
-- Isi **headline** yang jelas, misalnya *"Fresh Graduate Teknik Informatika, fokus Frontend Development"* — membantu recruiter dan mesin rekomendasi memahami dirimu.
+- Isi **headline** yang jelas, misalnya *"Fresh Graduate Teknik Informatika, fokus Frontend Development"*, untuk membantu recruiter memahami keahlianmu.
 - Perbarui **target posisi** jika kamu mulai melamar di bidang yang berbeda.
 
-Lanjut baca: [Panduan CV Builder](/artikel/panduan-cv-builder) atau [Paket & Harga](/artikel/paket-dan-harga).
+Lanjut baca: [Panduan CV Builder](/artikel/panduan-cv-builder) atau [Daftar & Masuk Akun](/artikel/daftar-dan-masuk).

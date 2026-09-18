@@ -16,22 +16,44 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   const router = useRouter();
   const pathname = usePathname();
 
+  // Always initialize to null on both SSR and Client to prevent React 19 hydration mismatch.
+  // Real auth verification and redirect happens safely in useEffect after hydration.
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+
   useEffect(() => {
     const session = getStoredSession();
     if (!session || !session.email) {
+      setIsAuthorized(false);
       const redirectUrl = pathname ? `/login?redirect=${encodeURIComponent(pathname)}` : '/login';
-      router.replace(redirectUrl);
+      window.location.replace(redirectUrl);
       return;
     }
 
+    setIsAuthorized(true);
+
     // Check if user has completed onboarding
     if (typeof window !== 'undefined') {
-      const onboardingCompleted = localStorage.getItem('cuti_onboarding_completed');
-      if (!onboardingCompleted && pathname !== '/onboarding') {
+      const isLocalCompleted = localStorage.getItem('employr_onboarding_completed') === 'true';
+      const isOnboarded = isLocalCompleted || session.onboarded === true;
+      if (session.onboarded && !isLocalCompleted) {
+        localStorage.setItem('employr_onboarding_completed', 'true');
+      }
+      if (!isOnboarded && pathname !== '/onboarding') {
         router.replace('/onboarding');
       }
     }
   }, [pathname, router]);
+
+  if (isAuthorized === false) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 font-sans text-xs text-slate-400">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-6 h-6 border-2 border-slate-300 dark:border-slate-700 border-t-[#1738D1] rounded-full animate-spin" />
+          <span>Mengalihkan ke halaman masuk...</span>
+        </div>
+      </div>
+    );
+  }
 
   const isCvPage = pathname === '/cv' || pathname?.startsWith('/cv/');
 
@@ -53,7 +75,6 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     <div className="h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex transition-colors font-sans print:h-auto print:overflow-visible print:block print:bg-white print:p-0 print:m-0">
       <Sidebar
         onOpenUpgradeModal={openUpgrade}
-        onSwitchToAdminPortal={() => router.push('/admin')}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={toggleSidebarCollapse}
         isMobileOpen={isMobileSidebarOpen}

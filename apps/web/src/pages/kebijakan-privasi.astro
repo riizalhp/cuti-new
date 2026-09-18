@@ -1,0 +1,845 @@
+---
+/**
+ * Kebijakan Privasi — Employr
+ * Disusun mengacu pada UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP).
+ * Struktur konten mencerminkan praktik data aktual platform:
+ * - Daftar tunggu (Early Tester): nama panggilan + nomor WhatsApp
+ * - Analitik pengunjung: visitor ID (cookie/localStorage), device, traffic source, UTM, halaman, durasi, IP
+ * - Aplikasi (dashboard): akun, CV & data karier, lamaran, log AI, log audit
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/employer/Icon.astro';
+
+const logoMark = '/logo.webp';
+const lastUpdated = '15 September 2026';
+
+const toc = [
+  ['#pendahuluan', 'Pendahuluan'],
+  ['#data-yang-dikumpulkan', 'Data yang Kami Kumpulkan'],
+  ['#dasar-pemrosesan', 'Dasar Pemrosesan'],
+  ['#cookie', 'Cookie & Penyimpanan Lokal'],
+  ['#penggunaan', 'Cara Kami Menggunakan Data'],
+  ['#pembagian', 'Pembagian Data'],
+  ['#ai-otomatis', 'AI & Keputusan Otomatis'],
+  ['#retensi', 'Penyimpanan & Retensi'],
+  ['#keamanan', 'Keamanan Data'],
+  ['#hak-anda', 'Hak-Hakmu'],
+  ['#anak', 'Data Anak'],
+  ['#transfer', 'Transfer Internasional'],
+  ['#perubahan', 'Perubahan Kebijakan'],
+  ['#kontak', 'Hubungi Kami'],
+] as const;
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Beranda', item: 'https://employr.id/' },
+    { '@type': 'ListItem', position: 2, name: 'Kebijakan Privasi', item: 'https://employr.id/kebijakan-privasi' },
+  ],
+};
+---
+
+<BaseLayout
+  title="Kebijakan Privasi — Employr"
+  description="Bagaimana Employr mengumpulkan, menggunakan, dan melindungi data pribadimu — disusun mengacu pada UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi."
+  keywords="kebijakan privasi Employr, pelindungan data pribadi, UU PDP, data CV, keamanan data karier"
+  canonicalUrl="https://employr.id/kebijakan-privasi"
+  breadcrumbSchema={breadcrumbSchema}
+>
+  <div class="pp-shell">
+    <!-- Header — konsisten dengan halaman 404 -->
+    <header class="pp-header">
+      <a href="/" class="pp-brand" aria-label="Beranda Employr">
+        <img src={logoMark} alt="Employr" width="140" height="36" />
+      </a>
+      <div class="pp-header__actions">
+        <a href="/" class="pp-header__link">Beranda</a>
+        <a href="/pre-register" class="pp-header__cta">Akses Awal <Icon name="move-up-right" size={12} /></a>
+      </div>
+    </header>
+
+    <!-- Progres baca -->
+    <div class="pp-progress" aria-hidden="true"><span id="pp-progress-bar"></span></div>
+
+    <!-- Hero editorial -->
+    <section class="pp-hero">
+      <div class="editorial-frame">
+        <div class="section-label"><span>KEBIJAKAN PRIVASI</span><i></i><span>TERAKHIR DIPERBARUI · {lastUpdated.toUpperCase()}</span></div>
+        <h1>Data kariermu <em>milikmu.</em><br />Kami hanya merapikannya.</h1>
+        <p class="pp-hero__lede">
+          Dokumen ini menjelaskan data apa yang kami kumpulkan saat kamu menggunakan Employr, alasan kami
+          memprosesnya, serta hak-hak yang bisa kamu jalankan — disusun mengacu pada
+          <strong>UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP)</strong>.
+        </p>
+      </div>
+    </section>
+
+    <!-- Konten -->
+    <main class="pp-main" id="konten-utama">
+      <div class="editorial-frame pp-grid">
+        <!-- Sidebar TOC -->
+        <aside class="pp-toc" aria-label="Daftar isi">
+          <b>Daftar Isi</b>
+          <nav>
+            {toc.map(([href, label]) => (
+              <a href={href} data-toc-link={href.slice(1)}>{label}</a>
+            ))}
+          </nav>
+          <div class="pp-toc__foot">
+            <span class="pp-dot"></span> 14 bagian · ±10 menit baca
+          </div>
+        </aside>
+
+        <!-- Isi -->
+        <article class="pp-body">
+          <!-- 01 -->
+          <section id="pendahuluan" class="pp-section">
+            <div class="section-label"><span>01</span><i></i><span>LINGKUP</span></div>
+            <h2>Pendahuluan</h2>
+            <p>
+              Employr adalah ruang kerja persiapan karier yang dioperasikan oleh <strong>PT Employr Media Indonesia</strong> berkedudukan di
+              Semarang, Indonesia ("kami"). Kebijakan ini berlaku untuk seluruh layanan kami: situs publik
+              employr.id, halaman daftar tunggu, aplikasi dashboard karier (app.employr.id), pusat bantuan
+              faq.employr.id, serta komunikasi terkait layanan tersebut.
+            </p>
+            <p>
+              Dengan menggunakan layanan kami, kamu dianggap telah membaca dan memahami kebijakan ini. Jika kamu
+              tidak menyetujui isinya, mohon hentikan penggunaan layanan. Versi terbaru dari kebijakan ini selalu
+              tersedia di halaman ini, dan perubahan penting akan kami sampaikan melalui layanan atau kontak yang
+              kamu berikan.
+            </p>
+            <div class="pp-callout">
+              <b>Ringkasnya</b>
+              <ul>
+                <li>Kami hanya mengumpulkan data yang diperlukan untuk menjalankan layanan.</li>
+                <li>Data CV-mu dipakai untuk fitur penyusunan &amp; pencocokan — bukan dijual atau dibagikan ke rekruter tanpa izinmu.</li>
+                <li>Kamu bisa meminta akses, koreksi, atau penghapusan data kapan saja lewat help.employr@outlook.com.</li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- 02 -->
+          <section id="data-yang-dikumpulkan" class="pp-section">
+            <div class="section-label"><span>02</span><i></i><span>INVENTARIS DATA</span></div>
+            <h2>Data yang Kami Kumpulkan</h2>
+            <p>Kami mengelompokkan data berdasarkan cara kamu berinteraksi dengan layanan:</p>
+
+            <h3>a. Data yang kamu berikan langsung</h3>
+            <ul>
+              <li><strong>Daftar tunggu (Akses Awal):</strong> nama panggilan dan nomor WhatsApp, untuk mengabari kamu saat akses awal dibuka.</li>
+              <li><strong>Akun aplikasi:</strong> nama, alamat email, dan nomor telepon saat mendaftar, termasuk profil dasar yang diambil dari akun Google apabila kamu mendaftar melalui Google.</li>
+              <li><strong>Data karier:</strong> isi CV yang kamu susun atau unggah — riwayat pendidikan, pengalaman kerja, keahlian, sertifikasi, dan proyek — beserta versi-versi CV yang kamu simpan.</li>
+              <li><strong>Data lamaran:</strong> catatan posisi yang kamu lamar, perusahaan, status seleksi, dan catatan pribadi yang kamu tulis pada pelacak lamaran.</li>
+            </ul>
+
+            <h3>b. Data yang terkumpul otomatis saat berkunjung</h3>
+            <ul>
+              <li><strong>Data perangkat &amp; teknis:</strong> tipe perangkat (desktop/tablet/mobile), jenis dan versi browser, sistem operasi, dan resolusi layar.</li>
+              <li><strong>Data penggunaan:</strong> halaman yang dilihat, durasi kunjungan, serta aktivitas interaksi di dalam layanan.</li>
+              <li><strong>Data sumber kunjungan:</strong> halaman perujuk (referrer) dan parameter kampanye (utm_source, utm_medium, utm_campaign, utm_content, utm_term).</li>
+              <li><strong>Data jaringan:</strong> alamat IP, yang dapat kami turunkan menjadi informasi kota dan negara secara perkiraan untuk keperluan analitik agregat.</li>
+            </ul>
+
+            <h3>c. Data yang dihasilkan sistem</h3>
+            <ul>
+              <li><strong>Log keamanan &amp; audit:</strong> catatan aktivitas sensitif pada akun (mis. perubahan data) yang menyertai IP dan user agent, untuk deteksi penyalahgunaan.</li>
+              <li><strong>Log penggunaan AI:</strong> catatan permintaan fitur berbasis AI (mis. penyusunan CV) untuk menjaga kualitas, mencegah penyalahgunaan, dan mengendalikan biaya. Isi dokumen CV-mu tidak kami gunakan untuk melatih model.</li>
+            </ul>
+
+            <div class="pp-note">
+              Kami <strong>tidak</strong> meminta, dan mohon jangan mengirimkan, data pribadi yang bersifat sensitif
+              sebagaimana dimaksud Pasal 4 UU PDP (mis. data kesehatan, biometrik, keyakinan, atau orientasi seksual)
+              melalui CV atau kolom manapun, kecuali kamu secara sukarela menuliskannya di dalam dokumen kariermu sendiri.
+            </div>
+          </section>
+
+          <!-- 03 -->
+          <section id="dasar-pemrosesan" class="pp-section">
+            <div class="section-label"><span>03</span><i></i><span>KEPATUHAN</span></div>
+            <h2>Dasar &amp; Tujuan Pemrosesan</h2>
+            <p>Sesuai UU PDP, setiap pemrosesan data kami berpijak pada salah satu dasar berikut:</p>
+            <div class="pp-table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Dasar pemrosesan</th><th>Data</th><th>Tujuan</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><b>Persetujuan</b></td>
+                    <td>Nomor WhatsApp &amp; nama pada daftar tunggu</td>
+                    <td>Mengirim pemberitahuan akses awal dan informasi peluncuran yang kamu minta.</td>
+                  </tr>
+                  <tr>
+                    <td><b>Pelaksanaan kontrak</b></td>
+                    <td>Akun, data karier, data lamaran</td>
+                    <td>Menyediakan fitur inti: penyusunan CV, pencocokan loker, pelacak lamaran, dan pengunduh dokumen.</td>
+                  </tr>
+                  <tr>
+                    <td><b>Kepentingan yang sah</b></td>
+                    <td>Data teknis, penggunaan, log audit</td>
+                    <td>Menjaga keamanan, mencegah penyalahgunaan, memperbaiki performa dan pengalaman layanan.</td>
+                  </tr>
+                  <tr>
+                    <td><b>Kewajiban hukum</b></td>
+                    <td>Data akun &amp; catatan transaksi (bila tersedia)</td>
+                    <td>Memenuhi ketentuan perpajakan, permintaan resmi berwenang, dan sengketa.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Kami tidak menggunakan data pribadimu untuk pengambilan keputusan yang berdampak hukum atau signifikan
+              tanpa campur tangan manusia. Penjelasan tentang fitur bertenaga AI tersedia pada
+              <a href="#ai-otomatis">bagian 07</a>.
+            </p>
+          </section>
+
+          <!-- 04 -->
+          <section id="cookie" class="pp-section">
+            <div class="section-label"><span>04</span><i></i><span>PENYIMPANAN DI PERANGKATMU</span></div>
+            <h2>Cookie &amp; Penyimpanan Lokal</h2>
+            <p>
+              Kami menggunakan cookie dan penyimpanan browser yang bersifat <strong>esensial/analitik internal</strong> —
+              bukan untuk iklan. Ringkasannya:
+            </p>
+            <div class="pp-table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Penyimpanan</th><th>Jenis</th><th>Isi</th><th>Masa berlaku</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>employr_visitor_id</code></td>
+                    <td>Cookie + localStorage</td>
+                    <td>Pengenal pengunjung acak (bukan nama/identitas) agar statistik kunjungan tidak terhitung ganda.</td>
+                    <td>±12 bulan</td>
+                  </tr>
+                  <tr>
+                    <td><code>employr_session_id</code></td>
+                    <td>sessionStorage</td>
+                    <td>Pengenal sesi kunjungan untuk menghitung durasi dan alur halaman.</td>
+                    <td>Per sesi (timeout 30 menit)</td>
+                  </tr>
+                  <tr>
+                    <td><code>employr_session_last_active</code></td>
+                    <td>sessionStorage</td>
+                    <td>Penanda waktu aktivitas terakhir untuk menutup sesi.</td>
+                    <td>Per sesi</td>
+                  </tr>
+                  <tr>
+                    <td>Sesi masuk aplikasi</td>
+                    <td>Cookie sesi</td>
+                    <td>Menjaga kamu tetap masuk di app.employr.id.</td>
+                    <td>Sesuai durasi sesi masuk</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Karena semua cookie kami bersifat fungsional/analitik internal dan tidak melacak lintas situs, kamu
+              tetap dapat menonaktifkannya lewat pengaturan browser tanpa kehilangan akses ke konten utama — meski
+              sebagian pengalaman (mis. sesi masuk) bisa terganggu.
+            </p>
+          </section>
+
+          <!-- 05 -->
+          <section id="penggunaan" class="pp-section">
+            <div class="section-label"><span>05</span><i></i><span>PENGGUNAAN</span></div>
+            <h2>Cara Kami Menggunakan Data</h2>
+            <ul>
+              <li><strong>Menjalankan fitur inti:</strong> menyusun, menyimpan, mencocokkan, dan mengekspor CV serta melacak status lamaran.</li>
+              <li><strong>Mengomunikasikan layanan:</strong> kabar akses awal, pengumuman peluncuran, dan balasan atas pertanyaanmu — hanya melalui kanal yang kamu berikan.</li>
+              <li><strong>Analitik &amp; perbaikan:</strong> memahami halaman mana yang bermanfaat, dari mana pengunjung datang, dan fitur mana yang perlu diperbaiki; laporan bersifat agregat dan tidak mengidentifikasi individu.</li>
+              <li><strong>Keamanan:</strong> mendeteksi spam, percobaan akses tidak sah, dan penyalahgunaan fitur.</li>
+              <li><strong>Kepatuhan:</strong> memenuhi permintaan yang sah dari aparat berwenang sesuai prosedur hukum Indonesia.</li>
+            </ul>
+            <p>
+              Kami <strong>tidak</strong> menjual data pribadimu, tidak memakainya untuk iklan pihak ketiga, dan tidak
+              mengirim CV-mu ke rekruter tanpa tindakan dan persetujuanmu.
+            </p>
+          </section>
+
+          <!-- 06 -->
+          <section id="pembagian" class="pp-section">
+            <div class="section-label"><span>06</span><i></i><span>PIHAK KETIGA</span></div>
+            <h2>Pembagian Data</h2>
+            <p>Data pribadimu hanya dibagikan dalam kondisi berikut:</p>
+            <ul>
+              <li><strong>Penyedia layanan (subprosesor):</strong> pihak yang membantu operasional kami — penyedia hosting dan basis data, layanan email/SMTP untuk korespondensi, penyedia otentikasi Google untuk proses masuk, penyedia model AI untuk fitur penyusunan CV, serta layanan pemetaan IP-ke-lokasi. Semuanya terikat kewajiban menjaga kerahasiaan data dan hanya memproses data sesuai instruksi kami.</li>
+              <li><strong>Kewajiban hukum:</strong> apabila diwajibkan oleh undang-undang, putusan pengadilan, atau permintaan resmi otoritas yang berwenang.</li>
+              <li><strong>Perubahan korporasi:</strong> jika terjadi merger atau pengalihan aset, data pribadi tetap dilindungi oleh kebijakan ini (atau kebijakan yang lebih baik) dan kamu akan diberi tahu sebelumnya.</li>
+              <li><strong>Dengan persetujuanmu:</strong> untuk hal lain di luar daftar di atas, kami akan meminta persetujuanmu lebih dahulu.</li>
+            </ul>
+            <p>
+              Daftar subprosesor utama dapat diminta melalui <a href="mailto:help.employr@outlook.com">help.employr@outlook.com</a>.
+              Saat artikel panduan atau laporan agregat dipublikasikan, datanya dianonimkan sehingga tidak dapat
+              ditelusuri ke dirimu.
+            </p>
+          </section>
+
+          <!-- 07 -->
+          <section id="ai-otomatis" class="pp-section">
+            <div class="section-label"><span>07</span><i></i><span>TRANSPARANSI AI</span></div>
+            <h2>AI &amp; Keputusan Otomatis</h2>
+            <p>
+              Fitur cerdas Employr bekerja dengan cara berikut, agar kamu punya gambaran jelas sebelum memakainya:
+            </p>
+            <ul>
+              <li><strong>Skor kecocokan CV–loker:</strong> sistem membandingkan kata kunci dan kualifikasi pada CV-mu dengan deskripsi loker yang kamu masukkan. Hasilnya berupa saran penyempurnaan — <em>keputusan akhir dan isi CV sepenuhnya tetap di tanganmu</em>.</li>
+              <li><strong>Penyusunan &amp; parafrasa berbantuan AI:</strong> potongan teks CV dapat dirapikan oleh model AI pihak penyedia yang kami kontrak. Konten dikirim hanya saat kamu menjalankan fitur tersebut dan tidak digunakan untuk melatih model.</li>
+              <li><strong>Tidak ada keputusan hukum otomatis:</strong> kami tidak memakai AI untuk menilai kelayakan kamu diterima kerja, dan tidak memberikan CV-mu ke sistem penilaian rekruter.</li>
+            </ul>
+            <p>
+              Apabila kamu tidak nyaman dengan pemrosesan otomatis, semua fitur inti tetap dapat dipakai secara manual.
+              Kamu juga berhak meminta tinjauan manusia atas hasil otomatis melalui kontak pada
+              <a href="#kontak">bagian 14</a>.
+            </p>
+          </section>
+
+          <!-- 08 -->
+          <section id="retensi" class="pp-section">
+            <div class="section-label"><span>08</span><i></i><span>LAMA SIMPAN</span></div>
+            <h2>Penyimpanan &amp; Retensi</h2>
+            <p>Kami menyimpan data hanya selama diperlukan untuk tujuan pemrosesannya:</p>
+            <div class="pp-table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Jenis data</th><th>Masa retensi</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Data akun aktif</td><td>Selama akun digunakan, lalu dihapus/anonimkan paling lambat 90 hari setelah permintaan penghapusan.</td></tr>
+                  <tr><td>Data daftar tunggu</td><td>Sampai kamu dimasukkan ke akses awal, atau anonimkan setelah 12 bulan tidak aktif.</td></tr>
+                  <tr><td>Data analitik pengunjung</td><td>Maksimal 24 bulan sejak aktivitas terakhir, dalam bentuk yang tidak mengidentifikasi individu.</td></tr>
+                  <tr><td>Log keamanan &amp; audit</td><td>Maksimal 12 bulan.</td></tr>
+                  <tr><td>Data wajib hukum</td><td>Sesuai jangka waktu yang diwajibkan peraturan perundang-undangan.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Setelah masa retensi berakhir, data dihapus secara aman atau dianonimkan sehingga tidak dapat lagi
+              dikaitkan dengan dirimu. Salinan pada cadangan (backup) rutin akan terhapus mengikuti siklus backup
+              tersebut, dengan tetap tunduk pada kebijakan retensi di atas.
+            </p>
+          </section>
+
+          <!-- 09 -->
+          <section id="keamanan" class="pp-section">
+            <div class="section-label"><span>09</span><i></i><span>PENGAMANAN</span></div>
+            <h2>Keamanan Data</h2>
+            <p>Langkah teknis dan organisatoris yang kami terapkan mencakup:</p>
+            <ul>
+              <li>Enkripsi data saat transit (HTTPS/TLS) dan pengamanan akses basis data dengan kredensial terkelola.</li>
+              <li>Kontrol akses berbasis peran: data pribadi hanya dapat diakses personel yang membutuhkannya.</li>
+              <li>Isolasi lingkungan produksi, pemantauan log, dan pencatatan audit untuk aktivitas sensitif.</li>
+              <li>Review keamanan berkala terhadap kode dan infrastruktur, termasuk penanganan kerentanan.</li>
+              <li>Prosedur respons insiden: bila terjadi kebocoran yang berdampak padamu, kami akan memberitahumu serta memberitahukan otoritas pelindungan data sebagaimana diatur UU PDP.</li>
+            </ul>
+            <p>
+              Tidak ada sistem yang 100% kebal. Kamu juga berperan: gunakan kata sandi yang kuat dan jangan bagikan
+              akses akunmu kepada siapa pun. Laporkan dugaan celah ke <a href="mailto:help.employr@outlook.com">help.employr@outlook.com</a>.
+            </p>
+          </section>
+
+          <!-- 10 -->
+          <section id="hak-anda" class="pp-section">
+            <div class="section-label"><span>10</span><i></i><span>KENDALIMU</span></div>
+            <h2>Hak-Hakmu</h2>
+            <p>Sesuai UU PDP, kamu berhak untuk:</p>
+            <ol>
+              <li>Mendapat <strong>informasi</strong> yang jelas tentang tujuan dan aktivitas pemrosesan.</li>
+              <li><strong>Mengakses dan memperoleh salinan</strong> data pribadimu yang kami proses.</li>
+              <li><strong>Melengkapi dan memperbarui</strong> data yang tidak akurat atau tidak lengkap.</li>
+              <li><strong>Mengakhiri pemrosesan, menghapus, atau memusnahkan</strong> data pribadimu.</li>
+              <li><strong>Menarik persetujuan</strong> atas pemrosesan yang berdasarkan persetujuan — tanpa memengaruhi pemrosesan yang sudah sah sebelumnya.</li>
+              <li><strong>Membantah pengambilan keputusan otomatis</strong> dan meminta penilaian oleh manusia.</li>
+              <li><strong>Menunda atau membatasi</strong> pemrosesan dalam sengketa tertentu.</li>
+              <li><strong>Menerima kompensasi</strong> atas pelanggaran data pribadi yang menimpa kerugian nyata.</li>
+              <li><strong>Mengajukan keberatan</strong> dan melaporkan pelanggaran kepada kami maupun otoritas yang berwenang.</li>
+            </ol>
+            <div class="pp-callout">
+              <b> Cara mengajukan permintaan</b>
+              <ul>
+                <li>Kirim email ke <a href="mailto:help.employr@outlook.com">help.employr@outlook.com</a> dengan subjek "Permintaan Data Pribadi", atau gunakan menu pengaturan akun di aplikasi (jika tersedia).</li>
+                <li>Kami merespons paling lambat <strong>14 (empat belas) hari kerja</strong>. Permintaan rumit dapat diperpanjang 30 hari dengan kami beri tahu alasannya.</li>
+                <li>Untuk perlindunganmu, kami dapat meminta verifikasi identitas singkat sebelum menindaklanjuti.</li>
+              </ul>
+            </div>
+            <p>
+              Jika kamu menilai respons kami tidak memuaskan, kamu berhak mengadu kepada otoritas pelindungan data
+              pribadi yang berwenang di Indonesia.
+            </p>
+          </section>
+
+          <!-- 11 -->
+          <section id="anak" class="pp-section">
+            <div class="section-label"><span>11</span><i></i><span>ANAK &amp; REMAJA</span></div>
+            <h2>Data Anak</h2>
+            <p>
+              Layanan kami ditujukan untuk pencari kerja dan penyusunan karier, sehingga tidak dimaksudkan untuk anak
+              di bawah 18 tahun. Kami tidak dengan sengaja mengumpulkan data pribadi anak; namun sesuai UU PDP,
+              pemrosesan data anak memerlukan persetujuan dari orang tua atau wali.
+            </p>
+            <p>
+              Apabila kamu orang tua/wali yang mengetahui anakmu mengirimkan data kepada kami, hubungi
+              <a href="mailto:help.employr@outlook.com">help.employr@outlook.com</a> — setelah diverifikasi, data terkait akan kami hapus.
+            </p>
+          </section>
+
+          <!-- 12 -->
+          <section id="transfer" class="pp-section">
+            <div class="section-label"><span>12</span><i></i><span>LUAR NEGERI</span></div>
+            <h2>Transfer Internasional</h2>
+            <p>
+              Beberapa penyedia layanan kami (mis. jaringan pengiriman konten, penyedia otentikasi, atau penyedia model
+              AI) dapat menyimpan atau memproses data di server di luar Indonesia. Dalam hal itu, kami memastikan
+              negara tujuan memiliki tingkat pelindungan yang setara atau lebih baik, atau ada pengikatan yang cukup
+              dan dapat diberlakukan secara hukum untuk melindungi datamu — sebagaimana disyaratkan Pasal 56 UU PDP.
+            </p>
+          </section>
+
+          <!-- 13 -->
+          <section id="perubahan" class="pp-section">
+            <div class="section-label"><span>13</span><i></i><span>PEMBARUAN</span></div>
+            <h2>Perubahan Kebijakan</h2>
+            <p>
+              Kebijakan ini dapat kami perbarui seiring perkembangan layanan atau peraturan. Tanggal
+              "terakhir diperbarui" di bagian atas halaman selalu mencerminkan versi terkini. Untuk perubahan yang
+              material — misalnya tujuan pemrosesan baru atau penambahan pihak yang menerima data — kami akan
+              memberitahumu lewat pengumuman di layanan atau kontak yang kamu berikan, dan meminta persetujuan ulang
+              bila diwajibkan.
+            </p>
+          </section>
+
+          <!-- 14 -->
+          <section id="kontak" class="pp-section">
+            <div class="section-label"><span>14</span><i></i><span>KONTAK</span></div>
+            <h2>Hubungi Kami</h2>
+            <p>Pengampu data pribadi untuk layanan Employr adalah <strong>PT Employr Media Indonesia</strong>, berkedudukan di Semarang, Indonesia.</p>
+            <div class="pp-contact">
+              <div>
+                <b>Email Resmi</b>
+                <a href="mailto:help.employr@outlook.com">help.employr@outlook.com</a>
+                <span>Permintaan data, pertanyaan, dan laporan kendala.</span>
+              </div>
+              <div>
+                <b>Threads Resmi</b>
+                <a href="https://www.threads.net/@employr.id" target="_blank" rel="noopener noreferrer">@employr.id</a>
+                <span>Diskusi terbuka, info resmi, dan pembaruan sistem.</span>
+              </div>
+              <div>
+                <b>DM Threads</b>
+                <a href="https://www.threads.net/@riizalhp" target="_blank" rel="noopener noreferrer">@riizalhp</a>
+                <span>Komunikasi personal dan bantuan langsung.</span>
+              </div>
+              <div>
+                <b>Pusat Bantuan</b>
+                <a href="https://faq.employr.id" target="_blank" rel="noopener noreferrer">faq.employr.id</a>
+                <span>Panduan penggunaan dan dokumentasi lengkap.</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Penutup -->
+          <div class="pp-end">
+            <div class="section-label"><span>KARIERMU, PILIHANMU</span><i></i><span>DATA-MU, KENDALIMU</span></div>
+            <a href="/pre-register" class="action-link">Mulai Persiapan Karier <Icon name="arrow-up-right" /></a>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="pp-footer">
+      <div class="editorial-frame pp-footer__inner">
+        <span>© {new Date().getFullYear()} Employr</span>
+        <span>KARIERMU, PILIHANMU.</span>
+        <span>SEMARANG · INDONESIA</span>
+      </div>
+    </footer>
+
+    <a href="#top" class="pp-top" aria-label="Kembali ke atas">↑</a>
+  </div>
+
+  <script>
+    // Progres baca + TOC aktif + kembali ke atas
+    const bar = document.getElementById('pp-progress-bar');
+    const sections = Array.from(document.querySelectorAll<HTMLElement>('.pp-section'));
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
+    const topBtn = document.querySelector<HTMLAnchorElement>('.pp-top');
+
+    const onScroll = () => {
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - window.innerHeight;
+      if (bar) bar.style.width = `${max > 0 ? Math.min(100, (window.scrollY / max) * 100) : 0}%`;
+
+      // Sorot bagian yang sedang dibaca di TOC
+      let current = '';
+      for (const s of sections) {
+        if (s.getBoundingClientRect().top <= 120) current = s.id;
+      }
+      links.forEach((l) => l.classList.toggle('is-active', l.dataset.tocLink === current));
+
+      if (topBtn) topBtn.classList.toggle('is-visible', window.scrollY > 600);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  </script>
+</BaseLayout>
+
+<style>
+  /* ===== Kerangka halaman (tema paper terang, konsisten 404) ===== */
+  .pp-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--paper, #f4f3ee);
+    color: var(--ink, #101010);
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .pp-shell ::selection { background: #1738d1; color: #fff; }
+
+  .pp-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px clamp(24px, 5vw, 48px);
+    border-bottom: 1px solid rgba(16, 16, 16, 0.08);
+    background: rgba(244, 243, 238, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .pp-brand img { height: 30px; width: auto; object-fit: contain; }
+  .pp-header__actions { display: flex; align-items: center; gap: 10px; }
+  .pp-header__link {
+    font-size: 12px;
+    font-weight: 700;
+    color: #6e6d68;
+    padding: 8px 12px;
+    transition: color 0.18s var(--ease-out, ease-out);
+  }
+  .pp-header__link:hover { color: var(--ink, #101010); }
+  .pp-header__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: #1738d1;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: 0 6px 18px rgba(23, 56, 209, 0.22);
+    transition: background 0.18s var(--ease-out, ease-out), transform 0.18s var(--ease-out, ease-out);
+  }
+  .pp-header__cta:hover { background: #132ea8; transform: translateY(-1px); }
+
+  .pp-progress {
+    position: sticky;
+    top: 66px;
+    z-index: 49;
+    height: 2px;
+    background: rgba(16, 16, 16, 0.06);
+  }
+  .pp-progress span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--blue, #0000ff);
+    transition: width 0.08s linear;
+  }
+
+  /* ===== Hero ===== */
+  .pp-hero { padding: clamp(56px, 9vw, 110px) 0 clamp(28px, 4vw, 48px); }
+  .pp-hero h1 {
+    font-family: 'Inter Tight', 'DM Sans', sans-serif;
+    font-size: clamp(2.1rem, 5.4vw, 4.1rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.04;
+    margin: 22px 0 0;
+  }
+  .pp-hero h1 em {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    color: #1738d1;
+  }
+  .pp-hero__lede {
+    max-width: 720px;
+    margin-top: 22px;
+    font-size: clamp(0.95rem, 1.4vw, 1.08rem);
+    line-height: 1.75;
+    color: #43423e;
+  }
+  .pp-hero__lede strong { color: var(--ink, #101010); }
+
+  /* ===== Grid konten + TOC ===== */
+  .pp-main { flex: 1; padding-bottom: clamp(56px, 8vw, 96px); }
+  .pp-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+    align-items: start;
+  }
+  @media (min-width: 1024px) {
+    .pp-grid { grid-template-columns: 230px minmax(0, 760px); gap: clamp(40px, 6vw, 88px); }
+  }
+
+  .pp-toc {
+    position: sticky;
+    top: 110px;
+    display: none;
+    padding: 22px;
+    border: 1px solid rgba(16, 16, 16, 0.1);
+    border-radius: 14px;
+    background: #fff;
+  }
+  @media (min-width: 1024px) { .pp-toc { display: block; } }
+  .pp-toc > b {
+    display: block;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #75746e;
+    margin-bottom: 14px;
+  }
+  .pp-toc nav { display: flex; flex-direction: column; }
+  .pp-toc nav a {
+    position: relative;
+    padding: 6px 0 6px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #6e6d68;
+    line-height: 1.5;
+    transition: color 0.18s var(--ease-out, ease-out);
+  }
+  .pp-toc nav a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    transform: translateY(-50%);
+    background: rgba(16, 16, 16, 0.18);
+    transition: background 0.18s var(--ease-out, ease-out);
+  }
+  .pp-toc nav a:hover { color: var(--ink, #101010); }
+  .pp-toc nav a.is-active { color: #1738d1; }
+  .pp-toc nav a.is-active::before { background: #1738d1; }
+  .pp-toc__foot {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(16, 16, 16, 0.08);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #8a8983;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .pp-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #1738d1;
+    animation: pp-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pp-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  /* ===== Isi ===== */
+  .pp-section { padding: clamp(30px, 4.5vw, 52px) 0; border-bottom: 1px solid rgba(16, 16, 16, 0.08); }
+  .pp-section:last-of-type { border-bottom: 0; }
+  .pp-section h2 {
+    font-family: 'Inter Tight', 'DM Sans', sans-serif;
+    font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 14px 0 18px;
+  }
+  .pp-section h3 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 26px 0 10px;
+  }
+  .pp-section p, .pp-section li {
+    font-size: 0.94rem;
+    line-height: 1.78;
+    color: #33322e;
+  }
+  .pp-section p { margin-bottom: 14px; }
+  .pp-section ul, .pp-section ol { display: flex; flex-direction: column; gap: 10px; margin: 0 0 18px; padding-left: 20px; }
+  .pp-section ul { list-style: none; padding-left: 0; }
+  .pp-section ul li { position: relative; padding-left: 20px; }
+  .pp-section ul li::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 0.72em;
+    width: 7px;
+    height: 7px;
+    background: var(--blue, #0000ff);
+  }
+  .pp-section ol li::marker { font-weight: 800; color: #1738d1; }
+  .pp-section a { color: #1738d1; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+  .pp-section a:hover { color: var(--blue, #0000ff); }
+  .pp-section b, .pp-section strong { color: var(--ink, #101010); }
+
+  /* Tabel */
+  .pp-table-wrap {
+    margin: 18px 0 22px;
+    border: 1px solid rgba(16, 16, 16, 0.1);
+    border-radius: 12px;
+    overflow-x: auto;
+    background: #fff;
+  }
+  .pp-table-wrap table { width: 100%; border-collapse: collapse; min-width: 560px; }
+  .pp-table-wrap th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #75746e;
+    padding: 13px 16px;
+    border-bottom: 1px solid rgba(16, 16, 16, 0.1);
+    background: #fafaf6;
+  }
+  .pp-table-wrap td {
+    font-size: 0.86rem;
+    line-height: 1.65;
+    color: #33322e;
+    padding: 13px 16px;
+    border-bottom: 1px solid rgba(16, 16, 16, 0.06);
+    vertical-align: top;
+  }
+  .pp-table-wrap tr:last-child td { border-bottom: 0; }
+  .pp-table-wrap td b { color: var(--ink, #101010); }
+  .pp-table-wrap code {
+    font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;
+    font-size: 0.78rem;
+    background: rgba(23, 56, 209, 0.06);
+    color: #1738d1;
+    padding: 2px 6px;
+    border-radius: 5px;
+    white-space: nowrap;
+  }
+
+  /* Callout & catatan */
+  .pp-callout, .pp-note {
+    margin: 22px 0 6px;
+    padding: 18px 20px;
+    border-radius: 12px;
+    background: #fff;
+  }
+  .pp-callout { border: 1px solid rgba(23, 56, 209, 0.28); border-left: 3px solid #1738d1; }
+  .pp-note { border: 1px solid rgba(16, 16, 16, 0.1); border-left: 3px solid var(--ink, #101010); }
+  .pp-callout b {
+    display: block;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #1738d1;
+    margin-bottom: 10px;
+  }
+  .pp-callout ul { margin-bottom: 0; }
+  .pp-callout ul li::before { background: #1738d1; }
+
+  /* Kontak */
+  .pp-contact {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 20px;
+  }
+  @media (min-width: 640px) { .pp-contact { grid-template-columns: repeat(3, 1fr); } }
+  .pp-contact > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 18px;
+    border: 1px solid rgba(16, 16, 16, 0.1);
+    border-radius: 12px;
+    background: #fff;
+  }
+  .pp-contact b {
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #75746e;
+  }
+  .pp-contact a { font-size: 0.9rem; }
+  .pp-contact span { font-size: 11.5px; line-height: 1.6; color: #6e6d68; }
+
+  /* Penutup */
+  .pp-end {
+    margin-top: clamp(36px, 5vw, 56px);
+    padding: clamp(28px, 4vw, 44px);
+    border-radius: 16px;
+    background: #101010;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    align-items: flex-start;
+  }
+  .pp-end .section-label { color: #a5a5a1; }
+  .pp-end .section-label i { background: #fff; }
+  .pp-end .action-link { color: #fff; }
+
+  /* Footer */
+  .pp-footer { border-top: 1px solid rgba(16, 16, 16, 0.08); padding: 22px 0; }
+  .pp-footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8a8983;
+  }
+
+  /* Tombol ke atas */
+  .pp-top {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 60;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #101010;
+    color: #fff;
+    font-size: 16px;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+    transition: opacity 0.25s var(--ease-out, ease-out), transform 0.25s var(--ease-out, ease-out);
+  }
+  .pp-top.is-visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+  /* Cetak */
+  @media print {
+    .pp-header, .pp-progress, .pp-toc, .pp-top, .pp-end, .pp-footer { display: none !important; }
+    .pp-shell { background: #fff; }
+    .pp-section { padding: 14px 0; page-break-inside: avoid; }
+  }
+</style>

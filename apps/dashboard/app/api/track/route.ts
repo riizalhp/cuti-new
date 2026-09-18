@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@cuti/db';
+import { prisma } from '@employr/db';
+import { checkRateLimit } from '@/lib/rate-limiter';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +23,19 @@ export async function POST(req: NextRequest) {
       activity_name,
       metadata,
       duration_increment_sec,
+      module_name,
+      error_details,
+      vitals,
     } = payload;
+
+    // Rate limiting: max 120 events per minute per visitor
+    const rl = checkRateLimit(`track:${visitor_id}`, 120, 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { success: false, message: 'Rate limit exceeded' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil(rl.retryAfterMs / 1000)) } }
+      );
+    }
 
     if (!visitor_id || !session_id) {
       return NextResponse.json({ success: false, message: 'visitor_id and session_id are required' }, { status: 400 });
@@ -49,34 +62,48 @@ export async function POST(req: NextRequest) {
       });
 
       if (!existingVisitor) {
-        await (prisma as any).visitor.create({
-          data: {
-            visitor_id,
-            user_id: user_id || null,
-            first_seen: now,
-            last_seen: now,
-            is_active: true,
-            current_page: path || '/',
-            current_title: title || 'Home',
-            domain: detectedDomain,
-            hostname: detectedHostname || null,
-            total_visits: 1,
-            total_pageviews: 1,
-            device_type: device?.device_type || 'Desktop',
-            browser: device?.browser || 'Unknown',
-            browser_version: device?.browser_version || '',
-            os: device?.os || 'Unknown',
-            screen_resolution: device?.screen_resolution || '',
-            ip_address: ip,
-            first_referrer: traffic?.referrer || null,
-            traffic_source: traffic?.traffic_source || 'Direct',
-            utm_source: traffic?.utm_source || null,
-            utm_medium: traffic?.utm_medium || null,
-            utm_campaign: traffic?.utm_campaign || null,
-            utm_content: traffic?.utm_content || null,
-            utm_term: traffic?.utm_term || null,
-          },
-        });
+        try {
+          await (prisma as any).visitor.create({
+            data: {
+              visitor_id,
+              user_id: user_id || null,
+              first_seen: now,
+              last_seen: now,
+              is_active: true,
+              current_page: path || '/',
+              current_title: title || 'Home',
+              domain: detectedDomain,
+              hostname: detectedHostname || null,
+              total_visits: 1,
+              total_pageviews: 1,
+              device_type: device?.device_type || 'Desktop',
+              browser: device?.browser || 'Unknown',
+              browser_version: device?.browser_version || '',
+              os: device?.os || 'Unknown',
+              screen_resolution: device?.screen_resolution || '',
+              ip_address: ip,
+              first_referrer: traffic?.referrer || null,
+              traffic_source: traffic?.traffic_source || 'Direct',
+              utm_source: traffic?.utm_source || null,
+              utm_medium: traffic?.utm_medium || null,
+              utm_campaign: traffic?.utm_campaign || null,
+              utm_content: traffic?.utm_content || null,
+              utm_term: traffic?.utm_term || null,
+            },
+          });
+        } catch (createErr: any) {
+          // If concurrent request already created the visitor, update instead
+          await (prisma as any).visitor.update({
+            where: { visitor_id },
+            data: {
+              last_seen: now,
+              is_active: true,
+              current_page: path || '/',
+              current_title: title || 'Home',
+              total_pageviews: { increment: 1 },
+            },
+          }).catch(() => {});
+        }
       } else {
         await (prisma as any).visitor.update({
           where: { visitor_id },
@@ -278,6 +305,140 @@ export async function POST(req: NextRequest) {
       });
 
       return NextResponse.json({ success: true, action: 'user_linked' });
+    }
+
+    if (action === 'module_heartbeat') {
+      const inc = duration_increment_sec || 25;
+      await (prisma as any).visitorActivity.create({
+        data: {
+          visitor_id,
+          session_id,
+          user_id: user_id || null,
+          activity_type: 'MODULE_DURATION',
+          activity_name: `Aktivitas Modul: ${module_name || 'UMUM'}`,
+          page_path: path || '/',
+          metadata: { module: module_name || 'UMUM', duration_sec: inc },
+          created_at: now,
+        },
+      });
+
+      return NextResponse.json({ success: true, action: 'module_heartbeat_recorded' });
+    }
+
+    if (action === 'cv_funnel_step') {
+      await (prisma as any).visitorActivity.create({
+        data: {
+          visitor_id,
+          session_id,
+          user_id: user_id || null,
+          activity_type: 'CV_FUNNEL_STEP',
+          activity_name: activity_name || 'CV Funnel Step',
+          page_path: path || '/cv',
+          metadata: metadata || null,
+          created_at: now,
+        },
+      });
+
+      return NextResponse.json({ success: true, action: 'cv_funnel_step_recorded' });
+    }
+
+    if (action === 'print_telemetry') {
+      await (prisma as any).visitorActivity.create({
+        data: {
+          visitor_id,
+          session_id,
+          user_id: user_id || null,
+          activity_type: 'PRINT_EXPORT',
+          activity_name: 'Cetak / Unduh CV (PDF/Print)',
+          page_path: path || '/cv',
+          metadata: metadata || null,
+          created_at: now,
+        },
+      });
+
+      return NextResponse.json({ success: true, action: 'print_telemetry_recorded' });
+    }
+
+    if (action === 'ats_score_log') {
+      await (prisma as any).visitorActivity.create({
+        data: {
+          visitor_id,
+          session_id,
+          user_id: user_id || null,
+          activity_type: 'ATS_SCORE_EVALUATION',
+          activity_name: `Skor Evaluasi ATS: ${metadata?.score || 0}/100`,
+          page_path: path || '/',
+          metadata: metadata || null,
+          created_at: now,
+        },
+      });
+
+      return NextResponse.json({ success: true, action: 'ats_score_log_recorded' });
+    }
+
+    if (action === 'client_error') {
+      const errorMsg = error_details?.message || 'Unknown Client Error';
+
+      // 1. Record as visitor activity
+      await (prisma as any).visitorActivity.create({
+        data: {
+          visitor_id,
+          session_id,
+          user_id: user_id || null,
+          activity_type: 'CLIENT_ERROR',
+          activity_name: `[Error Browser] ${errorMsg.slice(0, 100)}`,
+          page_path: path || '/',
+          metadata: { ...error_details, url },
+          created_at: now,
+        },
+      });
+
+      // 2. Also log to app_logs for admin monitoring
+      try {
+        await prisma.app_logs.create({
+          data: {
+            id: (await import('crypto')).randomUUID(),
+            source: 'SYSTEM',
+            level: 'WARNING',
+            message: `[Client Browser Error] ${errorMsg.slice(0, 200)}`,
+            details: {
+              error_details,
+              visitor_id,
+              session_id,
+              user_id,
+              path,
+              url,
+              ip,
+            },
+            created_at: now,
+          },
+        });
+      } catch (logErr: any) {
+        console.error('[Client Error Logging] Failed to write app_logs:', logErr.message);
+      }
+
+      return NextResponse.json({ success: true, action: 'client_error_recorded' });
+    }
+
+    if (action === 'web_vitals') {
+      try {
+        await (prisma as any).visitorActivity.create({
+          data: {
+            visitor_id,
+            session_id,
+            user_id: user_id || null,
+            activity_type: 'WEB_VITALS',
+            activity_name: `Page Speed: ${vitals?.pageLoadMs || 0}ms`,
+            page_path: path || '/',
+            metadata: vitals || null,
+            created_at: now,
+          },
+        });
+      } catch (vitalErr: any) {
+        // Silently skip if visitor record hasn't synced yet
+      }
+
+      return NextResponse.json({ success: true, action: 'web_vitals_recorded' });
     }
 
     return NextResponse.json({ success: false, message: 'Invalid action' }, { status: 400 });

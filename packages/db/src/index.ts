@@ -24,3 +24,4 @@ export type {
   VisitorActivity,
 } from './generated/client/index.js';
 export * from './logger.ts';
+export * from './learned-role-service.ts';

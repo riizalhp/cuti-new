@@ -26,13 +26,13 @@ Glassmorphism design inspired by Apple VisionOS, Linear.app, and Arc Browser:
 pnpm install
 
 # Run dev server
-pnpm --filter @cuti/web dev
+pnpm --filter @employr/web dev
 
 # Build for production
-pnpm --filter @cuti/web build
+pnpm --filter @employr/web build
 
 # Preview production build
-pnpm --filter @cuti/web preview
+pnpm --filter @employr/web preview
 ```
 
 Dev server runs on **http://localhost:4321**

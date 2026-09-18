@@ -34,7 +34,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const [dontShowToday, setDontShowToday] = useState(false);
-  const promoCode = 'CUTIPRO70';
+  const promoCode = 'EMPLOYR70';
 
   // Timer countdown simulation (e.g. 04:32:15)
   const [timeLeft, setTimeLeft] = useState({ hours: 4, minutes: 32, seconds: 15 });

@@ -1,0 +1,375 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import FooterPortal from '../../components/FooterPortal.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import SearchModal from '../../components/SearchModal.astro';
+import DetailCrossSections from '../../components/DetailCrossSections.astro';
+import { getPortalEventBySlug } from '../../lib/data';
+
+const event = await getPortalEventBySlug(Astro.params.slug || '');
+if (!event) {
+  return Astro.redirect('/event');
+}
+const canonical = `http://localhost:3003/event/${event.slug}`;
+const title = `${event.title} (${event.geo}) | Employer Job`;
+const description = `Hadiri ${event.title} di ${event.location}. Tanggal: ${event.fullDate || event.date}, Waktu: ${event.time}, Tiket: ${event.price}. Rundown agenda, daftar perusahaan rekruter, dan panduan registrasi.`;
+---
+
+<BaseLayout title={title} description={description} canonicalUrl={canonical}>
+  <Navbar />
+
+  <main class="bg-[#f4f3ee] min-h-screen pb-20">
+    <!-- Breadcrumbs Navigation -->
+    <div class="bg-white border-b border-[#d7d6cf]">
+      <div class="max-w-[1240px] mx-auto px-4 sm:px-6 py-4">
+        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs text-[#6e6d68] flex-wrap">
+          <a href="/" class="hover:text-[#0000ff] transition">Beranda</a>
+          <span>/</span>
+          <a href="/event" class="hover:text-[#0000ff] transition">Event & Job Fair</a>
+          <span>/</span>
+          <span class="text-[#6e6d68] font-medium">{event.geo}</span>
+          <span>/</span>
+          <span class="text-[#101010] font-semibold truncate max-w-[200px] sm:max-w-xs" aria-current="page">{event.title}</span>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Event Header Card -->
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6">
+      <div class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8 shadow-xs">
+        <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+          <div class="flex items-start gap-4 sm:gap-6">
+            <!-- Date Calendar Badge -->
+            <div class="w-16 sm:w-20 rounded-2xl bg-[#f4f3ee] border border-[#d7d6cf] overflow-hidden shrink-0 text-center shadow-2xs">
+              <div class="bg-[#0000ff] text-white text-[10px] font-bold py-1 uppercase tracking-wider">
+                {event.month}
+              </div>
+              <div class="text-2xl sm:text-3xl font-bold text-[#101010] py-2">
+                {event.day}
+              </div>
+              <div class="bg-[#d7d6cf]/30 text-[#6e6d68] text-[10px] font-semibold py-0.5">
+                2026
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center gap-2 flex-wrap mb-1.5">
+                <span class="text-sm font-semibold text-[#101010]">{event.organizer}</span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold">
+                  {event.format}
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[#0000ff] text-[11px] font-semibold">
+                  {event.type}
+                </span>
+                {event.badge && (
+                  <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold">
+                    {event.badge}
+                  </span>
+                )}
+              </div>
+              <h1 class="text-xl sm:text-2xl lg:text-3xl font-semibold text-[#101010] tracking-tight leading-snug">
+                {event.title}
+              </h1>
+              <div class="flex items-center gap-y-2 gap-x-4 flex-wrap mt-3 text-xs text-[#6e6d68] font-medium">
+                <span class="flex items-center gap-1.5 text-emerald-700 font-bold text-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
+                  {event.price}
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  Waktu: {event.time}
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                  Lokasi: {event.location}
+                </span>
+                {event.companies && (
+                  <span class="flex items-center gap-1.5 text-[#6e6d68]">
+                    <svg class="w-4 h-4 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    {event.companies}
+                  </span>
+                )}
+              </div>
+
+              <!-- Highlights Badges -->
+              <div class="flex items-center gap-1.5 flex-wrap mt-4">
+                {event.highlights.map((h) => (
+                  <span class="text-xs px-3 py-1 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#101010] font-medium">
+                    {h}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 w-full lg:w-64 pt-4 lg:pt-0 border-t lg:border-t-0 border-[#d7d6cf]/50">
+            <a
+              href="#registrasi-event"
+              class="w-full min-h-[44px] px-5 py-3 rounded-full bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-semibold text-xs shadow-md shadow-orange-500/20 text-center flex items-center justify-center gap-2 transition cursor-pointer"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
+              <span>Daftar Hadir Sekarang</span>
+            </a>
+            <div class="flex items-center gap-2 w-full">
+              <button
+                type="button"
+                id="btn-bookmark-event"
+                class="flex-1 min-h-[42px] px-4 py-2 rounded-full border border-[#d7d6cf] hover:bg-[#f4f3ee] text-[#101010] text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+              >
+                <svg class="w-4 h-4 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                <span>Simpan</span>
+              </button>
+              <button
+                type="button"
+                id="btn-share-event"
+                class="flex-1 min-h-[42px] px-4 py-2 rounded-full border border-[#d7d6cf] hover:bg-[#f4f3ee] text-[#101010] text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+              >
+                <svg class="w-4 h-4 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                <span>Bagikan</span>
+              </button>
+            </div>
+            <span class="text-[11px] text-[#6e6d68] text-center">
+              Kuota pendaftaran dibuka hingga H-1 acara
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Layout (Left Content + Right Sidebar) -->
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Left: Detail Information -->
+        <div class="lg:col-span-8 space-y-6">
+          <!-- 1. Event Overview -->
+          <article class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8">
+            <h2 class="text-lg font-semibold text-[#101010] mb-4 pb-3 border-b border-[#d7d6cf]/50 flex items-center gap-2">
+              <span class="w-1.5 h-4 bg-amber-600 rounded-full"></span>
+              Tentang Acara
+            </h2>
+            <p class="text-sm text-[#101010] leading-relaxed">
+              {event.description}
+            </p>
+
+            <div class="mt-6 p-4 rounded-xl bg-[#f4f3ee] border border-[#d7d6cf]">
+              <h3 class="text-xs font-semibold text-[#6e6d68] uppercase tracking-wider mb-2">Lokasi &amp; Alamat Venue:</h3>
+              <p class="text-sm font-semibold text-[#101010]">{event.location}</p>
+              <p class="text-xs text-[#6e6d68] mt-1">Wilayah: {event.geo} (Format: {event.format})</p>
+            </div>
+          </article>
+
+          <!-- 2. Agenda Timeline -->
+          {event.agenda && event.agenda.length > 0 && (
+            <article class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8">
+              <h2 class="text-lg font-semibold text-[#101010] mb-4 pb-3 border-b border-[#d7d6cf]/50 flex items-center gap-2">
+                <span class="w-1.5 h-4 bg-[#0000ff] rounded-full"></span>
+                Rundown &amp; Agenda Kegiatan
+              </h2>
+              <div class="space-y-4">
+                {event.agenda.map((a) => (
+                  <div class="flex items-start gap-4 pb-3 border-b border-[#d7d6cf]/50 last:border-0 last:pb-0">
+                    <span class="text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full shrink-0">
+                      {a.time}
+                    </span>
+                    <div>
+                      <strong class="text-sm font-semibold text-[#101010] block">{a.title || a.activity}</strong>
+                      {a.desc && <p class="text-xs text-[#6e6d68] mt-0.5">{a.desc}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </article>
+          )}
+
+          <!-- 3. Participating Companies (Exhibitors) -->
+          {event.exhibitors && event.exhibitors.length > 0 && (
+            <article class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8">
+              <div class="flex items-center justify-between pb-3 mb-4 border-b border-[#d7d6cf]/50">
+                <h2 class="text-lg font-semibold text-[#101010] flex items-center gap-2">
+                  <span class="w-1.5 h-4 bg-emerald-600 rounded-full"></span>
+                  Perusahaan Peserta Perekrut
+                </h2>
+                <span class="text-xs text-[#6e6d68] font-medium">
+                  {event.exhibitors.length} Perusahaan Terdaftar
+                </span>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {event.exhibitors.map((ex) => (
+                  <div class="p-3 rounded-xl bg-[#f4f3ee] border border-[#d7d6cf] text-center">
+                    <span class="text-xs font-semibold text-[#101010] block truncate">{ex}</span>
+                    <span class="text-[10px] text-emerald-700 font-semibold">Aktif Merekrut</span>
+                  </div>
+                ))}
+              </div>
+            </article>
+          )}
+
+          <!-- 4. Registration Guide -->
+          <article id="registrasi-event" class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8">
+            <h2 class="text-lg font-semibold text-[#101010] mb-3 flex items-center gap-2">
+              <span class="w-1.5 h-4 bg-orange-500 rounded-full"></span>
+              Prosedur Registrasi Hadir
+            </h2>
+            <p class="text-sm text-[#6e6d68] leading-relaxed mb-4">
+              Tiket masuk: <strong>{event.price}</strong>. Registrasi dilakukan melalui formulir resmi penyelenggara ({event.organizer}). Simpan kode tiket digital (QR Code) yang dikirimkan via email untuk ditunjukkan di pintu masuk.
+            </p>
+            <div class="p-5 rounded-2xl bg-[#f4f3ee] border border-[#d7d6cf] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <span class="text-xs font-semibold text-[#101010] block">Penyelenggara Acara:</span>
+                <span class="text-xs text-[#6e6d68]">{event.organizer} (Resmi Terverifikasi)</span>
+              </div>
+              <a
+                href={event.officialUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="min-h-[42px] px-5 py-2 rounded-full bg-[#0000ff] hover:bg-[#1738d1] text-white text-xs font-semibold transition flex items-center gap-2 shadow-xs"
+              >
+                <span>Daftar di Tautan Resmi Acara</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- Google Ads: In-feed Unit (Setelah Alur Pendaftaran Selesai) -->
+          <AdSlot type="infeed" note="Persiapan resume dan interview kerja untuk hadir di bursa karier." />
+        </div>
+
+        <!-- Right: Sidebar Information & Ads -->
+        <aside class="lg:col-span-4 space-y-6">
+          <div class="bg-white rounded-2xl border border-[#d7d6cf] p-5 shadow-xs">
+            <h3 class="text-sm font-semibold text-[#101010] mb-4 pb-2 border-b border-[#d7d6cf]/50">
+              Rincian Acara
+            </h3>
+            <div class="space-y-3 text-xs">
+              <div class="flex justify-between py-1 border-b border-[#d7d6cf]/50">
+                <span class="text-[#6e6d68]">Penyelenggara</span>
+                <span class="font-semibold text-[#101010] text-right">{event.organizer}</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-[#d7d6cf]/50">
+                <span class="text-[#6e6d68]">Tanggal Acara</span>
+                <span class="font-semibold text-[#101010] text-right">{event.fullDate || `${event.day} ${event.month} 2026`}</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-[#d7d6cf]/50">
+                <span class="text-[#6e6d68]">Waktu Pelaksanaan</span>
+                <span class="font-semibold text-[#101010] text-right">{event.time}</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-[#d7d6cf]/50">
+                <span class="text-[#6e6d68]">Tiket Masuk</span>
+                <span class="font-bold text-emerald-700 text-right">{event.price}</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-[#d7d6cf]/50">
+                <span class="text-[#6e6d68]">Format Kegiatan</span>
+                <span class="font-semibold text-[#101010] text-right">{event.format}</span>
+              </div>
+              <div class="flex justify-between py-1">
+                <span class="text-[#6e6d68]">Wilayah</span>
+                <span class="font-semibold text-[#101010] text-right">{event.geo}</span>
+              </div>
+            </div>
+
+            <a
+              href="#registrasi-event"
+              class="w-full min-h-[42px] mt-4 px-4 py-2.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+            >
+              Daftar Hadir
+            </a>
+          </div>
+
+          <!-- Preparation Checklist -->
+          <div class="bg-[#f4f3ee] rounded-2xl border border-[#d7d6cf] p-5">
+            <h4 class="text-xs font-bold text-[#101010] uppercase tracking-wider mb-2">
+              Persiapan Hadir ke Acara
+            </h4>
+            <ul class="text-xs text-[#6e6d68] space-y-1.5">
+              <li>• Cetak CV terbaru minimal 5 hingga 10 lembar.</li>
+              <li>• Kenakan pakaian formal atau kemeja rapi.</li>
+              <li>• Siapkan berkas portofolio di smartphone/cloud.</li>
+              <li>• Datang 30 menit lebih awal sebelum pembukaan.</li>
+            </ul>
+          </div>
+
+          <!-- Google Ads: High-Viewability Sticky Sidebar Unit (300x600) -->
+          <div class="sticky top-24">
+            <AdSlot type="skyscraper" note="Jangkau ribuan pencari kerja aktif di seluruh kota." />
+          </div>
+        </aside>
+      </div>
+
+      <!-- Google Ads: Leaderboard horizontal sebelum rekomendasi -->
+      <AdSlot type="leaderboard" note="Rekomendasi event dan bursa kerja terdekat di kota Anda." />
+
+      <!-- 5 Cross-Section Modules (Rekomendasi Lainnya) -->
+      <DetailCrossSections
+        currentType="event"
+        currentSlug={event.slug}
+        category={event.type}
+        geo={event.geo}
+      />
+    </div>
+  </main>
+
+  <FooterPortal />
+  <SearchModal />
+
+  <!-- Script for Toast Feedback -->
+  <script is:inline>
+    const shareBtn = document.getElementById('btn-share-event');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', async () => {
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: document.title,
+              url: window.location.href,
+            });
+          } catch (err) {}
+        } else {
+          navigator.clipboard.writeText(window.location.href);
+          alert('Tautan agenda event berhasil disalin.');
+        }
+      });
+    }
+
+    const bookmarkBtn = document.getElementById('btn-bookmark-event');
+    if (bookmarkBtn) {
+      bookmarkBtn.addEventListener('click', () => {
+        alert('Event telah disimpan ke agenda favorit.');
+      });
+    }
+  </script>
+
+  <!-- Structured Data JSON-LD -->
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": event.title,
+    "description": event.description,
+    "startDate": "2026-09-12T09:00:00+07:00",
+    "endDate": "2026-09-12T17:00:00+07:00",
+    "eventAttendanceMode": event.format === 'Online' ? "https://schema.org/OnlineEventAttendanceMode" : "https://schema.org/OfflineEventAttendanceMode",
+    "eventStatus": "https://schema.org/EventScheduled",
+    "location": {
+      "@type": "Place",
+      "name": event.location,
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": event.geo,
+        "addressCountry": "ID"
+      }
+    },
+    "organizer": {
+      "@type": "Organization",
+      "name": event.organizer
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": event.price === "Gratis" ? "0" : event.price,
+      "priceCurrency": "IDR",
+      "availability": "https://schema.org/InStock",
+      "url": canonical
+    },
+    "url": canonical
+  })} />
+</BaseLayout>

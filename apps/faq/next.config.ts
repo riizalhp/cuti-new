@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ["@cuti/faq"],
+  transpilePackages: ["@employr/faq"],
 
   // Enable optimizations
   compiler: {

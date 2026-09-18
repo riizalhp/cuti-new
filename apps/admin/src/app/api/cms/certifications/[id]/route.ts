@@ -1,5 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@cuti/db";
+import { prisma } from "@employr/db";
+
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    const cert = await prisma.certifications.findUnique({ where: { id } });
+    if (!cert) {
+      return NextResponse.json(
+        { success: false, message: "Sertifikasi tidak ditemukan" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        id: cert.id,
+        title: cert.title,
+        slug: cert.slug,
+        description: cert.description,
+        provider: cert.provider,
+        price: cert.price,
+        durationHours: cert.duration_hours,
+        isActive: cert.is_active,
+        externalUrl: cert.external_url,
+        coverImageUrl: cert.cover_image_url,
+        tags: cert.tags ?? [],
+        createdAt: cert.created_at.toISOString().split("T")[0],
+      },
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, message: error?.message ?? "Gagal memuat detail sertifikasi" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -13,6 +49,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       durationHours,
       externalUrl,
       coverImageUrl,
+      tags,
       isActive,
     } = body;
 
@@ -32,6 +69,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (durationHours !== undefined) data.duration_hours = durationHours;
     if (externalUrl !== undefined) data.external_url = externalUrl;
     if (coverImageUrl !== undefined) data.cover_image_url = coverImageUrl;
+    if (tags !== undefined) data.tags = Array.isArray(tags) ? tags : [];
     if (isActive !== undefined) data.is_active = isActive;
 
     const cert = await prisma.certifications.update({

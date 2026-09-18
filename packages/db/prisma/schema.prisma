@@ -31,12 +31,15 @@ model User {
   experience_year                             Int?                @default(0)
   skills                                      String[]
   target_job                                  String?             @db.VarChar(255)
+  preferences                                 Json?
   accounts                                    accounts[]
   ai_prompts                                  ai_prompts[]
   application_notes                           application_notes[]
   applications                                applications[]
   audit_logs                                  audit_logs[]
+  cover_letters                               cover_letters[]
   cv_projects                                 cv_projects[]
+  quiz_attempts                               quiz_attempts[]
   memberships                                 Membership?
   misi_submissions                            misi_submissions[]
   notifications                               notifications[]
@@ -53,6 +56,8 @@ model User {
   withdrawals_withdrawals_user_idTousers      withdrawals[]       @relation("withdrawals_user_idTousers")
   visitors                                    Visitor[]
   visitor_activities                          VisitorActivity[]
+  user_feedback                               UserFeedback[]
+  behavior_profile                            UserBehaviorProfile?
 
   @@map("users")
 }
@@ -194,6 +199,7 @@ model applications {
   interview_chance   InterviewChance?
   ai_insight         Json?
   ai_recommendations Json?
+  application_context Json?
   created_at         DateTime            @default(now())
   updated_at         DateTime
   application_notes  application_notes[]
@@ -219,10 +225,16 @@ model articles {
   content            String
   cover_image_url    String?
   author             String
+  tags               String[]            @default([])
   is_published       Boolean             @default(false)
   published_at       DateTime?
+  source             String              @default("manual")
+  external_url       String?
+  last_synced_at     DateTime?
   category_id        String?             @db.Uuid
   article_categories article_categories? @relation(fields: [category_id], references: [id])
+
+  @@index([source, external_url])
 }
 
 model audit_logs {
@@ -254,8 +266,13 @@ model certifications {
   price           Int
   duration_hours  Int
   external_url    String
+  source          String   @default("manual")
+  last_synced_at  DateTime?
+  tags            String[] @default([])
   is_active       Boolean  @default(true)
   created_at      DateTime @default(now())
+
+  @@index([source, external_url])
 }
 
 model companies {
@@ -280,6 +297,7 @@ model courses {
   level           String
   price           Int      @default(0)
   external_url    String
+  tags            String[] @default([])
   is_active       Boolean  @default(true)
   created_at      DateTime @default(now())
 }
@@ -336,8 +354,13 @@ model events {
   location        String
   type            WorkType @default(ONLINE)
   external_url    String
+  source          String   @default("manual")
+  last_synced_at  DateTime?
+  tags            String[] @default([])
   is_active       Boolean  @default(true)
   created_at      DateTime @default(now())
+
+  @@index([source, external_url])
 }
 
 model jobs {
@@ -353,13 +376,17 @@ model jobs {
   salary_period SalaryPeriod   @default(MONTH)
   requirements  Json?
   external_url  String
+  tags          String[]       @default([])
   is_active     Boolean        @default(true)
   deadline      DateTime?
+  source        String         @default("manual")
+  last_synced_at DateTime?
   created_at    DateTime       @default(now())
   applications  applications[]
   companies     companies      @relation(fields: [company_id], references: [id], onDelete: Cascade)
 
   @@index([is_active, location])
+  @@index([source, external_url])
 }
 
 model misi {
@@ -414,6 +441,21 @@ model notifications {
   users      User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id, read_at])
+}
+
+model cover_letters {
+  id         String   @id @db.Uuid
+  user_id    String   @db.Uuid
+  company    String
+  position   String
+  recruiter  String?
+  content    String
+  tone       String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  users      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, created_at])
 }
 
 model orders {
@@ -948,5 +990,202 @@ model VisitorActivity {
   @@index([activity_type])
   @@index([created_at])
   @@map("visitor_activities")
+}
+
+model quiz_packages {
+  id                  String   @id @db.Uuid
+  slug                String   @unique @db.VarChar(120)
+  title               String
+  category            String   @db.VarChar(60)
+  description         String
+  duration_minutes    Int      @default(15)
+  difficulty          String   @db.VarChar(20) @default("Sedang")
+  is_premium          Boolean  @default(false)
+  price               Int      @default(0)
+  passing_score       Int      @default(70)
+  is_active           Boolean  @default(true)
+  sort_order          Int      @default(0)
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+  questions           quiz_questions[]
+  attempts            quiz_attempts[]
+
+  @@map("quiz_packages")
+}
+
+model quiz_questions {
+  id            String  @id @db.Uuid
+  package_id    String  @db.Uuid
+  sort_order    Int     @default(0)
+  type          String  @db.VarChar(30) @default("multiple-choice")
+  question      String  @db.Text
+  code_snippet  String? @db.Text
+  options       Json?
+  correct_answer Json
+  explanation   String? @db.Text
+  ai_tip        String? @db.Text
+  packages      quiz_packages @relation(fields: [package_id], references: [id], onDelete: Cascade)
+
+  @@index([package_id, sort_order])
+  @@map("quiz_questions")
+}
+
+model quiz_attempts {
+  id                 String   @id @db.Uuid
+  user_id            String   @db.Uuid
+  package_id         String   @db.Uuid
+  status             String   @db.VarChar(20) @default("belum_selesai")
+  score              Int?
+  answers            Json?
+  flagged_questions  Int[]
+  started_at         DateTime @default(now())
+  completed_at       DateTime?
+  time_spent_seconds Int      @default(0)
+  users              User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  packages           quiz_packages @relation(fields: [package_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, package_id])
+  @@index([user_id, status])
+  @@map("quiz_attempts")
+}
+
+model growth_posts {
+  id               String   @id @db.Uuid
+  account          String   @db.VarChar(20)  // PERSONAL atau EMPLOYR
+  platform         String   @db.VarChar(20)  // THREADS atau LINKEDIN
+  content_type     String   @db.VarChar(30)  // Personal story, Educational, dll
+  hook_type        String   @db.VarChar(20)  // QUESTION atau STATEMENT
+  cta              String?  @db.VarChar(120)
+  experiment_id    String?  @db.VarChar(40)  // EXP-001, dll (opsional)
+  campaign_utm     String?  @db.VarChar(60)  // nilai utm_campaign
+  cta_url          String?  @db.VarChar(500) // link ber-UTM yang dipakai di konten
+  content          String   @db.Text
+  status           String   @db.VarChar(20) @default("DRAFT") // DRAFT, SCHEDULED, PUBLISHED
+  published_at     DateTime?
+  // Metrik manual (diinput setelah publish)
+  impressions      Int      @default(0)
+  likes            Int      @default(0)
+  comments         Int      @default(0)
+  reposts          Int      @default(0)
+  profile_visits   Int      @default(0)
+  link_clicks      Int      @default(0)  // boleh diisi manual atau dari tracker UTM
+  metrics_updated_at DateTime?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  @@index([status, published_at])
+  @@index([platform, account])
+  @@map("growth_posts")
+}
+
+model growth_experiments {
+  id             String   @id @db.Uuid
+  code           String   @unique @db.VarChar(40) // EXP-001
+  hypothesis     String   @db.Text
+  variable_tested String @db.VarChar(160)
+  platform       String   @db.VarChar(20)
+  kpi            String   @db.VarChar(80)
+  status         String   @db.VarChar(20) @default("RUNNING") // RUNNING, DONE, KILLED, PAUSED
+  decision       String?  @db.VarChar(20) // KEEP, ITERATE, KILL
+  result         String?  @db.Text
+  learning       String?  @db.Text
+  started_at     DateTime @default(now())
+  ended_at       DateTime?
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  @@map("growth_experiments")
+}
+
+model growth_journal {
+  id          String   @id @db.Uuid
+  week_label  String   @db.VarChar(40) // "Minggu 38 - Sep 2026"
+  wins        String?  @db.Text
+  failures    String?  @db.Text
+  learnings   String?  @db.Text
+  next_tests  String?  @db.Text
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([created_at])
+  @@map("growth_journal")
+}
+
+model UserFeedback {
+  id          String   @id @default(uuid()) @db.Uuid
+  user_id     String   @db.Uuid
+  feature     String   @db.VarChar(50)
+  context_id  String?  @db.Uuid
+  rating      Int      @db.SmallInt
+  comment     String?  @db.Text
+  page_path   String?  @db.VarChar(255)
+  created_at  DateTime @default(now())
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([feature])
+  @@index([created_at])
+  @@map("user_feedback")
+}
+
+model AnalyticsDailySummary {
+  id           String   @id @default(uuid()) @db.Uuid
+  date         DateTime @db.Date
+  metric_name  String   @db.VarChar(100)
+  metric_value Decimal  @db.Decimal(12, 4)
+  dimensions   Json?
+  created_at   DateTime @default(now())
+
+  @@unique([date, metric_name])
+  @@index([metric_name])
+  @@map("analytics_daily_summary")
+}
+
+model UserBehaviorProfile {
+  id                    String    @id @default(uuid()) @db.Uuid
+  user_id               String    @unique @db.Uuid
+  top_features_used     Json
+  preferred_industries  Json
+  avg_session_minutes   Decimal?  @db.Decimal(8, 2)
+  total_applications    Int       @default(0)
+  interview_rate        Decimal?  @db.Decimal(5, 4)
+  lifecycle_stage       String    @db.VarChar(30)
+  last_active_at        DateTime?
+  churn_risk            String?   @db.VarChar(10)
+  updated_at            DateTime  @updatedAt
+  user                  User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_behavior_profiles")
+}
+
+model LearnedRoleEntry {
+  id              String   @id @default(uuid()) @db.Uuid
+  role_name       String   @db.VarChar(150)
+  skills          String[]
+  education_level String?  @db.VarChar(50)
+  major           String?  @db.VarChar(150)
+  user_id         String?  @db.Uuid
+  created_at      DateTime @default(now())
+
+  @@index([role_name])
+  @@index([created_at])
+  @@map("learned_role_entries")
+}
+
+model LearnedRoleBlueprint {
+  id                    String   @id @default(uuid()) @db.Uuid
+  role_name             String   @unique @db.VarChar(150)
+  entry_count           Int      @default(0)
+  top_essential_skills  String[]
+  top_nicetohave_skills String[]
+  category              String   @default("other") @db.VarChar(50)
+  is_promoted           Boolean  @default(false)
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  @@index([role_name])
+  @@index([entry_count])
+  @@index([is_promoted])
+  @@map("learned_role_blueprints")
 }
 

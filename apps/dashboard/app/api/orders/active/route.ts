@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@cuti/db';
+import { prisma } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 
 function formatIndonesianDateTime(date: Date): string {
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
       estimatedTime,
       dataOption: 'existing',
       hrName: 'Sarah Melati, S.Psi',
-      hrRole: 'Senior Tech Recruiter CUTI',
+      hrRole: 'Senior Tech Recruiter Employr',
     };
 
     return NextResponse.json({ success: true, data: mappedOrder });

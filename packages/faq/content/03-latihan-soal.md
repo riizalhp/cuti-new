@@ -1,26 +1,25 @@
 ---
 title: Latihan Soal & Kuis
-description: Berlatih soal-soal karier dan teknis di Employr — kerjakan kuis gratis atau berbayar, lihat skor dan pembahasan, dan buka akses tambahan.
+description: Berlatih soal-soal karier dan teknis di Employr: kerjakan kuis gratis, lihat skor dan pembahasan untuk persiapan seleksi kerja.
 category: pengembangan-karier
 order: 3
-updatedAt: 2026-08-18
-keywords: latihan soal, kuis, quiz, soal, latihan, test, tryout, bank soal, pembahasan, skor kuis, beli akses
+updatedAt: 2026-09-15
+keywords: latihan soal, kuis, quiz, soal, latihan, test, tryout, bank soal, pembahasan, skor kuis, gratis
 ---
 
-Fitur **Latihan Soal** (/latihan-soal) menyediakan bank kuis untuk mengasah kemampuanmu — dari soal karier umum hingga teknis sesuai bidang.
+Fitur **Latihan Soal** (/latihan-soal) menyediakan bank kuis untuk mengasah kemampuanmu: dari soal karier umum hingga teknis sesuai bidang pekerjaan.
 
 ## Cara mengerjakan
 
 1. Buka menu **Latihan Soal**.
-2. Pilih kuis dari daftar — setiap kuis menampilkan topik, jumlah soal, dan **harga** (gratis atau berbayar).
-3. Untuk kuis berbayar, klik **Beli & Buka Akses** dan selesaikan pembayarannya.
+2. Pilih kuis dari daftar sesuai topik dan jumlah soal yang diinginkan.
+3. Klik kuis untuk langsung mulai mengerjakan.
 4. Kerjakan soal **pilihan ganda** satu per satu.
-5. Di akhir kuis kamu mendapat **skor** dan bisa melihat **pembahasan** jawaban.
+5. Di akhir kuis kamu mendapat **skor** dan bisa melihat **pembahasan** jawaban lengkap.
 
-## Kuis gratis vs berbayar
+## Akses kuis
 
-- **Gratis** — langsung bisa dikerjakan kapan saja.
-- **Berbayar** — bisa dibeli satu per satu (harga tampil per kuis, misal dalam rupiah), atau dibuka lewat paket premium yang mencakup Latihan Soal (lihat [Paket & Harga](/artikel/paket-dan-harga)).
+Seluruh bank latihan soal di Employr dapat kamu kerjakan secara gratis kapan saja tanpa dipungut biaya apa pun.
 
 ## Tips
 
@@ -30,8 +29,8 @@ Fitur **Latihan Soal** (/latihan-soal) menyediakan bank kuis untuk mengasah kema
 
 ## Pertanyaan umum
 
-- **Apakah ada batas pengerjaan ulang?** Kuis umumnya bisa diulang; skor terakhir yang tercatat.
-- **Pembelian akses berlaku berapa lama?** Akses kuis yang dibeli berlaku untuk akunmu sesuai ketentuan.
-- **Pembahasan ada untuk semua soal?** Ya, setelah selesai mengerjakan.
+- **Apakah ada batas pengerjaan ulang?** Kuis dapat diulang berkali-kali untuk mengasah kemampuan; skor terakhir yang tercatat di akunmu.
+- **Pembahasan ada untuk semua soal?** Ya, pembahasan langsung tampil setelah kamu menyelesaikan kuis.
+- **Apakah kuis ini gratis?** Ya, semua topik latihan soal dapat diakses secara gratis.
 
-Lanjut baca: [Kursus & Sertifikasi](/artikel/kursus-sertifikasi) dan [Cara Pembayaran](/artikel/cara-pembayaran).
+Lanjut baca: [Kursus & Sertifikasi](/artikel/kursus-sertifikasi) dan [Panduan Interview](/artikel/panduan-interview).

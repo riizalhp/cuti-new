@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FileText, ArrowRight } from "lucide-react";
-import type { FaqArticle } from "@cuti/faq";
-import { getCategory } from "@cuti/faq";
+import type { FaqArticle } from "@employr/faq";
+import { getCategory } from "@employr/faq";
 
 interface ArticleCardProps {
   article: FaqArticle;

@@ -32,7 +32,7 @@ export function SearchBox({ initialValue = "", size = "md", autoFocus = false }:
         type="search"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Cari jawaban, misalnya: cetak CV, tracker lamaran, pembayaran..."
+        placeholder="Cari jawaban, misalnya: cetak CV, tracker lamaran, evaluasi CV..."
         autoFocus={autoFocus}
         className={`w-full rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt-500 transition shadow-xs ${
           size === "lg"

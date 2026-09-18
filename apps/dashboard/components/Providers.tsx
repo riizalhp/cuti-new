@@ -12,6 +12,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
+    // Non-destructive migration of legacy cuti_* localStorage keys to employr_*
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('cuti_')) {
+          const newKey = 'employr_' + k.slice(5);
+          if (localStorage.getItem(newKey) === null) {
+            const val = localStorage.getItem(k);
+            if (val !== null) localStorage.setItem(newKey, val);
+          }
+        }
+      }
+    } catch {}
   }, []);
 
   return (

@@ -728,28 +728,14 @@ export function analyzeAtsCorrelation(
       ? searchTerms.some((term) => allCvText.includes(term))
       : allCvText.includes(item.kw.toLowerCase());
 
-    // Hitung skor visibilitas mata dan ATS secara dinamis
-    let visibilityScore = isFound ? 75 + ((idx * 7) % 20) : 30 + ((idx * 11) % 25);
-    let atsScore = isFound ? 85 + ((idx * 5) % 15) : 20 + ((idx * 7) % 20);
+    // Hitung skor visibilitas dan status keberadaan kata kunci secara jujur
+    const visibilityScore = isFound ? Math.min(95, 80 + idx * 3) : 0;
+    const atsScore = isFound ? Math.min(98, 85 + idx * 2) : 0;
 
-    if (item.category.includes('Keahlian Inti') && isFound) {
-      visibilityScore = Math.min(95, 80 + idx * 4);
-      atsScore = Math.min(98, 88 + idx * 3);
-    }
-
-    let quadrant: AtsCorrelationItem['quadrant'] = 'gold';
-    let recommendation = 'Sudah optimal baik untuk pandangan mata recruiter maupun mesin ATS.';
-
-    if (visibilityScore >= 65 && atsScore < 50) {
-      quadrant = 'prominent_low_ats';
-      recommendation = 'Bagian ini sangat terlihat oleh recruiter, tetapi kata kunci ATS belum tercantum secara eksplisit.';
-    } else if (visibilityScore < 50 && atsScore >= 65) {
-      quadrant = 'hidden_high_ats';
-      recommendation = 'Kata kunci ada di CV, namun letaknya kurang menonjol di zona pandang utama recruiter.';
-    } else if (visibilityScore < 50 && atsScore < 50) {
-      quadrant = 'cold_irrelevant';
-      recommendation = `Tambahkan kata kunci "${item.kw}" di seksi Ringkasan atau Pengalaman Utama agar terdeteksi ATS.`;
-    }
+    let quadrant: AtsCorrelationItem['quadrant'] = isFound ? 'gold' : 'cold_irrelevant';
+    let recommendation = isFound
+      ? 'Sudah terdeteksi di CV dan selaras dengan profil kompetensi posisi target.'
+      : `Disarankan dicantumkan di seksi Keahlian atau Pengalaman untuk posisi ${roleName}.`;
 
     return {
       id: `ats-corr-${idx}`,
@@ -884,18 +870,27 @@ export function runFullRvePipeline(
     `Apa pendekatan Anda dalam memastikan kualitas hasil kerja saat berkolaborasi dengan rekan tim lintas divisi?`,
   ];
 
-  // 7. Multi-Screener Evaluasi Persona (Mematuhi Aturan Brand)
+  // 7. Multi-Screener Evaluasi Persona (Mematuhi Aturan Brand & Evaluasi Mendalam)
+  const skillsListStr = parsedData.skills.length > 0 ? parsedData.skills.slice(0, 3).join(', ') : 'keahlian terkait';
+  const roleName = resolvedTargetRole || 'posisi target';
+  const companyName = rawFirstExp?.company || 'institusi kerja/proyek';
+  const expRoleName = rawFirstExp?.role || roleName;
+
   const aiEvaluations: AiModelEvaluation[] = [
     {
       modelName: 'Screener Algoritma Keyword (ATS Engine)',
       badgeColor: 'bg-emerald-500',
       score: screenerAtsScore,
       pros: [
-        `Kesesuaian kata kunci untuk posisi ${resolvedTargetRole} terdeteksi baik`,
-        `Daftar keahlian teknis relevan dengan filter sistem`,
+        `Kesesuaian kata kunci primer untuk posisi ${roleName} terindeks dengan baik pada filter sistem ATS, didukung kompetensi utama seperti ${skillsListStr} yang terbaca jelas oleh mesin parser.`,
+        `Struktur dokumen menggunakan penamaan seksi standar industri (Ringkasan, Pengalaman Kerja, Pendidikan, Keterampilan) sehingga sistem ATS mampu memetakan riwayat kandidat tanpa kegagalan segmentasi data.`,
+        `Format penulisan jabatan profesional ${expRoleName} dan instansi ${companyName} tersusun dalam teks murni yang ramah mesin pencari lowongan tanpa karakter tersembunyi yang berisiko korup.`,
       ],
       cons: [
-        parsedData.skills.length < 6 ? 'Daftar skill pendukung masih dapat diperluas' : 'Format kata kunci dapat lebih dispesifikasikan',
+        parsedData.skills.length < 6
+          ? `Daftar kata kunci keterampilan teknis (${parsedData.skills.length} terdeteksi) masih perlu diperkaya dengan tools modern, metodologi kerja industri, atau akronim spesifik peran ${roleName} agar lolos ambang batas filter ketat.`
+          : `Kepadatan variasi sinonim kata kunci industri masih dapat dioptimalkan agar profil menjangkau pencarian algoritma ATS multi-perusahaan secara lebih luas.`,
+        'Sebagian kata kunci keahlian masih berdiri sendiri di seksi keterampilan dan belum terintegrasi secara kontekstual ke dalam kalimat pencapaian pengalaman kerja.',
       ],
     },
     {
@@ -903,11 +898,13 @@ export function runFullRvePipeline(
       badgeColor: 'bg-blue-500',
       score: screenerVisualScore,
       pros: [
-        'Tata letak judul dan seksi pengalaman bersih (mudah dipindai 6 detik)',
-        'Hierarki visual judul jabatan dan nama instansi terbaca jelas',
+        `Zona pandang 6 detik pertama (F-Pattern) terbentuk optimal di area atas: nama kandidat (${parsedData.candidateName || 'Kandidat'}), kontak aktif, dan jabatan target langsung menangkap fokus reviewer dalam 3 detik awal.`,
+        `Hierarki tipografi antara judul posisi, nama institusi, dan rentang periode kerja memiliki kontras yang tegas sehingga memudahkan tim HRD memetakan kronologi karier secara vertikal dengan cepat.`,
+        `Panjang ringkasan profil proporsional dan terstruktur rapi, menghindarkan reviewer dari cognitive fatigue saat menyaring puluhan hingga ratusan berkas dalam sehari.`,
       ],
       cons: [
-        'Pastikan jeda baris antar poin pencapaian tetap lapang dan konsisten',
+        'Poin-poin uraian kerja membutuhkan konsistensi jeda antar-baris (line spacing) dan penyeragaman kata kerja aksi di awal kalimat agar alur pemindaian mata HRD terasa mengalir tanpa tersendat.',
+        `Kaitkan ringkasan eksekutif secara lebih tajam dengan karakteristik posisi target (${roleName}) untuk menciptakan hook emosional yang langsung membekas di benak reviewer.`,
       ],
     },
     {
@@ -915,11 +912,15 @@ export function runFullRvePipeline(
       badgeColor: 'bg-amber-500',
       score: screenerImpactScore,
       pros: [
-        'Uraian profil mencerminkan kesiapan kerja dan inisiatif profesional',
-        'Tanggung jawab pekerjaan selaras dengan ekspektasi recruiter',
+        `Pengalaman nyata pada ${expRoleName} di ${companyName} membuktikan kandidat memiliki pemahaman operasional dan kesiapan eksekusi tugas yang relevan dengan kebutuhan divisi kerja.`,
+        `Latar belakang pendidikan serta portofolio kompetensi mencerminkan etos kerja disiplin, daya nalar logis, serta kapasitas problem-solving yang selaras dengan ekspektasi peran ${roleName}.`,
+        `Uraian tanggung jawab memperlihatkan inisiatif kerja mandiri dan kemampuan koordinasi tim yang krusial untuk level posisi ${roleName}.`,
       ],
       cons: [
-        !hasStrongMetrics ? 'Perbanyak metrik persentase keberhasilan (%) konkret' : 'Pertajam detail dampak terhadap hasil tim/bisnis',
+        !hasStrongMetrics
+          ? 'Deskripsi pengalaman kerja masih dominan menyajikan daftar rutinitas tugas harian (task-oriented); sangat disarankan mengubah formulasi kalimat menjadi berorientasi dampak bisnis (impact-oriented) dengan menyertakan metrik kuantitatif terukur (%, efisiensi waktu, volume capaian).'
+          : 'Metrik persentase keberhasilan yang sudah ada perlu dipertajam dengan penjelasan konteks dampak bisnis langsung terhadap efisiensi tim atau pertumbuhan target perusahaan.',
+        `Perlu penegasan lebih mendalam mengenai skala tanggung jawab (seperti ukuran tim kolaborasi, kompleksitas tantangan teknis, atau lingkup proyek) agar Hiring Manager dapat memvalidasi tingkat otonomi kerja Anda secara akurat.`,
       ],
     },
   ];
@@ -995,7 +996,8 @@ export function generateCvScreenerAiPrompt(
   targetRole: string,
   targetLevel: string,
   persona: RecruiterPersona,
-  appliedFixIds: string[] = []
+  appliedFixIds: string[] = [],
+  activePurpose: CvPurpose = 'job'
 ): string {
   const role = targetRole || parsed.roleTitle || 'Professional';
   return `Evaluasi secara mendalam dokumen CV berikut untuk simulasi screening recruiter.
@@ -1003,6 +1005,7 @@ export function generateCvScreenerAiPrompt(
 DATA KANDIDAT:
 - Nama: ${parsed.candidateName}
 - Target Posisi: ${role} (Level: ${targetLevel})
+- Tujuan Evaluasi CV (Purpose Profile): ${activePurpose} (Sesuaikan ekspektasi komponen dengan tujuan ini)
 - Ringkasan Profil: ${parsed.summary || '-'}
 - Keterampilan / Skills: ${parsed.skills.join(', ') || '-'}
 - Pengalaman Kerja:
@@ -1017,6 +1020,20 @@ KRITERIA RECRUITER TARGET:
 - Hal yang Kurang Ditekankan: ${persona.reducedEmphasis.join(', ')}
 - Target Perusahaan: ${persona.companies.join(', ')}
 
+ATURAN KRITIS PENILAIAN MULTI-SCREENER (aiEvaluations):
+Wajib mengevaluasi secara ketat dan mendalam dari 3 sudut pandang independen dengan nama persis:
+1. "Screener Algoritma Keyword (ATS Engine)":
+   - 'pros' (2–3 poin, 15–35 kata per poin): Analisis detail kesesuaian kata kunci teknis, hard skills, dan istilah industri dengan target posisi ${role}. Sebutkan keahlian spesifik kandidat dari CV yang terbaca sempurna oleh parser ATS, serta evaluasi standarisasi format seksi.
+   - 'cons' (2 poin, 15–35 kata per poin): Analisis detail kata kunci industri yang masih minim, tools/metodologi modern yang perlu ditambahkan, serta kelemahan integrasi kata kunci ke dalam kalimat pencapaian kerja.
+2. "Screener Struktur Visual & Eye-Tracking (HRD)":
+   - 'pros' (2–3 poin, 15–35 kata per poin): Analisis efektivitas pola pemindaian 6 detik pertama (F-Pattern), hook ringkasan profil, ketegasan hierarki tipografi judul pekerjaan & instansi, dan kenyamanan spasi teks.
+   - 'cons' (2 poin, 15–35 kata per poin): Analisis konsistensi format bullet point, penyeragaman kata kerja aksi di awal kalimat, dan penajaman proposisi nilai pada ringkasan agar selaras dengan kultur kerja ${persona.name}.
+3. "Screener Dampak & Kualifikasi (Hiring Manager)":
+   - 'pros' (2–3 poin, 15–35 kata per poin): Analisis kesiapan kerja nyata, relevansi proyek/tanggung jawab terhadap kualifikasi ${role} level ${targetLevel}, dan inisiatif pemecahan masalah operasional.
+   - 'cons' (2 poin, 15–35 kata per poin): Analisis kelemahan perumusan kalimat yang masih task-oriented (daftar rutinitas tugas), minimnya metrik keberhasilan kuantitatif (%, efisiensi, skala capaian), dan pentingnya membuktikan dampak bisnis langsung.
+
+DILARANG KERAS MENGHASILKAN KATA PENDEK/SLOP seperti "Skill ada", "Format rapi", "Metrik kurang", "Mudah scan", "Summary hambar", "PM experience ada", "IPK bagus", "Dampak bisnis kabur". Setiap poin HARUS berupa kalimat evaluasi profesional yang utuh dan bernilai edukatif tinggi.
+
 KEMBALIKAN HANYA JSON VALID TANPA MARKDOWN DENGAN STRUKTUR BERIKUT:
 {
   "consensusScore": 88,
@@ -1026,7 +1043,7 @@ KEMBALIKAN HANYA JSON VALID TANPA MARKDOWN DENGAN STRUKTUR BERIKUT:
   "hrdNotes": "Catatan impresi 6 detik pertama...",
   "topAiSummary": {
     "overview": "Ringkasan kesiapan CV...",
-    "dropReasons": ["Poin kelemahan 1", "Poin kelemahan 2", "Poin kelemahan 3"],
+    "dropReasons": ["Poin kelemahan 1...", "Poin kelemahan 2...", "Poin kelemahan 3..."],
     "estimatedProbability": 88
   },
   "highPriorityRecommendations": [
@@ -1077,23 +1094,122 @@ KEMBALIKAN HANYA JSON VALID TANPA MARKDOWN DENGAN STRUKTUR BERIKUT:
     {
       "modelName": "Screener Algoritma Keyword (ATS Engine)",
       "score": 88,
-      "pros": ["Kelebihan 1", "Kelebihan 2"],
-      "cons": ["Catatan 1"]
+      "pros": [
+        "Kesesuaian kata kunci teknis dan fungsional untuk posisi ${role} terdeteksi baik pada sistem parser, didukung kompetensi spesifik yang selaras dengan kualifikasi lowongan.",
+        "Struktur dokumen dan penamaan seksi standar industri memudahkan parser mengekstraksi riwayat pendidikan serta pengalaman kerja tanpa kendala segmentasi data."
+      ],
+      "cons": [
+        "Daftar keahlian industri masih dapat diperkaya dengan tools modern atau metodologi relevan yang menjadi kata kunci pencarian utama recruiter.",
+        "Sebagian kata kunci teknis masih terpisah di seksi skill dan belum terintegrasi ke dalam uraian kalimat pencapaian pengalaman kerja."
+      ]
     },
     {
       "modelName": "Screener Struktur Visual & Eye-Tracking (HRD)",
       "score": 90,
-      "pros": ["Kelebihan 1", "Kelebihan 2"],
-      "cons": ["Catatan 1"]
+      "pros": [
+        "Pola pemindaian mata F-Pattern terbentuk optimal di seksi atas: nama kandidat, kontak aktif, dan posisi target langsung terbaca jelas dalam 3 detik pertama.",
+        "Hierarki tipografi antara judul posisi, nama institusi, dan periode kerja tersusun rapi sehingga memudahkan pemetaan kronologi karier secara instan."
+      ],
+      "cons": [
+        "Poin uraian pengalaman kerja memerlukan konsistensi penempatan kata kerja aksi di awal kalimat untuk menjaga ritme pemindaian cepat tim HRD.",
+        "Ringkasan profil perlu penajaman hook proposisi nilai yang lebih memikat agar langsung membedakan kandidat dari ratusan pelamar lain."
+      ]
     },
     {
       "modelName": "Screener Dampak & Kualifikasi (Hiring Manager)",
       "score": 86,
-      "pros": ["Kelebihan 1", "Kelebihan 2"],
-      "cons": ["Catatan 1"]
+      "pros": [
+        "Pengalaman kerja nyata dan keterlibatan proyek membuktikan kesiapan eksekusi operasional yang selaras dengan kualifikasi level ${targetLevel}.",
+        "Kompetensi pemecahan masalah serta daya adaptasi kerja tercermin secara positif dalam ruang lingkup tanggung jawab yang pernah diemban."
+      ],
+      "cons": [
+        "Uraian pencapaian kerja masih dominan berorientasi tugas rutin (task-oriented); disarankan mengubahnya menjadi impact-oriented dengan mencantumkan metrik angka konkret (%).",
+        "Perlu penjelasan lebih rinci terkait skala tanggung jawab atau kompleksitas tantangan kerja untuk membuktikan tingkat kemandirian kandidat."
+      ]
     }
   ]
 }`;
+}
+
+/**
+ * Helper untuk memperkaya dan menormalisasi poin evaluasi screener agar mendalam, profesional,
+ * dan terbebas dari frasa pendek/generik (antislop).
+ */
+export function enrichScreenerPoint(
+  text: string,
+  type: 'pro' | 'con',
+  screenerName: string,
+  context: {
+    targetRole?: string;
+    candidateName?: string;
+    skills?: string[];
+    company?: string;
+    expRole?: string;
+    hasMetrics?: boolean;
+    personaName?: string;
+  } = {}
+): string {
+  const clean = (text || '').trim();
+  const lower = clean.toLowerCase();
+  const role = context.targetRole || 'posisi target';
+  const skillsStr = context.skills && context.skills.length > 0
+    ? context.skills.slice(0, 3).join(', ')
+    : 'keahlian teknis terkait';
+  const company = context.company || 'institusi kerja/proyek';
+  const expRole = context.expRole || role;
+
+  // 1. Pemetaan frasa pendek khas generik
+  if (type === 'pro') {
+    if (lower.includes('skill ada') || lower === 'ada skill' || lower === 'skill relevan') {
+      return `Kesesuaian kata kunci keahlian teknis dan fungsional terdeteksi baik oleh parser ATS, didukung kompetensi utama (${skillsStr}) yang relevan dengan kualifikasi ${role}.`;
+    }
+    if (lower.includes('format rapi') || lower === 'format baik' || lower === 'tata letak baik') {
+      return `Format dokumen bersih dan terstruktur dengan penamaan seksi standar industri, mempermudah parser ATS mengekstrak data tanpa risiko karakter korup atau unparsed text.`;
+    }
+    if (lower.includes('mudah scan') || lower === 'scan mudah' || lower === 'baca cepat') {
+      return `Pola pemindaian mata F-Pattern terbentuk optimal di seksi atas: nama kandidat, kontak aktif, dan jabatan terkini langsung terbaca jelas dalam 3 detik pertama.`;
+    }
+    if (lower.includes('section jelas') || lower === 'seksi jelas' || lower === 'seksinya jelas') {
+      return `Hierarki visual dan tipografi antar seksi tertata tegas, memudahkan tim rekruter memetakan kronologi pendidikan dan perjalanan karier secara instan.`;
+    }
+    if (lower.includes('experience ada') || lower.includes('pengalaman ada') || lower.includes('pm experience')) {
+      return `Rekam jejak pengalaman nyata pada peran ${expRole} di ${company} membuktikan kesiapan kandidat dalam mengemban tanggung jawab dan kolaborasi tim secara profesional.`;
+    }
+    if (lower.includes('ipk bagus') || lower.includes('ipk tinggi') || lower === 'pendidikan bagus') {
+      return `Kualifikasi akademis dan prestasi studi mencerminkan daya tangkap tinggi, kedisiplinan kerja, serta fondasi keilmuan yang solid untuk level posisi ini.`;
+    }
+  } else {
+    if (lower.includes('metrik kurang') || lower === 'minim angka' || lower === 'kurang angka') {
+      return `Kepadatan metrik angka kuantitatif (%) pada uraian pengalaman kerja masih minim, sehingga algoritma belum dapat mengukur efektivitas dan dampak kerja secara terukur.`;
+    }
+    if (lower.includes('summary hambar') || lower === 'ringkasan hambar' || lower === 'summary standar') {
+      return `Ringkasan eksekutif (Executive Summary) belum memiliki kalimat hook pembeda yang kuat untuk langsung menegaskan proposisi nilai dan spesialisasi utama kandidat untuk peran ${role}.`;
+    }
+    if (lower.includes('dampak bisnis kabur') || lower === 'dampak kurang' || lower === 'kurang dampak') {
+      return `Deskripsi pengalaman kerja masih didominasi daftar rutinitas tugas (task-oriented), belum memperlihatkan dampak bisnis langsung (business impact) seperti efisiensi waktu, optimalisasi biaya, atau pertumbuhan metrik tim.`;
+    }
+  }
+
+  // 2. Jika kalimat terlalu pendek (< 32 karakter), perkaya dengan analisis mendalam kontekstual
+  if (clean.length < 32) {
+    const sName = (screenerName || '').toLowerCase();
+    if (sName.includes('ats') || sName.includes('keyword')) {
+      return type === 'pro'
+        ? `Kesesuaian kata kunci teknis dan format seksi terdeteksi baik oleh algoritma ATS untuk posisi ${role} (${clean}).`
+        : `Perluasan kata kunci industri spesifik dan integrasi tools relevan masih perlu ditingkatkan pada seksi pencapaian kerja (${clean}).`;
+    }
+    if (sName.includes('hrd') || sName.includes('visual') || sName.includes('eye')) {
+      return type === 'pro'
+        ? `Tata letak seksi dan hierarki judul memfasilitasi pemindaian cepat 6 detik pertama oleh tim HRD (${clean}).`
+        : `Kerapian jeda baris dan konsistensi bullet point perlu ditingkatkan untuk kenyamanan pemindaian visual tim HRD (${clean}).`;
+    }
+    // Hiring Manager / Dampak
+    return type === 'pro'
+      ? `Kualifikasi profesional dan inisiatif kerja menunjukkan kesiapan kandidat dalam memenuhi ekspektasi operasional tim (${clean}).`
+      : `Kuantifikasi hasil kerja dengan angka terukur dan bukti kontribusi dampak nyata masih perlu dipertajam (${clean}).`;
+  }
+
+  return clean;
 }
 
 /**
@@ -1111,6 +1227,14 @@ export function parseAiScreenerResponse(
       .trim();
 
     const parsed = JSON.parse(cleaned);
+
+    const context = {
+      targetRole: baselineResult.parsedData.roleTitle,
+      candidateName: baselineResult.parsedData.candidateName,
+      skills: baselineResult.parsedData.skills,
+      company: baselineResult.parsedData.experience[0]?.company,
+      expRole: baselineResult.parsedData.experience[0]?.role,
+    };
 
     return {
       ...baselineResult,
@@ -1132,18 +1256,19 @@ export function parseAiScreenerResponse(
         ? parsed.highPriorityRecommendations
         : baselineResult.highPriorityRecommendations,
       atsCorrelations: Array.isArray(parsed.atsCorrelations) && parsed.atsCorrelations.length > 0
-        ? parsed.atsCorrelations.map((item: any, idx: number) => ({
-            id: `ats-corr-${idx}`,
-            keyword: item.keyword || item.kw || `Skill #${idx + 1}`,
-            category: item.category || 'Kompetensi',
-            foundInCv: Boolean(item.foundInCv),
-            visibilityScore: typeof item.visibilityScore === 'number' ? item.visibilityScore : 75,
-            atsScore: typeof item.atsScore === 'number' ? item.atsScore : 80,
-            quadrant: ['gold', 'prominent_low_ats', 'hidden_high_ats', 'cold_irrelevant'].includes(item.quadrant)
-              ? item.quadrant
-              : 'gold',
-            recommendation: item.recommendation || 'Sesuai standar ATS.',
-          }))
+        ? parsed.atsCorrelations.map((item: any, idx: number) => {
+            const isFound = Boolean(item.foundInCv);
+            return {
+              id: `ats-corr-${idx}`,
+              keyword: item.keyword || item.kw || `Skill #${idx + 1}`,
+              category: item.category || 'Kompetensi Industri',
+              foundInCv: isFound,
+              visibilityScore: isFound ? (typeof item.visibilityScore === 'number' ? item.visibilityScore : 85) : 0,
+              atsScore: isFound ? (typeof item.atsScore === 'number' ? item.atsScore : 88) : 0,
+              quadrant: isFound ? 'gold' : 'cold_irrelevant',
+              recommendation: item.recommendation || (isFound ? 'Sudah terdeteksi di CV dan sesuai kualifikasi.' : 'Disarankan ditambahkan ke CV untuk memperkuat profil.'),
+            };
+          })
         : baselineResult.atsCorrelations,
       beforeAfterFixes: Array.isArray(parsed.beforeAfterFixes) && parsed.beforeAfterFixes.length > 0
         ? parsed.beforeAfterFixes.map((item: any, idx: number) => ({
@@ -1158,13 +1283,33 @@ export function parseAiScreenerResponse(
         ? parsed.predictedInterviewQuestions
         : baselineResult.predictedInterviewQuestions,
       aiEvaluations: Array.isArray(parsed.aiEvaluations) && parsed.aiEvaluations.length > 0
-        ? parsed.aiEvaluations.map((item: any, idx: number) => ({
-            modelName: item.modelName || `Screener #${idx + 1}`,
-            badgeColor: idx === 0 ? 'bg-emerald-500' : idx === 1 ? 'bg-blue-500' : 'bg-amber-500',
-            score: typeof item.score === 'number' ? item.score : baselineResult.consensusScore,
-            pros: Array.isArray(item.pros) ? item.pros : ['Struktur CV memenuhi standar'],
-            cons: Array.isArray(item.cons) ? item.cons : ['Tingkatkan detail pencapaian'],
-          }))
+        ? parsed.aiEvaluations.map((item: any, idx: number) => {
+            const defaultModel = idx === 0
+              ? 'Screener Algoritma Keyword (ATS Engine)'
+              : idx === 1
+              ? 'Screener Struktur Visual & Eye-Tracking (HRD)'
+              : 'Screener Dampak & Kualifikasi (Hiring Manager)';
+            const modelName = item.modelName || defaultModel;
+            const baselineItem = baselineResult.aiEvaluations[idx] || baselineResult.aiEvaluations[0];
+
+            const rawPros = Array.isArray(item.pros) && item.pros.length > 0 ? item.pros : (baselineItem?.pros || []);
+            const sanitizedPros = rawPros.map((p: any) =>
+              enrichScreenerPoint(typeof p === 'string' ? p : String(p || ''), 'pro', modelName, context)
+            );
+
+            const rawCons = Array.isArray(item.cons) && item.cons.length > 0 ? item.cons : (baselineItem?.cons || []);
+            const sanitizedCons = rawCons.map((c: any) =>
+              enrichScreenerPoint(typeof c === 'string' ? c : String(c || ''), 'con', modelName, context)
+            );
+
+            return {
+              modelName,
+              badgeColor: idx === 0 ? 'bg-emerald-500' : idx === 1 ? 'bg-blue-500' : 'bg-amber-500',
+              score: typeof item.score === 'number' ? item.score : (baselineItem?.score ?? baselineResult.consensusScore),
+              pros: sanitizedPros.length > 0 ? sanitizedPros : (baselineItem?.pros || ['Struktur CV memenuhi standar evaluasi ATS.']),
+              cons: sanitizedCons.length > 0 ? sanitizedCons : (baselineItem?.cons || ['Tingkatkan detail kuantifikasi pencapaian kerja.']),
+            };
+          })
         : baselineResult.aiEvaluations,
     };
   } catch (err) {
@@ -1172,4 +1317,5 @@ export function parseAiScreenerResponse(
     return baselineResult;
   }
 }
+
 

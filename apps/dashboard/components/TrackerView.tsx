@@ -27,9 +27,34 @@ import {
   RefreshCw,
   Loader2,
   Sparkles,
+  BellRing,
+  BellOff,
+  Send,
+  FileSearch,
+  CalendarCheck,
+  FolderArchive,
+  Clock,
+  CheckCircle2,
+  FilePlus,
 } from 'lucide-react';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { DotLottiePlayer } from '@/components/DotLottiePlayer';
+import { CitySearchInput } from '@/components/ui/CitySearchInput';
+import { TrackerDatePicker, fromISODate } from '@/components/ui/TrackerDatePicker';
+import { PortalSearchDropdown } from '@/components/ui/PortalSearchDropdown';
+import { AutoResizeTextarea } from '@/components/ui/AutoResizeTextarea';
+import { TrackerReminderHub } from '@/components/TrackerReminderHub';
+import { SwipeableReminderBanner } from '@/components/SwipeableReminderBanner';
+import { InterviewScheduleModal } from './InterviewScheduleModal';
+import { PostInterviewReviewModal } from './PostInterviewReviewModal';
+import { OfferingPreparationModal } from './OfferingPreparationModal';
+import {
+  calculateApplicationReminders,
+  isAppInterviewIgnored,
+  TrackerReminder,
+  parseIndonesianDate,
+  getDayDiff,
+} from '@/lib/trackerReminders';
 
 export interface ApplicationItem {
   id: string;
@@ -42,6 +67,20 @@ export interface ApplicationItem {
   notes: string;
   portal: string;
   portalUrl?: string;
+  interviewDate?: string;
+  interviewTime?: string;
+  interviewTimezone?: 'WIB' | 'WITA' | 'WIT';
+  interviewChecklist?: string[];
+  ignoreInterviewReminder?: boolean;
+  interviewNotes?: string;
+  interviewResult?: 'waiting' | 'passed_next_round' | 'offering' | 'rejected';
+  deadlineDate?: string;
+  offerDeadline?: string;
+  offeringChecklist?: string[];
+  offeringStartDate?: string;
+  hasAssessment?: boolean;
+  assessmentDeadline?: string;
+  hasTask?: boolean;
 }
 
 const KANBAN_COLUMNS: Array<{
@@ -202,67 +241,58 @@ const getCardPalette = (id: string): CardColorPalette => {
   return CARD_PALETTES[index];
 };
 
-const MONTH_NAMES = [
-  'Januari',
-  'Februari',
-  'Maret',
-  'April',
-  'Mei',
-  'Juni',
-  'Juli',
-  'Agustus',
-  'September',
-  'Oktober',
-  'November',
-  'Desember',
-];
-
-// Konversi format "23 Juli 2026" <-> "2026-07-23" (untuk <input type="date"> native)
-const toISODate = (val: string): string => {
-  if (!val) return '';
-  const parts = val.trim().split(/\s+/);
-  if (parts.length === 3) {
-    const day = Number(parts[0]);
-    const year = Number(parts[2]);
-    const mIdx = MONTH_NAMES.findIndex((m) => m === parts[1]);
-    if (!isNaN(day) && !isNaN(year) && mIdx >= 0) {
-      return `${year}-${String(mIdx + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    }
-  }
-  return '';
+export const COLUMN_EMPTY_STATES: Record<
+  ApplicationItem['status'],
+  { label: string; icon: any; iconColor: string; bgClass: string }
+> = {
+  Terkirim: {
+    label: 'Belum ada lamaran terkirim',
+    icon: Send,
+    iconColor: 'text-sky-500',
+    bgClass: 'bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400',
+  },
+  Screening: {
+    label: 'Belum ada tahap screening',
+    icon: FileSearch,
+    iconColor: 'text-orange-500',
+    bgClass: 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400',
+  },
+  Interview: {
+    label: 'Belum ada jadwal interview',
+    icon: CalendarCheck,
+    iconColor: 'text-amber-500',
+    bgClass: 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400',
+  },
+  Offering: {
+    label: 'Belum ada tawaran offering',
+    icon: Sparkles,
+    iconColor: 'text-emerald-500',
+    bgClass: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400',
+  },
+  Ditolak: {
+    label: 'Tidak ada lamaran ditolak',
+    icon: FolderArchive,
+    iconColor: 'text-rose-500',
+    bgClass: 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400',
+  },
 };
 
-const fromISODate = (iso: string): string => {
-  if (!iso) return '';
-  const parts = iso.split('-');
-  if (parts.length === 3) {
-    const year = Number(parts[0]);
-    const month = Number(parts[1]);
-    const day = Number(parts[2]);
-    if (!isNaN(year) && !isNaN(month) && !isNaN(day) && month >= 1 && month <= 12) {
-      return `${day} ${MONTH_NAMES[month - 1]} ${year}`;
-    }
-  }
-  return '';
+// Helper formatter input gaji "000.000.000" dengan pemisah ribuan titik
+export const formatSalaryInput = (raw: string): string => {
+  const digits = raw.replace(/\D/g, '');
+  if (!digits) return '';
+  const num = parseInt(digits, 10);
+  return `Rp ${num.toLocaleString('id-ID')}`;
 };
 
-// Preset portal untuk <datalist> (input bebas + saran dropdown native)
-const PORTAL_PRESETS = [
-  'LinkedIn',
-  'JobStreet',
-  'KitaLulus',
-  'Glints',
-  'Kalibrr',
-  'Indeed',
-  'Karir.com',
-  'Tech in Asia',
-  'Urbanhire',
-  'TopKarir',
-  'Deel',
-  'Website Perusahaan',
-  'Email Recruiter',
-  'Referensi / Karyawan Internal',
-];
+export const getTodayFormatted = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return fromISODate(`${year}-${month}-${day}`);
+};
+
 
 export const TrackerView: React.FC = () => {
   const [apps, setApps] = useState<ApplicationItem[]>([]);
@@ -274,7 +304,72 @@ export const TrackerView: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string>('Semua');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [isReminderHubOpen, setIsReminderHubOpen] = useState<boolean>(false);
+  const [dismissedReminderIds, setDismissedReminderIds] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('employr_dismissed_reminders');
+        return saved ? JSON.parse(saved) : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
 
+  const handleDismissReminder = (id: string) => {
+    setDismissedReminderIds((prev) => {
+      const updated = [...prev, id];
+      try {
+        localStorage.setItem('employr_dismissed_reminders', JSON.stringify(updated));
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('employr_reminders_updated'));
+        }
+      } catch {}
+      return updated;
+    });
+  };
+
+  const reminders = React.useMemo(() => {
+    const all = calculateApplicationReminders(apps);
+    return all.filter((r) => !dismissedReminderIds.includes(r.id));
+  }, [apps, dismissedReminderIds]);
+
+  const reminderByAppId = React.useMemo(() => {
+    const map = new Map<string, TrackerReminder>();
+    reminders.forEach((r) => {
+      if (r.appId && !map.has(r.appId)) {
+        map.set(r.appId, r);
+      }
+    });
+    return map;
+  }, [reminders]);
+
+
+  const getIgnoredInterviewAppIds = (): Set<string> => {
+    if (typeof window === 'undefined') return new Set();
+    try {
+      const raw = localStorage.getItem('employr_ignored_interview_reminders');
+      return new Set(raw ? JSON.parse(raw) : []);
+    } catch {
+      return new Set();
+    }
+  };
+
+  const setAppInterviewIgnored = (appId: string, ignored: boolean) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const current = getIgnoredInterviewAppIds();
+      if (ignored) {
+        current.add(appId);
+      } else {
+        current.delete(appId);
+      }
+      localStorage.setItem('employr_ignored_interview_reminders', JSON.stringify(Array.from(current)));
+    } catch {
+      // ignore
+    }
+  };
 
   const fetchApplications = async (showRefreshIndicator = false) => {
     if (showRefreshIndicator) setIsRefreshing(true);
@@ -282,7 +377,12 @@ export const TrackerView: React.FC = () => {
       setErrorMessage(null);
       const remoteApps = await trackerApi.getAll<ApplicationItem>();
       if (Array.isArray(remoteApps)) {
-        setApps(remoteApps);
+        const ignoredIds = getIgnoredInterviewAppIds();
+        const mergedApps = remoteApps.map((a) => ({
+          ...a,
+          ignoreInterviewReminder: a.ignoreInterviewReminder ?? ignoredIds.has(a.id),
+        }));
+        setApps(mergedApps);
       }
     } catch (err: any) {
       console.error('[TrackerView] Error fetching applications:', err);
@@ -305,6 +405,73 @@ export const TrackerView: React.FC = () => {
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [dragWidth, setDragWidth] = useState<number>(280);
   const [dragOverColumn, setDragOverColumn] = useState<ApplicationItem['status'] | null>(null);
+
+  // Fullscreen Offering Celebration state & Offering Preparation Modal state
+  const [showOfferingCelebration, setShowOfferingCelebration] = useState(false);
+  const [celebrationKey, setCelebrationKey] = useState(0);
+  const [celebratingApp, setCelebratingApp] = useState<ApplicationItem | null>(null);
+
+  const [isOfferingModalOpen, setIsOfferingModalOpen] = useState(false);
+  const [offeringModalApp, setOfferingModalApp] = useState<ApplicationItem | null>(null);
+
+  const triggerOfferingCelebration = (app?: ApplicationItem) => {
+    if (app) setCelebratingApp(app);
+    setCelebrationKey((prev) => prev + 1);
+    setShowOfferingCelebration(true);
+  };
+
+  const handleOpenOfferingModal = (app: ApplicationItem) => {
+    setOfferingModalApp(app);
+    setIsOfferingModalOpen(true);
+  };
+
+  const handleSaveOfferingPreparation = async (
+    appId: string,
+    data: {
+      offeringSalary?: string;
+      offeringDeadline?: string;
+      offeringStartDate?: string;
+      offeringNotes?: string;
+      offeringChecklist?: string[];
+    }
+  ) => {
+    setApps((prev) =>
+      prev.map((a) =>
+        a.id === appId
+          ? {
+              ...a,
+              salary: data.offeringSalary || a.salary,
+              offerDeadline: data.offeringDeadline,
+              deadlineDate: data.offeringDeadline || a.deadlineDate,
+              notes: data.offeringNotes !== undefined ? data.offeringNotes : a.notes,
+              offeringChecklist: data.offeringChecklist,
+              offeringStartDate: data.offeringStartDate,
+            }
+          : a
+      )
+    );
+
+    try {
+      await trackerApi.update(appId, {
+        salary: data.offeringSalary,
+        offerDeadline: data.offeringDeadline,
+        deadlineDate: data.offeringDeadline,
+        notes: data.offeringNotes,
+        offeringChecklist: data.offeringChecklist,
+        offeringStartDate: data.offeringStartDate,
+      });
+    } catch (err) {
+      console.error('[TrackerView] Failed to save offering preparation:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (!showOfferingCelebration) return;
+    const timer = setTimeout(() => {
+      setShowOfferingCelebration(false);
+    }, 5500);
+    return () => clearTimeout(timer);
+  }, [showOfferingCelebration, celebrationKey]);
 
   const handlePointerDownCard = (e: React.PointerEvent<HTMLDivElement>, app: ApplicationItem) => {
     // Skip if clicking delete button
@@ -344,7 +511,22 @@ export const TrackerView: React.FC = () => {
       if (colElem) {
         const targetStatus = colElem.getAttribute('data-column-status') as ApplicationItem['status'];
         if (targetStatus && targetStatus !== app.status) {
-          handleUpdateStatus(app.id, targetStatus);
+          if (targetStatus === 'Interview') {
+            const hasExistingInterviewData = Boolean(
+              app.interviewDate || app.interviewTime || (app.interviewChecklist && app.interviewChecklist.length > 0)
+            );
+            const isIgnored = app.ignoreInterviewReminder || isAppInterviewIgnored(app.id);
+
+            // Jika kartu sudah memiliki jadwal & persiapan (misal dari Offering / Ditolak dikembalikan ke Interview),
+            // langsung gunakan data yang sama tanpa perlu memaksa pengguna mengisi ulang dari awal!
+            if (hasExistingInterviewData || isIgnored) {
+              handleUpdateStatus(app.id, 'Interview');
+            } else {
+              handleOpenInterviewModal(app);
+            }
+          } else {
+            handleUpdateStatus(app.id, targetStatus);
+          }
         }
       }
 
@@ -357,6 +539,200 @@ export const TrackerView: React.FC = () => {
     window.addEventListener('pointercancel', handlePointerUp);
   };
 
+  // Interview Schedule & Preparation Modal State
+  const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
+  const [interviewModalApp, setInterviewModalApp] = useState<ApplicationItem | null>(null);
+
+  const handleOpenInterviewModal = (app: ApplicationItem) => {
+    setInterviewModalApp(app);
+    setIsInterviewModalOpen(true);
+  };
+
+  const handleSaveInterviewSchedule = async (
+    appId: string,
+    scheduleData: {
+      interviewDate: string;
+      interviewTime: string;
+      interviewTimezone: 'WIB' | 'WITA' | 'WIT';
+      interviewChecklist: string[];
+    }
+  ) => {
+    setIsInterviewModalOpen(false);
+    setInterviewModalApp(null);
+
+    setApps((prev) =>
+      prev.map((a) =>
+        a.id === appId
+          ? {
+              ...a,
+              status: 'Interview',
+              interviewDate: scheduleData.interviewDate,
+              interviewTime: scheduleData.interviewTime,
+              interviewTimezone: scheduleData.interviewTimezone,
+              interviewChecklist: scheduleData.interviewChecklist,
+              ignoreInterviewReminder: false,
+            }
+          : a
+      )
+    );
+    setAppInterviewIgnored(appId, false);
+
+    try {
+      await trackerApi.update(appId, {
+        status: 'Interview',
+        interviewDate: scheduleData.interviewDate,
+        interviewTime: scheduleData.interviewTime,
+        interviewTimezone: scheduleData.interviewTimezone,
+        interviewChecklist: scheduleData.interviewChecklist,
+        ignoreInterviewReminder: false,
+      });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('employr_reminders_updated'));
+      }
+    } catch (err) {
+      console.error('[TrackerView] Failed to save interview schedule:', err);
+      setErrorMessage('Lamaran belum tersimpan. Periksa koneksi internet Anda.');
+    }
+  };
+
+  const handleIgnoreInterviewReminder = async (appId: string) => {
+    setIsInterviewModalOpen(false);
+    setInterviewModalApp(null);
+
+    setApps((prev) =>
+      prev.map((a) =>
+        a.id === appId
+          ? {
+              ...a,
+              status: 'Interview',
+              ignoreInterviewReminder: true,
+            }
+          : a
+      )
+    );
+    setAppInterviewIgnored(appId, true);
+
+    try {
+      await trackerApi.update(appId, {
+        status: 'Interview',
+        ignoreInterviewReminder: true,
+      });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('employr_reminders_updated'));
+      }
+    } catch (err) {
+      console.error('[TrackerView] Failed to ignore interview reminder:', err);
+      setErrorMessage('Lamaran belum tersimpan. Periksa koneksi internet Anda.');
+    }
+  };
+
+  // Post-Interview Review Modal State & Handlers
+  const [postInterviewApp, setPostInterviewApp] = useState<ApplicationItem | null>(null);
+
+  const handleOpenPostInterviewModal = (app: ApplicationItem) => {
+    setPostInterviewApp(app);
+  };
+
+  const handleUpdatePostInterviewStatus = async (
+    appId: string,
+    newStatus: ApplicationItem['status'],
+    interviewNotes?: string,
+    interviewResult?: 'waiting' | 'passed_next_round' | 'offering' | 'rejected'
+  ) => {
+    setApps((prev) =>
+      prev.map((a) =>
+        a.id === appId
+          ? {
+              ...a,
+              status: newStatus,
+              ...(interviewNotes !== undefined ? { interviewNotes } : {}),
+              ...(interviewResult !== undefined ? { interviewResult } : {}),
+            }
+          : a
+      )
+    );
+
+    if (newStatus === 'Offering') {
+      const target = apps.find((a) => a.id === appId);
+      triggerOfferingCelebration(target || undefined);
+    }
+
+    try {
+      await trackerApi.update(appId, {
+        status: newStatus,
+        interviewNotes,
+        interviewResult,
+      });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('employr_reminders_updated'));
+      }
+    } catch (err) {
+      console.error('[TrackerView] Failed to update post interview status:', err);
+      fetchApplications();
+    }
+  };
+
+  const handleScheduleNextRound = async (
+    appId: string,
+    scheduleData: {
+      interviewDate: string;
+      interviewTime: string;
+      interviewTimezone: 'WIB' | 'WITA' | 'WIT';
+      interviewChecklist: string[];
+    },
+    interviewNotes?: string
+  ) => {
+    setApps((prev) =>
+      prev.map((a) =>
+        a.id === appId
+          ? {
+              ...a,
+              status: 'Interview',
+              interviewDate: scheduleData.interviewDate,
+              interviewTime: scheduleData.interviewTime,
+              interviewTimezone: scheduleData.interviewTimezone,
+              interviewChecklist: scheduleData.interviewChecklist,
+              interviewResult: 'passed_next_round',
+              ignoreInterviewReminder: false,
+              ...(interviewNotes !== undefined ? { interviewNotes } : {}),
+            }
+          : a
+      )
+    );
+
+    try {
+      await trackerApi.update(appId, {
+        status: 'Interview',
+        interviewDate: scheduleData.interviewDate,
+        interviewTime: scheduleData.interviewTime,
+        interviewTimezone: scheduleData.interviewTimezone,
+        interviewChecklist: scheduleData.interviewChecklist,
+        interviewResult: 'passed_next_round',
+        interviewNotes,
+        ignoreInterviewReminder: false,
+      });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('employr_reminders_updated'));
+      }
+    } catch (err) {
+      console.error('[TrackerView] Failed to schedule next round:', err);
+      fetchApplications();
+    }
+  };
+
+  const handleSaveInterviewNotesOnly = async (appId: string, interviewNotes: string) => {
+    setApps((prev) =>
+      prev.map((a) => (a.id === appId ? { ...a, interviewNotes } : a))
+    );
+
+    try {
+      await trackerApi.update(appId, { interviewNotes });
+    } catch (err) {
+      console.error('[TrackerView] Failed to save interview notes:', err);
+      fetchApplications();
+    }
+  };
+
   // New Application Form State
   const [newCompany, setNewCompany] = useState('');
   const [newPosition, setNewPosition] = useState('');
@@ -367,6 +743,37 @@ export const TrackerView: React.FC = () => {
   const [newNotes, setNewNotes] = useState('');
   const [newPortal, setNewPortal] = useState('');
   const [newPortalUrl, setNewPortalUrl] = useState('');
+  const [isCrawling, setIsCrawling] = useState(false);
+  const [crawlMessage, setCrawlMessage] = useState<string | null>(null);
+
+  const handleCrawlJobUrl = async () => {
+    if (!newPortalUrl.trim() || isCrawling) return;
+    setIsCrawling(true);
+    setCrawlMessage(null);
+    try {
+      const res = await fetch('/api/crawl-job', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: newPortalUrl.trim() }),
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        if (data.data.company) setNewCompany(data.data.company);
+        if (data.data.title) setNewPosition(data.data.title);
+        if (data.data.location && data.data.location !== 'Indonesia') setNewLocation(data.data.location);
+        if (data.data.salary) setNewSalary(data.data.salary);
+        if (data.data.portal) setNewPortal(data.data.portal);
+        if (data.data.description && !newNotes) setNewNotes(data.data.description);
+        setCrawlMessage('✨ Berhasil diekstrak & otomatis diterbitkan ke Portal Loker 3003!');
+      } else {
+        setCrawlMessage(data.message || 'Gagal mengekstrak tautan.');
+      }
+    } catch {
+      setCrawlMessage('Kendala koneksi saat mengekstrak tautan.');
+    } finally {
+      setIsCrawling(false);
+    }
+  };
 
   const handleAddApplication = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -376,18 +783,25 @@ export const TrackerView: React.FC = () => {
     setErrorMessage(null);
     const finalPortal = newPortal.trim() || 'Custom Portal';
 
+    let formattedPortalUrl = newPortalUrl.trim();
+    if (formattedPortalUrl) {
+      if (!/^https?:\/\//i.test(formattedPortalUrl)) {
+        formattedPortalUrl = `https://${formattedPortalUrl}`;
+      }
+    }
+
     const tempId = `app-temp-${Date.now()}`;
     const newApp: ApplicationItem = {
       id: tempId,
-      company: newCompany,
-      position: newPosition,
-      location: newLocation || 'Jakarta',
-      appliedDate: newAppliedDate || 'Hari ini',
+      company: newCompany.trim(),
+      position: newPosition.trim(),
+      location: newLocation.trim() || 'Jakarta',
+      appliedDate: newAppliedDate.trim() || getTodayFormatted(),
       status: newStatus,
-      salary: newSalary || '-',
-      notes: newNotes,
+      salary: newSalary.trim() || '-',
+      notes: newNotes.trim(),
       portal: finalPortal,
-      portalUrl: newPortalUrl.trim(),
+      portalUrl: formattedPortalUrl,
     };
 
     // Optimistic UI update
@@ -395,12 +809,19 @@ export const TrackerView: React.FC = () => {
     setIsAddModalOpen(false);
     resetForm();
 
+    if (newStatus === 'Offering') {
+      triggerOfferingCelebration(newApp);
+    }
+
     try {
       const created = await trackerApi.create(newApp);
       if (created && (created as any).id) {
         setApps((prev) =>
           prev.map((item) => (item.id === tempId ? { ...item, id: (created as any).id } : item))
         );
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('employr_reminders_updated'));
       }
     } catch (err) {
       console.error('[TrackerView] Failed to save application:', err);
@@ -423,11 +844,15 @@ export const TrackerView: React.FC = () => {
     setNewPortalUrl('');
   };
 
+
   const handleDeleteApp = async (id: string) => {
     const previous = [...apps];
     setApps((prev) => prev.filter((a) => a.id !== id));
     try {
       await trackerApi.delete(id);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('employr_reminders_updated'));
+      }
     } catch (err) {
       console.error('[TrackerView] Failed to delete application:', err);
       setErrorMessage('Lamaran belum tersimpan. Periksa koneksi internet Anda.');
@@ -437,11 +862,36 @@ export const TrackerView: React.FC = () => {
 
   const handleUpdateStatus = async (id: string, status: ApplicationItem['status']) => {
     const previous = [...apps];
+    const currentApp = apps.find((a) => a.id === id);
+    const isReturningToInterview = status === 'Interview' && currentApp?.status !== 'Interview';
+    const isMovingToOffering = status === 'Offering' && currentApp?.status !== 'Offering';
+    const isMovingToDitolak = status === 'Ditolak' && currentApp?.status !== 'Ditolak';
+
+    const resultUpdate: { interviewResult?: 'waiting' | 'offering' | 'rejected' } = {};
+    if (isReturningToInterview) {
+      resultUpdate.interviewResult = 'waiting';
+    } else if (isMovingToOffering) {
+      resultUpdate.interviewResult = 'offering';
+    } else if (isMovingToDitolak) {
+      resultUpdate.interviewResult = 'rejected';
+    }
+
     setApps((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, status } : a))
+      prev.map((a) => (a.id === id ? { ...a, status, ...resultUpdate } : a))
     );
+
+    if (isMovingToOffering) {
+      triggerOfferingCelebration(currentApp || undefined);
+    }
     try {
-      await trackerApi.updateStatus(id, status);
+      if (Object.keys(resultUpdate).length > 0) {
+        await trackerApi.update(id, { status, ...resultUpdate });
+      } else {
+        await trackerApi.updateStatus(id, status);
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('employr_reminders_updated'));
+      }
     } catch (err) {
       console.error('[TrackerView] Failed to update application status:', err);
       setErrorMessage('Lamaran belum tersimpan. Periksa koneksi internet Anda.');
@@ -554,11 +1004,24 @@ export const TrackerView: React.FC = () => {
           { label: 'Offering', value: counts.offering, icon: Sparkles, colorClass: 'text-emerald-600 dark:text-emerald-400' },
         ]}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2 w-full sm:w-auto">
+            <button
+              onClick={() => setIsReminderHubOpen(true)}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-[10px] bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition cursor-pointer relative"
+              title="Pusat Pengingat & Tindakan"
+            >
+              <BellRing className={`w-3.5 h-3.5 ${reminders.length > 0 ? 'text-orange-400' : ''}`} />
+              <span className="hidden sm:inline">Pengingat</span>
+              {reminders.length > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-orange-500 text-white shadow-xs leading-none">
+                  {reminders.length}
+                </span>
+              )}
+            </button>
             <button
               onClick={() => fetchApplications(true)}
               disabled={isRefreshing || isLoading}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs transition-all cursor-pointer disabled:opacity-50"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-[10px] bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition cursor-pointer disabled:opacity-50"
               title="Sinkronkan dengan Database"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -566,13 +1029,20 @@ export const TrackerView: React.FC = () => {
             </button>
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm transition-all shrink-0 cursor-pointer border-0"
+              className="flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-[10px] bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-black text-xs shadow-md shadow-orange-500/30 transition shrink-0 cursor-pointer border-0"
             >
               <Plus className="w-4 h-4" />
               <span>Tambah Lamaran</span>
             </button>
           </div>
         }
+      />
+
+      {/* Smart Reminder Alert Banner with Swipe to Dismiss */}
+      <SwipeableReminderBanner
+        reminders={reminders}
+        onDismissReminder={handleDismissReminder}
+        onOpenReminderHub={() => setIsReminderHubOpen(true)}
       />
 
       {/* Error Message Toast / Alert */}
@@ -666,68 +1136,43 @@ export const TrackerView: React.FC = () => {
         </div>
       )}
 
-      {/* Empty State: Belum Ada Lamaran (Friendly & Modern) */}
+      {/* Empty State: Belum Ada Lamaran (Clean, Focused & Anti-Slop UI) */}
       {!isLoading && apps.length === 0 && (
-        <div className="relative overflow-hidden rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-10 md:p-14 text-center flex flex-col items-center gap-5 shadow-sm animate-in fade-in duration-300">
-          {/* Dekorasi background lembut */}
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#1738D1]/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-orange-400/10 rounded-full blur-3xl pointer-events-none" />
-
-          {/* Ilustrasi Animasi Lottie */}
-          <div className="relative z-10 w-28 h-28 rounded-[10px] bg-gradient-to-br from-[#1738D1]/10 via-white to-orange-50 dark:from-navy-950 dark:via-slate-900 dark:to-slate-900 border border-[#1738D1]/20 dark:border-navy-800 flex items-center justify-center shadow-2xs">
-            <DotLottiePlayer
-              src="/animations/empty-tracker.json"
-              autoplay={true}
-              loop={true}
-              className="w-24 h-24"
-              fallback={<Briefcase className="w-12 h-12 text-[#1738D1] dark:text-blue-400" />}
-            />
+        <div className="rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 sm:p-12 text-center flex flex-col items-center gap-6 shadow-xs animate-in fade-in duration-300">
+          {/* Visual Icon Mark */}
+          <div className="w-14 h-14 rounded-[10px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-[#1738D1] dark:text-blue-400 shadow-2xs">
+            <Kanban className="w-7 h-7" />
           </div>
 
-          {/* Headline & Deskripsi */}
-          <div className="relative z-10 space-y-2 max-w-lg mx-auto">
-            <span className="inline-block px-3 py-1 rounded-[10px] text-[10px] font-black uppercase tracking-wider bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
+          {/* Headline & Description */}
+          <div className="space-y-2 max-w-xl mx-auto">
+            <span className="inline-block px-3 py-1 rounded-[10px] text-[10px] font-bold uppercase tracking-wider bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
               Mulai dari Sini
             </span>
-            <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Belum Ada Lamaran, Yuk Mulai!
-            </h3>
-            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
               Catat setiap lamaran kerja yang kamu kirim dan pantau progresnya — dari Terkirim, Screening, Interview, hingga Offering Letter — semua terpusat di satu dashboard.
             </p>
           </div>
 
-          {/* Keunggulan Tracker */}
-          <div className="relative z-10 flex flex-wrap items-center justify-center gap-2">
-            <span className="px-3 py-1.5 rounded-[10px] text-[11px] font-bold bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
-              <Plus className="w-3.5 h-3.5 text-[#1738D1] dark:text-blue-400" />
-              Tambah &amp; Kelola
-            </span>
-            <span className="px-3 py-1.5 rounded-[10px] text-[11px] font-bold bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
-              <Kanban className="w-3.5 h-3.5 text-orange-500" />
-              Drag &amp; Drop Kanban
-            </span>
-            <span className="px-3 py-1.5 rounded-[10px] text-[11px] font-bold bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-amber-500" />
-              Pantau Jadwal Interview
-            </span>
-          </div>
 
           {/* CTA Actions */}
-          <div className="relative z-10 flex flex-col sm:flex-row items-center gap-2.5">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-1 w-full sm:w-auto">
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="px-5 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition-all flex items-center gap-1.5 cursor-pointer border-0"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center justify-center gap-2 cursor-pointer border-0"
             >
               <Plus className="w-4 h-4" />
-              Tambah Lamaran Pertama
+              <span>Tambah Lamaran Pertama</span>
             </button>
             <Link
               href="/match-cv"
-              className="px-5 py-2.5 rounded-[10px] bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-xs border border-slate-700 dark:border-transparent transition flex items-center gap-1.5"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs border border-slate-200 dark:border-slate-700 transition flex items-center justify-center gap-2"
             >
-              <Sparkles className="w-4 h-4" />
-              Cari Lowongan
+              <Search className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+              <span>Cari Lowongan</span>
             </Link>
           </div>
         </div>
@@ -774,22 +1219,36 @@ export const TrackerView: React.FC = () => {
                   {/* Cards List in Column */}
                   <div className="space-y-3 min-h-[220px] transition-all">
                     {columnApps.length === 0 ? (
-                      <div className={`p-6 text-center text-slate-400 text-[11px] border border-dashed rounded-[10px] transition flex flex-col items-center justify-center gap-1.5 ${
-                        isOver ? 'border-orange-400 bg-[#1738D1]/10 text-orange-600 dark:text-orange-300 font-bold' : 'border-slate-200 dark:border-slate-800'
-                      }`}>
-                        {col.status === 'Offering' ? (
-                          <>
-                            <DotLottiePlayer
-                              src="/animations/offering-celebration.json"
-                              autoplay={true}
-                              loop={false}
-                              className="w-10 h-10 opacity-70"
-                            />
-                            <span>{isOver ? 'Lepas tawaran di sini!' : 'Belum ada tawaran'}</span>
-                          </>
-                        ) : (
-                          <span>{isOver ? 'Lepas di sini' : 'Kosong (Tarik kartu ke sini)'}</span>
-                        )}
+                      <div
+                        className={`p-6 text-center text-[11px] border border-dashed rounded-[10px] min-h-[160px] transition-all flex flex-col items-center justify-center gap-2 select-none ${
+                          isOver
+                            ? 'border-orange-400 bg-orange-50/60 dark:bg-orange-950/30 text-orange-600 dark:text-orange-300 font-bold scale-[1.01]'
+                            : 'border-slate-200 dark:border-slate-800 text-slate-400'
+                        }`}
+                      >
+                        {(() => {
+                          const config = COLUMN_EMPTY_STATES[col.status];
+                          const IconComp = config.icon;
+                          return (
+                            <>
+                              <div
+                                className={`w-9 h-9 rounded-full flex items-center justify-center transition-transform ${
+                                  isOver
+                                    ? 'scale-110 bg-orange-100 dark:bg-orange-900/60 text-orange-600'
+                                    : config.bgClass
+                                }`}
+                              >
+                                <IconComp className="w-4 h-4" />
+                              </div>
+                              <span className="font-semibold text-slate-700 dark:text-slate-300 text-xs">
+                                {isOver ? 'Lepas kartu di sini!' : config.label}
+                              </span>
+                              <span className="text-[10px] text-slate-400">
+                                {isOver ? 'Pindahkan ke kolom ini' : 'Tarik kartu ke sini'}
+                              </span>
+                            </>
+                          );
+                        })()}
                       </div>
                     ) : (
                       columnApps.map((app) => {
@@ -888,6 +1347,226 @@ export const TrackerView: React.FC = () => {
                                   </span>
                                 </div>
                               )}
+
+                              {/* Interview Specific Info Badge / Button */}
+                              {app.status === 'Interview' && (() => {
+                                const isIgnored = app.ignoreInterviewReminder || isAppInterviewIgnored(app.id);
+                                if (isIgnored) {
+                                  return (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleOpenInterviewModal(app);
+                                      }}
+                                      onPointerDown={(e) => e.stopPropagation()}
+                                      className="w-full flex items-center justify-between gap-1.5 px-2 py-1 rounded-[8px] bg-slate-100/90 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 hover:text-[#1738D1] dark:hover:text-blue-400 border border-slate-200 dark:border-slate-700 text-[10px] font-medium transition cursor-pointer mt-1"
+                                      title="Pengingat dinonaktifkan. Klik untuk atur jadwal & checklist."
+                                    >
+                                      <div className="flex items-center gap-1">
+                                        <BellOff className="w-3 h-3 text-slate-400 shrink-0" />
+                                        <span>Bebas Pengingat</span>
+                                      </div>
+                                      <span className="text-[9px] text-slate-400 underline">Atur</span>
+                                    </button>
+                                  );
+                                }
+
+                                if (app.interviewDate || app.interviewTime) {
+                                  const parsedDate = app.interviewDate ? parseIndonesianDate(app.interviewDate) : null;
+                                  const diffDays = parsedDate ? getDayDiff(parsedDate, new Date()) : null;
+                                  const isPastInterview = diffDays !== null && diffDays < 0;
+
+                                  if (isPastInterview) {
+                                    const absDays = Math.abs(diffDays);
+                                    const tagText = absDays === 1 ? 'Kemarin' : absDays < 7 ? `H+${absDays}` : absDays < 14 ? '1 mg lalu' : `${Math.floor(absDays / 7)} mg lalu`;
+
+                                    return (
+                                      <div className="space-y-1 mt-1">
+                                        <div className="flex items-center gap-1">
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleOpenPostInterviewModal(app);
+                                            }}
+                                            onPointerDown={(e) => e.stopPropagation()}
+                                            className="flex-1 flex items-center justify-between gap-1 px-2.5 py-1.5 rounded-[8px] bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/5 text-amber-900 dark:text-amber-200 border border-amber-300/80 dark:border-amber-700/60 text-[10px] font-bold transition hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-100/60 cursor-pointer shadow-2xs min-w-0"
+                                            title="Wawancara telah selesai. Klik untuk evaluasi hasil, catat pertanyaan, atau perbarui status"
+                                          >
+                                            <div className="flex items-center gap-1.5 truncate min-w-0">
+                                              <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                                              <span className="truncate">
+                                                {app.interviewNotes ? 'Evaluasi Ada • Cek Hasil' : 'Selesai • Gimana hasilnya?'}
+                                              </span>
+                                            </div>
+                                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-900/80 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-800 shrink-0 font-extrabold">
+                                              {tagText}
+                                            </span>
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleOpenInterviewModal(app);
+                                            }}
+                                            onPointerDown={(e) => e.stopPropagation()}
+                                            className="p-1.5 rounded-[8px] border border-amber-200 dark:border-amber-800 bg-amber-50/70 hover:bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 transition cursor-pointer shrink-0"
+                                            title="Buka / ubah jadwal interview & checklist persiapan"
+                                          >
+                                            <CalendarCheck className="w-3.5 h-3.5" />
+                                          </button>
+                                        </div>
+
+                                        {app.interviewNotes && (
+                                          <div
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleOpenPostInterviewModal(app);
+                                            }}
+                                            onPointerDown={(e) => e.stopPropagation()}
+                                            className="text-[10px] text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/70 p-1.5 rounded-[6px] border border-slate-200/80 dark:border-slate-700/60 line-clamp-2 cursor-pointer hover:border-amber-300 transition leading-snug"
+                                            title="Klik untuk lihat/edit catatan evaluasi lengkap"
+                                          >
+                                            <span className="font-semibold text-orange-600 dark:text-orange-400 mr-1">Evaluasi:</span>
+                                            {app.interviewNotes}
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  }
+
+                                  const checklistCount = app.interviewChecklist?.length || 0;
+                                  return (
+                                    <div className="space-y-1 mt-1">
+                                      <div className="flex items-center gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleOpenInterviewModal(app);
+                                          }}
+                                          onPointerDown={(e) => e.stopPropagation()}
+                                          className="flex-1 flex items-center justify-between gap-1 px-2 py-1 rounded-[8px] bg-indigo-50/90 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200/90 dark:border-indigo-800/80 text-[10px] font-bold transition hover:bg-indigo-100 dark:hover:bg-indigo-900/60 cursor-pointer min-w-0"
+                                          title="Klik untuk ubah jadwal atau cek persiapan interview"
+                                        >
+                                          <div className="flex items-center gap-1 truncate min-w-0">
+                                            <CalendarCheck className="w-3 h-3 text-[#1738D1] dark:text-blue-400 shrink-0" />
+                                            <span className="truncate">
+                                              {app.interviewDate || 'Wawancara'} {app.interviewTime ? `• ${app.interviewTime} ${app.interviewTimezone || 'WIB'}` : ''}
+                                            </span>
+                                          </div>
+                                          <span className="text-[9px] px-1.5 py-0.2 rounded bg-white dark:bg-slate-900 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 shrink-0 font-bold">
+                                            {checklistCount}/5 Siap
+                                          </span>
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleOpenPostInterviewModal(app);
+                                          }}
+                                          onPointerDown={(e) => e.stopPropagation()}
+                                          className="px-2 py-1 rounded-[8px] border border-amber-300 dark:border-amber-700/80 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 text-[10px] font-bold transition cursor-pointer flex items-center gap-1 shrink-0 shadow-2xs"
+                                          title="Klik untuk evaluasi hasil wawancara (Gimana hasilnya?)"
+                                        >
+                                          <CheckCircle2 className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                                          <span>Hasil?</span>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  );
+                                }
+
+                                return (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenInterviewModal(app);
+                                    }}
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                    className="w-full flex items-center justify-between gap-1.5 px-2 py-1 rounded-[8px] bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/90 dark:border-amber-800 text-[10px] font-bold hover:bg-amber-100 transition cursor-pointer mt-1"
+                                    title="Klik untuk input jam wawancara dan checklist persiapan"
+                                  >
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="w-3 h-3 text-amber-500 shrink-0" />
+                                      <span>Input Jam &amp; Checklist</span>
+                                    </div>
+                                    <span className="text-[9px] underline">Isi</span>
+                                  </button>
+                                );
+                              })()}
+
+                              {/* Offering Specific Preparation Badge / Button */}
+                              {app.status === 'Offering' && (() => {
+                                const checklistCount = app.offeringChecklist?.length || 0;
+                                const isAllDone = checklistCount >= 7;
+
+                                return (
+                                  <div className="space-y-1.5 mt-1">
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleOpenOfferingModal(app);
+                                      }}
+                                      onPointerDown={(e) => e.stopPropagation()}
+                                      className="w-full flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-[8px] bg-gradient-to-r from-emerald-500/15 via-emerald-500/10 to-teal-500/10 hover:from-emerald-500/25 hover:to-teal-500/20 text-emerald-900 dark:text-emerald-200 border border-emerald-300/90 dark:border-emerald-700/70 text-[10px] font-bold transition cursor-pointer shadow-2xs group/offering"
+                                      title="Klik untuk buka panduan & checklist persiapan offering (Gaji Gross vs Nett, denda, probation, dokumen)"
+                                    >
+                                      <div className="flex items-center gap-1.5 truncate min-w-0">
+                                        <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 animate-pulse" />
+                                        <span className="truncate">Persiapan Offering</span>
+                                      </div>
+                                      <span className={`text-[9px] px-1.5 py-0.2 rounded border shrink-0 font-extrabold ${
+                                        isAllDone
+                                          ? 'bg-emerald-600 text-white border-emerald-600'
+                                          : checklistCount > 0
+                                          ? 'bg-emerald-100 dark:bg-emerald-900/80 text-emerald-800 dark:text-emerald-200 border-emerald-200 dark:border-emerald-800'
+                                          : 'bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                                      }`}>
+                                        {checklistCount > 0 ? `${checklistCount}/7 Siap` : 'Cek Panduan'}
+                                      </span>
+                                    </button>
+
+                                    {(app.offerDeadline || app.offeringStartDate) && (
+                                      <div className="flex items-center gap-1.5 text-[9.5px] text-slate-500 dark:text-slate-400 px-1 truncate">
+                                        {app.offerDeadline && (
+                                          <span className="truncate" title={`Batas konfirmasi: ${app.offerDeadline}`}>
+                                            Batas: {app.offerDeadline}
+                                          </span>
+                                        )}
+                                        {app.offerDeadline && app.offeringStartDate && <span>•</span>}
+                                        {app.offeringStartDate && (
+                                          <span className="truncate" title={`Mulai kerja: ${app.offeringStartDate}`}>
+                                            Mulai: {app.offeringStartDate}
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })()}
+
+                              {(() => {
+                                const appReminder = reminderByAppId.get(app.id);
+                                if (!appReminder) return null;
+                                return (
+                                  <div
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setIsReminderHubOpen(true);
+                                    }}
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                    className="flex items-center gap-1.5 px-2 py-1 rounded-[8px] bg-orange-100/90 dark:bg-orange-950/80 text-orange-700 dark:text-orange-300 border border-orange-200/90 dark:border-orange-800 text-[10px] font-bold cursor-pointer hover:bg-orange-200/90 dark:hover:bg-orange-900/90 transition shadow-2xs mt-1"
+                                    title={appReminder.message}
+                                  >
+                                    <Clock className="w-3 h-3 shrink-0 text-orange-500" />
+                                    <span className="truncate">{appReminder.title}</span>
+                                  </div>
+                                );
+                              })()}
                             </div>
                           </div>
                         );
@@ -1134,6 +1813,20 @@ export const TrackerView: React.FC = () => {
                           <Building2 className="w-3.5 h-3.5" />
                           <span>{app.company}</span>
                         </div>
+                        {(() => {
+                          const appReminder = reminderByAppId.get(app.id);
+                          if (!appReminder) return null;
+                          return (
+                            <div
+                              onClick={() => setIsReminderHubOpen(true)}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[6px] bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800 text-[10px] font-bold cursor-pointer hover:bg-orange-200 transition mt-1"
+                              title={appReminder.message}
+                            >
+                              <Clock className="w-3 h-3 text-orange-500" />
+                              <span>{appReminder.title}</span>
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="p-4 whitespace-nowrap text-slate-600 dark:text-slate-300">
                         <div className="flex items-center gap-1">
@@ -1173,16 +1866,159 @@ export const TrackerView: React.FC = () => {
                         <div className="w-32">
                           <CustomSelect
                             value={app.status}
-                            onChange={(val) =>
-                              handleUpdateStatus(app.id, val as ApplicationItem['status'])
-                            }
+                            onChange={(val) => {
+                              const newStatus = val as ApplicationItem['status'];
+                              if (newStatus === app.status) return;
+                              if (newStatus === 'Interview') {
+                                const hasExistingInterviewData = Boolean(
+                                  app.interviewDate || app.interviewTime || (app.interviewChecklist && app.interviewChecklist.length > 0)
+                                );
+                                const isIgnored = app.ignoreInterviewReminder || isAppInterviewIgnored(app.id);
+                                if (hasExistingInterviewData || isIgnored) {
+                                  handleUpdateStatus(app.id, 'Interview');
+                                } else {
+                                  handleOpenInterviewModal(app);
+                                }
+                              } else {
+                                handleUpdateStatus(app.id, newStatus);
+                              }
+                            }}
                             options={['Terkirim', 'Screening', 'Interview', 'Offering', 'Ditolak']}
                             size="sm"
                           />
                         </div>
                       </td>
-                      <td className="p-4 max-w-xs text-slate-500 dark:text-slate-400 text-xs truncate">
-                        {app.notes || '-'}
+                      <td className="p-4 min-w-[200px] max-w-sm text-xs">
+                        {app.status === 'Interview' ? (
+                          <div className="space-y-1.5">
+                            {(() => {
+                              const isIgnored = app.ignoreInterviewReminder || isAppInterviewIgnored(app.id);
+                              if (isIgnored) {
+                                return (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenInterviewModal(app)}
+                                    className="inline-flex items-center gap-1 text-[10px] text-slate-400 hover:text-[#1738D1] dark:hover:text-blue-400 transition cursor-pointer"
+                                    title="Pengingat diabaikan. Klik untuk atur jadwal & persiapan."
+                                  >
+                                    <BellOff className="w-3 h-3 text-slate-400 shrink-0" />
+                                    <span>Bebas Pengingat</span>
+                                  </button>
+                                );
+                              }
+                              if (app.interviewDate || app.interviewTime) {
+                                const parsedDate = app.interviewDate ? parseIndonesianDate(app.interviewDate) : null;
+                                const diffDays = parsedDate ? getDayDiff(parsedDate, new Date()) : null;
+                                const isPastInterview = diffDays !== null && diffDays < 0;
+
+                                if (isPastInterview) {
+                                  const absDays = Math.abs(diffDays);
+                                  const tagText = absDays === 1 ? 'Kemarin' : absDays < 7 ? `H+${absDays}` : absDays < 14 ? '1 mg lalu' : `${Math.floor(absDays / 7)} mg lalu`;
+                                  return (
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenPostInterviewModal(app)}
+                                        className="inline-flex items-center gap-1 px-2 py-1 rounded-[6px] text-[10px] font-bold bg-amber-50 dark:bg-amber-950/80 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 transition cursor-pointer shadow-2xs"
+                                        title="Wawancara telah selesai. Klik untuk evaluasi hasil"
+                                      >
+                                        <CheckCircle2 className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                                        <span>Selesai ({tagText}) • Cek Hasil</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenInterviewModal(app)}
+                                        className="p-1 rounded-[6px] border border-amber-200 dark:border-amber-800 bg-amber-50/50 hover:bg-amber-100 text-amber-700 dark:text-amber-300 transition cursor-pointer"
+                                        title="Ubah jadwal & persiapan"
+                                      >
+                                        <CalendarCheck className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  );
+                                }
+
+                                return (
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenInterviewModal(app)}
+                                      className="inline-flex items-center gap-1 px-2 py-1 rounded-[6px] text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200/90 dark:border-indigo-800/80 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition cursor-pointer shadow-2xs"
+                                      title="Klik untuk ubah jadwal & checklist persiapan"
+                                    >
+                                      <CalendarCheck className="w-3 h-3 text-indigo-500 shrink-0" />
+                                      <span>{app.interviewDate || 'Wawancara'} {app.interviewTime ? `• ${app.interviewTime} ${app.interviewTimezone || 'WIB'}` : ''}</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenPostInterviewModal(app)}
+                                      className="px-2 py-1 rounded-[6px] bg-amber-50 hover:bg-amber-100 text-amber-700 dark:text-amber-300 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-[10px] font-bold transition cursor-pointer shadow-2xs flex items-center gap-1"
+                                      title="Evaluasi hasil wawancara (Gimana hasilnya?)"
+                                    >
+                                      <CheckCircle2 className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                                      <span>Hasil?</span>
+                                    </button>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenInterviewModal(app)}
+                                  className="inline-flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-semibold hover:underline cursor-pointer"
+                                >
+                                  <Clock className="w-3 h-3 text-amber-500 shrink-0" />
+                                  <span>Atur Jam &amp; Checklist</span>
+                                </button>
+                              );
+                            })()}
+
+                            {/* Catatan / Evaluasi Text */}
+                            {(app.interviewNotes || app.notes) && (
+                              <p className="text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed text-xs">
+                                {app.interviewNotes ? (
+                                  <span>
+                                    <strong className="text-orange-600 dark:text-orange-400 mr-1">Evaluasi:</strong>
+                                    {app.interviewNotes}
+                                  </span>
+                                ) : (
+                                  app.notes
+                                )}
+                              </p>
+                            )}
+                          </div>
+                        ) : app.status === 'Offering' ? (
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <button
+                                type="button"
+                                onClick={() => handleOpenOfferingModal(app)}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-200 border border-emerald-300/80 dark:border-emerald-700/80 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition cursor-pointer shadow-2xs"
+                                title="Buka checklist & panduan telaah penawaran kerja"
+                              >
+                                <Sparkles className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                <span>
+                                  Persiapan Offering ({app.offeringChecklist?.length ? `${app.offeringChecklist.length}/7 Siap` : 'Cek Panduan'})
+                                </span>
+                              </button>
+                            </div>
+                            {(app.offerDeadline || app.offeringStartDate) && (
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                                {app.offerDeadline ? `Batas: ${app.offerDeadline}` : ''}
+                                {app.offerDeadline && app.offeringStartDate ? ' • ' : ''}
+                                {app.offeringStartDate ? `Mulai: ${app.offeringStartDate}` : ''}
+                              </p>
+                            )}
+                            {app.notes && (
+                              <p className="text-slate-500 dark:text-slate-400 line-clamp-1 leading-relaxed text-xs">
+                                {app.notes}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-slate-500 dark:text-slate-400 truncate block">
+                            {app.notes || '-'}
+                          </span>
+                        )}
                       </td>
                       <td className="p-4 text-right whitespace-nowrap">
                         <button
@@ -1276,23 +2112,22 @@ export const TrackerView: React.FC = () => {
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                       Lokasi Kerja
                     </label>
-                    <input
-                      type="text"
-                      placeholder="Jakarta (Hybrid)"
+                    <CitySearchInput
                       value={newLocation}
-                      onChange={(e) => setNewLocation(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
+                      onChange={(val) => setNewLocation(val)}
+                      placeholder="Cari Kota / Kab di Indonesia..."
+                      size="sm"
+                      cityOnly={true}
                     />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                       Tanggal Melamar
                     </label>
-                    <input
-                      type="date"
-                      value={toISODate(newAppliedDate)}
-                      onChange={(e) => setNewAppliedDate(fromISODate(e.target.value))}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
+                    <TrackerDatePicker
+                      value={newAppliedDate}
+                      onChange={(val) => setNewAppliedDate(val)}
+                      placeholder="Pilih Tanggal Melamar"
                     />
                   </div>
                 </div>
@@ -1302,32 +2137,57 @@ export const TrackerView: React.FC = () => {
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                       Lamar Melalui Portal
                     </label>
-                    <input
-                      type="text"
-                      list="portal-presets"
+                    <PortalSearchDropdown
                       value={newPortal}
-                      onChange={(e) => setNewPortal(e.target.value)}
-                      placeholder="Ketik nama portal, atau pilih dari daftar"
-                      className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
+                      onChange={(portalName, defaultUrl) => {
+                        setNewPortal(portalName);
+                        if (defaultUrl && !newPortalUrl) {
+                          setNewPortalUrl(defaultUrl);
+                        }
+                      }}
+                      placeholder="Pilih atau cari portal loker..."
                     />
-                    <datalist id="portal-presets">
-                      {PORTAL_PRESETS.map((p) => (
-                        <option key={p} value={p} />
-                      ))}
-                    </datalist>
                   </div>
 
                   <div>
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                      Link / URL Lowongan Portal <span className="text-slate-400 font-normal">(Hyperlink Opsional)</span>
+                      Link / URL Lowongan Portal{' '}
+                      <span className="text-slate-400 font-normal text-[11px]">
+                        (Opsional, misal: linkedin.com/jobs/...)
+                      </span>
                     </label>
                     <input
                       type="text"
-                      placeholder="Contoh: https://linkedin.com/jobs/view/123456"
+                      placeholder="Contoh: linkedin.com/jobs/view/123456 atau glints.com/..."
                       value={newPortalUrl}
                       onChange={(e) => setNewPortalUrl(e.target.value)}
                       className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
                     />
+                    <div className="flex items-center gap-2 mt-2">
+                      <button
+                        type="button"
+                        onClick={handleCrawlJobUrl}
+                        disabled={isCrawling || !newPortalUrl.trim()}
+                        className="flex-1 py-2 px-3 rounded-[10px] bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
+                      >
+                        {isCrawling ? (
+                          <>
+                            <Loader2 size={13} className="animate-spin" />
+                            <span>Mengekstrak data & menerbitkan ke Portal...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles size={13} />
+                            <span>⚡ Auto-Isi dari Link & Publikasikan ke Portal Loker</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    {crawlMessage && (
+                      <p className={`text-[11px] font-medium mt-1.5 ${crawlMessage.includes('Berhasil') ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-amber-600 dark:text-amber-400'}`}>
+                        {crawlMessage}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -1344,16 +2204,28 @@ export const TrackerView: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                      Gaji Ekspektasi
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5 flex items-center justify-between">
+                      <span>Gaji Ekspektasi</span>
+                      <span className="text-slate-400 font-normal text-[10px]">Opsional</span>
                     </label>
                     <input
                       type="text"
-                      placeholder="Rp 15.000.000"
+                      placeholder="Rp 000.000.000"
                       value={newSalary}
-                      onChange={(e) => setNewSalary(e.target.value)}
+                      onChange={(e) => setNewSalary(formatSalaryInput(e.target.value))}
                       className="w-full px-3.5 py-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
                     />
+                  </div>
+                </div>
+
+                {/* Info Pengingat Otomatis */}
+                <div className="flex items-start gap-2.5 p-3 rounded-[10px] bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-800/60 text-xs text-blue-900 dark:text-blue-300">
+                  <Clock className="w-4 h-4 text-[#1738D1] dark:text-blue-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold">Pengingat Otomatis Aktif</span>
+                    <p className="text-[11px] text-blue-700/90 dark:text-blue-300/80 mt-0.5 leading-relaxed">
+                      Sistem otomatis memantau jadwal follow-up (H+3, H+5, H+10) berdasarkan tanggal melamar. Jam wawancara &amp; checklist persiapan akan otomatis diminta saat lamaran dipindahkan ke kolom Interview.
+                    </p>
                   </div>
                 </div>
 
@@ -1361,8 +2233,10 @@ export const TrackerView: React.FC = () => {
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                     Catatan Tambahan
                   </label>
-                  <textarea
-                    rows={4}
+                  <AutoResizeTextarea
+                    minHeight={72}
+                    maxHeight={280}
+                    rows={3}
                     placeholder="Catatan interview, kontak HRD/Recruiter, link lowongan, dsb..."
                     value={newNotes}
                     onChange={(e) => setNewNotes(e.target.value)}
@@ -1399,6 +2273,101 @@ export const TrackerView: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Tracker Reminder Hub Drawer */}
+      <TrackerReminderHub
+        isOpen={isReminderHubOpen}
+        onClose={() => setIsReminderHubOpen(false)}
+        reminders={reminders}
+        onDismissReminder={handleDismissReminder}
+        onSelectApp={(appId) => {
+          const target = apps.find((a) => a.id === appId);
+          if (target) {
+            setSearchTerm(target.company);
+          }
+        }}
+      />
+
+      {/* Modal Dialog Jadwal & Persiapan Interview */}
+      <InterviewScheduleModal
+        isOpen={isInterviewModalOpen}
+        app={interviewModalApp}
+        onClose={() => {
+          setIsInterviewModalOpen(false);
+          setInterviewModalApp(null);
+        }}
+        onSave={handleSaveInterviewSchedule}
+        onIgnore={handleIgnoreInterviewReminder}
+        onOpenReview={handleOpenPostInterviewModal}
+      />
+
+      {/* Modal Dialog Evaluasi & Hasil Wawancara (Post-Interview Review) */}
+      <PostInterviewReviewModal
+        isOpen={!!postInterviewApp}
+        app={postInterviewApp}
+        onClose={() => setPostInterviewApp(null)}
+        onUpdateStatus={handleUpdatePostInterviewStatus}
+        onScheduleNextRound={handleScheduleNextRound}
+        onSaveNotesOnly={handleSaveInterviewNotesOnly}
+        onEditSchedule={handleOpenInterviewModal}
+      />
+
+      {/* Modal Dialog Panduan & Persiapan Offering */}
+      <OfferingPreparationModal
+        isOpen={isOfferingModalOpen}
+        app={offeringModalApp}
+        onClose={() => {
+          setIsOfferingModalOpen(false);
+          setOfferingModalApp(null);
+        }}
+        onSave={handleSaveOfferingPreparation}
+      />
+
+      {/* Full-screen Offering Celebration - Pita-pita Confetti Lottie Jatuh Memenuhi Layar */}
+      {showOfferingCelebration && (
+        <div
+          key={celebrationKey}
+          aria-hidden="true"
+          className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center overflow-hidden"
+        >
+          {/* Banner Ucapan Selamat Mengambang */}
+          <div className="absolute top-8 left-1/2 -translate-x-1/2 z-10 px-5 py-2.5 rounded-[12px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-emerald-500/30 shadow-2xl flex items-center gap-3 animate-in fade-in zoom-in-95 duration-300">
+            <div className="w-9 h-9 rounded-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 shadow-xs shrink-0">
+              <Sparkles className="w-5 h-5 text-emerald-600 dark:text-emerald-400 animate-pulse" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-black text-slate-900 dark:text-white">
+                Selamat atas Offering Lamaranmu!
+              </p>
+              <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                Pencapaian luar biasa menuju karier impian.
+              </p>
+            </div>
+            {celebratingApp && (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowOfferingCelebration(false);
+                  handleOpenOfferingModal(celebratingApp);
+                }}
+                className="pointer-events-auto ml-1.5 px-3 py-1.5 rounded-[8px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-sm active:scale-95 transition flex items-center gap-1 cursor-pointer shrink-0"
+              >
+                <span>Cek Persiapan</span>
+              </button>
+            )}
+          </div>
+
+          {/* Animasi Pita-Pita & Confetti Lottie Jatuh Memenuhi Layar */}
+          <div className="w-full h-full">
+            <DotLottiePlayer
+              src="/animations/confetti-ribbons.json"
+              autoplay={true}
+              loop={false}
+              className="w-full h-full pointer-events-none [&_canvas]:!w-full [&_canvas]:!h-full [&_canvas]:!object-cover"
+            />
           </div>
         </div>
       )}

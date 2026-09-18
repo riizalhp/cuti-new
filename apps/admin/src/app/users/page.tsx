@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { DataTable } from "@/components/admin/DataTable"
+import { SidebarToggle } from "@/components/admin/SidebarToggle"
 import { motion } from "framer-motion"
 import { Search, Filter, UserPlus, RefreshCw } from "lucide-react"
 
@@ -87,9 +88,12 @@ export default function UsersPage() {
       transition={{ duration: 0.4 }}
     >
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-5">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Manajemen Pengguna</h1>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">Kelola dan pantau seluruh pengguna terdaftar via Database API</p>
+        <div className="flex items-center gap-3.5">
+          <SidebarToggle />
+          <div>
+            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Manajemen Pengguna</h1>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">Kelola dan pantau seluruh pengguna terdaftar via Database API</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <button

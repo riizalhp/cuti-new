@@ -22,3 +22,7 @@ export { MajorSearchInput } from "./MajorSearchInput";
 export { SchoolSearchInput } from "./SchoolSearchInput";
 
 export { PositionSearchInput } from "./PositionSearchInput";
+
+export { TrackerDatePicker } from "./TrackerDatePicker";
+
+export { PortalSearchDropdown } from "./PortalSearchDropdown";

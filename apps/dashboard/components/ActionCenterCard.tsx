@@ -3,7 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { userApi, cvApi, trackerApi, scheduleApi, jobsApi } from '@/lib/api';
-import { Sparkles, Calendar, FileCheck, Target, ArrowRight, FileText, CheckCircle2, Rocket, Search } from 'lucide-react';
+import {
+  CalendarIcon,
+  FileCheckIcon,
+  TargetIcon,
+  FileTextIcon,
+  CheckCircleIcon,
+  SearchIcon,
+} from '@/components/icons/CustomIcons';
 
 interface ActionCenterCardProps {
   userName?: string;
@@ -148,7 +155,7 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
             badgeColor: isToday
               ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
               : 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-            icon: Calendar,
+            icon: CalendarIcon,
             actionText: 'Siapkan Sesi',
             href: '/interview',
             urgency: isToday ? 10 : isTomorrow ? 8 : 5,
@@ -174,7 +181,7 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
             time: `Skor saat ini: ${Math.round(avgScore)}%`,
             badge: 'Perbaikan',
             badgeColor: 'bg-[#1738D1]/20 text-orange-300 border-[#1738D1]/30',
-            icon: FileCheck,
+            icon: FileCheckIcon,
             actionText: 'Optimalkan CV',
             href: '/cv',
             urgency: avgScore < 60 ? 7 : 4,
@@ -188,7 +195,7 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
           time: 'Belum ada CV',
           badge: 'Penting',
           badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-          icon: FileText,
+          icon: FileTextIcon,
           actionText: 'Buat CV',
           href: '/cv',
           urgency: 9,
@@ -203,7 +210,7 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
           time: 'Berdasarkan skill & pengalaman',
           badge: 'Rekomendasi',
           badgeColor: 'bg-[#1738D1]/20 text-orange-300 border-[#1738D1]/30',
-          icon: Target,
+          icon: TargetIcon,
           actionText: 'Lihat Lowongan',
           href: '/scrape-jobs',
           urgency: 3,
@@ -215,7 +222,7 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
           time: 'Cari yang sesuai profilmu',
           badge: 'Eksplorasi',
           badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-          icon: Search,
+          icon: SearchIcon,
           actionText: 'Cari Lowongan',
           href: '/scrape-jobs',
           urgency: 2,
@@ -234,7 +241,7 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
             time: 'Status: Terkirim / Screening',
             badge: 'Tracking',
             badgeColor: 'bg-sky-500/20 text-sky-300 border-sky-500/30',
-            icon: CheckCircle2,
+            icon: CheckCircleIcon,
             actionText: 'Lihat Status',
             href: '/tracker',
             urgency: 3,
@@ -268,7 +275,7 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
           secondaryText: 'Lengkapi profil',
           secondaryHref: '/pengaturan',
           badgeText: 'Cari Kerja',
-          icon: Search,
+          icon: SearchIcon,
         };
       case 'buat_cv':
         return {
@@ -279,7 +286,7 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
           primaryCtaText: cvCount > 0 ? 'Lanjutkan CV' : 'Buat CV',
           primaryCtaHref: '/cv',
           badgeText: 'Buat CV',
-          icon: FileText,
+          icon: FileTextIcon,
           progress: cvCount > 0 ? `${cvCompleteness}%` : '0%',
         };
       case 'perbaiki_cv':
@@ -291,7 +298,7 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
           primaryCtaText: 'Lihat Hasil Analisis',
           primaryCtaHref: '/cv',
           badgeText: 'Perbaiki CV',
-          icon: Sparkles,
+          icon: FileCheckIcon,
         };
       case 'cepat_dapat_kerja':
         return {
@@ -301,8 +308,8 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
             : 'Lengkapi CV dan mulai melamar',
           primaryCtaText: 'Lihat Lowongan Cocok',
           primaryCtaHref: '/scrape-jobs',
-          badgeText: 'Career Setup',
-          icon: Rocket,
+          badgeText: 'Persiapan Kerja',
+          icon: TargetIcon,
           stats: [
             { label: 'CV', val: cvCount > 0 ? 'Siap' : 'Belum' },
             { label: 'Job Match', val: String(jobMatchCount) },
@@ -318,8 +325,8 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
             : 'Dashboard kariermu siap digunakan',
           primaryCtaText: priorityItems.length > 0 ? 'Mulai Dari Prioritas Utama' : 'Jelajahi Fitur',
           primaryCtaHref: priorityItems.length > 0 ? priorityItems[0]?.href || '/cv' : '/cv',
-          badgeText: 'Action Center',
-          icon: Sparkles,
+          badgeText: 'Aktivitas Utama',
+          icon: TargetIcon,
         };
     }
   };
@@ -327,24 +334,18 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
   const heroContent = getHeroContent();
 
   return (
-    <div className="relative overflow-hidden rounded-[10px] bg-gradient-to-br from-slate-900 via-navy-900 to-slate-950 text-white p-5 sm:p-6 shadow-xl border border-slate-800/80 transition-all">
-      {/* Subtle Background Glow Decorative Element */}
-      <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-[#1738D1]/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-1/3 -mb-16 w-48 h-48 bg-[#1738D1]/10 rounded-full blur-2xl pointer-events-none" />
-
+    <div className="relative overflow-hidden rounded-[10px] bg-[#162758] border border-[#20367A] text-white p-5 sm:p-6 shadow-xs transition-all">
       <div className="relative z-10 space-y-4">
         {/* Header Sapaan & Subtitle */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[10px] text-[10px] font-bold bg-[#1738D1]/20 text-orange-400 border border-[#1738D1]/30 uppercase tracking-wider">
-                <Sparkles className="w-3 h-3 text-orange-400" />
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-[10px] text-[10px] font-bold bg-white/10 text-blue-200 border border-white/15 uppercase tracking-wider">
                 {heroContent.badgeText}
               </span>
-              <span className="text-xs text-slate-400">| Personalized Dashboard</span>
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
               {heroContent.title}
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 mt-0.5 font-medium">
@@ -355,9 +356,9 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
             {heroContent.stats && (
               <div className="flex flex-wrap gap-2 pt-2">
                 {heroContent.stats.map((st) => (
-                  <span key={st.label} className="px-2.5 py-1 rounded-[10px] bg-white/10 text-xs font-bold text-slate-200 border border-white/10 flex items-center gap-1.5">
+                  <span key={st.label} className="px-2.5 py-1 rounded-[10px] bg-white/10 text-xs font-bold text-slate-200 border border-white/15 shadow-2xs flex items-center gap-1.5">
                     <span className="text-slate-400 font-normal">{st.label}:</span>
-                    <span className="text-orange-400">{st.val}</span>
+                    <span className="text-orange-400 font-black">{st.val}</span>
                   </span>
                 ))}
               </div>
@@ -365,19 +366,18 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
           </div>
 
           {/* Primary CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 md:ml-auto">
             <button
               onClick={onPrimaryAction || (() => router.push(heroContent.primaryCtaHref))}
-              className="w-full sm:w-auto shrink-0 bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white px-5 py-3 rounded-[10px] font-bold text-xs sm:text-sm shadow-lg shadow-[#1738D1]/25 transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
+              className="w-full sm:w-auto shrink-0 bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white px-5 py-3 rounded-[10px] font-black text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center cursor-pointer border-0"
             >
               <span>{heroContent.primaryCtaText}</span>
-              <ArrowRight className="w-4 h-4" />
             </button>
 
             {heroContent.secondaryText && (
               <button
                 onClick={() => router.push(heroContent.secondaryHref || '/pengaturan')}
-                className="w-full sm:w-auto px-4 py-3 rounded-[10px] bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer text-center"
+                className="w-full sm:w-auto px-4 py-3 rounded-[10px] bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/15 shadow-2xs transition cursor-pointer text-center"
               >
                 {heroContent.secondaryText}
               </button>
@@ -390,26 +390,26 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
           {isLoading ? (
             // Loading skeleton
             [1, 2, 3].map((i) => (
-              <div key={i} className="bg-white/5 rounded-[10px] p-3.5 border border-white/10 space-y-3 animate-pulse">
+              <div key={i} className="bg-white/10 rounded-[10px] p-3.5 border border-white/15 space-y-3 animate-pulse">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-[10px] bg-white/10" />
-                    <div className="w-16 h-4 bg-white/10 rounded-full" />
+                    <div className="w-8 h-8 rounded-[10px] bg-white/15" />
+                    <div className="w-16 h-4 bg-white/15 rounded-[10px]" />
                   </div>
-                  <div className="w-6 h-4 bg-white/10 rounded" />
+                  <div className="w-6 h-4 bg-white/15 rounded-[10px]" />
                 </div>
                 <div className="space-y-1.5">
-                  <div className="h-3 w-full bg-white/10 rounded" />
-                  <div className="h-3 w-2/3 bg-white/10 rounded" />
+                  <div className="h-3 w-full bg-white/15 rounded-[10px]" />
+                  <div className="h-3 w-2/3 bg-white/15 rounded-[10px]" />
                 </div>
               </div>
             ))
           ) : priorityItems.length === 0 ? (
             // Empty state
             <div className="col-span-3 py-6 text-center">
-              <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-400 mb-2" />
-              <p className="text-xs font-bold text-white">Semua terlihat baik!</p>
-              <p className="text-[11px] text-slate-400 mt-1">Tidak ada prioritas mendesak saat ini</p>
+              <CheckCircleIcon size={32} className="mx-auto text-emerald-400 mb-2" />
+              <p className="text-xs font-bold text-white">Semua prioritas terselesaikan!</p>
+              <p className="text-[11px] text-slate-300 mt-1">Tidak ada prioritas mendesak saat ini</p>
             </div>
           ) : (
             priorityItems.map((item, idx) => {
@@ -418,18 +418,18 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
                 <div
                   key={item.id}
                   onClick={() => router.push(item.href)}
-                  className="group relative bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-[10px] p-3.5 border border-white/10 transition-all cursor-pointer flex flex-col justify-between space-y-3"
+                  className="group relative bg-white/10 hover:bg-white/15 rounded-[10px] p-3.5 border border-white/15 shadow-2xs transition-all cursor-pointer flex flex-col justify-between space-y-3"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-[10px] bg-white/10 text-orange-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                        <Icon className="w-4 h-4" />
+                      <div className="w-8 h-8 rounded-[10px] bg-white/15 text-orange-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform font-bold">
+                        <Icon size={16} />
                       </div>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${item.badgeColor}`}>
+                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-[10px] border ${item.badgeColor}`}>
                         {item.badge}
                       </span>
                     </div>
-                    <span className="text-[10px] font-mono font-bold text-slate-400">
+                    <span className="text-[10px] font-mono font-bold text-slate-300">
                       #0{idx + 1}
                     </span>
                   </div>
@@ -438,14 +438,13 @@ export const ActionCenterCard: React.FC<ActionCenterCardProps> = ({
                     <h4 className="text-xs font-bold text-white group-hover:text-orange-300 transition-colors line-clamp-1">
                       {item.title}
                     </h4>
-                    <p className="text-[11px] text-slate-400 mt-0.5 truncate">
+                    <p className="text-[11px] text-slate-300 mt-0.5 truncate">
                       {item.time}
                     </p>
                   </div>
 
-                  <div className="pt-1 flex items-center justify-between border-t border-white/5 text-[11px] font-bold text-orange-400 group-hover:text-orange-300">
+                  <div className="pt-2 flex items-center justify-between border-t border-white/10 text-[11px] font-bold text-orange-400 group-hover:text-orange-300">
                     <span>{item.actionText}</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
               );

@@ -109,14 +109,10 @@ export const CareerToolsGrid: React.FC = () => {
     }
 
     try {
-      const res = await fetch('/api/ai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: promptText,
-          systemInstruction,
-        }),
-      });
+      const res = await fetch('/api/ai', {        method: 'POST',        headers: { 'Content-Type': 'application/json' },        body: JSON.stringify({
+          prompt: `${systemInstruction}\n\n${promptText}`,
+          feature: 'career_tools',
+        }),      });
       const data = await res.json();
       if (data.text) {
         setOutputVal(data.text);

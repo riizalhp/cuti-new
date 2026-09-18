@@ -25,7 +25,7 @@ export default function PreRegisterForm({ apiBaseUrl }: PreRegisterFormProps) {
     const cleanPhone = phone.trim();
     const digitsOnly = cleanPhone.replace(/[^0-9]/g, '');
     if (!cleanPhone || digitsOnly.length < 8) {
-      setErrorMessage('Please enter a valid WhatsApp number.');
+      setErrorMessage('Nomor WhatsApp tidak valid.');
       return;
     }
 
@@ -41,7 +41,7 @@ export default function PreRegisterForm({ apiBaseUrl }: PreRegisterFormProps) {
     const cleanPhone = phone.trim();
 
     if (!cleanName) {
-      setErrorMessage('Please tell us what we should call you.');
+      setErrorMessage('Silakan isi nama panggilanmu.');
       return;
     }
 
@@ -119,10 +119,10 @@ export default function PreRegisterForm({ apiBaseUrl }: PreRegisterFormProps) {
               </div>
               <div>
                 <h3 className="text-base font-bold text-white leading-tight">
-                  {isExisting ? "You're Already on the List!" : `Welcome aboard, ${registeredName || 'Friend'}!`}
+                  {isExisting ? "Kamu Sudah Terdaftar di Daftar Tunggu!" : `Selamat Bergabung, ${registeredName || 'Teman'}!`}
                 </h3>
                 <p className="text-xs text-white/75 mt-0.5 leading-relaxed">
-                  We'll notify you on WhatsApp (<strong className="text-white font-medium">{registeredPhone}</strong>) when early access opens.
+                  Kami akan mengabarimu lewat WhatsApp (<strong className="text-white font-medium">{registeredPhone}</strong>) saat akses awal dibuka.
                 </p>
               </div>
             </div>
@@ -130,14 +130,14 @@ export default function PreRegisterForm({ apiBaseUrl }: PreRegisterFormProps) {
             <div className="pt-2 flex items-center justify-between border-t border-white/10 text-xs">
               <span className="text-white/50 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-                <span>Early Access Slot Reserved</span>
+                <span>Slot Akses Awal Tersimpan</span>
               </span>
               <button
                 type="button"
                 onClick={handleReset}
                 className="text-blue-400 hover:text-blue-300 font-medium transition cursor-pointer"
               >
-                Register another
+                Daftarkan nomor lain
               </button>
             </div>
           </motion.div>
@@ -174,7 +174,7 @@ export default function PreRegisterForm({ apiBaseUrl }: PreRegisterFormProps) {
                       setPhone(clean);
                       if (errorMessage) setErrorMessage('');
                     }}
-                    placeholder="May I have your WhatsApp number?"
+                    placeholder="Boleh tahu nomor WhatsApp kamu? (contoh: 08123456789)"
                     required
                     style={inputResetStyle}
                     className={`w-full text-base sm:text-lg font-medium py-2 bg-transparent border-b-2 text-white placeholder:text-white/40 focus:outline-none transition ${
@@ -189,7 +189,7 @@ export default function PreRegisterForm({ apiBaseUrl }: PreRegisterFormProps) {
                   type="submit"
                   className="rounded-full bg-[#1738D1] hover:bg-[#132ea8] active:scale-[0.98] text-white font-semibold text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 flex items-center gap-1.5 sm:gap-2 shrink-0 transition duration-150 shadow-lg shadow-[#1738D1]/30 cursor-pointer mb-0.5"
                 >
-                  <span>Continue</span>
+                  <span>Lanjutkan</span>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                   </svg>
@@ -230,7 +230,7 @@ export default function PreRegisterForm({ apiBaseUrl }: PreRegisterFormProps) {
                       setName(e.target.value);
                       if (errorMessage) setErrorMessage('');
                     }}
-                    placeholder="What should I call you?"
+                    placeholder="Siapa nama panggilanmu?"
                     required
                     style={inputResetStyle}
                     className={`w-full text-base sm:text-lg font-medium py-2 bg-transparent border-b-2 text-white placeholder:text-white/40 focus:outline-none transition ${
@@ -252,11 +252,11 @@ export default function PreRegisterForm({ apiBaseUrl }: PreRegisterFormProps) {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      <span>Joining...</span>
+                      <span>Mendaftar...</span>
                     </>
                   ) : (
                     <>
-                      <span>Join waitlist</span>
+                      <span>Daftar Sekarang</span>
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M17 7H7M17 7V17" />
                       </svg>

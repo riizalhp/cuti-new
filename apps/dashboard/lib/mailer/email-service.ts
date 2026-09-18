@@ -13,6 +13,8 @@ export interface SmtpConfig {
   sentToday?: number;
 }
 
+export type EmailDesignType = 'standar' | 'minimal' | 'klasik' | 'serif' | 'dark';
+
 export interface EmailPayload {
   to: string;
   toName?: string;
@@ -26,7 +28,7 @@ export interface EmailPayload {
   senderPortfolio?: string;
   bodyContent?: string;
   customSubject?: string;
-  design?: 'klasik' | 'minimal' | 'dark' | 'serif';
+  design?: EmailDesignType;
   attachments?: Array<{
     filename: string;
     content?: Buffer | string;
@@ -78,7 +80,7 @@ export function generateDynamicSubject(company: string, position: string): strin
 
 export function renderEmailHtml(
   payload: EmailPayload,
-  design: 'klasik' | 'minimal' | 'dark' | 'serif' = 'klasik'
+  design: EmailDesignType = 'standar'
 ): { subject: string; html: string; text: string } {
   const company = payload.company || 'Perusahaan';
   const position = payload.position || 'Posisi';
@@ -99,11 +101,11 @@ export function renderEmailHtml(
     : `Bersama email ini saya menyampaikan ketertarikan untuk bergabung dan memberikan kontribusi terbaik di <strong>${company}</strong> untuk posisi <strong>${position}</strong>. Terlampir saya sertakan CV dan berkas pendukung sebagai bahan pertimbangan Bapak/Ibu.`;
 
   const contactList = [
-    payload.senderPhone ? `📞 ${payload.senderPhone}` : null,
-    payload.senderEmail ? `✉️ ${payload.senderEmail}` : null,
-    payload.senderLinkedin ? `🔗 ${payload.senderLinkedin}` : null,
-    payload.senderGithub ? `💻 ${payload.senderGithub}` : null,
-    payload.senderPortfolio ? `🌐 ${payload.senderPortfolio}` : null,
+    payload.senderPhone ? `Telp/WA: ${payload.senderPhone}` : null,
+    payload.senderEmail ? `Email: ${payload.senderEmail}` : null,
+    payload.senderLinkedin ? `LinkedIn: ${payload.senderLinkedin}` : null,
+    payload.senderGithub ? `GitHub: ${payload.senderGithub}` : null,
+    payload.senderPortfolio ? `Portofolio: ${payload.senderPortfolio}` : null,
   ]
     .filter(Boolean)
     .join(' &nbsp;|&nbsp; ');
@@ -213,8 +215,7 @@ export function renderEmailHtml(
   </table>
 </body>
 </html>`;
-  } else {
-    // Klasik (Default)
+  } else if (design === 'klasik') {
     htmlBody = `
 <!DOCTYPE html>
 <html lang="id">
@@ -249,6 +250,26 @@ export function renderEmailHtml(
   </table>
 </body>
 </html>`;
+  } else {
+    // Standar / Polos (Default) - Tampilan natural selayaknya mengetik email langsung di Gmail/Outlook
+    htmlBody = `
+<!DOCTYPE html>
+<html lang="id">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/></head>
+<body style="margin:0;padding:20px 16px;background-color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:#1e293b;">
+  <div style="max-width:640px;margin:0 auto;">
+    <p style="margin:0 0 16px 0;font-weight:600;color:#0f172a;">${greeting} ${company},</p>
+    <p style="margin:0 0 16px 0;color:#1e293b;">${opening}</p>
+    <div style="margin:0 0 20px 0;color:#1e293b;">${mainBody}</div>
+    <p style="margin:0 0 24px 0;color:#1e293b;">${closing}</p>
+    <div style="margin-top:28px;padding-top:16px;border-top:1px solid #e2e8f0;">
+      <p style="margin:0;font-weight:600;color:#0f172a;font-size:14px;">Hormat saya,</p>
+      <p style="margin:4px 0 0 0;font-weight:700;color:#0f172a;font-size:15px;">${senderName}</p>
+      ${contactList ? `<p style="margin:6px 0 0 0;font-size:12px;color:#64748b;">${contactList}</p>` : ''}
+    </div>
+  </div>
+</body>
+</html>`;
   }
 
   const textBody = `${greeting} ${company},
@@ -261,7 +282,13 @@ ${closing.replace(/<[^>]+>/g, '')}
 
 Hormat saya,
 ${senderName}
-${[payload.senderPhone, payload.senderEmail, payload.senderLinkedin].filter(Boolean).join(' | ')}
+${[
+  payload.senderPhone ? `Telp/WA: ${payload.senderPhone}` : null,
+  payload.senderEmail ? `Email: ${payload.senderEmail}` : null,
+  payload.senderLinkedin ? `LinkedIn: ${payload.senderLinkedin}` : null,
+  payload.senderGithub ? `GitHub: ${payload.senderGithub}` : null,
+  payload.senderPortfolio ? `Portofolio: ${payload.senderPortfolio}` : null,
+].filter(Boolean).join(' | ')}
 `;
 
   return { subject, html: htmlBody, text: textBody };
@@ -300,7 +327,7 @@ export async function dispatchEmail(
   smtp: SmtpConfig,
   payload: EmailPayload
 ): Promise<{ success: boolean; messageId?: string; error?: string; renderedSubject: string }> {
-  const { subject, html, text } = renderEmailHtml(payload, payload.design || 'klasik');
+  const { subject, html, text } = renderEmailHtml(payload, payload.design || 'standar');
 
   try {
     const transporter = await createSmtpTransporter(smtp);

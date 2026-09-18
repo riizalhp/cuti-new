@@ -6,7 +6,7 @@ const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@cuti/db', '@cuti/types'],
+  transpilePackages: ['@employr/db', '@employr/types'],
   outputFileTracingRoot: path.join(__dirname, '../../'),
   outputFileTracingIncludes: {
     '/**': [

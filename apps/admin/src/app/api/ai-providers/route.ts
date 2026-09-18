@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@cuti/db";
+import { prisma } from "@employr/db";
 import crypto from "crypto";
 
 export async function GET() {
@@ -39,9 +39,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { name, label, endpointUrl, apiKey, model, priority, authType, alias } = body;
 
-    if (!name || !endpointUrl || !apiKey || !model) {
+    if (!name || !endpointUrl || !model) {
       return NextResponse.json(
-        { success: false, message: "Nama, endpoint, API key, dan model wajib diisi." },
+        { success: false, message: "Nama, endpoint, dan model wajib diisi." },
         { status: 400 }
       );
     }
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
         name,
         label: label || name,
         base_url: endpointUrl,
-        api_key: apiKey,
+        api_key: apiKey?.trim() || "ollama",
         model,
         priority: priority ?? 0,
         is_active: true,

@@ -44,9 +44,9 @@ Setiap persona menampilkan **skor kecocokan dinamis** dengan isi CV-mu — jadi 
 
 ## Pertanyaan umum
 
-- **Apakah butuh akun premium?** Fitur ini tersedia di dashboard; beberapa modul/limit mungkin dibatasi sesuai paketmu.
-- **Hasil evaluasi disimpan di mana?** Di riwayat per akun (localStorage per pengguna) — bisa dilihat kapan saja.
-- **CV saya aman?** Ya — CV hanya dipakai untuk analisis di akunmu.
+- **Apakah fitur evaluasi CV ini gratis?** Ya, seluruh simulasi dan evaluasi persona recruiter dapat kamu gunakan langsung secara gratis melalui dashboard tanpa biaya.
+- **Hasil evaluasi disimpan di mana?** Di riwayat per akun (localStorage per pengguna), sehingga bisa dilihat kapan saja.
+- **CV saya aman?** Ya, CV hanya dipakai untuk analisis di akunmu.
 - **Kenapa skor persona berubah?** Karena skor dihitung dinamis dari isi CV-mu (skill, pengalaman, pendidikan, metrik), bukan angka acak.
 
 Lanjut baca: [Kecocokan Lowongan](/artikel/kecocokan-lowongan) dan [Memahami Skor ATS](/artikel/skor-ats-cv).

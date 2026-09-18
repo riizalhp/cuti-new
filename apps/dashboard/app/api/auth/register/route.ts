@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, logSecurityEvent, logApp, extractRequestContext } from '@cuti/db';
+import { prisma, logSecurityEvent, logApp, extractRequestContext } from '@employr/db';
 import { checkRateLimit } from '@/lib/rate-limit';
 import crypto from 'crypto';
 
@@ -22,7 +22,7 @@ function hashPassword(password: string): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, password } = body;
+    const { name, email, password, otp } = body;
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -31,8 +31,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!otp || typeof otp !== 'string' || otp.trim().length !== 6) {
+      return NextResponse.json(
+        { success: false, message: 'Kode verifikasi 6-digit wajib diisi.' },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
     const cleanEmail = email.trim().toLowerCase();
     const cleanName = name.trim();
+    const cleanOtp = otp.trim();
 
     if (password.length < 6) {
       return NextResponse.json(
@@ -64,6 +72,38 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Verifikasi kode OTP dari tabel verifications
+    const hashedOtp = crypto.createHash('sha256').update(cleanOtp).digest('hex');
+    const verificationRecord = await prisma.verifications.findFirst({
+      where: { identifier: cleanEmail },
+      orderBy: { created_at: 'desc' },
+    });
+
+    if (!verificationRecord) {
+      return NextResponse.json(
+        { success: false, message: 'Kode verifikasi tidak ditemukan atau belum diminta. Silakan minta kode verifikasi.' },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    if (new Date() > new Date(verificationRecord.expires_at)) {
+      await prisma.verifications.deleteMany({ where: { identifier: cleanEmail } }).catch(() => {});
+      return NextResponse.json(
+        { success: false, message: 'Kode verifikasi telah kedaluwarsa. Silakan minta kode baru.' },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    if (verificationRecord.value !== hashedOtp) {
+      return NextResponse.json(
+        { success: false, message: 'Kode verifikasi salah. Periksa kembali email kamu.' },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // Hapus verifikasi setelah berhasil (one-time use)
+    await prisma.verifications.deleteMany({ where: { identifier: cleanEmail } }).catch(() => {});
+
     const hashedPassword = hashPassword(password);
     const userId = crypto.randomUUID();
     const accountId = crypto.randomUUID();
@@ -76,8 +116,10 @@ export async function POST(req: NextRequest) {
         data: {
           id: userId,
           email: cleanEmail,
+          email_verified: true,
           name: cleanName,
           role: 'USER',
+          onboarded: false,
           updated_at: now,
         },
       }),
@@ -107,6 +149,7 @@ export async function POST(req: NextRequest) {
       name: newUser.name,
       email: newUser.email,
       role: newUser.role,
+      onboarded: false,
     };
 
     logSecurityEvent({
@@ -129,7 +172,7 @@ export async function POST(req: NextRequest) {
       userId: newUser.id,
     });
 
-    // Create secure database session
+    // Create secure database session for automatic login
     const sessionToken = crypto.randomBytes(32).toString('hex');
     const thirtyDaysInSeconds = 30 * 24 * 60 * 60;
     const expiresAt = new Date(Date.now() + thirtyDaysInSeconds * 1000);
@@ -149,7 +192,7 @@ export async function POST(req: NextRequest) {
     const response = NextResponse.json(
       {
         success: true,
-        message: 'Akun berhasil didaftarkan di database.',
+        message: 'Akun berhasil didaftarkan dan langsung masuk.',
         data: {
           ...userData,
           token: sessionToken,
@@ -158,7 +201,16 @@ export async function POST(req: NextRequest) {
       { status: 201, headers: corsHeaders }
     );
 
-    // Set secure HttpOnly session cookie
+    // Set secure HttpOnly session cookie (employr + legacy cuti)
+    response.cookies.set({
+      name: 'employr_auth_session',
+      value: sessionToken,
+      maxAge: thirtyDaysInSeconds,
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+    });
     response.cookies.set({
       name: 'cuti_auth_session',
       value: sessionToken,
@@ -169,7 +221,15 @@ export async function POST(req: NextRequest) {
       secure: process.env.NODE_ENV === 'production',
     });
 
-    // Set non-sensitive UI display cookie for fast header render
+    // Set UI display cookie with onboarded: false
+    response.cookies.set({
+      name: 'employr_user_session',
+      value: encodeURIComponent(JSON.stringify(userData)),
+      maxAge: thirtyDaysInSeconds,
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: false,
+    });
     response.cookies.set({
       name: 'cuti_user_session',
       value: encodeURIComponent(JSON.stringify(userData)),

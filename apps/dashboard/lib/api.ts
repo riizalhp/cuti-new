@@ -1,7 +1,7 @@
 /**
  * API Client for Employr Dashboard
  *
- * Base configuration for making API calls to the CUTI backend & database.
+ * Base configuration for making API calls to the Employr backend & database.
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
@@ -15,6 +15,43 @@ export interface ApiResponse<T> {
 export interface ApiError {
   message: string;
   status: number;
+}
+
+interface CacheEntry<T> {
+  data: ApiResponse<T>;
+  timestamp: number;
+}
+
+const apiCache = new Map<string, CacheEntry<any>>();
+const inFlightRequests = new Map<string, Promise<ApiResponse<any>>>();
+
+export interface ApiGetOptions {
+  bypassCache?: boolean;
+  ttlMs?: number;
+}
+
+/**
+ * Invalidate client-side API cache.
+ * If prefix is provided, only entries whose endpoint contains prefix are deleted.
+ * If no prefix is provided, the entire cache is cleared.
+ */
+export function invalidateApiCache(prefix?: string): void {
+  if (!prefix) {
+    apiCache.clear();
+    return;
+  }
+  for (const key of apiCache.keys()) {
+    if (key.includes(prefix)) {
+      apiCache.delete(key);
+    }
+  }
+}
+
+function autoInvalidate(endpoint: string): void {
+  const clean = endpoint.split("?")[0].replace(/^\/api\//, "").split("/")[0];
+  if (clean) {
+    invalidateApiCache(`/api/${clean}`);
+  }
 }
 
 /**
@@ -34,6 +71,11 @@ export async function apiFetch<T>(
     } else {
       url = endpoint.startsWith("/v1") ? `/api${endpoint.replace("/v1", "")}` : endpoint;
     }
+  }
+
+  const method = (options?.method || "GET").toUpperCase();
+  if (method !== "GET") {
+    autoInvalidate(endpoint);
   }
 
   try {
@@ -61,10 +103,39 @@ export async function apiFetch<T>(
 }
 
 /**
- * GET request helper
+ * GET request helper with deduplication & memory caching
  */
-export async function apiGet<T>(endpoint: string): Promise<ApiResponse<T>> {
-  return apiFetch<T>(endpoint, { method: "GET" });
+export async function apiGet<T>(
+  endpoint: string,
+  options?: ApiGetOptions
+): Promise<ApiResponse<T>> {
+  const ttl = options?.ttlMs ?? 15000; // 15 seconds TTL
+  const now = Date.now();
+
+  if (!options?.bypassCache) {
+    const cached = apiCache.get(endpoint);
+    if (cached && now - cached.timestamp < ttl) {
+      return cached.data;
+    }
+
+    const pending = inFlightRequests.get(endpoint);
+    if (pending) {
+      return pending as Promise<ApiResponse<T>>;
+    }
+  }
+
+  const fetchPromise = (async () => {
+    try {
+      const res = await apiFetch<T>(endpoint, { method: "GET" });
+      apiCache.set(endpoint, { data: res, timestamp: Date.now() });
+      return res;
+    } finally {
+      inFlightRequests.delete(endpoint);
+    }
+  })();
+
+  inFlightRequests.set(endpoint, fetchPromise);
+  return fetchPromise;
 }
 
 /**
@@ -104,9 +175,9 @@ export async function apiDelete<T>(endpoint: string): Promise<ApiResponse<T>> {
  * CV API Client - Connected directly to Database & User Session
  */
 export const cvApi = {
-  async getAll<T = any>(): Promise<T[]> {
+  async getAll<T = any>(bypassCache: boolean = false): Promise<T[]> {
     try {
-      const res = await apiGet<T[]>("/api/cv");
+      const res = await apiGet<T[]>("/api/cv", { bypassCache });
       return res.data || [];
     } catch {
       return [];
@@ -175,9 +246,9 @@ export const orderApi = {
  * Job Tracker API Client - Connected directly to Database & User Session
  */
 export const trackerApi = {
-  async getAll<T = any>(): Promise<T[]> {
+  async getAll<T = any>(bypassCache: boolean = false): Promise<T[]> {
     try {
-      const res = await apiGet<T[]>("/api/applications");
+      const res = await apiGet<T[]>("/api/applications", { bypassCache });
       return res.data || [];
     } catch {
       return [];
@@ -235,9 +306,9 @@ export const trackerApi = {
  * Schedules & Reminders API Client
  */
 export const scheduleApi = {
-  async getAll<T = any>(): Promise<T[]> {
+  async getAll<T = any>(bypassCache: boolean = false): Promise<T[]> {
     try {
-      const res = await apiGet<T[]>("/api/schedules");
+      const res = await apiGet<T[]>("/api/schedules", { bypassCache });
       return res.data || [];
     } catch {
       return [];
@@ -249,9 +320,9 @@ export const scheduleApi = {
  * User Profile API Client
  */
 export const userApi = {
-  async getProfile<T = any>(): Promise<T | null> {
+  async getProfile<T = any>(bypassCache: boolean = false): Promise<T | null> {
     try {
-      const res = await apiGet<T>("/v1/user/profile");
+      const res = await apiGet<T>("/api/user/profile", { bypassCache });
       return res.data;
     } catch {
       return null;
@@ -259,7 +330,7 @@ export const userApi = {
   },
   async updateProfile<T = any>(profileData: unknown): Promise<T | null> {
     try {
-      const res = await apiPut<T>("/v1/user/profile", profileData);
+      const res = await apiPut<T>("/api/user/profile", profileData);
       return res.data;
     } catch {
       return null;
@@ -271,17 +342,17 @@ export const userApi = {
  * Jobs API Client - Job scraping and matching
  */
 export const jobsApi = {
-  async getAll<T = any>(): Promise<T[]> {
+  async getAll<T = any>(bypassCache: boolean = false): Promise<T[]> {
     try {
-      const res = await apiGet<T[]>("/api/jobs");
+      const res = await apiGet<T[]>("/api/jobs", { bypassCache });
       return res.data || [];
     } catch {
       return [];
     }
   },
-  async getRecommended<T = any>(limit: number = 10): Promise<T[]> {
+  async getRecommended<T = any>(limit: number = 10, bypassCache: boolean = false): Promise<T[]> {
     try {
-      const res = await apiGet<T[]>(`/api/jobs/recommended?limit=${limit}`);
+      const res = await apiGet<T[]>(`/api/jobs/recommended?limit=${limit}`, { bypassCache });
       return res.data || [];
     } catch {
       return [];
@@ -290,12 +361,42 @@ export const jobsApi = {
 };
 
 /**
+ * Notifications API Client - Persistent notifications from the notifications table
+ */
+export const notificationsApi = {
+  async getAll<T = any>(bypassCache: boolean = false): Promise<T[]> {
+    try {
+      const res = await apiGet<T[]>("/api/notifications", { bypassCache });
+      return res.data || [];
+    } catch {
+      return [];
+    }
+  },
+  async markAllRead(): Promise<boolean> {
+    try {
+      await apiFetch("/api/notifications", { method: "PATCH", body: JSON.stringify({}) });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  async markRead(id: string): Promise<boolean> {
+    try {
+      await apiFetch("/api/notifications", { method: "PATCH", body: JSON.stringify({ id }) });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+};
+
+/**
  * Activities API Client - Track user activities and timeline
  */
 export const activitiesApi = {
-  async getAll<T = any>(limit: number = 10): Promise<T[]> {
+  async getAll<T = any>(limit: number = 10, bypassCache: boolean = false): Promise<T[]> {
     try {
-      const res = await apiGet<T[]>(`/api/activities?limit=${limit}`);
+      const res = await apiGet<T[]>(`/api/activities?limit=${limit}`, { bypassCache });
       return res.data || [];
     } catch {
       return [];
@@ -323,6 +424,47 @@ export const aiGatewayApi = {
     } catch (err: any) {
       console.error("[aiGatewayApi] Request failed:", err);
       throw err;
+    }
+  },
+};
+
+/**
+ * Cover Letters API Client - Persistent cover letter library in the database
+ */
+export const coverLetterApi = {
+  async getAll<T = any>(): Promise<T[]> {
+    try {
+      const res = await apiGet<T[]>("/api/cover-letters");
+      return res.data || [];
+    } catch {
+      return [];
+    }
+  },
+  async create<T = any>(data: { company: string; position: string; recruiter?: string; tone?: string; content: string }): Promise<T | null> {
+    try {
+      const res = await apiPost<T>("/api/cover-letters", data);
+      return res.data || null;
+    } catch {
+      return null;
+    }
+  },
+  async update<T = any>(id: string, data: { company?: string; position?: string; recruiter?: string; content?: string }): Promise<T | null> {
+    try {
+      const res = await apiFetch<T>(`/api/cover-letters/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+      return res.data || null;
+    } catch {
+      return null;
+    }
+  },
+  async delete(id: string): Promise<boolean> {
+    try {
+      await apiDelete(`/api/cover-letters/${id}`);
+      return true;
+    } catch {
+      return false;
     }
   },
 };
@@ -368,3 +510,32 @@ export const mailerApi = {
     return await apiPost<any>("/api/mailer/batch", data);
   },
 };
+
+/**
+ * Career Intelligence API Client
+ */
+export const careerIntelligenceApi = {
+  async get(roleId?: string, cvId?: string) {
+    try {
+      const params = new URLSearchParams();
+      if (roleId) params.set('roleId', roleId);
+      if (cvId) params.set('cvId', cvId);
+      const query = params.toString() ? `?${params.toString()}` : '';
+      const res = await apiGet<any>(`/api/career-intelligence${query}`);
+      return res.data || null;
+    } catch (err) {
+      console.warn('[careerIntelligenceApi.get] Failed:', err);
+      return null;
+    }
+  },
+  async setTargetRole(roleId: string, cvId?: string) {
+    try {
+      const res = await apiPost<any>('/api/career-intelligence', { roleId, cvId });
+      return res.data || null;
+    } catch (err) {
+      console.warn('[careerIntelligenceApi.setTargetRole] Failed:', err);
+      return null;
+    }
+  },
+};
+

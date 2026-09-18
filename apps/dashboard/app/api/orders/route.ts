@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@cuti/db';
+import { prisma } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 import crypto from 'crypto';
 
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
       estimatedTime: '15-20 Menit Lagi',
       dataOption: body.dataOption || 'existing',
       hrName: 'Sarah Melati, S.Psi',
-      hrRole: 'Senior Tech Recruiter CUTI',
+      hrRole: 'Senior Tech Recruiter Employr',
     };
 
     return NextResponse.json({ success: true, data: mappedOrder });

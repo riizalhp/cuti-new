@@ -80,6 +80,10 @@ export const InterviewView: React.FC = () => {
     },
   ];
 
+  // Pertanyaan simulasi: digenerate AI via /api/ai, fallback ke seed default
+  const [simQuestions, setSimQuestions] = useState(mockSimQuestions);
+  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
+
   // Bank Pertanyaan Interview
   const [expandedQId, setExpandedQId] = useState<string | null>('q1');
   const [filterCategory, setFilterCategory] = useState<string>('Semua');
@@ -183,12 +187,64 @@ export const InterviewView: React.FC = () => {
   const completedCount = checkListItems.filter((item) => item.done).length;
   const progressPercent = Math.round((completedCount / checkListItems.length) * 100);
 
+  // Generate pertanyaan simulasi berdasarkan posisi & level via /api/ai
+  const generateSimQuestions = async (role: string, level: string) => {
+    setIsGeneratingQuestions(true);
+    try {
+      const prompt = `Buatlah 5 pertanyaan interview simulasi untuk kandidat posisi "${role}" pada tahap "${level}".
+Konteks: platform persiapan karier Indonesia. Campur pertanyaan behavioral (STAR), situasional, dan teknis sesuai level.
+
+Kembalikan HANYA JSON valid tanpa markdown, format persis:
+{
+  "questions": [
+    { "q": "Teks pertanyaan interview...", "hint": "Tips singkat cara menjawab dengan baik..." }
+  ]
+}
+Berikan tepat 5 objek di dalam array questions.`;
+
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          feature: 'interview_simulator',
+          task: 'interview_simulator',
+          promptName: 'AI Interview Question Generator',
+          prompt,
+        }),
+      });
+
+      if (!res.ok) throw new Error(`AI API error ${res.status}`);
+      const json = await res.json();
+      if (!json.text) throw new Error('Empty AI response');
+
+      const cleaned = json.text.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const parsed = JSON.parse(cleaned);
+      if (Array.isArray(parsed.questions) && parsed.questions.length > 0) {
+        const valid = parsed.questions
+          .filter((item: any) => item && typeof item.q === 'string' && item.q.trim())
+          .map((item: any) => ({
+            q: String(item.q).trim(),
+            hint: typeof item.hint === 'string' ? item.hint.trim() : 'Gunakan metode STAR dan sertakan hasil terukur.',
+          }));
+        if (valid.length > 0) {
+          setSimQuestions(valid);
+          setSimQuestionIndex(0);
+        }
+      }
+    } catch (err) {
+      // Gagal generate: pertahankan pertanyaan seed default
+      console.warn('[Interview Question Generator AI Error, keep seed questions]:', err);
+    } finally {
+      setIsGeneratingQuestions(false);
+    }
+  };
+
   // Handle AI Simulation Submit via /api/ai
   const handleSimulateSubmit = async () => {
     if (!userAnswer.trim()) return;
     setIsEvaluating(true);
 
-    const currentQuestion = mockSimQuestions[simQuestionIndex];
+    const currentQuestion = simQuestions[simQuestionIndex];
 
     try {
       const prompt = `Anda adalah Evaluator Interview AI Profesional untuk platform persiapan karier.
@@ -224,7 +280,6 @@ Kembalikan HANYA JSON valid tanpa markdown, tanpa teks pengantar, dengan format 
           task: 'interview_simulator',
           promptName: 'AI Interview Simulation Evaluator',
           prompt,
-          systemInstruction: 'Anda adalah Senior HR & Technical Hiring Manager. Evaluasi jawaban interview secara profesional, konstruktif, dan kembalikan HANYA format JSON valid.',
         }),
       });
 
@@ -290,6 +345,16 @@ Kembalikan HANYA JSON valid tanpa markdown, tanpa teks pengantar, dengan format 
             colorClass: 'text-indigo-600 dark:text-indigo-400',
           },
         ]}
+        actions={
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('simulasi')}
+            className="px-3.5 py-2 rounded-[10px] bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-black text-xs shadow-md shadow-orange-500/30 transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 border-0"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Mulai Simulasi AI</span>
+          </button>
+        }
       />
 
       {/* Sub Navigation Bar */}
@@ -366,6 +431,7 @@ Kembalikan HANYA JSON valid tanpa markdown, tanpa teks pengantar, dengan format 
                         setSelectedRole(e.target.value);
                         setEvaluationResult(null);
                         setUserAnswer('');
+                        generateSimQuestions(e.target.value, selectedLevel);
                       }}
                       className="w-full p-2.5 pr-9 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none focus:ring-2 focus:ring-[#1738D1] appearance-none cursor-pointer text-xs"
                     >
@@ -386,7 +452,10 @@ Kembalikan HANYA JSON valid tanpa markdown, tanpa teks pengantar, dengan format 
                   <div className="relative">
                     <select
                       value={selectedLevel}
-                      onChange={(e) => setSelectedLevel(e.target.value)}
+                      onChange={(e) => {
+                        setSelectedLevel(e.target.value);
+                        generateSimQuestions(selectedRole, e.target.value);
+                      }}
                       className="w-full p-2.5 pr-9 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none focus:ring-2 focus:ring-[#1738D1] appearance-none cursor-pointer text-xs"
                     >
                       <option value="HR Screening">HR Screening &amp; Behavioral</option>
@@ -419,24 +488,24 @@ Kembalikan HANYA JSON valid tanpa markdown, tanpa teks pengantar, dengan format 
                   </span>
                   <button
                     onClick={() => {
-                      setSimQuestionIndex((prev) => (prev + 1) % mockSimQuestions.length);
+                      setSimQuestionIndex((prev) => (prev + 1) % simQuestions.length);
                       setUserAnswer('');
                       setEvaluationResult(null);
                     }}
                     className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1 cursor-pointer"
                   >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Ganti Pertanyaan</span>
+                    <RotateCcw className={`w-3.5 h-3.5 ${isGeneratingQuestions ? 'animate-spin' : ''}`} />
+                    <span>{isGeneratingQuestions ? 'Menyiapkan...' : 'Ganti Pertanyaan'}</span>
                   </button>
                 </div>
 
                 <h3 className="font-extrabold text-base text-slate-900 dark:text-white leading-relaxed">
-                  &quot;{mockSimQuestions[simQuestionIndex].q}&quot;
+                  &quot;{simQuestions[simQuestionIndex]?.q || 'Memuat pertanyaan...'}&quot;
                 </h3>
 
                 <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                  <span>Tips Jawaban: {mockSimQuestions[simQuestionIndex].hint}</span>
+                  <span>Tips Jawaban: {simQuestions[simQuestionIndex]?.hint || 'Gunakan metode STAR.'}</span>
                 </p>
               </div>
 

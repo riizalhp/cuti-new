@@ -1,5 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@cuti/db";
+import { prisma } from "@employr/db";
+
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    const event = await prisma.events.findUnique({ where: { id } });
+    if (!event) {
+      return NextResponse.json(
+        { success: false, message: "Event tidak ditemukan" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        id: event.id,
+        title: event.title,
+        slug: event.slug,
+        description: event.description,
+        eventDate: event.event_date.toISOString().split("T")[0],
+        location: event.location,
+        type: event.type,
+        isActive: event.is_active,
+        externalUrl: event.external_url,
+        coverImageUrl: event.cover_image_url,
+        tags: event.tags ?? [],
+        createdAt: event.created_at.toISOString().split("T")[0],
+      },
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, message: error?.message ?? "Gagal memuat detail event" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -13,6 +49,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       type,
       externalUrl,
       coverImageUrl,
+      tags,
       isActive,
     } = body;
 
@@ -32,6 +69,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (type !== undefined) data.type = type;
     if (externalUrl !== undefined) data.external_url = externalUrl;
     if (coverImageUrl !== undefined) data.cover_image_url = coverImageUrl;
+    if (tags !== undefined) data.tags = Array.isArray(tags) ? tags : [];
     if (isActive !== undefined) data.is_active = isActive;
 
     const event = await prisma.events.update({

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@cuti/db';
+import { prisma } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
+import { createNotification } from '@/lib/notification-helper';
 import crypto from 'crypto';
 
 export async function POST(req: NextRequest, context: { params: Promise<{ id: string }> }) {
@@ -56,6 +57,15 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
         data: { status: 'PAID', paid_at: new Date() },
       }),
     ]);
+
+    await createNotification({
+      userId: user.id,
+      title: 'Reward misi berhasil diklaim',
+      message: `Kamu menerima ${submission.payout_amount.toLocaleString('id-ID')} koin dari reward misi. Cek riwayat koin untuk detailnya.`,
+      category: 'CAREER',
+      priority: 'SUCCESS',
+      actionUrl: '/misi-cuan',
+    });
 
     return NextResponse.json({
       success: true,

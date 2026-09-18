@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Search, SearchX } from "lucide-react";
-import { searchFaq } from "@cuti/faq";
+import { searchFaq } from "@employr/faq";
 import { SearchBox } from "@/components/SearchBox";
 import { ArticleCard } from "@/components/ArticleCard";
+import { SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -10,9 +11,29 @@ interface PageProps {
 }
 
 export const metadata: Metadata = {
-  title: "Cari di Pusat Bantuan",
-  description: "Cari artikel panduan penggunaan Employr.",
+  title: "Pencarian Panduan & Artikel",
+  description: "Cari artikel bantuan, dokumentasi CV ATS, tracker lamaran, dan panduan interview di Pusat Bantuan Employr.",
   alternates: { canonical: "/cari" },
+  openGraph: {
+    title: "Pencarian Panduan | Pusat Bantuan Employr",
+    description: "Cari artikel bantuan, dokumentasi CV ATS, tracker lamaran, dan panduan interview di Pusat Bantuan Employr.",
+    url: `${SITE_URL}/cari`,
+    type: "website",
+    images: [
+      {
+        url: "/logo.webp",
+        width: 800,
+        height: 600,
+        alt: "Pencarian Pusat Bantuan Employr",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pencarian Panduan | Pusat Bantuan Employr",
+    description: "Cari artikel bantuan, dokumentasi CV ATS, tracker lamaran, dan panduan interview di Pusat Bantuan Employr.",
+    images: ["/logo.webp"],
+  },
 };
 
 export default async function SearchPage({ searchParams }: PageProps) {
@@ -77,7 +98,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
               {query
-                ? "Coba kata kunci lain yang lebih umum, misalnya \"cetak CV\", \"tracker\", \"pembayaran\", atau \"referral\"."
+                ? "Coba kata kunci lain yang lebih umum, misalnya \"cetak CV\", \"tracker\", \"evaluasi\", atau \"referral\"."
                 : "Ketik kata kunci di kotak pencarian di atas, misalnya \"cara cetak CV ke PDF\"."}
             </p>
           </div>

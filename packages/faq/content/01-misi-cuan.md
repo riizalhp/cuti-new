@@ -31,13 +31,13 @@ keywords: misi cuan, misi, cuan, koin, xp, level, check-in harian, reward, leade
 ## Riwayat & penukaran
 
 - Tab **Riwayat** menampilkan log misi yang disetujui serta pencairan reward.
-- Koin yang terkumpul bisa ditukar dengan **Saldo E-Wallet**, **Pulsa**, atau **Akses Membership Lifetime** (opsi penukaran sesuai ketersediaan).
+- Koin yang terkumpul bisa ditukar dengan **Saldo E-Wallet** atau **Pulsa** (opsi penukaran sesuai ketersediaan program).
 
 ## Pertanyaan umum
 
 - **Kapan reward masuk?** Setelah admin menyetujui bukti pengerjaan misi.
 - **Bisa ikut misi yang sama dua kali?** Umumnya setiap misi hanya sekali per akun (per user & misi).
 - **Koin hangus?** Koin tersimpan di saldo akunmu; aturan kedaluwarsa mengikuti ketentuan program.
-- **Check-in lupa satu hari?** Tidak apa-apa — kamu hanya kehilangan bonus hari itu, bisa lanjut besok.
+- **Check-in lupa satu hari?** Tidak apa-apa, kamu hanya kehilangan bonus hari itu dan bisa lanjut besok.
 
-Lanjut baca: [Referral](/artikel/referral) dan [Paket & Harga](/artikel/paket-dan-harga).
+Lanjut baca: [Referral](/artikel/referral) dan [Panduan CV Builder](/artikel/panduan-cv-builder).

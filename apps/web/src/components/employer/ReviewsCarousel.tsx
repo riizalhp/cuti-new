@@ -23,26 +23,26 @@ const DEFAULT_REVIEWS: Review[] = [
   {
     id: 1,
     author: 'Rian Pratama',
-    title: 'Computer Science Fresh Grad · Bandung',
-    body: 'I used to get ghosted on applications. After using Employr action-verb tips and aligning my keywords with the job post, I landed my first interview in just two weeks.',
+    title: 'Lulusan Baru Informatika · Bandung',
+    body: 'Dulu sering kirim berkas tapi gak ada kabar sama sekali. Pas nyoba susun CV lewat Employr dan disesuaikan sama kata kunci lokernya, seminggu kemudian langsung dapat panggilan interview pertama.',
   },
   {
     id: 2,
     author: 'Siti Rahmadani',
-    title: 'Vocational Accounting Graduate · Surabaya',
-    body: 'The tracker feature was a lifesaver. I used to lose track of where I had applied. Now everything is neatly organized all the way through to my offer letter.',
+    title: 'Lulusan SMK Akuntansi · Surabaya',
+    body: 'Fitur Tracker-nya ngebantu banget. Dulu sering lupa posisi apa aja yang udah didaftar. Sekarang status berkas dan jadwal interview tercatat rapi sampai akhirnya keterima kerja.',
   },
   {
     id: 3,
     author: 'Dimas Arya Nugraha',
-    title: 'Final-Year Management Student · Yogyakarta',
-    body: 'Being able to keep separate CV versions for internships and full-time jobs without messy copy-pasting is brilliant. Super practical!',
+    title: 'Mahasiswa Tingkat Akhir Manajemen · Yogyakarta',
+    body: 'Bisa simpan beberapa versi CV sekaligus buat magang dan kerja tetap tanpa harus repot copy-paste manual. Praktis dan gak bikin pusing.',
   },
   {
     id: 4,
     author: 'Aisyah Putri Maharani',
-    title: 'Career Switcher / Junior UI Designer · Jakarta',
-    body: 'The exported PDF is clean and reads perfectly on ATS parsers. I felt way more confident submitting my portfolio to my dream startup.',
+    title: 'Pindah Jalur Karier / Junior UI Designer · Jakarta',
+    body: 'Hasil unduh PDF-nya rapi dan sesuai format ATS. Jadi jauh lebih percaya diri pas kirim lamaran dan portofolio ke startup impian.',
   },
 ];
 

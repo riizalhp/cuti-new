@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, logSecurityEvent, logApp, extractRequestContext } from '@cuti/db';
+import { prisma, logSecurityEvent, logApp, extractRequestContext } from '@employr/db';
+import { createNotification } from '@/lib/notification-helper';
 import crypto from 'crypto';
 
 export async function POST(req: NextRequest) {
@@ -154,6 +155,15 @@ export async function POST(req: NextRequest) {
         message: `Payment successful for order ${order_id} (User: ${order.user_id}, Tier: ${tier})`,
         ip: ctx.ip,
         userId: order.user_id,
+      });
+
+      await createNotification({
+        userId: order.user_id,
+        title: 'Pembayaran berhasil — Membership aktif',
+        message: `Paket ${order.package} sudah aktif. Selamat menikmati fitur premium Employr!`,
+        category: 'MEMBERSHIP',
+        priority: 'SUCCESS',
+        actionUrl: '/pengaturan?tab=langganan',
       });
 
       return NextResponse.json({

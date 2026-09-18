@@ -5,7 +5,7 @@
  * with timing, status code, user context, and error details.
  *
  * Usage in route handlers:
- *   import { withApiLog } from "@cuti/db/api-logger";
+ *   import { withApiLog } from "@employr/db/api-logger";
  *   export const GET = withApiLog(async (req) => { ... }, "AUTH");
  */
 

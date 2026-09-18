@@ -4,6 +4,8 @@
 // Mengambil lowongan dari HALAMAN PUBLIK portal (SSR HTML), TANPA bypass
 // login/CAPTCHA/anti-bot, sesuai panduan platform (lihat history chat Manus).
 //
+// UPDATE: Sekarang otomatis download & proses company logo ke WebP lokal
+//
 // Portal yang scrapable dari halaman publik:
 //   - Jobstreet  (id.jobstreet.com  — JSON JobSearchV7SearchResponse di <script>)
 //   - Glints     (glints.com        — __NEXT_DATA__ > initialJobs.jobsInPage)
@@ -25,6 +27,8 @@
 // tanpa bypass CAPTCHA — lihat lib/browser-portals.ts): Indeed, Loker.id,
 // Jooble, Cake.me (CakeResume), Karir.com, KitaLulus.
 // ============================================================================
+
+import { downloadAndProcessLogo } from './image-processor';
 
 export type PortalId =
   | 'Jobstreet'
@@ -56,7 +60,8 @@ export type PortalId =
   | 'InfoLokerBanten'
   | 'InfoLokerKarawang'
   | 'LokerMuslim'
-  | 'LowkerJogja';
+  | 'LowkerJogja'
+  | 'Disnakerja';
 
 export interface ExtractedJob {
   id: string;
@@ -74,11 +79,15 @@ export interface ExtractedJob {
   description: string;
   requirements: string[];
   skills: string[];
+  companyLogo?: string;
+  companyWebsite?: string;
   isSaved?: boolean;
 }
 
+export { JOB_CLUSTERS, type JobCluster } from './job-clusters';
+
 export interface ScrapeOptions {
-  keyword: string;
+  keyword?: string;
   location?: string;
   portals?: PortalId[];
 }
@@ -256,6 +265,29 @@ function slugify(s: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
+/**
+ * Coba tebak logo URL dari nama perusahaan via Google Favicon / Unavatar.
+ * Hanya fallback — portal yang punya logo di JSON data seharusnya lebih akurat.
+ */
+function guessLogoUrl(companyName: string, companyWebsite?: string): string | undefined {
+  if (!companyName || companyName === 'Perusahaan') return undefined;
+  // Kalau ada website, pakai domain-nya langsung
+  if (companyWebsite) {
+    try {
+      const domain = new URL(companyWebsite).hostname.replace(/^www\./, '');
+      return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+    } catch { /* skip */ }
+  }
+  // Fallback: tebak domain dari nama perusahaan
+  const clean = companyName
+    .replace(/\b(PT\.?|CV\.?|UD\.?|Yayasan|BUMN|Persero|Holding|Group|Indonesia|Tbk|Plant|Corporate|Corp|Ltd|LLC)\b/gi, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '');
+  if (!clean || clean.length < 2) return undefined;
+  return `https://www.google.com/s2/favicons?domain=${clean}.com&sz=128`;
+}
+
 function timeAgo(iso: string | null | undefined): string {
   if (!iso) return 'Baru saja';
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -331,8 +363,11 @@ function computeMatchScore(keyword: string, title: string, skills: string[], des
 
 /** Jobstreet — https://id.jobstreet.com/id/job-search/{slug}-jobs/ */
 async function scrapeJobstreet(keyword: string): Promise<{ jobs: ExtractedJob[]; log: string }> {
-  const slug = slugify(keyword);
-  const url = `https://id.jobstreet.com/id/job-search/${slug}-jobs/`;
+  const cleanKw = keyword?.trim() || '';
+  const url =
+    cleanKw && cleanKw.toLowerCase() !== 'all'
+      ? `https://id.jobstreet.com/id/job-search/${slugify(cleanKw)}-jobs/`
+      : `https://id.jobstreet.com/id/job-search/jobs-in-indonesia/`;
   const html = await fetchHtml(url);
   const resp = extractJsonFromMarker(html, '{"__typename":"JobSearchV7SearchResponse"');
   if (!resp?.results?.jobs?.length) throw new Error('Tidak ada data lowongan di respons Jobstreet');
@@ -371,6 +406,7 @@ async function scrapeJobstreet(keyword: string): Promise<{ jobs: ExtractedJob[];
       const company = (org?.name || j.advertiser?.name || 'Perusahaan').trim();
       const location = (loc?.displayName?.text || 'Indonesia').trim();
       const skills = inferSkills(title, description);
+      const logoUrl = org?.images?.logo?.url || org?.logoUrl || j.advertiser?.logoUrl || undefined;
 
       jobs.push({
         id: `jobstreet-${j.id}`,
@@ -388,6 +424,7 @@ async function scrapeJobstreet(keyword: string): Promise<{ jobs: ExtractedJob[];
         description,
         requirements: inferRequirements(description),
         skills,
+        companyLogo: logoUrl || guessLogoUrl(company),
       });
     } catch {
       // lewati job yang gagal diparse
@@ -399,7 +436,11 @@ async function scrapeJobstreet(keyword: string): Promise<{ jobs: ExtractedJob[];
 
 /** Glints — https://glints.com/id/opportunities/jobs/explore?keyword=... */
 async function scrapeGlints(keyword: string): Promise<{ jobs: ExtractedJob[]; log: string }> {
-  const url = `https://glints.com/id/opportunities/jobs/explore?keyword=${encodeURIComponent(keyword)}`;
+  const cleanKw = keyword?.trim() || '';
+  const url =
+    cleanKw && cleanKw.toLowerCase() !== 'all'
+      ? `https://glints.com/id/opportunities/jobs/explore?keyword=${encodeURIComponent(cleanKw)}`
+      : `https://glints.com/id/opportunities/jobs/explore`;
   const html = await fetchHtml(url);
   const data = extractNextData(html);
   const rawJobs: any[] = data?.props?.pageProps?.initialJobs?.jobsInPage || [];
@@ -430,11 +471,13 @@ async function scrapeGlints(keyword: string): Promise<{ jobs: ExtractedJob[]; lo
 
       const title = String(j.title || '').trim();
       const skills = inferSkills(title, '', (j.skills || []).map((s: any) => s?.name).filter(Boolean));
+      const companyName = String(j.company?.name || 'Perusahaan').trim();
+      const glintLogo = j.company?.logo || j.company?.logoUrl || undefined;
 
       jobs.push({
         id: `glints-${j.id}`,
         title,
-        company: String(j.company?.name || 'Perusahaan').trim(),
+        company: companyName,
         location,
         salary: salaryText,
         portal: 'Glints',
@@ -447,6 +490,7 @@ async function scrapeGlints(keyword: string): Promise<{ jobs: ExtractedJob[]; lo
         description: '',
         requirements: [],
         skills,
+        companyLogo: glintLogo || guessLogoUrl(companyName),
       });
     } catch {
       // lewati job yang gagal diparse
@@ -477,6 +521,7 @@ async function scrapeLinkedInPortal(keyword: string, location?: string): Promise
     description: j.description,
     requirements: inferRequirements(j.description),
     skills: inferSkills(j.title, j.description, j.skills),
+    companyLogo: (j as any).companyLogo || guessLogoUrl(j.company),
   }));
 
   return { jobs: mapped, log: `LinkedIn: ${jobs.length} lowongan diekstrak (sesi login Anda)` };
@@ -484,7 +529,11 @@ async function scrapeLinkedInPortal(keyword: string, location?: string): Promise
 
 /** Dealls — https://dealls.com/jobs?q=... */
 async function scrapeDealls(keyword: string): Promise<{ jobs: ExtractedJob[]; log: string }> {
-  const url = `https://dealls.com/jobs?q=${encodeURIComponent(keyword)}`;
+  const cleanKw = keyword?.trim() || '';
+  const url =
+    cleanKw && cleanKw.toLowerCase() !== 'all'
+      ? `https://dealls.com/jobs?q=${encodeURIComponent(cleanKw)}`
+      : `https://dealls.com/jobs`;
   const html = await fetchHtml(url);
   const data = extractNextData(html);
   const pages: any[] =
@@ -511,11 +560,13 @@ async function scrapeDealls(keyword: string): Promise<{ jobs: ExtractedJob[]; lo
       const title = String(d.role || '').trim();
       const skills = inferSkills(title, '', (d.skills || []).map((s: any) => s?.name).filter(Boolean));
       const location = d.city || d.country || (workplace === 'remote' ? 'Remote' : 'Indonesia');
+      const deallsCompany = String(d.company?.name || 'Perusahaan').trim();
+      const deallsLogo = d.company?.logo || d.company?.logoUrl || d.company?.image || undefined;
 
       jobs.push({
         id: `dealls-${d.id}`,
         title,
-        company: String(d.company?.name || 'Perusahaan').trim(),
+        company: deallsCompany,
         location: String(location).trim(),
         salary: salaryText,
         portal: 'Dealls',
@@ -528,6 +579,7 @@ async function scrapeDealls(keyword: string): Promise<{ jobs: ExtractedJob[]; lo
         description: '',
         requirements: [],
         skills,
+        companyLogo: deallsLogo || guessLogoUrl(deallsCompany),
       });
     } catch {
       // lewati job yang gagal diparse
@@ -539,7 +591,12 @@ async function scrapeDealls(keyword: string): Promise<{ jobs: ExtractedJob[]; lo
 
 /** Talent.com — https://id.talent.com/jobs?k=...&l=... (SSR, kartu publik) */
 async function scrapeTalent(keyword: string, location?: string): Promise<{ jobs: ExtractedJob[]; log: string }> {
-  const url = `https://id.talent.com/jobs?k=${encodeURIComponent(keyword)}&l=${encodeURIComponent(location?.trim() || 'Indonesia')}`;
+  const cleanKw = keyword?.trim() || '';
+  const loc = location?.trim() || 'Indonesia';
+  const url =
+    cleanKw && cleanKw.toLowerCase() !== 'all'
+      ? `https://id.talent.com/jobs?k=${encodeURIComponent(cleanKw)}&l=${encodeURIComponent(loc)}`
+      : `https://id.talent.com/jobs?l=${encodeURIComponent(loc)}`;
   const html = await fetchHtml(url);
 
   // Setiap kartu lowongan ditandai data-testid="job-card-unified" (SSR)
@@ -585,6 +642,7 @@ async function scrapeTalent(keyword: string, location?: string): Promise<{ jobs:
         description,
         requirements: inferRequirements(description),
         skills,
+        companyLogo: guessLogoUrl(company),
       });
     } catch {
       // lewati job yang gagal diparse
@@ -596,8 +654,11 @@ async function scrapeTalent(keyword: string, location?: string): Promise<{ jobs:
 
 /** Kalibrr — https://www.kalibrr.com/home/te/{slug} (__NEXT_DATA__ > props.pageProps.jobs) */
 async function scrapeKalibrr(keyword: string): Promise<{ jobs: ExtractedJob[]; log: string }> {
-  const slug = slugify(keyword);
-  const url = `https://www.kalibrr.com/home/te/${slug}`;
+  const cleanKw = keyword?.trim() || '';
+  const url =
+    cleanKw && cleanKw.toLowerCase() !== 'all'
+      ? `https://www.kalibrr.com/home/te/${slugify(cleanKw)}`
+      : `https://www.kalibrr.com/home`;
   const html = await fetchHtml(url);
   const data = extractNextData(html);
   const rawJobs: any[] = data?.props?.pageProps?.jobs || [];
@@ -628,11 +689,13 @@ async function scrapeKalibrr(keyword: string): Promise<{ jobs: ExtractedJob[]; l
       const title = String(j.name || '').trim();
       const description = String(j.description || '').trim();
       const skills = inferSkills(title, description);
+      const kalibrrCompany = String(j.companyName || 'Perusahaan').trim();
+      const kalibrrLogo = j.company?.logo || j.companyLogo || undefined;
 
       jobs.push({
         id: `kalibrr-${j.id}`,
         title,
-        company: String(j.companyName || 'Perusahaan').trim(),
+        company: kalibrrCompany,
         location,
         salary: salaryText,
         portal: 'Kalibrr',
@@ -645,6 +708,7 @@ async function scrapeKalibrr(keyword: string): Promise<{ jobs: ExtractedJob[]; l
         description,
         requirements: extractRequirements(j.qualifications),
         skills,
+        companyLogo: kalibrrLogo || guessLogoUrl(kalibrrCompany),
       });
     } catch {
       // lewati job yang gagal diparse
@@ -656,7 +720,11 @@ async function scrapeKalibrr(keyword: string): Promise<{ jobs: ExtractedJob[]; l
 
 /** Jobindo — https://jobindo.com/cari-lowongan-kerja?search=... (Inertia data-page di <div id="app">) */
 async function scrapeJobindo(keyword: string): Promise<{ jobs: ExtractedJob[]; log: string }> {
-  const url = `https://jobindo.com/cari-lowongan-kerja?search=${encodeURIComponent(keyword)}`;
+  const cleanKw = keyword?.trim() || '';
+  const url =
+    cleanKw && cleanKw.toLowerCase() !== 'all'
+      ? `https://jobindo.com/cari-lowongan-kerja?search=${encodeURIComponent(cleanKw)}`
+      : `https://jobindo.com/cari-lowongan-kerja`;
   const html = await fetchHtml(url);
   const m = html.match(/<div id="app" data-page="([\s\S]*?)"\s*>/);
   if (!m) throw new Error('Tidak dapat menemukan data halaman Jobindo');
@@ -686,11 +754,13 @@ async function scrapeJobindo(keyword: string): Promise<{ jobs: ExtractedJob[]; l
       const description = String(j.description || stripHtml(j.html) || '').trim();
       const skills = inferSkills(title, description);
       const postedIso = j.date ? new Date(Number(j.date) * 1000).toISOString() : String(j.created_at || '').replace(' ', 'T');
+      const jobindoCompany = String(j.employer_detail?.company || 'Perusahaan').trim();
+      const jobindoLogo = j.employer_detail?.logo || j.employer_detail?.image || undefined;
 
       jobs.push({
         id: `jobindo-${j.id}`,
         title,
-        company: String(j.employer_detail?.company || 'Perusahaan').trim(),
+        company: jobindoCompany,
         location: String(j.region_name || 'Indonesia').trim(),
         salary: salaryText,
         portal: 'Jobindo',
@@ -703,6 +773,7 @@ async function scrapeJobindo(keyword: string): Promise<{ jobs: ExtractedJob[]; l
         description,
         requirements: extractRequirements(j.message) || inferRequirements(description),
         skills,
+        companyLogo: jobindoLogo || guessLogoUrl(jobindoCompany),
       });
     } catch {
       // lewati job yang gagal diparse
@@ -723,7 +794,7 @@ async function scrapeJobindo(keyword: string): Promise<{ jobs: ExtractedJob[]; l
 // fallback ke halaman daftar bila pencarian kosong/tidak ada lowongan.
 
 const WP_JOB_TITLE_RE =
-  /(lowongan|loker|staff|admin|developer|operator|sales|marketing|karyawan|magang|intern|crew|produksi|spv|supervisor|frontline|engineer|analyst|guru|driver|cleaning|satpam|helper|accounting|finance|hrd|designer|store|part\s?time|full\s?time|cs\b|kasir|pramuniaga)/i;
+  /(lowongan|loker|staff|admin|developer|operator|sales|marketing|karyawan|magang|intern|crew|produksi|spv|supervisor|frontline|engineer|analyst|guru|driver|cleaning|satpam|helper|accounting|finance|hrd|designer|store|part\s?time|full\s?time|cs\b|kasir|pramuniaga|barista|waiter|waitress|cook|kitchen|steward|receptionist|resepsionis|gudang|kurir|roaster|bartender|baker|pastry|server|housekeeping|security|teknisi|mekanik|penjaga|pabrik|packing|packer)/i;
 
 const WP_NAV_BLOCKLIST = [
   'pasang', 'login', 'register', 'tentang', 'kontak', 'kebijakan', 'privacy',
@@ -943,15 +1014,18 @@ function extractWordpressAnchors(html: string, cfg: WordPressPortalConfig): Arra
 }
 
 async function scrapeWordpressPortal(keyword: string, cfg: WordPressPortalConfig): Promise<{ jobs: ExtractedJob[]; log: string }> {
+  const cleanKw = keyword?.trim() || '';
   let html = '';
-  try {
-    html = await fetchHtml(cfg.searchUrl(keyword));
-  } catch {
-    html = '';
+  if (cleanKw && cleanKw.toLowerCase() !== 'all') {
+    try {
+      html = await fetchHtml(cfg.searchUrl(cleanKw));
+    } catch {
+      html = '';
+    }
   }
   let anchors = html ? extractWordpressAnchors(html, cfg) : [];
   if (!anchors.length) {
-    // Fallback ke halaman daftar (pencarian kosong / tidak tersedia)
+    // Fallback ke halaman daftar (pencarian kosong / mode explore)
     html = await fetchHtml(cfg.listUrl);
     anchors = extractWordpressAnchors(html, cfg);
   }
@@ -983,6 +1057,7 @@ async function scrapeWordpressPortal(keyword: string, cfg: WordPressPortalConfig
         description: '',
         requirements: [],
         skills,
+        companyLogo: guessLogoUrl(company),
       });
     } catch {
       // lewati job yang gagal diparse
@@ -998,7 +1073,11 @@ async function scrapeWordpressPortal(keyword: string, cfg: WordPressPortalConfig
 
 /** Jora — https://id.jora.com/jobs?sp=search&q=... */
 async function scrapeJora(keyword: string): Promise<{ jobs: ExtractedJob[]; log: string }> {
-  const url = `https://id.jora.com/jobs?sp=search&q=${encodeURIComponent(keyword)}`;
+  const cleanKw = keyword?.trim() || '';
+  const url =
+    cleanKw && cleanKw.toLowerCase() !== 'all'
+      ? `https://id.jora.com/jobs?sp=search&q=${encodeURIComponent(cleanKw)}`
+      : `https://id.jora.com/jobs?sp=search&q=`;
   const html = await fetchHtml(url);
   const cards = html.split('class="job-card').slice(1);
   if (!cards.length) throw new Error('Tidak ada data lowongan di respons Jora');
@@ -1052,6 +1131,7 @@ async function scrapeJora(keyword: string): Promise<{ jobs: ExtractedJob[]; log:
         description: '',
         requirements: [],
         skills,
+        companyLogo: guessLogoUrl(company || 'Perusahaan'),
       });
     } catch {
       // lewati job yang gagal diparse
@@ -1081,7 +1161,11 @@ const BLOGGER_PORTALS: BloggerPortalConfig[] = [
 ];
 
 async function scrapeBloggerPortal(keyword: string, cfg: BloggerPortalConfig): Promise<{ jobs: ExtractedJob[]; log: string }> {
-  const url = `${cfg.blogBase}/feeds/posts/default?alt=json&q=${encodeURIComponent(keyword)}&max-results=25`;
+  const cleanKw = keyword?.trim() || '';
+  const url =
+    cleanKw && cleanKw.toLowerCase() !== 'all'
+      ? `${cfg.blogBase}/feeds/posts/default?alt=json&q=${encodeURIComponent(cleanKw)}&max-results=25`
+      : `${cfg.blogBase}/feeds/posts/default?alt=json&max-results=30`;
   const html = await fetchHtml(url);
   let entries: any[] = [];
   try {
@@ -1119,6 +1203,7 @@ async function scrapeBloggerPortal(keyword: string, cfg: BloggerPortalConfig): P
         description,
         requirements: inferRequirements(description),
         skills,
+        companyLogo: guessLogoUrl(company),
       });
     } catch {
       // lewati job yang gagal diparse
@@ -1126,6 +1211,83 @@ async function scrapeBloggerPortal(keyword: string, cfg: BloggerPortalConfig): P
   }
 
   return { jobs, log: `${cfg.label}: ${jobs.length} lowongan diekstrak dari feed publik` };
+}
+
+// ---------------------------------------------------------------------------
+// Disnakerja — WordPress RSS feed (https://www.disnakerja.com)
+// ---------------------------------------------------------------------------
+// Judul post = nama perusahaan (mis. "PT Tracon Industri (TRACON)"), bukan
+// posisi, jadi pola WordPress biasa (filter judul lowongan) tidak cocok.
+// Feed RSS (?s={kw}&feed=rss2) menyediakan item terstruktur: title, link,
+// pubDate, dan kategori (Full Time, Part Time, lokasi, pendidikan, sektor).
+
+async function scrapeDisnakerja(keyword: string): Promise<{ jobs: ExtractedJob[]; log: string }> {
+  const cleanKw = keyword?.trim() || '';
+  const url =
+    cleanKw && cleanKw.toLowerCase() !== 'all'
+      ? `https://www.disnakerja.com/?s=${encodeURIComponent(cleanKw)}&feed=rss2`
+      : `https://www.disnakerja.com/feed/`;
+  const xml = await fetchHtml(url);
+
+  // Parse blok <item>...</item> dari feed RSS
+  const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
+  if (!items.length) throw new Error('Tidak ada lowongan ditemukan di respons Disnakerja');
+
+  const jobs: ExtractedJob[] = [];
+  for (const m of items) {
+    try {
+      const raw = m[1];
+      const stripCdata = (s: string) => s.replace(/^<!\[CDATA\[|\]\]>$/g, '');
+      const title = decodeHtmlEntities(stripCdata(raw.match(/<title>([\s\S]*?)<\/title>/)?.[1] || ''))
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (!title) continue;
+      const link = raw.match(/<link>([\s\S]*?)<\/link>/)?.[1]?.trim() || '';
+      const pubDate = raw.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1]?.trim() || '';
+      const categories = [...raw.matchAll(/<category>([\s\S]*?)<\/category>/g)].map((c) =>
+        decodeHtmlEntities(stripCdata(c[1])).trim()
+      );
+      const contentMatch = raw.match(/<content:encoded><!\[CDATA\[([\s\S]*?)\]\]><\/content:encoded>/);
+      const description = contentMatch ? stripHtml(contentMatch[1]).slice(0, 600) : '';
+
+      const catLower = categories.map((c) => c.toLowerCase());
+      let jobType: ExtractedJob['jobType'] = 'Full-time';
+      if (catLower.some((c) => c.includes('part time') || c.includes('parttime'))) jobType = 'Contract';
+      else if (catLower.some((c) => c.includes('contract') || c.includes('kontrak'))) jobType = 'Contract';
+      else if (catLower.some((c) => c.includes('magang') || c.includes('intern'))) jobType = 'Internship';
+
+      // Lokasi dari kategori (kota/provinsi yang dikenal)
+      const location = categories.find((c) =>
+        WP_KNOWN_CITIES.some((k) => new RegExp(`(^|[^a-z])${k}([^a-z]|$)`).test(c.toLowerCase()))
+      );
+
+      const company = extractCompanyFromTitle(title);
+      const skills = inferSkills(title, description);
+
+      jobs.push({
+        id: `disnakerja-${slugify(title).slice(0, 36)}-${jobs.length}`,
+        title,
+        company,
+        location: location || extractLocationFromTitle(title) || 'Indonesia',
+        salary: extractSalaryFromTitle(title) || 'Gaji tidak ditampilkan',
+        portal: 'Disnakerja',
+        portalUrl: link,
+        jobType,
+        experience: inferExperience(title),
+        postedTime: pubDate ? timeAgo(pubDate) : 'Baru saja',
+        extractedTime: 'Baru saja',
+        matchScore: computeMatchScore(keyword, title, skills, description),
+        description,
+        requirements: inferRequirements(description),
+        skills,
+        companyLogo: guessLogoUrl(company),
+      });
+    } catch {
+      // lewati job yang gagal diparse
+    }
+  }
+
+  return { jobs, log: `Disnakerja: ${jobs.length} lowongan diekstrak dari feed publik` };
 }
 
 // ---------------------------------------------------------------------------
@@ -1145,8 +1307,8 @@ function dedupeJobs(jobs: ExtractedJob[]): ExtractedJob[] {
 }
 
 export async function runScrape(options: ScrapeOptions): Promise<ScrapeOutput> {
-  const keyword = options.keyword?.trim();
-  if (!keyword) throw new Error('Kata kunci / posisi pekerjaan wajib diisi.');
+  const keyword = options.keyword?.trim() || '';
+  const isExplore = !keyword || keyword.toLowerCase() === 'all';
 
   const ALLOWED_PORTALS: PortalId[] = [
     'Jobstreet', 'Glints', 'Dealls', 'Talent', 'LinkedIn', 'Kalibrr', 'Jobindo',
@@ -1154,7 +1316,7 @@ export async function runScrape(options: ScrapeOptions): Promise<ScrapeOutput> {
     'Indeed', 'Loker.id', 'Jooble', 'CakeResume', 'Karir.com', 'KitaLulus',
     'LokerHeadOffice', 'SejakKemarin', 'LamarLangsung', 'InfoLokerKerja', 'SolusiKerja',
     'BursaKerjaDepnaker', 'LokerAnakMedan', 'InfoLokerJabar', 'InfoLokerBanten',
-    'InfoLokerKarawang', 'LokerMuslim', 'LowkerJogja',
+    'InfoLokerKarawang', 'LokerMuslim', 'LowkerJogja', 'Disnakerja',
   ];
 
   const requested = options.portals?.length
@@ -1182,6 +1344,7 @@ export async function runScrape(options: ScrapeOptions): Promise<ScrapeOutput> {
     InfoLokerKarawang: { status: 'skipped', count: 0, message: 'Tidak dipilih' },
     LokerMuslim: { status: 'skipped', count: 0, message: 'Tidak dipilih' },
     LowkerJogja: { status: 'skipped', count: 0, message: 'Tidak dipilih' },
+    Disnakerja: { status: 'skipped', count: 0, message: 'Tidak dipilih' },
     Jora: { status: 'skipped', count: 0, message: 'Tidak dipilih' },
     Jobinaja: { status: 'skipped', count: 0, message: 'Tidak dipilih' },
     Lokernas: { status: 'skipped', count: 0, message: 'Tidak dipilih' },
@@ -1196,7 +1359,11 @@ export async function runScrape(options: ScrapeOptions): Promise<ScrapeOutput> {
   };
 
   const ts = () => new Date().toLocaleTimeString('id-ID', { hour12: false });
-  logs.push(`[${ts()}] 🌐 Bot scraper dimulai — kata kunci "${keyword}"`);
+  logs.push(
+    `[${ts()}] 🌐 Bot scraper dimulai — ${
+      isExplore ? 'mode "Semua Lowongan Terbaru (Explore)"' : `kata kunci "${keyword}"`
+    }`
+  );
   logs.push(`[${ts()}] 🔍 Menghubungkan ke halaman publik ${requested.join(', ')}...`);
 
   const scrapers: Array<{ id: PortalId; fn: (kw: string) => Promise<{ jobs: ExtractedJob[]; log: string }> }> = [
@@ -1209,6 +1376,7 @@ export async function runScrape(options: ScrapeOptions): Promise<ScrapeOutput> {
     { id: 'Jora', fn: (kw) => scrapeJora(kw) },
     ...BLOGGER_PORTALS.map((cfg) => ({ id: cfg.id, fn: (kw: string) => scrapeBloggerPortal(kw, cfg) })),
     ...WORDPRESS_PORTALS.map((cfg) => ({ id: cfg.id, fn: (kw: string) => scrapeWordpressPortal(kw, cfg) })),
+    { id: 'Disnakerja', fn: (kw) => scrapeDisnakerja(kw) },
     ...BROWSER_PORTAL_IDS.map((id) => ({
       id,
       fn: async (kw: string) => {
@@ -1230,6 +1398,7 @@ export async function runScrape(options: ScrapeOptions): Promise<ScrapeOutput> {
           description: '',
           requirements: [],
           skills: inferSkills(j.title, ''),
+          companyLogo: (j as any).companyLogo || guessLogoUrl(j.company),
         }));
         return { jobs: mapped, log };
       },

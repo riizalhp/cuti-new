@@ -1,3 +1,66 @@
 ---
-return Astro.redirect('/sertifikat');
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import FooterPortal from '../../components/FooterPortal.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import SearchModal from '../../components/SearchModal.astro';
+import PageHero from '../../components/common/PageHero.astro';
+import { sertifikasiList, ensureData } from '../../data/mock';
+
+await ensureData();
+const sertifikasiListSnapshot = [...sertifikasiList];
+
+const title = "Direktori Sertifikasi Profesional & Industri | Employer Job";
+const description = "Kurasi sertifikasi standar nasional dan internasional dari Google, Microsoft, BNSP, AWS, dan lembaga terkemuka.";
 ---
+
+<BaseLayout title={title} description={description} canonicalUrl="http://localhost:3003/sertifikasi">
+  <Navbar />
+
+  <main class="bg-[#f4f3ee] min-h-screen pb-16">
+    <PageHero
+      eyebrow="Sertifikasi Profesional"
+      title="Sertifikasi Profesional &amp; <em>Industri Terakreditasi</em>"
+      description="Tingkatkan kredibilitas CV dan portofoliomu dengan sertifikasi yang diakui industri global dan nasional."
+      badge={{ text: `${sertifikasiListSnapshot.length} Skema Tersedia`, bgColor: 'bg-emerald-50', textColor: 'text-emerald-700', borderColor: 'border border-emerald-200' }}
+    >
+      <nav slot="breadcrumb" class="flex items-center gap-2 text-xs text-[#6e6d68] mb-4" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-[#0000ff] transition">Beranda</a>
+        <span>/</span>
+        <span class="text-[#101010] font-semibold">Sertifikasi</span>
+      </nav>
+    </PageHero>
+
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6">
+      <AdSlot type="leaderboard" note="Rekomendasi program pelatihan dan bimbingan sertifikasi." />
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
+        {sertifikasiListSnapshot.map((sert) => (
+          <article class="bg-white rounded-2xl border border-[#d7d6cf] overflow-hidden hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:border-[#0000ff]/30 hover:-translate-y-1 transition duration-300 flex flex-col justify-between">
+            <div class="p-5">
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold">{sert.issuer}</span>
+                <span class="text-[11px] font-medium text-[#6e6d68]">{sert.duration}</span>
+              </div>
+              <h2 class="text-base font-semibold text-[#101010] hover:text-[#0000ff] transition leading-snug">
+                <a href={`/sertifikasi/${sert.slug}`}>{sert.title}</a>
+              </h2>
+              <p class="text-xs text-[#6e6d68] line-clamp-3 mt-2 leading-relaxed">{sert.description}</p>
+            </div>
+            <div class="p-5 pt-0 border-t border-[#d7d6cf]/50 mt-3">
+              <div class="flex items-center justify-between pt-3">
+                <span class="text-xs font-bold text-[#101010]">{sert.price}</span>
+                <a href={`/sertifikasi/${sert.slug}`} class="px-4 py-2 rounded-full bg-[#0000ff] hover:bg-[#1738d1] text-white text-xs font-semibold transition shadow-xs">
+                  Lihat Detail →
+                </a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </main>
+
+  <FooterPortal />
+  <SearchModal />
+</BaseLayout>

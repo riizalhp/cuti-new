@@ -1,0 +1,612 @@
+<title>Job Scraper Monitor</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --border: #e0e0e0;
+    --text: #1a1a1a;
+    --text-secondary: #666666;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --success: #16a34a;
+    --warning: #f59e0b;
+    --error: #dc2626;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0a0a0a;
+      --card: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #f5f5f5;
+      --text-secondary: #a3a3a3;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --success: #22c55e;
+      --warning: #fbbf24;
+      --error: #ef4444;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0a0a0a;
+    --card: #1a1a1a;
+    --border: #2a2a2a;
+    --text: #f5f5f5;
+    --text-secondary: #a3a3a3;
+    --accent: #3b82f6;
+    --accent-hover: #60a5fa;
+    --success: #22c55e;
+    --warning: #fbbf24;
+    --error: #ef4444;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 24px;
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 32px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .control-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+
+  .control-header {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .keywords-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .keyword-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text);
+  }
+
+  .keyword-btn:hover {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: white;
+  }
+
+  .keyword-btn.active {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: white;
+  }
+
+  .keyword-btn.loading {
+    opacity: 0.6;
+    cursor: not-allowed;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 12px;
+  }
+
+  button {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+  }
+
+  .btn-secondary {
+    background: var(--card);
+    border: 2px solid var(--border);
+    color: var(--text);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    border-color: var(--accent);
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .log-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+
+  .log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .log-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .clear-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+
+  .log-content {
+    background: #000;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    border-radius: 8px;
+    padding: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+    line-height: 1.5;
+  }
+
+  .log-line {
+    margin-bottom: 4px;
+  }
+
+  .log-line.success { color: #22c55e; }
+  .log-line.warning { color: #fbbf24; }
+  .log-line.error { color: #ef4444; }
+
+  .jobs-table {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .table-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .table-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .table-content {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    text-align: left;
+    padding: 12px 24px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  td {
+    padding: 16px 24px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  .portal-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--accent);
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 16px; }
+    h1 { font-size: 24px; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .action-buttons { flex-direction: column; }
+  }
+</style>
+
+<div class="container">
+  <header>
+    <h1>🔍 Job Scraper Monitor</h1>
+    <p class="subtitle">Real-time monitoring dashboard untuk auto-scraping system</p>
+  </header>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Jobs</div>
+      <div class="stat-value" id="total-jobs">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Active Jobs</div>
+      <div class="stat-value" id="active-jobs">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Scraped Today</div>
+      <div class="stat-value" id="scraped-today">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Companies</div>
+      <div class="stat-value" id="total-companies">—</div>
+    </div>
+  </div>
+
+  <div class="control-panel">
+    <div class="control-header">Scrape Jobs by Keyword</div>
+    <div class="keywords-grid" id="keywords-grid">
+      <!-- Keywords will be populated here -->
+    </div>
+    <div class="action-buttons">
+      <button class="btn-primary" id="scrape-all">🌐 Scrape All Keywords</button>
+      <button class="btn-secondary" id="refresh-db">🔄 Refresh Database</button>
+    </div>
+  </div>
+
+  <div class="log-panel">
+    <div class="log-header">
+      <div class="log-title">📋 Scraping Log</div>
+      <button class="clear-btn" id="clear-log">Clear</button>
+    </div>
+    <div class="log-content" id="log-content">
+      <div class="log-line">Waiting for action...</div>
+    </div>
+  </div>
+
+  <div class="jobs-table">
+    <div class="table-header">
+      <div class="table-title">Recent Jobs</div>
+    </div>
+    <div class="table-content">
+      <table id="jobs-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Company</th>
+            <th>Location</th>
+            <th>Portal</th>
+            <th>Posted</th>
+          </tr>
+        </thead>
+        <tbody id="jobs-tbody">
+          <tr>
+            <td colspan="5" style="text-align: center; color: var(--text-secondary);">
+              Loading jobs...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = 'http://localhost:3000/api';
+const KEYWORDS = ['Admin', 'Staff', 'Marketing', 'Sales', 'Accounting', 'IT', 'Designer', 'Customer Service', 'Programmer'];
+
+let isScrapingActive = false;
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  initKeywords();
+  loadStats();
+  loadJobs();
+
+  document.getElementById('scrape-all').addEventListener('click', scrapeAllKeywords);
+  document.getElementById('refresh-db').addEventListener('click', refreshDatabase);
+  document.getElementById('clear-log').addEventListener('click', clearLog);
+
+  // Auto-refresh stats every 30 seconds
+  setInterval(loadStats, 30000);
+});
+
+function initKeywords() {
+  const grid = document.getElementById('keywords-grid');
+  KEYWORDS.forEach(keyword => {
+    const btn = document.createElement('button');
+    btn.className = 'keyword-btn';
+    btn.textContent = keyword;
+    btn.dataset.keyword = keyword;
+    btn.addEventListener('click', () => scrapeSingleKeyword(keyword));
+    grid.appendChild(btn);
+  });
+}
+
+function log(message, type = 'info') {
+  const content = document.getElementById('log-content');
+  const line = document.createElement('div');
+  line.className = `log-line ${type}`;
+  const timestamp = new Date().toLocaleTimeString();
+  line.textContent = `[${timestamp}] ${message}`;
+  content.insertBefore(line, content.firstChild);
+
+  // Keep only last 50 lines
+  while (content.children.length > 50) {
+    content.removeChild(content.lastChild);
+  }
+}
+
+function clearLog() {
+  document.getElementById('log-content').innerHTML = '<div class="log-line">Log cleared.</div>';
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch(`${API_BASE}/job-sync`);
+    const data = await res.json();
+
+    if (data.success) {
+      document.getElementById('total-jobs').textContent =
+        (data.stats.totalActive + data.stats.totalInactive).toLocaleString();
+      document.getElementById('active-jobs').textContent =
+        data.stats.totalActive.toLocaleString();
+      document.getElementById('scraped-today').textContent =
+        data.stats.scrapedActive.toLocaleString();
+
+      // Count unique companies from bySource
+      const totalCompanies = data.stats.bySource.reduce((sum, s) => sum + s.count, 0);
+      document.getElementById('total-companies').textContent = totalCompanies.toLocaleString();
+    }
+  } catch (error) {
+    log('Failed to load stats: ' + error.message, 'error');
+  }
+}
+
+async function loadJobs() {
+  try {
+    const res = await fetch(`${API_BASE}/jobs?limit=20`);
+    const data = await res.json();
+
+    if (data.success && data.data) {
+      const tbody = document.getElementById('jobs-tbody');
+      tbody.innerHTML = '';
+
+      if (data.data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No jobs found. Start scraping!</td></tr>';
+        return;
+      }
+
+      data.data.forEach(job => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${job.title || 'N/A'}</td>
+          <td>${job.company || 'N/A'}</td>
+          <td>${job.location || 'N/A'}</td>
+          <td><span class="portal-badge">${job.source || 'Unknown'}</span></td>
+          <td>${job.postedDate || 'Recently'}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+  } catch (error) {
+    log('Failed to load jobs: ' + error.message, 'error');
+  }
+}
+
+async function scrapeSingleKeyword(keyword) {
+  if (isScrapingActive) {
+    log('⚠️ Scraping already in progress...', 'warning');
+    return;
+  }
+
+  const btn = document.querySelector(`[data-keyword="${keyword}"]`);
+  btn.classList.add('loading');
+  isScrapingActive = true;
+
+  log(`🌐 Starting scrape for "${keyword}"...`, 'info');
+
+  try {
+    const res = await fetch(`${API_BASE}/job-sync`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keyword })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      log(`✅ "${keyword}": ${data.scraped} scraped, ${data.created} created, ${data.updated} updated`, 'success');
+      await loadStats();
+      await loadJobs();
+    } else {
+      log(`❌ Failed to scrape "${keyword}": ${data.message}`, 'error');
+    }
+  } catch (error) {
+    log(`❌ Error scraping "${keyword}": ${error.message}`, 'error');
+  } finally {
+    btn.classList.remove('loading');
+    isScrapingActive = false;
+  }
+}
+
+async function scrapeAllKeywords() {
+  if (isScrapingActive) {
+    log('⚠️ Scraping already in progress...', 'warning');
+    return;
+  }
+
+  const btn = document.getElementById('scrape-all');
+  btn.disabled = true;
+  isScrapingActive = true;
+
+  log('🚀 Starting comprehensive scraping...', 'info');
+
+  let totalScraped = 0;
+  let totalCreated = 0;
+  let totalUpdated = 0;
+
+  for (const keyword of KEYWORDS) {
+    const keywordBtn = document.querySelector(`[data-keyword="${keyword}"]`);
+    keywordBtn.classList.add('loading');
+
+    log(`🔍 Scraping "${keyword}"...`, 'info');
+
+    try {
+      const res = await fetch(`${API_BASE}/job-sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keyword })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        totalScraped += data.scraped || 0;
+        totalCreated += data.created || 0;
+        totalUpdated += data.updated || 0;
+        log(`✅ "${keyword}": ${data.scraped} jobs (${data.created} new)`, 'success');
+      } else {
+        log(`❌ "${keyword}" failed: ${data.message}`, 'error');
+      }
+
+      keywordBtn.classList.remove('loading');
+
+      // Wait 2 seconds between keywords to avoid overload
+      if (KEYWORDS.indexOf(keyword) < KEYWORDS.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    } catch (error) {
+      log(`❌ Error scraping "${keyword}": ${error.message}`, 'error');
+      keywordBtn.classList.remove('loading');
+    }
+  }
+
+  log(`🎉 Completed! Total: ${totalScraped} scraped, ${totalCreated} created, ${totalUpdated} updated`, 'success');
+
+  await loadStats();
+  await loadJobs();
+
+  btn.disabled = false;
+  isScrapingActive = false;
+}
+
+async function refreshDatabase() {
+  const btn = document.getElementById('refresh-db');
+  btn.disabled = true;
+
+  log('🔄 Refreshing database...', 'info');
+
+  try {
+    const res = await fetch(`${API_BASE}/scrape-jobs/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ limit: 100 })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      log(`✅ Refreshed: ${data.checked} checked, ${data.deactivated} deactivated, ${data.logosProcessed || 0} logos processed`, 'success');
+      await loadStats();
+      await loadJobs();
+    } else {
+      log(`❌ Refresh failed: ${data.message}`, 'error');
+    }
+  } catch (error) {
+    log(`❌ Error refreshing: ${error.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+</script>

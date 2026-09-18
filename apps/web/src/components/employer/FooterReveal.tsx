@@ -139,36 +139,38 @@ export default function FooterReveal({ logoMark }: FooterRevealProps) {
           <div className="editorial-frame footer__top">
             <div>
               <div ref={brandRef} className="brand-mark">
-                <img src={logoMark} alt="Employr Logo" title="Employr - Career Operating System" className="brand-symbol" />
+                <img src={logoMark} alt="Logo Employr" title="Employr - Persiapan Karier Menuju Pekerjaan Impian" className="brand-symbol" />
               </div>
-              <p ref={taglineRef}>Start your career journey today.</p>
+              <p ref={taglineRef}>Mulai persiapan kariermu hari ini.</p>
             </div>
             <div className="footer__links">
               <div ref={(el) => { colRefs.current[0] = el; }}>
-                <b>Product</b>
-                <button type="button" onClick={() => handleToast('CV Builder coming soon.')}>CV Builder</button>
-                <button type="button" onClick={() => handleToast('Job search coming soon.')}>Find Jobs</button>
-                <button type="button" onClick={() => handleToast('CV matching coming soon.')}>Match CV</button>
-                <button type="button" onClick={() => handleToast('Career switch coming soon.')}>Switch Careers</button>
+                <b>Produk</b>
+                <button type="button" onClick={() => handleToast('Fitur CV Builder segera hadir.')}>CV Builder</button>
+                <button type="button" onClick={() => handleToast('Pencarian loker segera hadir.')}>Cari Loker</button>
+                <button type="button" onClick={() => handleToast('Pencocokan CV segera hadir.')}>Cocokkan CV</button>
+                <button type="button" onClick={() => handleToast('Panduan pindah karier segera hadir.')}>Pindah Karier</button>
               </div>
               <div ref={(el) => { colRefs.current[1] = el; }}>
-                <b>Insights</b>
-                <button type="button" onClick={() => handleToast('Career guides coming soon.')}>Career Guide</button>
-                <button type="button" onClick={() => handleToast('CV tips coming soon.')}>CV Tips</button>
-                <button type="button" onClick={() => handleToast('Market insights coming soon.')}>Market Insights</button>
+                <b>Panduan</b>
+                <button type="button" onClick={() => handleToast('Panduan karier segera hadir.')}>Panduan Karier</button>
+                <button type="button" onClick={() => handleToast('Tips CV segera hadir.')}>Tips CV</button>
+                <button type="button" onClick={() => handleToast('Tren dunia kerja segera hadir.')}>Tren Kerja</button>
               </div>
               <div ref={(el) => { colRefs.current[2] = el; }}>
-                <b>Company</b>
-                <button type="button" onClick={() => handleToast('About Employr coming soon.')}>About</button>
-                <button type="button" onClick={() => handleToast('Contact details coming soon.')}>Contact</button>
-                <button type="button" onClick={() => handleToast('Privacy policy coming soon.')}>Privacy</button>
+                <b>Perusahaan</b>
+                <button type="button" onClick={() => handleToast('Informasi tentang kami segera hadir.')}>Tentang Kami</button>
+                <a href="mailto:help.employr@outlook.com">Email CS</a>
+                <a href="https://www.threads.net/@employr.id" target="_blank" rel="noopener noreferrer">Threads @employr.id</a>
+                <a href="https://www.threads.net/@riizalhp" target="_blank" rel="noopener noreferrer">DM @riizalhp</a>
+                <a href="/kebijakan-privasi">Privasi</a>
               </div>
             </div>
           </div>
 
           <div ref={bottomRef} className="editorial-frame footer__bottom">
-            <span>© 2026 Employr · Career Operating System</span>
-            <span>YOUR CAREER, BUILT FOR YOU.</span>
+            <span>© 2026 Employr</span>
+            <span>KARIERMU, PILIHANMU.</span>
             <span>SEMARANG · INDONESIA</span>
           </div>
         </div>

@@ -238,9 +238,9 @@ function buildFallbackAnswer(query: string): string {
     "",
     `Kamu bertanya: "${query.trim()}"`,
     "",
-    "Coba gunakan kata kunci yang lebih spesifik, misalnya: \"cara cetak CV PDF\", \"tambah lamaran di tracker\", \"kode voucher\", atau \"check-in harian\".",
+    "Coba gunakan kata kunci yang lebih spesifik, misalnya: \"cara cetak CV PDF\", \"tambah lamaran di tracker\", \"evaluasi CV\", atau \"check-in harian\".",
     "",
-    "Kamu juga bisa melihat semua artikel panduan di faq.employr.id, atau hubungi tim Customer Service Employr melalui email support@employr.id.",
+    "Kamu juga bisa melihat semua artikel panduan di faq.employr.id, atau hubungi tim Customer Service Employr melalui email help.employr@outlook.com, Threads @employr.id, atau DM Threads @riizalhp.",
   ].join("\n");
 }
 
@@ -249,12 +249,12 @@ export function getQuickPrompts(limit = 4): string[] {
   const topSlugs = [
     "cara-cetak-cv-pdf",
     "tracker-lamaran",
-    "cara-pembayaran",
+    "evaluasi-cv-screener",
     "misi-cuan",
     "referral",
     "skor-ats-cv",
-    "paket-dan-harga",
-    "jasa-cv-hrd",
+    "career-readiness",
+    "onboarding-pertama-kali",
   ];
   const articles = loadArticles();
   return topSlugs

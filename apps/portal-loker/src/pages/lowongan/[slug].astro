@@ -1,177 +1,361 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
+import Navbar from '../../components/Navbar.astro';
+import FooterPortal from '../../components/FooterPortal.astro';
 import AdSlot from '../../components/AdSlot.astro';
-import { lowonganList } from '../../data/mock';
+import SearchModal from '../../components/SearchModal.astro';
+import DetailCrossSections from '../../components/DetailCrossSections.astro';
+import CompanyLogo from '../../components/CompanyLogo.astro';
+import { getPortalJobBySlug } from '../../lib/data';
 
-export function getStaticPaths() {
-  return lowonganList.map((job) => ({
-    params: { slug: job.slug },
-    props: { job },
-  }));
+const job = await getPortalJobBySlug(Astro.params.slug || '');
+if (!job) {
+  return Astro.redirect('/lowongan');
 }
 
-const { job } = Astro.props;
-const canonical = `http://localhost:3003/lowongan/${job.slug}/`;
-const title = `${job.title} — ${job.company} di ${job.geo} | PortalKerja`;
-const description = `${job.title} di ${job.company}, ${job.location}. ${job.type} · ${job.salary}. ${job.description.slice(0, 140)}`;
-const related = lowonganList.filter((j) => j.slug !== job.slug).slice(0, 3);
+const canonical = `http://localhost:3003/lowongan/${job.slug}`;
+const title = `${job.title} di ${job.company}, ${job.geo} | Employer Job`;
+const description = `Lowongan kerja ${job.title} di ${job.company}, ${job.location}. Tipe: ${job.type}, Gaji: ${job.salary}. Informasi lengkap kualifikasi, benefit, dan cara melamar resmi.`;
 ---
+
 <BaseLayout title={title} description={description} canonicalUrl={canonical}>
-  <Header />
-  <main>
-    <div class="wrap">
-      <!-- Breadcrumb SEO -->
-      <nav aria-label="Breadcrumb" class="breadcrumb">
-        <a href="/">Beranda</a><span>›</span>
-        <a href="/#lowongan">Lowongan</a><span>›</span>
-        <a href={`/#lowongan`}>{job.geo}</a><span>›</span>
-        <span aria-current="page">{job.title}</span>
-      </nav>
+  <Navbar />
 
-      <!-- GEO badge + posted -->
-      <div class="detail-head">
-        <div class="ph ph-logo" aria-hidden="true">Logo</div>
-        <div class="head-main">
-          <div class="caps" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-            <span>{job.company} · {job.geo}</span>
-            {job.badge && <span class="badge lime">{job.badge}</span>}
-            <span class="tiny" style="font-weight:500;">{job.postedAt} · {job.type}</span>
-          </div>
-          <h1 style="font-size:28px; margin-top:6px;">{job.title} <em>di {job.geo}</em></h1>
-          <div class="meta" style="margin-top:8px;">
-            <span><i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-500"></i> {job.location}</span>
-            <span><i data-lucide="briefcase" class="w-3.5 h-3.5 text-slate-400"></i> {job.type}</span>
-            <span><i data-lucide="dollar-sign" class="w-3.5 h-3.5 text-emerald-600"></i> {job.salary}</span>
-            <span><i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i> Tayang {job.postedAt}</span>
-          </div>
-          <div class="chips" style="margin-top:10px;">
-            {job.skills.map((s) => <span class="chip">{s}</span>)}
-          </div>
-        </div>
-        <div class="head-cta">
-          <a class="btn btn-primary btn-block" href="#lamar"><i data-lucide="send" class="w-3.5 h-3.5"></i> Lamar Sekarang</a>
-          <button class="btn btn-block" type="button"><i data-lucide="heart" class="w-3.5 h-3.5"></i> Simpan</button>
-          <span class="tiny" style="text-align:center; display:block; margin-top:6px;">Dilamar 86 orang · Sisa 12 hari</span>
-        </div>
-      </div>
-
-      <div class="layout" style="padding-top:18px;">
-        <!-- LEFT: MAIN CONTENT -->
-        <div class="stack">
-          <article class="card">
-            <h2 style="font-size:18px;">Deskripsi Pekerjaan</h2>
-            <p class="muted" style="font-size:14px; line-height:1.7;">{job.description}</p>
-            <div class="divider"></div>
-            <h3>Kualifikasi</h3>
-            <ul class="list">
-              {job.qualifications.map((q) => <li>{q}</li>)}
-            </ul>
-            <h3 style="margin-top:16px;">Benefit & Fasilitas</h3>
-            <ul class="list">
-              {job.benefits.map((b) => <li>{b}</li>)}
-            </ul>
-            <div class="notice" style="margin-top:16px;">
-              <span class="dot"></span>
-              <span><strong>Lokasi GEO:</strong> {job.location} — cocok untuk pencari kerja di {job.geo} dan sekitarnya. Waspada penipuan: proses rekrutmen gratis.</span>
-            </div>
-          </article>
-
-          <!-- In-feed Ad GEO targeted -->
-          <AdSlot type="infeed" note={`Iklan relevan untuk ${job.geo}`} />
-
-          <article class="card" id="lamar">
-            <h2 style="font-size:18px;">Cara Melamar</h2>
-            <p class="small">Klik <strong>Lamar Sekarang</strong> untuk mengirim CV via PortalKerja. Kamu akan diarahkan ke dashboard untuk lengkapi profil dan kirim lamaran tercatat.</p>
-            <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
-              <a class="btn btn-primary" href={`http://localhost:3000/register`}><i data-lucide="send" class="w-3.5 h-3.5"></i> Lamar via PortalKerja</a>
-              <a class="btn" href="#"><i data-lucide="share-2" class="w-3.5 h-3.5"></i> Bagikan Lowongan</a>
-            </div>
-            <p class="tiny" style="margin-top:10px;">Dengan melamar kamu menyetujui syarat & ketentuan PortalKerja. Lowongan diverifikasi tim kurasi.</p>
-          </article>
-
-          <article class="card">
-            <h3>Tentang {job.company}</h3>
-            <p class="small muted" style="line-height:1.7;">{job.companyAbout}</p>
-            <div class="chips" style="margin-top:10px;">
-              <span class="chip">Terverifikasi</span>
-              <span class="chip">{job.geo}</span>
-              <span class="chip">Aktif merekrut</span>
-            </div>
-          </article>
-
-          <!-- Related -->
-          <section>
-            <h2 style="margin-bottom:12px;">Lowongan serupa di {job.geo}</h2>
-            <div class="grid-2">
-              {related.map((r) => (
-                <a class="card" href={`/lowongan/${r.slug}/`} style="text-decoration:none;">
-                  <span class="caps">{r.company} · {r.geo}</span>
-                  <h3 style="font-size:15px;">{r.title}</h3>
-                  <span class="tiny">{r.location} · {r.salary}</span>
-                  <div class="chips">{r.skills.slice(0,2).map((s)=><span class="chip">{s}</span>)}</div>
-                </a>
-              ))}
-            </div>
-          </section>
-        </div>
-
-        <!-- RIGHT: SIDEBAR -->
-        <aside class="sidebar">
-          <div class="side-box" style="border:1px solid var(--cobalt);">
-            <h4>Ringkasan Lowongan</h4>
-            <div class="stack" style="gap:10px; font-size:13px;">
-              <div class="kv"><span class="tiny">Perusahaan</span><strong>{job.company}</strong></div>
-              <div class="kv"><span class="tiny">Lokasi (GEO)</span><strong>{job.location}</strong></div>
-              <div class="kv"><span class="tiny">Tipe</span><strong>{job.type}</strong></div>
-              <div class="kv"><span class="tiny">Gaji</span><strong>{job.salary}</strong></div>
-              <div class="kv"><span class="tiny">Diposting</span><strong>{job.postedAt}</strong></div>
-              <a class="btn btn-primary btn-block" href="#lamar" style="margin-top:6px;">Lamar Sekarang</a>
-              <span class="tiny" style="text-align:center;">Gratis — tanpa pungutan</span>
-            </div>
-          </div>
-
-          <AdSlot type="mrec" />
-
-          <div class="side-box">
-            <h4>Tips Lolos di {job.geo}</h4>
-            <p class="small muted">Update CV dengan keyword <em>{job.skills[0]}</em> dan lokasi {job.geo} agar ATS mudah menemukan lamaranmu.</p>
-            <a class="small" href={`/artikel/7-kesalahan-cv-fresh-graduate-ditolak-hrd-tips-lolos-ats-2026/`} style="color:var(--cobalt); margin-top:8px; display:block;">Baca panduan CV ATS →</a>
-          </div>
-
-          <AdSlot type="skyscraper" />
-        </aside>
+  <main class="bg-[#f4f3ee] min-h-screen pb-20">
+    <!-- Breadcrumbs Navigation -->
+    <div class="bg-white border-b border-[#d7d6cf]">
+      <div class="max-w-[1240px] mx-auto px-4 sm:px-6 py-4">
+        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs text-[#6e6d68] flex-wrap">
+          <a href="/" class="hover:text-[#0000ff] transition">Beranda</a>
+          <span>/</span>
+          <a href="/lowongan" class="hover:text-[#0000ff] transition">Lowongan Kerja</a>
+          <span>/</span>
+          <span class="text-[#6e6d68] font-medium">{job.geo}</span>
+          <span>/</span>
+          <span class="text-[#101010] font-semibold truncate max-w-[200px] sm:max-w-xs" aria-current="page">{job.title}</span>
+        </nav>
       </div>
     </div>
-  </main>
-  <Footer />
 
-  <!-- SEO Structured Data -->
-  <script type="application/ld+json" set:html={JSON.stringify({
+    <!-- Job Header Card -->
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6">
+      <div class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8 shadow-xs">
+        <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+          <div class="flex items-start gap-4 sm:gap-5">
+            <CompanyLogo name={job.company} logoUrl={job.companyLogo} website={job.companyWebsite} size="lg" class="w-16 h-16 sm:w-20 sm:h-20 text-xl" />
+            <div>
+              <div class="flex items-center gap-2 flex-wrap mb-1.5">
+                <span class="text-sm font-semibold text-[#101010]">{job.company}</span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[#0000ff] text-[11px] font-semibold">
+                  <svg class="w-3 h-3 text-[#0000ff]" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                  Terverifikasi
+                </span>
+                {job.badge && (
+                  <span class="px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold">
+                    {job.badge}
+                  </span>
+                )}
+              </div>
+              <h1 class="text-xl sm:text-2xl lg:text-3xl font-semibold text-[#101010] tracking-tight leading-snug">
+                {job.title}
+              </h1>
+              <div class="flex items-center gap-y-2 gap-x-4 flex-wrap mt-3 text-xs text-[#6e6d68] font-medium">
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                  {job.location}
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                  {job.type} ({job.experience})
+                </span>
+                <span class="flex items-center gap-1.5 text-emerald-700 font-bold">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  {job.salary}
+                </span>
+                <span class="flex items-center gap-1.5 text-[#6e6d68]">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  Tayang {job.postedAt}
+                </span>
+              </div>
+
+              <!-- Required Skills Chips -->
+              <div class="flex items-center gap-1.5 flex-wrap mt-4">
+                {job.skills.map((s) => (
+                  <span class="text-xs px-3 py-1 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#101010] font-medium">
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 w-full lg:w-64 pt-4 lg:pt-0 border-t lg:border-t-0 border-[#d7d6cf]/50">
+            <a
+              href="#cara-melamar"
+              class="w-full min-h-[44px] px-5 py-3 rounded-full bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-semibold text-xs shadow-md shadow-orange-500/20 text-center flex items-center justify-center gap-2 transition cursor-pointer"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+              <span>Lamar Sekarang</span>
+            </a>
+            <div class="flex items-center gap-2 w-full">
+              <button
+                type="button"
+                id="btn-bookmark"
+                class="flex-1 min-h-[42px] px-4 py-2 rounded-full border border-[#d7d6cf] hover:bg-[#f4f3ee] text-[#101010] text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+              >
+                <svg class="w-4 h-4 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                <span>Simpan</span>
+              </button>
+              <button
+                type="button"
+                id="btn-share"
+                class="flex-1 min-h-[42px] px-4 py-2 rounded-full border border-[#d7d6cf] hover:bg-[#f4f3ee] text-[#101010] text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+              >
+                <svg class="w-4 h-4 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                <span>Bagikan</span>
+              </button>
+            </div>
+            <p class="text-[11px] text-[#6e6d68] text-center">
+              Pendaftaran gratis, tanpa dipungut biaya apapun.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Layout (Left Content + Right Sidebar) -->
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Left: Detail Articles & Specifications -->
+        <div class="lg:col-span-8 space-y-6">
+          <!-- 1. Job Description -->
+          <article class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8">
+            <h2 class="text-lg font-semibold text-[#101010] mb-4 pb-3 border-b border-[#d7d6cf]/50 flex items-center gap-2">
+              <span class="w-1.5 h-4 bg-[#0000ff] rounded-full"></span>
+              Deskripsi Pekerjaan
+            </h2>
+            <div class="text-sm text-[#101010] leading-relaxed whitespace-pre-line space-y-3">
+              <p>{job.description}</p>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-[#d7d6cf]/50">
+              <h3 class="text-base font-semibold text-[#101010] mb-3">Kualifikasi &amp; Persyaratan:</h3>
+              <ul class="space-y-2.5 text-sm text-[#101010]">
+                {job.qualifications.map((q) => (
+                  <li class="flex items-start gap-2.5">
+                    <svg class="w-4 h-4 text-emerald-600 mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>{q}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-[#d7d6cf]/50">
+              <h3 class="text-base font-semibold text-[#101010] mb-3">Benefit &amp; Fasilitas:</h3>
+              <ul class="space-y-2.5 text-sm text-[#101010]">
+                {job.benefits.map((b) => (
+                  <li class="flex items-start gap-2.5">
+                    <svg class="w-4 h-4 text-[#0000ff] mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <!-- Fraud Alert Notice -->
+            <div class="mt-8 p-4 rounded-xl bg-amber-50/80 border border-amber-200/80 flex items-start gap-3 text-xs text-amber-900 leading-relaxed">
+              <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+              <div>
+                <strong class="font-bold block mb-0.5">Waspada Penipuan Rekrutmen</strong>
+                Perusahaan tidak pernah memungut biaya apapun (tiket, akomodasi, atau seragam) dalam seluruh tahapan seleksi kerja. Laporkan jika ada indikasi pungutan liar.
+              </div>
+            </div>
+          </article>
+
+          <!-- 2. How to Apply Section -->
+          <article id="cara-melamar" class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8">
+            <h2 class="text-lg font-semibold text-[#101010] mb-3 flex items-center gap-2">
+              <span class="w-1.5 h-4 bg-orange-500 rounded-full"></span>
+              Tata Cara Melamar
+            </h2>
+            <p class="text-sm text-[#6e6d68] leading-relaxed mb-5">
+              Silakan kirimkan CV terbaru yang sudah dioptimalkan sesuai kata kunci kualifikasi di atas. Lamaran dapat diajukan langsung melalui portal resmi rekruter atau tautan karir di bawah ini.
+            </p>
+            <div class="p-5 rounded-2xl bg-[#f4f3ee] border border-[#d7d6cf] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <span class="text-xs font-semibold text-[#101010] block">Sumber Informasi Resmi:</span>
+                <span class="text-xs text-[#6e6d68]">{job.source}</span>
+              </div>
+              <a
+                href={job.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="min-h-[42px] px-5 py-2 rounded-full bg-[#0000ff] hover:bg-[#1738d1] text-white text-xs font-semibold transition flex items-center gap-2 shadow-xs"
+              >
+                <span>Buka Link Pendaftaran Resmi</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- Google Ads: In-feed Unit (Setelah Alur Pendaftaran Selesai) -->
+          <AdSlot type="infeed" note={`Rekomendasi pelatihan dan persiapan sertifikasi profesi ${job.category}.`} />
+
+          <!-- 3. Company Overview -->
+          <article class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8">
+            <h2 class="text-lg font-semibold text-[#101010] mb-3">Tentang {job.company}</h2>
+            <p class="text-sm text-[#101010] leading-relaxed">{job.companyAbout}</p>
+            <div class="flex items-center gap-2 flex-wrap mt-4">
+              <span class="text-xs px-3 py-1 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#6e6d68] font-medium">Kota: {job.geo}</span>
+              <span class="text-xs px-3 py-1 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#6e6d68] font-medium">Bidang: {job.category}</span>
+              <span class="text-xs px-3 py-1 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#6e6d68] font-medium">Status: Aktif Merekrut</span>
+            </div>
+          </article>
+        </div>
+
+        <!-- Right: Sticky Sidebar with Summary & Google Ads -->
+        <aside class="lg:col-span-4 space-y-6">
+          <!-- Job Summary Box -->
+          <div class="bg-white rounded-2xl border border-[#d7d6cf] p-5 shadow-xs">
+            <h3 class="text-sm font-semibold text-[#101010] mb-4 pb-2 border-b border-[#d7d6cf]/50">
+              Ringkasan Posisi
+            </h3>
+            <div class="space-y-3 text-xs">
+              <div class="flex justify-between py-1 border-b border-[#d7d6cf]/50">
+                <span class="text-[#6e6d68]">Perusahaan</span>
+                <span class="font-semibold text-[#101010] text-right">{job.company}</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-[#d7d6cf]/50">
+                <span class="text-[#6e6d68]">Lokasi Penempatan</span>
+                <span class="font-semibold text-[#101010] text-right">{job.location}</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-[#d7d6cf]/50">
+                <span class="text-[#6e6d68]">Tingkat Pengalaman</span>
+                <span class="font-semibold text-[#101010] text-right">{job.experience}</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-[#d7d6cf]/50">
+                <span class="text-[#6e6d68]">Tipe Kontrak</span>
+                <span class="font-semibold text-[#101010] text-right">{job.type}</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-[#d7d6cf]/50">
+                <span class="text-[#6e6d68]">Rentang Gaji</span>
+                <span class="font-bold text-emerald-700 text-right">{job.salary}</span>
+              </div>
+              <div class="flex justify-between py-1">
+                <span class="text-[#6e6d68]">Tanggal Tayang</span>
+                <span class="font-semibold text-[#101010] text-right">{job.postedAt}</span>
+              </div>
+            </div>
+
+            <a
+              href="#cara-melamar"
+              class="w-full min-h-[42px] mt-4 px-4 py-2 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-xs"
+            >
+              Lamar Posisi Ini
+            </a>
+          </div>
+
+          <!-- ATS Preparation Tip -->
+          <div class="bg-white rounded-2xl border border-[#d7d6cf] p-5 shadow-xs">
+            <h4 class="text-xs font-bold text-[#0000ff] uppercase tracking-wider mb-1">
+              Tips Lolos Seleksi ATS
+            </h4>
+            <p class="text-xs text-[#6e6d68] leading-relaxed mt-2">
+              Pastikan kata kunci keahlian seperti <strong class="text-[#101010]">{job.skills.slice(0, 2).join(', ')}</strong> tertulis jelas di bagian pengalaman atau keterampilan CV Anda.
+            </p>
+            <a
+              href="http://localhost:3000/cv"
+              class="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#0000ff] hover:underline"
+            >
+              <span>Optimalkan CV di Dashboard →</span>
+            </a>
+          </div>
+
+          <!-- Google Ads: High-Viewability Sticky Sidebar Unit (300x600) -->
+          <div class="sticky top-24">
+            <AdSlot type="skyscraper" note={`Pelatihan dan jalur karier profesional ${job.category}.`} />
+          </div>
+        </aside>
+      </div>
+
+      <!-- Google Ads: Leaderboard horizontal sebelum rekomendasi -->
+      <AdSlot type="leaderboard" note="Rekomendasi program pelatihan dan bursa kerja nasional." />
+
+      <!-- 5 Cross-Section Modules (Rekomendasi Lainnya) -->
+      <DetailCrossSections
+        currentType="lowongan"
+        currentSlug={job.slug}
+        category={job.category}
+        geo={job.geo}
+      />
+    </div>
+  </main>
+
+  <FooterPortal />
+  <SearchModal />
+
+  <!-- Script for Toast Feedback on Share & Bookmark -->
+  <script is:inline>
+    const shareBtn = document.getElementById('btn-share');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', async () => {
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: document.title,
+              url: window.location.href,
+            });
+          } catch (err) {
+            // User cancelled share
+          }
+        } else {
+          navigator.clipboard.writeText(window.location.href);
+          alert('Tautan lowongan berhasil disalin ke papan klip.');
+        }
+      });
+    }
+
+    const bookmarkBtn = document.getElementById('btn-bookmark');
+    if (bookmarkBtn) {
+      bookmarkBtn.addEventListener('click', () => {
+        alert('Lowongan telah ditambahkan ke daftar simpanan Anda.');
+      });
+    }
+  </script>
+
+  <!-- Structured Data JSON-LD for Google Jobs -->
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "JobPosting",
     "title": job.title,
     "description": job.description,
-    "datePosted": "2026-08-18",
-    "employmentType": job.type.toUpperCase().replace('-','_'),
-    "hiringOrganization": { "@type": "Organization", "name": job.company },
-    "jobLocation": { "@type": "Place", "address": { "@type": "PostalAddress", "addressLocality": job.geo, "addressRegion": job.location } },
-    "baseSalary": { "@type": "MonetaryAmount", "currency": "IDR", "value": { "@type": "QuantitativeValue", "value": job.salary } },
+    "datePosted": new Date().toISOString().split('T')[0],
+    "employmentType": job.type.toUpperCase().replace('-', '_'),
+    "hiringOrganization": {
+      "@type": "Organization",
+      "name": job.company,
+      "logo": job.companyLogo || "http://localhost:3003/employer-job.svg"
+    },
+    "jobLocation": {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": job.geo,
+        "addressRegion": job.location,
+        "addressCountry": "ID"
+      }
+    },
+    "baseSalary": {
+      "@type": "MonetaryAmount",
+      "currency": "IDR",
+      "value": {
+        "@type": "QuantitativeValue",
+        "value": job.salary
+      }
+    },
     "url": canonical
   })} />
-
-  <style>
-    .breadcrumb { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:16px 0 8px; font-size:13px; color:var(--muted);}
-    .breadcrumb a:hover{color:var(--cobalt);}
-    .breadcrumb span[aria-current]{color:var(--ink); font-weight:600;}
-    .detail-head { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:18px; display:flex; gap:18px; align-items:flex-start; box-shadow:var(--shadow); }
-    .head-main{flex:1}
-    .head-cta{width:220px; flex:none; display:flex; flex-direction:column; gap:8px;}
-    .divider{height:1px; background:var(--border); margin:14px 0;}
-    .list{margin:8px 0 0 18px; color:var(--muted); font-size:14px; line-height:1.7;}
-    .kv{display:flex; flex-direction:column; gap:2px; border-bottom:1px solid var(--border); padding-bottom:8px;}
-    .kv:last-child{border:0;}
-    @media(max-width: 780px){ .detail-head{flex-direction:column;} .head-cta{width:100%;} }
-  </style>
 </BaseLayout>

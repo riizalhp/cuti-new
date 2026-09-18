@@ -34,7 +34,7 @@ export const LatestMissionsList: React.FC = () => {
     {
       id: 'testimoni',
       title: 'Tulis Testimoni Positif',
-      desc: 'Bagikan pengalaman kamu memakai CUTI.',
+      desc: 'Bagikan pengalaman kamu memakai Employr.',
       reward: '+40 Cuan',
       status: 'pending',
       icon: MessageSquare,

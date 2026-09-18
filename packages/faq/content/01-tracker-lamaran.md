@@ -52,8 +52,8 @@ Klik toggle **Tabel** untuk melihat semua lamaran dalam bentuk daftar yang bisa:
 ## Pertanyaan umum
 
 - **Lamaran tersimpan di mana?** Di database Employr, terhubung ke akunmu. Bisa diakses dari perangkat lain setelah login.
-- **Bagaimana jika gagal menyimpan?** Akan muncul pesan *"Lamaran belum tersimpan. Periksa koneksi internet Anda."* — cek koneksi lalu klik Sinkronisasi.
-- **Bisa lamaran tanpa link portal?** Bisa — portal opsional, cukup isi perusahaan & posisi.
-- **Ada batas jumlah lamaran?** Akun Free memiliki batas tertentu; lihat [Paket & Harga](/artikel/paket-dan-harga) untuk detail.
+- **Bagaimana jika gagal menyimpan?** Akan muncul pesan *"Lamaran belum tersimpan. Periksa koneksi internet Anda."* (cek koneksi lalu klik Sinkronisasi).
+- **Bisa lamaran tanpa link portal?** Bisa, kolom portal opsional, cukup isi nama perusahaan & posisi.
+- **Ada batas jumlah lamaran?** Tidak ada batasan. Kamu bebas menambahkan dan memantau riwayat lamaran kerja sebanyak apa pun secara gratis.
 
 Lanjut baca: [Scraper Lowongan](/artikel/scraper-lowongan) dan [Panduan Interview](/artikel/panduan-interview).

@@ -1,6 +1,6 @@
 # Employr Admin Panel
 
-Admin dashboard for the CUTI platform built with Next.js 15.
+Admin dashboard for the Employr platform built with Next.js 15.
 
 ## Features
 
@@ -27,13 +27,13 @@ Admin dashboard for the CUTI platform built with Next.js 15.
 pnpm install
 
 # Run dev server (port 3002)
-pnpm --filter @cuti/admin dev
+pnpm --filter @employr/admin dev
 
 # Build for production
-pnpm --filter @cuti/admin build
+pnpm --filter @employr/admin build
 
 # Start production server
-pnpm --filter @cuti/admin start
+pnpm --filter @employr/admin start
 ```
 
 ## Project Structure

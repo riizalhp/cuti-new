@@ -3,9 +3,19 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { cvApi } from '@/lib/api';
-import { FileText, Sliders, ChevronDown, ChevronUp, CheckCircle2, Sparkles, Plus } from 'lucide-react';
-import { calculateAtsScore, getAtsStatusLabel } from '@/lib/ats-score';
+import {
+  FileTextIcon,
+  SlidersIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  CheckCircleIcon,
+  AlertTriangleIcon,
+  AlertCircleIcon,
+} from '@/components/icons/CustomIcons';
+import { calculateAtsScore, getAtsStatusLabel, getScoreColorTokens } from '@/lib/ats-score';
 import { calculateDynamicAtsScore } from '@/lib/ats-score-engine';
+import { FeedbackWidget } from '@/components/ui/FeedbackWidget';
+import { getStoredSession } from '@/lib/auth';
 
 interface CVATSScoreCardProps {
   onOptimizeClick?: () => void;
@@ -17,7 +27,13 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
 }) => {
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const [atsScore, setAtsScore] = useState<number | null>(null);
+
+  useEffect(() => {
+    const session = getStoredSession();
+    if (session?.id) setUserId(session.id);
+  }, []);
   const [cvTitle, setCvTitle] = useState<string>('Memuat data CV...');
   const [accuracyRate, setAccuracyRate] = useState<number>(0);
   const [recommendationsCount, setRecommendationsCount] = useState<number>(0);
@@ -113,7 +129,7 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
 
           setIsEmptyOrDefault(dynResults.every((r) => r.isEmptyOrDefault));
           setPenalties([...new Set(allIssues.map((i) => i.message))]);
-          setBonuses(['Model Dynamic ATS Score (4 Engine) Active']);
+          setBonuses(['Analisis multi-faktor ATS aktif']);
         }
       } else {
         setHasCv(false);
@@ -136,6 +152,7 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
 
   const displayScore = atsScore !== null ? atsScore : 0;
   const statusLabel = getAtsStatusLabel(displayScore, isEmptyOrDefault);
+  const scoreTokens = getScoreColorTokens(hasCv ? displayScore : 0, isEmptyOrDefault || !hasCv);
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-full transition-all space-y-4">
@@ -143,8 +160,8 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/50">
-              <FileText className="w-4 h-4" />
+            <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center border transition-colors ${scoreTokens.iconWrapper}`}>
+              <FileTextIcon size={16} />
             </div>
             <div>
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">
@@ -157,27 +174,32 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
           </div>
 
           <div className="text-right flex items-center gap-2">
-            <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+            <span className={`text-xl font-black font-mono transition-colors ${scoreTokens.text}`}>
               {atsScore !== null ? `${displayScore}/100` : '...'}
             </span>
           </div>
         </div>
 
         {/* Score Summary Badge Box */}
-        <div className="flex items-center justify-between bg-emerald-50/70 dark:bg-emerald-950/30 p-3 rounded-[10px] border border-emerald-100 dark:border-emerald-900/40 my-3">
+        <div className={`flex items-center justify-between p-3 rounded-[10px] border my-3 transition-colors ${scoreTokens.bgBox} ${scoreTokens.border}`}>
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            {scoreTokens.tier === 'good' && (
+              <CheckCircleIcon size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+            )}
+            {scoreTokens.tier === 'medium' && (
+              <AlertTriangleIcon size={16} className="text-amber-600 dark:text-amber-400 shrink-0" />
+            )}
+            {scoreTokens.tier === 'low' && (
+              <AlertCircleIcon size={16} className="text-rose-600 dark:text-rose-400 shrink-0" />
+            )}
+            {scoreTokens.tier === 'empty' && (
+              <FileTextIcon size={16} className="text-slate-400 dark:text-slate-500 shrink-0" />
+            )}
             <span className="text-xs font-bold text-slate-900 dark:text-white">
               Status ATS: Terbaca {accuracyRate}% Akurat
             </span>
           </div>
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-[10px] ${
-            displayScore >= 85
-              ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950'
-              : displayScore >= 70
-              ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-950'
-              : 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950'
-          }`}>
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-[10px] border transition-colors ${scoreTokens.badge}`}>
             {statusLabel}
           </span>
         </div>
@@ -188,17 +210,17 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
             {!hasCv
               ? 'Buat CV untuk melihat skor ATS kamu'
               : isEmptyOrDefault
-              ? 'CV masih kosong / template default — isi data asli dulu'
+              ? 'CV masih kosong atau template default: isi data asli kamu terlebih dahulu'
               : recommendationsCount > 0
               ? `${recommendationsCount} penalti aktif, ${bonuses.length} bonus didapat`
               : 'Format CV optimal & siap screening HR'}
           </span>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-0.5 cursor-pointer"
+            className={`font-bold hover:underline flex items-center gap-0.5 cursor-pointer transition-colors ${scoreTokens.text}`}
           >
             <span>{isExpanded ? 'Tutup Detail' : 'Lihat Detail'}</span>
-            {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            {isExpanded ? <ChevronUpIcon size={14} /> : <ChevronDownIcon size={14} />}
           </button>
         </div>
 
@@ -207,7 +229,7 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
           <div className="space-y-3 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 animate-in fade-in duration-200">
             {/* Daftar Penalti / Pengurangan Skor */}
             {penalties.length > 0 && (
-              <div className="space-y-1 bg-red-50/70 dark:bg-red-950/30 p-2.5 rounded-[8px] border border-red-100 dark:border-red-900/40">
+              <div className="space-y-1 bg-red-50/70 dark:bg-red-950/30 p-2.5 rounded-[10px] border border-red-100 dark:border-red-900/40">
                 <p className="text-[11px] font-bold text-red-700 dark:text-red-300">Pengurangan Skor (Penalti):</p>
                 <ul className="text-[10px] text-red-600 dark:text-red-400 space-y-0.5 pl-3 list-disc">
                   {penalties.map((p, idx) => (
@@ -219,7 +241,7 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
 
             {/* Daftar Bonus / Penambahan Skor */}
             {bonuses.length > 0 && (
-              <div className="space-y-1 bg-emerald-50/70 dark:bg-emerald-950/30 p-2.5 rounded-[8px] border border-emerald-100 dark:border-emerald-900/40">
+              <div className="space-y-1 bg-emerald-50/70 dark:bg-emerald-950/30 p-2.5 rounded-[10px] border border-emerald-100 dark:border-emerald-900/40">
                 <p className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">Penambahan Skor (Bonus):</p>
                 <ul className="text-[10px] text-emerald-600 dark:text-emerald-400 space-y-0.5 pl-3 list-disc">
                   {bonuses.map((b, idx) => (
@@ -242,11 +264,13 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
                 <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
                   <div
                     className={`h-1.5 rounded-full transition-all duration-500 ${
-                      c.score >= 90
+                      c.score >= 75
                         ? 'bg-emerald-500'
-                        : c.score >= 80
-                        ? 'bg-[#1738D1]'
-                        : 'bg-amber-500'
+                        : c.score >= 60
+                        ? 'bg-amber-500'
+                        : c.score > 0
+                        ? 'bg-rose-500'
+                        : 'bg-slate-300 dark:bg-slate-700'
                     }`}
                     style={{ width: `${c.score}%` }}
                   />
@@ -258,13 +282,20 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
       </div>
 
       {/* Action Button */}
-      <button
-        onClick={onOptimizeClick || (() => router.push('/cv'))}
-        className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition cursor-pointer border-0"
-      >
-        <Sliders className="w-3.5 h-3.5" />
-        <span>Optimalkan CV Sekarang</span>
-      </button>
+      <div className="flex flex-col gap-3">
+        {userId && (
+          <div className="flex justify-end">
+            <FeedbackWidget feature="ats_score" userId={userId} />
+          </div>
+        )}
+        <button
+          onClick={onOptimizeClick || (() => router.push('/cv'))}
+          className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition cursor-pointer border-0"
+        >
+          <SlidersIcon size={14} />
+          <span>Optimalkan CV Sekarang</span>
+        </button>
+      </div>
     </div>
   );
 };

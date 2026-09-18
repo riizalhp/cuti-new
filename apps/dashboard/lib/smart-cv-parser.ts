@@ -52,6 +52,35 @@ export interface ParsedCvReference {
   relationship?: string;
 }
 
+export interface ParsedCvPublication {
+  id: string;
+  title: string;
+  publisher: string;
+  authors: string;
+  date: string;
+  link: string;
+}
+
+export interface ParsedCvAward {
+  id: string;
+  name: string;
+  issuer: string;
+  date: string;
+}
+
+export interface ParsedCvPortfolioLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
+export interface ParsedCvOtherRelevant {
+  id: string;
+  title: string;
+  period: string;
+  description: string;
+}
+
 export interface ParsedCvResult {
   isValidCv: boolean;
   cvConfidenceScore: number;
@@ -75,6 +104,11 @@ export interface ParsedCvResult {
   organizations?: ParsedCvOrganization[];
   certifications?: ParsedCvCertification[];
   references?: ParsedCvReference[];
+  publications?: ParsedCvPublication[];
+  awards?: ParsedCvAward[];
+  portfolioLinks?: ParsedCvPortfolioLink[];
+  otherRelevant?: ParsedCvOtherRelevant[];
+  hobbies?: string[];
 }
 
 export interface DynamicDictionaries {
@@ -226,6 +260,7 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
   const allCities = Array.from(new Set([...INDONESIAN_CITIES, ...(dynamicDicts?.cities || [])]));
   const allSkills = Array.from(new Set([...BASE_SKILL_DICTIONARY, ...(dynamicDicts?.skills || [])]));
   const allPositions = Array.from(new Set([...BASE_POSITION_DICTIONARY, ...(dynamicDicts?.positions || [])]));
+  const allInstitutions = Array.from(new Set(dynamicDicts?.institutions || [])).sort((a, b) => b.length - a.length);
 
   // 1. Identify & Segment CV Sections
   const sections: Record<string, string[]> = {};
@@ -328,6 +363,26 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
     let cleanedUniv = rawUniv.split(/,|\.|-|\(|\/|\n/)[0].trim().replace(/[“”"']/g, '').trim();
     cleanedUniv = cleanedUniv.replace(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|202\d|201\d|199\d)[\s\S]*$/i, '').trim();
     institutionName = cleanedUniv;
+  }
+
+  // Fallback pencocokan nama institusi dari kamus pembelajaran (cv_learning_dictionary)
+  if (!institutionName && allInstitutions.length > 0) {
+    const targetHaystack = eduText || cleanText;
+    for (const inst of allInstitutions) {
+      if (inst && inst.trim().length >= 3) {
+        const escaped = inst.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const instRegex = new RegExp(`\\b${escaped}\\b`, 'i');
+        if (instRegex.test(targetHaystack)) {
+          institutionName = inst.trim();
+          if (!educationLevel) {
+            if (/\b(SMA|Sekolah Menengah Atas|SLTA|MA)\b/i.test(inst)) educationLevel = 'SMA';
+            else if (/\b(SMK|Sekolah Menengah Kejuruan)\b/i.test(inst)) educationLevel = 'SMK';
+            else if (/\b(Universitas|Institut|Politeknik)\b/i.test(inst)) educationLevel = 'S1';
+          }
+          break;
+        }
+      }
+    }
   }
 
   let major = '';
@@ -716,8 +771,7 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
   }
 
   // 12. References Parsing
-  const refSectionLines = sections['REFERENCES'] || [];
-  const parsedReferences: ParsedCvReference[] = [];
+  const refSectionLines = sections['REFERENCES'] || [];  const parsedReferences: ParsedCvReference[] = [];
 
   for (let i = 0; i < refSectionLines.length; i++) {
     const line = refSectionLines[i].trim();
@@ -762,6 +816,134 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
     }
   }
 
+  // 12b. Publications Parsing (Publikasi Ilmiah)
+  const pubSectionLines = sections['PUBLICATIONS'] || [];
+  const parsedPublications: ParsedCvPublication[] = [];
+  for (let i = 0; i < pubSectionLines.length; i++) {
+    const line = pubSectionLines[i].trim();
+    if (!line || /^--\s*\d+\s*of\s*\d+\s*--/i.test(line)) continue;
+
+    // Baris sitasi: "Judul. Jurnal, Tahun" atau "Judul – Penerbit, 2024"
+    let title = line;
+    let publisher = '';
+    let date = '';
+    let link = '';
+
+    const doiMatch = line.match(/https?:\/\/doi\.org\/\S+|10\.\d{4,}\/\S+/i);
+    if (doiMatch) link = doiMatch[0];
+
+    const parts = line.split(/[–—,.]/).map((s) => s.trim()).filter(Boolean);
+    if (parts.length >= 2) {
+      title = parts[0];
+      publisher = parts.slice(1).join(', ');
+    }
+
+    const pubDateMatch = line.match(/\b(19|20)\d{2}\b/);
+    if (pubDateMatch) {
+      date = pubDateMatch[0];
+      publisher = publisher.replace(pubDateMatch[0], '').trim().replace(/[–—,-]\s*$/, '').trim();
+    }
+
+    if (title && title.length >= 8) {
+      parsedPublications.push({
+        id: `pub-${Date.now()}-${parsedPublications.length}`,
+        title,
+        publisher,
+        authors: '',
+        date,
+        link,
+      });
+    }
+  }
+
+  // 12c. Awards Parsing (Penghargaan & Prestasi)
+  const awardSectionLines = sections['AWARDS'] || [];
+  const parsedAwards: ParsedCvAward[] = [];
+  for (let i = 0; i < awardSectionLines.length; i++) {
+    const line = awardSectionLines[i].trim();
+    if (!line || /^--\s*\d+\s*of\s*\d+\s*--/i.test(line)) continue;
+
+    let name = line;
+    let issuer = '';
+    let date = '';
+
+    if (line.includes(' – ') || line.includes(' - ') || line.includes(',')) {
+      const parts = line.split(/[–—,-]/).map((s) => s.trim()).filter(Boolean);
+      name = parts[0];
+      issuer = parts.slice(1).join(', ');
+    }
+
+    const awardDateMatch = line.match(/\b(19|20)\d{2}\b/);
+    if (awardDateMatch) {
+      date = awardDateMatch[0];
+      issuer = issuer.replace(awardDateMatch[0], '').trim().replace(/[–—,-]\s*$/, '').trim();
+    }
+
+    parsedAwards.push({
+      id: `awd-${Date.now()}-${parsedAwards.length}`,
+      name,
+      issuer,
+      date,
+    });
+  }
+
+  // 12d. Portfolio Links & Hobbies Parsing
+  const parsedPortfolioLinks: ParsedCvPortfolioLink[] = [];
+  const urlRegex = /https?:\/\/[^\s,]+|(?:www\.)[a-z0-9-]+\.[a-z]{2,}[^\s,]*/gi;
+  const headerBody = (sections['HEADER'] || []).join('\n');
+  const summaryBody = (sections['SUMMARY'] || []).join('\n');
+  [
+    ...Array.from(headerBody.matchAll(urlRegex)).map((m) => m[0]),
+    ...Array.from(summaryBody.matchAll(urlRegex)).map((m) => m[0]),
+  ].forEach((rawUrl, idx) => {
+    const url = rawUrl.replace(/[.,;]+$/, '');
+    if (!url || parsedPortfolioLinks.some((l) => l.url === url)) return;
+    let label = 'Tautan';
+    if (/github\.com/i.test(url)) label = 'GitHub';
+    else if (/linkedin\.com/i.test(url)) label = 'LinkedIn';
+    else if (/behance\.net/i.test(url)) label = 'Behance';
+    else if (/dribbble\.com/i.test(url)) label = 'Dribbble';
+    else if (/medium\.com/i.test(url)) label = 'Medium';
+    else label = 'Portofolio / Website';
+    parsedPortfolioLinks.push({ id: `plink-${Date.now()}-${idx}`, label, url });
+  });
+
+  // Bare-link line (tanpa protokol) di section manapun → masuk portfolio, bukan hobi.
+  // Section PROJECT & EXPERIENCE dikecualikan agar tidak menduplikasi link proyek.
+  const BARE_LINK_SECTIONS_EXCLUDED = new Set(['PROJECT', 'EXPERIENCE']);
+  for (const [secName, secLines] of Object.entries(sections)) {
+    if (BARE_LINK_SECTIONS_EXCLUDED.has(secName)) continue;
+    for (const rawLine of secLines) {
+      const bare = rawLine.replace(/^[\s•\-\*\d\.\)]+/, '').replace(/[.,;]+$/, '').trim();
+      if (!bare || bare.includes(' ')) continue;
+      if (!/^(https?:\/\/|www\.|github\.com|linkedin\.com|behance\.net|dribbble\.com|medium\.com|gitlab\.com)/i.test(bare)) continue;
+      const normalized = bare.startsWith('http') ? bare : `https://${bare}`;
+      if (parsedPortfolioLinks.some((l) => l.url === normalized)) continue;
+      let label = 'Portofolio / Website';
+      if (/github\.com/i.test(bare)) label = 'GitHub';
+      else if (/linkedin\.com/i.test(bare)) label = 'LinkedIn';
+      else if (/behance\.net/i.test(bare)) label = 'Behance';
+      else if (/dribbble\.com/i.test(bare)) label = 'Dribbble';
+      else if (/medium\.com/i.test(bare)) label = 'Medium';
+      else if (/gitlab\.com/i.test(bare)) label = 'GitLab';
+      parsedPortfolioLinks.push({ id: `plink-bare-${Date.now()}-${parsedPortfolioLinks.length}`, label, url: normalized });
+    }
+  }
+
+  const interestSectionLines = sections['INTERESTS'] || [];
+  const parsedHobbies: string[] = [];
+  for (const line of interestSectionLines) {
+    line
+      .replace(/^[\s•\-\*\d\.\)]+/, '')
+      .split(/[,•|;]/)
+      .map((h) => h.trim())
+      .filter((h) => h.length >= 2 && h.length <= 40)
+      .filter((h) => !/(\.com|\.net|\.org|\.io|\.dev|\.id\b|http|www\.)/i.test(h))
+      .forEach((h) => {
+        if (!parsedHobbies.includes(h)) parsedHobbies.push(h);
+      });
+  }
+
   // 13. Education Array
   const parsedEducation: ParsedCvEducation[] = institutionName
     ? [
@@ -791,6 +973,7 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
   // 14. Document Validity & CV Confidence Score Calculation
   let cvConfidenceScore = 0;
 
+  // --- Positive signals ---
   if (contactInfo) cvConfidenceScore += 15;
   if (phone) cvConfidenceScore += 10;
   if (educationLevel || institutionName || parsedEducation.length > 0) cvConfidenceScore += 25;
@@ -798,7 +981,35 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
   if (deduplicatedSkills.length > 0) cvConfidenceScore += 15;
   if (fullName && fullName.length >= 3) cvConfidenceScore += 10;
 
-  // Negative blacklist markers (Non-CV documents)
+  // Explicit CV/Resume marker in document text
+  const hasExplicitCvMarker = /\b(Curriculum\s*Vitae|Resume|Daftar\s*Riwayat\s*Hidup)\b/i.test(cleanText);
+  if (hasExplicitCvMarker) cvConfidenceScore += 15;
+
+  // Structure ratio: CV = many short lines & bullets, narrative docs = long paragraphs
+  const shortLines = lines.filter(l => l.length > 0 && l.length < 80).length;
+  const longParagraphs = lines.filter(l => l.length > 200).length;
+  const structureRatio = lines.length > 0 ? shortLines / lines.length : 0;
+  if (structureRatio > 0.65 && longParagraphs <= 2) {
+    cvConfidenceScore += 8;
+  }
+  if (structureRatio < 0.3 && longParagraphs > 5) {
+    cvConfidenceScore -= 15;
+  }
+
+
+  // Multi-section detection: valid CVs typically have 2+ distinct section types
+  const totalWords = cleanText.split(/\s+/).filter(Boolean).length;
+  const detectedSections = new Set<string>();
+  for (const line of lines) {
+    const sectionType = detectSectionType(line);
+    if (sectionType) detectedSections.add(sectionType);
+  }
+  if (detectedSections.size >= 3) cvConfidenceScore += 12;
+  else if (detectedSections.size <= 1 && totalWords > 100) cvConfidenceScore -= 10;
+
+  // --- Negative blacklist markers (Non-CV documents) ---
+
+  // Existing blacklists (Tier 0: -50 each, stackable)
   const isInvoice = /\b(Invoice|Faktur\s*Pajak|Kuitansi|Total\s*Pembayaran|Bilyet|Surat\s*Tagihan|Receipt|Subtotal|Metode\s*Pembayaran|Nomor\s*Rekening|Rekening\s*Tujuan)\b/i.test(cleanText);
   const isAcademicPaper = /\b(BAB\s+[IVXLCDM]+\s+(PENDAHULUAN|METODOLOGI|PEMBAHASAN|HASIL)|Daftar\s*Pustaka|Tinjauan\s*Pustaka|Rumusan\s*Masalah|Latar\s*Belakang\s*Masalah|Abstrak\s+Penelitian)\b/i.test(cleanText);
   const isLegalDocument = /\b(Surat\s*Perjanjian|Akta\s*Notaris|Pihak\s*Pertama|Pihak\s*Kedua|Pasal\s+\d+|SURAT\s*KEPUTUSAN|SURAT\s*KUASA)\b/i.test(cleanText);
@@ -807,19 +1018,92 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
     (/\b(Emergency\s*Contact|Kontak\s*Darurat|Nama\s*Ayah|Nama\s*Ibu|Susunan\s*Keluarga|Riwayat\s*Keluarga|Golongan\s*Darah|Pernahkah\s*Anda\s*Dihukum|Criminal\s*Record|Expected\s*Salary|Gaji\s*yang\s*Diharapkan|Alasan\s*Berhenti|Reason\s*for\s*Leaving|Pernyataan\s*Pelamar|Tanda\s*Tangan\s*Pelamar|Signature\s*of\s*Applicant)\b/i.test(cleanText) &&
      /\b(Formulir|Form|Application|Pendaftaran|Kuesioner|Questionnaire|Assessment)\b/i.test(cleanText));
 
-  if (isInvoice || isAcademicPaper || isLegalDocument || isIdentityDoc || isApplicationForm) {
-    cvConfidenceScore -= 50;
-  }
+  if (isInvoice) cvConfidenceScore -= 50;
+  if (isAcademicPaper) cvConfidenceScore -= 50;
+  if (isLegalDocument) cvConfidenceScore -= 50;
+  if (isIdentityDoc) cvConfidenceScore -= 50;
+  if (isApplicationForm) cvConfidenceScore -= 50;
 
-  const totalWords = cleanText.split(/\s+/).filter(Boolean).length;
+  // Tier 1: Documents that resemble CVs but aren't (-30 each)
+  const isCoverLetter =
+    /\b(Dengan\s*Hormat|Yang\s*Terhormat|Kepada\s*Yth|Dear\s*(Sir|Madam|Mr|Ms|Hiring|HR)|Hormat\s*Saya|Demikian\s*Surat\s*Lamaran|I\s*am\s*writing\s*to\s*(?:apply|express)|melamar\s*(?:posisi|pekerjaan|sebagai)|mengajukan\s*diri|tertarik\s*(?:untuk|melamar)|I\s*would\s*like\s*to\s*apply|saya\s*bermaksud\s*melamar|melalui\s*surat\s*ini)\b/i.test(cleanText) &&
+    /\b(Surat\s*Lamaran|Cover\s*Letter|Application\s*Letter|Surat\s*Pengantar)\b/i.test(cleanText);
+
+  const isRecommendationLetter = /\b(Surat\s*Rekomendasi|Letter\s*of\s*Recommendation|Reference\s*Letter|To\s*Whom\s*It\s*May\s*Concern|dengan\s*ini\s*merekomendasikan|I\s*(?:am\s*pleased\s*to|highly)\s*recommend|yang\s*bersangkutan\s*(?:telah|pernah|merupakan))\b/i.test(cleanText);
+
+  const isWorkCertificate = /\b(Surat\s*Keterangan\s*(?:Kerja|Bekerja|Pengalaman)|Paklaring|Certificate\s*of\s*Employment|Service\s*Certificate|benar\s*(?:telah|pernah)\s*bekerja|dengan\s*ini\s*menerangkan\s*bahwa)\b/i.test(cleanText);
+
+  if (isCoverLetter) cvConfidenceScore -= 30;
+  if (isRecommendationLetter) cvConfidenceScore -= 30;
+  if (isWorkCertificate) cvConfidenceScore -= 30;
+
+  // Tier 2: Administrative documents (-45 each)
+  const isTranscript =
+    /\b(Transkrip\s*(?:Nilai|Akademik)|Academic\s*Transcript|Daftar\s*Nilai|Indeks\s*Prestasi\s*Kumulatif|(?:Semester|Term)\s*(?:GPA|IPK)|Kartu\s*Hasil\s*Studi|KHS)\b/i.test(cleanText) &&
+    /\b(SKS|Credit|Nilai|Grade|(?:IP|GPA)\s*[:=]\s*\d)\b/i.test(cleanText);
+
+  const isDiplomaCertificate = /\b(IJAZAH|(?:SURAT\s*TANDA\s*)?TAMAT\s*(?:BELAJAR|PENDIDIKAN)|Certificate\s*of\s*(?:Completion|Graduation)|dinyatakan\s*(?:LULUS|telah\s*menyelesaikan))\b/i.test(cleanText);
+
+  const isOfferingLetter = /\b(Offering\s*Letter|Surat\s*Penawaran\s*Kerja|Kontrak\s*Kerja|Employment\s*(?:Contract|Agreement|Offer)|Masa\s*Percobaan|Probation\s*Period|take-home\s*pay|gaji\s*pokok\s*(?:sebesar|Rp)|kompensasi\s*(?:dan|&)\s*benefit)\b/i.test(cleanText);
+
+  const isPayslip =
+    /\b(Slip\s*Gaji|Payslip|Pay\s*Slip|Rincian\s*(?:Gaji|Penghasilan)|Komponen\s*Gaji|Gaji\s*Pokok|Tunjangan|Potongan|BPJS|PPh\s*21|Take\s*Home\s*Pay|Netto)\b/i.test(cleanText) &&
+    /\b(Rp\.?\s*[\d.,]+|IDR\s*[\d.,]+)\b/i.test(cleanText);
+
+  if (isTranscript) cvConfidenceScore -= 45;
+  if (isDiplomaCertificate) cvConfidenceScore -= 45;
+  if (isOfferingLetter) cvConfidenceScore -= 45;
+  if (isPayslip) cvConfidenceScore -= 45;
+
+  // Tier 3: Clearly non-career documents (-55 each)
+  const isProposal = /\b(PROPOSAL\s*(?:BISNIS|USAHA|KEGIATAN|PENELITIAN|PROYEK)|BUSINESS\s*PLAN|Executive\s*Summary|Analisis\s*(?:SWOT|Pasar|Kelayakan)|Target\s*Pasar|Strategi\s*Pemasaran|Proyeksi\s*Keuangan|Break\s*Even\s*Point)\b/i.test(cleanText);
+
+  const isCompanyProfile =
+    /\b(Company\s*Profile|Profil\s*Perusahaan|Tentang\s*Kami|About\s*Us|Visi\s*(?:dan|&)\s*Misi|Our\s*(?:Services|Products|Team|History)|Klien\s*Kami|Our\s*Clients)\b/i.test(cleanText) &&
+    !hasExplicitCvMarker;
+
+  const isOfficialLetter = /\b(SKCK|Surat\s*Keterangan\s*(?:Catatan\s*Kepolisian|Sehat|Berkelakuan\s*Baik|Domisili|Tidak\s*(?:Pernah|Sedang))|Surat\s*(?:Tugas|Perintah|Edaran|Undangan)\s*(?:Nomor|No\.?))\b/i.test(cleanText);
+
+  if (isProposal) cvConfidenceScore -= 55;
+  if (isCompanyProfile) cvConfidenceScore -= 55;
+  if (isOfficialLetter) cvConfidenceScore -= 55;
+
   if (totalWords < 20) {
     cvConfidenceScore -= 40;
+  }
+
+  // Fresh graduate safety net: if doc explicitly says "CV/Resume" and has education, don't reject
+  const hasAnyNonCvBlacklist = isInvoice || isAcademicPaper || isLegalDocument || isIdentityDoc || isApplicationForm ||
+    isCoverLetter || isRecommendationLetter || isWorkCertificate || isTranscript || isDiplomaCertificate ||
+    isOfferingLetter || isPayslip || isProposal || isCompanyProfile || isOfficialLetter;
+  if (hasExplicitCvMarker && (educationLevel || institutionName) && !hasAnyNonCvBlacklist && cvConfidenceScore >= 25 && cvConfidenceScore < 35) {
+    cvConfidenceScore = 35;
   }
 
   const isValidCv = cvConfidenceScore >= 35;
   let validationMessage = '';
   if (!isValidCv) {
-    if (isApplicationForm) {
+    if (isCoverLetter) {
+      validationMessage = 'Berkas yang diunggah terdeteksi sebagai Surat Lamaran / Cover Letter, bukan dokumen CV. Silakan unggah berkas CV/Resume kamu yang terpisah.';
+    } else if (isRecommendationLetter) {
+      validationMessage = 'Berkas yang diunggah terdeteksi sebagai Surat Rekomendasi, bukan CV/Resume.';
+    } else if (isWorkCertificate) {
+      validationMessage = 'Berkas yang diunggah terdeteksi sebagai Surat Keterangan Kerja / Paklaring, bukan CV/Resume.';
+    } else if (isTranscript) {
+      validationMessage = 'Berkas yang diunggah terdeteksi sebagai Transkrip Nilai, bukan CV/Resume.';
+    } else if (isDiplomaCertificate) {
+      validationMessage = 'Berkas yang diunggah terdeteksi sebagai Ijazah / Sertifikat Kelulusan, bukan CV/Resume.';
+    } else if (isOfferingLetter) {
+      validationMessage = 'Berkas yang diunggah terdeteksi sebagai Surat Penawaran Kerja / Kontrak, bukan CV/Resume.';
+    } else if (isPayslip) {
+      validationMessage = 'Berkas yang diunggah terdeteksi sebagai Slip Gaji / Payslip, bukan CV/Resume.';
+    } else if (isProposal) {
+      validationMessage = 'Berkas yang diunggah terdeteksi sebagai Proposal / Business Plan, bukan CV/Resume.';
+    } else if (isCompanyProfile) {
+      validationMessage = 'Berkas yang diunggah terdeteksi sebagai Company Profile, bukan CV/Resume.';
+    } else if (isOfficialLetter) {
+      validationMessage = 'Berkas yang diunggah terdeteksi sebagai Surat Resmi / Dokumen Kedinasan, bukan CV/Resume.';
+    } else if (isApplicationForm) {
       validationMessage = 'Berkas yang diunggah terdeteksi sebagai Formulir Pendaftaran / Application Form, bukan dokumen CV/Resume. Silakan unggah berkas CV/Resume kamu.';
     } else if (isInvoice) {
       validationMessage = 'Berkas yang diunggah terdeteksi sebagai Faktur / Invoice tagihan, bukan dokumen CV/Resume.';
@@ -858,6 +1142,11 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
     projects: parsedProjects,
     organizations: parsedOrganizations,
     certifications: parsedCertifications,
-    references: parsedReferences
+    references: parsedReferences,
+    publications: parsedPublications,
+    awards: parsedAwards,
+    portfolioLinks: parsedPortfolioLinks,
+    otherRelevant: [],
+    hobbies: parsedHobbies
   };
 }

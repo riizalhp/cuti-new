@@ -11,11 +11,12 @@ export function Footer() {
             <div className="flex items-center justify-center overflow-hidden shrink-0">
               <Image
                 src="/logo.webp"
-                alt="Employr"
+                alt="Logo Employr"
                 width={100}
                 height={28}
+                loading="lazy"
                 unoptimized
-                className="h-6 w-auto object-contain"
+                className="h-6 w-auto object-contain dark:brightness-0 dark:invert transition-all"
               />
             </div>
             <div>
@@ -38,6 +39,16 @@ export function Footer() {
             <Link href="https://employr.id" target="_blank" rel="noopener noreferrer" className="hover:text-cobalt-600 dark:hover:text-blue-300 transition">
               employr.id
             </Link>
+            <span className="text-slate-300 dark:text-slate-700">|</span>
+            <a href="mailto:help.employr@outlook.com" className="hover:text-cobalt-600 dark:hover:text-blue-300 transition">
+              help.employr@outlook.com
+            </a>
+            <a href="https://www.threads.net/@employr.id" target="_blank" rel="noopener noreferrer" className="hover:text-cobalt-600 dark:hover:text-blue-300 transition">
+              Threads @employr.id
+            </a>
+            <a href="https://www.threads.net/@riizalhp" target="_blank" rel="noopener noreferrer" className="hover:text-cobalt-600 dark:hover:text-blue-300 transition">
+              DM @riizalhp
+            </a>
             <span className="text-slate-300 dark:text-slate-700">|</span>
             <span>© 2026 Employr</span>
           </div>

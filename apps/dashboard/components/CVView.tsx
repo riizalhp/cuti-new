@@ -736,6 +736,36 @@ export interface ReferenceItem {
   phone?: string;
   note?: string;
 }
+export interface PublicationItem {
+  id: string;
+  title: string;
+  publisher?: string;
+  authors?: string;
+  date?: string;
+  link?: string;
+  description?: string;
+}
+
+export interface AwardItem {
+  id: string;
+  name: string;
+  issuer?: string;
+  date?: string;
+  description?: string;
+}
+
+export interface PortfolioLinkItem {
+  id: string;
+  label: string;
+  url: string;
+}
+
+export interface OtherRelevantItem {
+  id: string;
+  title: string;
+  period?: string;
+  description?: string;
+}
 
 export interface CVData {
   id: string;
@@ -804,6 +834,10 @@ export interface CVData {
   scholarships?: ScholarshipItem[];
   volunteers?: VolunteerItem[];
   references?: ReferenceItem[];
+  publications?: PublicationItem[];
+  awards?: AwardItem[];
+  portfolioLinks?: PortfolioLinkItem[];
+  otherRelevant?: OtherRelevantItem[];
 
   templateId?: string;
   docFontFamily?: 'sans' | 'serif' | 'mono' | 'standard';
@@ -1106,9 +1140,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
   const [isLoadingCvList, setIsLoadingCvList] = useState<boolean>(true);
   const [cvList, setCvList] = useState<CVData[]>(initialCVs);
-  const [viewMode, setViewMode] = useState<'list' | 'create' | 'preview' | 'ai-wizard' | 'ai-progress'>(() => {
+  const [viewMode, setViewMode] = useState<'list' | 'create' | 'preview' | 'ai-wizard' | 'ai-progress' | 'template-wizard'>(() => {
     if (!cvId) return 'list';
-    if (cvId === 'create') return 'create';
+    if (cvId === 'create') return 'template-wizard';
     return 'preview';
   });
 
@@ -1594,8 +1628,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     setIsFormDrawerOpen(true);
   }, [cvId, cvList]);
 
-  // Template Modal State
-  const [showTemplateModal, setShowTemplateModal] = useState<boolean>(false);
+  // Template Wizard State
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('ats-modern');
   const [templateModalStep, setTemplateModalStep] = useState<number>(1);
   const [newCvPurpose, setNewCvPurpose] = useState<CvPurpose>('job');
@@ -2060,7 +2093,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('cuti_cv_list', JSON.stringify(updatedList));
     }
-    setShowTemplateModal(false);
+    setViewMode('preview');
     setTemplateModalStep(1);
     router.push(`/cv/${newId}`);
   };
@@ -2080,7 +2113,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   };
 
   useEffect(() => {
-    if (!showTemplateModal) return;
+    if (viewMode !== 'template-wizard') return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (templateModalStep === 2) {
         const availableTemplates = cvTemplates.filter((tpl) => !tpl.hidden);
@@ -2103,22 +2136,22 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           handleSelectTemplateAndNext();
         }
       } else if (e.key === 'Escape') {
-        setShowTemplateModal(false);
+        setViewMode('list');
         setTemplateModalStep(1);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showTemplateModal, templateModalStep, selectedTemplateId, cvTemplates]);
+  }, [viewMode, templateModalStep, selectedTemplateId, cvTemplates]);
 
   useEffect(() => {
-    if (showTemplateModal && templateModalStep === 1 && selectedTemplateId) {
+    if (viewMode === 'template-wizard' && templateModalStep === 2 && selectedTemplateId) {
       const selectedEl = document.getElementById(`template-card-${selectedTemplateId}`);
       if (selectedEl) {
         selectedEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     }
-  }, [selectedTemplateId, showTemplateModal, templateModalStep]);
+  }, [selectedTemplateId, viewMode, templateModalStep]);
 
   // AI CV Creation Wizard State
   const [aiWizardStep, setAiWizardStep] = useState<number>(1); // 1: Package, 2: Payment, 3: Data Option/Form, 4: Progress
@@ -3620,7 +3653,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <button
                 type="button"
                 onClick={() => {
-                  setShowTemplateModal(true);
+                  setViewMode('template-wizard');
+                  setTemplateModalStep(1);
                 }}
                 className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 active:scale-[0.98] transition cursor-pointer w-full sm:w-auto"
               >
@@ -3861,7 +3895,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full max-w-sm justify-center">
                 <button
                   type="button"
-                  onClick={() => setShowTemplateModal(true)}
+                  onClick={() => { setViewMode('template-wizard'); setTemplateModalStep(1); }}
                   className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 active:scale-[0.98] transition flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
@@ -3905,6 +3939,627 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         </div>
       )}
 
+      
+      {/* VIEW MODE: CV CREATION WIZARD (DEDICATED FULL-PAGE FLOW) */}
+      {viewMode === 'template-wizard' && (
+        <div className="space-y-6 max-w-6xl mx-auto animate-in fade-in duration-200">
+          {/* Top Editorial Header & Stepper */}
+          <div className="relative overflow-hidden bg-[#162758] border border-[#20367A] rounded-[10px] p-5 md:p-6 text-white shadow-xs">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 text-blue-200 text-xs font-bold">
+                  <LayoutGrid className="w-4 h-4 text-amber-400" />
+                  <span>CV ATS Builder • Alur Pembuatan CV Mandiri</span>
+                </div>
+                <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">
+                  {templateModalStep === 1 && 'Langkah 1: Tentukan Tujuan Pembuatan CV'}
+                  {templateModalStep === 2 && 'Langkah 2: Pilih Desain Template ATS'}
+                  {templateModalStep === 3 && 'Langkah 3: Konfigurasi & Mulai Isi CV'}
+                </h2>
+                <p className="text-xs md:text-sm text-blue-100/80 max-w-2xl leading-relaxed">
+                  {templateModalStep === 1 && 'Pilih tujuan yang paling sesuai untuk mengkalibrasi matriks scoring ATS, bobot komponen, dan fokus evaluasi CV kamu.'}
+                  {templateModalStep === 2 && 'Klik template untuk melihat preview A4 dengan data contoh. Pilih yang paling sesuai dengan target pekerjaan kamu.'}
+                  {templateModalStep === 3 && `Template terpilih: ${cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS Standard'} • Tujuan: ${CV_PURPOSE_PROFILES[newCvPurpose]?.title || 'Lamar Kerja'}`}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setViewMode('list');
+                  setTemplateModalStep(1);
+                }}
+                className="self-start md:self-center px-4 py-2 rounded-[10px] bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-1.5 cursor-pointer shrink-0 shadow-2xs"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Kembali ke Daftar CV</span>
+              </button>
+            </div>
+
+            {/* Stepper Steps Bar */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-6 pt-5 border-t border-white/15 relative z-10">
+              {[
+                { step: 1, title: 'Tujuan CV', desc: '10 Profil Adaptif' },
+                { step: 2, title: 'Pilih Template', desc: 'Layout & Desain ATS' },
+                { step: 3, title: 'Konfigurasi', desc: 'Import / Contoh / Kosong' },
+              ].map((item) => {
+                const isActive = templateModalStep === item.step;
+                const isPassed = templateModalStep > item.step;
+                return (
+                  <div
+                    key={item.step}
+                    onClick={() => {
+                      if (isPassed) setTemplateModalStep(item.step);
+                    }}
+                    className={`p-3 rounded-[10px] border transition-all text-left ${
+                      isPassed ? 'cursor-pointer hover:bg-white/15' : ''
+                    } ${
+                      isActive
+                        ? 'bg-white text-slate-900 border-white shadow-md'
+                        : isPassed
+                        ? 'bg-white/10 text-white border-white/20'
+                        : 'bg-white/5 text-white/60 border-white/10'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span
+                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
+                          isActive
+                            ? 'bg-[#1738D1] text-white'
+                            : isPassed
+                            ? 'bg-emerald-400 text-slate-900'
+                            : 'bg-white/20 text-white'
+                        }`}
+                      >
+                        {isPassed ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : item.step}
+                      </span>
+                      <div className="min-w-0">
+                        <div className={`text-xs font-extrabold truncate ${isActive ? 'text-slate-900' : 'text-white'}`}>{item.title}</div>
+                        <div className={`text-[10px] font-medium truncate hidden sm:block ${isActive ? 'text-slate-500' : 'text-white/70'}`}>{item.desc}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Main Card Content: Steps 1, 2, 3 */}
+          <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+{templateModalStep === 1 && (
+              <>
+                <div className="p-5 md:p-6 overflow-y-auto bg-slate-50 dark:bg-slate-950 flex-1 space-y-4">
+                  {/* Category Filter */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <div className="flex items-center gap-2">
+                      <Target className="w-4 h-4 text-orange-500" />
+                      <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                        Katalog Profil Tujuan CV (10 Pilihan Adaptif)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
+                      {[
+                        { id: 'all', label: 'Semua (10)' },
+                        { id: 'career', label: 'Karier' },
+                        { id: 'entry', label: 'Pemula / Mahasiswa' },
+                        { id: 'flexible', label: 'Fleksibel' },
+                        { id: 'academic', label: 'Akademik' },
+                      ].map((tab) => (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setPurposeCategoryFilterInModal(tab.id as any)}
+                          className={`px-2.5 py-1 rounded-[10px] text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
+                            purposeCategoryFilterInModal === tab.id
+                              ? 'bg-[#1738D1] text-white shadow-xs'
+                              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+                          }`}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Grid 10 Purpose Profiles */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {Object.values(CV_PURPOSE_PROFILES)
+                      .filter((p) => purposeCategoryFilterInModal === 'all' || p.category === purposeCategoryFilterInModal)
+                      .map((prof) => {
+                        const isSelected = newCvPurpose === prof.id;
+                        return (
+                          <div
+                            key={prof.id}
+                            onClick={() => setNewCvPurpose(prof.id)}
+                            className={`p-4 rounded-[10px] border text-left transition-all cursor-pointer flex flex-col justify-between relative ${
+                              isSelected
+                                ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] ring-2 ring-[#1738D1]/25 shadow-sm'
+                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-slate-700'
+                            }`}
+                          >
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <h4 className="text-sm font-black text-slate-900 dark:text-white">
+                                  {prof.title}
+                                </h4>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <span className="px-2 py-0.5 rounded-[6px] text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                    {prof.badge}
+                                  </span>
+                                  {isSelected && (
+                                    <span className="w-5 h-5 rounded-full bg-[#1738D1] text-white flex items-center justify-center">
+                                      <Check className="w-3.5 h-3.5 text-white" />
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                                {prof.evaluationFocusText}
+                              </p>
+                            </div>
+
+                            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
+                              <span className="text-slate-500 dark:text-slate-400 font-bold truncate pr-2">
+                                Komponen: {prof.requiredComponents.slice(0, 3).join(', ')}
+                              </span>
+                              <span className={`font-bold shrink-0 ${isSelected ? 'text-[#1738D1] dark:text-blue-400' : 'text-slate-400'}`}>
+                                {isSelected ? 'Terpilih' : 'Klik untuk Pilih'}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+
+                {/* Footer Step 1 */}
+                <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                    Tujuan aktif: <strong className="text-slate-900 dark:text-white">{CV_PURPOSE_PROFILES[newCvPurpose]?.title}</strong>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setViewMode('list'); setTemplateModalStep(1);
+                      }}
+                      className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSelectPurposeAndNext}
+                      className="px-6 py-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+                    >
+                      <span>Lanjut: Pilih Template</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* STEP 2: PILIH TEMPLATE CV MANDIRI (Dedicated Section Page) */}
+            {templateModalStep === 2 && (
+              <>
+                <div className="flex flex-1 overflow-hidden">
+                  {/* Left: Template List */}
+                  <div className="w-80 border-r border-slate-200 dark:border-slate-800 overflow-y-auto bg-slate-50 dark:bg-slate-950/60 p-4 space-y-3">
+                    {cvTemplates
+                      .filter((tpl) => !tpl.hidden)
+                      .map((tpl) => {
+                        const isSelected = selectedTemplateId === tpl.id;
+                        return (
+                          <div
+                            key={tpl.id}
+                            id={`template-card-${tpl.id}`}
+                            onClick={() => setSelectedTemplateId(tpl.id)}
+                            className={`p-4 rounded-[10px] border transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-blue-50 dark:bg-blue-950/70 border-navy-600 ring-2 ring-blue-600/30 shadow-md'
+                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-navy-700'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-16 rounded-[10px] border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 shadow-2xs bg-white">
+                                <TemplateThumbnailVisual templateId={tpl.id} customData={formData} />
+                              </div>
+                              <div className="space-y-1 min-w-0">
+                                <span className="px-2 py-0.5 rounded-[10px] text-[9px] font-extrabold uppercase bg-blue-100 text-navy-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-navy-800 inline-block truncate">
+                                  {tpl.badge}
+                                </span>
+                                <h4 className="font-extrabold text-sm text-slate-900 dark:text-white leading-tight">
+                                  {tpl.name}
+                                </h4>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+
+                  {/* Right: A4 Preview with Dummy Data */}
+                  <div className="flex-1 overflow-y-auto bg-slate-200/80 dark:bg-slate-950 p-4 md:p-6 flex justify-center items-start">
+                    <div className="relative w-[105mm] h-[148.5mm] shadow-2xl rounded-[10px] border border-slate-300 dark:border-slate-800 bg-white overflow-hidden shrink-0 my-auto">
+                      <div
+                        className="w-[210mm] min-h-[297mm] bg-white origin-top-left scale-50 pointer-events-none"
+                        style={{ fontFamily: "'Satoshi', sans-serif" }}
+                      >
+                        <CVTemplatePreview templateId={selectedTemplateId} customData={formData} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Step 2 */}
+                <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
+                  <button
+                    type="button"
+                    onClick={() => setTemplateModalStep(1)}
+                    className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Kembali ke Tujuan CV</span>
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setViewMode('list'); setTemplateModalStep(1);
+                      }}
+                      className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSelectTemplateAndNext}
+                      className="px-6 py-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+                    >
+                      <span>Gunakan Template Ini</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* STEP 3: KONFIGURASI CV BARU (Dedicated Section Page) */}
+            {templateModalStep === 3 && (
+              <>
+                <div className="p-6 md:p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 space-y-6 flex-1">
+                  <div className="w-full bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      {/* Sisi Kiri: Ringkasan Template & Tujuan + Input Judul & Posisi */}
+                      <div className="space-y-4">
+                        {/* Info Template & Tujuan Terpilih */}
+                        <div className="p-4 rounded-[10px] bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-navy-800/60 flex items-center justify-between">
+                          <div className="space-y-1">
+                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                              Ringkasan Pilihan
+                            </span>
+                            <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">
+                              {cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS Standard'}
+                            </h4>
+                            <div className="flex items-center gap-1.5 pt-0.5">
+                              <span className="px-2 py-0.5 rounded-[6px] text-[10px] font-bold bg-[#1738D1] text-white">
+                                {CV_PURPOSE_PROFILES[newCvPurpose]?.title}
+                              </span>
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                                {CV_PURPOSE_PROFILES[newCvPurpose]?.badge}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-1 items-end">
+                            <button
+                              type="button"
+                              onClick={() => setTemplateModalStep(1)}
+                              className="text-[11px] font-bold text-blue-600 hover:text-orange-600 dark:text-blue-400 hover:underline cursor-pointer"
+                            >
+                              Ubah Tujuan
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setTemplateModalStep(2)}
+                              className="text-[11px] font-bold text-blue-600 hover:text-orange-600 dark:text-blue-400 hover:underline cursor-pointer"
+                            >
+                              Ubah Template
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Input Nama CV */}
+                        <div>
+                          <label className="block text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider mb-1.5">
+                            Nama / Judul CV <span className="text-rose-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={newCvTitle}
+                            onChange={(e) => setNewCvTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleCreateCvFromTemplate();
+                              }
+                            }}
+                            placeholder="Contoh: CV Loker Software Engineer 2026"
+                            className={`w-full px-4 py-2.5 rounded-[10px] border text-xs font-medium focus:ring-2 transition ${
+                              templateFormSubmitted && !isNewCvTitleValid
+                                ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100 focus:ring-rose-500 focus:border-rose-500'
+                                : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-blue-500 focus:border-blue-500'
+                            }`}
+                          />
+                          {templateFormSubmitted && !isNewCvTitleValid ? (
+                            <p className="text-[11px] font-bold text-rose-500 mt-1 flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                              <span>Judul CV wajib diisi untuk melanjutkan.</span>
+                            </p>
+                          ) : (
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                              Nama untuk memudahkan kamu membedakan file CV di dashboard.
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Input Lowongan / Target Posisi */}
+                        <div>
+                          <label className="block text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider mb-1.5">
+                            Lowongan / Target Posisi <span className="text-rose-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={newCvJobTitle}
+                            onChange={(e) => setNewCvJobTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleCreateCvFromTemplate();
+                              }
+                            }}
+                            placeholder="Contoh: Senior Frontend Developer / Staff Administrasi"
+                            className={`w-full px-4 py-2.5 rounded-[10px] border text-xs font-medium focus:ring-2 transition ${
+                              templateFormSubmitted && !isNewCvJobTitleValid
+                                ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100 focus:ring-rose-500 focus:border-rose-500'
+                                : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-blue-500 focus:border-blue-500'
+                            }`}
+                          />
+                          {templateFormSubmitted && !isNewCvJobTitleValid ? (
+                            <p className="text-[11px] font-bold text-rose-500 mt-1 flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                              <span>Lowongan / Target Posisi wajib diisi untuk melanjutkan.</span>
+                            </p>
+                          ) : (
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                              Posisi pekerjaan spesifik yang menjadi target lamaran kamu.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Sisi Kanan: Pilihan Cara Memulai CV */}
+                      <div className="space-y-4 lg:border-l lg:border-slate-200 lg:dark:border-slate-800 lg:pl-8">
+                        <label className="block text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider mb-2.5">
+                          Pilih Cara Memulai Isi CV <span className="text-rose-500">*</span>
+                        </label>
+                        <div className="space-y-3">
+                          {/* Option 1: Mulai dari contoh */}
+                          <div
+                            onClick={() => setNewCvStartMode('example')}
+                            className={`p-4 rounded-[10px] border transition-all cursor-pointer flex items-center justify-between gap-4 ${
+                              newCvStartMode === 'example'
+                                ? 'bg-blue-50 dark:bg-blue-950/70 border-navy-600 ring-2 ring-blue-600/30 shadow-xs'
+                                : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="p-2.5 rounded-[10px] bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 shrink-0">
+                                <FileText className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <h5 className="font-extrabold text-xs text-slate-900 dark:text-white">
+                                  Mulai dari Contoh
+                                </h5>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">
+                                  Data profil &amp; riwayat contoh yang siap kamu sesuaikan.
+                                </p>
+                              </div>
+                            </div>
+                            {newCvStartMode === 'example' && <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />}
+                          </div>
+
+                          {/* Option 2: Kosongkan */}
+                          <div
+                            onClick={() => setNewCvStartMode('empty')}
+                            className={`p-4 rounded-[10px] border transition-all cursor-pointer flex items-center justify-between gap-4 ${
+                              newCvStartMode === 'empty'
+                                ? 'bg-blue-50 dark:bg-blue-950/70 border-navy-600 ring-2 ring-blue-600/30 shadow-xs'
+                                : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="p-2.5 rounded-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shrink-0">
+                                <FileUp className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <h5 className="font-extrabold text-xs text-slate-900 dark:text-white">
+                                  Kosongkan Lembar Kerja
+                                </h5>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">
+                                  Mulai dari lembar kerja kosong dan ketik dari awal.
+                                </p>
+                              </div>
+                            </div>
+                            {newCvStartMode === 'empty' && <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />}
+                          </div>
+
+                          {/* Option 3: Impor file */}
+                          <div
+                            onClick={() => setNewCvStartMode('import')}
+                            className={`p-4 rounded-[10px] border transition-all cursor-pointer flex flex-col gap-3 ${
+                              newCvStartMode === 'import'
+                                ? 'bg-blue-50 dark:bg-blue-950/70 border-navy-600 ring-2 ring-blue-600/30 shadow-xs'
+                                : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-[10px] bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 shrink-0">
+                                  <Upload className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <h5 className="font-extrabold text-xs text-slate-900 dark:text-white">
+                                    Impor File CV
+                                  </h5>
+                                  <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">
+                                    Unggah dokumen CV lama (PDF/DOCX/TXT).
+                                  </p>
+                                </div>
+                              </div>
+                              {newCvStartMode === 'import' && <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />}
+                            </div>
+
+                            {/* Onboarding-style Rich Upload & Auto-Scan Feature */}
+                            {newCvStartMode === 'import' && (
+                              <div className="pt-3 border-t border-slate-200 dark:border-slate-700/60 space-y-3" onClick={(e) => e.stopPropagation()}>
+                                {!importScanCompleted ? (
+                                  <div className="space-y-3">
+                                    {/* Upload Dropzone */}
+                                    <label className="w-full p-6 border-2 border-dashed border-[#1738D1]/50 hover:border-[#1738D1] dark:border-blue-800 rounded-[10px] bg-blue-50/30 dark:bg-blue-950/20 transition flex flex-col items-center justify-center gap-2.5 cursor-pointer group">
+                                      <div className="w-12 h-12 rounded-[10px] bg-blue-100 dark:bg-blue-900/60 text-[#1738D1] dark:text-blue-400 flex items-center justify-center group-hover:scale-105 transition shadow-xs">
+                                        <FileUp className="w-6 h-6" />
+                                      </div>
+                                      <div className="text-center space-y-0.5">
+                                        <p className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
+                                          Klik untuk pilih file atau tarik berkas ke sini
+                                        </p>
+                                        <p className="text-[10px] font-medium text-slate-400">
+                                          Mendukung PDF, DOCX, DOC, TXT, dan JSON (Maksimal 10MB)
+                                        </p>
+                                      </div>
+                                      <input
+                                        type="file"
+                                        accept=".pdf,.docx,.doc,.txt,.json"
+                                        onChange={(e) => {
+                                          const file = e.target.files?.[0];
+                                          if (file) handleImportFileUploadAndScan(file);
+                                        }}
+                                        className="hidden"
+                                      />
+                                    </label>
+
+                                    {/* Scanning Progress State */}
+                                    {isImportScanning && (
+                                      <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                                        <div className="flex items-center justify-between text-xs font-bold">
+                                          <span className="flex items-center gap-2 text-[#1738D1]">
+                                            <span className="w-2 h-2 rounded-full bg-[#1738D1] animate-ping" />
+                                            Memindai &amp; mengekstrak struktur CV...
+                                          </span>
+                                          <span className="text-slate-500">{importScanProgress}%</span>
+                                        </div>
+                                        <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                                          <div
+                                            className="h-full bg-[#1738D1] transition-all duration-300"
+                                            style={{ width: `${importScanProgress}%` }}
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Scan Error */}
+                                    {importScanError && (
+                                      <div className="p-3 rounded-[10px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-start gap-2.5 text-xs text-amber-700 dark:text-amber-400">
+                                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                                        <span className="text-[11px] leading-relaxed">{importScanError}</span>
+                                      </div>
+                                    )}
+
+                                    {templateFormSubmitted && !isNewCvFileValid && !isImportScanning && !importScanError && (
+                                      <p className="text-[11px] font-bold text-rose-500 flex items-center justify-center gap-1">
+                                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                        <span>Wajib memilih dan memindai file CV untuk diimpor.</span>
+                                      </p>
+                                    )}
+                                  </div>
+                                ) : (
+                                  /* Clean Scanned Success State */
+                                  <div className="p-3 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-3 text-xs text-emerald-700 dark:text-emerald-400">
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                      <div className="w-8 h-8 rounded-[8px] bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                                        <FileCheck className="w-4 h-4" />
+                                      </div>
+                                      <div className="min-w-0">
+                                        <p className="truncate text-xs font-bold text-emerald-800 dark:text-emerald-200">
+                                          {newCvFile?.name}
+                                        </p>
+                                        <p className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                                          {newCvFile ? `${(newCvFile.size / 1024).toFixed(1)} KB • ` : ''}Berhasil dipindai &amp; data siap dimuat ke CV
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setImportScanCompleted(false);
+                                        setNewCvFile(null);
+                                        setImportedCvData(null);
+                                        setImportScanError(null);
+                                      }}
+                                      className="px-2.5 py-1.5 rounded-[6px] border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold hover:bg-emerald-100 dark:hover:bg-slate-700 transition flex items-center gap-1 shrink-0 cursor-pointer shadow-2xs"
+                                    >
+                                      <RotateCcw className="w-3 h-3" />
+                                      <span>Ganti File</span>
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Step 3 */}
+                <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
+                  <button
+                    type="button"
+                    onClick={() => setTemplateModalStep(2)}
+                    className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Kembali ke Pilih Template</span>
+                  </button>
+
+                  <div className="flex items-center gap-3">
+                    {templateFormSubmitted && !isTemplateFormValid && (
+                      <span className="text-xs font-extrabold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 bg-rose-50 dark:bg-rose-950/60 px-3 py-1.5 rounded-[10px] border border-rose-200 dark:border-rose-800">
+                        <AlertCircle className="w-4 h-4 shrink-0 animate-bounce text-rose-500" />
+                        <span>Harap isi semua kolom wajib (*)</span>
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleCreateCvFromTemplate}
+                      className="px-6 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md shadow-[#1738D1]/20"
+                    >
+                      <span>Buat &amp; Edit CV</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      
       {/* VIEW MODE 2: AI CV CREATION WIZARD (STEP-BY-STEP ORDER & DATA WIZARD) */}
       {viewMode === 'ai-wizard' && (
         <div className="space-y-6">
@@ -8148,588 +8803,6 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 <span>Ya, Hapus CV</span>
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 3: PILIH TEMPLATE CV MANDIRI & KONFIGURASI */}
-      {showTemplateModal && (
-        <div
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setShowTemplateModal(false);
-              setTemplateModalStep(1);
-            }
-          }}
-          className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto"
-        >
-          <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto">
-            {/* Modal Header - Unified Blue Theme */}
-            <div className="p-5 md:p-6 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between bg-gradient-to-r from-blue-900 via-slate-900 to-blue-950 text-white">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-blue-300 text-xs font-bold">
-                  <LayoutGrid className="w-4 h-4 text-amber-400" />
-                  <span>
-                    {templateModalStep === 1 && 'Langkah 1 dari 3: Tujuan Pembuatan CV'}
-                    {templateModalStep === 2 && 'Langkah 2 dari 3: Pilih Desain Template'}
-                    {templateModalStep === 3 && 'Langkah 3 dari 3: Konfigurasi CV Baru'}
-                  </span>
-                </div>
-                <h3 className="text-lg md:text-xl font-extrabold text-white">
-                  {templateModalStep === 1 && 'Tujuan Pembuatan CV'}
-                  {templateModalStep === 2 && 'Pilih Template CV Mandiri'}
-                  {templateModalStep === 3 && 'Konfigurasi CV Baru'}
-                </h3>
-                <p className="text-xs text-blue-100/90">
-                  {templateModalStep === 1 && 'Pilih tujuan yang paling sesuai untuk menyesuaikan matriks bobot scoring dan fokus evaluasi CV kamu.'}
-                  {templateModalStep === 2 && 'Klik template untuk melihat preview A4 dengan data contoh. Pilih yang paling sesuai dengan target pekerjaan kamu.'}
-                  {templateModalStep === 3 && `Template terpilih: ${cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS Standard'} • Tujuan: ${CV_PURPOSE_PROFILES[newCvPurpose]?.title || 'Lamar Kerja'}`}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowTemplateModal(false);
-                  setTemplateModalStep(1);
-                }}
-                className="p-1.5 text-slate-300 hover:text-white rounded-[10px] bg-white/10 hover:bg-white/20 transition cursor-pointer shrink-0"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* STEP 1: TUJUAN PEMBUATAN CV (Dedicated Section Page) */}
-            {templateModalStep === 1 && (
-              <>
-                <div className="p-5 md:p-6 overflow-y-auto bg-slate-50 dark:bg-slate-950 flex-1 space-y-4">
-                  {/* Category Filter */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <div className="flex items-center gap-2">
-                      <Target className="w-4 h-4 text-orange-500" />
-                      <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                        Katalog Profil Tujuan CV (10 Pilihan Adaptif)
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
-                      {[
-                        { id: 'all', label: 'Semua (10)' },
-                        { id: 'career', label: 'Karier' },
-                        { id: 'entry', label: 'Pemula / Mahasiswa' },
-                        { id: 'flexible', label: 'Fleksibel' },
-                        { id: 'academic', label: 'Akademik' },
-                      ].map((tab) => (
-                        <button
-                          key={tab.id}
-                          type="button"
-                          onClick={() => setPurposeCategoryFilterInModal(tab.id as any)}
-                          className={`px-2.5 py-1 rounded-[10px] text-[11px] font-bold transition whitespace-nowrap cursor-pointer ${
-                            purposeCategoryFilterInModal === tab.id
-                              ? 'bg-[#1738D1] text-white shadow-xs'
-                              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
-                          }`}
-                        >
-                          {tab.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Grid 10 Purpose Profiles */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {Object.values(CV_PURPOSE_PROFILES)
-                      .filter((p) => purposeCategoryFilterInModal === 'all' || p.category === purposeCategoryFilterInModal)
-                      .map((prof) => {
-                        const isSelected = newCvPurpose === prof.id;
-                        return (
-                          <div
-                            key={prof.id}
-                            onClick={() => setNewCvPurpose(prof.id)}
-                            className={`p-4 rounded-[10px] border text-left transition-all cursor-pointer flex flex-col justify-between relative ${
-                              isSelected
-                                ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] ring-2 ring-[#1738D1]/25 shadow-sm'
-                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-slate-700'
-                            }`}
-                          >
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between gap-2">
-                                <h4 className="text-sm font-black text-slate-900 dark:text-white">
-                                  {prof.title}
-                                </h4>
-                                <div className="flex items-center gap-1.5 shrink-0">
-                                  <span className="px-2 py-0.5 rounded-[6px] text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                                    {prof.badge}
-                                  </span>
-                                  {isSelected && (
-                                    <span className="w-5 h-5 rounded-full bg-[#1738D1] text-white flex items-center justify-center">
-                                      <Check className="w-3.5 h-3.5 text-white" />
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-
-                              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                                {prof.evaluationFocusText}
-                              </p>
-                            </div>
-
-                            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
-                              <span className="text-slate-500 dark:text-slate-400 font-bold truncate pr-2">
-                                Komponen: {prof.requiredComponents.slice(0, 3).join(', ')}
-                              </span>
-                              <span className={`font-bold shrink-0 ${isSelected ? 'text-[#1738D1] dark:text-blue-400' : 'text-slate-400'}`}>
-                                {isSelected ? 'Terpilih' : 'Klik untuk Pilih'}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
-
-                {/* Footer Step 1 */}
-                <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                    Tujuan aktif: <strong className="text-slate-900 dark:text-white">{CV_PURPOSE_PROFILES[newCvPurpose]?.title}</strong>
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowTemplateModal(false);
-                        setTemplateModalStep(1);
-                      }}
-                      className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
-                    >
-                      Batal
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSelectPurposeAndNext}
-                      className="px-6 py-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
-                    >
-                      <span>Lanjut: Pilih Template</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* STEP 2: PILIH TEMPLATE CV MANDIRI (Dedicated Section Page) */}
-            {templateModalStep === 2 && (
-              <>
-                <div className="flex flex-1 overflow-hidden">
-                  {/* Left: Template List */}
-                  <div className="w-80 border-r border-slate-200 dark:border-slate-800 overflow-y-auto bg-slate-50 dark:bg-slate-950/60 p-4 space-y-3">
-                    {cvTemplates
-                      .filter((tpl) => !tpl.hidden)
-                      .map((tpl) => {
-                        const isSelected = selectedTemplateId === tpl.id;
-                        return (
-                          <div
-                            key={tpl.id}
-                            id={`template-card-${tpl.id}`}
-                            onClick={() => setSelectedTemplateId(tpl.id)}
-                            className={`p-4 rounded-[10px] border transition-all cursor-pointer ${
-                              isSelected
-                                ? 'bg-blue-50 dark:bg-blue-950/70 border-navy-600 ring-2 ring-blue-600/30 shadow-md'
-                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-navy-700'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-12 h-16 rounded-[10px] border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 shadow-2xs bg-white">
-                                <TemplateThumbnailVisual templateId={tpl.id} customData={formData} />
-                              </div>
-                              <div className="space-y-1 min-w-0">
-                                <span className="px-2 py-0.5 rounded-[10px] text-[9px] font-extrabold uppercase bg-blue-100 text-navy-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-navy-800 inline-block truncate">
-                                  {tpl.badge}
-                                </span>
-                                <h4 className="font-extrabold text-sm text-slate-900 dark:text-white leading-tight">
-                                  {tpl.name}
-                                </h4>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </div>
-
-                  {/* Right: A4 Preview with Dummy Data */}
-                  <div className="flex-1 overflow-y-auto bg-slate-200/80 dark:bg-slate-950 p-4 md:p-6 flex justify-center items-start">
-                    <div className="relative w-[105mm] h-[148.5mm] shadow-2xl rounded-[10px] border border-slate-300 dark:border-slate-800 bg-white overflow-hidden shrink-0 my-auto">
-                      <div
-                        className="w-[210mm] min-h-[297mm] bg-white origin-top-left scale-50 pointer-events-none"
-                        style={{ fontFamily: "'Satoshi', sans-serif" }}
-                      >
-                        <CVTemplatePreview templateId={selectedTemplateId} customData={formData} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer Step 2 */}
-                <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
-                  <button
-                    type="button"
-                    onClick={() => setTemplateModalStep(1)}
-                    className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span>Kembali ke Tujuan CV</span>
-                  </button>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowTemplateModal(false);
-                        setTemplateModalStep(1);
-                      }}
-                      className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
-                    >
-                      Batal
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSelectTemplateAndNext}
-                      className="px-6 py-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
-                    >
-                      <span>Gunakan Template Ini</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* STEP 3: KONFIGURASI CV BARU (Dedicated Section Page) */}
-            {templateModalStep === 3 && (
-              <>
-                <div className="p-6 md:p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 space-y-6 flex-1">
-                  <div className="w-full bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                      {/* Sisi Kiri: Ringkasan Template & Tujuan + Input Judul & Posisi */}
-                      <div className="space-y-4">
-                        {/* Info Template & Tujuan Terpilih */}
-                        <div className="p-4 rounded-[10px] bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-navy-800/60 flex items-center justify-between">
-                          <div className="space-y-1">
-                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-                              Ringkasan Pilihan
-                            </span>
-                            <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">
-                              {cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS Standard'}
-                            </h4>
-                            <div className="flex items-center gap-1.5 pt-0.5">
-                              <span className="px-2 py-0.5 rounded-[6px] text-[10px] font-bold bg-[#1738D1] text-white">
-                                {CV_PURPOSE_PROFILES[newCvPurpose]?.title}
-                              </span>
-                              <span className="text-[10px] text-slate-500 dark:text-slate-400">
-                                {CV_PURPOSE_PROFILES[newCvPurpose]?.badge}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex flex-col gap-1 items-end">
-                            <button
-                              type="button"
-                              onClick={() => setTemplateModalStep(1)}
-                              className="text-[11px] font-bold text-blue-600 hover:text-orange-600 dark:text-blue-400 hover:underline cursor-pointer"
-                            >
-                              Ubah Tujuan
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setTemplateModalStep(2)}
-                              className="text-[11px] font-bold text-blue-600 hover:text-orange-600 dark:text-blue-400 hover:underline cursor-pointer"
-                            >
-                              Ubah Template
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Input Nama CV */}
-                        <div>
-                          <label className="block text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider mb-1.5">
-                            Nama / Judul CV <span className="text-rose-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            value={newCvTitle}
-                            onChange={(e) => setNewCvTitle(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                handleCreateCvFromTemplate();
-                              }
-                            }}
-                            placeholder="Contoh: CV Loker Software Engineer 2026"
-                            className={`w-full px-4 py-2.5 rounded-[10px] border text-xs font-medium focus:ring-2 transition ${
-                              templateFormSubmitted && !isNewCvTitleValid
-                                ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100 focus:ring-rose-500 focus:border-rose-500'
-                                : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-blue-500 focus:border-blue-500'
-                            }`}
-                          />
-                          {templateFormSubmitted && !isNewCvTitleValid ? (
-                            <p className="text-[11px] font-bold text-rose-500 mt-1 flex items-center gap-1">
-                              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                              <span>Judul CV wajib diisi untuk melanjutkan.</span>
-                            </p>
-                          ) : (
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                              Nama untuk memudahkan kamu membedakan file CV di dashboard.
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Input Lowongan / Target Posisi */}
-                        <div>
-                          <label className="block text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider mb-1.5">
-                            Lowongan / Target Posisi <span className="text-rose-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            value={newCvJobTitle}
-                            onChange={(e) => setNewCvJobTitle(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                handleCreateCvFromTemplate();
-                              }
-                            }}
-                            placeholder="Contoh: Senior Frontend Developer / Staff Administrasi"
-                            className={`w-full px-4 py-2.5 rounded-[10px] border text-xs font-medium focus:ring-2 transition ${
-                              templateFormSubmitted && !isNewCvJobTitleValid
-                                ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100 focus:ring-rose-500 focus:border-rose-500'
-                                : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-blue-500 focus:border-blue-500'
-                            }`}
-                          />
-                          {templateFormSubmitted && !isNewCvJobTitleValid ? (
-                            <p className="text-[11px] font-bold text-rose-500 mt-1 flex items-center gap-1">
-                              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                              <span>Lowongan / Target Posisi wajib diisi untuk melanjutkan.</span>
-                            </p>
-                          ) : (
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                              Posisi pekerjaan spesifik yang menjadi target lamaran kamu.
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Sisi Kanan: Pilihan Cara Memulai CV */}
-                      <div className="space-y-4 lg:border-l lg:border-slate-200 lg:dark:border-slate-800 lg:pl-8">
-                        <label className="block text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider mb-2.5">
-                          Pilih Cara Memulai Isi CV <span className="text-rose-500">*</span>
-                        </label>
-                        <div className="space-y-3">
-                          {/* Option 1: Mulai dari contoh */}
-                          <div
-                            onClick={() => setNewCvStartMode('example')}
-                            className={`p-4 rounded-[10px] border transition-all cursor-pointer flex items-center justify-between gap-4 ${
-                              newCvStartMode === 'example'
-                                ? 'bg-blue-50 dark:bg-blue-950/70 border-navy-600 ring-2 ring-blue-600/30 shadow-xs'
-                                : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="p-2.5 rounded-[10px] bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 shrink-0">
-                                <FileText className="w-5 h-5" />
-                              </div>
-                              <div>
-                                <h5 className="font-extrabold text-xs text-slate-900 dark:text-white">
-                                  Mulai dari Contoh
-                                </h5>
-                                <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">
-                                  Data profil &amp; riwayat contoh yang siap kamu sesuaikan.
-                                </p>
-                              </div>
-                            </div>
-                            {newCvStartMode === 'example' && <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />}
-                          </div>
-
-                          {/* Option 2: Kosongkan */}
-                          <div
-                            onClick={() => setNewCvStartMode('empty')}
-                            className={`p-4 rounded-[10px] border transition-all cursor-pointer flex items-center justify-between gap-4 ${
-                              newCvStartMode === 'empty'
-                                ? 'bg-blue-50 dark:bg-blue-950/70 border-navy-600 ring-2 ring-blue-600/30 shadow-xs'
-                                : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="p-2.5 rounded-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shrink-0">
-                                <FileUp className="w-5 h-5" />
-                              </div>
-                              <div>
-                                <h5 className="font-extrabold text-xs text-slate-900 dark:text-white">
-                                  Kosongkan Lembar Kerja
-                                </h5>
-                                <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">
-                                  Mulai dari lembar kerja kosong dan ketik dari awal.
-                                </p>
-                              </div>
-                            </div>
-                            {newCvStartMode === 'empty' && <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />}
-                          </div>
-
-                          {/* Option 3: Impor file */}
-                          <div
-                            onClick={() => setNewCvStartMode('import')}
-                            className={`p-4 rounded-[10px] border transition-all cursor-pointer flex flex-col gap-3 ${
-                              newCvStartMode === 'import'
-                                ? 'bg-blue-50 dark:bg-blue-950/70 border-navy-600 ring-2 ring-blue-600/30 shadow-xs'
-                                : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between gap-4">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2.5 rounded-[10px] bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 shrink-0">
-                                  <Upload className="w-5 h-5" />
-                                </div>
-                                <div>
-                                  <h5 className="font-extrabold text-xs text-slate-900 dark:text-white">
-                                    Impor File CV
-                                  </h5>
-                                  <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">
-                                    Unggah dokumen CV lama (PDF/DOCX/TXT).
-                                  </p>
-                                </div>
-                              </div>
-                              {newCvStartMode === 'import' && <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />}
-                            </div>
-
-                            {/* Onboarding-style Rich Upload & Auto-Scan Feature */}
-                            {newCvStartMode === 'import' && (
-                              <div className="pt-3 border-t border-slate-200 dark:border-slate-700/60 space-y-3" onClick={(e) => e.stopPropagation()}>
-                                {!importScanCompleted ? (
-                                  <div className="space-y-3">
-                                    {/* Upload Dropzone */}
-                                    <label className="w-full p-6 border-2 border-dashed border-[#1738D1]/50 hover:border-[#1738D1] dark:border-blue-800 rounded-[10px] bg-blue-50/30 dark:bg-blue-950/20 transition flex flex-col items-center justify-center gap-2.5 cursor-pointer group">
-                                      <div className="w-12 h-12 rounded-[10px] bg-blue-100 dark:bg-blue-900/60 text-[#1738D1] dark:text-blue-400 flex items-center justify-center group-hover:scale-105 transition shadow-xs">
-                                        <FileUp className="w-6 h-6" />
-                                      </div>
-                                      <div className="text-center space-y-0.5">
-                                        <p className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
-                                          Klik untuk pilih file atau tarik berkas ke sini
-                                        </p>
-                                        <p className="text-[10px] font-medium text-slate-400">
-                                          Mendukung PDF, DOCX, DOC, TXT, dan JSON (Maksimal 10MB)
-                                        </p>
-                                      </div>
-                                      <input
-                                        type="file"
-                                        accept=".pdf,.docx,.doc,.txt,.json"
-                                        onChange={(e) => {
-                                          const file = e.target.files?.[0];
-                                          if (file) handleImportFileUploadAndScan(file);
-                                        }}
-                                        className="hidden"
-                                      />
-                                    </label>
-
-                                    {/* Scanning Progress State */}
-                                    {isImportScanning && (
-                                      <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5">
-                                        <div className="flex items-center justify-between text-xs font-bold">
-                                          <span className="flex items-center gap-2 text-[#1738D1]">
-                                            <span className="w-2 h-2 rounded-full bg-[#1738D1] animate-ping" />
-                                            Memindai &amp; mengekstrak struktur CV...
-                                          </span>
-                                          <span className="text-slate-500">{importScanProgress}%</span>
-                                        </div>
-                                        <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                                          <div
-                                            className="h-full bg-[#1738D1] transition-all duration-300"
-                                            style={{ width: `${importScanProgress}%` }}
-                                          />
-                                        </div>
-                                      </div>
-                                    )}
-
-                                    {/* Scan Error */}
-                                    {importScanError && (
-                                      <div className="p-3 rounded-[10px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-start gap-2.5 text-xs text-amber-700 dark:text-amber-400">
-                                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                                        <span className="text-[11px] leading-relaxed">{importScanError}</span>
-                                      </div>
-                                    )}
-
-                                    {templateFormSubmitted && !isNewCvFileValid && !isImportScanning && !importScanError && (
-                                      <p className="text-[11px] font-bold text-rose-500 flex items-center justify-center gap-1">
-                                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                                        <span>Wajib memilih dan memindai file CV untuk diimpor.</span>
-                                      </p>
-                                    )}
-                                  </div>
-                                ) : (
-                                  /* Clean Scanned Success State */
-                                  <div className="p-3 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-3 text-xs text-emerald-700 dark:text-emerald-400">
-                                    <div className="flex items-center gap-2.5 min-w-0">
-                                      <div className="w-8 h-8 rounded-[8px] bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-300 flex items-center justify-center shrink-0">
-                                        <FileCheck className="w-4 h-4" />
-                                      </div>
-                                      <div className="min-w-0">
-                                        <p className="truncate text-xs font-bold text-emerald-800 dark:text-emerald-200">
-                                          {newCvFile?.name}
-                                        </p>
-                                        <p className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
-                                          {newCvFile ? `${(newCvFile.size / 1024).toFixed(1)} KB • ` : ''}Berhasil dipindai &amp; data siap dimuat ke CV
-                                        </p>
-                                      </div>
-                                    </div>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setImportScanCompleted(false);
-                                        setNewCvFile(null);
-                                        setImportedCvData(null);
-                                        setImportScanError(null);
-                                      }}
-                                      className="px-2.5 py-1.5 rounded-[6px] border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold hover:bg-emerald-100 dark:hover:bg-slate-700 transition flex items-center gap-1 shrink-0 cursor-pointer shadow-2xs"
-                                    >
-                                      <RotateCcw className="w-3 h-3" />
-                                      <span>Ganti File</span>
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer Step 3 */}
-                <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
-                  <button
-                    type="button"
-                    onClick={() => setTemplateModalStep(2)}
-                    className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span>Kembali ke Pilih Template</span>
-                  </button>
-
-                  <div className="flex items-center gap-3">
-                    {templateFormSubmitted && !isTemplateFormValid && (
-                      <span className="text-xs font-extrabold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 bg-rose-50 dark:bg-rose-950/60 px-3 py-1.5 rounded-[10px] border border-rose-200 dark:border-rose-800">
-                        <AlertCircle className="w-4 h-4 shrink-0 animate-bounce text-rose-500" />
-                        <span>Harap isi semua kolom wajib (*)</span>
-                      </span>
-                    )}
-                    <button
-                      type="button"
-                      onClick={handleCreateCvFromTemplate}
-                      className="px-6 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md shadow-[#1738D1]/20"
-                    >
-                      <span>Buat &amp; Edit CV</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
           </div>
         </div>
       )}

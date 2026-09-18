@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchFaq, getQuickPrompts } from "@cuti/faq";
+import { searchFaq, getQuickPrompts } from "@employr/faq";
 
 /**
  * Chat Customer Service (Herdi) — berbasis retrieval, BUKAN AI generatif.
  *
  * Mesin: TF-IDF + cosine similarity atas artikel Pusat Bantuan
- * (paket @cuti/faq, sumber konten: packages/faq/content).
+ * (paket @employr/faq, sumber konten: packages/faq/content).
  * Cepat, gratis, deterministik, offline, dan selalu merujuk ke sumber resmi.
  */
 
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     if (!query || typeof query !== "string" || !query.trim()) {
       return NextResponse.json(
         {
-          text: "Halo! Saya Herdi dari Customer Service Employr. Silakan ketik pertanyaanmu, misalnya: cara cetak CV ke PDF, kendala pembayaran, atau panduan misi & referral.",
+          text: "Halo! Saya Herdi dari Customer Service Employr. Silakan ketik pertanyaanmu, misalnya: cara cetak CV ke PDF, tracker lamaran, atau panduan misi & referral.",
           suggestions: getQuickPrompts(4),
         },
         { status: 200 }

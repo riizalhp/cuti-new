@@ -97,16 +97,21 @@ export default function NotFound() {
 
           {/* Short Action Buttons */}
           <div className="flex items-center justify-center gap-3 w-full max-w-xs mx-auto">
-            <Link href="/beranda" className="flex-1">
-              <Button
-                variant="primary"
-                size="default"
-                className="w-full h-10 px-5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 active:scale-[0.98] transition flex items-center justify-center gap-1.5"
-              >
-                <Home className="w-3.5 h-3.5" />
-                <span>Beranda</span>
-              </Button>
-            </Link>
+            <Button
+              variant="primary"
+              size="default"
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.location.href = '/beranda';
+                } else {
+                  router.push('/beranda');
+                }
+              }}
+              className="flex-1 h-10 px-5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 active:scale-[0.98] transition flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Home className="w-3.5 h-3.5" />
+              <span>Beranda</span>
+            </Button>
 
             <button
               onClick={() => router.back()}
@@ -121,7 +126,7 @@ export default function NotFound() {
 
       {/* Footer Info — Full Width Edge-to-Edge */}
       <footer className="w-full px-6 sm:px-12 py-4 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 dark:text-slate-600 border-t border-slate-200/80 dark:border-slate-800/80 shrink-0 bg-white/40 dark:bg-slate-900/40">
-        <p>© {new Date().getFullYear()} Employr · Career Operating System</p>
+        <p>© {new Date().getFullYear()} Employr</p>
         <div className="flex items-center gap-5 text-xs text-slate-500 dark:text-slate-400">
           <Link href="/beranda" className="hover:text-slate-800 dark:hover:text-slate-200 transition">
             Beranda

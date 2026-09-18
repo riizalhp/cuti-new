@@ -29,7 +29,7 @@ export const LatestArticlesList: React.FC = () => {
       title: '20 Pertanyaan Interview Tersering & Cara Menjawabnya',
       category: 'Persiapan Interview',
       readTime: '6 min baca',
-      author: 'CutiCoach',
+      author: 'EmployrCoach',
       desc: 'Panduan menjawab pertanyaan "Ceritakan tentang diri Anda" hingga strategi menjawab pertanyaan tentang kelemahan dengan metode STAR.',
       content:
         'Gunakan teknik STAR (Situation, Task, Action, Result). Jelaskan situasi yang pernah dialami, tugas yang diemban, tindakan nyata yang diambil, serta hasil terukur yang berhasil diraih.',
@@ -49,7 +49,7 @@ export const LatestArticlesList: React.FC = () => {
       title: 'Contoh CV Fresh Graduate Tanpa Pengalaman Kerja',
       category: 'Fresh Graduate',
       readTime: '5 min baca',
-      author: 'CutiCoach',
+      author: 'EmployrCoach',
       desc: 'Cara menyoroti pengalaman organisasi, tugas akhir, serta sertifikasi online agar tetap terlihat kompeten.',
       content:
         'Bagi lulusan baru, tekankan pada achievement akademis, proyek perkuliahan, pengalaman kepanitiaan, serta skill praktis yang dikuasai.',

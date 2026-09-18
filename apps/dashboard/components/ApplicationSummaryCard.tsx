@@ -3,15 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { trackerApi, cvApi } from '@/lib/api';
 import {
-  Briefcase,
-  Users,
-  Award,
-  Zap,
-  TrendingUp,
-  ArrowUpRight,
-  Clock,
-  Sparkles,
-} from 'lucide-react';
+  BriefcaseIcon,
+  UsersIcon,
+  AwardIcon,
+  ZapIcon,
+  TrendingUpIcon,
+  ClockIcon,
+} from '@/components/icons/CustomIcons';
 
 interface ApplicationSummaryCardProps {
   onViewTracker?: () => void;
@@ -74,62 +72,49 @@ export const ApplicationSummaryCard: React.FC<ApplicationSummaryCardProps> = ({ 
       title: 'Lamaran Aktif',
       value: String(totalApps),
       badge: recentAppsCount > 0 ? `+${recentAppsCount} minggu ini` : 'Belum ada baru',
-      subtitle: reviewingCount > 0 ? `${reviewingCount} dalam proses peninjauan` : 'Belum ada dalam review',
-      icon: Briefcase,
+      subtitle: reviewingCount > 0 ? `${reviewingCount} dalam peninjauan HR` : 'Belum ada dalam review',
+      icon: BriefcaseIcon,
       color: 'bg-orange-50 text-orange-600 dark:bg-orange-950/80 dark:text-orange-400 border border-orange-100 dark:border-orange-900/50',
-      progress: Math.min(100, Math.round((totalApps / 15) * 100)),
-      progressColor: 'bg-[#1738D1]',
     },
     {
       title: 'Interview',
       value: String(interviewCount),
-      badge: 'Menunggu',
-      subtitle: interviewCount > 0 ? 'Sesi aktif dijadwalkan' : 'Belum ada jadwal',
-      icon: Users,
+      badge: interviewCount > 0 ? 'Aktif' : 'Menunggu',
+      subtitle: interviewCount > 0 ? `${interviewCount} sesi aktif dijadwalkan` : 'Belum ada jadwal wawancara',
+      icon: UsersIcon,
       color: 'bg-amber-50 text-amber-600 dark:bg-amber-950/80 dark:text-amber-400 border border-amber-100 dark:border-amber-900/50',
-      progress: Math.min(100, interviewCount * 25),
-      progressColor: 'bg-amber-500',
     },
     {
       title: 'Offering',
       value: String(offeringCount),
       badge: offeringCount > 0 ? 'Diterima' : 'Dalam Proses',
-      subtitle: offeringCount > 0 ? 'Penawaran kerja diterima' : 'Target bulan ini',
-      icon: Award,
+      subtitle: offeringCount > 0 ? 'Penawaran kerja diterima' : 'Target capaian karier',
+      icon: AwardIcon,
       color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/80 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50',
-      progress: offeringCount > 0 ? 100 : 0,
-      progressColor: 'bg-emerald-500',
     },
     {
       title: 'ATS Match Score',
       value: `${atsScore}%`,
-      badge: atsScore >= 85 ? 'Sangat Relevan' : 'Cukup Baik',
+      badge: atsScore >= 85 ? 'Sangat Relevan' : atsScore > 0 ? 'Cukup Baik' : 'Belum Ada',
       subtitle: atsSubtitle,
-      icon: Zap,
-      color: 'bg-orange-50 text-orange-600 dark:bg-orange-950/80 dark:text-orange-400 border border-orange-100 dark:border-orange-900/50',
+      icon: ZapIcon,
+      color: 'bg-blue-50 text-blue-600 dark:bg-blue-950/80 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50',
       progress: atsScore,
-      progressColor: 'bg-[#1738D1]',
     },
   ];
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-6 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors space-y-5">
+    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-6 border border-slate-200 dark:border-slate-800 shadow-xs transition-colors space-y-5">
       {/* Top Header Row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-[10px] bg-[#1738D1] dark:bg-[#1738D1] text-white flex items-center justify-center shadow-md shadow-[#1738D1]/20 shrink-0">
-            <TrendingUp className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-[10px] bg-[#1738D1] text-white flex items-center justify-center shrink-0">
+            <TrendingUpIcon size={20} />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                Ringkasan Lamaran Kerja
-              </h3>
-              <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-bold bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/50 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-orange-500" />
-                Live Update
-              </span>
-            </div>
+            <h3 className="font-bold text-base text-slate-900 dark:text-white">
+              Ringkasan Lamaran Kerja
+            </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Pantau progres lamaran, jadwal interview, dan penawaran kerja kamu dalam satu tempat
             </p>
@@ -138,16 +123,15 @@ export const ApplicationSummaryCard: React.FC<ApplicationSummaryCardProps> = ({ 
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-[10px] border border-slate-200/80 dark:border-slate-700 flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-orange-500" />
+            <ClockIcon size={14} className="text-orange-500" />
             <span>30 Hari Terakhir</span>
           </span>
           {onViewTracker && (
             <button
               onClick={onViewTracker}
-              className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/60 dark:hover:bg-orange-900/60 px-3 py-1.5 rounded-[10px] border border-orange-200/60 dark:border-orange-800/50 transition flex items-center gap-1 cursor-pointer"
+              className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/60 dark:hover:bg-orange-900/60 px-3 py-1.5 rounded-[10px] border border-orange-200/60 dark:border-orange-800/50 transition flex items-center cursor-pointer"
             >
               <span>Tracker Detail</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
@@ -164,7 +148,7 @@ export const ApplicationSummaryCard: React.FC<ApplicationSummaryCardProps> = ({ 
             >
               <div className="flex items-center justify-between gap-2">
                 <div className={`p-2.5 rounded-[10px] ${stat.color} shrink-0`}>
-                  <Icon className="w-5 h-5" />
+                  <Icon size={18} />
                 </div>
                 <span className="text-[10px] font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 px-2.5 py-1 rounded-[10px] border border-slate-200 dark:border-slate-700 shadow-2xs truncate">
                   {stat.badge}
@@ -172,7 +156,7 @@ export const ApplicationSummaryCard: React.FC<ApplicationSummaryCardProps> = ({ 
               </div>
 
               <div>
-                <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tight group-hover:scale-102 transition-transform origin-left">
+                <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                   {stat.value}
                 </p>
                 <p className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-0.5">
@@ -183,13 +167,17 @@ export const ApplicationSummaryCard: React.FC<ApplicationSummaryCardProps> = ({ 
                 </p>
               </div>
 
-              {/* Mini progress bar indicator */}
-              <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                <div
-                  className={`h-full ${stat.progressColor} rounded-full transition-all duration-500`}
-                  style={{ width: `${stat.progress}%` }}
-                />
-              </div>
+              {/* Progress bar only for real 0-100% metrics (e.g. ATS Score) */}
+              {typeof stat.progress === 'number' ? (
+                <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                    style={{ width: `${stat.progress}%` }}
+                  />
+                </div>
+              ) : (
+                <div className="h-1.5" />
+              )}
             </div>
           );
         })}

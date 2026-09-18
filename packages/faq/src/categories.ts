@@ -15,7 +15,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
     slug: "cv-dokumen",
     label: "CV & Dokumen",
     description:
-      "Buat CV ATS, cetak PDF, pahami skor ATS, layanan CV by HRD, dan surat lamaran.",
+      "Buat CV ATS, cetak PDF, pahami skor ATS, dan susun surat lamaran.",
   },
   {
     slug: "evaluasi-optimasi",
@@ -40,12 +40,6 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
     label: "Pengembangan Karier",
     description:
       "Ukur Career Readiness, ikuti kursus & sertifikasi, dan latihan soal.",
-  },
-  {
-    slug: "membership-pembayaran",
-    label: "Membership & Pembayaran",
-    description:
-      "Pilih paket keanggotaan, metode pembayaran, dan pakai voucher promo.",
   },
   {
     slug: "akun-bantuan",

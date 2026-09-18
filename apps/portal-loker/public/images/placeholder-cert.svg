@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" fill="none">
+  <defs>
+    <linearGradient id="certBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b132b" />
+      <stop offset="50%" stop-color="#1c2541" />
+      <stop offset="100%" stop-color="#1738D1" />
+    </linearGradient>
+    <linearGradient id="goldAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+    <pattern id="certGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255, 255, 255, 0.05)" stroke-width="1" />
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="500" fill="url(#certBg)" />
+  <rect width="800" height="500" fill="url(#certGrid)" />
+
+  <!-- Ambient Glow -->
+  <circle cx="400" cy="220" r="160" fill="#1738D1" opacity="0.35" filter="blur(60px)" />
+
+  <!-- Central Seal Shield Icon -->
+  <g transform="translate(350, 150)">
+    <circle cx="50" cy="50" r="54" fill="rgba(255, 255, 255, 0.08)" stroke="rgba(255, 255, 255, 0.2)" stroke-width="2" />
+    <circle cx="50" cy="50" r="44" fill="rgba(23, 56, 209, 0.4)" stroke="url(#goldAccent)" stroke-width="2.5" />
+    <!-- Checkmark Shield -->
+    <path d="M50 30 L66 38 V52 C66 64 50 72 50 72 C50 72 34 64 34 52 V38 Z" fill="url(#goldAccent)" opacity="0.9" />
+    <path d="M43 50 L48 55 L58 44" stroke="#0B132B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+
+  <!-- Label Badge -->
+  <g transform="translate(400, 310)">
+    <rect x="-110" y="0" width="220" height="32" rx="16" fill="rgba(255, 255, 255, 0.12)" stroke="rgba(255, 255, 255, 0.25)" stroke-width="1" />
+    <text x="0" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">SERTIFIKASI RESMI</text>
+  </g>
+
+  <text x="400" y="370" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="500" fill="rgba(255, 255, 255, 0.7)" text-anchor="middle">Standar Kompetensi Nasional &amp; Global</text>
+</svg>

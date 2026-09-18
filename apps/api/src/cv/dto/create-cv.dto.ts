@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createCvSchema } from '@cuti/types';
+import { createCvSchema } from '@employr/types';
 
 export const createCvDtoSchema = createCvSchema;
 

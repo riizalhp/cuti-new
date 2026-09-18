@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@cuti/db';
+import { prisma } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 
 type TransactionType = 'MEMBERSHIP' | 'TOPUP' | 'ADDON' | 'REFERRAL_REWARD' | 'MISI_REWARD';
@@ -69,7 +69,7 @@ async function buildProfilePayload(userId: string, user: any) {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
-  const [membership, transactions, referrals, activeMisi, userSubmissions, leaderboardRows, checkinToday] = await Promise.all([
+  const [membership, transactions, referrals, activeMisi, userSubmissions, leaderboardRows, checkinToday, userPrefsRow] = await Promise.all([
     prisma.membership.findUnique({ where: { user_id: userId } }),
     prisma.transactions.findMany({ where: { user_id: userId }, orderBy: { created_at: 'desc' }, take: 30 }),
     prisma.referrals.findMany({
@@ -97,6 +97,7 @@ async function buildProfilePayload(userId: string, user: any) {
         created_at: { gte: startOfToday },
       },
     }),
+    prisma.user.findUnique({ where: { id: userId }, select: { preferences: true } }),
   ]);
 
   // --- Gamification ---
@@ -216,28 +217,75 @@ async function buildProfilePayload(userId: string, user: any) {
   const firstName = (user.name || 'USER').split(' ')[0].toUpperCase();
   const referralCode = user.referral_code || `EMPLOYR-${firstName}${new Date().getFullYear()}`;
 
+  const prefs = (userPrefsRow?.preferences as Record<string, any> | null) || {};
+
+  // Auto fallback bio dari CV pertama jika di preferences masih kosong
+  let resolvedBio = typeof prefs.bio === 'string' ? prefs.bio : '';
+  if (!resolvedBio || resolvedBio.trim() === '') {
+    try {
+      const firstCv = await prisma.cv_projects.findFirst({
+        where: { user_id: userId, is_active: true },
+        orderBy: { created_at: 'asc' },
+        select: { data: true },
+      });
+      if (firstCv && firstCv.data && typeof firstCv.data === 'object') {
+        const cvData = firstCv.data as Record<string, any>;
+        if (typeof cvData.summary === 'string' && cvData.summary.trim()) {
+          resolvedBio = cvData.summary.trim();
+          // Auto-backfill ke preferences pengguna secara non-blocking
+          prisma.user
+            .update({
+              where: { id: userId },
+              data: {
+                preferences: {
+                  ...prefs,
+                  bio: resolvedBio,
+                },
+              },
+            })
+            .catch(() => {});
+        }
+      }
+    } catch (e) {
+      console.warn('[buildProfilePayload] Gagal fallback bio dari CV:', e);
+    }
+  }
+
   return {
     id: user.id,
     name: user.name,
     fullName: user.name,
     email: user.email,
-    phone: user.phone || '',
-    avatarUrl: user.avatar_url || '',
-    photoUrl: user.avatar_url || '',
-    headline: user.target_job || 'Pencari Kerja & Professional',
-    location: 'Jakarta, Indonesia',
-    bio: 'Pengguna aktif Employr yang sedang mempersiapkan karir profesional.',
-    linkedin: '',
-    github: '',
-    website: '',
-    expectedSalary: 'Rp 10.000.000 - Rp 15.000.000',
-    experienceYears: user.experience_year ? `${user.experience_year} Tahun` : '1-3 Tahun',
-    workPreference: 'Hybrid',
-    education: user.education || '',
-    major: user.major || '',
-    lastCompany: user.last_company || '',
-    targetJob: user.target_job || '',
+    phone: user.phone || prefs.phone || '',
+    avatarUrl: user.avatar_url || prefs.avatarUrl || '',
+    photoUrl: user.avatar_url || prefs.photoUrl || '',
+    headline: prefs.headline || '',
+    location: prefs.location || '',
+    bio: resolvedBio,
+    address: prefs.address || '',
+    gender: prefs.gender || '',
+    birthDate: prefs.birthDate || '',
+    linkedin: prefs.linkedin || '',
+    github: prefs.github || '',
+    website: prefs.website || '',
+    portfolio: prefs.portfolio || '',
+    targetIndustry: prefs.targetIndustry || '',
+    expectedSalary: prefs.expectedSalary || '',
+    experienceYears: prefs.experienceYears || (user.experience_year ? `${user.experience_year} Tahun` : ''),
+    workPreference: prefs.workPreference || '',
+    targetCities: prefs.targetCities || '',
+    availability: prefs.availability || '',
+    canRelocate: prefs.canRelocate ?? false,
+    negotiableSalary: prefs.negotiableSalary ?? true,
+    desiredBenefits: Array.isArray(prefs.desiredBenefits) ? prefs.desiredBenefits : [],
+    education: user.education || prefs.education || '',
+    major: user.major || prefs.major || '',
+    lastCompany: user.last_company || prefs.lastCompany || '',
+    targetJob: user.target_job || prefs.targetRole || prefs.targetPosition || '',
+    targetPosition: user.target_job || prefs.targetRole || prefs.targetPosition || '',
+    targetRole: user.target_job || prefs.targetRole || prefs.targetPosition || '',
     skills: user.skills || [],
+    onboarded: Boolean(user.onboarded),
     referralCode,
     referralLink: `https://employr.id/ref/${referralCode}`,
     membership: membership
@@ -254,6 +302,7 @@ async function buildProfilePayload(userId: string, user: any) {
       level,
       checkedInToday: !!checkinToday,
     },
+    preferences: (userPrefsRow?.preferences as Record<string, any> | null) || null,
     missions,
     missionHistory,
     coinHistory,
@@ -272,7 +321,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: true, data: null });
     }
 
-    const profile = await buildProfilePayload(user.id, user);
+    const fullUser = await prisma.user.findUnique({ where: { id: user.id } });
+    if (!fullUser) {
+      return NextResponse.json({ success: true, data: null });
+    }
+
+    const profile = await buildProfilePayload(fullUser.id, fullUser);
     return NextResponse.json({ success: true, data: profile });
   } catch (error: any) {
     console.error('[GET /api/user/profile] Error:', error);
@@ -305,24 +359,70 @@ async function handleUpsert(req: NextRequest) {
       updated_at: new Date(),
     };
 
+    if (typeof body.onboarded === 'boolean') data.onboarded = body.onboarded;
     if (typeof body.name === 'string' && body.name.trim()) data.name = body.name.trim();
     if (typeof body.fullName === 'string' && body.fullName.trim()) data.name = body.fullName.trim();
-    if (typeof body.phone === 'string') data.phone = body.phone.trim() || null;
+    if (typeof body.phone === 'string') {
+      const cleanPhone = body.phone.trim();
+      data.phone = cleanPhone || null;
+    }
     if (typeof body.avatarUrl === 'string') data.avatar_url = body.avatarUrl || null;
     if (typeof body.photoUrl === 'string' && !data.avatar_url) data.avatar_url = body.photoUrl || null;
     if (typeof body.education === 'string') data.education = body.education || null;
     if (typeof body.major === 'string') data.major = body.major || null;
     if (typeof body.lastCompany === 'string') data.last_company = body.lastCompany || null;
-    if (typeof body.targetJob === 'string') data.target_job = body.targetJob || null;
-    if (typeof body.target_job === 'string') data.target_job = body.target_job || null;
-    if (typeof body.headline === 'string' && body.headline.trim() && !data.target_job) {
-      data.target_job = body.headline.trim();
+    if (typeof body.targetRole === 'string' && body.targetRole.trim()) {
+      data.target_job = body.targetRole.trim();
+    }
+    if (typeof body.targetJob === 'string' && body.targetJob.trim()) {
+      data.target_job = body.targetJob.trim();
+    }
+    if (typeof body.target_job === 'string' && body.target_job.trim()) {
+      data.target_job = body.target_job.trim();
+    }
+    if (typeof body.targetPosition === 'string' && body.targetPosition.trim() && !data.target_job) {
+      data.target_job = body.targetPosition.trim();
     }
     if (typeof body.experienceYears === 'string') {
       const match = body.experienceYears.match(/\d+/);
       if (match) data.experience_year = parseInt(match[0], 10);
     }
     if (Array.isArray(body.skills)) data.skills = body.skills.filter((s: any) => typeof s === 'string');
+
+    // Notification, regional & extended profile preferences disimpan sebagai JSON terstruktur
+    const current = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { preferences: true },
+    });
+    const existing = (current?.preferences as Record<string, any> | null) || {};
+    const prefs: Record<string, any> = { ...existing };
+
+    if (body.preferences && typeof body.preferences === 'object' && !Array.isArray(body.preferences)) {
+      const incoming = body.preferences as Record<string, any>;
+      if (incoming.notifications && typeof incoming.notifications === 'object') {
+        prefs.notifications = { ...(existing.notifications || {}), ...incoming.notifications };
+      }
+      if (typeof incoming.language === 'string') prefs.language = incoming.language;
+      if (typeof incoming.timezone === 'string') prefs.timezone = incoming.timezone;
+      if (typeof incoming.currency === 'string') prefs.currency = incoming.currency;
+      if (typeof incoming.theme === 'string') prefs.theme = incoming.theme;
+    }
+
+    const extraFields = [
+      'location', 'bio', 'headline', 'address', 'gender', 'birthDate',
+      'linkedin', 'github', 'website', 'portfolio', 'targetIndustry',
+      'expectedSalary', 'workPreference', 'targetCities', 'availability',
+      'canRelocate', 'negotiableSalary', 'desiredBenefits', 'experienceYears',
+      'targetRole', 'targetPosition',
+      'phone'
+    ];
+    for (const field of extraFields) {
+      if (body[field] !== undefined) {
+        prefs[field] = body[field];
+      }
+    }
+
+    data.preferences = prefs;
 
     await prisma.user.update({
       where: { id: user.id },
@@ -340,19 +440,39 @@ async function handleUpsert(req: NextRequest) {
             }
           });
         }
+        if (typeof body.education === 'string' && body.education.trim().length > 1) {
+          toInsert.push({ category: 'institution', value: body.education.trim() });
+        }
         if (typeof body.major === 'string' && body.major.trim().length > 1) {
-          toInsert.push({ category: 'institution', value: body.major.trim() });
+          toInsert.push({ category: 'major', value: body.major.trim() });
         }
         if (typeof body.targetJob === 'string' && body.targetJob.trim().length > 1) {
           toInsert.push({ category: 'position', value: body.targetJob.trim() });
         }
 
         for (const item of toInsert) {
-          await (prisma as any).cv_learning_dictionary.upsert({
-            where: { value: item.value },
-            update: { frequency: { increment: 1 } },
-            create: { category: item.category, value: item.value, frequency: 1 },
-          }).catch(() => {});
+          const cleanVal = item.value.trim();
+          if (!cleanVal) continue;
+          try {
+            const existing = await (prisma as any).cv_learning_dictionary.findFirst({
+              where: { value: { equals: cleanVal, mode: 'insensitive' } },
+            });
+
+            if (existing) {
+              await (prisma as any).cv_learning_dictionary.update({
+                where: { id: existing.id },
+                data: { frequency: { increment: 1 } },
+              });
+            } else {
+              await (prisma as any).cv_learning_dictionary.create({
+                data: {
+                  category: item.category,
+                  value: cleanVal,
+                  frequency: 1,
+                },
+              });
+            }
+          } catch {}
         }
       } catch (err) {
         // Silently ignore learning errors to avoid affecting profile saves

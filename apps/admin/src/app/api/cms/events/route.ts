@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@cuti/db";
+import { prisma } from "@employr/db";
 
 function slugify(text: string): string {
   return text
@@ -26,6 +26,7 @@ export async function GET() {
       isActive: e.is_active,
       externalUrl: e.external_url,
       coverImageUrl: e.cover_image_url,
+      tags: e.tags ?? [],
       createdAt: e.created_at.toISOString().split("T")[0],
     }));
 
@@ -49,6 +50,7 @@ export async function POST(req: NextRequest) {
       type,
       externalUrl,
       coverImageUrl,
+      tags,
       isActive,
     } = body;
 
@@ -76,6 +78,7 @@ export async function POST(req: NextRequest) {
         type: type ?? "ONLINE",
         external_url: externalUrl,
         cover_image_url: coverImageUrl ?? null,
+        tags: Array.isArray(tags) ? tags : [],
         is_active: isActive ?? true,
       },
     });

@@ -19,7 +19,7 @@ export const LatestEventsList: React.FC = () => {
     {
       id: 1,
       title: 'National Virtual Job Fair 2026',
-      organizer: 'CUTI & Kemenaker',
+      organizer: 'Employr & Kemenaker',
       date: '28 - 30 Juli 2026',
       time: '09:00 - 16:00 WIB',
       location: 'Virtual / Online Zoom',

@@ -1,117 +1,67 @@
 ---
-// Navbar.astro - Header Editorial Career Information Portal
+// Navbar.astro - Header Editorial Career Information Portal (Port 4321 Style)
 ---
 
-<header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 transition-all">
+<header class="sticky top-0 z-40 bg-[#f4f3ee]/90 backdrop-blur-md border-b border-[#101010]/8 transition-all">
   <div class="max-w-[1240px] mx-auto px-4 sm:px-6 h-[72px] flex items-center justify-between gap-4">
     <!-- Brand Logo -->
     <a href="/" class="flex items-center group py-1" aria-label="Beranda Employer Job">
       <img
         src="/employer-job.svg"
         alt="Employer Job"
-        class="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-[1.02]"
+        class="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-[1.02]"
       />
     </a>
 
-    <!-- Desktop Navigation -->
-    <nav class="hidden lg:flex items-center gap-1 text-[14px] font-normal text-slate-600">
-      <a href="/" class="px-3.5 py-2 rounded-lg text-[#1738d1] font-medium bg-blue-50/80 hover:bg-blue-50 transition-colors">
-        Beranda
+    <!-- Desktop Horizontal Navigation -->
+    <nav class="hidden md:flex items-center gap-1 text-[13px] font-bold text-[#101010]">
+      <a href="/lowongan" class="px-3.5 py-1.5 rounded-full hover:bg-[#101010]/5 transition-colors">
+        Lowongan
       </a>
-
-      <!-- Dropdown Lowongan -->
-      <div class="relative group">
-        <a href="/lowongan" class="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-100 flex items-center gap-1 transition-colors cursor-pointer">
-          <span>Lowongan</span>
-          <svg class="w-4 h-4 text-slate-400 group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-          </svg>
-        </a>
-        <div class="absolute left-0 top-full pt-2 opacity-0 translate-y-1 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible transition-all duration-150 z-50">
-          <div class="w-56 bg-white rounded-xl shadow-xl border border-slate-100 p-2 text-sm">
-            <a href="/lowongan" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-[#1738d1] transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#1738d1]"></span>
-              Semua Lowongan
-            </a>
-            <a href="/lowongan?exp=fresh" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-[#1738d1] transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-              Fresh Graduate
-            </a>
-            <a href="/lowongan?type=remote" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-[#1738d1] transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-              Kerja Remote
-            </a>
-            <a href="/lowongan?type=magang" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-[#1738d1] transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-              Magang & Internship
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <a href="/sertifikasi" class="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition-colors">
+      <a href="/sertifikasi" class="px-3.5 py-1.5 rounded-full hover:bg-[#101010]/5 transition-colors">
         Sertifikasi
       </a>
-      <a href="/course" class="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition-colors">
-        Course
+      <a href="/course" class="px-3.5 py-1.5 rounded-full hover:bg-[#101010]/5 transition-colors">
+        Pelatihan
       </a>
-      <a href="/event" class="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition-colors">
+      <a href="/event" class="px-3.5 py-1.5 rounded-full hover:bg-[#101010]/5 transition-colors">
         Event
       </a>
-
-      <!-- Dropdown Artikel -->
-      <div class="relative group">
-        <a href="/career" class="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-100 flex items-center gap-1 transition-colors cursor-pointer">
-          <span>Artikel</span>
-          <svg class="w-4 h-4 text-slate-400 group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-          </svg>
-        </a>
-        <div class="absolute left-0 top-full pt-2 opacity-0 translate-y-1 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible transition-all duration-150 z-50">
-          <div class="w-56 bg-white rounded-xl shadow-xl border border-slate-100 p-2 text-sm">
-            <a href="/career" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-[#1738d1] transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#1738d1]"></span>
-              Semua Artikel
-            </a>
-            <a href="/career?cat=tips" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-[#1738d1] transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-              Tips Karier
-            </a>
-            <a href="/career?cat=cv" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-[#1738d1] transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-              CV & Interview
-            </a>
-            <a href="/career?cat=gaji" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-[#1738d1] transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-              Dunia Kerja & Gaji
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <a href="/tentang" class="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition-colors">
-        Tentang
+      <a href="/career" class="px-3.5 py-1.5 rounded-full hover:bg-[#101010]/5 transition-colors">
+        Tips Karier
       </a>
     </nav>
 
     <!-- Header Actions -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2 sm:gap-3">
       <!-- Search Button Trigger -->
       <button
         type="button"
         id="open-search-btn"
         aria-label="Cari info lowongan, sertifikasi, dan event"
-        class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-600 hover:text-[#1738d1] hover:bg-slate-100 transition-colors cursor-pointer"
+        class="w-9 h-9 rounded-full flex items-center justify-center text-[#101010] bg-white border border-[#d7d6cf]/80 hover:border-[#101010] hover:bg-white transition-all cursor-pointer shadow-xs"
       >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
         </svg>
       </button>
 
-      <!-- Masuk Button (Link ke portal akun pengguna) -->
+      <!-- B2B Action Button: Outlined Pill -->
+      <a
+        href="/tentang#iklan"
+        class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#d7d6cf] bg-white/80 hover:bg-white hover:border-[#101010] text-[#101010] font-bold text-xs transition-all active:scale-[0.98] shadow-xs"
+        title="Portal Perekrut & Pasang Lowongan Kerja"
+      >
+        <svg class="w-3.5 h-3.5 text-[#0000ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+        </svg>
+        <span>Pasang Lowongan</span>
+      </a>
+
+      <!-- Masuk Button: Pill Employr Blue -->
       <a
         href="http://localhost:3000/login"
-        class="px-5 py-2.5 rounded-xl bg-[#1738d1] hover:bg-[#122ca6] text-white text-sm font-medium shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30 transition-all active:scale-[0.98] inline-flex items-center gap-1.5"
+        class="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[#0000ff] hover:bg-[#0000cc] text-white text-xs font-bold tracking-wide shadow-[0_4px_14px_rgba(0,0,255,0.25)] hover:shadow-[0_6px_20px_rgba(0,0,255,0.35)] transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
       >
         <span>Masuk</span>
       </a>
@@ -121,33 +71,72 @@
         type="button"
         id="mobile-menu-btn"
         aria-label="Buka menu navigasi"
-        class="lg:hidden w-10 h-10 rounded-xl flex items-center justify-center text-slate-600 hover:bg-slate-100"
+        class="md:hidden w-9 h-9 rounded-full flex items-center justify-center text-[#101010] bg-white border border-[#d7d6cf] hover:bg-[#101010]/5 transition-colors"
       >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
         </svg>
       </button>
     </div>
   </div>
 
-  <!-- Mobile Dropdown Menu -->
-  <div id="mobile-menu" class="hidden lg:hidden border-t border-slate-100 bg-white px-4 py-4 space-y-2 shadow-lg">
-    <a href="/" class="block px-3 py-2.5 rounded-lg text-sm font-bold text-[#1738d1] bg-blue-50">Beranda</a>
-    <a href="/lowongan" class="block px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50">Lowongan Kerja</a>
-    <a href="/sertifikasi" class="block px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50">Sertifikasi</a>
-    <a href="/course" class="block px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50">Course & Pelatihan</a>
-    <a href="/event" class="block px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50">Event & Job Fair</a>
-    <a href="/career" class="block px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50">Artikel & Tips Karier</a>
-    <a href="/tentang" class="block px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50">Tentang Employer Job</a>
+  <!-- Mobile Drawer Backdrop & Panel -->
+  <div id="mobile-drawer-backdrop" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 hidden transition-opacity"></div>
+  <div id="mobile-drawer" class="fixed top-0 right-0 bottom-0 w-[280px] bg-[#f4f3ee] z-50 border-l border-[#d7d6cf] shadow-2xl p-6 flex flex-col justify-between translate-x-full transition-transform duration-300">
+    <div>
+      <div class="flex items-center justify-between pb-6 border-b border-[#101010]/8">
+        <img src="/employer-job.svg" alt="Employer Job" class="h-7 w-auto object-contain" />
+        <button id="mobile-drawer-close" aria-label="Tutup menu" class="w-8 h-8 rounded-full flex items-center justify-center text-[#101010] hover:bg-[#101010]/5">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="flex flex-col gap-1.5 pt-6 text-sm font-bold text-[#101010]">
+        <a href="/lowongan" class="px-4 py-2.5 rounded-xl hover:bg-[#101010]/5 transition-colors">Lowongan</a>
+        <a href="/sertifikasi" class="px-4 py-2.5 rounded-xl hover:bg-[#101010]/5 transition-colors">Sertifikasi</a>
+        <a href="/course" class="px-4 py-2.5 rounded-xl hover:bg-[#101010]/5 transition-colors">Pelatihan</a>
+        <a href="/event" class="px-4 py-2.5 rounded-xl hover:bg-[#101010]/5 transition-colors">Event</a>
+        <a href="/career" class="px-4 py-2.5 rounded-xl hover:bg-[#101010]/5 transition-colors">Tips Karier</a>
+      </nav>
+    </div>
+
+    <div class="pt-6 border-t border-[#101010]/8 flex flex-col gap-3">
+      <a
+        href="/tentang#iklan"
+        class="flex items-center justify-between px-4 py-2.5 rounded-full bg-white border border-[#d7d6cf] text-xs font-bold text-[#101010]"
+      >
+        <span>Pasang Iklan / B2B</span>
+        <span class="text-[10px] font-black text-[#0000ff] uppercase bg-blue-50 px-2 py-0.5 rounded-full">B2B</span>
+      </a>
+      <a
+        href="http://localhost:3000/login"
+        class="flex items-center justify-center px-4 py-2.5 rounded-full bg-[#0000ff] text-white text-xs font-bold shadow-md shadow-blue-500/20"
+      >
+        Masuk Akun
+      </a>
+    </div>
   </div>
 </header>
 
 <script is:inline>
   const mobileBtn = document.getElementById('mobile-menu-btn');
-  const mobileMenu = document.getElementById('mobile-menu');
-  if (mobileBtn && mobileMenu) {
-    mobileBtn.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
-    });
+  const drawer = document.getElementById('mobile-drawer');
+  const backdrop = document.getElementById('mobile-drawer-backdrop');
+  const closeBtn = document.getElementById('mobile-drawer-close');
+
+  function openDrawer() {
+    drawer?.classList.remove('translate-x-full');
+    backdrop?.classList.remove('hidden');
   }
+
+  function closeDrawer() {
+    drawer?.classList.add('translate-x-full');
+    backdrop?.classList.add('hidden');
+  }
+
+  mobileBtn?.addEventListener('click', openDrawer);
+  closeBtn?.addEventListener('click', closeDrawer);
+  backdrop?.addEventListener('click', closeDrawer);
 </script>

@@ -1,3 +1,77 @@
 ---
-return Astro.redirect('/kursus');
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import FooterPortal from '../../components/FooterPortal.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import SearchModal from '../../components/SearchModal.astro';
+import PageHero from '../../components/common/PageHero.astro';
+import { courseList, ensureData } from '../../data/mock';
+
+await ensureData();
+const courseListSnapshot = [...courseList];
+
+const title = "Direktori Kursus & Bootcamp Skill Digital | Employer Job";
+const description = "Daftar kursus, pelatihan, dan bootcamp pilihan untuk menguasai skill digital yang paling dicari perusahaan.";
 ---
+
+<BaseLayout title={title} description={description} canonicalUrl="http://localhost:3003/course">
+  <Navbar />
+
+  <main class="bg-[#f4f3ee] min-h-screen pb-16">
+    <PageHero
+      eyebrow="Pelatihan &amp; Skill"
+      title="Kursus &amp; Pelatihan <em>Skill Masa Depan</em>"
+      description="Belajar pemrograman, desain produk, pemasaran digital, analisa data, dan produktivitas dari mentor terpercaya."
+      badge={{ text: `${courseListSnapshot.length} Program Tersedia`, bgColor: 'bg-purple-50', textColor: 'text-purple-700', borderColor: 'border border-purple-200' }}
+    >
+      <nav slot="breadcrumb" class="flex items-center gap-2 text-xs text-[#6e6d68] mb-4" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-[#0000ff]">Beranda</a>
+        <span>/</span>
+        <span class="text-[#101010] font-semibold">Kursus &amp; Pelatihan</span>
+      </nav>
+    </PageHero>
+
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6">
+      <AdSlot type="leaderboard" note="Rekomendasi kursus dan pelatihan dengan potongan beasiswa." />
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
+        {courseListSnapshot.map((c) => (
+          <article class="bg-white rounded-2xl border border-[#d7d6cf] overflow-hidden hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:border-[#0000ff]/30 hover:-translate-y-1 transition duration-300 flex flex-col justify-between">
+            <div>
+              <div class="h-36 bg-[#eae8e0] overflow-hidden relative">
+                <img src={c.image} alt={c.title} class="w-full h-full object-cover" loading="lazy" />
+                <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-[#101010]/80 text-white text-[10px] font-semibold backdrop-blur-xs">
+                  {c.level}
+                </span>
+              </div>
+              <div class="p-5">
+                <div class="flex items-center gap-2 text-[11px] text-[#6e6d68] mb-1.5">
+                  <span class="font-semibold text-[#101010]">{c.provider}</span>
+                  <span>·</span>
+                  <span>{c.duration}</span>
+                  <span>·</span>
+                  <span class="text-amber-600 font-bold">Rating {c.rating}</span>
+                </div>
+                <h2 class="text-base font-semibold text-[#101010] hover:text-[#0000ff] transition leading-snug">
+                  <a href={`/course/${c.slug}`}>{c.title}</a>
+                </h2>
+                <p class="text-xs text-[#6e6d68] line-clamp-2 mt-2 leading-relaxed">{c.description}</p>
+              </div>
+            </div>
+            <div class="p-5 pt-0 border-t border-[#d7d6cf]/50">
+              <div class="flex items-center justify-between pt-3">
+                <span class="text-xs font-bold text-[#101010]">{c.price}</span>
+                <a href={`/course/${c.slug}`} class="px-4 py-2 rounded-full bg-[#0000ff] hover:bg-[#1738d1] text-white text-xs font-semibold transition shadow-xs">
+                  Detail Kursus →
+                </a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </main>
+
+  <FooterPortal />
+  <SearchModal />
+</BaseLayout>

@@ -1,0 +1,127 @@
+---
+// StickyAnchorBar.astro - Bilah Navigasi Lengket Cepat & Tombol Kembali ke Atas
+---
+
+<!-- Sticky Anchor Bar (Muncul setelah scroll melewati Hero) -->
+<div
+  id="sticky-anchor-bar"
+  class="fixed top-[72px] left-0 right-0 z-30 bg-[#f4f3ee]/95 backdrop-blur-md border-b border-[#101010]/8 shadow-xs transition-all duration-300 -translate-y-full opacity-0 pointer-events-none"
+  aria-label="Navigasi cepat halaman"
+>
+  <div class="max-w-[1240px] mx-auto px-4 sm:px-6 h-12 flex items-center justify-between gap-4">
+    <!-- Anchor Links Group -->
+    <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-1">
+      <span class="hidden sm:flex items-center gap-1.5 text-xs font-bold text-[#6e6d68] mr-1 shrink-0 uppercase tracking-wider text-[10px]">
+        <span class="w-1.5 h-1.5 bg-[#0000ff] rounded-xs"></span>
+        <span>Lompat:</span>
+      </span>
+
+      <a
+        href="#lowongan"
+        class="anchor-pill px-3.5 py-1 rounded-full text-xs font-bold text-[#6e6d68] hover:text-[#101010] hover:bg-white border border-transparent hover:border-[#d7d6cf] transition shrink-0"
+      >
+        Lowongan
+      </a>
+
+      <a
+        href="#sertifikasi"
+        class="anchor-pill px-3.5 py-1 rounded-full text-xs font-bold text-[#6e6d68] hover:text-[#101010] hover:bg-white border border-transparent hover:border-[#d7d6cf] transition shrink-0"
+      >
+        Sertifikasi
+      </a>
+
+      <a
+        href="#course"
+        class="anchor-pill px-3.5 py-1 rounded-full text-xs font-bold text-[#6e6d68] hover:text-[#101010] hover:bg-white border border-transparent hover:border-[#d7d6cf] transition shrink-0"
+      >
+        Pelatihan
+      </a>
+
+      <a
+        href="#event"
+        class="anchor-pill px-3.5 py-1 rounded-full text-xs font-bold text-[#6e6d68] hover:text-[#101010] hover:bg-white border border-transparent hover:border-[#d7d6cf] transition shrink-0"
+      >
+        Event
+      </a>
+
+      <a
+        href="#editorial-hub"
+        class="anchor-pill px-3.5 py-1 rounded-full text-xs font-bold text-[#6e6d68] hover:text-[#101010] hover:bg-white border border-transparent hover:border-[#d7d6cf] transition shrink-0"
+      >
+        Tips Karier
+      </a>
+
+      <a
+        href="#lead-magnet-cv"
+        class="anchor-pill px-3.5 py-1 rounded-full text-xs font-bold text-[#0000ff] bg-blue-50 border border-[#0000ff]/20 hover:bg-blue-100 transition shrink-0 flex items-center gap-1.5"
+      >
+        <span>Template CV</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-[#0000ff]"></span>
+      </a>
+    </div>
+
+    <!-- Quick Action / CTA -->
+    <a
+      href="/lowongan"
+      class="hidden md:inline-flex items-center gap-1 text-xs font-bold text-[#0000ff] hover:underline shrink-0"
+    >
+      <span>Semua Loker →</span>
+    </a>
+  </div>
+</div>
+
+<!-- Floating Back to Top Button -->
+<button
+  type="button"
+  id="back-to-top"
+  aria-label="Kembali ke atas"
+  class="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full bg-[#0000ff] hover:bg-[#0000cc] text-white shadow-[0_4px_14px_rgba(0,0,255,0.3)] flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+>
+  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+  </svg>
+</button>
+
+<script is:inline>
+  // Scroll detector for sticky anchor bar and floating back-to-top button
+  const anchorBar = document.getElementById('sticky-anchor-bar');
+  const backToTopBtn = document.getElementById('back-to-top');
+
+  function handleScroll() {
+    const scrollY = window.scrollY;
+
+    // Show sticky anchor bar after passing Hero section (420px)
+    if (anchorBar) {
+      if (scrollY > 420) {
+        anchorBar.classList.remove('-translate-y-full', 'opacity-0', 'pointer-events-none');
+        anchorBar.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+      } else {
+        anchorBar.classList.add('-translate-y-full', 'opacity-0', 'pointer-events-none');
+        anchorBar.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+      }
+    }
+
+    // Show back-to-top button after passing certification area (approx 900px)
+    if (backToTopBtn) {
+      if (scrollY > 900) {
+        backToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+        backToTopBtn.classList.add('opacity-100', 'pointer-events-auto');
+      } else {
+        backToTopBtn.classList.add('opacity-0', 'pointer-events-none');
+        backToTopBtn.classList.remove('opacity-100', 'pointer-events-auto');
+      }
+    }
+  }
+
+  window.addEventListener('scroll', handleScroll, { passive: true });
+
+  // Smooth scroll to top
+  if (backToTopBtn) {
+    backToTopBtn.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+  }
+</script>

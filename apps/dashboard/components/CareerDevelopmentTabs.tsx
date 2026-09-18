@@ -1,11 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BookOpen, GraduationCap, Award, Calendar, ChevronRight, Clock, ExternalLink, X } from 'lucide-react';
+import {
+  BookOpenIcon,
+  GraduationCapIcon,
+  AwardIcon,
+  CalendarIcon,
+  ClockIcon,
+  ExternalLinkIcon,
+} from '@/components/icons/CustomIcons';
+
+const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL || 'http://localhost:3003';
 
 export const CareerDevelopmentTabs: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'artikel' | 'kursus' | 'sertifikasi' | 'event'>('artikel');
-  const [activeModalItem, setActiveModalItem] = useState<any | null>(null);
 
   // Data murni dari database via /api/career — tanpa fallback hardcoded.
   const [articles, setArticles] = useState<any[]>([]);
@@ -32,7 +40,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
   const EmptyState = ({ icon: Icon, title, desc }: { icon: any; title: string; desc: string }) => (
     <div className="col-span-full flex flex-col items-center justify-center text-center py-12 px-6 rounded-[10px] border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/30">
       <div className="w-12 h-12 rounded-[10px] bg-[#1F3578]/10 dark:bg-blue-950 text-[#1F3578] dark:text-blue-400 flex items-center justify-center mb-3">
-        <Icon className="w-6 h-6" />
+        <Icon size={24} />
       </div>
       <h4 className="text-sm font-bold text-slate-900 dark:text-white">{title}</h4>
       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs leading-relaxed">{desc}</p>
@@ -40,10 +48,10 @@ export const CareerDevelopmentTabs: React.FC = () => {
   );
 
   const tabs = [
-    { id: 'artikel', label: 'Artikel Karier', icon: BookOpen, count: articles.length },
-    { id: 'kursus', label: 'Kursus & Skills', icon: GraduationCap, count: courses.length },
-    { id: 'sertifikasi', label: 'Sertifikasi', icon: Award, count: certifications.length },
-    { id: 'event', label: 'Event Job Fair', icon: Calendar, count: events.length },
+    { id: 'artikel', label: 'Artikel Karier', icon: BookOpenIcon, count: articles.length },
+    { id: 'kursus', label: 'Kursus & Skills', icon: GraduationCapIcon, count: courses.length },
+    { id: 'sertifikasi', label: 'Sertifikasi', icon: AwardIcon, count: certifications.length },
+    { id: 'event', label: 'Event Job Fair', icon: CalendarIcon, count: events.length },
   ];
 
   return (
@@ -74,7 +82,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon size={14} />
                 <span>{tab.label}</span>
               </button>
             );
@@ -87,41 +95,49 @@ export const CareerDevelopmentTabs: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {articles.length === 0 && !isLoading && (
             <EmptyState
-              icon={BookOpen}
+              icon={BookOpenIcon}
               title="Belum Ada Artikel Karier"
               desc="Artikel panduan karier akan muncul di sini setelah tim Employr mempublikasikannya."
             />
           )}
-          {articles.map((art) => (
-            <div
-              key={art.id}
-              onClick={() => setActiveModalItem(art)}
-              className="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition cursor-pointer flex flex-col justify-between group space-y-3"
-            >
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-orange-50 text-orange-700 dark:bg-orange-950/80 dark:text-orange-300 border border-orange-200 dark:border-orange-800/60">
-                    {art.category}
-                  </span>
-                  <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {art.readTime}
-                  </span>
-                </div>
-                <h4 className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400 transition line-clamp-2">
-                  {art.title}
-                </h4>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 mt-1">
-                  {art.desc}
-                </p>
-              </div>
+          {articles.map((art) => {
+            const articleUrl = art.slug
+              ? `${PORTAL_URL}/career/${art.slug}`
+              : art.externalUrl || `${PORTAL_URL}/career`;
 
-              <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-[11px] font-bold text-orange-600 dark:text-orange-400">
-                <span>Baca Panduan</span>
-                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-          ))}
+            return (
+              <a
+                key={art.id}
+                href={articleUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-4 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition cursor-pointer flex flex-col justify-between group space-y-3 no-underline"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-orange-50 text-orange-700 dark:bg-orange-950/80 dark:text-orange-300 border border-orange-200 dark:border-orange-800/60">
+                      {art.category}
+                    </span>
+                    <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                      <ClockIcon size={12} />
+                      {art.readTime}
+                    </span>
+                  </div>
+                  <h4 className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400 transition line-clamp-2">
+                    {art.title}
+                  </h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 mt-1">
+                    {art.desc}
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-[11px] font-bold text-orange-600 dark:text-orange-400">
+                  <span>Baca Panduan</span>
+                  <ExternalLinkIcon size={14} />
+                </div>
+              </a>
+            );
+          })}
         </div>
       )}
 
@@ -129,7 +145,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {courses.length === 0 && !isLoading && (
             <EmptyState
-              icon={GraduationCap}
+              icon={GraduationCapIcon}
               title="Belum Ada Kursus & Skills"
               desc="Rekomendasi kursus dan pelatihan akan muncul di sini setelah tim Employr menambahkannya."
             />
@@ -161,7 +177,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
 
               <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
                 <span>Lihat Kursus</span>
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ExternalLinkIcon size={14} />
               </div>
             </a>
           ))}
@@ -172,7 +188,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {certifications.length === 0 && !isLoading && (
             <EmptyState
-              icon={Award}
+              icon={AwardIcon}
               title="Belum Ada Sertifikasi"
               desc="Daftar sertifikasi resmi dan internasional akan muncul di sini setelah tim Employr menambahkannya."
             />
@@ -204,7 +220,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
 
               <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-[11px] font-bold text-amber-600 dark:text-amber-400">
                 <span>Info Sertifikasi</span>
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ExternalLinkIcon size={14} />
               </div>
             </a>
           ))}
@@ -215,7 +231,7 @@ export const CareerDevelopmentTabs: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {events.length === 0 && !isLoading && (
             <EmptyState
-              icon={Calendar}
+              icon={CalendarIcon}
               title="Belum Ada Event & Job Fair"
               desc="Event job fair, webinar, dan workshop akan muncul di sini setelah tim Employr menjadwalkannya."
             />
@@ -247,44 +263,10 @@ export const CareerDevelopmentTabs: React.FC = () => {
 
               <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-[11px] font-bold text-blue-600 dark:text-blue-400">
                 <span>Daftar Event</span>
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ExternalLinkIcon size={14} />
               </div>
             </a>
           ))}
-        </div>
-      )}
-
-      {/* Modal detail for Article tab */}
-      {activeModalItem && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg p-6 relative">
-            <button
-              onClick={() => setActiveModalItem(null)}
-              className="absolute top-4 right-4 p-1.5 rounded-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <span className="px-2.5 py-0.5 rounded-[10px] text-xs font-bold bg-orange-50 text-orange-700 dark:bg-orange-950/80 dark:text-orange-300 border border-orange-200 dark:border-orange-800/60">
-              {activeModalItem.category}
-            </span>
-
-            <h3 className="text-base font-extrabold text-slate-900 dark:text-white mt-2">
-              {activeModalItem.title}
-            </h3>
-
-            <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-[10px] border border-slate-200/80 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 leading-relaxed my-4 space-y-2">
-              <p className="font-semibold">{activeModalItem.desc}</p>
-              <p>{activeModalItem.content}</p>
-            </div>
-
-            <button
-              onClick={() => setActiveModalItem(null)}
-              className="w-full py-2.5 rounded-[10px] bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition cursor-pointer border-0"
-            >
-              Tutup Panduan
-            </button>
-          </div>
         </div>
       )}
     </div>

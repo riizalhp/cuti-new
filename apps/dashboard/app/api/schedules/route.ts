@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, ApplicationStatus } from '@cuti/db';
+import { prisma, ApplicationStatus } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 
 function formatDayLabel(targetDate: Date): { dayLabel: string; isToday: boolean } {

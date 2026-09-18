@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@cuti/db";
+import { prisma } from "@employr/db";
 
 // PUT: Update provider by ID
 export async function PUT(
@@ -19,12 +19,17 @@ export async function PUT(
       );
     }
 
+    const shouldUpdateApiKey =
+      typeof apiKey === "string" &&
+      apiKey.trim().length > 0 &&
+      !apiKey.includes("••••");
+
     const updated = await prisma.ai_providers.update({
       where: { id },
       data: {
         ...(name && { name, label: label || name }),
         ...(endpointUrl && { base_url: endpointUrl }),
-        ...(apiKey !== undefined && { api_key: apiKey }),
+        ...(shouldUpdateApiKey && { api_key: apiKey.trim() }),
         ...(model && { model }),
         ...(priority !== undefined && { priority }),
         ...(isActive !== undefined && { is_active: isActive }),

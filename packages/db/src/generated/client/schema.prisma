@@ -10,49 +10,54 @@ datasource db {
 }
 
 model User {
-  id                                          String              @id @default(uuid()) @db.Uuid
-  email                                       String              @unique
-  email_verified                              Boolean             @default(false)
+  id                                          String               @id @default(uuid()) @db.Uuid
+  email                                       String               @unique
+  email_verified                              Boolean              @default(false)
   name                                        String
   phone                                       String?
   avatar_url                                  String?
-  referral_code                               String?             @unique
-  role                                        Role                @default(USER)
-  weekly_target                               Int                 @default(10)
+  referral_code                               String?              @unique
+  role                                        Role                 @default(USER)
+  weekly_target                               Int                  @default(10)
   bank_name                                   String?
   bank_account_number                         String?
   bank_account_name                           String?
-  created_at                                  DateTime            @default(now())
+  created_at                                  DateTime             @default(now())
   updated_at                                  DateTime
-  onboarded                                   Boolean?            @default(false)
-  education                                   String?             @db.VarChar(255)
-  major                                       String?             @db.VarChar(255)
-  last_company                                String?             @db.VarChar(255)
-  experience_year                             Int?                @default(0)
+  onboarded                                   Boolean?             @default(false)
+  education                                   String?              @db.VarChar(255)
+  major                                       String?              @db.VarChar(255)
+  last_company                                String?              @db.VarChar(255)
+  experience_year                             Int?                 @default(0)
   skills                                      String[]
-  target_job                                  String?             @db.VarChar(255)
+  target_job                                  String?              @db.VarChar(255)
+  preferences                                 Json?
   accounts                                    accounts[]
   ai_prompts                                  ai_prompts[]
   application_notes                           application_notes[]
   applications                                applications[]
   audit_logs                                  audit_logs[]
+  cover_letters                               cover_letters[]
   cv_projects                                 cv_projects[]
+  quiz_attempts                               quiz_attempts[]
   memberships                                 Membership?
   misi_submissions                            misi_submissions[]
   notifications                               notifications[]
   orders                                      orders[]
-  referrals_referrals_referred_idTousers      referrals[]         @relation("referrals_referred_idTousers")
-  referrals_referrals_referrer_idTousers      referrals[]         @relation("referrals_referrer_idTousers")
+  referrals_referrals_referred_idTousers      referrals[]          @relation("referrals_referred_idTousers")
+  referrals_referrals_referrer_idTousers      referrals[]          @relation("referrals_referrer_idTousers")
   reminders                                   reminders[]
   sessions                                    sessions[]
   system_settings                             system_settings[]
   transactions                                transactions[]
   smtp_accounts                               SmtpAccount[]
   email_batch_jobs                            EmailBatchJob[]
-  withdrawals_withdrawals_processed_byTousers withdrawals[]       @relation("withdrawals_processed_byTousers")
-  withdrawals_withdrawals_user_idTousers      withdrawals[]       @relation("withdrawals_user_idTousers")
+  withdrawals_withdrawals_processed_byTousers withdrawals[]        @relation("withdrawals_processed_byTousers")
+  withdrawals_withdrawals_user_idTousers      withdrawals[]        @relation("withdrawals_user_idTousers")
   visitors                                    Visitor[]
   visitor_activities                          VisitorActivity[]
+  user_feedback                               UserFeedback[]
+  behavior_profile                            UserBehaviorProfile?
 
   @@map("users")
 }
@@ -180,26 +185,27 @@ model application_notes {
 }
 
 model applications {
-  id                 String              @id @db.Uuid
-  user_id            String              @db.Uuid
-  job_id             String?             @db.Uuid
-  company_name       String
-  position           String
-  job_url            String?
-  status             ApplicationStatus   @default(APPLIED)
-  source             ApplicationSource   @default(MANUAL)
-  applied_at         DateTime            @default(now())
-  match_score        Int?
-  ats_score          Int?
-  interview_chance   InterviewChance?
-  ai_insight         Json?
-  ai_recommendations Json?
-  created_at         DateTime            @default(now())
-  updated_at         DateTime
-  application_notes  application_notes[]
-  jobs               jobs?               @relation(fields: [job_id], references: [id])
-  users              User                @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  reminders          reminders[]
+  id                  String              @id @db.Uuid
+  user_id             String              @db.Uuid
+  job_id              String?             @db.Uuid
+  company_name        String
+  position            String
+  job_url             String?
+  status              ApplicationStatus   @default(APPLIED)
+  source              ApplicationSource   @default(MANUAL)
+  applied_at          DateTime            @default(now())
+  match_score         Int?
+  ats_score           Int?
+  interview_chance    InterviewChance?
+  ai_insight          Json?
+  ai_recommendations  Json?
+  application_context Json?
+  created_at          DateTime            @default(now())
+  updated_at          DateTime
+  application_notes   application_notes[]
+  jobs                jobs?               @relation(fields: [job_id], references: [id])
+  users               User                @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  reminders           reminders[]
 
   @@index([user_id, created_at])
   @@index([user_id, status])
@@ -221,8 +227,13 @@ model articles {
   author             String
   is_published       Boolean             @default(false)
   published_at       DateTime?
+  source             String              @default("manual")
+  external_url       String?
+  last_synced_at     DateTime?
   category_id        String?             @db.Uuid
   article_categories article_categories? @relation(fields: [category_id], references: [id])
+
+  @@index([source, external_url])
 }
 
 model audit_logs {
@@ -245,17 +256,21 @@ model audit_logs {
 }
 
 model certifications {
-  id              String   @id @default(uuid()) @db.Uuid
+  id              String    @id @default(uuid()) @db.Uuid
   title           String
-  slug            String   @unique
+  slug            String    @unique
   description     String
   provider        String
   cover_image_url String?
   price           Int
   duration_hours  Int
   external_url    String
-  is_active       Boolean  @default(true)
-  created_at      DateTime @default(now())
+  source          String    @default("manual")
+  last_synced_at  DateTime?
+  is_active       Boolean   @default(true)
+  created_at      DateTime  @default(now())
+
+  @@index([source, external_url])
 }
 
 model companies {
@@ -327,39 +342,46 @@ model cv_templates {
 }
 
 model events {
-  id              String   @id @default(uuid()) @db.Uuid
+  id              String    @id @default(uuid()) @db.Uuid
   title           String
-  slug            String   @unique
+  slug            String    @unique
   description     String
   cover_image_url String?
   event_date      DateTime
   location        String
-  type            WorkType @default(ONLINE)
+  type            WorkType  @default(ONLINE)
   external_url    String
-  is_active       Boolean  @default(true)
-  created_at      DateTime @default(now())
+  source          String    @default("manual")
+  last_synced_at  DateTime?
+  is_active       Boolean   @default(true)
+  created_at      DateTime  @default(now())
+
+  @@index([source, external_url])
 }
 
 model jobs {
-  id            String         @id @db.Uuid
-  company_id    String         @db.Uuid
-  title         String
-  slug          String         @unique
-  description   String
-  location      String
-  work_type     WorkType
-  salary_min    Int?
-  salary_max    Int?
-  salary_period SalaryPeriod   @default(MONTH)
-  requirements  Json?
-  external_url  String
-  is_active     Boolean        @default(true)
-  deadline      DateTime?
-  created_at    DateTime       @default(now())
-  applications  applications[]
-  companies     companies      @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  id             String         @id @db.Uuid
+  company_id     String         @db.Uuid
+  title          String
+  slug           String         @unique
+  description    String
+  location       String
+  work_type      WorkType
+  salary_min     Int?
+  salary_max     Int?
+  salary_period  SalaryPeriod   @default(MONTH)
+  requirements   Json?
+  external_url   String
+  is_active      Boolean        @default(true)
+  deadline       DateTime?
+  source         String         @default("manual")
+  last_synced_at DateTime?
+  created_at     DateTime       @default(now())
+  applications   applications[]
+  companies      companies      @relation(fields: [company_id], references: [id], onDelete: Cascade)
 
   @@index([is_active, location])
+  @@index([source, external_url])
 }
 
 model misi {
@@ -414,6 +436,21 @@ model notifications {
   users      User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id, read_at])
+}
+
+model cover_letters {
+  id         String   @id @db.Uuid
+  user_id    String   @db.Uuid
+  company    String
+  position   String
+  recruiter  String?
+  content    String
+  tone       String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  users      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, created_at])
 }
 
 model orders {
@@ -948,4 +985,170 @@ model VisitorActivity {
   @@index([activity_type])
   @@index([created_at])
   @@map("visitor_activities")
+}
+
+model quiz_packages {
+  id               String           @id @db.Uuid
+  slug             String           @unique @db.VarChar(120)
+  title            String
+  category         String           @db.VarChar(60)
+  description      String
+  duration_minutes Int              @default(15)
+  difficulty       String           @default("Sedang") @db.VarChar(20)
+  is_premium       Boolean          @default(false)
+  price            Int              @default(0)
+  passing_score    Int              @default(70)
+  is_active        Boolean          @default(true)
+  sort_order       Int              @default(0)
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+  questions        quiz_questions[]
+  attempts         quiz_attempts[]
+
+  @@map("quiz_packages")
+}
+
+model quiz_questions {
+  id             String        @id @db.Uuid
+  package_id     String        @db.Uuid
+  sort_order     Int           @default(0)
+  type           String        @default("multiple-choice") @db.VarChar(30)
+  question       String        @db.Text
+  code_snippet   String?       @db.Text
+  options        Json?
+  correct_answer Json
+  explanation    String?       @db.Text
+  ai_tip         String?       @db.Text
+  packages       quiz_packages @relation(fields: [package_id], references: [id], onDelete: Cascade)
+
+  @@index([package_id, sort_order])
+  @@map("quiz_questions")
+}
+
+model quiz_attempts {
+  id                 String        @id @db.Uuid
+  user_id            String        @db.Uuid
+  package_id         String        @db.Uuid
+  status             String        @default("belum_selesai") @db.VarChar(20)
+  score              Int?
+  answers            Json?
+  flagged_questions  Int[]
+  started_at         DateTime      @default(now())
+  completed_at       DateTime?
+  time_spent_seconds Int           @default(0)
+  users              User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  packages           quiz_packages @relation(fields: [package_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, package_id])
+  @@index([user_id, status])
+  @@map("quiz_attempts")
+}
+
+model growth_posts {
+  id                 String    @id @db.Uuid
+  account            String    @db.VarChar(20) // PERSONAL atau EMPLOYR
+  platform           String    @db.VarChar(20) // THREADS atau LINKEDIN
+  content_type       String    @db.VarChar(30) // Personal story, Educational, dll
+  hook_type          String    @db.VarChar(20) // QUESTION atau STATEMENT
+  cta                String?   @db.VarChar(120)
+  experiment_id      String?   @db.VarChar(40) // EXP-001, dll (opsional)
+  campaign_utm       String?   @db.VarChar(60) // nilai utm_campaign
+  cta_url            String?   @db.VarChar(500) // link ber-UTM yang dipakai di konten
+  content            String    @db.Text
+  status             String    @default("DRAFT") @db.VarChar(20) // DRAFT, SCHEDULED, PUBLISHED
+  published_at       DateTime?
+  // Metrik manual (diinput setelah publish)
+  impressions        Int       @default(0)
+  likes              Int       @default(0)
+  comments           Int       @default(0)
+  reposts            Int       @default(0)
+  profile_visits     Int       @default(0)
+  link_clicks        Int       @default(0) // boleh diisi manual atau dari tracker UTM
+  metrics_updated_at DateTime?
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  @@index([status, published_at])
+  @@index([platform, account])
+  @@map("growth_posts")
+}
+
+model growth_experiments {
+  id              String    @id @db.Uuid
+  code            String    @unique @db.VarChar(40) // EXP-001
+  hypothesis      String    @db.Text
+  variable_tested String    @db.VarChar(160)
+  platform        String    @db.VarChar(20)
+  kpi             String    @db.VarChar(80)
+  status          String    @default("RUNNING") @db.VarChar(20) // RUNNING, DONE, KILLED, PAUSED
+  decision        String?   @db.VarChar(20) // KEEP, ITERATE, KILL
+  result          String?   @db.Text
+  learning        String?   @db.Text
+  started_at      DateTime  @default(now())
+  ended_at        DateTime?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  @@map("growth_experiments")
+}
+
+model growth_journal {
+  id         String   @id @db.Uuid
+  week_label String   @db.VarChar(40) // "Minggu 38 - Sep 2026"
+  wins       String?  @db.Text
+  failures   String?  @db.Text
+  learnings  String?  @db.Text
+  next_tests String?  @db.Text
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([created_at])
+  @@map("growth_journal")
+}
+
+model UserFeedback {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  feature    String   @db.VarChar(50)
+  context_id String?  @db.Uuid
+  rating     Int      @db.SmallInt
+  comment    String?  @db.Text
+  page_path  String?  @db.VarChar(255)
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([feature])
+  @@index([created_at])
+  @@map("user_feedback")
+}
+
+model AnalyticsDailySummary {
+  id           String   @id @default(uuid()) @db.Uuid
+  date         DateTime @db.Date
+  metric_name  String   @db.VarChar(100)
+  metric_value Decimal  @db.Decimal(12, 4)
+  dimensions   Json?
+  created_at   DateTime @default(now())
+
+  @@unique([date, metric_name])
+  @@index([metric_name])
+  @@map("analytics_daily_summary")
+}
+
+model UserBehaviorProfile {
+  id                   String    @id @default(uuid()) @db.Uuid
+  user_id              String    @unique @db.Uuid
+  top_features_used    Json
+  preferred_industries Json
+  avg_session_minutes  Decimal?  @db.Decimal(8, 2)
+  total_applications   Int       @default(0)
+  interview_rate       Decimal?  @db.Decimal(5, 4)
+  lifecycle_stage      String    @db.VarChar(30)
+  last_active_at       DateTime?
+  churn_risk           String?   @db.VarChar(10)
+  updated_at           DateTime  @updatedAt
+  user                 User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_behavior_profiles")
 }
