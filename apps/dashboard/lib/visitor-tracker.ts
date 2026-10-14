@@ -9,6 +9,7 @@ export interface VisitorDeviceInfo {
   browser_version: string;
   os: string;
   screen_resolution: string;
+  fingerprint?: string;
 }
 
 export interface TrafficSourceInfo {
@@ -99,6 +100,71 @@ function setCookie(name: string, value: string, days = 365) {
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
 }
 
+function cyrb53(str: string, seed = 0): string {
+  let h1 = 0xdeadbeef ^ seed,
+    h2 = 0x41c6ce57 ^ seed;
+  for (let i = 0, ch; i < str.length; i++) {
+    ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+
+function getCanvasFingerprint(): string {
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 200;
+    canvas.height = 50;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return 'nocanvas';
+    ctx.textBaseline = 'top';
+    ctx.font = "14px 'Arial', sans-serif";
+    ctx.fillStyle = '#f60';
+    ctx.fillRect(125, 1, 62, 20);
+    ctx.fillStyle = '#069';
+    ctx.fillText('Employr.id', 2, 15);
+    ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+    ctx.fillText('Employr.id', 4, 17);
+    return canvas.toDataURL();
+  } catch {
+    return 'canvaserr';
+  }
+}
+
+export function generateBrowserFingerprint(): string {
+  if (typeof window === 'undefined') return '';
+  try {
+    const nav = window.navigator as any;
+    const screen = window.screen;
+    const tz = Intl?.DateTimeFormat?.().resolvedOptions?.().timeZone || 'UTC';
+    const canvasSig = getCanvasFingerprint();
+
+    const rawSignature = [
+      nav.userAgent || '',
+      nav.language || '',
+      nav.hardwareConcurrency || 4,
+      nav.deviceMemory || 4,
+      nav.platform || '',
+      nav.maxTouchPoints || 0,
+      screen.width || 0,
+      screen.height || 0,
+      screen.colorDepth || 24,
+      window.devicePixelRatio || 1,
+      tz,
+      canvasSig,
+    ].join('###');
+
+    const hash1 = cyrb53(rawSignature, 100);
+    const hash2 = cyrb53(rawSignature, 200);
+    return `fp_${hash1}_${hash2}`;
+  } catch {
+    return `fp_fallback_${Math.random().toString(36).substring(2, 9)}`;
+  }
+}
+
 export function getOrCreateVisitorId(): string {
   if (typeof window === 'undefined') return '';
   let visId =
@@ -107,8 +173,8 @@ export function getOrCreateVisitorId(): string {
     localStorage.getItem(LEGACY_VISITOR_COOKIE_KEY) ||
     getCookie(LEGACY_VISITOR_COOKIE_KEY);
   if (!visId) {
-    const rand = Math.random().toString(36).substring(2, 9);
-    visId = `vis_${Date.now().toString(36)}_${rand}`;
+    const browserFp = generateBrowserFingerprint();
+    visId = browserFp || `vis_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
   }
   localStorage.setItem(VISITOR_COOKIE_KEY, visId);
   setCookie(VISITOR_COOKIE_KEY, visId, 365);
@@ -197,6 +263,7 @@ export function parseDeviceInfo(): VisitorDeviceInfo {
     browser_version,
     os,
     screen_resolution,
+    fingerprint: generateBrowserFingerprint(),
   };
 }
 
@@ -272,8 +339,17 @@ export function setTrackingEndpoint(endpoint: string) {
   apiEndpoint = endpoint;
 }
 
+function isValidUUID(str?: string | null): boolean {
+  if (!str || typeof str !== 'string') return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
+
 export function sendTrackingBeacon(payload: TrackingPayload) {
   if (typeof window === 'undefined') return;
+
+  if (payload.user_id && !isValidUUID(payload.user_id)) {
+    payload.user_id = null;
+  }
 
   const bodyStr = JSON.stringify(payload);
 

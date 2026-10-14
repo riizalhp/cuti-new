@@ -70,7 +70,7 @@ export const AutoResizeTextarea = React.forwardRef<
           if (onInput) onInput(e);
         }}
         className={cn(
-          'w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1] transition-all leading-relaxed shadow-2xs resize-none overflow-hidden',
+          'w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-cobalt-500 focus:ring-1 focus:ring-cobalt-500 transition-all leading-relaxed shadow-2xs resize-none overflow-hidden',
           className
         )}
         style={{ ...style }}

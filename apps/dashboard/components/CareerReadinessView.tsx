@@ -32,13 +32,22 @@ import {
   AlertCircle,
   Check,
   Zap,
+  Lock,
 } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const CareerReadinessView: React.FC = () => {
   const router = useRouter();
   const toast = useToast();
   const [activeSubTab, setActiveSubTab] = useState<'dimensi' | 'audit' | 'roadmap' | 'sertifikat'>('dimensi');
-  const { score: hookScore, diagnosticScore, updateDiagnosticScore, resetDiagnosticScore, isLoaded } = useCareerReadiness();
+  const {
+    score: hookScore,
+    diagnosticScore,
+    updateDiagnosticScore,
+    resetDiagnosticScore,
+    isLoaded,
+    reload: reloadHook,
+  } = useCareerReadiness();
 
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [holisticData, setHolisticData] = useState<HolisticReadinessEvaluation | null>(null);
@@ -56,19 +65,27 @@ export const CareerReadinessView: React.FC = () => {
   const loadHolisticData = useCallback(async () => {
     setIsLoadingData(true);
     try {
+      let currentDiag = diagnosticScore;
+      if (currentDiag === null && typeof window !== 'undefined') {
+        const stored = localStorage.getItem('employr_diagnostic_quiz_score');
+        if (stored !== null && !isNaN(Number(stored))) {
+          currentDiag = Number(stored);
+        }
+      }
+
       const [cvs, apps] = await Promise.all([
         cvApi.getAll().catch(() => []),
         trackerApi.getAll().catch(() => []),
       ]);
 
-      const evaluated = calculateHolisticReadiness(cvs, apps);
+      const evaluated = calculateHolisticReadiness(cvs, apps, currentDiag);
       setHolisticData(evaluated);
     } catch (error) {
       console.error('[CareerReadinessView] Gagal memuat data kesiapan:', error);
     } finally {
       setIsLoadingData(false);
     }
-  }, []);
+  }, [diagnosticScore]);
 
   useEffect(() => {
     loadHolisticData();
@@ -81,8 +98,8 @@ export const CareerReadinessView: React.FC = () => {
   const diagnosticQuestions = [
     {
       id: 1,
-      q: 'Seberapa spesifik dan terarah target posisi pekerjaan yang ingin Anda tuju saat ini?',
-      dimension: 'Riset & Kecocokan Lowongan',
+      q: 'Seberapa spesifik dan terarah target posisi pekerjaan yang ingin kamu tuju saat ini?',
+      dimension: 'Spesifikasi & Relevansi Peran',
       options: [
         { text: 'Sangat spesifik: sudah riset kualifikasi industri & kata kunci peran tersebut', points: 20 },
         { text: 'Ada 2–3 pilihan posisi berbeda yang masih dieksplorasi secara umum', points: 12 },
@@ -91,17 +108,17 @@ export const CareerReadinessView: React.FC = () => {
     },
     {
       id: 2,
-      q: 'Bagaimana status kelengkapan dan format CV ATS Anda saat melamar pekerjaan?',
+      q: 'Bagaimana status kelengkapan dan format CV ATS kamu saat melamar pekerjaan?',
       dimension: 'Kualitas Berkas & ATS',
       options: [
-        { text: 'Format standar ATS dengan skor evaluasi ≥ 75 dan kata kunci relevan', points: 20 },
+        { text: 'Format standar ATS dengan skor evaluasi ≥ 70 dan kata kunci relevan', points: 20 },
         { text: 'Sudah ada CV, namun belum pernah diuji format ATS dan kata kuncinya', points: 12 },
         { text: 'Masih berupa draf kasar atau belum diperbarui lebih dari 6 bulan', points: 5 },
       ],
     },
     {
       id: 3,
-      q: 'Apakah Anda selalu menyertakan surat lamaran / email pengantar yang dipersonalisasi?',
+      q: 'Apakah kamu selalu menyertakan surat lamaran / email pengantar yang dipersonalisasi?',
       dimension: 'Administrasi & Berkas Lamaran',
       options: [
         { text: 'Ya, selalu menyusun email & surat lamaran terarah sesuai nama perusahaan', points: 20 },
@@ -111,7 +128,7 @@ export const CareerReadinessView: React.FC = () => {
     },
     {
       id: 4,
-      q: 'Berapa banyak lamaran kerja yang Anda kirim dan pantau secara konsisten tiap minggu?',
+      q: 'Berapa banyak lamaran kerja yang kamu kirim dan pantau secara konsisten tiap minggu?',
       dimension: 'Momentum Pelamaran & Tracker',
       options: [
         { text: 'Minimal 3–5 lamaran terfokus per minggu dan dicatat rapi di Tracker', points: 20 },
@@ -121,7 +138,7 @@ export const CareerReadinessView: React.FC = () => {
     },
     {
       id: 5,
-      q: 'Bagaimana kesiapan Anda terkait riset standar gaji dan negosiasi kompensasi peran?',
+      q: 'Bagaimana kesiapan kamu terkait riset standar gaji dan negosiasi kompensasi peran?',
       dimension: 'Kesiapan Negosiasi & Administrasi',
       options: [
         { text: 'Sudah mengetahui rentang gaji pasar peran tersebut dan batas minimum yang realistis', points: 20 },
@@ -139,7 +156,7 @@ export const CareerReadinessView: React.FC = () => {
     const totalPoints = Object.values(testAnswers).reduce((a, b) => a + b, 0);
     updateDiagnosticScore(totalPoints);
     setIsTestSubmitted(true);
-    toast.success('Diagnostik Selesai', `Skor evaluasi mandiri tersimpan: ${totalPoints}/100.`);
+    toast.success('Diagnostik Selesai', `Skor evaluasi mandiri tersimpan: ${totalPoints}/100. Indeks kesiapan kerja terkalibrasi.`);
   };
 
   const handlePrintCertificate = () => {
@@ -149,14 +166,14 @@ export const CareerReadinessView: React.FC = () => {
   };
 
   const handleCopyLinkedInBadge = () => {
-    const shareText = `Saya telah menyelesaikan Career Readiness Evaluation di Employr dengan skor ${displayScore}/100. Siap berkontribusi di dunia kerja profesional! #Employr #JobReady #CareerReadiness`;
+    const shareText = `Saya telah menyelesaikan Career Readiness Evaluation di Employr dengan skor ${displayScore}/100 (${badgeInfo.label}). Siap berkontribusi di dunia kerja profesional! #Employr #JobReady #CareerReadiness`;
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(shareText);
       toast.success('Teks Berhasil Disalin', 'Teks pengumuman kesiapan kerja siap dipasang di LinkedIn!');
     }
   };
 
-  // Skor tampilan utama selalu berbasis data riil objektif (Single Source of Truth)
+  // Skor tampilan utama selalu berbasis Single Source of Truth
   const displayScore = holisticData?.score ?? hookScore;
   const badgeInfo = getReadinessBadge(displayScore);
 
@@ -177,25 +194,25 @@ export const CareerReadinessView: React.FC = () => {
   return (
     <div className="space-y-6 font-sans">
       {/* 1. Header Banner & Master Hero Score */}
-      <div className="bg-navy-700 rounded-[10px] p-6 text-white border border-navy-800 shadow-md">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-orange-400 font-bold text-xs uppercase tracking-wider">
-              <TrendingUp className="w-4 h-4" />
-              <span>Indeks Kesiapan Kerja Employr</span>
+      <div className="bg-navy-700 rounded-[10px] p-4 sm:p-5 md:p-6 text-white border border-navy-800 shadow-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
+          <div className="space-y-1 sm:space-y-2">
+            <div className="flex items-center gap-1.5 text-orange-400 font-bold text-[11px] sm:text-xs uppercase tracking-wider">
+              <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>Indeks Kesiapan Kerja</span>
             </div>
-            <h1 className="text-xl md:text-2xl font-extrabold tracking-tight">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight">
               Career Readiness Index
             </h1>
-            <p className="text-xs text-slate-200 max-w-xl leading-relaxed">
-              Evaluasi komprehensif mengukur kesiapan berkas lamaran, riset peran target, administrasi dokumen, dan momentum pelacakan karier Anda.
+            <p className="hidden sm:block text-xs text-slate-200 max-w-xl leading-relaxed">
+              Tolok ukur komprehensif dari 4 pilar kesiapan kerja: Kualitas Berkas &amp; ATS, Spesifikasi Peran, Paket Administrasi, dan Momentum Pelamaran.
             </p>
           </div>
 
           {/* Master Radial Ring Card */}
-          <div className="p-4 bg-white/10 backdrop-blur-md rounded-[10px] border border-white/15 flex items-center gap-4 shrink-0">
-            <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
-              <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+          <div className="p-3 sm:p-4 bg-white/10 backdrop-blur-md rounded-[10px] border border-white/15 flex items-center justify-between sm:justify-start gap-3 sm:gap-4 shrink-0">
+            <div className="relative w-12 h-12 sm:w-16 sm:h-16 shrink-0 flex items-center justify-center">
+              <svg className="w-12 h-12 sm:w-16 sm:h-16 transform -rotate-90" viewBox="0 0 36 36">
                 <path
                   className="text-white/20"
                   strokeWidth="3.5"
@@ -213,124 +230,162 @@ export const CareerReadinessView: React.FC = () => {
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
               </svg>
-              <span className="absolute text-sm font-black text-white">
+              <span className="absolute text-xs sm:text-sm font-black text-white">
                 {isLoaded ? `${displayScore}%` : '...'}
               </span>
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-slate-300 uppercase tracking-wider block font-bold">
+                <span className="text-[10px] sm:text-caption text-slate-300 uppercase tracking-wider block font-bold">
                   Status Kesiapan
                 </span>
                 <button
                   onClick={() => {
                     loadHolisticData();
+                    reloadHook();
                     toast.info('Data Disinkronkan', 'Kalkulasi diperbarui dengan data profil terkini.');
                   }}
                   title="Sinkronkan kalkulasi profil terbaru"
-                  className="text-[10px] text-orange-300 hover:text-orange-200 underline flex items-center gap-0.5 cursor-pointer"
+                  className="px-1.5 py-0.5 sm:px-2 sm:py-1 min-h-[24px] sm:min-h-[30px] rounded-[6px] hover:bg-white/10 text-[10px] sm:text-caption font-bold text-orange-300 hover:text-orange-200 flex items-center gap-1 cursor-pointer transition"
                 >
                   <RefreshCw className="w-2.5 h-2.5" />
-                  <span>Sinkronkan</span>
+                  <span className="hidden sm:inline">Sinkronkan</span>
                 </button>
               </div>
-              <span className={`inline-block px-2.5 py-1 rounded-[10px] text-xs font-extrabold ${badgeInfo.color}`}>
-                {badgeInfo.label}
-              </span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className={`inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[8px] sm:rounded-[10px] text-[10px] sm:text-xs font-extrabold ${badgeInfo.color}`}>
+                  {badgeInfo.label}
+                </span>
+                {holisticData?.isCalibrated && (
+                  <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-[6px] bg-orange-500/20 text-orange-200 border border-orange-400/30">
+                    Kuis +15%
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Diagnostic Highlight Cards (Superpower & Bottleneck) */}
+        {/* Diagnostic Highlight Cards: Desktop 2-Cols, Mobile Streamlined Alert */}
         {holisticData && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5 pt-5 border-t border-white/10 text-xs">
-            <div className="p-3 rounded-[10px] bg-white/5 border border-white/10 flex items-start gap-3">
-              <div className="p-2 rounded-[8px] bg-emerald-500/20 text-emerald-400 shrink-0">
-                <Sparkles className="w-4 h-4" />
+          <>
+            {/* Desktop / Tablet View (>= sm) */}
+            <div className="hidden sm:grid sm:grid-cols-2 gap-3 mt-4 sm:mt-5 pt-4 border-t border-white/10 text-xs">
+              <div className="p-3 rounded-[10px] bg-white/5 border border-white/10 flex items-start gap-3">
+                <div className="p-2 rounded-[8px] bg-emerald-500/20 text-emerald-400 shrink-0">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div className="space-y-0.5">
+                  <span className="text-caption font-bold text-emerald-300 uppercase tracking-wider block">
+                    Keunggulan Utama (Superpower)
+                  </span>
+                  <strong className="text-white block font-bold text-xs">{holisticData.superpower.title}</strong>
+                  <p className="text-slate-300 text-caption leading-relaxed">{holisticData.superpower.desc}</p>
+                </div>
               </div>
-              <div className="space-y-0.5">
-                <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider block">
-                  Keunggulan Utama (Superpower)
-                </span>
-                <strong className="text-white block font-bold text-xs">{holisticData.superpower.title}</strong>
-                <p className="text-slate-300 text-[11px] leading-relaxed">{holisticData.superpower.desc}</p>
+
+              <div className="p-3 rounded-[10px] bg-white/5 border border-white/10 flex items-start gap-3">
+                <div className="p-2 rounded-[8px] bg-amber-500/20 text-amber-400 shrink-0">
+                  <Zap className="w-4 h-4" />
+                </div>
+                <div className="space-y-0.5 flex-1">
+                  <span className="text-caption font-bold text-amber-300 uppercase tracking-wider block">
+                    Prioritas Peningkatan (Bottleneck)
+                  </span>
+                  <strong className="text-white block font-bold text-xs">{holisticData.bottleneck.title}</strong>
+                  <p className="text-slate-300 text-caption leading-relaxed">{holisticData.bottleneck.desc}</p>
+                  {holisticData.bottleneck.actionPath && (
+                    <button
+                      onClick={() => router.push(holisticData.bottleneck.actionPath!)}
+                      className="mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 min-h-[30px] rounded-[6px] bg-white/10 hover:bg-white/20 text-caption font-bold text-orange-200 cursor-pointer transition"
+                    >
+                      <span>{holisticData.bottleneck.actionLabel || 'Perbaiki Sekarang'}</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="p-3 rounded-[10px] bg-white/5 border border-white/10 flex items-start gap-3">
-              <div className="p-2 rounded-[8px] bg-amber-500/20 text-amber-400 shrink-0">
-                <Zap className="w-4 h-4" />
-              </div>
-              <div className="space-y-0.5 flex-1">
-                <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider block">
-                  Prioritas Peningkatan (Bottleneck)
-                </span>
-                <strong className="text-white block font-bold text-xs">{holisticData.bottleneck.title}</strong>
-                <p className="text-slate-300 text-[11px] leading-relaxed">{holisticData.bottleneck.desc}</p>
+            {/* Mobile View (< sm): Compact Priority Alert */}
+            <div className="sm:hidden block mt-3 pt-3 border-t border-white/10">
+              <div className="p-2.5 rounded-[8px] bg-white/5 border border-white/10 flex items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="p-1.5 rounded-[6px] bg-amber-500/20 text-amber-400 shrink-0">
+                    <Zap className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider block leading-tight">
+                      Prioritas Perbaikan:
+                    </span>
+                    <span className="text-white font-bold text-xs truncate block">
+                      {holisticData.bottleneck.title}
+                    </span>
+                  </div>
+                </div>
                 {holisticData.bottleneck.actionPath && (
                   <button
                     onClick={() => router.push(holisticData.bottleneck.actionPath!)}
-                    className="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-orange-400 hover:text-orange-300 underline cursor-pointer"
+                    className="shrink-0 px-2.5 py-1 min-h-[28px] rounded-[6px] bg-white/15 hover:bg-white/25 text-[11px] font-bold text-orange-200 flex items-center gap-1 cursor-pointer transition"
                   >
-                    <span>{holisticData.bottleneck.actionLabel || 'Perbaiki Sekarang'}</span>
+                    <span>Perbaiki</span>
                     <ArrowRight className="w-3 h-3" />
                   </button>
                 )}
               </div>
             </div>
-          </div>
+          </>
         )}
 
-        {/* Sub Navigation Bar */}
-        <div className="flex flex-wrap items-center gap-2 mt-6 pt-4 border-t border-white/10 text-xs font-semibold">
-          <button
-            onClick={() => setActiveSubTab('dimensi')}
-            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 cursor-pointer ${
-              activeSubTab === 'dimensi'
-                ? 'bg-[#1738D1] text-white font-bold shadow-xs'
-                : 'bg-white/10 hover:bg-white/20 text-white'
-            }`}
+        {/* Sub Navigation Bar: Single-Row Scrollable with Short Mobile Labels */}
+        <div className="mt-3.5 sm:mt-5 pt-3 border-t border-white/10">
+          <Tabs
+            value={activeSubTab}
+            onValueChange={(val) => setActiveSubTab(val as any)}
           >
-            <BarChart2 className="w-3.5 h-3.5" />
-            <span>4 Dimensi Kesiapan</span>
-          </button>
-
-          <button
-            onClick={() => setActiveSubTab('audit')}
-            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 cursor-pointer ${
-              activeSubTab === 'audit'
-                ? 'bg-[#1738D1] text-white font-bold shadow-xs'
-                : 'bg-white/10 hover:bg-white/20 text-white'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Asesmen Diagnostik Cepat</span>
-          </button>
-
-          <button
-            onClick={() => setActiveSubTab('roadmap')}
-            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 cursor-pointer ${
-              activeSubTab === 'roadmap'
-                ? 'bg-[#1738D1] text-white font-bold shadow-xs'
-                : 'bg-white/10 hover:bg-white/20 text-white'
-            }`}
-          >
-            <Target className="w-3.5 h-3.5" />
-            <span>Roadmap Pencapaian</span>
-          </button>
-
-          <button
-            onClick={() => setActiveSubTab('sertifikat')}
-            className={`px-3.5 py-2 rounded-[10px] transition flex items-center gap-1.5 cursor-pointer ${
-              activeSubTab === 'sertifikat'
-                ? 'bg-[#1738D1] text-white font-bold shadow-xs'
-                : 'bg-white/10 hover:bg-white/20 text-white'
-            }`}
-          >
-            <Award className="w-3.5 h-3.5" />
-            <span>Sertifikat Kesiapan</span>
-          </button>
+            <TabsList
+              variant="pill"
+              className="bg-white/10 border-white/10 text-white p-1 flex-nowrap overflow-x-auto no-scrollbar justify-start gap-1 w-full max-w-full"
+            >
+              <TabsTrigger
+                size="sm"
+                value="dimensi"
+                className="shrink-0 text-slate-200 hover:text-white data-[state=active]:bg-cobalt-500 data-[state=active]:text-white text-xs py-1.5 px-2.5 sm:px-3"
+              >
+                <BarChart2 className="w-3.5 h-3.5 shrink-0" />
+                <span className="sm:hidden">Dimensi</span>
+                <span className="hidden sm:inline">4 Dimensi Kesiapan</span>
+              </TabsTrigger>
+              <TabsTrigger
+                size="sm"
+                value="audit"
+                className="shrink-0 text-slate-200 hover:text-white data-[state=active]:bg-cobalt-500 data-[state=active]:text-white text-xs py-1.5 px-2.5 sm:px-3"
+              >
+                <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                <span className="sm:hidden">Diagnostik</span>
+                <span className="hidden sm:inline">Asesmen Diagnostik Cepat</span>
+              </TabsTrigger>
+              <TabsTrigger
+                size="sm"
+                value="roadmap"
+                className="shrink-0 text-slate-200 hover:text-white data-[state=active]:bg-cobalt-500 data-[state=active]:text-white text-xs py-1.5 px-2.5 sm:px-3"
+              >
+                <Target className="w-3.5 h-3.5 shrink-0" />
+                <span className="sm:hidden">Roadmap</span>
+                <span className="hidden sm:inline">Roadmap Pencapaian</span>
+              </TabsTrigger>
+              <TabsTrigger
+                size="sm"
+                value="sertifikat"
+                className="shrink-0 text-slate-200 hover:text-white data-[state=active]:bg-cobalt-500 data-[state=active]:text-white text-xs py-1.5 px-2.5 sm:px-3"
+              >
+                <Award className="w-3.5 h-3.5 shrink-0" />
+                <span className="sm:hidden">Sertifikat</span>
+                <span className="hidden sm:inline">Sertifikat Kesiapan</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
 
@@ -354,7 +409,7 @@ export const CareerReadinessView: React.FC = () => {
                       </div>
                       <div>
                         <h3 className="font-bold text-sm text-slate-900 dark:text-white">{p.title}</h3>
-                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                        <span className="text-caption text-slate-500 dark:text-slate-400 font-medium">
                           Status: {p.status}
                         </span>
                       </div>
@@ -382,7 +437,7 @@ export const CareerReadinessView: React.FC = () => {
                   {/* Key Metrics Checklist */}
                   {Array.isArray(p.metrics) && p.metrics.length > 0 && (
                     <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                      <span className="text-caption font-bold text-slate-500 uppercase tracking-wider block">
                         Indikator Penilaian Riil:
                       </span>
                       {p.metrics.map((m, mIdx) => (
@@ -390,15 +445,15 @@ export const CareerReadinessView: React.FC = () => {
                           key={mIdx}
                           className="flex items-center justify-between text-xs py-1 px-2 rounded-[8px] bg-slate-50 dark:bg-slate-800/40"
                         >
-                          <span className="text-slate-600 dark:text-slate-300 text-[11px] flex items-center gap-1.5">
+                          <span className="text-slate-600 dark:text-slate-300 text-caption flex items-center gap-1.5">
                             {m.passed ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                              <Check className="w-3.5 h-3.5 text-emerald-700 shrink-0 dark:text-emerald-400" />
                             ) : (
-                              <AlertCircle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                              <AlertCircle className="w-3.5 h-3.5 text-amber-700 shrink-0 dark:text-amber-400" />
                             )}
                             <span>{m.label}</span>
                           </span>
-                          <span className={`text-[10px] font-bold ${m.passed ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}`}>
+                          <span className={`text-caption font-bold ${m.passed ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-400'}`}>
                             {m.value}
                           </span>
                         </div>
@@ -407,7 +462,7 @@ export const CareerReadinessView: React.FC = () => {
                   )}
 
                   {/* Saran Perbaikan */}
-                  <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-[11px] space-y-0.5">
+                  <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-caption space-y-0.5">
                     <strong className={`block font-bold transition-colors ${pTokens.text}`}>
                       Rekomendasi Tindakan:
                     </strong>
@@ -437,17 +492,17 @@ export const CareerReadinessView: React.FC = () => {
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
             <div>
               <h2 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-orange-500" />
+                <Sparkles className="w-4 h-4 text-orange-700 dark:text-orange-400" />
                 <span>Asesmen Diagnostik Kesiapan Kerja (5 Pertanyaan Reflektif)</span>
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Evaluasi mandiri strategi dan kesiapan pelamaran kerja Anda. Jawaban membantu Anda mendeteksi gap persiapan kerja.
+                Evaluasi mandiri strategi dan kesiapan pelamaran kerja kamu. Hasilnya mengalibrasi 15% dari skor kesiapan kerja terpadu.
               </p>
             </div>
             {diagnosticScore !== null && (
               <div className="text-right">
-                <span className="text-[10px] text-slate-400 block font-medium">Skor Evaluasi Mandiri</span>
-                <span className="text-sm font-black text-orange-600">{diagnosticScore} / 100</span>
+                <span className="text-caption text-slate-500 block font-medium dark:text-slate-400">Skor Evaluasi Mandiri</span>
+                <span className="text-sm font-black text-orange-700 dark:text-orange-400">{diagnosticScore} / 100</span>
               </div>
             )}
           </div>
@@ -459,7 +514,7 @@ export const CareerReadinessView: React.FC = () => {
                   <h3 className="font-bold text-xs md:text-sm text-slate-900 dark:text-white">
                     {qIndex + 1}. {q.q}
                   </h3>
-                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-[6px]">
+                  <span className="text-caption font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-[6px]">
                     {q.dimension}
                   </span>
                 </div>
@@ -474,14 +529,14 @@ export const CareerReadinessView: React.FC = () => {
                         onClick={() => handleSelectOption(q.id, opt.points)}
                         className={`w-full text-left p-3.5 rounded-[10px] border text-xs transition flex items-center justify-between gap-3 cursor-pointer ${
                           isSelected
-                            ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] text-blue-950 dark:text-blue-200 font-bold'
+                            ? 'bg-blue-50/80 dark:bg-blue-950/60 border-cobalt-500 text-blue-950 dark:text-blue-200 font-bold'
                             : 'bg-slate-50/50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300'
                         }`}
                       >
                         <span>{opt.text}</span>
                         <div
                           className={`w-4 h-4 rounded-full border shrink-0 flex items-center justify-center ${
-                            isSelected ? 'border-[#1738D1] bg-[#1738D1]' : 'border-slate-300 dark:border-slate-600'
+                            isSelected ? 'border-cobalt-500 bg-cobalt-500' : 'border-slate-300 dark:border-slate-600'
                           }`}
                         >
                           {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
@@ -500,6 +555,7 @@ export const CareerReadinessView: React.FC = () => {
                 setTestAnswers({});
                 setIsTestSubmitted(false);
                 resetDiagnosticScore();
+                loadHolisticData();
                 toast.info('Hasil Direset', 'Skor evaluasi mandiri telah dihapus.');
               }}
               className="px-4 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 cursor-pointer"
@@ -511,21 +567,21 @@ export const CareerReadinessView: React.FC = () => {
             <button
               onClick={handleCalculateTest}
               disabled={Object.keys(testAnswers).length < diagnosticQuestions.length}
-              className="px-6 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] disabled:opacity-50 text-white font-bold text-xs transition shadow-md shadow-[#1738D1]/20 flex items-center gap-2 cursor-pointer border-0"
+              className="px-6 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 disabled:opacity-50 text-white font-bold text-xs transition shadow-md shadow-cobalt-500/20 flex items-center gap-2 cursor-pointer border-0"
             >
               <BarChart2 className="w-4 h-4" />
-              <span>Simpan Hasil Evaluasi Mandiri</span>
+              <span>Simpan &amp; Kalibrasi Skor</span>
             </button>
           </div>
 
-          {isTestSubmitted && (
+          {(isTestSubmitted || diagnosticScore !== null) && (
             <div className="p-5 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 space-y-2 animate-in fade-in duration-300">
               <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-sm">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <CheckCircle2 className="w-5 h-5 text-emerald-700 dark:text-emerald-400" />
                 <span>Skor Evaluasi Mandiri: {diagnosticScore} / 100</span>
               </div>
               <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                Hasil evaluasi mandiri telah tersimpan sebagai panduan refleksi Anda. Untuk menaikkan skor kesiapan riil di platform, lengkapi berkas CV di menu CV Builder dan perbanyak melamar melalui Tracker Lamaran.
+                Hasil evaluasi mandiri tersimpan dan berkontribusi 15% pada Indeks Kesiapan Kerja kamu ({displayScore}%). Untuk memaksimalkan 85% skor objektif profil, lengkapi berkas di CV Builder dan tingkatkan aktivitas melamar di Tracker.
               </p>
             </div>
           )}
@@ -537,11 +593,11 @@ export const CareerReadinessView: React.FC = () => {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 space-y-6 shadow-xs">
           <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
             <h2 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-              <Target className="w-5 h-5 text-orange-600" />
+              <Target className="w-5 h-5 text-orange-700 dark:text-orange-400" />
               <span>Roadmap Pencapaian Kesiapan Kerja (Dynamic Milestones)</span>
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Pantau kemajuan konkret Anda. Setiap milestone akan tercentang otomatis saat Anda melengkapi data dan melakukan aktivitas di platform.
+              Pantau kemajuan konkret kamu. Setiap milestone tercentang otomatis saat kamu melengkapi data profil dan melakukan aktivitas di platform.
             </p>
           </div>
 
@@ -566,9 +622,9 @@ export const CareerReadinessView: React.FC = () => {
                       <div
                         className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
                           isDone
-                            ? 'bg-emerald-600 text-white'
+                            ? 'bg-emerald-700 text-white'
                             : isInProgress
-                            ? 'bg-[#1738D1] text-white'
+                            ? 'bg-cobalt-500 text-white'
                             : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                         }`}
                       >
@@ -578,7 +634,7 @@ export const CareerReadinessView: React.FC = () => {
                         <div className="flex items-center gap-2">
                           <h3 className="font-bold text-sm text-slate-900 dark:text-white">{m.title}</h3>
                           <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-[6px] ${
+                            className={`text-caption font-bold px-2 py-0.5 rounded-[6px] ${
                               isDone
                                 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/80 dark:text-emerald-300'
                                 : isInProgress
@@ -589,7 +645,7 @@ export const CareerReadinessView: React.FC = () => {
                             {isDone ? 'Selesai' : isInProgress ? `${m.progressPercent}% Tercapai` : 'Belum Dimulai'}
                           </span>
                         </div>
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400 block">{m.subtitle}</span>
+                        <span className="text-caption text-slate-500 dark:text-slate-400 block">{m.subtitle}</span>
                       </div>
                     </div>
 
@@ -598,7 +654,7 @@ export const CareerReadinessView: React.FC = () => {
                       className={`px-3 py-1.5 rounded-[10px] text-xs font-bold transition flex items-center gap-1 cursor-pointer self-start md:self-auto border-0 ${
                         isDone
                           ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
-                          : 'bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-xs'
+                          : 'bg-cobalt-500 hover:bg-cobalt-600 text-white shadow-xs'
                       }`}
                     >
                       <span>{m.actionLabel}</span>
@@ -615,14 +671,14 @@ export const CareerReadinessView: React.FC = () => {
                     {m.tasks.map((task, tIdx) => (
                       <div
                         key={tIdx}
-                        className={`flex items-center gap-2 p-2 rounded-[8px] text-[11px] ${
+                        className={`flex items-center gap-2 p-2 rounded-[8px] text-caption ${
                           task.completed
                             ? 'bg-emerald-100/60 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-300 font-medium'
                             : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
                         }`}
                       >
                         {task.completed ? (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0 dark:text-emerald-400" />
                         ) : (
                           <div className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-slate-600 shrink-0" />
                         )}
@@ -640,71 +696,101 @@ export const CareerReadinessView: React.FC = () => {
       {/* SUBTAB 4: SERTIFIKAT READINESS RESMI */}
       {activeSubTab === 'sertifikat' && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-6 space-y-6 shadow-xs text-center">
-          <div className="max-w-2xl mx-auto p-8 rounded-[10px] bg-navy-700 text-white border-2 border-amber-400 shadow-xl space-y-4 relative overflow-hidden">
-            <div className="flex items-center justify-center gap-2 text-amber-400">
-              <ShieldCheck className="w-9 h-9" />
-            </div>
-
-            <span className="text-[10px] uppercase font-black tracking-widest text-amber-300 block">
-              SERTIFIKAT KESIAPAN KERJA DIGITAL
-            </span>
-
-            <h2 className="text-xl md:text-2xl font-black text-white">
-              Certificate of Career Readiness
-            </h2>
-
-            <p className="text-xs text-slate-300 max-w-lg mx-auto leading-relaxed">
-              Diterbitkan secara digital oleh sistem verifikasi Employr kepada pencari kerja yang telah menyelesaikan audit profil dan mencapai skor kesiapan kerja terverifikasi.
-            </p>
-
-            <div className="py-3 border-y border-white/10 max-w-sm mx-auto flex items-center justify-around text-amber-300 font-bold text-xs">
-              <div className="flex items-center gap-1.5">
-                <Award className="w-4 h-4" />
-                <span>Skor: {displayScore} / 100</span>
+          {displayScore >= 80 ? (
+            <div className="max-w-2xl mx-auto p-8 rounded-[10px] bg-navy-700 text-white border-2 border-amber-400 shadow-xl space-y-4 relative overflow-hidden">
+              <div className="flex items-center justify-center gap-2 text-amber-400">
+                <ShieldCheck className="w-9 h-9" />
               </div>
-              <div className="text-slate-400">|</div>
-              <div className="text-[11px] text-slate-200">
-                ID: EMP-CRI-2026
-              </div>
-            </div>
 
-            {/* List of passed competencies */}
-            <div className="max-w-md mx-auto text-left bg-white/5 rounded-[8px] p-3 border border-white/10 space-y-1.5 text-[11px] text-slate-300">
-              <span className="font-bold text-amber-300 block text-[10px] uppercase tracking-wider">
-                Dimensi Terverifikasi:
+              <span className="text-caption uppercase font-black tracking-widest text-amber-300 block">
+                SERTIFIKAT KESIAPAN KERJA DIGITAL
               </span>
-              <div className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Struktur Dokumen CV Sesuai Standar ATS</span>
+
+              <h2 className="text-xl md:text-2xl font-black text-white">
+                Certificate of Career Readiness
+              </h2>
+
+              <p className="text-xs text-slate-300 max-w-lg mx-auto leading-relaxed">
+                Diterbitkan secara digital oleh sistem verifikasi Employr kepada pencari kerja yang telah menyelesaikan audit profil dan mencapai predikat <strong>Job Ready Plus</strong>.
+              </p>
+
+              <div className="py-3 border-y border-white/10 max-w-sm mx-auto flex items-center justify-around text-amber-300 font-bold text-xs">
+                <div className="flex items-center gap-1.5">
+                  <Award className="w-4 h-4" />
+                  <span>Skor: {displayScore} / 100</span>
+                </div>
+                <div className="text-slate-500 dark:text-slate-400">|</div>
+                <div className="text-caption text-slate-200">
+                  ID: EMP-CRI-2026
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Spesifikasi Relevansi Peran &amp; Keahlian Industri</span>
+
+              {/* List of passed competencies */}
+              <div className="max-w-md mx-auto text-left bg-white/5 rounded-[8px] p-3 border border-white/10 space-y-1.5 text-caption text-slate-300">
+                <span className="font-bold text-amber-300 block text-caption uppercase tracking-wider">
+                  Dimensi Terverifikasi:
+                </span>
+                <div className="flex items-center gap-2">
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Kualitas Berkas Sesuai Standar ATS &amp; Jam Terbang Terdata</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Spesifikasi Target Peran &amp; Kepadatan Keahlian Terarah</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Paket Administrasi &amp; Kredensial Lengkap</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Kedisiplinan Pelacakan Lamaran di Tracker Terbukti</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Paket Administrasi &amp; Surat Lamaran Kerja</span>
+
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button
+                  onClick={handlePrintCertificate}
+                  className="px-4 py-2.5 rounded-[10px] bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow-md cursor-pointer border-0"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Cetak / Simpan PDF</span>
+                </button>
+
+                <button
+                  onClick={handleCopyLinkedInBadge}
+                  className="px-4 py-2.5 rounded-[10px] bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition flex items-center gap-1.5 border border-white/20 cursor-pointer"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>Bagikan ke LinkedIn</span>
+                </button>
               </div>
             </div>
+          ) : (
+            <div className="max-w-md mx-auto p-8 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 space-y-4">
+              <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center justify-center mx-auto">
+                <Lock className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                  Sertifikat Terkunci (Target Skor ≥ 80)
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Skor kesiapan kerja kamu saat ini adalah <strong>{displayScore}/100</strong>. Capai minimal skor 80 (Sangat Siap Kerja) untuk membuka dan mengunduh sertifikat resmi ini.
+                </p>
+              </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-              <button
-                onClick={handlePrintCertificate}
-                className="px-4 py-2.5 rounded-[10px] bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow-md cursor-pointer border-0"
-              >
-                <Download className="w-4 h-4" />
-                <span>Cetak / Simpan PDF</span>
-              </button>
-
-              <button
-                onClick={handleCopyLinkedInBadge}
-                className="px-4 py-2.5 rounded-[10px] bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition flex items-center gap-1.5 border border-white/20 cursor-pointer"
-              >
-                <Share2 className="w-4 h-4" />
-                <span>Bagikan ke LinkedIn</span>
-              </button>
+              <div className="pt-2">
+                <button
+                  onClick={() => setActiveSubTab('dimensi')}
+                  className="px-4 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 mx-auto cursor-pointer border-0"
+                >
+                  <span>Lihat Rekomendasi Peningkatan</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>

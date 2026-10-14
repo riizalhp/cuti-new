@@ -5,61 +5,930 @@ import FooterPortal from '../../components/FooterPortal.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import SearchModal from '../../components/SearchModal.astro';
 import PageHero from '../../components/common/PageHero.astro';
-import { artikelList, ensureData } from '../../data/mock';
+import SubsectionHeader from '../../components/common/SubsectionHeader.astro';
+import OrganicCardSmall from '../../components/common/OrganicCardSmall.astro';
+import {
+  artikelList,
+  lowonganList,
+  sertifikasiList,
+  courseList,
+  eventList,
+  ensureData,
+} from '../../data/mock';
+import { APP_URL, CV_BUILDER_URL } from '../../lib/urls';
 
 await ensureData();
 const artikelListSnapshot = [...artikelList];
+const lowonganSnapshot = [...lowonganList];
+const sertifikasiSnapshot = [...sertifikasiList];
+const courseSnapshot = [...courseList];
+const eventSnapshot = [...eventList];
 
-const title = "Artikel, Tips Karier & Panduan Melamar Kerja | Employer Job";
-const description = "Kumpulan panduan menyusun CV ATS, tips interview, strategi negosiasi gaji, dan tren dunia kerja terkini untuk talenta muda.";
+const rawQ = Astro.url.searchParams.get('q') || '';
+const query = rawQ.trim().toLowerCase();
+const rawCat = Astro.url.searchParams.get('cat') || '';
+const catFilter = rawCat.trim().toLowerCase();
+const rawTag = Astro.url.searchParams.get('tag') || '';
+const tagFilter = rawTag.trim().toLowerCase();
+
+let filteredArticles = [...artikelListSnapshot];
+
+if (query) {
+  filteredArticles = filteredArticles.filter((art) => {
+    const matchTitle = (art.title || '').toLowerCase().includes(query);
+    const matchExcerpt = (art.excerpt || '').toLowerCase().includes(query);
+    const matchCat = (art.category || '').toLowerCase().includes(query);
+    const matchAuthor = (art.author || '').toLowerCase().includes(query);
+    const matchTags = Array.isArray(art.tags) && art.tags.some((t) => t.toLowerCase().includes(query));
+    return matchTitle || matchExcerpt || matchCat || matchAuthor || matchTags;
+  });
+}
+
+if (catFilter) {
+  filteredArticles = filteredArticles.filter((art) => {
+    const c = (art.category || '').toLowerCase();
+    const t = (art.title || '').toLowerCase();
+    return c.includes(catFilter) || t.includes(catFilter);
+  });
+}
+
+if (tagFilter) {
+  filteredArticles = filteredArticles.filter((art) => {
+    const matchTagArr = Array.isArray(art.tags) && art.tags.some((t) => t.toLowerCase().includes(tagFilter));
+    const matchTitle = (art.title || '').toLowerCase().includes(tagFilter);
+    const matchCat = (art.category || '').toLowerCase().includes(tagFilter);
+    return matchTagArr || matchTitle || matchCat;
+  });
+}
+
+// Pagination Configuration (8 artikel per halaman: 4 artikel + In-Feed Ad + 4 artikel agar seimbang dengan sidebar)
+const ITEMS_PER_PAGE = 8;
+const totalItems = filteredArticles.length;
+const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
+const rawPage = parseInt(Astro.url.searchParams.get('page') || '1', 10);
+const currentPage = Number.isNaN(rawPage) ? 1 : Math.min(Math.max(1, rawPage), totalPages);
+const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+const paginatedArticles = filteredArticles.slice(startIndex, endIndex);
+
+// Bagi daftar artikel halaman aktif menjadi 2 batch simetris (4 dan 4) dengan In-Feed Ad di tengah
+const firstBatchArticles = paginatedArticles.slice(0, 4);
+const secondBatchArticles = paginatedArticles.slice(4);
+
+// Helper pembentuk URL pagination dengan mempertahankan parameter filter aktif
+function buildPageUrl(pageNum: number): string {
+  const params = new URLSearchParams();
+  if (rawQ) params.set('q', rawQ);
+  if (rawCat) params.set('cat', rawCat);
+  if (rawTag) params.set('tag', rawTag);
+  if (pageNum > 1) params.set('page', String(pageNum));
+  const qs = params.toString();
+  return qs ? `/career?${qs}` : '/career';
+}
+
+// Data Sidebar Kanan: Artikel Viral/Populer & Spotlight
+const viralArticles = artikelListSnapshot.slice(0, 5);
+const spotlightArticle = artikelListSnapshot[5] || artikelListSnapshot[0] || null;
+
+// Data Bagian Bawah: Baca Juga Artikel, Lowongan (dengan Ads di sela-sela), Sertifikasi, Course & Event
+const readAlsoArticles = artikelListSnapshot
+  .filter((a) => !paginatedArticles.some((p) => p.slug === a.slug))
+  .slice(0, 3);
+const fallbackReadAlso = readAlsoArticles.length >= 3 ? readAlsoArticles : artikelListSnapshot.slice(0, 3);
+
+const featuredJobs = lowonganSnapshot.slice(0, 4);
+const firstJobBatch = featuredJobs.slice(0, 2);
+const secondJobBatch = featuredJobs.slice(2, 4);
+
+const topSertifikasi = sertifikasiSnapshot.slice(0, 3);
+const topCourses = courseSnapshot.slice(0, 3);
+const topEvents = eventSnapshot.slice(0, 3);
+
+const isFiltered = Boolean(query || catFilter || tagFilter);
+const displayTitle = query
+  ? `Hasil Pencarian Artikel: <em>"${rawQ}"</em>`
+  : tagFilter
+  ? `Topik Panduan: <em>#${rawTag}</em>`
+  : catFilter
+  ? `Panduan Bidang <em>${rawCat}</em>`
+  : "Artikel &amp; <em>Tips Praktis Karier</em>";
+
+const title = rawQ
+  ? `Hasil Pencarian Artikel "${rawQ}" | Employr Portal`
+  : "Artikel, Tips Karier & Panduan Melamar Kerja | Employr Portal";
+const description = "Kumpulan panduan menyusun CV ATS, tips interview, strategi negosiasi gaji, dan tren dunia kerja terkini untuk talenta muda Indonesia.";
+
+const popularTopics = [
+  { label: 'CV ATS', q: 'cv' },
+  { label: 'Interview HRD', q: 'interview' },
+  { label: 'Negosiasi Gaji', q: 'gaji' },
+  { label: 'Portofolio', q: 'portofolio' },
+  { label: 'LinkedIn', q: 'linkedin' },
+  { label: 'Switch Career', q: 'switch career' },
+];
 ---
 
 <BaseLayout title={title} description={description} canonicalUrl="http://localhost:3003/career">
   <Navbar />
 
-  <main class="bg-[#f4f3ee] min-h-screen pb-16">
+  <main class="bg-[#f4f3ee] min-h-screen pb-20">
     <PageHero
       eyebrow="Panduan Karier"
-      title="Artikel &amp; <em>Tips Praktis Karier</em>"
-      description="Trik lolos screening CV, teknik menjawab pertanyaan wawancara tersulit, dan peta jalan keahlian yang dibutuhkan rekruter."
-      badge={{ text: `${artikelListSnapshot.length} Artikel Tersedia`, bgColor: 'bg-rose-50', textColor: 'text-rose-700', borderColor: 'border border-rose-200' }}
+      title={displayTitle}
+      description={
+        isFiltered
+          ? `Menampilkan ${totalItems} artikel panduan karier yang sesuai dengan filter pilihanmu.`
+          : "Trik lolos screening CV, teknik menjawab pertanyaan wawancara tersulit, dan peta jalan keahlian yang dibutuhkan rekruter."
+      }
+      badge={{
+        text: `${totalItems} Artikel Tersedia`,
+        bgColor: 'bg-rose-50',
+        textColor: 'text-rose-800',
+        borderColor: 'border border-rose-200',
+      }}
     >
-      <nav slot="breadcrumb" class="flex items-center gap-2 text-xs text-[#6e6d68] mb-4" aria-label="Breadcrumb">
-        <a href="/" class="hover:text-[#0000ff]">Beranda</a>
-        <span>/</span>
+      <nav slot="breadcrumb" class="flex items-center gap-2 text-xs text-[#55544f] mb-4 flex-wrap" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-[#1738D1] transition py-1">Beranda</a>
+        <span aria-hidden="true">/</span>
         <span class="text-[#101010] font-semibold">Artikel &amp; Tips Karier</span>
+        {isFiltered && (
+          <>
+            <span aria-hidden="true">/</span>
+            <span class="text-[#1738D1] font-semibold">
+              {rawQ ? `Pencarian "${rawQ}"` : rawTag ? `#${rawTag}` : `Kategori ${rawCat}`}
+            </span>
+          </>
+        )}
       </nav>
     </PageHero>
 
     <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6">
-      <AdSlot type="leaderboard" note="Rekomendasi bacaan dan panduan karier terpilih." />
+      <!-- Top Leaderboard Ad Slot -->
+      <AdSlot type="leaderboard" note="Rekomendasi bacaan karier dan program persiapan kerja terpilih." />
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-        {artikelListSnapshot.map((art) => (
-          <article class="bg-white rounded-2xl border border-[#d7d6cf] overflow-hidden hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:border-[#0000ff]/30 hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
-            <div>
-              <div class="h-44 bg-[#eae8e0] overflow-hidden">
-                <img src={art.image} alt={art.title} class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" />
-              </div>
-              <div class="p-5">
-                <div class="flex items-center gap-2 text-[11px] text-[#6e6d68] mb-2">
-                  <span class="px-2.5 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 font-semibold">{art.category}</span>
-                  <span>·</span>
-                  <span>{art.readTime}</span>
-                </div>
-                <h2 class="text-base font-semibold text-[#101010] group-hover:text-[#0000ff] transition leading-snug">
-                  <a href={`/career/${art.slug}`}>{art.title}</a>
-                </h2>
-                <p class="text-xs text-[#6e6d68] line-clamp-2 mt-2 leading-relaxed">{art.excerpt}</p>
-              </div>
-            </div>
-            <div class="p-5 pt-0">
-              <a href={`/career/${art.slug}`} class="inline-block px-4 py-2 rounded-full bg-[#0000ff] hover:bg-[#1738d1] text-white text-xs font-semibold transition shadow-xs">
-                Baca Selengkapnya →
+      <!-- 2-Grid Layout: Kiri (Daftar Artikel + In-Feed Ad + Pagination) & Kanan (Viral, Spotlight, Ads Internal, Ads External) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mt-6">
+        
+        <!-- KOLOM KIRI (8 Kolom / ~67%): Pencarian, Filter Kategori, Daftar Artikel, In-Feed Ad, Pagination -->
+        <div class="lg:col-span-8 space-y-6 min-w-0">
+          
+          <!-- Search & Category Filter Panel -->
+          <div class="bg-white rounded-2xl border border-[#d7d6cf] p-4 sm:p-5 shadow-xs space-y-4">
+            <form
+              action="/career"
+              method="GET"
+              role="search"
+              aria-label="Cari artikel panduan karier"
+              class="bg-[#f4f3ee] border border-[#d7d6cf] focus-within:bg-white focus-within:border-[#1738D1] focus-within:ring-2 focus-within:ring-[#1738D1]/20 rounded-full p-1.5 pl-4 flex items-center gap-2 transition"
+            >
+              <label for="career-search-input" class="sr-only">Cari topik artikel karier</label>
+              <svg class="w-4 h-4 text-[#55544f] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              <input
+                id="career-search-input"
+                type="search"
+                name="q"
+                value={rawQ}
+                placeholder="Cari topik (CV ATS, Interview HRD, Negosiasi Gaji, Portofolio)..."
+                class="min-w-0 flex-1 text-xs sm:text-sm text-[#101010] placeholder-[#55544f] outline-none bg-transparent font-medium py-1.5"
+              />
+              {isFiltered && (
+                <a
+                  href="/career"
+                  class="min-h-[40px] inline-flex items-center text-xs font-bold text-[#55544f] hover:text-[#101010] px-2.5 shrink-0 focus-visible:ring-2 focus-visible:ring-[#1738D1] rounded-full"
+                >
+                  Reset
+                </a>
+              )}
+              <button
+                type="submit"
+                class="min-h-[42px] px-5 py-2 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-xs transition cursor-pointer shrink-0"
+              >
+                Cari Artikel
+              </button>
+            </form>
+
+            <!-- Category Filter Pills (Touch Target >= 44px) -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs" role="navigation" aria-label="Filter kategori artikel">
+              <a
+                href="/career"
+                aria-current={!catFilter && !tagFilter ? 'page' : undefined}
+                class={`px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-full font-bold shrink-0 transition ${
+                  !catFilter && !tagFilter
+                    ? 'bg-[#101010] text-white shadow-xs'
+                    : 'bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf] hover:border-[#101010]'
+                }`}
+              >
+                Semua Topik
+              </a>
+              <a
+                href="/career?cat=cv"
+                aria-current={catFilter === 'cv' ? 'page' : undefined}
+                class={`px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-full font-bold shrink-0 transition ${
+                  catFilter === 'cv'
+                    ? 'bg-[#1738D1] text-white shadow-xs'
+                    : 'bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf] hover:border-[#101010]'
+                }`}
+              >
+                CV &amp; Lamaran
+              </a>
+              <a
+                href="/career?cat=interview"
+                aria-current={catFilter === 'interview' ? 'page' : undefined}
+                class={`px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-full font-bold shrink-0 transition ${
+                  catFilter === 'interview'
+                    ? 'bg-[#1738D1] text-white shadow-xs'
+                    : 'bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf] hover:border-[#101010]'
+                }`}
+              >
+                Interview Kerja
+              </a>
+              <a
+                href="/career?cat=gaji"
+                aria-current={catFilter === 'gaji' ? 'page' : undefined}
+                class={`px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-full font-bold shrink-0 transition ${
+                  catFilter === 'gaji'
+                    ? 'bg-[#1738D1] text-white shadow-xs'
+                    : 'bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf] hover:border-[#101010]'
+                }`}
+              >
+                Standar Gaji
+              </a>
+              <a
+                href="/career?cat=karier"
+                aria-current={catFilter === 'karier' ? 'page' : undefined}
+                class={`px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-full font-bold shrink-0 transition ${
+                  catFilter === 'karier'
+                    ? 'bg-[#1738D1] text-white shadow-xs'
+                    : 'bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf] hover:border-[#101010]'
+                }`}
+              >
+                Dunia Kerja
               </a>
             </div>
-          </article>
-        ))}
+          </div>
+
+          <!-- Header Bar Daftar Artikel & Indikator Halaman -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+            <SubsectionHeader
+              title={isFiltered ? 'Hasil Pencarian Panduan' : 'Daftar Panduan & Artikel Karier'}
+              level={2}
+              eyebrow="Kurasi Redaksi Employr"
+            />
+            {totalItems > 0 && (
+              <span class="text-xs font-semibold text-[#55544f] shrink-0">
+                Menampilkan {startIndex + 1}-{endIndex} dari {totalItems} artikel
+              </span>
+            )}
+          </div>
+
+          <!-- Daftar Artikel atau Empty State -->
+          {paginatedArticles.length === 0 ? (
+            <div class="bg-white rounded-2xl border border-[#d7d6cf] p-8 sm:p-10 text-center my-4 space-y-3">
+              <div class="w-12 h-12 rounded-full bg-rose-50 border border-rose-200 text-rose-800 flex items-center justify-center mx-auto font-bold text-sm">
+                0
+              </div>
+              <h3 class="text-base font-bold text-[#101010]">
+                Belum ada artikel yang cocok dengan pencarianmu
+              </h3>
+              <p class="text-xs sm:text-sm text-[#55544f] max-w-md mx-auto leading-relaxed">
+                {rawQ
+                  ? `Tidak ditemukan panduan dengan kata kunci "${rawQ}". Coba kata kunci seperti CV, Interview, Gaji, atau LinkedIn.`
+                  : 'Belum ada artikel pada kategori ini. Silakan kembali ke daftar semua topik.'}
+              </p>
+              <div class="pt-2">
+                <a
+                  href="/career"
+                  class="min-h-[44px] inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold transition shadow-xs"
+                >
+                  Reset Filter &amp; Tampilkan Semua
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div class="space-y-6">
+              <!-- Batch 1: 4 Artikel Pertama dalam Grid 2 Kolom -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {firstBatchArticles.map((art) => (
+                  <OrganicCardSmall
+                    image={art.image}
+                    imageAlt={art.title}
+                    category={art.category}
+                    date={art.date ? `${art.date} · ${art.readTime}` : art.readTime}
+                    title={art.title}
+                    href={`/career/${art.slug}`}
+                    description={art.excerpt}
+                    actionText="Baca Panduan"
+                  />
+                ))}
+              </div>
+
+              <!-- In-Feed Ad di Sela-Sela Daftar Artikel -->
+              <AdSlot
+                type="infeed"
+                className="my-2"
+                note="Tingkatkan daya saing lamaran kerjamu dengan sertifikasi kompetensi resmi."
+              />
+
+              <!-- Batch 2: Sisa Artikel pada Halaman Aktif -->
+              {secondBatchArticles.length > 0 && (
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {secondBatchArticles.map((art) => (
+                    <OrganicCardSmall
+                      image={art.image}
+                      imageAlt={art.title}
+                      category={art.category}
+                      date={art.date ? `${art.date} · ${art.readTime}` : art.readTime}
+                      title={art.title}
+                      href={`/career/${art.slug}`}
+                      description={art.excerpt}
+                      actionText="Baca Panduan"
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <!-- Pagination Controls (Anti Endless Scroll) -->
+          {totalPages > 1 && (
+            <nav
+              aria-label="Navigasi halaman daftar artikel"
+              class="bg-white rounded-2xl border border-[#d7d6cf] p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs"
+            >
+              <span class="text-xs font-semibold text-[#55544f]">
+                Halaman <strong class="text-[#101010]">{currentPage}</strong> dari <strong class="text-[#101010]">{totalPages}</strong>
+              </span>
+
+              <div class="flex items-center gap-1.5 flex-wrap justify-center">
+                {currentPage > 1 ? (
+                  <a
+                    href={buildPageUrl(currentPage - 1)}
+                    class="min-h-[44px] px-4 py-2 rounded-full bg-[#f4f3ee] hover:bg-[#101010] hover:text-white text-[#101010] border border-[#d7d6cf] text-xs font-bold inline-flex items-center justify-center transition"
+                  >
+                    Sebelumnya
+                  </a>
+                ) : (
+                  <span
+                    aria-disabled="true"
+                    class="min-h-[44px] px-4 py-2 rounded-full bg-[#f4f3ee]/60 text-[#55544f]/60 border border-[#d7d6cf]/60 text-xs font-bold inline-flex items-center justify-center cursor-not-allowed select-none"
+                  >
+                    Sebelumnya
+                  </span>
+                )}
+
+                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNum) => (
+                  <a
+                    href={buildPageUrl(pageNum)}
+                    aria-current={pageNum === currentPage ? 'page' : undefined}
+                    aria-label={`Halaman ${pageNum}`}
+                    class={`min-w-[44px] min-h-[44px] px-3.5 py-2 rounded-full text-xs font-bold inline-flex items-center justify-center transition ${
+                      pageNum === currentPage
+                        ? 'bg-[#1738D1] text-white shadow-xs'
+                        : 'bg-white hover:bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf]'
+                    }`}
+                  >
+                    {pageNum}
+                  </a>
+                ))}
+
+                {currentPage < totalPages ? (
+                  <a
+                    href={buildPageUrl(currentPage + 1)}
+                    class="min-h-[44px] px-4 py-2 rounded-full bg-[#f4f3ee] hover:bg-[#101010] hover:text-white text-[#101010] border border-[#d7d6cf] text-xs font-bold inline-flex items-center justify-center transition"
+                  >
+                    Berikutnya
+                  </a>
+                ) : (
+                  <span
+                    aria-disabled="true"
+                    class="min-h-[44px] px-4 py-2 rounded-full bg-[#f4f3ee]/60 text-[#55544f]/60 border border-[#d7d6cf]/60 text-xs font-bold inline-flex items-center justify-center cursor-not-allowed select-none"
+                  >
+                    Berikutnya
+                  </span>
+                )}
+              </div>
+            </nav>
+          )}
+        </div>
+
+        <!-- KOLOM KANAN (4 Kolom / ~33%): Artikel Viral, Spotlight, Ads Internal, Ads External -->
+        <aside class="lg:col-span-4 space-y-6 min-w-0" aria-label="Sorotan Artikel, Produk Internal, dan Mitra Karier">
+          
+          <!-- 1. ARTIKEL VIRAL / PALING BANYAK DICARI -->
+          <section aria-labelledby="heading-viral-articles" class="bg-white rounded-2xl border border-[#d7d6cf] p-5 shadow-xs">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b border-[#d7d6cf]/70">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-rose-600 shrink-0"></span>
+                <h2 id="heading-viral-articles" class="text-xs font-extrabold uppercase tracking-wider text-[#101010]">
+                  Artikel Terpopuler Minggu Ini
+                </h2>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-800 border border-rose-200">
+                Tren Karier
+              </span>
+            </div>
+
+            {viralArticles.length === 0 ? (
+              <p class="text-xs text-[#55544f] py-2">Belum ada daftar artikel populer.</p>
+            ) : (
+              <ol class="space-y-3.5">
+                {viralArticles.map((art, index) => (
+                  <li class="group border-b border-[#d7d6cf]/50 last:border-b-0 pb-3.5 last:pb-0">
+                    <a
+                      href={`/career/${art.slug}`}
+                      class="flex items-start gap-3 rounded-xl focus-visible:ring-2 focus-visible:ring-[#1738D1] outline-none"
+                    >
+                      <span class="w-7 h-7 rounded-lg bg-[#f4f3ee] border border-[#d7d6cf] group-hover:bg-[#1738D1] group-hover:text-white group-hover:border-[#1738D1] text-[#101010] font-extrabold text-xs flex items-center justify-center shrink-0 transition mt-0.5">
+                        0{index + 1}
+                      </span>
+                      <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-1.5 text-[11px] text-[#55544f] font-semibold mb-0.5">
+                          <span class="text-[#1738D1] font-bold">{art.category}</span>
+                          <span aria-hidden="true">·</span>
+                          <span>{art.readTime}</span>
+                        </div>
+                        <h3 class="text-xs sm:text-[13px] font-bold text-[#101010] group-hover:text-[#1738D1] transition leading-snug line-clamp-2">
+                          {art.title}
+                        </h3>
+                      </div>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </section>
+
+          <!-- 2. SPOTLIGHT KARIER & TOPIK FOKUS -->
+          {spotlightArticle && (
+            <section aria-labelledby="heading-spotlight" class="bg-white rounded-2xl border border-[#d7d6cf] p-5 shadow-xs space-y-4">
+              <div class="flex items-center justify-between pb-2.5 border-b border-[#d7d6cf]/70">
+                <span id="heading-spotlight" class="text-xs font-extrabold uppercase tracking-wider text-[#1738D1]">
+                  Spotlight Redaksi
+                </span>
+                <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#f0f2ff] text-[#1738D1] border border-[#1738D1]/20">
+                  Pilihan Utama
+                </span>
+              </div>
+
+              <div class="p-4 rounded-xl bg-[#f4f3ee] border border-[#d7d6cf]">
+                <span class="text-[11px] font-bold text-[#55544f] block mb-1">
+                  {spotlightArticle.category} · {spotlightArticle.readTime}
+                </span>
+                <h3 class="text-sm font-bold text-[#101010] leading-snug mb-2">
+                  <a href={`/career/${spotlightArticle.slug}`} class="hover:text-[#1738D1] transition">
+                    {spotlightArticle.title}
+                  </a>
+                </h3>
+                <p class="text-xs text-[#55544f] line-clamp-2 leading-relaxed mb-3">
+                  {spotlightArticle.excerpt}
+                </p>
+                <a
+                  href={`/career/${spotlightArticle.slug}`}
+                  class="min-h-[40px] px-4 py-2 rounded-full bg-white hover:bg-[#101010] hover:text-white text-[#101010] border border-[#d7d6cf] text-xs font-bold inline-flex items-center justify-center transition"
+                >
+                  Baca Spotlight
+                </a>
+              </div>
+
+              <div>
+                <h4 class="text-[11px] font-bold uppercase tracking-wider text-[#55544f] mb-2.5">
+                  Topik Paling Dicari Pelamar
+                </h4>
+                <div class="flex flex-wrap gap-2">
+                  {popularTopics.map((topic) => (
+                    <a
+                      href={`/career?q=${encodeURIComponent(topic.q)}`}
+                      class="min-h-[38px] px-3 py-1.5 rounded-full bg-[#f4f3ee] hover:bg-[#f0f2ff] hover:text-[#1738D1] hover:border-[#1738D1]/40 text-[#101010] border border-[#d7d6cf] text-xs font-semibold inline-flex items-center transition"
+                    >
+                      #{topic.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
+
+          <!-- 3. ADS INTERNAL (EKOSISTEM EMPLOYR: CEK SKOR CV ATS & CV BUILDER) -->
+          <section
+            id="cek-ats"
+            aria-labelledby="heading-internal-ad"
+            class="bg-[#101010] text-white rounded-2xl border border-[#101010] p-5 sm:p-6 shadow-xs space-y-4 scroll-mt-24"
+          >
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/15 text-white border border-white/20">
+                Fitur Internal Employr
+              </span>
+              <span class="text-[11px] font-semibold text-[#c8f55b]">
+                Standar Rekruter
+              </span>
+            </div>
+
+            <div>
+              <h3 id="heading-internal-ad" class="text-base sm:text-lg font-bold text-white leading-snug">
+                Cek Skor CV ATS &amp; Susun Resume Siap Lamar
+              </h3>
+              <p class="text-xs text-[#d7d6cf] mt-1.5 leading-relaxed">
+                Periksa kecocokan kata kunci CV kamu dengan lowongan incaran atau susun CV standar HRD dalam hitungan menit di Dashboard Employr.
+              </p>
+            </div>
+
+            <div class="flex flex-col gap-2.5 pt-1">
+              <a
+                href={`${APP_URL}/cv-screener`}
+                class="min-h-[44px] w-full px-4 py-2.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold inline-flex items-center justify-center transition shadow-xs"
+              >
+                Buka Pemeriksa CV ATS
+              </a>
+              <a
+                href={CV_BUILDER_URL}
+                class="min-h-[44px] w-full px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-bold inline-flex items-center justify-center transition"
+              >
+                Buat CV Saya
+              </a>
+            </div>
+          </section>
+
+          <!-- 4. NEWSLETTER KARIER MINGGUAN (MENGISI SPACE KOSONG DENGAN VALUE NYATA) -->
+          <section
+            aria-labelledby="heading-newsletter"
+            class="bg-white rounded-2xl border border-[#d7d6cf] p-5 sm:p-6 shadow-xs space-y-3.5 relative overflow-hidden"
+          >
+            <div class="flex items-center justify-between pb-2.5 border-b border-[#d7d6cf]/70">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-[#1738D1]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                <h3 id="heading-newsletter" class="text-xs font-extrabold uppercase tracking-wider text-[#101010]">
+                  Newsletter Karier Mingguan
+                </h3>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-[#1738D1] border border-blue-200">
+                Edisi Senin
+              </span>
+            </div>
+
+            <div>
+              <h4 class="text-sm font-bold text-[#101010] leading-snug">
+                Tips Lolos Interview &amp; Info Loker Terkurasi
+              </h4>
+              <p class="text-xs text-[#55544f] mt-1 leading-relaxed">
+                Dapatkan bocoran pertanyaan HRD, panduan CV ATS, dan kurasi lowongan kerja terverifikasi langsung di inbox kamu setiap Senin pagi.
+              </p>
+            </div>
+
+            <form
+              id="career-newsletter-form"
+              class="space-y-2.5 pt-1"
+            >
+              <div>
+                <label for="career-newsletter-email" class="sr-only">Alamat email kamu</label>
+                <input
+                  id="career-newsletter-email"
+                  type="email"
+                  required
+                  placeholder="nama@email.com"
+                  class="w-full min-h-[42px] px-3.5 py-2 rounded-xl bg-[#f4f3ee] border border-[#d7d6cf] text-xs text-[#101010] placeholder-[#55544f] outline-none focus:bg-white focus:border-[#1738D1] focus:ring-2 focus:ring-[#1738D1]/20 font-medium transition"
+                />
+              </div>
+              <button
+                type="submit"
+                id="career-newsletter-btn"
+                class="w-full min-h-[44px] px-4 py-2.5 rounded-full bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white text-xs font-bold transition shadow-xs cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>Daftar Newsletter</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </button>
+              <p class="text-[10px] text-[#55544f] text-center leading-tight">
+                Gratis dan bebas spam. Berhenti berlangganan kapan saja.
+              </p>
+            </form>
+
+            <div id="career-newsletter-error" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-center text-xs text-rose-700 font-medium"></div>
+
+            <div id="newsletter-success-msg" class="hidden p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center space-y-1">
+              <span class="text-xs font-bold text-emerald-800 block">Terima Kasih!</span>
+              <p id="career-newsletter-success-desc" class="text-[11px] text-emerald-700 leading-relaxed font-medium">
+                Email kamu telah terdaftar. Kami akan mengirimkan kurasi karier terbaik setiap Senin pagi.
+              </p>
+            </div>
+
+            <script is:inline>
+              const careerForm = document.getElementById('career-newsletter-form');
+              const careerEmailInput = document.getElementById('career-newsletter-email');
+              const careerBtn = document.getElementById('career-newsletter-btn');
+              const careerSuccess = document.getElementById('newsletter-success-msg');
+              const careerSuccessDesc = document.getElementById('career-newsletter-success-desc');
+              const careerError = document.getElementById('career-newsletter-error');
+
+              if (careerForm && careerEmailInput) {
+                careerForm.addEventListener('submit', async (e) => {
+                  e.preventDefault();
+                  const email = careerEmailInput.value?.trim();
+                  if (!email) return;
+
+                  if (careerBtn) {
+                    careerBtn.disabled = true;
+                    careerBtn.innerText = 'Mendaftarkan...';
+                  }
+                  if (careerError) careerError.classList.add('hidden');
+
+                  try {
+                    const res = await fetch('/api/newsletter/subscribe', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email, source: 'CAREER_INDEX_WEEKLY' }),
+                    });
+                    const data = await res.json();
+
+                    if (res.ok && data.success) {
+                      if (careerSuccessDesc && data.message) {
+                        careerSuccessDesc.innerText = data.message;
+                      }
+                      if (careerSuccess) careerSuccess.classList.remove('hidden');
+                      careerForm.classList.add('hidden');
+                    } else {
+                      if (careerError) {
+                        careerError.innerText = data.message || 'Gagal mendaftar newsletter.';
+                        careerError.classList.remove('hidden');
+                      }
+                    }
+                  } catch (err) {
+                    if (careerError) {
+                      careerError.innerText = 'Terjadi gangguan koneksi. Silakan coba lagi.';
+                      careerError.classList.remove('hidden');
+                    }
+                  } finally {
+                    if (careerBtn) {
+                      careerBtn.disabled = false;
+                      careerBtn.innerHTML = '<span>Daftar Newsletter</span>';
+                    }
+                  }
+                });
+              }
+            </script>
+          </section>
+
+          <!-- 5. ADS EXTERNAL (MITRA KARIER & LEMBAGA PELATIHAN) -->
+          <AdSlot
+            type="skyscraper"
+            note="Program bimbingan karier intensif dan penyaluran kerja mitra industri."
+          />
+        </aside>
+      </div>
+
+      <!-- =====================================================================
+           BAGIAN BAWAH HALAMAN: BACA JUGA ARTIKEL, LOWONGAN (DENGAN ADS DI SELA-SELA), SERTIFIKASI, COURSE & EVENT
+           ===================================================================== -->
+      <div class="mt-14 pt-10 border-t border-[#d7d6cf] space-y-12">
+        
+        <!-- Section Bawah 1: Baca Juga Artikel & Panduan Pilihan -->
+        {fallbackReadAlso.length > 0 && (
+          <section aria-labelledby="heading-read-also" class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8 shadow-xs">
+            <div class="mb-6 pb-3 border-b border-[#d7d6cf]/60">
+              <SubsectionHeader
+                title="Baca Juga Panduan Karier Pilihan"
+                level={2}
+                eyebrow="Rekomendasi Bacaan Lanjutan"
+                eyebrowColor="text-rose-800"
+                rightContent={true}
+              >
+                <a slot="right" href="/career" class="text-xs font-bold text-[#1738D1] hover:underline shrink-0">
+                  Lihat Indeks Artikel
+                </a>
+              </SubsectionHeader>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {fallbackReadAlso.map((art) => (
+                <OrganicCardSmall
+                  image={art.image}
+                  imageAlt={art.title}
+                  category={art.category}
+                  date={art.date ? `${art.date} · ${art.readTime}` : art.readTime}
+                  title={art.title}
+                  href={`/career/${art.slug}`}
+                  description={art.excerpt}
+                  actionText="Baca Artikel"
+                  surfaceColor="#f4f3ee"
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        <!-- Section Bawah 2: Daftar Lowongan Kerja Aktif + Ads di Sela-Sela Daftar Lowongannya -->
+        {featuredJobs.length > 0 && (
+          <section aria-labelledby="heading-related-jobs" class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8 shadow-xs">
+            <div class="mb-6 pb-3 border-b border-[#d7d6cf]/60">
+              <SubsectionHeader
+                title="Lowongan Kerja yang Sedang Membuka Pendaftaran"
+                level={2}
+                eyebrow="Praktikkan Tips Kariermu Sekarang"
+                eyebrowColor="text-[#1738D1]"
+                rightContent={true}
+              >
+                <a slot="right" href="/lowongan" class="text-xs font-bold text-[#1738D1] hover:underline shrink-0">
+                  Lihat Semua Loker ({lowonganSnapshot.length})
+                </a>
+              </SubsectionHeader>
+            </div>
+
+            <div class="space-y-4">
+              <!-- 2 Lowongan Pertama -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {firstJobBatch.map((job) => (
+                  <article class="rounded-2xl p-5 bg-[#f4f3ee] border border-[#d7d6cf] hover:border-[#1738D1]/50 transition flex flex-col justify-between gap-4">
+                    <div>
+                      <div class="flex items-center justify-between gap-2 flex-wrap mb-1.5">
+                        <span class="text-xs font-bold text-[#55544f] uppercase tracking-wider">{job.company}</span>
+                        <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[#1738D1] font-bold">{job.type}</span>
+                      </div>
+                      <h3 class="text-base font-bold text-[#101010] hover:text-[#1738D1] transition leading-snug">
+                        <a href={`/lowongan/${job.slug}`}>{job.title}</a>
+                      </h3>
+                      <p class="text-xs text-[#55544f] mt-1 line-clamp-2 leading-relaxed">
+                        {job.description}
+                      </p>
+                    </div>
+                    <div class="pt-3 border-t border-[#d7d6cf]/70 flex items-center justify-between gap-2 flex-wrap">
+                      <div class="text-xs">
+                        <span class="font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">{job.salary}</span>
+                        <span class="text-[#55544f] ml-2">{job.location}</span>
+                      </div>
+                      <a
+                        href={`/lowongan/${job.slug}`}
+                        class="min-h-[40px] px-4 py-2 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold inline-flex items-center justify-center transition shadow-xs"
+                      >
+                        Lamar Sekarang
+                      </a>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <!-- Ads di Sela-Sela Daftar Lowongan -->
+              <AdSlot
+                type="infeed"
+                className="my-3"
+                note="Cocokkan CV kamu dengan standar kualifikasi perusahaan mitra sebelum mengirim lamaran."
+              />
+
+              <!-- 2 Lowongan Berikutnya -->
+              {secondJobBatch.length > 0 && (
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {secondJobBatch.map((job) => (
+                    <article class="rounded-2xl p-5 bg-[#f4f3ee] border border-[#d7d6cf] hover:border-[#1738D1]/50 transition flex flex-col justify-between gap-4">
+                      <div>
+                        <div class="flex items-center justify-between gap-2 flex-wrap mb-1.5">
+                          <span class="text-xs font-bold text-[#55544f] uppercase tracking-wider">{job.company}</span>
+                          <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[#1738D1] font-bold">{job.type}</span>
+                        </div>
+                        <h3 class="text-base font-bold text-[#101010] hover:text-[#1738D1] transition leading-snug">
+                          <a href={`/lowongan/${job.slug}`}>{job.title}</a>
+                        </h3>
+                        <p class="text-xs text-[#55544f] mt-1 line-clamp-2 leading-relaxed">
+                          {job.description}
+                        </p>
+                      </div>
+                      <div class="pt-3 border-t border-[#d7d6cf]/70 flex items-center justify-between gap-2 flex-wrap">
+                        <div class="text-xs">
+                          <span class="font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">{job.salary}</span>
+                          <span class="text-[#55544f] ml-2">{job.location}</span>
+                        </div>
+                        <a
+                          href={`/lowongan/${job.slug}`}
+                          class="min-h-[40px] px-4 py-2 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold inline-flex items-center justify-center transition shadow-xs"
+                        >
+                          Lamar Sekarang
+                        </a>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        <!-- Section Bawah 3: Sertifikasi Resmi yang Sedang Buka -->
+        {topSertifikasi.length > 0 && (
+          <section aria-labelledby="heading-related-certs" class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8 shadow-xs">
+            <div class="mb-6 pb-3 border-b border-[#d7d6cf]/60">
+              <SubsectionHeader
+                title="Sertifikasi Resmi & Kompetensi Industri"
+                level={2}
+                eyebrow="Validasi Keahlian di CV"
+                eyebrowColor="text-emerald-800"
+                rightContent={true}
+              >
+                <a slot="right" href="/sertifikasi" class="text-xs font-bold text-[#1738D1] hover:underline shrink-0">
+                  Lihat Semua Sertifikasi
+                </a>
+              </SubsectionHeader>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {topSertifikasi.map((sert) => (
+                <OrganicCardSmall
+                  image={sert.image}
+                  imageAlt={sert.title}
+                  category={sert.issuer}
+                  date={sert.duration}
+                  title={sert.title}
+                  href={`/sertifikasi/${sert.slug}`}
+                  description={sert.description}
+                  price={sert.price}
+                  actionText="Cek Skema"
+                  surfaceColor="#f4f3ee"
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        <!-- Section Bawah 4: Pelatihan Skill & Agenda Event Karier -->
+        {(topCourses.length > 0 || topEvents.length > 0) && (
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {topCourses.length > 0 && (
+              <section aria-labelledby="heading-related-courses" class="bg-white rounded-2xl border border-[#d7d6cf] p-6 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div class="mb-5 pb-3 border-b border-[#d7d6cf]/60">
+                    <SubsectionHeader
+                      title="Kursus & Pelatihan Skill"
+                      level={2}
+                      eyebrow="Upskilling Praktis"
+                      eyebrowColor="text-[#1738D1]"
+                      rightContent={true}
+                    >
+                      <a slot="right" href="/course" class="text-xs font-bold text-[#1738D1] hover:underline shrink-0">
+                        Semua Kelas
+                      </a>
+                    </SubsectionHeader>
+                  </div>
+
+                  <div class="space-y-3">
+                    {topCourses.map((crs) => (
+                      <a
+                        href={`/course/${crs.slug}`}
+                        class="block p-4 rounded-xl bg-[#f4f3ee] border border-[#d7d6cf] hover:border-[#1738D1] transition group"
+                      >
+                        <div class="flex items-center justify-between gap-2 text-[11px] font-bold text-[#55544f] mb-1">
+                          <span>{crs.level} · {crs.provider}</span>
+                          <span class="text-[#1738D1]">{crs.price}</span>
+                        </div>
+                        <h3 class="text-sm font-bold text-[#101010] group-hover:text-[#1738D1] transition leading-snug">
+                          {crs.title}
+                        </h3>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {topEvents.length > 0 && (
+              <section aria-labelledby="heading-related-events" class="bg-white rounded-2xl border border-[#d7d6cf] p-6 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div class="mb-5 pb-3 border-b border-[#d7d6cf]/60">
+                    <SubsectionHeader
+                      title="Agenda Event & Job Fair"
+                      level={2}
+                      eyebrow="Networking & Walk-In"
+                      eyebrowColor="text-amber-800"
+                      rightContent={true}
+                    >
+                      <a slot="right" href="/event" class="text-xs font-bold text-[#1738D1] hover:underline shrink-0">
+                        Semua Agenda
+                      </a>
+                    </SubsectionHeader>
+                  </div>
+
+                  <div class="space-y-3">
+                    {topEvents.map((evt) => (
+                      <a
+                        href={`/event/${evt.slug}`}
+                        class="block p-4 rounded-xl bg-[#f4f3ee] border border-[#d7d6cf] hover:border-[#1738D1] transition group"
+                      >
+                        <div class="flex items-center justify-between gap-2 text-[11px] font-bold text-[#55544f] mb-1">
+                          <span>{evt.format} · {evt.type}</span>
+                          <span class="text-amber-900 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">{evt.date}</span>
+                        </div>
+                        <h3 class="text-sm font-bold text-[#101010] group-hover:text-[#1738D1] transition leading-snug">
+                          {evt.title}
+                        </h3>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
+          </div>
+        )}
+
       </div>
     </div>
   </main>

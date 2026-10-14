@@ -27,7 +27,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
     slug: "lamaran-kerja",
     label: "Lamaran Kerja",
     description:
-      "Kelola tracker lamaran, scan lowongan dari banyak portal, dan persiapan interview.",
+      "Kelola tracker lamaran, pindai lowongan lintas portal, dan persiapan interview.",
   },
   {
     slug: "misi-reward",
@@ -45,7 +45,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
     slug: "akun-bantuan",
     label: "Akun & Bantuan",
     description:
-      "Keamanan akun, kendala umum yang sering terjadi, dan cara menghubungi Customer Service.",
+      "Keamanan akun, penanganan kendala teknis, dan cara menghubungi tim bantuan.",
   },
 ];
 

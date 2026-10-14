@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Calendar, FolderOpen, ChevronRight, ExternalLink } from "lucide-react";
+import { ArrowLeft, Calendar, FolderOpen, ChevronRight, ExternalLink, MessageSquareText, Search } from "lucide-react";
+import { OpenChatButton } from "@/components/OpenChatButton";
 import {
   getArticleBySlug,
   getArticlesByCategory,
@@ -9,6 +10,7 @@ import {
   renderMarkdown,
 } from "@employr/faq";
 import { SITE_URL } from "@/lib/site";
+import { ArticleCard } from "@/components/ArticleCard";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -122,7 +124,7 @@ export default async function ArticlePage({ params }: PageProps) {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
@@ -131,9 +133,9 @@ export default async function ArticlePage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-12 items-start">
         {/* MAIN ARTICLE */}
-        <article className="lg:col-span-8">
+        <article className="lg:col-span-8 xl:col-span-8 2xl:col-span-9 max-w-4xl">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 mb-4" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-cobalt-600 dark:hover:text-blue-300 transition">
@@ -174,14 +176,29 @@ export default async function ArticlePage({ params }: PageProps) {
               <div dangerouslySetInnerHTML={{ __html: html }} />
             </div>
           </div>
+
+          {/* Related Articles in Cutout Style */}
+          {related.length > 0 && (
+            <div className="mt-8 space-y-4">
+              <h2 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
+                Panduan Terkait di {category.label}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {related.slice(0, 2).map((rel) => (
+                  <ArticleCard key={rel.slug} article={rel} />
+                ))}
+              </div>
+            </div>
+          )}
         </article>
 
         {/* SIDEBAR */}
-        <aside className="lg:col-span-4 space-y-5 lg:sticky lg:top-20">
+        <aside className="lg:col-span-4 xl:col-span-4 2xl:col-span-3 space-y-5 lg:sticky lg:top-20">
+          {/* Related in category */}
           {/* Related in category */}
           <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-xs p-5">
             <h2 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
-              <FolderOpen className="w-4 h-4 text-orange-500" />
+              <FolderOpen className="w-4 h-4 text-slate-500 dark:text-slate-400" />
               Lainnya di {category.label}
             </h2>
             {related.length > 0 ? (
@@ -190,7 +207,7 @@ export default async function ArticlePage({ params }: PageProps) {
                   <li key={rel.slug}>
                     <Link
                       href={`/artikel/${rel.slug}`}
-                      className="block p-2.5 rounded-[10px] text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-cobalt-600 dark:hover:text-blue-300 transition leading-snug"
+                      className="block p-2.5 rounded-[8px] text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-cobalt-600 dark:hover:text-blue-300 transition leading-snug"
                     >
                       {rel.title}
                     </Link>
@@ -198,25 +215,32 @@ export default async function ArticlePage({ params }: PageProps) {
                 ))}
               </ul>
             ) : (
-              <p className="text-xs text-slate-400">Tidak ada artikel lain di kategori ini.</p>
+              <p className="text-xs text-slate-400">Belum ada artikel lain di kategori ini.</p>
             )}
           </div>
 
           {/* Help CTA */}
-          <div className="relative overflow-hidden rounded-[10px] bg-navy-700 text-white p-5 border border-navy-800 shadow-md">
-            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-cobalt-500/20 rounded-full blur-2xl pointer-events-none" />
-            <div className="relative z-10 space-y-3">
-              <h2 className="text-sm font-extrabold">Masih butuh bantuan?</h2>
-              <p className="text-[11px] text-slate-200 leading-relaxed">
-                Cari artikel lain di Pusat Bantuan, atau tanya langsung ke Herdi di pojok kanan bawah dashboard.
+          <div className="rounded-[10px] bg-navy-800 text-white p-5 border border-navy-700 shadow-sm">
+            <div className="space-y-3">
+              <h2 className="text-sm font-extrabold">Perlu panduan topik lain?</h2>
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                Telusuri seluruh artikel bantuan atau tanyakan langsung melalui widget Herdi di pojok kanan bawah.
               </p>
-              <Link
-                href="/"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[10px] bg-white text-navy-800 text-xs font-extrabold shadow-md hover:bg-slate-100 transition border-0"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                Lihat semua artikel
-              </Link>
+              <div className="flex flex-wrap items-center gap-2">
+                <OpenChatButton
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[8px] bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold shadow-xs transition border-0 cursor-pointer"
+                >
+                  <MessageSquareText className="w-3.5 h-3.5" />
+                  Tanya Herdi
+                </OpenChatButton>
+                <Link
+                  href="/cari"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[8px] bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition border-0"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  Cari Artikel
+                </Link>
+              </div>
             </div>
           </div>
         </aside>

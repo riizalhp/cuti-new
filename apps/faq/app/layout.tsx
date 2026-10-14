@@ -2,8 +2,28 @@ import type { Metadata } from "next";
 import { Providers } from "@/components/Providers";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { FloatingChat } from "@/components/FloatingChat";
+import { Geist, Inter, JetBrains_Mono } from "next/font/google";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
+
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-geist",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -11,7 +31,7 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description:
-    "Pusat Bantuan resmi Employr: panduan lengkap pembuatan CV ATS, evaluasi CV persona recruiter, pelacakan lamaran kerja, dan persiapan interview 100% gratis.",
+    "Pusat Bantuan resmi Employr: panduan pembuatan CV ATS, evaluasi berkas, pelacakan lamaran kerja di tracker, dan persiapan interview.",
   applicationName: SITE_NAME,
   keywords: [
     "Pusat Bantuan Employr",
@@ -47,7 +67,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Pusat Bantuan & Panduan Resmi Employr",
     description:
-      "Dokumentasi dan panduan resmi ekosistem Employr: buat CV ATS, tracker lamaran, evaluasi CV recruiter, dan persiapan interview 100% gratis.",
+      "Dokumentasi dan panduan resmi ekosistem Employr: penyusunan CV ATS, tracker lamaran, evaluasi berkas, dan persiapan interview.",
     url: SITE_URL,
     siteName: SITE_NAME,
     locale: "id_ID",
@@ -65,7 +85,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Pusat Bantuan & Panduan Resmi Employr",
     description:
-      "Dokumentasi dan panduan resmi ekosistem Employr: buat CV ATS, tracker lamaran, evaluasi CV recruiter, dan persiapan interview 100% gratis.",
+      "Dokumentasi dan panduan resmi ekosistem Employr: penyusunan CV ATS, tracker lamaran, evaluasi berkas, dan persiapan interview.",
     images: ["/logo.webp"],
   },
   robots: {
@@ -115,14 +135,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="id" className={`${geist.variable} ${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
-          rel="stylesheet"
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
@@ -133,6 +147,7 @@ export default function RootLayout({
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
+          <FloatingChat />
         </Providers>
       </body>
     </html>

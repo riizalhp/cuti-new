@@ -326,7 +326,7 @@ Gunakan Bahasa Indonesia kasual, ringkas, dan membangun kepercayaan.
 #### Right-Hand Slide-in Drawer Spec
 
 - **Overlay Backdrop**: `fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end transition-opacity`
-- **Drawer Panel**: `relative z-10 w-full max-w-md sm:max-w-lg h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300`
+- **Drawer Panel**: `relative z-10 w-full max-w-md sm:max-w-xl h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300`
 - **Header**: `p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30`
 - **Content Body**: `p-6 overflow-y-auto space-y-4 flex-1`
 - **Sticky Footer**: `p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-end gap-2.5`

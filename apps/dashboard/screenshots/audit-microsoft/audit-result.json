@@ -1,0 +1,231 @@
+{
+  "categoryScores": {
+    "accessibilityScore": 95,
+    "microcopyScore": 100,
+    "visualHierarchyScore": 100,
+    "profileQualityScore": 93,
+    "overallAuditScore": 97
+  },
+  "report": {
+    "title": "Audit LinkedIn Coding Teacher • Riizalhp | Employr | Employr",
+    "headings": [
+      {
+        "level": 1,
+        "tag": "H1",
+        "text": "Standar 30 Detik Recruiter"
+      },
+      {
+        "level": 2,
+        "tag": "H2",
+        "text": "Langkah Cepat: Terapkan Hasil ke LinkedIn Kamu\nMulai dari Sini"
+      },
+      {
+        "level": 3,
+        "tag": "H3",
+        "text": "Salin Headline Rekomendasi"
+      },
+      {
+        "level": 3,
+        "tag": "H3",
+        "text": "Salin Draf Bio / About Lengkap"
+      },
+      {
+        "level": 3,
+        "tag": "H3",
+        "text": "Buka Profil LinkedIn Kamu"
+      },
+      {
+        "level": 2,
+        "tag": "H2",
+        "text": "Hasil Penilaian & Rekomendasi Profil"
+      },
+      {
+        "level": 3,
+        "tag": "H3",
+        "text": "Rekomendasi Utama (Langkah Paling Berdampak)"
+      },
+      {
+        "level": 4,
+        "tag": "H4",
+        "text": "Optimasi Headline Profil ke Formula 3 Unsur Recruiter"
+      },
+      {
+        "level": 4,
+        "tag": "H4",
+        "text": "Restrukturisasi Bagian About (Formula 3 Kalimat + 3–5 Bullets Bukti)"
+      },
+      {
+        "level": 4,
+        "tag": "H4",
+        "text": "Penyematan (Pinning) Top 3–5 Keahlian Teknis Utama"
+      },
+      {
+        "level": 2,
+        "tag": "H2",
+        "text": "Hasil Ekstraksi Profil LinkedIn Asli"
+      },
+      {
+        "level": 3,
+        "tag": "H3",
+        "text": "Rizal Hanifa Pratama"
+      },
+      {
+        "level": 3,
+        "tag": "H3",
+        "text": "Evidence Bank (Fakta Kunci yang Mendasari Rekomendasi)\nAuto-Populated"
+      }
+    ],
+    "headingSkips": [],
+    "interactivesCount": 43,
+    "smallTargets24": [],
+    "smallTargets44Count": 42,
+    "allCapsElements": [],
+    "contrastViolations": [
+      {
+        "text": "0",
+        "ratio": 3.55,
+        "threshold": 4.5,
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(255, 59, 48)",
+        "tag": "SPAN",
+        "fontSize": "9.5px"
+      },
+      {
+        "text": "1",
+        "ratio": 3.55,
+        "threshold": 4.5,
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(255, 59, 48)",
+        "tag": "SPAN",
+        "fontSize": "9.5px"
+      },
+      {
+        "text": "2",
+        "ratio": 3.55,
+        "threshold": 4.5,
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(255, 59, 48)",
+        "tag": "SPAN",
+        "fontSize": "9.5px"
+      },
+      {
+        "text": "3",
+        "ratio": 3.55,
+        "threshold": 4.5,
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(255, 59, 48)",
+        "tag": "SPAN",
+        "fontSize": "9.5px"
+      },
+      {
+        "text": "4",
+        "ratio": 3.55,
+        "threshold": 4.5,
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(255, 59, 48)",
+        "tag": "SPAN",
+        "fontSize": "9.5px"
+      },
+      {
+        "text": "5",
+        "ratio": 3.55,
+        "threshold": 4.5,
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(255, 59, 48)",
+        "tag": "SPAN",
+        "fontSize": "9.5px"
+      },
+      {
+        "text": "6",
+        "ratio": 3.55,
+        "threshold": 4.5,
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgb(255, 59, 48)",
+        "tag": "SPAN",
+        "fontSize": "9.5px"
+      },
+      {
+        "text": "Kondisi saat ini:",
+        "ratio": 4.35,
+        "threshold": 4.5,
+        "color": "lab(48.0876 -2.03595 -16.5814)",
+        "bg": "rgb(241, 245, 249)",
+        "tag": "SPAN",
+        "fontSize": "11.9994px"
+      },
+      {
+        "text": "Kondisi saat ini:",
+        "ratio": 4.35,
+        "threshold": 4.5,
+        "color": "lab(48.0876 -2.03595 -16.5814)",
+        "bg": "rgb(241, 245, 249)",
+        "tag": "SPAN",
+        "fontSize": "11.9994px"
+      },
+      {
+        "text": "Kondisi saat ini:",
+        "ratio": 4.35,
+        "threshold": 4.5,
+        "color": "lab(48.0876 -2.03595 -16.5814)",
+        "bg": "rgb(241, 245, 249)",
+        "tag": "SPAN",
+        "fontSize": "11.9994px"
+      }
+    ],
+    "tabButtons": [
+      "1. Rekomendasi Utama",
+      "2. Bedah Profil 30 Detik",
+      "3. Headline & Bio",
+      "4. Keahlian & Bukti",
+      "5. Checklist Publish"
+    ]
+  },
+  "mobileOverflow": {
+    "hasOverflow": false,
+    "docWidth": 375,
+    "scrollWidth": 375,
+    "overflowingCount": 24,
+    "sample": [
+      {
+        "tag": "BUTTON",
+        "class": "px-3.5 py-2 min-h-[36px] rounded-[10px] transition shrink-0 flex items-center gap-1.5 cursor-pointer bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700/70",
+        "right": 417,
+        "docWidth": 375
+      },
+      {
+        "tag": "SPAN",
+        "class": "",
+        "right": 405,
+        "docWidth": 375
+      },
+      {
+        "tag": "BUTTON",
+        "class": "px-3.5 py-2 min-h-[36px] rounded-[10px] transition shrink-0 flex items-center gap-1.5 cursor-pointer bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700/70",
+        "right": 571,
+        "docWidth": 375
+      },
+      {
+        "tag": "svg",
+        "class": {},
+        "right": 447,
+        "docWidth": 375
+      },
+      {
+        "tag": "path",
+        "class": {},
+        "right": 446,
+        "docWidth": 375
+      }
+    ]
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+  ],
+  "tabContentsKeys": [
+    "1. Rekomendasi Utama",
+    "2. Bedah Profil 30 Detik",
+    "3. Headline & Bio",
+    "4. Keahlian & Bukti",
+    "5. Checklist Publish"
+  ]
+}

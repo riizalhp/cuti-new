@@ -7,7 +7,7 @@ import {
   artikelList,
   ensureData,
 } from '../data/mock';
-import CompanyLogo from './CompanyLogo.astro';
+import OrganicCardSmall from './common/OrganicCardSmall.astro';
 
 await ensureData();
 
@@ -53,34 +53,31 @@ const relatedArticles = [...artikelList]
           {currentType === 'lowongan' ? 'Lowongan Lain yang Relevan' : 'Lowongan Kerja yang Sedang Membuka Pendaftaran'}
         </h2>
       </div>
-      <a href="/lowongan" class="text-xs font-semibold text-[#0000ff] hover:underline shrink-0">
-        Lihat Semua Lowongan →
+      <a href="/lowongan" class="text-xs font-semibold text-[#1738D1] hover:underline shrink-0">
+        Lihat Semua Loker
       </a>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       {relatedJobs.map((job) => (
-        <article class="bg-white rounded-2xl p-5 border border-[#d7d6cf] hover:border-[#0000ff]/30 hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:-translate-y-1 transition duration-300 flex flex-col justify-between">
+        <article class="bg-white rounded-2xl p-5 border border-[#d7d6cf] hover:border-[#1738D1]/30 hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:-translate-y-1 transition duration-300 flex flex-col justify-between">
           <div>
-            <div class="flex items-center gap-3 mb-3">
-              <CompanyLogo name={job.company} logoUrl={job.companyLogo} size="sm" class="w-10 h-10" />
-              <div class="min-w-0">
-                <p class="text-xs font-semibold text-[#101010] truncate">{job.company}</p>
-                <p class="text-[11px] text-[#6e6d68]">{job.location}</p>
-              </div>
+            <div class="mb-2.5">
+              <p class="text-xs font-bold text-[#52514c] uppercase tracking-wider truncate">{job.company}</p>
+              <p class="text-[11px] text-[#52514c] mt-0.5">{job.location}</p>
             </div>
-            <h3 class="text-sm font-semibold text-[#101010] hover:text-[#0000ff] transition line-clamp-2 leading-snug">
+            <h3 class="text-sm font-semibold text-[#101010] hover:text-[#1738D1] transition line-clamp-2 leading-snug">
               <a href={`/lowongan/${job.slug}`}>{job.title}</a>
             </h3>
             <div class="flex items-center gap-1.5 flex-wrap mt-2.5">
-              <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[#0000ff] font-semibold">{job.type}</span>
-              <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#6e6d68] font-medium">{job.experience}</span>
+              <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[#1738D1] font-semibold">{job.type}</span>
+              <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#52514c] font-medium">{job.experience}</span>
             </div>
           </div>
           <div class="mt-4 pt-3 border-t border-[#d7d6cf]/50 flex items-center justify-between">
             <span class="text-xs font-bold text-emerald-700">{job.salary}</span>
-            <a href={`/lowongan/${job.slug}`} class="px-3 py-1 rounded-full bg-[#0000ff] text-white hover:bg-[#1738d1] text-xs font-semibold transition shadow-xs">
-              Detail →
+            <a href={`/lowongan/${job.slug}`} class="min-h-[44px] px-4 py-2 rounded-full bg-[#1738D1] text-white hover:bg-[#132EA8] text-xs font-semibold transition shadow-xs flex items-center justify-center focus-visible:outline-2 focus-visible:outline-[#1738D1]">
+              Detail
             </a>
           </div>
         </article>
@@ -97,33 +94,25 @@ const relatedArticles = [...artikelList]
           {currentType === 'sertifikasi' ? 'Sertifikasi Terkait Lainnya' : 'Sertifikasi Terakreditasi yang Sedang Buka'}
         </h2>
       </div>
-      <a href="/sertifikasi" class="text-xs font-semibold text-[#0000ff] hover:underline shrink-0">
-        Lihat Semua Sertifikasi →
+      <a href="/sertifikasi" class="text-xs font-semibold text-[#1738D1] hover:underline shrink-0">
+        Lihat Semua Sertifikasi
       </a>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       {relatedSertifikasi.map((sert) => (
-        <article class="bg-white rounded-2xl p-5 border border-[#d7d6cf] hover:border-[#0000ff]/30 hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:-translate-y-1 transition duration-300 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between gap-2 mb-2">
-              <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold">{sert.issuer}</span>
-              <span class="text-[10px] text-[#6e6d68] font-medium">{sert.duration}</span>
-            </div>
-            <h3 class="text-sm font-semibold text-[#101010] hover:text-[#0000ff] transition line-clamp-2 leading-snug">
-              <a href={`/sertifikasi/${sert.slug}`}>{sert.title}</a>
-            </h3>
-            <p class="text-xs text-[#6e6d68] line-clamp-2 mt-2 leading-relaxed">
-              {sert.description}
-            </p>
-          </div>
-          <div class="mt-4 pt-3 border-t border-[#d7d6cf]/50 flex items-center justify-between">
-            <span class="text-xs font-bold text-[#101010]">{sert.price}</span>
-            <a href={`/sertifikasi/${sert.slug}`} class="px-3 py-1 rounded-full bg-[#0000ff] text-white hover:bg-[#1738d1] text-xs font-semibold transition shadow-xs">
-              Cek Syarat →
-            </a>
-          </div>
-        </article>
+        <OrganicCardSmall
+          image={sert.image}
+          imageAlt={sert.title}
+          category={sert.issuer}
+          date={sert.duration}
+          title={sert.title}
+          href={`/sertifikasi/${sert.slug}`}
+          description={sert.description}
+          price={sert.price}
+          badge={sert.level}
+          actionText="Cek Syarat"
+        />
       ))}
     </div>
   </section>
@@ -137,75 +126,56 @@ const relatedArticles = [...artikelList]
           {currentType === 'event' ? 'Event & Job Fair Lainnya' : 'Event & Job Fair Terdekat'}
         </h2>
       </div>
-      <a href="/event" class="text-xs font-semibold text-[#0000ff] hover:underline shrink-0">
-        Lihat Semua Event →
+      <a href="/event" class="text-xs font-semibold text-[#1738D1] hover:underline shrink-0">
+        Lihat Semua Event
       </a>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       {relatedEvents.map((evt) => (
-        <article class="bg-white rounded-2xl p-5 border border-[#d7d6cf] hover:border-[#0000ff]/30 hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:-translate-y-1 transition duration-300 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center gap-2 text-[10px] text-[#6e6d68] mb-2">
-              <span class="font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">{evt.day} {evt.month} 2026</span>
-              <span>{evt.format}</span>
-            </div>
-            <h3 class="text-sm font-semibold text-[#101010] hover:text-[#0000ff] transition line-clamp-2 leading-snug">
-              <a href={`/event/${evt.slug}`}>{evt.title}</a>
-            </h3>
-            <p class="text-xs text-[#6e6d68] line-clamp-2 mt-2 leading-relaxed">
-              {evt.location}
-            </p>
-          </div>
-          <div class="mt-4 pt-3 border-t border-[#d7d6cf]/50 flex items-center justify-between">
-            <span class="text-xs font-bold text-emerald-700">{evt.price}</span>
-            <a href={`/event/${evt.slug}`} class="px-3 py-1 rounded-full bg-[#0000ff] text-white hover:bg-[#1738d1] text-xs font-semibold transition shadow-xs">
-              Daftar Hadir →
-            </a>
-          </div>
-        </article>
+        <OrganicCardSmall
+          image={evt.image}
+          imageAlt={evt.title}
+          category={`${evt.format} · ${evt.type}`}
+          date={`${evt.day} ${evt.month} 2026`}
+          title={evt.title}
+          href={`/event/${evt.slug}`}
+          description={evt.description}
+          location={evt.location}
+          price={evt.price}
+          actionText="Lihat Detail"
+        />
       ))}
     </div>
   </section>
 
-  <!-- 4. Course & Pelatihan yang Sedang Buka -->
+  <!-- 4. Pelatihan Skill Digital yang Sedang Buka -->
   <section aria-labelledby="heading-cross-courses">
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
       <div>
         <div class="section-label mb-2"><i></i>PENINGKATAN SKILL DIGITAL</div>
         <h2 id="heading-cross-courses" class="text-xl sm:text-2xl font-semibold text-[#101010] tracking-tight">
-          {currentType === 'course' ? 'Pelatihan Terkait Lainnya' : 'Course & Pelatihan yang Sedang Buka'}
+          {currentType === 'course' ? 'Pelatihan Terkait Lainnya' : 'Pelatihan Skill Digital yang Sedang Buka'}
         </h2>
       </div>
-      <a href="/course" class="text-xs font-semibold text-[#0000ff] hover:underline shrink-0">
-        Lihat Semua Pelatihan →
+      <a href="/course" class="text-xs font-semibold text-[#1738D1] hover:underline shrink-0">
+        Lihat Semua Pelatihan
       </a>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       {relatedCourses.map((crs) => (
-        <article class="bg-white rounded-2xl border border-[#d7d6cf] overflow-hidden hover:border-[#0000ff]/30 hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:-translate-y-1 transition duration-300 flex flex-col justify-between">
-          <div class="h-28 bg-[#f4f3ee] relative overflow-hidden">
-            <img src={crs.image} alt={crs.title} class="w-full h-full object-cover" loading="lazy" />
-            <span class="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-[#101010]/80 text-white text-[9px] font-bold">
-              {crs.level}
-            </span>
-          </div>
-          <div class="p-5 flex-1 flex flex-col justify-between">
-            <div>
-              <p class="text-[11px] text-[#6e6d68] mb-1">{crs.provider} · {crs.duration}</p>
-              <h3 class="text-sm font-semibold text-[#101010] hover:text-[#0000ff] transition line-clamp-2 leading-snug">
-                <a href={`/course/${crs.slug}`}>{crs.title}</a>
-              </h3>
-            </div>
-            <div class="mt-4 pt-3 border-t border-[#d7d6cf]/50 flex items-center justify-between">
-              <span class="text-xs font-bold text-[#101010]">{crs.price}</span>
-              <a href={`/course/${crs.slug}`} class="px-3 py-1 rounded-full bg-[#0000ff] text-white hover:bg-[#1738d1] text-xs font-semibold transition shadow-xs">
-                Ikuti Kelas →
-              </a>
-            </div>
-          </div>
-        </article>
+        <OrganicCardSmall
+          image={crs.image}
+          imageAlt={crs.title}
+          category={`${crs.level} · ${crs.provider}`}
+          date={crs.duration}
+          title={crs.title}
+          href={`/course/${crs.slug}`}
+          description={crs.description}
+          price={crs.price}
+          actionText="Detail Kelas"
+        />
       ))}
     </div>
   </section>
@@ -219,33 +189,23 @@ const relatedArticles = [...artikelList]
           {currentType === 'career' ? 'Artikel Karier Pilihan Lainnya' : 'Artikel & Tips Karier Terbaru'}
         </h2>
       </div>
-      <a href="/career" class="text-xs font-semibold text-[#0000ff] hover:underline shrink-0">
-        Lihat Semua Artikel →
+      <a href="/career" class="text-xs font-semibold text-[#1738D1] hover:underline shrink-0">
+        Lihat Semua Artikel
       </a>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       {relatedArticles.map((art) => (
-        <article class="bg-white rounded-2xl p-5 border border-[#d7d6cf] hover:border-[#0000ff]/30 hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:-translate-y-1 transition duration-300 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-[10px] text-[#6e6d68] mb-2">
-              <span class="font-bold text-[#0000ff] bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">{art.category}</span>
-              <span>{art.readTime}</span>
-            </div>
-            <h3 class="text-sm font-semibold text-[#101010] hover:text-[#0000ff] transition line-clamp-2 leading-snug">
-              <a href={`/career/${art.slug}`}>{art.title}</a>
-            </h3>
-            <p class="text-xs text-[#6e6d68] line-clamp-2 mt-2 leading-relaxed">
-              {art.excerpt}
-            </p>
-          </div>
-          <div class="mt-4 pt-3 border-t border-[#d7d6cf]/50 flex items-center justify-between">
-            <span class="text-[11px] text-[#6e6d68]">{art.date}</span>
-            <a href={`/career/${art.slug}`} class="px-3 py-1 rounded-full bg-[#0000ff] text-white hover:bg-[#1738d1] text-xs font-semibold transition shadow-xs">
-              Baca Artikel →
-            </a>
-          </div>
-        </article>
+        <OrganicCardSmall
+          image={art.image}
+          imageAlt={art.title}
+          category={art.category}
+          date={art.date ? `${art.date} · ${art.readTime}` : art.readTime}
+          title={art.title}
+          href={`/career/${art.slug}`}
+          description={art.excerpt}
+          actionText="Baca Artikel"
+        />
       ))}
     </div>
   </section>

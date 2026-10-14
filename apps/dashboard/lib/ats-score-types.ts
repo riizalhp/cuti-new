@@ -4,7 +4,7 @@ export interface ATSIssue {
   id: string;
   category: 'contentQuality' | 'atsReadability' | 'completeness' | 'contentIntegrity';
   severity: 'critical' | 'major' | 'minor';
-  section?: 'basics' | 'summary' | 'experience' | 'education' | 'skills' | 'projects' | 'certifications';
+  section?: 'basics' | 'summary' | 'experience' | 'education' | 'skills' | 'projects' | 'certifications' | 'organizations';
   fieldId?: string;
   message: string;
   recommendation: string;

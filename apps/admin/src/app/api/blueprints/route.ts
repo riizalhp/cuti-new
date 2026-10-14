@@ -3,24 +3,29 @@ import { prisma } from "@employr/db";
 
 export async function GET(req: NextRequest) {
   try {
-    const rows = await prisma.$queryRaw<any[]>`
-      SELECT 
-        id, 
-        role_name, 
-        entry_count, 
-        top_essential_skills, 
-        top_nicetohave_skills, 
-        category, 
-        is_promoted, 
-        created_at, 
-        updated_at
-      FROM learned_role_blueprints
-      ORDER BY is_promoted DESC, entry_count DESC, updated_at DESC
-    `;
+    const { searchParams } = new URL(req.url);
+    const limit = Math.min(parseInt(searchParams.get("limit") || "250", 10), 1000);
 
-    const totalSubmissionsResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
-      SELECT COUNT(*)::bigint as count FROM learned_role_entries
-    `;
+    const [rows, totalSubmissionsResult] = await Promise.all([
+      prisma.$queryRaw<any[]>`
+        SELECT 
+          id, 
+          role_name, 
+          entry_count, 
+          top_essential_skills, 
+          top_nicetohave_skills, 
+          category, 
+          is_promoted, 
+          created_at, 
+          updated_at
+        FROM learned_role_blueprints
+        ORDER BY is_promoted DESC, entry_count DESC, updated_at DESC
+        LIMIT ${limit}
+      `,
+      prisma.$queryRaw<Array<{ count: bigint }>>`
+        SELECT COUNT(*)::bigint as count FROM learned_role_entries
+      `,
+    ]);
 
     const totalSubmissions = totalSubmissionsResult[0]?.count
       ? Number(totalSubmissionsResult[0].count)

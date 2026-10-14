@@ -137,11 +137,13 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   };
 
   const popoverPositionClass =
-    align === 'right' || allowPresent
+    align === 'right'
       ? 'right-0 left-auto'
       : align === 'left'
       ? 'left-0 right-auto'
-      : 'right-0 sm:right-0 sm:left-auto';
+      : allowPresent
+      ? 'right-0 sm:right-0'
+      : 'left-0 sm:left-auto sm:right-0';
 
   const canGoPrevYear = minYear === null || (selectedYear - 1) >= minYear;
   const isValueInvalid = minDate ? isEndDateBeforeStartDate(minDate, value) : false;
@@ -159,12 +161,12 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         }`}
       >
         <div className="flex items-center gap-2 truncate">
-          <CalendarIcon className={`w-4 h-4 ${isValueInvalid ? 'text-rose-500' : 'text-orange-500'} shrink-0`} />
+          <CalendarIcon className={`w-4 h-4 ${isValueInvalid ? 'text-rose-700 dark:text-rose-400' : 'text-orange-700 dark:text-orange-400'} shrink-0`} />
           <span className="truncate">
             {value ? (
-              <span className={`font-semibold ${isValueInvalid ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'}`}>{value}</span>
+              <span className={`font-semibold ${isValueInvalid ? 'text-rose-700 dark:text-rose-400' : 'text-slate-900 dark:text-white'}`}>{value}</span>
             ) : (
-              <span className="text-slate-400 font-normal">{placeholder}</span>
+              <span className="text-slate-500 font-normal dark:text-slate-400">{placeholder}</span>
             )}
           </span>
         </div>
@@ -172,7 +174,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
           <button
             type="button"
             onClick={handleClear}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded-[10px] transition cursor-pointer"
+            className="text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded-[10px] transition cursor-pointer dark:text-slate-400"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -180,7 +182,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       </div>
 
       {isOpen && (
-        <div className={`absolute z-50 ${popoverPositionClass} w-72 sm:w-80 mt-1.5 p-4 rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl animate-in fade-in-80 zoom-in-95 duration-150 text-xs`}>
+        <div className={`absolute z-50 ${popoverPositionClass} w-[calc(100vw-3rem)] max-w-[300px] sm:max-w-none sm:w-80 mt-1.5 p-3.5 sm:p-4 rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl animate-in fade-in-80 zoom-in-95 duration-150 text-xs`}>
           {/* Year Header Navigator */}
           <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 dark:border-slate-800">
             <button
@@ -190,7 +192,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
               className={`p-1.5 rounded-[10px] transition ${
                 canGoPrevYear
                   ? 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer'
-                  : 'opacity-30 cursor-not-allowed text-slate-400'
+                  : 'opacity-30 cursor-not-allowed text-slate-500'
               }`}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -223,9 +225,9 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                   title={isBeforeMin ? 'Tanggal selesai tidak boleh sebelum tanggal mulai' : undefined}
                   className={`py-2 px-1 rounded-[10px] text-center font-medium transition ${
                     isBeforeMin
-                      ? 'opacity-30 cursor-not-allowed bg-slate-100 dark:bg-slate-800/50 text-slate-400 dark:text-slate-600 line-through'
+                      ? 'opacity-30 cursor-not-allowed bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-600 line-through'
                       : isSelected
-                      ? 'bg-[#1738D1] text-white font-bold shadow-md cursor-pointer'
+                      ? 'bg-cobalt-500 text-white font-bold shadow-md cursor-pointer'
                       : 'text-slate-700 dark:text-slate-200 hover:bg-orange-50 dark:hover:bg-slate-800 cursor-pointer'
                   }`}
                 >
@@ -243,8 +245,8 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                 onClick={handleSelectPresent}
                 className={`w-full py-2 px-3 rounded-[10px] font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
                   value === 'Sekarang'
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
+                    ? 'bg-emerald-700 text-white'
+                    : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
                 }`}
               >
                 <Check className="w-3.5 h-3.5" />

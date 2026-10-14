@@ -1,66 +1,64 @@
 ---
 title: Kendala Umum & Solusinya
-description: Kumpulan masalah yang sering terjadi — pesan error penyimpanan, AI tidak merespons, halaman tidak terbuka, data tidak muncul, dan cara mengatasinya.
+description: Solusi kendala umum penggunaan: penyimpanan lamaran, proses analisis tertunda, kendala muat halaman, dan sinkronisasi data akun.
 category: akun-bantuan
 order: 2
-updatedAt: 2026-08-18
-keywords: kendala, error, masalah, tidak bisa, gagal, bug, solusi, perbaikan, error message, tidak muncul, loading, refresh, koneksi
+updatedAt: 2026-09-26
+keywords: kendala, error, masalah, gagal simpan, bug, solusi, perbaikan, loading, refresh, koneksi, sinkronisasi
 ---
 
-Berikut masalah yang paling sering dilaporkan dan cara mengatasinya.
+Rangkuman kendala yang paling sering dilaporkan beserta langkah penyelesaiannya.
 
 ## 1. "Lamaran belum tersimpan. Periksa koneksi internet Anda."
 
-Muncul di **Tracker Lamaran** saat penyimpanan/hapus gagal.
+Pesan ini muncul di Tracker Lamaran ketika proses penyimpanan atau penghapusan data terputus.
 
-- **Cek koneksi internet** — pastikan stabil.
-- Klik tombol **Sinkronisasi** untuk memuat ulang data dari database.
-- Jika tetap gagal, refresh halaman lalu coba lagi.
+- Pastikan koneksi internet aktif dan stabil.
+- Klik tombol **Sinkronisasi** untuk menyegarkan data langsung dari server.
+- Muat ulang halaman peramban jika status belum diperbarui.
 
-## 2. Fitur AI / Asisten tidak merespons atau "AI_API_KEY belum dikonfigurasi"
+## 2. Fitur analisis atau penyusunan otomatis tidak merespons
 
-Fitur yang memanggil layanan AI (misal menulis ringkasan CV, evaluasi, asisten karier) membutuhkan konfigurasi server.
+Layanan evaluasi profil, rekomendasi perbaikan kalimat CV, dan penyusunan otomatis diproses melalui antrean sistem server.
 
-- Ini **kendala sisi server** — hubungi Customer Service agar tim memastikan `AI_API_KEY` / `AI_ENDPOINT` terisi.
-- Sementara itu, fitur non-AI (CV builder, tracker, dll) tetap bisa dipakai normal.
-- Untuk **Chat CS di pojok kanan bawah**, jawaban berasal dari Pusat Bantuan (bukan AI) sehingga tetap berfungsi.
+- Jika proses terhenti atau menampilkan pesan gagal, tunggu 1-2 menit lalu klik kembali tombol proses. Tim sistem menjalankan percobaan ulang otomatis di latar belakang.
+- Fitur dasar seperti penyunting CV, pengelolaan tracker, dan penelusuran lowongan tetap dapat kamu gunakan tanpa gangguan.
+- Karakter Herdi di pojok kanan bawah dashboard tetap aktif melayani pertanyaan seputar dokumentasi.
 
-## 3. Halaman tidak terbuka / blank / error saat load
+## 3. Halaman blank atau gagal dimuat
 
-- **Refresh** halaman (Ctrl+F5 untuk hard refresh).
-- Pastikan kamu **login** — halaman pengguna memerlukan sesi.
-- Coba browser lain (Chrome/Edge) atau mode *incognito*.
-- Jika hanya di satu perangkat, coba dari perangkat lain.
+- Segarkan halaman dengan tombol refresh atau kombinasi Ctrl+F5 untuk membersihkan cache lokal.
+- Pastikan sesi login masih aktif. Jika sesi kedaluwarsa, masuk kembali ke akunmu.
+- Gunakan peramban modern seperti Google Chrome atau Microsoft Edge versi terbaru.
 
-## 4. Data tidak muncul setelah login (CV / lamaran hilang)
+## 4. Berkas CV atau kartu lamaran tidak muncul setelah login
 
-- Pastikan kamu login dengan **akun yang sama** dengan akun saat data dibuat.
-- Sesi tersimpan per perangkat — logout lalu login ulang kadang menyelesaikan masalah.
-- Klik **Sinkronisasi** (di tracker) atau muat ulang halaman CV.
-- Jika benar-benar hilang, hubungi CS dengan email akunmu.
+- Pastikan alamat email yang kamu gunakan sama persis dengan akun saat data pertama kali dibuat.
+- Keluar dari akun (logout), tutup tab peramban, lalu masuk kembali.
+- Klik tombol **Sinkronisasi** di papan tracker atau muat ulang halaman CV Saya.
+- Jika data tetap tidak tampil, hubungi Customer Service dengan menyertakan alamat email akun terdaftar.
 
-## 5. Skor / status tidak berubah
+## 5. Skor ATS atau kesiapan kerja belum berubah
 
-- Skor ATS & Career Readiness dihitung dari **data terbaru** — simpan dulu perubahan CV/profil, lalu muat ulang.
-- Beberapa perubahan memerlukan isian minimal (misal ringkasan ≥ beberapa kalimat) sebelum skor naik.
+- Skor dihitung berdasarkan data tersimpan terbaru. Pastikan kamu sudah menekan tombol simpan pada perubahan CV atau profil sebelum memeriksa pembaruan skor.
+- Penilaian membutuhkan data yang bermakna, misalnya ringkasan profesional dengan kalimat terstruktur dan rincian keahlian yang relevan.
 
-## 6. Cetak CV tidak rapi
+## 6. Hasil cetak PDF tampak terpotong atau tanpa warna
 
-- Nyalakan **Background graphics** dan set **Margin: None** di dialog print. Lihat [Cara Cetak CV ke PDF](/artikel/cara-cetak-cv-pdf).
+- Pada jendela cetak peramban, centang opsi **Background graphics** dan atur **Margin** ke pilihan **None**. Petunjuk lengkap dapat dibaca di artikel [Cara Cetak CV ke PDF](/artikel/cara-cetak-cv-pdf).
 
-## 7. Sesi login portal (LinkedIn/scraper) bermasalah
+## 7. Sambungan portal lowongan terputus
 
-- Login ulang lewat tombol yang tersedia.
-- Hapus sesi lama (logout) lalu hubungkan lagi.
-- Sesi disimpan lokal (jika berganti perangkat, silakan hubungkan ulang).
+- Masuk kembali melalui tombol yang tersedia pada menu penelusuran lowongan.
+- Bersihkan riwayat sesi lama lalu tautkan kembali akun portalmu.
 
-## Jika belum terselesaikan
+## Bantuan lanjutan
 
-Siapkan informasi berikut agar CS bisa membantu lebih cepat:
+Bila kendala belum terselesaikan, sertakan rincian berikut saat menghubungi tim bantuan:
 
-- Email akun
-- Nama fitur & halaman yang bermasalah
-- Screenshot pesan error
-- Langkah yang sudah kamu coba
+- Alamat email akun terdaftar
+- Nama halaman atau fitur yang mengalami kendala
+- Tangkapan layar pesan error
+- Rangkuman langkah yang sudah kamu coba
 
-Kemudian hubungi kami lewat [Hubungi Customer Service](/artikel/hubungi-customer-service).
+Hubungi tim melalui panduan di [Hubungi Customer Service](/artikel/hubungi-customer-service).

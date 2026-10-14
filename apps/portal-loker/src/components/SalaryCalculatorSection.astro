@@ -1,0 +1,1502 @@
+---
+import CutoutCorner from './common/CutoutCorner.astro';
+import AdSlot from './AdSlot.astro';
+import { REGION_WAGE_BENCHMARKS, PROVINCE_LIST } from '../data/umk-2026';
+import { TRACKER_URL } from '../lib/urls';
+
+interface Props {
+  showSectionHeader?: boolean;
+}
+
+const { showSectionHeader = true } = Astro.props;
+const defaultRegion =
+  REGION_WAGE_BENCHMARKS.find((r) => r.id === 'kota-semarang') || REGION_WAGE_BENCHMARKS[0];
+
+function formatExactRupiah(val: number): string {
+  const hasDecimals = Math.round(val * 100) % 100 !== 0;
+  return (
+    'Rp ' +
+    val.toLocaleString('id-ID', {
+      minimumFractionDigits: hasDecimals ? 2 : 0,
+      maximumFractionDigits: hasDecimals ? 2 : 0,
+    })
+  );
+}
+---
+
+<section id="kalkulator-gaji" class="py-8 sm:py-14 bg-[#f4f3ee] border-b border-[#d7d6cf]/80 scroll-mt-20">
+  <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
+    {showSectionHeader && (
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 sm:mb-10">
+        <div>
+          <div class="section-label mb-2.5">
+            <span>STANDAR UPAH RIIL</span>
+            <i></i>
+            <span>PP 58/2023 &amp; 142 UMK 2026</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#101010] tracking-tight leading-[1.12]">
+            Kalkulator gaji bersih &amp;<br class="hidden sm:inline" />
+            <em>daya beli kota kerja.</em>
+          </h2>
+          <p class="text-xs sm:text-sm text-[#55544f] mt-2.5 max-w-2xl leading-relaxed font-medium">
+            Hitung estimasi pendapatan bersih bulanan (take-home pay), rincian potongan BPJS Ketenagakerjaan, BPJS Kesehatan, dan PPh 21 Tarif Efektif Rata-rata (TER) beserta perbandingannya terhadap 142 UMK Kabupaten/Kota Tahun 2026.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2 self-start md:self-auto shrink-0">
+          <span class="px-3.5 py-2 rounded-full text-xs font-bold bg-white text-[#101010] border border-[#d7d6cf] shadow-xs tabular-nums">
+            142 Kabupaten/Kota · UMK 2026
+          </span>
+        </div>
+      </div>
+    )}
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+      <!-- PANEL KIRI: INPUT PARAMETER & ANALISIS UPAH RIIL (7 KOLOM) -->
+      <div class="lg:col-span-7 space-y-5 min-w-0">
+        
+        <!-- KARTU 1: INPUT PENGHASILAN & LOKASI KERJA -->
+        <div class="bg-white rounded-[20px] sm:rounded-[24px] border border-[#d7d6cf] p-5 sm:p-7 shadow-[0_4px_20px_-2px_rgba(16,16,16,0.04)] space-y-6">
+          
+          <!-- Baris 1: Pilih Wilayah Kerja (Custom Dropdown Rata Kiri Kota/Kab & Rata Kanan Nominal) -->
+          <div>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <label id="calc-region-label" for="calc-region-trigger" class="text-xs sm:text-sm font-bold text-[#101010]">
+                1. Lokasi Kabupaten / Kota Kerja (142 Daerah)
+              </label>
+              <span id="calc-region-zone" class="text-[11px] font-semibold text-[#1738D1] bg-[#f0f2ff] px-2.5 py-0.5 rounded-full border border-[#1738D1]/20">
+                {defaultRegion.zoneLabel}
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+              <!-- Custom Searchable Aligned Dropdown (8 Kolom) -->
+              <div class="sm:col-span-8 relative" id="calc-region-dropdown-root">
+                <input type="hidden" id="calc-region-value" value={defaultRegion.id} />
+
+                <button
+                  type="button"
+                  id="calc-region-trigger"
+                  aria-haspopup="listbox"
+                  aria-expanded="false"
+                  aria-labelledby="calc-region-label"
+                  class="w-full min-h-[48px] px-4 py-2.5 rounded-xl bg-[#f9f8f5] border border-[#d7d6cf] hover:border-[#101010] focus:border-[#1738D1] focus:bg-white transition flex items-center justify-between gap-3 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1738D1] outline-none"
+                >
+                  <span class="min-w-0 flex-1 text-left">
+                    <span id="calc-trigger-city" class="block text-xs sm:text-sm font-bold text-[#101010] truncate">
+                      {defaultRegion.city}
+                    </span>
+                    <span id="calc-trigger-prov" class="block text-[11px] font-medium text-[#55544f] truncate">
+                      {defaultRegion.province}
+                    </span>
+                  </span>
+
+                  <span class="shrink-0 flex items-center gap-2.5">
+                    <span class="text-right">
+                      <span class="block text-[10px] font-bold uppercase tracking-wider text-[#55544f]">UMK 2026</span>
+                      <span id="calc-trigger-umk" class="block text-xs sm:text-sm font-extrabold text-[#1738D1] tabular-nums">
+                        {formatExactRupiah(defaultRegion.umkExact)}
+                      </span>
+                    </span>
+                    <svg id="calc-trigger-chevron" class="w-4 h-4 text-[#55544f] transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </span>
+                </button>
+
+                <!-- Popover Panel -->
+                <div
+                  id="calc-region-popover"
+                  role="dialog"
+                  aria-label="Pilih Kabupaten atau Kota UMK 2026"
+                  class="hidden absolute left-0 right-0 top-[calc(100%+6px)] z-50 bg-white rounded-2xl border border-[#101010] shadow-[0_18px_40px_rgba(16,16,16,0.16)] overflow-hidden"
+                >
+                  <!-- Search & Filter Provinsi di dalam Dropdown -->
+                  <div class="p-3 bg-[#f9f8f5] border-b border-[#d7d6cf] space-y-2">
+                    <div class="relative flex items-center">
+                      <svg class="w-4 h-4 text-[#55544f] absolute left-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <input
+                        type="text"
+                        id="calc-dd-search"
+                        placeholder="Cari Kabupaten/Kota atau Provinsi..."
+                        autocomplete="off"
+                        class="w-full min-h-[40px] pl-9 pr-3 py-1.5 rounded-lg bg-white border border-[#d7d6cf] focus:border-[#1738D1] text-xs font-medium text-[#101010] placeholder-[#55544f] outline-none"
+                      />
+                    </div>
+
+                    <div class="flex items-center justify-between gap-2">
+                      <label for="calc-dd-prov-filter" class="sr-only">Filter Provinsi</label>
+                      <select
+                        id="calc-dd-prov-filter"
+                        class="w-full min-h-[36px] px-2.5 py-1 rounded-lg bg-white border border-[#d7d6cf] text-[11px] font-bold text-[#101010] outline-none cursor-pointer"
+                      >
+                        <option value="">Semua Provinsi (142 Kabupaten/Kota)</option>
+                        {PROVINCE_LIST.map((prov) => (
+                          <option value={prov}>{prov}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Header Kolom Rata Kiri (Kota/Kab) & Rata Kanan (Nominal UMK) -->
+                  <div class="px-4 py-2 bg-[#f4f3ee] border-b border-[#d7d6cf] flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-[#55544f]">
+                    <span class="text-left">Kabupaten / Kota (Provinsi)</span>
+                    <span class="text-right">Nominal UMK 2026</span>
+                  </div>
+
+                  <!-- Daftar 142 Kabupaten/Kota -->
+                  <div
+                    id="calc-dd-list"
+                    role="listbox"
+                    aria-label="Daftar 142 UMK Kabupaten/Kota 2026"
+                    class="max-h-[290px] overflow-y-auto divide-y divide-[#d7d6cf]/50"
+                  >
+                    {REGION_WAGE_BENCHMARKS.map((reg) => {
+                      const isSelected = reg.id === defaultRegion.id;
+                      const formattedExact = formatExactRupiah(reg.umkExact);
+                      return (
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected ? 'true' : 'false'}
+                          data-id={reg.id}
+                          data-no={reg.no}
+                          data-city={reg.city}
+                          data-province={reg.province}
+                          data-query={reg.searchQuery}
+                          data-umk={reg.umk2026}
+                          data-umk-exact={formattedExact}
+                          data-sk={reg.skReference}
+                          data-living={reg.livingCostSingle}
+                          data-rent={reg.rentEstimate}
+                          data-food={reg.foodEstimate}
+                          data-transport={reg.transportUtilityEstimate}
+                          data-zone={reg.zoneLabel}
+                          data-search={`${reg.city} ${reg.province} ${reg.zoneLabel}`.toLowerCase()}
+                          class={`calc-dd-option w-full px-4 py-2.5 flex items-center justify-between gap-3 transition cursor-pointer text-left hover:bg-[#f0f2ff] focus:bg-[#f0f2ff] outline-none ${
+                            isSelected ? 'bg-[#f0f2ff]/80' : 'bg-white'
+                          }`}
+                        >
+                          <!-- RATA KIRI: Nama Kota/Kabupaten & Provinsi -->
+                          <span class="min-w-0 flex-1 text-left">
+                            <span class="block text-xs sm:text-sm font-bold text-[#101010] truncate">
+                              {reg.city}
+                            </span>
+                            <span class="block text-[11px] font-medium text-[#55544f] truncate">
+                              {reg.province} · {reg.zoneLabel}
+                            </span>
+                          </span>
+
+                          <!-- RATA KANAN: Nominal UMK 2026 Presisi -->
+                          <span class="shrink-0 text-right tabular-nums">
+                            <span class="block text-xs sm:text-sm font-extrabold text-[#101010] tabular-nums">
+                              {formattedExact}
+                            </span>
+                            <span class="block text-[10px] font-semibold text-[#55544f] tabular-nums">
+                              KHL Rp {reg.livingCostSingle.toLocaleString('id-ID')}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div id="calc-dd-empty" class="hidden p-5 text-center text-xs text-[#55544f] font-medium">
+                    Kabupaten/Kota tidak ditemukan. Coba kata kunci lain.
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                id="btn-apply-umk"
+                class="sm:col-span-4 min-h-[48px] px-4 py-2.5 rounded-xl bg-[#f4f3ee] hover:bg-[#101010] text-[#101010] hover:text-white border border-[#d7d6cf] hover:border-[#101010] text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-[0.98]"
+              >
+                <span>Gunakan Angka UMK</span>
+              </button>
+            </div>
+            <p class="text-[11px] text-[#55544f] mt-1.5 font-medium">
+              Standar UMK 2026 mengacu pada Keputusan Gubernur/Walikota masing-masing daerah dan menjadi batas upah minimum resmi.
+            </p>
+          </div>
+
+          <!-- Baris 2: Input Gaji Pokok + Tunjangan Tetap -->
+          <div class="pt-4 border-t border-[#d7d6cf]/70">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <label for="calc-gross-input" class="text-xs sm:text-sm font-bold text-[#101010]">
+                2. Gaji Pokok &amp; Tunjangan Tetap (Per Bulan)
+              </label>
+              <span class="text-[11px] font-medium text-[#55544f]">Dasar hitung BPJS &amp; PPh 21</span>
+            </div>
+
+            <div class="relative flex items-center">
+              <span class="absolute left-4 text-sm sm:text-base font-extrabold text-[#55544f] select-none pointer-events-none">
+                Rp
+              </span>
+              <input
+                type="text"
+                id="calc-gross-input"
+                inputmode="numeric"
+                value={defaultRegion.umk2026.toLocaleString('id-ID')}
+                aria-label="Nominal Gaji Pokok dan Tunjangan Tetap dalam Rupiah"
+                class="w-full min-h-[52px] pl-12 pr-4 py-3 rounded-xl bg-[#f9f8f5] border border-[#d7d6cf] focus:border-[#1738D1] focus:bg-white text-lg sm:text-xl font-extrabold text-[#101010] tabular-nums outline-none transition focus-visible:ring-2 focus-visible:ring-[#1738D1]"
+              />
+            </div>
+
+            <!-- Range Slider Halus -->
+            <div class="mt-3">
+              <label for="calc-gross-slider" class="sr-only">Geser nominal gaji kotor</label>
+              <input
+                type="range"
+                id="calc-gross-slider"
+                min="2000000"
+                max="35000000"
+                step="100000"
+                value={String(defaultRegion.umk2026)}
+                class="w-full h-2 bg-[#e5e4dc] rounded-lg appearance-none cursor-pointer accent-[#1738D1]"
+              />
+              <div class="flex justify-between text-[11px] font-semibold text-[#55544f] tabular-nums mt-1">
+                <span>Rp 2 Jt</span>
+                <span>Rp 10 Jt</span>
+                <span>Rp 20 Jt</span>
+                <span>Rp 35 Jt</span>
+              </div>
+            </div>
+
+            <!-- Quick Preset Nominal Buttons (Min 44px touch target) -->
+            <div class="mt-3.5">
+              <span class="text-[11px] font-bold text-[#55544f] block mb-2">Pilihan Cepat Gaji Kotor:</span>
+              <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                <button
+                  type="button"
+                  data-preset="umk"
+                  class="calc-preset-btn min-h-[44px] px-2.5 py-2 rounded-xl border border-[#1738D1] bg-[#f0f2ff] text-xs font-bold text-[#1738D1] transition cursor-pointer active:scale-[0.98]"
+                >
+                  Sesuai UMK
+                </button>
+                <button
+                  type="button"
+                  data-preset="4500000"
+                  class="calc-preset-btn min-h-[44px] px-2.5 py-2 rounded-xl border border-[#d7d6cf] bg-white hover:border-[#1738D1] hover:text-[#1738D1] text-xs font-bold text-[#101010] tabular-nums transition cursor-pointer active:scale-[0.98]"
+                >
+                  Rp 4,5 Jt
+                </button>
+                <button
+                  type="button"
+                  data-preset="6000000"
+                  class="calc-preset-btn min-h-[44px] px-2.5 py-2 rounded-xl border border-[#d7d6cf] bg-white hover:border-[#1738D1] hover:text-[#1738D1] text-xs font-bold text-[#101010] tabular-nums transition cursor-pointer active:scale-[0.98]"
+                >
+                  Rp 6 Jt
+                </button>
+                <button
+                  type="button"
+                  data-preset="8000000"
+                  class="calc-preset-btn min-h-[44px] px-2.5 py-2 rounded-xl border border-[#d7d6cf] bg-white hover:border-[#1738D1] hover:text-[#1738D1] text-xs font-bold text-[#101010] tabular-nums transition cursor-pointer active:scale-[0.98]"
+                >
+                  Rp 8 Jt
+                </button>
+                <button
+                  type="button"
+                  data-preset="10000000"
+                  class="calc-preset-btn min-h-[44px] px-2.5 py-2 rounded-xl border border-[#d7d6cf] bg-white hover:border-[#1738D1] hover:text-[#1738D1] text-xs font-bold text-[#101010] tabular-nums transition cursor-pointer active:scale-[0.98]"
+                >
+                  Rp 10 Jt
+                </button>
+                <button
+                  type="button"
+                  data-preset="15000000"
+                  class="calc-preset-btn min-h-[44px] px-2.5 py-2 rounded-xl border border-[#d7d6cf] bg-white hover:border-[#1738D1] hover:text-[#1738D1] text-xs font-bold text-[#101010] tabular-nums transition cursor-pointer active:scale-[0.98]"
+                >
+                  Rp 15 Jt
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Baris 3: Tunjangan Tidak Tetap / Insentif Bulanan -->
+          <div class="pt-4 border-t border-[#d7d6cf]/70">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <label for="calc-allowance-input" class="text-xs sm:text-sm font-bold text-[#101010]">
+                3. Tunjangan Tidak Tetap / Insentif (Opsional)
+              </label>
+              <span class="text-[11px] font-medium text-[#55544f]">Uang makan/transport kehadiran, komisi</span>
+            </div>
+
+            <div class="relative flex items-center">
+              <span class="absolute left-4 text-sm font-bold text-[#55544f] select-none pointer-events-none">
+                Rp
+              </span>
+              <input
+                type="text"
+                id="calc-allowance-input"
+                inputmode="numeric"
+                value="0"
+                aria-label="Nominal Tunjangan Tidak Tetap atau Insentif dalam Rupiah"
+                class="w-full min-h-[46px] pl-12 pr-4 py-2.5 rounded-xl bg-[#f9f8f5] border border-[#d7d6cf] focus:border-[#1738D1] focus:bg-white text-sm sm:text-base font-bold text-[#101010] tabular-nums outline-none transition focus-visible:ring-2 focus-visible:ring-[#1738D1]"
+              />
+            </div>
+            <p class="text-[11px] text-[#55544f] mt-1.5 font-medium">
+              Tunjangan tidak tetap menambah penghasilan bruto kena pajak PPh 21, namun tidak menjadi dasar potongan iuran BPJS.
+            </p>
+          </div>
+
+          <!-- Baris 4: Status PTKP & Skema Pemotongan -->
+          <div class="pt-4 border-t border-[#d7d6cf]/70 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Status PTKP -->
+            <div>
+              <label for="calc-ptkp-select" class="text-xs sm:text-sm font-bold text-[#101010] block mb-2">
+                4. Status Perkawinan &amp; Tanggungan (PTKP)
+              </label>
+              <div class="relative">
+                <select
+                  id="calc-ptkp-select"
+                  class="w-full min-h-[46px] pl-3.5 pr-9 py-2.5 rounded-xl bg-[#f9f8f5] border border-[#d7d6cf] hover:border-[#101010] focus:border-[#1738D1] focus:bg-white text-xs sm:text-sm font-bold text-[#101010] outline-none transition appearance-none cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1738D1]"
+                >
+                  <option value="TK/0" data-ter="A">TK/0 - Lajang, 0 Tanggungan (TER A)</option>
+                  <option value="TK/1" data-ter="A">TK/1 - Lajang, 1 Tanggungan (TER A)</option>
+                  <option value="K/0" data-ter="A">K/0 - Menikah, 0 Tanggungan (TER A)</option>
+                  <option value="TK/2" data-ter="B">TK/2 - Lajang, 2 Tanggungan (TER B)</option>
+                  <option value="TK/3" data-ter="B">TK/3 - Lajang, 3 Tanggungan (TER B)</option>
+                  <option value="K/1" data-ter="B">K/1 - Menikah, 1 Tanggungan (TER B)</option>
+                  <option value="K/2" data-ter="B">K/2 - Menikah, 2 Tanggungan (TER B)</option>
+                  <option value="K/3" data-ter="C">K/3 - Menikah, 3 Tanggungan (TER C)</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-[#55544f]">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Skema Pemotongan Pajak -->
+            <div>
+              <span class="text-xs sm:text-sm font-bold text-[#101010] block mb-2">
+                5. Skema Kontrak Gaji
+              </span>
+              <div class="grid grid-cols-2 gap-2" role="group" aria-label="Pilih skema pemotongan gaji">
+                <button
+                  type="button"
+                  id="scheme-gross-btn"
+                  data-scheme="gross"
+                  aria-pressed="true"
+                  class="calc-scheme-btn min-h-[46px] px-3 py-2 rounded-xl border border-[#1738D1] bg-[#f0f2ff] text-[#1738D1] text-xs font-bold transition cursor-pointer"
+                >
+                  Potong Gaji (Gross)
+                </button>
+                <button
+                  type="button"
+                  id="scheme-net-btn"
+                  data-scheme="net"
+                  aria-pressed="false"
+                  class="calc-scheme-btn min-h-[46px] px-3 py-2 rounded-xl border border-[#d7d6cf] bg-[#f9f8f5] text-[#55544f] hover:text-[#101010] text-xs font-bold transition cursor-pointer"
+                >
+                  Terima Bersih (Net)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Baris 5: Komponen Kepesertaan BPJS -->
+          <div class="pt-4 border-t border-[#d7d6cf]/70">
+            <span class="text-xs font-bold text-[#101010] block mb-2.5">
+              Komponen Kepesertaan BPJS Karyawan:
+            </span>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <label class="min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#d7d6cf] bg-[#f9f8f5] hover:border-[#101010] flex items-center gap-2.5 cursor-pointer transition select-none">
+                <input
+                  type="checkbox"
+                  id="chk-bpjs-jht"
+                  checked
+                  class="w-4 h-4 rounded accent-[#1738D1] cursor-pointer shrink-0"
+                />
+                <span class="text-xs font-bold text-[#101010]">
+                  BPJS TK - JHT <span class="text-[#55544f] font-semibold">(2%)</span>
+                </span>
+              </label>
+
+              <label class="min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#d7d6cf] bg-[#f9f8f5] hover:border-[#101010] flex items-center gap-2.5 cursor-pointer transition select-none">
+                <input
+                  type="checkbox"
+                  id="chk-bpjs-jp"
+                  checked
+                  class="w-4 h-4 rounded accent-[#1738D1] cursor-pointer shrink-0"
+                />
+                <span class="text-xs font-bold text-[#101010]">
+                  BPJS TK - JP <span class="text-[#55544f] font-semibold">(1%)</span>
+                </span>
+              </label>
+
+              <label class="min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#d7d6cf] bg-[#f9f8f5] hover:border-[#101010] flex items-center gap-2.5 cursor-pointer transition select-none">
+                <input
+                  type="checkbox"
+                  id="chk-bpjs-kes"
+                  checked
+                  class="w-4 h-4 rounded accent-[#1738D1] cursor-pointer shrink-0"
+                />
+                <span class="text-xs font-bold text-[#101010]">
+                  BPJS Kesehatan <span class="text-[#55544f] font-semibold">(1%)</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- KARTU 2: ANALISIS DAYA BELI & STANDAR UPAH RIIL WILAYAH -->
+        <div class="bg-white rounded-[20px] sm:rounded-[24px] border border-[#d7d6cf] p-5 sm:p-7 shadow-[0_4px_20px_-2px_rgba(16,16,16,0.04)] space-y-5">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#1738D1] block mb-1">
+                Benchmark Daya Beli Daerah
+              </span>
+              <h3 class="text-base sm:text-lg font-bold text-[#101010]">
+                Analisis Upah Riil di <span id="benchmark-city-name">{defaultRegion.city}</span>
+              </h3>
+              <p class="text-[11px] font-medium text-[#55544f] mt-0.5">
+                Provinsi <span id="benchmark-prov-name" class="font-bold text-[#101010]">{defaultRegion.province}</span> · Dasar Hukum: <span id="benchmark-sk-ref" class="font-semibold text-[#101010]">{defaultRegion.skReference}</span>
+              </p>
+            </div>
+            <span
+              id="benchmark-status-badge"
+              class="px-3 py-1 rounded-full text-xs font-bold bg-[#ecfdf5] text-[#065f46] border border-[#a7f3d0] tabular-nums"
+            >
+              Sesuai Standar UMK
+            </span>
+          </div>
+
+          <!-- 3 Metrik Utama Perbandingan Wilayah -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="p-3.5 rounded-xl bg-[#f9f8f5] border border-[#d7d6cf]/80">
+              <span class="text-[11px] font-semibold text-[#55544f] block mb-1">Patokan UMK 2026</span>
+              <div id="benchmark-umk-val" class="text-sm sm:text-base font-extrabold text-[#101010] tabular-nums">
+                {formatExactRupiah(defaultRegion.umkExact)}
+              </div>
+              <span id="benchmark-umk-diff" class="text-[11px] font-bold text-[#065f46] tabular-nums mt-0.5 block">
+                Sesuai standar UMK
+              </span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#f9f8f5] border border-[#d7d6cf]/80">
+              <span class="text-[11px] font-semibold text-[#55544f] block mb-1">Total Biaya Hidup Lajang</span>
+              <div id="benchmark-khl-val" class="text-sm sm:text-base font-extrabold text-[#101010] tabular-nums">
+                Rp {defaultRegion.livingCostSingle.toLocaleString('id-ID')}
+              </div>
+              <span id="benchmark-khl-note" class="text-[11px] font-medium text-[#55544f] mt-0.5 block">
+                Estimasi kos, makan &amp; transport
+              </span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#f9f8f5] border border-[#d7d6cf]/80">
+              <span class="text-[11px] font-semibold text-[#55544f] block mb-1">Sisa Ruang Finansial</span>
+              <div id="benchmark-surplus-val" class="text-sm sm:text-base font-extrabold text-[#065f46] tabular-nums">
+                +Rp 653.641
+              </div>
+              <span id="benchmark-surplus-note" class="text-[11px] font-medium text-[#55544f] mt-0.5 block">
+                Selisih THP vs Biaya Hidup
+              </span>
+            </div>
+          </div>
+
+          <!-- Rincian Riil Komponen Biaya Hidup Lajang (Kos, Makan, Transportasi) -->
+          <div class="p-4 rounded-xl bg-[#f9f8f5] border border-[#d7d6cf]/80 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#101010]">
+                Rincian Estimasi Pengeluaran Lajang di <span id="benchmark-breakdown-city">{defaultRegion.city}</span>
+              </h4>
+              <span id="benchmark-zone-pill" class="text-[11px] font-semibold text-[#55544f]">
+                {defaultRegion.zoneLabel}
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div class="p-3 rounded-lg bg-white border border-[#d7d6cf]/80 flex items-center justify-between sm:block">
+                <span class="text-[11px] font-semibold text-[#55544f] block">1. Sewa Kos Lajang</span>
+                <strong id="benchmark-rent-val" class="text-xs sm:text-sm font-extrabold text-[#101010] tabular-nums mt-0.5 block">
+                  Rp {defaultRegion.rentEstimate.toLocaleString('id-ID')} / bln
+                </strong>
+              </div>
+
+              <div class="p-3 rounded-lg bg-white border border-[#d7d6cf]/80 flex items-center justify-between sm:block">
+                <span class="text-[11px] font-semibold text-[#55544f] block">2. Makan Harian (3x)</span>
+                <strong id="benchmark-food-val" class="text-xs sm:text-sm font-extrabold text-[#101010] tabular-nums mt-0.5 block">
+                  Rp {defaultRegion.foodEstimate.toLocaleString('id-ID')} / bln
+                </strong>
+              </div>
+
+              <div class="p-3 rounded-lg bg-white border border-[#d7d6cf]/80 flex items-center justify-between sm:block">
+                <span class="text-[11px] font-semibold text-[#55544f] block">3. Transport &amp; Utilitas</span>
+                <strong id="benchmark-transport-val" class="text-xs sm:text-sm font-extrabold text-[#101010] tabular-nums mt-0.5 block">
+                  Rp {defaultRegion.transportUtilityEstimate.toLocaleString('id-ID')} / bln
+                </strong>
+              </div>
+            </div>
+          </div>
+
+          <p id="benchmark-summary-text" class="text-xs sm:text-sm text-[#55544f] leading-relaxed font-medium bg-[#f9f8f5] p-3.5 rounded-xl border border-[#d7d6cf]/70">
+            Pendapatan bersih ini melampaui estimasi biaya hidup lajang di {defaultRegion.city} dan menyisakan ruang tabungan bulanan yang sehat.
+          </p>
+
+          <!-- Rekomendasi Alokasi Gaji Bersih 50 / 30 / 20 -->
+          <div class="pt-3 border-t border-[#d7d6cf]/70">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="text-xs sm:text-sm font-bold text-[#101010]">
+                Rekomendasi Alokasi Take-Home Pay (50 / 30 / 20)
+              </h4>
+              <span class="text-[11px] font-medium text-[#55544f]">Dari gaji bersih diterima</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div class="p-3 rounded-xl border border-[#d7d6cf] bg-white">
+                <div class="flex items-center justify-between text-xs font-bold text-[#101010] mb-1">
+                  <span>Kebutuhan Pokok</span>
+                  <span class="px-2 py-0.5 rounded-full bg-[#f4f3ee] text-[10px]">50%</span>
+                </div>
+                <div id="alloc-needs" class="text-sm font-extrabold text-[#101010] tabular-nums">
+                  Rp 1.776.820
+                </div>
+                <span class="text-[11px] text-[#55544f] block mt-0.5">Kos, makan harian, listrik</span>
+              </div>
+
+              <div class="p-3 rounded-xl border border-[#d7d6cf] bg-white">
+                <div class="flex items-center justify-between text-xs font-bold text-[#101010] mb-1">
+                  <span>Operasional &amp; Sosial</span>
+                  <span class="px-2 py-0.5 rounded-full bg-[#f4f3ee] text-[10px]">30%</span>
+                </div>
+                <div id="alloc-wants" class="text-sm font-extrabold text-[#101010] tabular-nums">
+                  Rp 1.066.092
+                </div>
+                <span class="text-[11px] text-[#55544f] block mt-0.5">Transport, kuota, penunjang kerja</span>
+              </div>
+
+              <div class="p-3 rounded-xl border border-[#d7d6cf] bg-white">
+                <div class="flex items-center justify-between text-xs font-bold text-[#101010] mb-1">
+                  <span>Tabungan &amp; Darurat</span>
+                  <span class="px-2 py-0.5 rounded-full bg-[#ecfdf5] text-[#065f46] text-[10px]">20%</span>
+                </div>
+                <div id="alloc-savings" class="text-sm font-extrabold text-[#065f46] tabular-nums">
+                  Rp 710.728
+                </div>
+                <span class="text-[11px] text-[#55544f] block mt-0.5">Dana darurat &amp; sertifikasi</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- PANEL KANAN: SLIP RINCIAN TAKE-HOME PAY + ADS SPACE (5 KOLOM, STICKY) -->
+      <div class="lg:col-span-5 lg:sticky lg:top-24 min-w-0 space-y-5">
+        <div
+          class="group/cutout bg-white rounded-[20px] sm:rounded-[24px] border border-[#101010] p-5 sm:p-7 shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] relative overflow-hidden"
+          data-slot="cutout-card"
+        >
+          <!-- Top-Right Cutout Pin Badge -->
+          <div
+            class="absolute top-0 right-0 bg-[#1738D1] text-white rounded-bl-[14px] px-3.5 h-[28px] flex items-center text-[10px] font-bold shadow-xs z-10"
+            data-slot="cutout-card-pin"
+          >
+            <span id="slip-ter-badge" class="leading-none">TER Kategori A</span>
+            <CutoutCorner class="text-[#1738D1] absolute top-0 -left-[14px] -rotate-90 pointer-events-none" size={14} />
+            <CutoutCorner class="text-[#1738D1] absolute right-0 -bottom-[14px] -rotate-90 pointer-events-none" size={14} />
+          </div>
+
+          <!-- Header Slip Gaji Bersih -->
+          <div class="pb-5 border-b border-[#d7d6cf]">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#55544f] block mb-1">
+              Estimasi Take-Home Pay (Gaji Bersih)
+            </span>
+            <div
+              id="res-thp-monthly"
+              class="text-3xl sm:text-4xl font-extrabold text-[#101010] tracking-tight tabular-nums select-all"
+            >
+              Rp 3.553.641
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2 mt-2 text-xs text-[#55544f] font-medium">
+              <span>
+                Setara <strong id="res-thp-yearly" class="text-[#101010] font-bold tabular-nums">Rp 42.643.692</strong> / tahun
+              </span>
+              <span
+                id="res-thp-ratio-pill"
+                class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#ecfdf5] text-[#065f46] border border-[#a7f3d0] tabular-nums"
+              >
+                96,0% dari Bruto
+              </span>
+            </div>
+
+            <!-- Bar Proporsi Visual -->
+            <div class="mt-4">
+              <div class="w-full h-3 rounded-full bg-[#f4f3ee] overflow-hidden flex border border-[#d7d6cf]/80" role="img" aria-label="Proporsi gaji bersih terhadap potongan">
+                <div id="bar-thp" class="h-full bg-[#1738D1] transition-all duration-300" style="width: 96%"></div>
+                <div id="bar-bpjs" class="h-full bg-[#f59e0b] transition-all duration-300" style="width: 4%"></div>
+                <div id="bar-tax" class="h-full bg-[#e11d48] transition-all duration-300" style="width: 0%"></div>
+              </div>
+              <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold text-[#55544f] mt-2 tabular-nums">
+                <span class="inline-flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-xs bg-[#1738D1] inline-block"></span>
+                  <span>Bersih: <strong id="legend-thp-pct" class="text-[#101010]">96,0%</strong></span>
+                </span>
+                <span class="inline-flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-xs bg-[#f59e0b] inline-block"></span>
+                  <span>BPJS: <strong id="legend-bpjs-pct" class="text-[#101010]">4,0%</strong></span>
+                </span>
+                <span class="inline-flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-xs bg-[#e11d48] inline-block"></span>
+                  <span>PPh 21: <strong id="legend-tax-pct" class="text-[#101010]">0,0%</strong></span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rincian Penghasilan Bruto -->
+          <div class="py-4 border-b border-[#d7d6cf] space-y-2 text-xs">
+            <div class="text-[11px] font-extrabold uppercase tracking-wider text-[#101010] mb-1">
+              Komponen Penghasilan Kotor
+            </div>
+            <div class="flex items-center justify-between text-[#55544f] font-medium">
+              <span>Gaji Pokok &amp; Tunjangan Tetap</span>
+              <span id="res-base-salary" class="font-bold text-[#101010] tabular-nums">Rp 3.701.709</span>
+            </div>
+            <div class="flex items-center justify-between text-[#55544f] font-medium">
+              <span>Tunjangan Tidak Tetap / Insentif</span>
+              <span id="res-allowance" class="font-bold text-[#101010] tabular-nums">Rp 0</span>
+            </div>
+            <div id="row-net-subsidy" class="hidden items-center justify-between text-[#065f46] font-semibold">
+              <span>Tunjangan Pajak &amp; BPJS (Gross-Up Kantor)</span>
+              <span id="res-net-subsidy" class="font-bold tabular-nums">+Rp 0</span>
+            </div>
+            <div class="flex items-center justify-between pt-1.5 border-t border-dashed border-[#d7d6cf] font-bold text-[#101010]">
+              <span>Total Penghasilan Bruto</span>
+              <span id="res-total-gross" class="tabular-nums">Rp 3.701.709</span>
+            </div>
+          </div>
+
+          <!-- Rincian Potongan Karyawan -->
+          <div class="py-4 border-b border-[#d7d6cf] space-y-2.5 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#101010]">
+                Rincian Potongan Karyawan
+              </span>
+              <span id="res-scheme-note" class="text-[11px] font-semibold text-[#55544f]">
+                Dipotong dari gaji
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between text-[#55544f] font-medium">
+              <span>BPJS Ketenagakerjaan - JHT (2%)</span>
+              <span id="res-deduct-jht" class="font-bold text-[#101010] tabular-nums">-Rp 74.034</span>
+            </div>
+
+            <div class="flex items-center justify-between text-[#55544f] font-medium">
+              <div>
+                <span>BPJS Ketenagakerjaan - JP (1%)</span>
+                <span class="block text-[10px] text-[#55544f]">Maks. dasar upah Rp 10.547.400</span>
+              </div>
+              <span id="res-deduct-jp" class="font-bold text-[#101010] tabular-nums">-Rp 37.017</span>
+            </div>
+
+            <div class="flex items-center justify-between text-[#55544f] font-medium">
+              <div>
+                <span>BPJS Kesehatan (1%)</span>
+                <span class="block text-[10px] text-[#55544f]">Maks. dasar upah Rp 12.000.000</span>
+              </div>
+              <span id="res-deduct-kes" class="font-bold text-[#101010] tabular-nums">-Rp 37.017</span>
+            </div>
+
+            <div class="flex items-center justify-between text-[#55544f] font-medium">
+              <div>
+                <span>Pajak PPh 21 Bulanan (<span id="res-ter-rate-label">TER 0%</span>)</span>
+                <span id="res-ter-ptkp-label" class="block text-[10px] text-[#55544f]">Status TK/0 · Kategori A</span>
+              </div>
+              <span id="res-deduct-tax" class="font-bold text-[#065f46] tabular-nums">Rp 0 (Bebas Pajak)</span>
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-dashed border-[#d7d6cf] font-extrabold text-[#101010]">
+              <span>Total Potongan Bulanan</span>
+              <span id="res-total-deductions" class="text-[#b91c1c] tabular-nums">-Rp 148.068</span>
+            </div>
+          </div>
+
+          <!-- Accordion: Iuran yang Ditanggung Perusahaan (Transparansi Penuh) -->
+          <details class="group py-3.5 border-b border-[#d7d6cf] text-xs">
+            <summary class="flex items-center justify-between font-bold text-[#101010] cursor-pointer list-none select-none min-h-[36px]">
+              <span>Lihat Iuran yang Dibayar Perusahaan (+10,24%)</span>
+              <svg class="w-4 h-4 text-[#55544f] transition-transform group-open:rotate-180 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+            <div class="mt-3 pt-2.5 border-t border-[#d7d6cf]/60 space-y-2 text-[#55544f]">
+              <p class="text-[11px] leading-relaxed mb-2">
+                Selain gaji pokokmu, perusahaan wajib menyetorkan iuran jaminan sosial berikut tanpa memotong gajimu:
+              </p>
+              <div class="flex justify-between">
+                <span>BPJS Kesehatan Pemberi Kerja (4%)</span>
+                <span id="res-comp-kes" class="font-bold text-[#101010] tabular-nums">Rp 148.068</span>
+              </div>
+              <div class="flex justify-between">
+                <span>BPJS TK - JHT Pemberi Kerja (3,7%)</span>
+                <span id="res-comp-jht" class="font-bold text-[#101010] tabular-nums">Rp 136.963</span>
+              </div>
+              <div class="flex justify-between">
+                <span>BPJS TK - JP Pemberi Kerja (2%)</span>
+                <span id="res-comp-jp" class="font-bold text-[#101010] tabular-nums">Rp 74.034</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Jaminan Kecelakaan Kerja &amp; Kematian (0,54%)</span>
+                <span id="res-comp-jkk" class="font-bold text-[#101010] tabular-nums">Rp 19.989</span>
+              </div>
+              <div class="flex justify-between pt-1.5 border-t border-dashed border-[#d7d6cf] font-bold text-[#101010]">
+                <span>Total Pengeluaran Perusahaan (CTC)</span>
+                <span id="res-comp-ctc" class="text-[#1738D1] tabular-nums">Rp 4.080.763</span>
+              </div>
+            </div>
+          </details>
+
+          <!-- Tombol Aksi (Min 44px touch target) -->
+          <div class="pt-5 space-y-2.5">
+            <a
+              id="btn-explore-city-jobs"
+              href={`/lowongan?loc=${encodeURIComponent(defaultRegion.searchQuery)}`}
+              class="w-full min-h-[46px] px-5 py-3 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs sm:text-sm font-bold text-center transition flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(23,56,209,0.25)] active:scale-[0.98]"
+            >
+              <span>Lihat Loker Aktif di <span id="btn-city-label">{defaultRegion.city}</span></span>
+            </a>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                id="btn-copy-slip"
+                class="min-h-[44px] px-4 py-2.5 rounded-full bg-[#f4f3ee] hover:bg-[#101010] text-[#101010] hover:text-white border border-[#d7d6cf] hover:border-[#101010] text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
+              >
+                <span id="btn-copy-slip-text">Salin Rincian Gaji</span>
+              </button>
+
+              <a
+                href={TRACKER_URL}
+                class="min-h-[44px] px-4 py-2.5 rounded-full bg-white hover:border-[#101010] text-[#101010] border border-[#d7d6cf] text-xs font-bold transition flex items-center justify-center gap-1.5 active:scale-[0.98]"
+              >
+                <span>Catat di Tracker</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADS SPACE SIDEBAR / MREC DI BAWAH SLIP KALKULATOR -->
+        <AdSlot
+          type="mrec"
+          className="!my-0"
+          note="Susun CV berstandar sistem rekruter agar negosiasi gaji pertamamu lebih meyakinkan."
+        />
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    const CAP_BPJS_KES = 12000000;
+    const CAP_BPJS_JP = 10547400;
+
+    const TER_TABLE_A = [
+      { max: 5400000, rate: 0 },
+      { max: 5650000, rate: 0.25 },
+      { max: 5950000, rate: 0.5 },
+      { max: 6300000, rate: 0.75 },
+      { max: 6750000, rate: 1.0 },
+      { max: 7500000, rate: 1.25 },
+      { max: 8550000, rate: 1.5 },
+      { max: 9650000, rate: 1.75 },
+      { max: 10050000, rate: 2.0 },
+      { max: 10350000, rate: 2.25 },
+      { max: 10700000, rate: 2.5 },
+      { max: 11050000, rate: 3.0 },
+      { max: 11600000, rate: 3.5 },
+      { max: 12500000, rate: 4.0 },
+      { max: 13750000, rate: 5.0 },
+      { max: 15100000, rate: 6.0 },
+      { max: 16950000, rate: 7.0 },
+      { max: 19750000, rate: 8.0 },
+      { max: 24150000, rate: 9.0 },
+      { max: 26450000, rate: 10.0 },
+      { max: 28000000, rate: 11.0 },
+      { max: 30050000, rate: 12.0 },
+      { max: 32400000, rate: 13.0 },
+      { max: 35400000, rate: 14.0 },
+      { max: 39100000, rate: 15.0 },
+      { max: 43850000, rate: 16.0 },
+      { max: 47800000, rate: 17.0 },
+      { max: 51400000, rate: 18.0 },
+      { max: 56300000, rate: 19.0 },
+      { max: Infinity, rate: 20.0 },
+    ];
+
+    const TER_TABLE_B = [
+      { max: 6200000, rate: 0 },
+      { max: 6500000, rate: 0.25 },
+      { max: 6850000, rate: 0.5 },
+      { max: 7300000, rate: 0.75 },
+      { max: 9200000, rate: 1.0 },
+      { max: 10750000, rate: 1.5 },
+      { max: 11250000, rate: 2.0 },
+      { max: 11600000, rate: 2.5 },
+      { max: 12600000, rate: 3.0 },
+      { max: 13600000, rate: 4.0 },
+      { max: 14950000, rate: 5.0 },
+      { max: 16400000, rate: 6.0 },
+      { max: 18450000, rate: 7.0 },
+      { max: 21850000, rate: 8.0 },
+      { max: 26000000, rate: 9.0 },
+      { max: 27700000, rate: 10.0 },
+      { max: 29350000, rate: 11.0 },
+      { max: 31450000, rate: 12.0 },
+      { max: 33950000, rate: 13.0 },
+      { max: 37100000, rate: 14.0 },
+      { max: 41100000, rate: 15.0 },
+      { max: Infinity, rate: 16.0 },
+    ];
+
+    const TER_TABLE_C = [
+      { max: 6600000, rate: 0 },
+      { max: 6950000, rate: 0.25 },
+      { max: 7350000, rate: 0.5 },
+      { max: 7800000, rate: 0.75 },
+      { max: 8850000, rate: 1.0 },
+      { max: 9800000, rate: 1.25 },
+      { max: 10950000, rate: 1.5 },
+      { max: 11200000, rate: 1.75 },
+      { max: 12050000, rate: 2.0 },
+      { max: 12950000, rate: 3.0 },
+      { max: 14150000, rate: 4.0 },
+      { max: 15550000, rate: 5.0 },
+      { max: 17050000, rate: 6.0 },
+      { max: 19500000, rate: 7.0 },
+      { max: 22700000, rate: 8.0 },
+      { max: 26600000, rate: 9.0 },
+      { max: 28100000, rate: 10.0 },
+      { max: 30100000, rate: 11.0 },
+      { max: 32600000, rate: 12.0 },
+      { max: 35400000, rate: 13.0 },
+      { max: 38900000, rate: 14.0 },
+      { max: Infinity, rate: 15.0 },
+    ];
+
+    function getTerRate(grossIncome, category) {
+      const table =
+        category === 'C'
+          ? TER_TABLE_C
+          : category === 'B'
+          ? TER_TABLE_B
+          : TER_TABLE_A;
+      for (let i = 0; i < table.length; i++) {
+        if (grossIncome <= table[i].max) {
+          return table[i].rate;
+        }
+      }
+      return 15.0;
+    }
+
+    function formatRupiah(num) {
+      return 'Rp ' + Math.round(num).toLocaleString('id-ID');
+    }
+
+    function formatInputThousands(num) {
+      return Math.max(0, Math.round(num)).toLocaleString('id-ID');
+    }
+
+    function parseNumericInput(val) {
+      if (!val) return 0;
+      const digits = String(val).replace(/[^0-9]/g, '');
+      return digits ? parseInt(digits, 10) : 0;
+    }
+
+    // Custom Dropdown DOM References
+    const dropdownRoot = document.getElementById('calc-region-dropdown-root');
+    const regionValueInput = document.getElementById('calc-region-value');
+    const regionTrigger = document.getElementById('calc-region-trigger');
+    const triggerCity = document.getElementById('calc-trigger-city');
+    const triggerProv = document.getElementById('calc-trigger-prov');
+    const triggerUmk = document.getElementById('calc-trigger-umk');
+    const triggerChevron = document.getElementById('calc-trigger-chevron');
+    const regionPopover = document.getElementById('calc-region-popover');
+    const ddSearch = document.getElementById('calc-dd-search');
+    const ddProvFilter = document.getElementById('calc-dd-prov-filter');
+    const ddOptions = document.querySelectorAll('.calc-dd-option');
+    const ddEmpty = document.getElementById('calc-dd-empty');
+
+    const regionZone = document.getElementById('calc-region-zone');
+    const btnApplyUmk = document.getElementById('btn-apply-umk');
+    const grossInput = document.getElementById('calc-gross-input');
+    const grossSlider = document.getElementById('calc-gross-slider');
+    const allowanceInput = document.getElementById('calc-allowance-input');
+    const ptkpSelect = document.getElementById('calc-ptkp-select');
+    const schemeGrossBtn = document.getElementById('scheme-gross-btn');
+    const schemeNetBtn = document.getElementById('scheme-net-btn');
+    const chkJht = document.getElementById('chk-bpjs-jht');
+    const chkJp = document.getElementById('chk-bpjs-jp');
+    const chkKes = document.getElementById('chk-bpjs-kes');
+    const presetBtns = document.querySelectorAll('.calc-preset-btn');
+
+    let currentScheme = 'gross';
+    let lastSummaryClipboard = '';
+
+    function getSelectedOptionEl() {
+      const currentId = regionValueInput ? regionValueInput.value : '';
+      for (let i = 0; i < ddOptions.length; i++) {
+        if (ddOptions[i].getAttribute('data-id') === currentId) {
+          return ddOptions[i];
+        }
+      }
+      return ddOptions[0] || null;
+    }
+
+    function getSelectedRegionData() {
+      const opt = getSelectedOptionEl();
+      if (!opt) return null;
+      return {
+        id: opt.getAttribute('data-id') || 'kota-semarang',
+        city: opt.getAttribute('data-city') || 'Kota Semarang',
+        province: opt.getAttribute('data-province') || 'Jawa Tengah',
+        query: opt.getAttribute('data-query') || 'Semarang',
+        umk: parseInt(opt.getAttribute('data-umk') || '3701709', 10),
+        umkExactFormatted: opt.getAttribute('data-umk-exact') || 'Rp 3.701.709',
+        sk: opt.getAttribute('data-sk') || '',
+        living: parseInt(opt.getAttribute('data-living') || '2900000', 10),
+        rent: parseInt(opt.getAttribute('data-rent') || '850000', 10),
+        food: parseInt(opt.getAttribute('data-food') || '1400000', 10),
+        transport: parseInt(opt.getAttribute('data-transport') || '650000', 10),
+        zone: opt.getAttribute('data-zone') || '',
+      };
+    }
+
+    function openDropdown() {
+      if (!regionPopover || !regionTrigger) return;
+      regionPopover.classList.remove('hidden');
+      regionTrigger.setAttribute('aria-expanded', 'true');
+      triggerChevron?.classList.add('rotate-180');
+      setTimeout(() => {
+        ddSearch?.focus();
+      }, 20);
+    }
+
+    function closeDropdown() {
+      if (!regionPopover || !regionTrigger) return;
+      regionPopover.classList.add('hidden');
+      regionTrigger.setAttribute('aria-expanded', 'false');
+      triggerChevron?.classList.remove('rotate-180');
+    }
+
+    function filterDropdownList() {
+      const q = (ddSearch ? ddSearch.value : '').trim().toLowerCase();
+      const prov = ddProvFilter ? ddProvFilter.value : '';
+      let visible = 0;
+
+      ddOptions.forEach((opt) => {
+        const hay = opt.getAttribute('data-search') || '';
+        const optProv = opt.getAttribute('data-province') || '';
+        const matchQ = !q || hay.includes(q);
+        const matchProv = !prov || optProv === prov;
+        if (matchQ && matchProv) {
+          opt.classList.remove('hidden');
+          opt.classList.add('flex');
+          visible++;
+        } else {
+          opt.classList.add('hidden');
+          opt.classList.remove('flex');
+        }
+      });
+
+      if (ddEmpty) {
+        if (visible === 0) {
+          ddEmpty.classList.remove('hidden');
+        } else {
+          ddEmpty.classList.add('hidden');
+        }
+      }
+    }
+
+    function selectRegionById(regionId, syncSalaryToUmk) {
+      if (!regionValueInput) return;
+      regionValueInput.value = regionId;
+
+      ddOptions.forEach((opt) => {
+        const isCurrent = opt.getAttribute('data-id') === regionId;
+        opt.setAttribute('aria-selected', isCurrent ? 'true' : 'false');
+        if (isCurrent) {
+          opt.classList.add('bg-[#f0f2ff]/80');
+          opt.classList.remove('bg-white');
+        } else {
+          opt.classList.remove('bg-[#f0f2ff]/80');
+          opt.classList.add('bg-white');
+        }
+      });
+
+      const region = getSelectedRegionData();
+      if (region) {
+        if (triggerCity) triggerCity.textContent = region.city;
+        if (triggerProv) triggerProv.textContent = region.province;
+        if (triggerUmk) triggerUmk.textContent = region.umkExactFormatted;
+        if (syncSalaryToUmk && grossInput) {
+          grossInput.value = formatInputThousands(region.umk);
+          if (grossSlider) grossSlider.value = String(region.umk);
+        }
+      }
+
+      closeDropdown();
+      recalculate();
+    }
+
+    regionTrigger?.addEventListener('click', () => {
+      const isOpen = regionTrigger.getAttribute('aria-expanded') === 'true';
+      if (isOpen) {
+        closeDropdown();
+      } else {
+        openDropdown();
+      }
+    });
+
+    ddSearch?.addEventListener('input', filterDropdownList);
+    ddProvFilter?.addEventListener('change', filterDropdownList);
+
+    ddOptions.forEach((opt) => {
+      opt.addEventListener('click', () => {
+        const id = opt.getAttribute('data-id');
+        if (id) selectRegionById(id, false);
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (dropdownRoot && !dropdownRoot.contains(e.target)) {
+        closeDropdown();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeDropdown();
+      }
+    });
+
+    function highlightActivePreset(baseSalary, umkVal) {
+      presetBtns.forEach((btn) => {
+        const presetAttr = btn.getAttribute('data-preset');
+        const targetVal = presetAttr === 'umk' ? umkVal : parseInt(presetAttr || '0', 10);
+        const isActive = Math.abs(baseSalary - targetVal) < 500;
+        if (isActive) {
+          btn.classList.add('border-[#1738D1]', 'bg-[#f0f2ff]', 'text-[#1738D1]');
+          btn.classList.remove('border-[#d7d6cf]', 'bg-white', 'bg-[#f9f8f5]', 'text-[#101010]');
+        } else {
+          btn.classList.remove('border-[#1738D1]', 'bg-[#f0f2ff]', 'text-[#1738D1]');
+          btn.classList.add('border-[#d7d6cf]', presetAttr === 'umk' ? 'bg-[#f9f8f5]' : 'bg-white', 'text-[#101010]');
+        }
+      });
+    }
+
+    function recalculate() {
+      const region = getSelectedRegionData();
+      if (!region) return;
+
+      const baseSalary = parseNumericInput(grossInput?.value);
+      const variableAllowance = parseNumericInput(allowanceInput?.value);
+      const totalInitialGross = baseSalary + variableAllowance;
+
+      const ptkpOpt = ptkpSelect?.options[ptkpSelect.selectedIndex];
+      const ptkpCode = ptkpOpt ? ptkpOpt.value : 'TK/0';
+      const terCategory = ptkpOpt ? ptkpOpt.getAttribute('data-ter') || 'A' : 'A';
+
+      const deductJht = chkJht?.checked ? Math.round(baseSalary * 0.02) : 0;
+      const deductJp = chkJp?.checked ? Math.round(Math.min(baseSalary, CAP_BPJS_JP) * 0.01) : 0;
+      const deductKes = chkKes?.checked ? Math.round(Math.min(baseSalary, CAP_BPJS_KES) * 0.01) : 0;
+      const totalEmployeeBpjs = deductJht + deductJp + deductKes;
+
+      const terRatePct = getTerRate(totalInitialGross, terCategory);
+      const deductTax = Math.round(totalInitialGross * (terRatePct / 100));
+
+      const totalDeductions = totalEmployeeBpjs + deductTax;
+
+      let takeHomePay = 0;
+      let netSubsidy = 0;
+      let effectiveGross = totalInitialGross;
+
+      if (currentScheme === 'net') {
+        takeHomePay = totalInitialGross;
+        netSubsidy = totalDeductions;
+        effectiveGross = totalInitialGross + netSubsidy;
+      } else {
+        takeHomePay = Math.max(0, totalInitialGross - totalDeductions);
+      }
+
+      const compKes = Math.round(Math.min(baseSalary, CAP_BPJS_KES) * 0.04);
+      const compJht = Math.round(baseSalary * 0.037);
+      const compJp = Math.round(Math.min(baseSalary, CAP_BPJS_JP) * 0.02);
+      const compJkkJkm = Math.round(baseSalary * 0.0054);
+      const totalCompanyContribution = compKes + compJht + compJp + compJkkJkm + netSubsidy;
+      const totalCtc = totalInitialGross + totalCompanyContribution;
+
+      // Update UI Wilayah & Benchmark Daya Beli Daerah
+      if (regionZone) regionZone.textContent = region.zone;
+      const elCityName = document.getElementById('benchmark-city-name');
+      if (elCityName) elCityName.textContent = region.city;
+
+      const elProvName = document.getElementById('benchmark-prov-name');
+      if (elProvName) elProvName.textContent = region.province;
+
+      const elSkRef = document.getElementById('benchmark-sk-ref');
+      if (elSkRef) elSkRef.textContent = region.sk;
+
+      const elBreakdownCity = document.getElementById('benchmark-breakdown-city');
+      if (elBreakdownCity) elBreakdownCity.textContent = region.city;
+
+      const elZonePill = document.getElementById('benchmark-zone-pill');
+      if (elZonePill) elZonePill.textContent = region.zone;
+
+      const elUmkVal = document.getElementById('benchmark-umk-val');
+      if (elUmkVal) elUmkVal.textContent = region.umkExactFormatted;
+
+      const diffFromUmk = baseSalary - region.umk;
+      const elUmkDiff = document.getElementById('benchmark-umk-diff');
+      if (elUmkDiff) {
+        if (Math.abs(diffFromUmk) < 500) {
+          elUmkDiff.textContent = 'Sesuai standar UMK daerah';
+          elUmkDiff.className = 'text-[11px] font-bold text-[#065f46] tabular-nums mt-0.5 block';
+        } else if (diffFromUmk > 0) {
+          elUmkDiff.textContent = '+' + formatRupiah(diffFromUmk) + ' di atas UMK';
+          elUmkDiff.className = 'text-[11px] font-bold text-[#065f46] tabular-nums mt-0.5 block';
+        } else {
+          elUmkDiff.textContent = '-' + formatRupiah(Math.abs(diffFromUmk)) + ' di bawah UMK';
+          elUmkDiff.className = 'text-[11px] font-bold text-[#b91c1c] tabular-nums mt-0.5 block';
+        }
+      }
+
+      const elKhlVal = document.getElementById('benchmark-khl-val');
+      if (elKhlVal) elKhlVal.textContent = formatRupiah(region.living);
+
+      const elRentVal = document.getElementById('benchmark-rent-val');
+      if (elRentVal) elRentVal.textContent = formatRupiah(region.rent) + ' / bln';
+
+      const elFoodVal = document.getElementById('benchmark-food-val');
+      if (elFoodVal) elFoodVal.textContent = formatRupiah(region.food) + ' / bln';
+
+      const elTransportVal = document.getElementById('benchmark-transport-val');
+      if (elTransportVal) elTransportVal.textContent = formatRupiah(region.transport) + ' / bln';
+
+      const surplus = takeHomePay - region.living;
+      const elSurplusVal = document.getElementById('benchmark-surplus-val');
+      if (elSurplusVal) {
+        if (surplus >= 0) {
+          elSurplusVal.textContent = '+' + formatRupiah(surplus);
+          elSurplusVal.className = 'text-sm sm:text-base font-extrabold text-[#065f46] tabular-nums';
+        } else {
+          elSurplusVal.textContent = '-' + formatRupiah(Math.abs(surplus));
+          elSurplusVal.className = 'text-sm sm:text-base font-extrabold text-[#b91c1c] tabular-nums';
+        }
+      }
+
+      // Badge & Ringkasan Daya Beli
+      const elStatusBadge = document.getElementById('benchmark-status-badge');
+      const elSummaryText = document.getElementById('benchmark-summary-text');
+
+      if (baseSalary < region.umk - 500) {
+        if (elStatusBadge) {
+          elStatusBadge.textContent = 'Di Bawah Standar UMK';
+          elStatusBadge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-[#fef2f2] text-[#991b1b] border border-[#fecaca] tabular-nums';
+        }
+        if (elSummaryText) {
+          elSummaryText.textContent =
+            'Gaji pokok ini berada di bawah patokan UMK ' +
+            region.city +
+            ' (' +
+            region.umkExactFormatted +
+            '). Pastikan apakah posisi ini merupakan paruh waktu, magang, atau skala usaha mikro yang memiliki ketentuan tersendiri.';
+        }
+      } else if (surplus >= region.living * 0.2) {
+        if (elStatusBadge) {
+          elStatusBadge.textContent = 'Daya Beli Kuat & Sehat';
+          elStatusBadge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-[#ecfdf5] text-[#065f46] border border-[#a7f3d0] tabular-nums';
+        }
+        if (elSummaryText) {
+          elSummaryText.textContent =
+            'Gaji bersih ' +
+            formatRupiah(takeHomePay) +
+            ' melampaui biaya hidup lajang di ' +
+            region.city +
+            ' (kos ' +
+            formatRupiah(region.rent) +
+            ', makan ' +
+            formatRupiah(region.food) +
+            ', transport ' +
+            formatRupiah(region.transport) +
+            '). Kamu memiliki ruang sisa sekitar ' +
+            formatRupiah(surplus) +
+            ' per bulan untuk ditabung.';
+        }
+      } else {
+        if (elStatusBadge) {
+          elStatusBadge.textContent = 'Sesuai Standar Daerah';
+          elStatusBadge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-[#fffbeb] text-[#92400e] border border-[#fde68a] tabular-nums';
+        }
+        if (elSummaryText) {
+          elSummaryText.textContent =
+            'Gaji ini memenuhi standar UMK ' +
+            region.city +
+            ', namun setelah dipotong iuran wajib cukup berdekatan dengan estimasi biaya hidup lajang (' +
+            formatRupiah(region.living) +
+            '). Disarankan mengatur anggaran kos (' +
+            formatRupiah(region.rent) +
+            ') dan makan harian secara disiplin.';
+        }
+      }
+
+      // Alokasi 50 / 30 / 20
+      const elNeeds = document.getElementById('alloc-needs');
+      const elWants = document.getElementById('alloc-wants');
+      const elSavings = document.getElementById('alloc-savings');
+      if (elNeeds) elNeeds.textContent = formatRupiah(takeHomePay * 0.5);
+      if (elWants) elWants.textContent = formatRupiah(takeHomePay * 0.3);
+      if (elSavings) elSavings.textContent = formatRupiah(takeHomePay * 0.2);
+
+      // Update Slip Kanan
+      const elSlipTerBadge = document.getElementById('slip-ter-badge');
+      if (elSlipTerBadge) elSlipTerBadge.textContent = 'TER Kategori ' + terCategory;
+
+      const elThpMonthly = document.getElementById('res-thp-monthly');
+      if (elThpMonthly) elThpMonthly.textContent = formatRupiah(takeHomePay);
+
+      const elThpYearly = document.getElementById('res-thp-yearly');
+      if (elThpYearly) elThpYearly.textContent = formatRupiah(takeHomePay * 12);
+
+      const denom = effectiveGross > 0 ? effectiveGross : 1;
+      const thpPct = Math.max(0, Math.min(100, (takeHomePay / denom) * 100));
+      const bpjsPct = Math.max(0, Math.min(100, (totalEmployeeBpjs / denom) * 100));
+      const taxPct = Math.max(0, Math.min(100, (deductTax / denom) * 100));
+
+      const elRatioPill = document.getElementById('res-thp-ratio-pill');
+      if (elRatioPill) {
+        elRatioPill.textContent =
+          currentScheme === 'net'
+            ? '100% Terima Bersih (Net)'
+            : thpPct.toFixed(1).replace('.', ',') + '% dari Bruto';
+      }
+
+      const barThp = document.getElementById('bar-thp');
+      const barBpjs = document.getElementById('bar-bpjs');
+      const barTax = document.getElementById('bar-tax');
+      if (barThp) barThp.style.width = thpPct.toFixed(2) + '%';
+      if (barBpjs) barBpjs.style.width = bpjsPct.toFixed(2) + '%';
+      if (barTax) barTax.style.width = taxPct.toFixed(2) + '%';
+
+      const legThp = document.getElementById('legend-thp-pct');
+      const legBpjs = document.getElementById('legend-bpjs-pct');
+      const legTax = document.getElementById('legend-tax-pct');
+      if (legThp) legThp.textContent = thpPct.toFixed(1).replace('.', ',') + '%';
+      if (legBpjs) legBpjs.textContent = bpjsPct.toFixed(1).replace('.', ',') + '%';
+      if (legTax) legTax.textContent = taxPct.toFixed(1).replace('.', ',') + '%';
+
+      // Rincian Bruto & Potongan
+      const elBase = document.getElementById('res-base-salary');
+      const elAllow = document.getElementById('res-allowance');
+      const rowSubsidy = document.getElementById('row-net-subsidy');
+      const elSubsidy = document.getElementById('res-net-subsidy');
+      const elTotalGross = document.getElementById('res-total-gross');
+
+      if (elBase) elBase.textContent = formatRupiah(baseSalary);
+      if (elAllow) elAllow.textContent = formatRupiah(variableAllowance);
+      if (rowSubsidy && elSubsidy) {
+        if (currentScheme === 'net') {
+          rowSubsidy.classList.remove('hidden');
+          rowSubsidy.classList.add('flex');
+          elSubsidy.textContent = '+' + formatRupiah(netSubsidy);
+        } else {
+          rowSubsidy.classList.add('hidden');
+          rowSubsidy.classList.remove('flex');
+        }
+      }
+      if (elTotalGross) elTotalGross.textContent = formatRupiah(effectiveGross);
+
+      const elSchemeNote = document.getElementById('res-scheme-note');
+      if (elSchemeNote) {
+        elSchemeNote.textContent =
+          currentScheme === 'net' ? 'Ditanggung perusahaan' : 'Dipotong dari gaji';
+      }
+
+      const elDedJht = document.getElementById('res-deduct-jht');
+      const elDedJp = document.getElementById('res-deduct-jp');
+      const elDedKes = document.getElementById('res-deduct-kes');
+      const elTerRateLabel = document.getElementById('res-ter-rate-label');
+      const elTerPtkpLabel = document.getElementById('res-ter-ptkp-label');
+      const elDedTax = document.getElementById('res-deduct-tax');
+      const elTotDed = document.getElementById('res-total-deductions');
+
+      if (elDedJht) elDedJht.textContent = deductJht > 0 ? '-' + formatRupiah(deductJht) : 'Rp 0';
+      if (elDedJp) elDedJp.textContent = deductJp > 0 ? '-' + formatRupiah(deductJp) : 'Rp 0';
+      if (elDedKes) elDedKes.textContent = deductKes > 0 ? '-' + formatRupiah(deductKes) : 'Rp 0';
+      if (elTerRateLabel) elTerRateLabel.textContent = 'TER ' + String(terRatePct).replace('.', ',') + '%';
+      if (elTerPtkpLabel) elTerPtkpLabel.textContent = 'Status ' + ptkpCode + ' · Kategori ' + terCategory;
+      if (elDedTax) {
+        elDedTax.textContent = deductTax > 0 ? '-' + formatRupiah(deductTax) : 'Rp 0 (Bebas Pajak)';
+        elDedTax.className =
+          deductTax > 0
+            ? 'font-bold text-[#b91c1c] tabular-nums'
+            : 'font-bold text-[#065f46] tabular-nums';
+      }
+      if (elTotDed) {
+        elTotDed.textContent =
+          currentScheme === 'net'
+            ? 'Rp 0 (Ditanggung Kantor)'
+            : '-' + formatRupiah(totalDeductions);
+      }
+
+      // Iuran Perusahaan
+      const elCompKes = document.getElementById('res-comp-kes');
+      const elCompJht = document.getElementById('res-comp-jht');
+      const elCompJp = document.getElementById('res-comp-jp');
+      const elCompJkk = document.getElementById('res-comp-jkk');
+      const elCompCtc = document.getElementById('res-comp-ctc');
+
+      if (elCompKes) elCompKes.textContent = formatRupiah(compKes);
+      if (elCompJht) elCompJht.textContent = formatRupiah(compJht);
+      if (elCompJp) elCompJp.textContent = formatRupiah(compJp);
+      if (elCompJkk) elCompJkk.textContent = formatRupiah(compJkkJkm);
+      if (elCompCtc) elCompCtc.textContent = formatRupiah(totalCtc);
+
+      // Update CTA Loker Kota
+      const btnCityJobs = document.getElementById('btn-explore-city-jobs');
+      const btnCityLabel = document.getElementById('btn-city-label');
+      if (btnCityJobs) {
+        btnCityJobs.setAttribute('href', '/lowongan?loc=' + encodeURIComponent(region.query));
+      }
+      if (btnCityLabel) {
+        btnCityLabel.textContent = region.city;
+      }
+
+      highlightActivePreset(baseSalary, region.umk);
+
+      lastSummaryClipboard = [
+        'SIMULASI GAJI BERSIH (TAKE-HOME PAY) - EMPLOYR',
+        'Lokasi Kerja: ' + region.city + ', ' + region.province + ' (UMK 2026: ' + region.umkExactFormatted + ')',
+        'Dasar Hukum: ' + region.sk,
+        'Status Pajak: ' + ptkpCode + ' (TER Kategori ' + terCategory + ') · Skema ' + (currentScheme === 'net' ? 'Net/Gross-Up' : 'Gross'),
+        '----------------------------------------',
+        'Gaji Pokok & Tunjangan Tetap: ' + formatRupiah(baseSalary),
+        'Tunjangan Tidak Tetap: ' + formatRupiah(variableAllowance),
+        'Potongan BPJS TK (JHT 2% + JP 1%): -' + formatRupiah(deductJht + deductJp),
+        'Potongan BPJS Kesehatan (1%): -' + formatRupiah(deductKes),
+        'PPh 21 Bulanan (TER ' + terRatePct + '%): -' + formatRupiah(deductTax),
+        '----------------------------------------',
+        'ESTIMASI TAKE-HOME PAY: ' + formatRupiah(takeHomePay) + ' / bulan',
+        'Estimasi Biaya Hidup Lajang di ' + region.city + ': ' + formatRupiah(region.living) + ' (Kos ' + formatRupiah(region.rent) + ', Makan ' + formatRupiah(region.food) + ', Transport ' + formatRupiah(region.transport) + ')',
+      ].join('\n');
+    }
+
+    // Event Listeners
+    grossInput?.addEventListener('input', () => {
+      const val = parseNumericInput(grossInput.value);
+      grossInput.value = val > 0 ? formatInputThousands(val) : '';
+      if (grossSlider) {
+        grossSlider.value = String(Math.min(35000000, Math.max(2000000, val)));
+      }
+      recalculate();
+    });
+
+    grossInput?.addEventListener('blur', () => {
+      const val = parseNumericInput(grossInput.value);
+      grossInput.value = formatInputThousands(val);
+    });
+
+    grossSlider?.addEventListener('input', () => {
+      const val = parseInt(grossSlider.value || '0', 10);
+      if (grossInput) grossInput.value = formatInputThousands(val);
+      recalculate();
+    });
+
+    allowanceInput?.addEventListener('input', () => {
+      const val = parseNumericInput(allowanceInput.value);
+      allowanceInput.value = val > 0 ? formatInputThousands(val) : '';
+      recalculate();
+    });
+
+    allowanceInput?.addEventListener('blur', () => {
+      const val = parseNumericInput(allowanceInput.value);
+      allowanceInput.value = formatInputThousands(val);
+    });
+
+    ptkpSelect?.addEventListener('change', recalculate);
+    chkJht?.addEventListener('change', recalculate);
+    chkJp?.addEventListener('change', recalculate);
+    chkKes?.addEventListener('change', recalculate);
+
+    btnApplyUmk?.addEventListener('click', () => {
+      const region = getSelectedRegionData();
+      if (!region || !grossInput) return;
+      grossInput.value = formatInputThousands(region.umk);
+      if (grossSlider) grossSlider.value = String(region.umk);
+      recalculate();
+    });
+
+    presetBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const presetAttr = btn.getAttribute('data-preset');
+        const region = getSelectedRegionData();
+        const targetVal =
+          presetAttr === 'umk'
+            ? region
+              ? region.umk
+              : 3701709
+            : parseInt(presetAttr || '6000000', 10);
+        if (grossInput) grossInput.value = formatInputThousands(targetVal);
+        if (grossSlider) grossSlider.value = String(targetVal);
+        recalculate();
+      });
+    });
+
+    function setScheme(scheme) {
+      currentScheme = scheme;
+      if (scheme === 'gross') {
+        schemeGrossBtn?.setAttribute('aria-pressed', 'true');
+        schemeNetBtn?.setAttribute('aria-pressed', 'false');
+        schemeGrossBtn?.classList.add('border-[#1738D1]', 'bg-[#f0f2ff]', 'text-[#1738D1]');
+        schemeGrossBtn?.classList.remove('border-[#d7d6cf]', 'bg-[#f9f8f5]', 'text-[#55544f]');
+        schemeNetBtn?.classList.remove('border-[#1738D1]', 'bg-[#f0f2ff]', 'text-[#1738D1]');
+        schemeNetBtn?.classList.add('border-[#d7d6cf]', 'bg-[#f9f8f5]', 'text-[#55544f]');
+      } else {
+        schemeGrossBtn?.setAttribute('aria-pressed', 'false');
+        schemeNetBtn?.setAttribute('aria-pressed', 'true');
+        schemeNetBtn?.classList.add('border-[#1738D1]', 'bg-[#f0f2ff]', 'text-[#1738D1]');
+        schemeNetBtn?.classList.remove('border-[#d7d6cf]', 'bg-[#f9f8f5]', 'text-[#55544f]');
+        schemeGrossBtn?.classList.remove('border-[#1738D1]', 'bg-[#f0f2ff]', 'text-[#1738D1]');
+        schemeGrossBtn?.classList.add('border-[#d7d6cf]', 'bg-[#f9f8f5]', 'text-[#55544f]');
+      }
+      recalculate();
+    }
+
+    schemeGrossBtn?.addEventListener('click', () => setScheme('gross'));
+    schemeNetBtn?.addEventListener('click', () => setScheme('net'));
+
+    // Copy to Clipboard
+    const btnCopySlip = document.getElementById('btn-copy-slip');
+    const btnCopyText = document.getElementById('btn-copy-slip-text');
+    btnCopySlip?.addEventListener('click', () => {
+      if (!lastSummaryClipboard) return;
+      navigator.clipboard?.writeText(lastSummaryClipboard).then(() => {
+        if (btnCopyText) {
+          const prev = btnCopyText.textContent;
+          btnCopyText.textContent = 'Rincian Tersalin';
+          setTimeout(() => {
+            btnCopyText.textContent = prev;
+          }, 2000);
+        }
+      });
+    });
+
+    // Expose helper for external benchmark table buttons
+    window.__employrSelectCalcRegion = function (regionId) {
+      selectRegionById(regionId, true);
+      const calcEl = document.getElementById('kalkulator-gaji');
+      calcEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    // Initial render
+    recalculate();
+  })();
+</script>

@@ -24,6 +24,8 @@ export async function middleware(req: NextRequest) {
     pathname === "/api/auth/login" ||
     pathname === "/api/track" ||
     pathname === "/api/pre-register" ||
+    pathname === "/api/newsletter/subscribe" ||
+    pathname === "/api/newsletter/unsubscribe" ||
     pathname === "/site.webmanifest" ||
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml" ||
@@ -47,7 +49,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  const admin = await verifyAdminSession(sessionCookie);
+  const userAgent = req.headers.get("user-agent") || null;
+  const admin = await verifyAdminSession(sessionCookie, userAgent);
 
   if (!admin || admin.role !== "ADMIN") {
     if (pathname.startsWith("/api")) {

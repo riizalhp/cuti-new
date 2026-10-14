@@ -499,3 +499,42 @@ export async function PUT(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   return handleUpsert(req);
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const user = await getAuthUser(req);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: 'Sesi login telah kedaluwarsa.' },
+        { status: 401 }
+      );
+    }
+
+    await prisma.$transaction([
+      prisma.sessions.deleteMany({ where: { user_id: user.id } }),
+      prisma.cv_projects.deleteMany({ where: { user_id: user.id } }),
+      prisma.applications.deleteMany({ where: { user_id: user.id } }),
+      prisma.notifications.deleteMany({ where: { user_id: user.id } }),
+      prisma.accounts.deleteMany({ where: { user_id: user.id } }),
+      prisma.membership.deleteMany({ where: { user_id: user.id } }),
+      prisma.user.delete({ where: { id: user.id } }),
+    ]);
+
+    const res = NextResponse.json({
+      success: true,
+      message: 'Akun dan seluruh data profil berhasil dihapus permanen.',
+    });
+
+    ['employr_auth_session', 'employr_auth_token', 'employr_user_session', 'cuti_auth_session', 'cuti_auth_token', 'cuti_user_session'].forEach((cookieName) => {
+      res.cookies.delete(cookieName);
+    });
+
+    return res;
+  } catch (error: any) {
+    console.error('[DELETE /api/user/profile] Error:', error);
+    return NextResponse.json(
+      { success: false, message: 'Gagal menghapus akun.' },
+      { status: 500 }
+    );
+  }
+}

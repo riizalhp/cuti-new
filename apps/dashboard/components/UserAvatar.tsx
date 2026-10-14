@@ -75,6 +75,7 @@ export function UserAvatar({
         variant={variant}
         colors={colors}
         square={square}
+        title={true}
       />
     </div>
   );

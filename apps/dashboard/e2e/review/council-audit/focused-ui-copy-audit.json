@@ -1,0 +1,1713 @@
+[
+  {
+    "id": "login",
+    "name": "Masuk Akun",
+    "path": "/login",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\login.png",
+    "count": 3,
+    "items": [
+      {
+        "tag": "div",
+        "role": "body",
+        "sentences": [
+          "Masuk ke Akun\n\nKelola CV, lamaran kerja, dan pantau progres kariermu.",
+          "Email\n*\nKata Sandi\n*\nIngat saya\nLupa kata sandi?",
+          "Masuk Sekarang\natau\nLanjutkan dengan Google\n\nBelum punya akun?",
+          "Daftar sekarang\n\n© 2026 Employr"
+        ],
+        "sentenceCount": 4,
+        "charCount": 214,
+        "text": "Masuk ke Akun Kelola CV, lamaran kerja, dan pantau progres kariermu. Email * Kata Sandi * Ingat saya Lupa kata sandi? Masuk Sekarang atau Lanjutkan dengan Google Belum punya akun? Daftar sekarang © 2026 Employr"
+      },
+      {
+        "tag": "div",
+        "role": "body",
+        "sentences": [
+          "Semua urusan kariermu,\nsiap di satu ruang kerja.",
+          "Bikin CV lolos ATS, cocokan keahlian dengan kriteria lowongan, dan pantau setiap tahapan wawancara secara real-time."
+        ],
+        "sentenceCount": 2,
+        "charCount": 166,
+        "text": "Semua urusan kariermu, siap di satu ruang kerja. Bikin CV lolos ATS, cocokan keahlian dengan kriteria lowongan, dan pantau setiap tahapan wawancara secara real-time."
+      },
+      {
+        "tag": "div",
+        "role": "body",
+        "sentences": [
+          "“\n\n“Employr bikin proses bikin CV dan tracking lamaran jadi jauh lebih cepat dan terstruktur.",
+          "Diterima kerja dalam 3 minggu!”\n\nRP\nRian Pratama\nSoftware Engineer di Tech Company\n“\n\n“Fitur pelacak lamaran dan tips penyesuaian CV sangat membantu.",
+          "Semua tahapan teratur rapi sampai dapat offering letter!”\n\nSR\nSiti Rahmadani\nVocational Accounting Graduate · Surabaya\n“\n\n“Bisa simpan beberapa versi CV tanpa repot copy-paste manual.",
+          "Sangat praktis dan langsung lolos sortir awal!”\n\nDA\nDimas Arya Nugraha\nFinal-Year Management Student · Yogyakarta"
+        ],
+        "sentenceCount": 4,
+        "charCount": 541,
+        "text": "“ “Employr bikin proses bikin CV dan tracking lamaran jadi jauh lebih cepat dan terstruktur. Diterima kerja dalam 3 minggu!” RP Rian Pratama Software Engineer di Tech Company “ “Fitur pelacak lamaran dan tips penyesuaian CV sangat membantu. Semua tahapan teratur rapi sampai dapat offering letter!” SR Siti Rahmadani Vocational Accounting Graduate · Surabaya “ “Bisa simpan beberapa versi CV tanpa repot copy-paste manual. Sangat praktis dan langsung lolos sortir awal!” DA Dimas Arya Nugraha Final-Year Management Student · Yogyakarta"
+      }
+    ]
+  },
+  {
+    "id": "forgot-password",
+    "name": "Lupa Password",
+    "path": "/forgot-password",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\forgot-password.png",
+    "count": 1,
+    "items": [
+      {
+        "tag": "div",
+        "role": "body",
+        "sentences": [
+          "Lupa Kata Sandi\n\nMasukkan alamat email akun kamu untuk menerima tautan pengaturan ulang kata sandi.",
+          "Email Terdaftar\nKirim Tautan Reset\nKembali ke Halaman Masuk"
+        ],
+        "sentenceCount": 2,
+        "charCount": 160,
+        "text": "Lupa Kata Sandi Masukkan alamat email akun kamu untuk menerima tautan pengaturan ulang kata sandi. Email Terdaftar Kirim Tautan Reset Kembali ke Halaman Masuk"
+      }
+    ]
+  },
+  {
+    "id": "reset-password",
+    "name": "Reset Password",
+    "path": "/reset-password?token=test_token_audit",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\reset-password.png",
+    "count": 3,
+    "items": [
+      {
+        "tag": "div",
+        "role": "body",
+        "sentences": [
+          "Atur Kata Sandi Baru\n\nBuat kata sandi baru untuk mengamankan akun Employr kamu.",
+          "Tautan pengaturan ulang kata sandi tidak lengkap atau tautan yang kamu buka salah.",
+          "Silakan ajukan tautan baru melalui halaman lupa kata sandi.",
+          "Minta Tautan Reset Baru\nKembali ke Halaman Masuk"
+        ],
+        "sentenceCount": 4,
+        "charCount": 273,
+        "text": "Atur Kata Sandi Baru Buat kata sandi baru untuk mengamankan akun Employr kamu. Tautan pengaturan ulang kata sandi tidak lengkap atau tautan yang kamu buka salah. Silakan ajukan tautan baru melalui halaman lupa kata sandi. Minta Tautan Reset Baru Kembali ke Halaman Masuk"
+      },
+      {
+        "tag": "div",
+        "role": "body",
+        "sentences": [
+          "Tautan pengaturan ulang kata sandi tidak lengkap atau tautan yang kamu buka salah.",
+          "Silakan ajukan tautan baru melalui halaman lupa kata sandi.",
+          "Minta Tautan Reset Baru"
+        ],
+        "sentenceCount": 3,
+        "charCount": 167,
+        "text": "Tautan pengaturan ulang kata sandi tidak lengkap atau tautan yang kamu buka salah. Silakan ajukan tautan baru melalui halaman lupa kata sandi. Minta Tautan Reset Baru"
+      },
+      {
+        "tag": "div",
+        "role": "body",
+        "sentences": [
+          "Tautan pengaturan ulang kata sandi tidak lengkap atau tautan yang kamu buka salah.",
+          "Silakan ajukan tautan baru melalui halaman lupa kata sandi."
+        ],
+        "sentenceCount": 2,
+        "charCount": 142,
+        "text": "Tautan pengaturan ulang kata sandi tidak lengkap atau tautan yang kamu buka salah. Silakan ajukan tautan baru melalui halaman lupa kata sandi."
+      }
+    ]
+  },
+  {
+    "id": "onboarding",
+    "name": "Onboarding",
+    "path": "/onboarding",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\onboarding.png",
+    "count": 3,
+    "items": [
+      {
+        "tag": "div",
+        "role": "onboarding-step",
+        "sentences": [
+          "KETENTUAN LAYANAN\nSelamat datang di\n\nSebelum mulai, harap baca dan setujui ketentuan layanan kami.",
+          "Saya menyetujui seluruh ketentuan layanan dan kebijakan privasi Employr untuk rekomendasi lowongan kerja & layanan pembuatan CV.",
+          "Syarat & Ketentuan ↗\n•\nKebijakan Privasi ↗\nMulai Sekarang\n\nData kamu aman bersama Employr"
+        ],
+        "sentenceCount": 3,
+        "charCount": 318,
+        "text": "KETENTUAN LAYANAN Selamat datang di Sebelum mulai, harap baca dan setujui ketentuan layanan kami. Saya menyetujui seluruh ketentuan layanan dan kebijakan privasi Employr untuk rekomendasi lowongan kerja & layanan pembuatan CV. Syarat & Ketentuan ↗ • Kebijakan Privasi ↗ Mulai Sekarang Data kamu aman bersama Employr"
+      },
+      {
+        "tag": "div",
+        "role": "onboarding-step",
+        "sentences": [
+          "Selamat datang di\n\nSebelum mulai, harap baca dan setujui ketentuan layanan kami.",
+          "Saya menyetujui seluruh ketentuan layanan dan kebijakan privasi Employr untuk rekomendasi lowongan kerja & layanan pembuatan CV.",
+          "Syarat & Ketentuan ↗\n•\nKebijakan Privasi ↗\nMulai Sekarang"
+        ],
+        "sentenceCount": 3,
+        "charCount": 268,
+        "text": "Selamat datang di Sebelum mulai, harap baca dan setujui ketentuan layanan kami. Saya menyetujui seluruh ketentuan layanan dan kebijakan privasi Employr untuk rekomendasi lowongan kerja & layanan pembuatan CV. Syarat & Ketentuan ↗ • Kebijakan Privasi ↗ Mulai Sekarang"
+      },
+      {
+        "tag": "div",
+        "role": "onboarding-step",
+        "sentences": [
+          "Saya menyetujui seluruh ketentuan layanan dan kebijakan privasi Employr untuk rekomendasi lowongan kerja & layanan pembuatan CV.",
+          "Syarat & Ketentuan ↗\n•\nKebijakan Privasi ↗"
+        ],
+        "sentenceCount": 2,
+        "charCount": 171,
+        "text": "Saya menyetujui seluruh ketentuan layanan dan kebijakan privasi Employr untuk rekomendasi lowongan kerja & layanan pembuatan CV. Syarat & Ketentuan ↗ • Kebijakan Privasi ↗"
+      }
+    ]
+  },
+  {
+    "id": "beranda",
+    "name": "Beranda",
+    "path": "/beranda",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\beranda.png",
+    "count": 19,
+    "items": [
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "AKTIVITAS UTAMA\nSelamat pagi, Budi\n\nDashboard kariermu siap digunakan\n\nJelajahi Fitur\n\nSemua prioritas terselesaikan!",
+          "Tidak ada prioritas mendesak saat ini"
+        ],
+        "sentenceCount": 2,
+        "charCount": 156,
+        "text": "AKTIVITAS UTAMA Selamat pagi, Budi Dashboard kariermu siap digunakan Jelajahi Fitur Semua prioritas terselesaikan! Tidak ada prioritas mendesak saat ini"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Progress & Funnel Lamaran\n4 Tahapan\n\nRasio konversi tiap tahap seleksi\n\nDetail Tracker\nLamaran Dikirim\n\n0 Dokumen terkirim ke HR\n\n0\n0%\nScreening HR\n\n0 Berkas lolos filter awal\n\n0\n0%\nSesi Interview\n\n0 Undangan wawancara\n\n0\n0%\nOffering Letter\n\n0 Penawaran kerja resmi\n\n0\n0%\n\nInsight Konversi Seleksi:\n\nBelum ada dokumen lamaran terkirim.",
+          "Catat lamaran pertamamu di Tracker untuk memantau rasio konversi seleksi.",
+          "Analisis Detail Conversion Rate di Tracker"
+        ],
+        "sentenceCount": 3,
+        "charCount": 453,
+        "text": "Progress & Funnel Lamaran 4 Tahapan Rasio konversi tiap tahap seleksi Detail Tracker Lamaran Dikirim 0 Dokumen terkirim ke HR 0 0% Screening HR 0 Berkas lolos filter awal 0 0% Sesi Interview 0 Undangan wawancara 0 0% Offering Letter 0 Penawaran kerja resmi 0 0% Insight Konversi Seleksi: Belum ada dokumen lamaran terkirim. Catat lamaran pertamamu di Tracker untuk memantau rasio konversi seleksi. Analisis Detail Conversion Rate di Tracker"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Insight Konversi Seleksi:\n\nBelum ada dokumen lamaran terkirim.",
+          "Catat lamaran pertamamu di Tracker untuk memantau rasio konversi seleksi."
+        ],
+        "sentenceCount": 2,
+        "charCount": 136,
+        "text": "Insight Konversi Seleksi: Belum ada dokumen lamaran terkirim. Catat lamaran pertamamu di Tracker untuk memantau rasio konversi seleksi."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Jadwal Terdekat\n0 Agenda\n\nAgenda interview, tes & deadline\n\nSemua\n\nTidak ada agenda mendesak\n\nJadwal interview dan batas waktu lamaran kamu akan muncul otomatis di sini.",
+          "Buka Tracker\nPanduan & Simulator Interview"
+        ],
+        "sentenceCount": 2,
+        "charCount": 213,
+        "text": "Jadwal Terdekat 0 Agenda Agenda interview, tes & deadline Semua Tidak ada agenda mendesak Jadwal interview dan batas waktu lamaran kamu akan muncul otomatis di sini. Buka Tracker Panduan & Simulator Interview"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Sprint Lamaran Minggu Ini\n\nTarget mingguan & konsistensi melamar\n\n0 Hari Streak\nProgres Minggu Ini\n0 / 10 Lamaran(0%)\nAKTIVITAS HARIAN (SENIN - MINGGU):\nBELUM ADA\n\nKirim minimal 5-10 lamaran per minggu secara konsisten untuk memperluas peluang dipanggil wawancara kerja.",
+          "Lihat Tracker\nLamar Loker"
+        ],
+        "sentenceCount": 2,
+        "charCount": 297,
+        "text": "Sprint Lamaran Minggu Ini Target mingguan & konsistensi melamar 0 Hari Streak Progres Minggu Ini 0 / 10 Lamaran(0%) AKTIVITAS HARIAN (SENIN - MINGGU): BELUM ADA Kirim minimal 5-10 lamaran per minggu secara konsisten untuk memperluas peluang dipanggil wawancara kerja. Lihat Tracker Lamar Loker"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Karier\n3 min baca\nCV vs.",
+          "Résumé: What&#8217;s the Difference?",
+          "When you're applying for a job, you'll often hear the terms CV and résumé .",
+          "But what's the difference between them?",
+          "While the two…"
+        ],
+        "sentenceCount": 5,
+        "charCount": 193,
+        "text": "Karier 3 min baca CV vs. Résumé: What&#8217;s the Difference? When you're applying for a job, you'll often hear the terms CV and résumé . But what's the difference between them? While the two…"
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "When you're applying for a job, you'll often hear the terms CV and résumé .",
+          "But what's the difference between them?",
+          "While the two…"
+        ],
+        "sentenceCount": 3,
+        "charCount": 130,
+        "text": "When you're applying for a job, you'll often hear the terms CV and résumé . But what's the difference between them? While the two…"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Karier\n3 min baca\nRemote or Office Work?",
+          "What to Consider When Choosing a Work Setup\n\nWhere you work can shape how you work.",
+          "For some professionals, working from home offers flexibility and less commuting.",
+          "For others…"
+        ],
+        "sentenceCount": 4,
+        "charCount": 217,
+        "text": "Karier 3 min baca Remote or Office Work? What to Consider When Choosing a Work Setup Where you work can shape how you work. For some professionals, working from home offers flexibility and less commuting. For others…"
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Where you work can shape how you work.",
+          "For some professionals, working from home offers flexibility and less commuting.",
+          "For others…"
+        ],
+        "sentenceCount": 3,
+        "charCount": 131,
+        "text": "Where you work can shape how you work. For some professionals, working from home offers flexibility and less commuting. For others…"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Karier\n5 min baca\n10 Questions Every Student Should Ask Before Accepting an Internship\n\nGetting an internship offer is exciting.",
+          "But before saying yes, take a moment to understand what you're signing up for.",
+          "An interns…"
+        ],
+        "sentenceCount": 3,
+        "charCount": 219,
+        "text": "Karier 5 min baca 10 Questions Every Student Should Ask Before Accepting an Internship Getting an internship offer is exciting. But before saying yes, take a moment to understand what you're signing up for. An interns…"
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Getting an internship offer is exciting.",
+          "But before saying yes, take a moment to understand what you're signing up for.",
+          "An interns…"
+        ],
+        "sentenceCount": 3,
+        "charCount": 131,
+        "text": "Getting an internship offer is exciting. But before saying yes, take a moment to understand what you're signing up for. An interns…"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Strategi Melamar\n1 min baca\nPanduan Lengkap Cara Melamar Kerja via Email & WA\n\nSelalu gunakan email profesional.",
+          "Gunakan subject yang jelas seperti \"Lamaran Pekerjaan - [Posisi] - [Nama]\".",
+          "Etika, penulisan sub…"
+        ],
+        "sentenceCount": 3,
+        "charCount": 210,
+        "text": "Strategi Melamar 1 min baca Panduan Lengkap Cara Melamar Kerja via Email & WA Selalu gunakan email profesional. Gunakan subject yang jelas seperti \"Lamaran Pekerjaan - [Posisi] - [Nama]\". Etika, penulisan sub…"
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Selalu gunakan email profesional.",
+          "Gunakan subject yang jelas seperti \"Lamaran Pekerjaan - [Posisi] - [Nama]\".",
+          "Etika, penulisan sub…"
+        ],
+        "sentenceCount": 3,
+        "charCount": 131,
+        "text": "Selalu gunakan email profesional. Gunakan subject yang jelas seperti \"Lamaran Pekerjaan - [Posisi] - [Nama]\". Etika, penulisan sub…"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Persiapan Interview\n1 min baca\n20 Pertanyaan Interview Tersering & Cara Menjawabnya\n\nGunakan teknik STAR (Situation, Task, Action, Result).",
+          "Jelaskan situasi yang pernah dialami, tugas yang diemban, serta hasil teruk…"
+        ],
+        "sentenceCount": 2,
+        "charCount": 216,
+        "text": "Persiapan Interview 1 min baca 20 Pertanyaan Interview Tersering & Cara Menjawabnya Gunakan teknik STAR (Situation, Task, Action, Result). Jelaskan situasi yang pernah dialami, tugas yang diemban, serta hasil teruk…"
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Gunakan teknik STAR (Situation, Task, Action, Result).",
+          "Jelaskan situasi yang pernah dialami, tugas yang diemban, serta hasil teruk…"
+        ],
+        "sentenceCount": 2,
+        "charCount": 131,
+        "text": "Gunakan teknik STAR (Situation, Task, Action, Result). Jelaskan situasi yang pernah dialami, tugas yang diemban, serta hasil teruk…"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Optimasi CV\n1 min baca\nCara Membuat CV ATS Friendly yang Lolos Screening HR\n\nSistem ATS memfilter ribuan CV berdasarkan kata kunci.",
+          "Gunakan font standar, hindari grafik kompleks, serta cantumkan kata kunci y…"
+        ],
+        "sentenceCount": 2,
+        "charCount": 208,
+        "text": "Optimasi CV 1 min baca Cara Membuat CV ATS Friendly yang Lolos Screening HR Sistem ATS memfilter ribuan CV berdasarkan kata kunci. Gunakan font standar, hindari grafik kompleks, serta cantumkan kata kunci y…"
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Sistem ATS memfilter ribuan CV berdasarkan kata kunci.",
+          "Gunakan font standar, hindari grafik kompleks, serta cantumkan kata kunci y…"
+        ],
+        "sentenceCount": 2,
+        "charCount": 131,
+        "text": "Sistem ATS memfilter ribuan CV berdasarkan kata kunci. Gunakan font standar, hindari grafik kompleks, serta cantumkan kata kunci y…"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Karier\n3 min baca\nManajemen Talent Acquisition: Cara Meningkatkan Kualitas SDM lebih Efisien\n\nStrategi manajemen talent acquisition dalam meningkatkan kualitas SDM merupakan kunci utama perusahaan.",
+          "Di era digital , metode pe…"
+        ],
+        "sentenceCount": 2,
+        "charCount": 225,
+        "text": "Karier 3 min baca Manajemen Talent Acquisition: Cara Meningkatkan Kualitas SDM lebih Efisien Strategi manajemen talent acquisition dalam meningkatkan kualitas SDM merupakan kunci utama perusahaan. Di era digital , metode pe…"
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Strategi manajemen talent acquisition dalam meningkatkan kualitas SDM merupakan kunci utama perusahaan.",
+          "Di era digital , metode pe…"
+        ],
+        "sentenceCount": 2,
+        "charCount": 131,
+        "text": "Strategi manajemen talent acquisition dalam meningkatkan kualitas SDM merupakan kunci utama perusahaan. Di era digital , metode pe…"
+      }
+    ]
+  },
+  {
+    "id": "cv",
+    "name": "CV Saya",
+    "path": "/cv",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\cv.png",
+    "count": 4,
+    "items": [
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Dashboard\nCV Saya\nDark\nNotifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6\n\nBudi Santoso\n\nCV BUILDER\nTOTAL CV:\n0\nSKOR TERTINGGI:\n0/100\nRATA-RATA ATS:\n0/100\nMenampilkan 0 dokumen CV\nBelum Ada CV Tersimpan\n\nBuat CV pertamamu sekarang — pilih template terverifikasi ATS dan lengkapi data profil kamu untuk optimasi screening recruiter terbaik.",
+          "Buat CV Mandiri"
+        ],
+        "sentenceCount": 2,
+        "charCount": 346,
+        "text": "Dashboard CV Saya Dark Notifikasi, 3 belum dibaca 0 1 2 3 4 5 6 Budi Santoso CV BUILDER TOTAL CV: 0 SKOR TERTINGGI: 0/100 RATA-RATA ATS: 0/100 Menampilkan 0 dokumen CV Belum Ada CV Tersimpan Buat CV pertamamu sekarang — pilih template terverifikasi ATS dan lengkapi data profil kamu untuk optimasi screening recruiter terbaik. Buat CV Mandiri"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "CV BUILDER\nTOTAL CV:\n0\nSKOR TERTINGGI:\n0/100\nRATA-RATA ATS:\n0/100\nMenampilkan 0 dokumen CV\nBelum Ada CV Tersimpan\n\nBuat CV pertamamu sekarang — pilih template terverifikasi ATS dan lengkapi data profil kamu untuk optimasi screening recruiter terbaik.",
+          "Buat CV Mandiri"
+        ],
+        "sentenceCount": 2,
+        "charCount": 267,
+        "text": "CV BUILDER TOTAL CV: 0 SKOR TERTINGGI: 0/100 RATA-RATA ATS: 0/100 Menampilkan 0 dokumen CV Belum Ada CV Tersimpan Buat CV pertamamu sekarang — pilih template terverifikasi ATS dan lengkapi data profil kamu untuk optimasi screening recruiter terbaik. Buat CV Mandiri"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Menampilkan 0 dokumen CV\nBelum Ada CV Tersimpan\n\nBuat CV pertamamu sekarang — pilih template terverifikasi ATS dan lengkapi data profil kamu untuk optimasi screening recruiter terbaik.",
+          "Buat CV Mandiri"
+        ],
+        "sentenceCount": 2,
+        "charCount": 201,
+        "text": "Menampilkan 0 dokumen CV Belum Ada CV Tersimpan Buat CV pertamamu sekarang — pilih template terverifikasi ATS dan lengkapi data profil kamu untuk optimasi screening recruiter terbaik. Buat CV Mandiri"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Belum Ada CV Tersimpan\n\nBuat CV pertamamu sekarang — pilih template terverifikasi ATS dan lengkapi data profil kamu untuk optimasi screening recruiter terbaik.",
+          "Buat CV Mandiri"
+        ],
+        "sentenceCount": 2,
+        "charCount": 176,
+        "text": "Belum Ada CV Tersimpan Buat CV pertamamu sekarang — pilih template terverifikasi ATS dan lengkapi data profil kamu untuk optimasi screening recruiter terbaik. Buat CV Mandiri"
+      }
+    ]
+  },
+  {
+    "id": "cv-screener",
+    "name": "Screening ATS",
+    "path": "/cv-screener",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\cv-screener.png",
+    "count": 3,
+    "items": [
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "1\nPROFIL CV & TARGET PEKERJAAN\nPosisi Umum\nTarget Lowongan\nProfil CV Aktif\nCV AKTIF:\nBelum ada CV tersimpan\n\nBuat CV terlebih dahulu di CV ATS Builder untuk mengevaluasi.",
+          "Buat CV di Builder\nNama Posisi Pekerjaan Target *\nTingkat Senioritas\nEntry-Level (0 - 1 Tahun)\nRecruiter aktif: Startup (Fast-Paced & Impact) • 5 Modul Evaluasi Otomatis\nMulai Simulasi Screening CV (1-Klik)"
+        ],
+        "sentenceCount": 2,
+        "charCount": 378,
+        "text": "1 PROFIL CV & TARGET PEKERJAAN Posisi Umum Target Lowongan Profil CV Aktif CV AKTIF: Belum ada CV tersimpan Buat CV terlebih dahulu di CV ATS Builder untuk mengevaluasi. Buat CV di Builder Nama Posisi Pekerjaan Target * Tingkat Senioritas Entry-Level (0 - 1 Tahun) Recruiter aktif: Startup (Fast-Paced & Impact) • 5 Modul Evaluasi Otomatis Mulai Simulasi Screening CV (1-Klik)"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Profil CV Aktif\nCV AKTIF:\nBelum ada CV tersimpan\n\nBuat CV terlebih dahulu di CV ATS Builder untuk mengevaluasi.",
+          "Buat CV di Builder\nNama Posisi Pekerjaan Target *\nTingkat Senioritas\nEntry-Level (0 - 1 Tahun)"
+        ],
+        "sentenceCount": 2,
+        "charCount": 207,
+        "text": "Profil CV Aktif CV AKTIF: Belum ada CV tersimpan Buat CV terlebih dahulu di CV ATS Builder untuk mengevaluasi. Buat CV di Builder Nama Posisi Pekerjaan Target * Tingkat Senioritas Entry-Level (0 - 1 Tahun)"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Profil CV Aktif\nCV AKTIF:\nBelum ada CV tersimpan\n\nBuat CV terlebih dahulu di CV ATS Builder untuk mengevaluasi.",
+          "Buat CV di Builder"
+        ],
+        "sentenceCount": 2,
+        "charCount": 131,
+        "text": "Profil CV Aktif CV AKTIF: Belum ada CV tersimpan Buat CV terlebih dahulu di CV ATS Builder untuk mengevaluasi. Buat CV di Builder"
+      }
+    ]
+  },
+  {
+    "id": "tracker",
+    "name": "Tracker Lamaran",
+    "path": "/tracker",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\tracker.png",
+    "count": 3,
+    "items": [
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "BERANDA\nBeranda\nPROFIL & DOKUMEN\nCV Saya\nScreening & Evaluasi ATS\nOptimasi LinkedIn\nCAREER INTELLIGENCE\nCareer Intelligence\nLAMARAN\nTracker Lamaran\nEmail & Cover Letter\nLoker\nLAINNYA\nPengaturan\nSaran Fitur\nLapor Kendala\nCareer Readiness\n0%\nTingkatkan Kesiapan\n0%\nKeluar Akun\nDashboard\nTracker Lamaran\nDark\nNotifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6\n\nBudi Santoso\n\nJOB TRACKER\nTOTAL:\n–\nSCREENING:\n–\nINTERVIEW:\n–\nOFFERING:\n–\nPengingat\n1\nTambah Lamaran\nGagal memuat daftar lamaran.",
+          "Periksa koneksi internet Anda.",
+          "Coba lagi\nTutup"
+        ],
+        "sentenceCount": 3,
+        "charCount": 523,
+        "text": "BERANDA Beranda PROFIL & DOKUMEN CV Saya Screening & Evaluasi ATS Optimasi LinkedIn CAREER INTELLIGENCE Career Intelligence LAMARAN Tracker Lamaran Email & Cover Letter Loker LAINNYA Pengaturan Saran Fitur Lapor Kendala Career Readiness 0% Tingkatkan Kesiapan 0% Keluar Akun Dashboard Tracker Lamaran Dark Notifikasi, 3 belum dibaca 0 1 2 3 4 5 6 Budi Santoso JOB TRACKER TOTAL: – SCREENING: – INTERVIEW: – OFFERING: – Pengingat 1 Tambah Lamaran Gagal memuat daftar lamaran. Periksa koneksi internet Anda. Coba lagi Tutup"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "JOB TRACKER\nTOTAL:\n–\nSCREENING:\n–\nINTERVIEW:\n–\nOFFERING:\n–\nPengingat\n1\nTambah Lamaran\nGagal memuat daftar lamaran.",
+          "Periksa koneksi internet Anda.",
+          "Coba lagi\nTutup"
+        ],
+        "sentenceCount": 3,
+        "charCount": 161,
+        "text": "JOB TRACKER TOTAL: – SCREENING: – INTERVIEW: – OFFERING: – Pengingat 1 Tambah Lamaran Gagal memuat daftar lamaran. Periksa koneksi internet Anda. Coba lagi Tutup"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Gagal memuat daftar lamaran.",
+          "Periksa koneksi internet Anda.",
+          "Coba lagi\nTutup"
+        ],
+        "sentenceCount": 3,
+        "charCount": 75,
+        "text": "Gagal memuat daftar lamaran. Periksa koneksi internet Anda. Coba lagi Tutup"
+      }
+    ]
+  },
+  {
+    "id": "career-intelligence",
+    "name": "Career Intelligence",
+    "path": "/career-intelligence",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\career-intelligence.png",
+    "count": 14,
+    "items": [
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "STANDAR INDUSTRI\nDiperbarui: 6 Oktober 2026\nCareer Intelligence\n\nEksplorasi standar acuan kompetensi pasar kerja untuk posisi Staff Administrasi & Operasional.",
+          "Target:\nStaff Administrasi & Operasional (Administrasi)\n+ Ganti / Tambah Posisi Lain..."
+        ],
+        "sentenceCount": 2,
+        "charCount": 248,
+        "text": "STANDAR INDUSTRI Diperbarui: 6 Oktober 2026 Career Intelligence Eksplorasi standar acuan kompetensi pasar kerja untuk posisi Staff Administrasi & Operasional. Target: Staff Administrasi & Operasional (Administrasi) + Ganti / Tambah Posisi Lain..."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "MODE STANDAR INDUSTRI\nPeta Acuan Kompetensi Perekrut\n\nAnda belum memiliki dokumen CV atau keahlian tersimpan.",
+          "Di bawah ini adalah peta radar kompetensi standar industri yang disyaratkan untuk posisi Staff Administrasi & Operasional.",
+          "Jadikan standar ini sebagai acuan saat menyusun dokumen lamaran pertama Anda.",
+          "Susun CV Staff Administrasi & Operasional"
+        ],
+        "sentenceCount": 4,
+        "charCount": 353,
+        "text": "MODE STANDAR INDUSTRI Peta Acuan Kompetensi Perekrut Anda belum memiliki dokumen CV atau keahlian tersimpan. Di bawah ini adalah peta radar kompetensi standar industri yang disyaratkan untuk posisi Staff Administrasi & Operasional. Jadikan standar ini sebagai acuan saat menyusun dokumen lamaran pertama Anda. Susun CV Staff Administrasi & Operasional"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "MODE STANDAR INDUSTRI\nPeta Acuan Kompetensi Perekrut\n\nAnda belum memiliki dokumen CV atau keahlian tersimpan.",
+          "Di bawah ini adalah peta radar kompetensi standar industri yang disyaratkan untuk posisi Staff Administrasi & Operasional.",
+          "Jadikan standar ini sebagai acuan saat menyusun dokumen lamaran pertama Anda."
+        ],
+        "sentenceCount": 3,
+        "charCount": 310,
+        "text": "MODE STANDAR INDUSTRI Peta Acuan Kompetensi Perekrut Anda belum memiliki dokumen CV atau keahlian tersimpan. Di bawah ini adalah peta radar kompetensi standar industri yang disyaratkan untuk posisi Staff Administrasi & Operasional. Jadikan standar ini sebagai acuan saat menyusun dokumen lamaran pertama Anda."
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Anda belum memiliki dokumen CV atau keahlian tersimpan.",
+          "Di bawah ini adalah peta radar kompetensi standar industri yang disyaratkan untuk posisi Staff Administrasi & Operasional.",
+          "Jadikan standar ini sebagai acuan saat menyusun dokumen lamaran pertama Anda."
+        ],
+        "sentenceCount": 3,
+        "charCount": 256,
+        "text": "Anda belum memiliki dokumen CV atau keahlian tersimpan. Di bawah ini adalah peta radar kompetensi standar industri yang disyaratkan untuk posisi Staff Administrasi & Operasional. Jadikan standar ini sebagai acuan saat menyusun dokumen lamaran pertama Anda."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "KESIAPAN KARIER\n10% Data Lengkap\n0%\nCareer Readiness\n\nBerdasarkan kelengkapan CV, keahlian terdata, dan riwayat lamaran yang aktif.",
+          "Periksa Pilar Kesiapan"
+        ],
+        "sentenceCount": 2,
+        "charCount": 155,
+        "text": "KESIAPAN KARIER 10% Data Lengkap 0% Career Readiness Berdasarkan kelengkapan CV, keahlian terdata, dan riwayat lamaran yang aktif. Periksa Pilar Kesiapan"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "REKOMENDASI LANGKAH TERBAIK\nSusun CV Pertama Anda untuk Posisi Staff Administrasi & Operasional\n\nGunakan standar industri ini sebagai panduan.",
+          "Cantumkan keahlian Aplikasi Perkantoran & Spreadsheet & Ketelitian & Pengelolaan Data pada dokumen CV Anda.",
+          "Buat CV Staff Administrasi & Operasional\nLihat Lowongan Terbuka"
+        ],
+        "sentenceCount": 3,
+        "charCount": 315,
+        "text": "REKOMENDASI LANGKAH TERBAIK Susun CV Pertama Anda untuk Posisi Staff Administrasi & Operasional Gunakan standar industri ini sebagai panduan. Cantumkan keahlian Aplikasi Perkantoran & Spreadsheet & Ketelitian & Pengelolaan Data pada dokumen CV Anda. Buat CV Staff Administrasi & Operasional Lihat Lowongan Terbuka"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "REKOMENDASI LANGKAH TERBAIK\nSusun CV Pertama Anda untuk Posisi Staff Administrasi & Operasional\n\nGunakan standar industri ini sebagai panduan.",
+          "Cantumkan keahlian Aplikasi Perkantoran & Spreadsheet & Ketelitian & Pengelolaan Data pada dokumen CV Anda."
+        ],
+        "sentenceCount": 2,
+        "charCount": 250,
+        "text": "REKOMENDASI LANGKAH TERBAIK Susun CV Pertama Anda untuk Posisi Staff Administrasi & Operasional Gunakan standar industri ini sebagai panduan. Cantumkan keahlian Aplikasi Perkantoran & Spreadsheet & Ketelitian & Pengelolaan Data pada dokumen CV Anda."
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Gunakan standar industri ini sebagai panduan.",
+          "Cantumkan keahlian Aplikasi Perkantoran & Spreadsheet & Ketelitian & Pengelolaan Data pada dokumen CV Anda."
+        ],
+        "sentenceCount": 2,
+        "charCount": 153,
+        "text": "Gunakan standar industri ini sebagai panduan. Cantumkan keahlian Aplikasi Perkantoran & Spreadsheet & Ketelitian & Pengelolaan Data pada dokumen CV Anda."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Peta Radar Kompetensi\n5 Area Kunci\nAplikasi Perkant..",
+          "Ketelitian & Pen..",
+          "Komunikasi Bisni..",
+          "Koordinasi Opera..",
+          "Penyelesaian Mas..",
+          "Profil Anda\nStandar Role Target\nBuka Rincian Nilai & Bukti Lengkap"
+        ],
+        "sentenceCount": 6,
+        "charCount": 196,
+        "text": "Peta Radar Kompetensi 5 Area Kunci Aplikasi Perkant.. Ketelitian & Pen.. Komunikasi Bisni.. Koordinasi Opera.. Penyelesaian Mas.. Profil Anda Standar Role Target Buka Rincian Nilai & Bukti Lengkap"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Aplikasi Perkant..",
+          "Ketelitian & Pen..",
+          "Komunikasi Bisni..",
+          "Koordinasi Opera..",
+          "Penyelesaian Mas..",
+          "Profil Anda\nStandar Role Target"
+        ],
+        "sentenceCount": 6,
+        "charCount": 126,
+        "text": "Aplikasi Perkant.. Ketelitian & Pen.. Komunikasi Bisni.. Koordinasi Opera.. Penyelesaian Mas.. Profil Anda Standar Role Target"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Aplikasi Perkant..",
+          "Ketelitian & Pen..",
+          "Komunikasi Bisni..",
+          "Koordinasi Opera..",
+          "Penyelesaian Mas.."
+        ],
+        "sentenceCount": 5,
+        "charCount": 94,
+        "text": "Aplikasi Perkant.. Ketelitian & Pen.. Komunikasi Bisni.. Koordinasi Opera.. Penyelesaian Mas.."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Kekuatan Terbesar Anda\nNilai Tertinggi\nAplikasi Perkantoran & Spreadsheet\nStandar role: 85\n0\nBukti\nKetelitian & Pengelolaan Data\nStandar role: 80\n0\nBukti\nKomunikasi Bisnis & Korespondensi\nStandar role: 75\n0\nBukti\nKesenjangan Skill Prioritas\nLihat Semua\nAplikasi Perkantoran & Spreadsheet\n0 → 85\n\nPelajari formula esensial (VLOOKUP, Pivot Table) dan cantumkan bukti projek mini rekap data di CV.",
+          "Ketelitian & Pengelolaan Data\n0 → 80\n\nTuliskan pengalaman organisasi atau kepanitiaan di CV yang melibatkan pendataan berkas dan presensi."
+        ],
+        "sentenceCount": 2,
+        "charCount": 534,
+        "text": "Kekuatan Terbesar Anda Nilai Tertinggi Aplikasi Perkantoran & Spreadsheet Standar role: 85 0 Bukti Ketelitian & Pengelolaan Data Standar role: 80 0 Bukti Komunikasi Bisnis & Korespondensi Standar role: 75 0 Bukti Kesenjangan Skill Prioritas Lihat Semua Aplikasi Perkantoran & Spreadsheet 0 → 85 Pelajari formula esensial (VLOOKUP, Pivot Table) dan cantumkan bukti projek mini rekap data di CV. Ketelitian & Pengelolaan Data 0 → 80 Tuliskan pengalaman organisasi atau kepanitiaan di CV yang melibatkan pendataan berkas dan presensi."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Kesenjangan Skill Prioritas\nLihat Semua\nAplikasi Perkantoran & Spreadsheet\n0 → 85\n\nPelajari formula esensial (VLOOKUP, Pivot Table) dan cantumkan bukti projek mini rekap data di CV.",
+          "Ketelitian & Pengelolaan Data\n0 → 80\n\nTuliskan pengalaman organisasi atau kepanitiaan di CV yang melibatkan pendataan berkas dan presensi."
+        ],
+        "sentenceCount": 2,
+        "charCount": 321,
+        "text": "Kesenjangan Skill Prioritas Lihat Semua Aplikasi Perkantoran & Spreadsheet 0 → 85 Pelajari formula esensial (VLOOKUP, Pivot Table) dan cantumkan bukti projek mini rekap data di CV. Ketelitian & Pengelolaan Data 0 → 80 Tuliskan pengalaman organisasi atau kepanitiaan di CV yang melibatkan pendataan berkas dan presensi."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Aplikasi Perkantoran & Spreadsheet\n0 → 85\n\nPelajari formula esensial (VLOOKUP, Pivot Table) dan cantumkan bukti projek mini rekap data di CV.",
+          "Ketelitian & Pengelolaan Data\n0 → 80\n\nTuliskan pengalaman organisasi atau kepanitiaan di CV yang melibatkan pendataan berkas dan presensi."
+        ],
+        "sentenceCount": 2,
+        "charCount": 281,
+        "text": "Aplikasi Perkantoran & Spreadsheet 0 → 85 Pelajari formula esensial (VLOOKUP, Pivot Table) dan cantumkan bukti projek mini rekap data di CV. Ketelitian & Pengelolaan Data 0 → 80 Tuliskan pengalaman organisasi atau kepanitiaan di CV yang melibatkan pendataan berkas dan presensi."
+      }
+    ]
+  },
+  {
+    "id": "misi-cuan",
+    "name": "Misi Cuan",
+    "path": "/misi-cuan",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\misi-cuan.png",
+    "count": 0,
+    "items": []
+  },
+  {
+    "id": "referral",
+    "name": "Referral",
+    "path": "/referral",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\referral.png",
+    "count": 3,
+    "items": [
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "KODE REFERRAL UNIK KAMU\n\nTeman kamu akan mendapatkan potongan harga khusus saat memilih paket CV pertama mereka.",
+          "LINK BAGIKAN LANGSUNG\n\nBagikan link ini langsung ke grup WhatsApp alumni, LinkedIn, atau Telegram kamu."
+        ],
+        "sentenceCount": 2,
+        "charCount": 217,
+        "text": "KODE REFERRAL UNIK KAMU Teman kamu akan mendapatkan potongan harga khusus saat memilih paket CV pertama mereka. LINK BAGIKAN LANGSUNG Bagikan link ini langsung ke grup WhatsApp alumni, LinkedIn, atau Telegram kamu."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Cara Kerja Program Referral (3 Langkah)\n1\nBagikan Kode Unik\n\nKirim kode atau link referral kamu ke teman pencari kerja.",
+          "2\nTeman Daftar & Beli Paket\n\nTeman mendaftar akun dan membeli paket membership pilihan mereka.",
+          "3\nDapatkan Komisi Tunai\n\nDapatkan komisi tunai Rp2.500 yang langsung masuk ke saldo akunmu per teman berhasil."
+        ],
+        "sentenceCount": 3,
+        "charCount": 327,
+        "text": "Cara Kerja Program Referral (3 Langkah) 1 Bagikan Kode Unik Kirim kode atau link referral kamu ke teman pencari kerja. 2 Teman Daftar & Beli Paket Teman mendaftar akun dan membeli paket membership pilihan mereka. 3 Dapatkan Komisi Tunai Dapatkan komisi tunai Rp2.500 yang langsung masuk ke saldo akunmu per teman berhasil."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "1\nBagikan Kode Unik\n\nKirim kode atau link referral kamu ke teman pencari kerja.",
+          "2\nTeman Daftar & Beli Paket\n\nTeman mendaftar akun dan membeli paket membership pilihan mereka.",
+          "3\nDapatkan Komisi Tunai\n\nDapatkan komisi tunai Rp2.500 yang langsung masuk ke saldo akunmu per teman berhasil."
+        ],
+        "sentenceCount": 3,
+        "charCount": 287,
+        "text": "1 Bagikan Kode Unik Kirim kode atau link referral kamu ke teman pencari kerja. 2 Teman Daftar & Beli Paket Teman mendaftar akun dan membeli paket membership pilihan mereka. 3 Dapatkan Komisi Tunai Dapatkan komisi tunai Rp2.500 yang langsung masuk ke saldo akunmu per teman berhasil."
+      }
+    ]
+  },
+  {
+    "id": "pengaturan",
+    "name": "Pengaturan",
+    "path": "/pengaturan",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\pengaturan.png",
+    "count": 4,
+    "items": [
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "BIODATA DIRI\n\nNama lengkap dan identitas resmi untuk berkas lamaran.",
+          "Nama Lengkap\n\nBudi Santoso\n\nHeadline Profesional\n\nBelum diisi\n\nJenis Kelamin\n\nBelum ditentukan\n\nTanggal Lahir\n\nBelum ditentukan"
+        ],
+        "sentenceCount": 2,
+        "charCount": 197,
+        "text": "BIODATA DIRI Nama lengkap dan identitas resmi untuk berkas lamaran. Nama Lengkap Budi Santoso Headline Profesional Belum diisi Jenis Kelamin Belum ditentukan Tanggal Lahir Belum ditentukan"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "KONTAK & DOMISILI\n\nKontak yang akan dicantumkan di header CV dan notifikasi lamaran.",
+          "Email Utama\nTerverifikasi\n\nbudi.santoso@gmail.com\n\nNomor WhatsApp / HP\n\nBelum diisi\n\nKota & Provinsi Domisili\n\nBelum diisi\n\nAlamat Singkat\n\nBelum diisi"
+        ],
+        "sentenceCount": 2,
+        "charCount": 237,
+        "text": "KONTAK & DOMISILI Kontak yang akan dicantumkan di header CV dan notifikasi lamaran. Email Utama Terverifikasi budi.santoso@gmail.com Nomor WhatsApp / HP Belum diisi Kota & Provinsi Domisili Belum diisi Alamat Singkat Belum diisi"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "TENTANG SAYA\n\nParagraf pembuka singkat (3-5 kalimat) yang menonjolkan keunggulan utama dan target karir kamu.",
+          "Belum ada ringkasan diri\n\nKlik di sini untuk menulis deskripsi singkat tentang latar belakang dan keahlianmu."
+        ],
+        "sentenceCount": 2,
+        "charCount": 220,
+        "text": "TENTANG SAYA Paragraf pembuka singkat (3-5 kalimat) yang menonjolkan keunggulan utama dan target karir kamu. Belum ada ringkasan diri Klik di sini untuk menulis deskripsi singkat tentang latar belakang dan keahlianmu."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "PORTOFOLIO & MEDIA SOSIAL\n\nTautkan profil online agar recruiter dapat mengecek karya nyata dan rekam jejak kamu.",
+          "LinkedIn\nBelum ditambahkan\nGitHub / Repo\nBelum ditambahkan\nWebsite Pribadi\nBelum ditambahkan\nDribbble / Portofolio\nBelum ditambahkan"
+        ],
+        "sentenceCount": 2,
+        "charCount": 246,
+        "text": "PORTOFOLIO & MEDIA SOSIAL Tautkan profil online agar recruiter dapat mengecek karya nyata dan rekam jejak kamu. LinkedIn Belum ditambahkan GitHub / Repo Belum ditambahkan Website Pribadi Belum ditambahkan Dribbble / Portofolio Belum ditambahkan"
+      }
+    ]
+  },
+  {
+    "id": "readiness",
+    "name": "Kesiapan Kerja (Readiness)",
+    "path": "/readiness",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\readiness.png",
+    "count": 8,
+    "items": [
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "INDEKS KESIAPAN KERJA EMPLOYR\nCareer Readiness Index\n\nEvaluasi komprehensif mengukur kesiapan berkas lamaran, riset peran target, administrasi dokumen, dan momentum pelacakan karier Anda.",
+          "0%\nSTATUS KESIAPAN\nSinkronkan\nBelum Ada Data Profil"
+        ],
+        "sentenceCount": 2,
+        "charCount": 240,
+        "text": "INDEKS KESIAPAN KERJA EMPLOYR Career Readiness Index Evaluasi komprehensif mengukur kesiapan berkas lamaran, riset peran target, administrasi dokumen, dan momentum pelacakan karier Anda. 0% STATUS KESIAPAN Sinkronkan Belum Ada Data Profil"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "KEUNGGULAN UTAMA (SUPERPOWER)\nMenunggu Analisis Berkas\n\nLengkapi profil dan buat CV pertamamu untuk menemukan kekuatan terbaikmu.",
+          "PRIORITAS PENINGKATAN (BOTTLENECK)\nMomentum Pelamaran & Tracker\n\nFokus perbaikan mendesak: Momentum Pelamaran & Tracker (0/100).",
+          "Mengoptimalkan bagian ini akan meningkatkan kesiapan kerja Anda secara signifikan.",
+          "Tambah Lamaran di Tracker"
+        ],
+        "sentenceCount": 4,
+        "charCount": 369,
+        "text": "KEUNGGULAN UTAMA (SUPERPOWER) Menunggu Analisis Berkas Lengkapi profil dan buat CV pertamamu untuk menemukan kekuatan terbaikmu. PRIORITAS PENINGKATAN (BOTTLENECK) Momentum Pelamaran & Tracker Fokus perbaikan mendesak: Momentum Pelamaran & Tracker (0/100). Mengoptimalkan bagian ini akan meningkatkan kesiapan kerja Anda secara signifikan. Tambah Lamaran di Tracker"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "PRIORITAS PENINGKATAN (BOTTLENECK)\nMomentum Pelamaran & Tracker\n\nFokus perbaikan mendesak: Momentum Pelamaran & Tracker (0/100).",
+          "Mengoptimalkan bagian ini akan meningkatkan kesiapan kerja Anda secara signifikan.",
+          "Tambah Lamaran di Tracker"
+        ],
+        "sentenceCount": 3,
+        "charCount": 238,
+        "text": "PRIORITAS PENINGKATAN (BOTTLENECK) Momentum Pelamaran & Tracker Fokus perbaikan mendesak: Momentum Pelamaran & Tracker (0/100). Mengoptimalkan bagian ini akan meningkatkan kesiapan kerja Anda secara signifikan. Tambah Lamaran di Tracker"
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Fokus perbaikan mendesak: Momentum Pelamaran & Tracker (0/100).",
+          "Mengoptimalkan bagian ini akan meningkatkan kesiapan kerja Anda secara signifikan."
+        ],
+        "sentenceCount": 2,
+        "charCount": 146,
+        "text": "Fokus perbaikan mendesak: Momentum Pelamaran & Tracker (0/100). Mengoptimalkan bagian ini akan meningkatkan kesiapan kerja Anda secara signifikan."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Kualitas Berkas & Skor ATS\nStatus: Belum Ada Data\n0 / 100\n\nBelum ada CV yang tersimpan.",
+          "Buat CV pertama Anda untuk memulai kalkulasi kesiapan.",
+          "INDIKATOR PENILAIAN RIIL:\nSkor ATS\n0/100\nRingkasan Diri\nKosong\nPengalaman\nBelum ada\nRekomendasi Tindakan:\nMulai buat CV standar industri di menu CV Builder.",
+          "Buat CV Sekarang"
+        ],
+        "sentenceCount": 4,
+        "charCount": 317,
+        "text": "Kualitas Berkas & Skor ATS Status: Belum Ada Data 0 / 100 Belum ada CV yang tersimpan. Buat CV pertama Anda untuk memulai kalkulasi kesiapan. INDIKATOR PENILAIAN RIIL: Skor ATS 0/100 Ringkasan Diri Kosong Pengalaman Belum ada Rekomendasi Tindakan: Mulai buat CV standar industri di menu CV Builder. Buat CV Sekarang"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Riset & Kecocokan Lowongan\nStatus: Belum Ada Data\n0 / 100\n\nTentukan posisi kerja target dan bandingkan kecocokan keahlian Anda.",
+          "INDIKATOR PENILAIAN RIIL:\nTarget Posisi\nBelum ada\nKeahlian Kunci\n0 skill\nRelevansi Industri\nBelum diuji\nRekomendasi Tindakan:\nBuat CV dan uji kecocokan dengan deskripsi lowongan kerja impian.",
+          "Buka Match CV"
+        ],
+        "sentenceCount": 3,
+        "charCount": 334,
+        "text": "Riset & Kecocokan Lowongan Status: Belum Ada Data 0 / 100 Tentukan posisi kerja target dan bandingkan kecocokan keahlian Anda. INDIKATOR PENILAIAN RIIL: Target Posisi Belum ada Keahlian Kunci 0 skill Relevansi Industri Belum diuji Rekomendasi Tindakan: Buat CV dan uji kecocokan dengan deskripsi lowongan kerja impian. Buka Match CV"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Administrasi & Berkas Lamaran\nStatus: Belum Ada Data\n0 / 100\n\nLengkapi identitas diri dan siapkan surat pengantar lamaran profesional.",
+          "INDIKATOR PENILAIAN RIIL:\nKontak Valid\nBelum ada\nDomisili\nBelum ada\nTautan Portofolio\nBelum ada\nRekomendasi Tindakan:\nLengkapi data identitas di CV dan buat draf surat lamaran pertama.",
+          "Buka Menu Mailer"
+        ],
+        "sentenceCount": 3,
+        "charCount": 337,
+        "text": "Administrasi & Berkas Lamaran Status: Belum Ada Data 0 / 100 Lengkapi identitas diri dan siapkan surat pengantar lamaran profesional. INDIKATOR PENILAIAN RIIL: Kontak Valid Belum ada Domisili Belum ada Tautan Portofolio Belum ada Rekomendasi Tindakan: Lengkapi data identitas di CV dan buat draf surat lamaran pertama. Buka Menu Mailer"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Momentum Pelamaran & Tracker\nStatus: Belum Ada Data\n0 / 100\n\nPantau kemajuan karier Anda dengan mencatat setiap lowongan yang dilamar.",
+          "INDIKATOR PENILAIAN RIIL:\nLamaran Terkirim\n0 lamaran\nRitme Mingguan\nBelum aktif\nStatus Pipeline\nKosong\nRekomendasi Tindakan:\nMulai tambahkan lamaran pertama Anda di Tracker Lamaran.",
+          "Tambah Lamaran di Tracker"
+        ],
+        "sentenceCount": 3,
+        "charCount": 343,
+        "text": "Momentum Pelamaran & Tracker Status: Belum Ada Data 0 / 100 Pantau kemajuan karier Anda dengan mencatat setiap lowongan yang dilamar. INDIKATOR PENILAIAN RIIL: Lamaran Terkirim 0 lamaran Ritme Mingguan Belum aktif Status Pipeline Kosong Rekomendasi Tindakan: Mulai tambahkan lamaran pertama Anda di Tracker Lamaran. Tambah Lamaran di Tracker"
+      }
+    ]
+  },
+  {
+    "id": "mailer",
+    "name": "Email & Surat Lamaran",
+    "path": "/mailer",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\mailer.png",
+    "count": 6,
+    "items": [
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Langkah 1\nSiapkan Draf Surat Lamaran / Isi Email\n\nPilih template cepat di bawah atau susun secara cerdas.",
+          "Kamu cukup klik Salin Teks untuk kirim manual, atau klik Lanjut Kirim Otomatis untuk kirim instan ke HRD.",
+          "Pilihan kamu:\nSalin Bebas (Manual)\n/\nKirim Otomatis"
+        ],
+        "sentenceCount": 3,
+        "charCount": 264,
+        "text": "Langkah 1 Siapkan Draf Surat Lamaran / Isi Email Pilih template cepat di bawah atau susun secara cerdas. Kamu cukup klik Salin Teks untuk kirim manual, atau klik Lanjut Kirim Otomatis untuk kirim instan ke HRD. Pilihan kamu: Salin Bebas (Manual) / Kirim Otomatis"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Langkah 1\nSiapkan Draf Surat Lamaran / Isi Email\n\nPilih template cepat di bawah atau susun secara cerdas.",
+          "Kamu cukup klik Salin Teks untuk kirim manual, atau klik Lanjut Kirim Otomatis untuk kirim instan ke HRD."
+        ],
+        "sentenceCount": 2,
+        "charCount": 211,
+        "text": "Langkah 1 Siapkan Draf Surat Lamaran / Isi Email Pilih template cepat di bawah atau susun secara cerdas. Kamu cukup klik Salin Teks untuk kirim manual, atau klik Lanjut Kirim Otomatis untuk kirim instan ke HRD."
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Pilih template cepat di bawah atau susun secara cerdas.",
+          "Kamu cukup klik Salin Teks untuk kirim manual, atau klik Lanjut Kirim Otomatis untuk kirim instan ke HRD."
+        ],
+        "sentenceCount": 2,
+        "charCount": 161,
+        "text": "Pilih template cepat di bawah atau susun secara cerdas. Kamu cukup klik Salin Teks untuk kirim manual, atau klik Lanjut Kirim Otomatis untuk kirim instan ke HRD."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Kustomisasi Parameter Surat\n\nSesuaikan manual, atau tempel seluruh teks loker untuk pengisian otomatis.",
+          "Tempel Teks Loker\nPilih CV Saya (Basis Kualifikasi)\nBelum ada CV di akunmu.",
+          "Buat CV\nPerusahaan Target *\nPosisi Pekerjaan *\nKualifikasi Loker (Deskripsi Posisi)\nTempel Lengkap\nDirekomendasikan\n\nSistem menyelaraskan syarat lowongan ini dengan keahlian di CV-mu.",
+          "Nama Recruiter (Opsional)\nGaya Bahasa / Tone\nFormal (Bahasa Indonesia)\nHighlight Pengalaman Kunci (Opsional)\nSusun Surat Lamaran Cerdas"
+        ],
+        "sentenceCount": 4,
+        "charCount": 501,
+        "text": "Kustomisasi Parameter Surat Sesuaikan manual, atau tempel seluruh teks loker untuk pengisian otomatis. Tempel Teks Loker Pilih CV Saya (Basis Kualifikasi) Belum ada CV di akunmu. Buat CV Perusahaan Target * Posisi Pekerjaan * Kualifikasi Loker (Deskripsi Posisi) Tempel Lengkap Direkomendasikan Sistem menyelaraskan syarat lowongan ini dengan keahlian di CV-mu. Nama Recruiter (Opsional) Gaya Bahasa / Tone Formal (Bahasa Indonesia) Highlight Pengalaman Kunci (Opsional) Susun Surat Lamaran Cerdas"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Hasil Susunan Surat\nLive Sinkron\n\nDraf surat siap disalin atau diedit langsung.",
+          "Salin Cepat\nTeks di atas dapat langsung kamu ketik/edit sesuai kebutuhan.",
+          "767 karakter\nSalin Teks (Manual)\nSimpan Draf\nLanjut Kirim Otomatis"
+        ],
+        "sentenceCount": 3,
+        "charCount": 221,
+        "text": "Hasil Susunan Surat Live Sinkron Draf surat siap disalin atau diedit langsung. Salin Cepat Teks di atas dapat langsung kamu ketik/edit sesuai kebutuhan. 767 karakter Salin Teks (Manual) Simpan Draf Lanjut Kirim Otomatis"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Daftar Surat Lamaran Tersimpan (0)\nDapat disalin langsung atau dimuat ke editor kapan saja\nBelum ada surat lamaran yang disimpan.",
+          "Buat surat baru dan klik \"Simpan Draf\" untuk menyimpannya di sini."
+        ],
+        "sentenceCount": 2,
+        "charCount": 196,
+        "text": "Daftar Surat Lamaran Tersimpan (0) Dapat disalin langsung atau dimuat ke editor kapan saja Belum ada surat lamaran yang disimpan. Buat surat baru dan klik \"Simpan Draf\" untuk menyimpannya di sini."
+      }
+    ]
+  },
+  {
+    "id": "scrape-jobs",
+    "name": "Pencarian Loker",
+    "path": "/scrape-jobs",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\scrape-jobs.png",
+    "count": 17,
+    "items": [
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "Mode Explore (Semua Terbaru):Klik tombol 'Semua Terbaru' untuk meraup feed lowongan terbaru lintas bidang dari 24+ portal publik.",
+          "Refresh Status DB: Cek dan perbarui status lowongan yang sudah ada di database tanpa scrape ulang portal (lebih hemat waktu).",
+          "Cron Otomatis: Scrape harian jam 01.00 WIB menjalankan Mode Explore diikuti klaster profesi lengkap secara otomatis."
+        ],
+        "sentenceCount": 3,
+        "charCount": 372,
+        "text": "Mode Explore (Semua Terbaru):Klik tombol 'Semua Terbaru' untuk meraup feed lowongan terbaru lintas bidang dari 24+ portal publik. Refresh Status DB: Cek dan perbarui status lowongan yang sudah ada di database tanpa scrape ulang portal (lebih hemat waktu). Cron Otomatis: Scrape harian jam 01.00 WIB menjalankan Mode Explore diikuti klaster profesi lengkap secara otomatis."
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "Konten Tersimpan (DB)\n16\nARTIKEL\n3\nEVENT\n7\nSERTIFIKASI\n\nArtikel & sertifikasi ikut disinkronkan cron harian 01.00 WIB.",
+          "Scraper event menyusul (sumber SPA)."
+        ],
+        "sentenceCount": 2,
+        "charCount": 155,
+        "text": "Konten Tersimpan (DB) 16 ARTIKEL 3 EVENT 7 SERTIFIKASI Artikel & sertifikasi ikut disinkronkan cron harian 01.00 WIB. Scraper event menyusul (sumber SPA)."
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "DB TERSIMPAN\nAktif\nPower Planner & Maintenance Officer at PT Kawasan Industri Terpadu Batang member of PT Danareksa Persero\nDanareksa.",
+          "Batang, Central Java (Jawa Tengah), Indonesia\n-\n5 hari lalu\nSumber Asli"
+        ],
+        "sentenceCount": 2,
+        "charCount": 206,
+        "text": "DB TERSIMPAN Aktif Power Planner & Maintenance Officer at PT Kawasan Industri Terpadu Batang member of PT Danareksa Persero Danareksa. Batang, Central Java (Jawa Tengah), Indonesia - 5 hari lalu Sumber Asli"
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "DB TERSIMPAN\nAktif\nPower Planner & Maintenance Officer at PT Kawasan Industri Terpadu Batang member of PT Danareksa Persero\nDanareksa.",
+          "Batang, Central Java (Jawa Tengah), Indonesia\n-"
+        ],
+        "sentenceCount": 2,
+        "charCount": 182,
+        "text": "DB TERSIMPAN Aktif Power Planner & Maintenance Officer at PT Kawasan Industri Terpadu Batang member of PT Danareksa Persero Danareksa. Batang, Central Java (Jawa Tengah), Indonesia -"
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "DB TERSIMPAN\nAktif\nStaff Gudang\nPT.",
+          "Evo Manufacturing Indonesia\nSurabaya, East Java (Jawa Timur), Indonesia\n-\n5 hari lalu\nSumber Asli"
+        ],
+        "sentenceCount": 2,
+        "charCount": 133,
+        "text": "DB TERSIMPAN Aktif Staff Gudang PT. Evo Manufacturing Indonesia Surabaya, East Java (Jawa Timur), Indonesia - 5 hari lalu Sumber Asli"
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "DB TERSIMPAN\nAktif\nOperator Batching Plant\nPT.",
+          "Evo Manufacturing Indonesia\nPalembang, South Sumatra (Sumatra Selatan), Indonesia\n-\n5 hari lalu\nSumber Asli"
+        ],
+        "sentenceCount": 2,
+        "charCount": 154,
+        "text": "DB TERSIMPAN Aktif Operator Batching Plant PT. Evo Manufacturing Indonesia Palembang, South Sumatra (Sumatra Selatan), Indonesia - 5 hari lalu Sumber Asli"
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "DB TERSIMPAN\nAktif\nOperator Premix\nPT.",
+          "Evo Manufacturing Indonesia\nBanyu Asin, Sumatera Selatan, Indonesia\n-\n5 hari lalu\nSumber Asli"
+        ],
+        "sentenceCount": 2,
+        "charCount": 132,
+        "text": "DB TERSIMPAN Aktif Operator Premix PT. Evo Manufacturing Indonesia Banyu Asin, Sumatera Selatan, Indonesia - 5 hari lalu Sumber Asli"
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "DB TERSIMPAN\nAktif\nOperator Excavator\nPT.",
+          "Evo Manufacturing Indonesia\nPalembang, South Sumatra (Sumatra Selatan), Indonesia\n-\n5 hari lalu\nSumber Asli"
+        ],
+        "sentenceCount": 2,
+        "charCount": 149,
+        "text": "DB TERSIMPAN Aktif Operator Excavator PT. Evo Manufacturing Indonesia Palembang, South Sumatra (Sumatra Selatan), Indonesia - 5 hari lalu Sumber Asli"
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "DB TERSIMPAN\nAktif\nOperator Forklift\nPT.",
+          "Evo Manufacturing Indonesia\nBanyuasin, South Sumatra (Sumatra Selatan), Indonesia\n-\n5 hari lalu\nSumber Asli"
+        ],
+        "sentenceCount": 2,
+        "charCount": 148,
+        "text": "DB TERSIMPAN Aktif Operator Forklift PT. Evo Manufacturing Indonesia Banyuasin, South Sumatra (Sumatra Selatan), Indonesia - 5 hari lalu Sumber Asli"
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "DB TERSIMPAN\nAktif\nGeneral Affairs Admin Intern\nPT.",
+          "Evo Manufacturing Indonesia\nPalembang, South Sumatra (Sumatra Selatan), Indonesia\n-\n5 hari lalu\nSumber Asli"
+        ],
+        "sentenceCount": 2,
+        "charCount": 159,
+        "text": "DB TERSIMPAN Aktif General Affairs Admin Intern PT. Evo Manufacturing Indonesia Palembang, South Sumatra (Sumatra Selatan), Indonesia - 5 hari lalu Sumber Asli"
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "DB TERSIMPAN\nAktif\nGeneral Affairs Admin Intern\nPT.",
+          "Evo Manufacturing Indonesia\nPalembang, South Sumatra (Sumatra Selatan), Indonesia\n-"
+        ],
+        "sentenceCount": 2,
+        "charCount": 135,
+        "text": "DB TERSIMPAN Aktif General Affairs Admin Intern PT. Evo Manufacturing Indonesia Palembang, South Sumatra (Sumatra Selatan), Indonesia -"
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "DB TERSIMPAN\nAktif\nWarehouse Sparepart Admin\nPT.",
+          "Evo Manufacturing Indonesia\nBanyuasin, South Sumatra (Sumatra Selatan), Indonesia\n-\n5 hari lalu\nSumber Asli"
+        ],
+        "sentenceCount": 2,
+        "charCount": 156,
+        "text": "DB TERSIMPAN Aktif Warehouse Sparepart Admin PT. Evo Manufacturing Indonesia Banyuasin, South Sumatra (Sumatra Selatan), Indonesia - 5 hari lalu Sumber Asli"
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "DB TERSIMPAN\nAktif\nWarehouse Sparepart Admin\nPT.",
+          "Evo Manufacturing Indonesia\nBanyuasin, South Sumatra (Sumatra Selatan), Indonesia\n-"
+        ],
+        "sentenceCount": 2,
+        "charCount": 132,
+        "text": "DB TERSIMPAN Aktif Warehouse Sparepart Admin PT. Evo Manufacturing Indonesia Banyuasin, South Sumatra (Sumatra Selatan), Indonesia -"
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "DB TERSIMPAN\nAktif\nSITE ENGINEER (PROJECT)\nPT.",
+          "Evo Manufacturing Indonesia\nBanyu Asin, Sumatera Selatan, Indonesia\n-\n6 hari lalu\nSumber Asli"
+        ],
+        "sentenceCount": 2,
+        "charCount": 140,
+        "text": "DB TERSIMPAN Aktif SITE ENGINEER (PROJECT) PT. Evo Manufacturing Indonesia Banyu Asin, Sumatera Selatan, Indonesia - 6 hari lalu Sumber Asli"
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "DB TERSIMPAN\nAktif\nCustomer Experience Officer\nPT Prodia Widyahusada Tbk.",
+          "(Prodia)\nCentral Jakarta, DKI Jakarta, Indonesia\n-\n6 hari lalu\nSumber Asli"
+        ],
+        "sentenceCount": 2,
+        "charCount": 148,
+        "text": "DB TERSIMPAN Aktif Customer Experience Officer PT Prodia Widyahusada Tbk. (Prodia) Central Jakarta, DKI Jakarta, Indonesia - 6 hari lalu Sumber Asli"
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "DB TERSIMPAN\nAktif\nLoker Operation & Maintenance Staff Jakarta Selatan (Gaji s/d Rp6.500.000) – PT.",
+          "Bayu Buana Gemilang\nPerusahaan\nJakarta\n-\n6 hari lalu\nSumber Asli"
+        ],
+        "sentenceCount": 2,
+        "charCount": 164,
+        "text": "DB TERSIMPAN Aktif Loker Operation & Maintenance Staff Jakarta Selatan (Gaji s/d Rp6.500.000) – PT. Bayu Buana Gemilang Perusahaan Jakarta - 6 hari lalu Sumber Asli"
+      },
+      {
+        "tag": "div",
+        "role": "card-subtext",
+        "sentences": [
+          "DB TERSIMPAN\nAktif\nLoker Operation & Maintenance Staff Jakarta Selatan (Gaji s/d Rp6.500.000) – PT.",
+          "Bayu Buana Gemilang\nPerusahaan\nJakarta\n-"
+        ],
+        "sentenceCount": 2,
+        "charCount": 140,
+        "text": "DB TERSIMPAN Aktif Loker Operation & Maintenance Staff Jakarta Selatan (Gaji s/d Rp6.500.000) – PT. Bayu Buana Gemilang Perusahaan Jakarta -"
+      }
+    ]
+  },
+  {
+    "id": "interview",
+    "name": "Simulasi Interview",
+    "path": "/interview",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\interview.png",
+    "count": 4,
+    "items": [
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Pengaturan Sesi Simulasi\nPosisi / Peran Pekerjaan\nSoftware Engineer / Developer\nDigital Marketing Specialist\nData Analyst & BI\nHuman Resources Specialist\nProduct Manager\nTingkat / Jenis Interview\nHR Screening & Behavioral\nUser / Managerial & Technical\nDirector / Final Board Interview\nPetunjuk Simulasi\n\nKetik jawaban seolah-olah Anda sedang di depan pewawancara asli.",
+          "Sistem akan menganalisis poin kekuatan & area perbaikan."
+        ],
+        "sentenceCount": 2,
+        "charCount": 425,
+        "text": "Pengaturan Sesi Simulasi Posisi / Peran Pekerjaan Software Engineer / Developer Digital Marketing Specialist Data Analyst & BI Human Resources Specialist Product Manager Tingkat / Jenis Interview HR Screening & Behavioral User / Managerial & Technical Director / Final Board Interview Petunjuk Simulasi Ketik jawaban seolah-olah Anda sedang di depan pewawancara asli. Sistem akan menganalisis poin kekuatan & area perbaikan."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Posisi / Peran Pekerjaan\nSoftware Engineer / Developer\nDigital Marketing Specialist\nData Analyst & BI\nHuman Resources Specialist\nProduct Manager\nTingkat / Jenis Interview\nHR Screening & Behavioral\nUser / Managerial & Technical\nDirector / Final Board Interview\nPetunjuk Simulasi\n\nKetik jawaban seolah-olah Anda sedang di depan pewawancara asli.",
+          "Sistem akan menganalisis poin kekuatan & area perbaikan."
+        ],
+        "sentenceCount": 2,
+        "charCount": 400,
+        "text": "Posisi / Peran Pekerjaan Software Engineer / Developer Digital Marketing Specialist Data Analyst & BI Human Resources Specialist Product Manager Tingkat / Jenis Interview HR Screening & Behavioral User / Managerial & Technical Director / Final Board Interview Petunjuk Simulasi Ketik jawaban seolah-olah Anda sedang di depan pewawancara asli. Sistem akan menganalisis poin kekuatan & area perbaikan."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Petunjuk Simulasi\n\nKetik jawaban seolah-olah Anda sedang di depan pewawancara asli.",
+          "Sistem akan menganalisis poin kekuatan & area perbaikan."
+        ],
+        "sentenceCount": 2,
+        "charCount": 140,
+        "text": "Petunjuk Simulasi Ketik jawaban seolah-olah Anda sedang di depan pewawancara asli. Sistem akan menganalisis poin kekuatan & area perbaikan."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "PERTANYAAN #1 (SOFTWARE ENGINEER)\nGanti Pertanyaan\n\"Ceritakan pengalaman Anda saat menangani bug kritis di lingkungan produksi (production) yang berdampak pada pengguna.\"\n\nTips Jawaban: Gunakan metode STAR (Situation, Task, Action, Result) dan sebutkan langkah mitigasi jangka panjang.",
+          "Jawaban Anda:\n0 karakter\nBersihkan\nEvaluasi Jawaban"
+        ],
+        "sentenceCount": 2,
+        "charCount": 338,
+        "text": "PERTANYAAN #1 (SOFTWARE ENGINEER) Ganti Pertanyaan \"Ceritakan pengalaman Anda saat menangani bug kritis di lingkungan produksi (production) yang berdampak pada pengguna.\" Tips Jawaban: Gunakan metode STAR (Situation, Task, Action, Result) dan sebutkan langkah mitigasi jangka panjang. Jawaban Anda: 0 karakter Bersihkan Evaluasi Jawaban"
+      }
+    ]
+  },
+  {
+    "id": "latihan-soal",
+    "name": "Latihan Soal",
+    "path": "/latihan-soal",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\latihan-soal.png",
+    "count": 8,
+    "items": [
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "BUMN & CPNS\nGRATIS\nSimulasi TKD BUMN & Core Values AKHLAK 2026\n\nLatihan soal standar BUMN terbaru mencakup Verbal, Numerik, Logika, dan Core Values AKHLAK BUMN.",
+          "15 Mins\n5 Soal\nHOTS\nMulai Kerjakan Soal"
+        ],
+        "sentenceCount": 2,
+        "charCount": 201,
+        "text": "BUMN & CPNS GRATIS Simulasi TKD BUMN & Core Values AKHLAK 2026 Latihan soal standar BUMN terbaru mencakup Verbal, Numerik, Logika, dan Core Values AKHLAK BUMN. 15 Mins 5 Soal HOTS Mulai Kerjakan Soal"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "BUMN & CPNS\nGRATIS\nSimulasi TKD BUMN & Core Values AKHLAK 2026\n\nLatihan soal standar BUMN terbaru mencakup Verbal, Numerik, Logika, dan Core Values AKHLAK BUMN.",
+          "15 Mins\n5 Soal\nHOTS"
+        ],
+        "sentenceCount": 2,
+        "charCount": 181,
+        "text": "BUMN & CPNS GRATIS Simulasi TKD BUMN & Core Values AKHLAK 2026 Latihan soal standar BUMN terbaru mencakup Verbal, Numerik, Logika, dan Core Values AKHLAK BUMN. 15 Mins 5 Soal HOTS"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "TECH & CODING\nGRATIS\nFrontend React.js & Modern JavaScript Assessment\n\nUji pemahaman Hook, State Management, Virtual DOM, dan ES6+ untuk persiapan technical interview.",
+          "20 Mins\n4 Soal\nSedang\nMulai Kerjakan Soal"
+        ],
+        "sentenceCount": 2,
+        "charCount": 210,
+        "text": "TECH & CODING GRATIS Frontend React.js & Modern JavaScript Assessment Uji pemahaman Hook, State Management, Virtual DOM, dan ES6+ untuk persiapan technical interview. 20 Mins 4 Soal Sedang Mulai Kerjakan Soal"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "TECH & CODING\nGRATIS\nFrontend React.js & Modern JavaScript Assessment\n\nUji pemahaman Hook, State Management, Virtual DOM, dan ES6+ untuk persiapan technical interview.",
+          "20 Mins\n4 Soal\nSedang"
+        ],
+        "sentenceCount": 2,
+        "charCount": 190,
+        "text": "TECH & CODING GRATIS Frontend React.js & Modern JavaScript Assessment Uji pemahaman Hook, State Management, Virtual DOM, dan ES6+ untuk persiapan technical interview. 20 Mins 4 Soal Sedang"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "BUMN & CPNS\nGRATIS\nSKD CPNS 2026 — Tes Wawasan Kebangsaan (TWK)\n\nLatihan soal TWK mencakup Pancasila, UUD 1945, NKRI, Bhinneka Tunggal Ika, dan Nasionalisme.",
+          "15 Mins\n4 Soal\nSedang\nMulai Kerjakan Soal"
+        ],
+        "sentenceCount": 2,
+        "charCount": 200,
+        "text": "BUMN & CPNS GRATIS SKD CPNS 2026 — Tes Wawasan Kebangsaan (TWK) Latihan soal TWK mencakup Pancasila, UUD 1945, NKRI, Bhinneka Tunggal Ika, dan Nasionalisme. 15 Mins 4 Soal Sedang Mulai Kerjakan Soal"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "BUMN & CPNS\nGRATIS\nSKD CPNS 2026 — Tes Wawasan Kebangsaan (TWK)\n\nLatihan soal TWK mencakup Pancasila, UUD 1945, NKRI, Bhinneka Tunggal Ika, dan Nasionalisme.",
+          "15 Mins\n4 Soal\nSedang"
+        ],
+        "sentenceCount": 2,
+        "charCount": 180,
+        "text": "BUMN & CPNS GRATIS SKD CPNS 2026 — Tes Wawasan Kebangsaan (TWK) Latihan soal TWK mencakup Pancasila, UUD 1945, NKRI, Bhinneka Tunggal Ika, dan Nasionalisme. 15 Mins 4 Soal Sedang"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "BAHASA & TOEFL\nGRATIS\nTOEFL Structure & Written Expression Practice\n\nLatihan soal Grammar, Subject-Verb Agreement, Inversion, dan Error Identification untuk skor TOEFL 550+.",
+          "10 Mins\n3 Soal\nHOTS\nMulai Kerjakan Soal"
+        ],
+        "sentenceCount": 2,
+        "charCount": 214,
+        "text": "BAHASA & TOEFL GRATIS TOEFL Structure & Written Expression Practice Latihan soal Grammar, Subject-Verb Agreement, Inversion, dan Error Identification untuk skor TOEFL 550+. 10 Mins 3 Soal HOTS Mulai Kerjakan Soal"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "BAHASA & TOEFL\nGRATIS\nTOEFL Structure & Written Expression Practice\n\nLatihan soal Grammar, Subject-Verb Agreement, Inversion, dan Error Identification untuk skor TOEFL 550+.",
+          "10 Mins\n3 Soal\nHOTS"
+        ],
+        "sentenceCount": 2,
+        "charCount": 194,
+        "text": "BAHASA & TOEFL GRATIS TOEFL Structure & Written Expression Practice Latihan soal Grammar, Subject-Verb Agreement, Inversion, dan Error Identification untuk skor TOEFL 550+. 10 Mins 3 Soal HOTS"
+      }
+    ]
+  },
+  {
+    "id": "saran-fitur",
+    "name": "Saran Fitur",
+    "path": "/saran-fitur",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\saran-fitur.png",
+    "count": 5,
+    "items": [
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Formulir Pengajuan Fitur\n\nBerikan rincian ide dengan jelas agar tim pengembang dapat memahaminya dengan mudah.",
+          "Judul Saran Fitur *\nArea / Bagian Terkait *\nCV Builder & Desain CV\nKendala yang Dihadapi & Manfaat Fitur *\nEkspektasi Cara Kerja / Alur Fitur\nOpsional\nReferensi Mockup / Gambar Sketsa\nOpsional (Maks.",
+          "5 gambar, bisa paste Ctrl+V)\nPilih gambar atau seret ke sini, atau tekan Ctrl+V untuk tempel\n\nPNG, JPG, WEBP hingga 5MB per file\n\nNama Pengaju\nEmail Kontak\nKirim Saran Fitur"
+        ],
+        "sentenceCount": 3,
+        "charCount": 485,
+        "text": "Formulir Pengajuan Fitur Berikan rincian ide dengan jelas agar tim pengembang dapat memahaminya dengan mudah. Judul Saran Fitur * Area / Bagian Terkait * CV Builder & Desain CV Kendala yang Dihadapi & Manfaat Fitur * Ekspektasi Cara Kerja / Alur Fitur Opsional Referensi Mockup / Gambar Sketsa Opsional (Maks. 5 gambar, bisa paste Ctrl+V) Pilih gambar atau seret ke sini, atau tekan Ctrl+V untuk tempel PNG, JPG, WEBP hingga 5MB per file Nama Pengaju Email Kontak Kirim Saran Fitur"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Referensi Mockup / Gambar Sketsa\nOpsional (Maks.",
+          "5 gambar, bisa paste Ctrl+V)\nPilih gambar atau seret ke sini, atau tekan Ctrl+V untuk tempel\n\nPNG, JPG, WEBP hingga 5MB per file"
+        ],
+        "sentenceCount": 2,
+        "charCount": 177,
+        "text": "Referensi Mockup / Gambar Sketsa Opsional (Maks. 5 gambar, bisa paste Ctrl+V) Pilih gambar atau seret ke sini, atau tekan Ctrl+V untuk tempel PNG, JPG, WEBP hingga 5MB per file"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Tips Menyampaikan Saran\n1\n\nFokus pada masalah: Jelaskan apa yang saat ini memakan waktu atau menyulitkanmu saat melamar kerja.",
+          "2\n\nBeri contoh konkret: Contoh skenario nyata mempermudah tim kami dalam merancang solusinya.",
+          "3\n\nPantau tanggapan tim: Tim pengembang akan meninjau setiap usulan dan memberikan respon berkala langsung di tab Riwayat."
+        ],
+        "sentenceCount": 3,
+        "charCount": 345,
+        "text": "Tips Menyampaikan Saran 1 Fokus pada masalah: Jelaskan apa yang saat ini memakan waktu atau menyulitkanmu saat melamar kerja. 2 Beri contoh konkret: Contoh skenario nyata mempermudah tim kami dalam merancang solusinya. 3 Pantau tanggapan tim: Tim pengembang akan meninjau setiap usulan dan memberikan respon berkala langsung di tab Riwayat."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "1\n\nFokus pada masalah: Jelaskan apa yang saat ini memakan waktu atau menyulitkanmu saat melamar kerja.",
+          "2\n\nBeri contoh konkret: Contoh skenario nyata mempermudah tim kami dalam merancang solusinya.",
+          "3\n\nPantau tanggapan tim: Tim pengembang akan meninjau setiap usulan dan memberikan respon berkala langsung di tab Riwayat."
+        ],
+        "sentenceCount": 3,
+        "charCount": 321,
+        "text": "1 Fokus pada masalah: Jelaskan apa yang saat ini memakan waktu atau menyulitkanmu saat melamar kerja. 2 Beri contoh konkret: Contoh skenario nyata mempermudah tim kami dalam merancang solusinya. 3 Pantau tanggapan tim: Tim pengembang akan meninjau setiap usulan dan memberikan respon berkala langsung di tab Riwayat."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Tahapan Ide Fitur\nDitinjau Tim\n\nSedang dipelajari oleh tim produk.",
+          "Direncanakan\n\nTelah disetujui dan masuk daftar rencana rilis.",
+          "Sedang Dibuat\n\nTim teknis sedang mengembangkan fitur ini.",
+          "Sudah Rilis\n\nFitur telah selesai dibuat dan bisa digunakan!",
+          "Belum Memungkinkan\n\nBelum sesuai dengan prioritas atau arah pengembangan saat ini."
+        ],
+        "sentenceCount": 5,
+        "charCount": 333,
+        "text": "Tahapan Ide Fitur Ditinjau Tim Sedang dipelajari oleh tim produk. Direncanakan Telah disetujui dan masuk daftar rencana rilis. Sedang Dibuat Tim teknis sedang mengembangkan fitur ini. Sudah Rilis Fitur telah selesai dibuat dan bisa digunakan! Belum Memungkinkan Belum sesuai dengan prioritas atau arah pengembangan saat ini."
+      }
+    ]
+  },
+  {
+    "id": "lapor-bug",
+    "name": "Lapor Kendala",
+    "path": "/lapor-bug",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\lapor-bug.png",
+    "count": 5,
+    "items": [
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Apa kendala yang kamu temukan?",
+          "*\nHalaman Tempat Kendala Terjadi\nBeranda (/beranda)\nCeritakan Kendalanya *\nTangkapan Layar / Screenshot (Opsional)\n\nLampirkan gambar tampilan yang error jika ada.",
+          "Maks.",
+          "3 file\nKlik untuk memilih gambar atau seret file ke sini\nBisa juga langsung tekan Ctrl + V di mana saja pada halaman ini untuk menempelkan screenshot.",
+          "Laporanmu akan langsung ditinjau oleh tim kami untuk segera diperbaiki.",
+          "Kirim Laporan Kendala"
+        ],
+        "sentenceCount": 6,
+        "charCount": 447,
+        "text": "Apa kendala yang kamu temukan? * Halaman Tempat Kendala Terjadi Beranda (/beranda) Ceritakan Kendalanya * Tangkapan Layar / Screenshot (Opsional) Lampirkan gambar tampilan yang error jika ada. Maks. 3 file Klik untuk memilih gambar atau seret file ke sini Bisa juga langsung tekan Ctrl + V di mana saja pada halaman ini untuk menempelkan screenshot. Laporanmu akan langsung ditinjau oleh tim kami untuk segera diperbaiki. Kirim Laporan Kendala"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Tangkapan Layar / Screenshot (Opsional)\n\nLampirkan gambar tampilan yang error jika ada.",
+          "Maks.",
+          "3 file\nKlik untuk memilih gambar atau seret file ke sini\nBisa juga langsung tekan Ctrl + V di mana saja pada halaman ini untuk menempelkan screenshot."
+        ],
+        "sentenceCount": 3,
+        "charCount": 245,
+        "text": "Tangkapan Layar / Screenshot (Opsional) Lampirkan gambar tampilan yang error jika ada. Maks. 3 file Klik untuk memilih gambar atau seret file ke sini Bisa juga langsung tekan Ctrl + V di mana saja pada halaman ini untuk menempelkan screenshot."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Tangkapan Layar / Screenshot (Opsional)\n\nLampirkan gambar tampilan yang error jika ada.",
+          "Maks.",
+          "3 file"
+        ],
+        "sentenceCount": 3,
+        "charCount": 101,
+        "text": "Tangkapan Layar / Screenshot (Opsional) Lampirkan gambar tampilan yang error jika ada. Maks. 3 file"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "INFO SISTEM KAMU\nSertakan\n\nData ini otomatis diambil dari browsermu untuk membantu developer mereproduksi kendala dengan cepat.",
+          "Browser\nMicrosoft Edge\nSistem Operasi\nWindows\nResolusi Layar\n1440 x 900 (1x)\nStatus Jaringan\nOnline"
+        ],
+        "sentenceCount": 2,
+        "charCount": 228,
+        "text": "INFO SISTEM KAMU Sertakan Data ini otomatis diambil dari browsermu untuk membantu developer mereproduksi kendala dengan cepat. Browser Microsoft Edge Sistem Operasi Windows Resolusi Layar 1440 x 900 (1x) Status Jaringan Online"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "TIPS PELAPORAN EFEKTIF\nSebutkan apa yang kamu klik: Ceritakan kronologi sebelum error muncul.",
+          "Lampirkan screenshot: Gambar tampilan rusak sangat mempercepat penanganan.",
+          "Pantau balasan admin: Tim kami akan membalas langsung di tiket laporanmu."
+        ],
+        "sentenceCount": 3,
+        "charCount": 242,
+        "text": "TIPS PELAPORAN EFEKTIF Sebutkan apa yang kamu klik: Ceritakan kronologi sebelum error muncul. Lampirkan screenshot: Gambar tampilan rusak sangat mempercepat penanganan. Pantau balasan admin: Tim kami akan membalas langsung di tiket laporanmu."
+      }
+    ]
+  },
+  {
+    "id": "pembayaran",
+    "name": "Pembayaran / Membership",
+    "path": "/pembayaran",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\council-audit\\pembayaran.png",
+    "count": 19,
+    "items": [
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "AKTIVITAS UTAMA\nSelamat pagi, Budi\n\nDashboard kariermu siap digunakan\n\nJelajahi Fitur\n\nSemua prioritas terselesaikan!",
+          "Tidak ada prioritas mendesak saat ini"
+        ],
+        "sentenceCount": 2,
+        "charCount": 156,
+        "text": "AKTIVITAS UTAMA Selamat pagi, Budi Dashboard kariermu siap digunakan Jelajahi Fitur Semua prioritas terselesaikan! Tidak ada prioritas mendesak saat ini"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Progress & Funnel Lamaran\n4 Tahapan\n\nRasio konversi tiap tahap seleksi\n\nDetail Tracker\nLamaran Dikirim\n\n0 Dokumen terkirim ke HR\n\n0\n0%\nScreening HR\n\n0 Berkas lolos filter awal\n\n0\n0%\nSesi Interview\n\n0 Undangan wawancara\n\n0\n0%\nOffering Letter\n\n0 Penawaran kerja resmi\n\n0\n0%\n\nInsight Konversi Seleksi:\n\nBelum ada dokumen lamaran terkirim.",
+          "Catat lamaran pertamamu di Tracker untuk memantau rasio konversi seleksi.",
+          "Analisis Detail Conversion Rate di Tracker"
+        ],
+        "sentenceCount": 3,
+        "charCount": 453,
+        "text": "Progress & Funnel Lamaran 4 Tahapan Rasio konversi tiap tahap seleksi Detail Tracker Lamaran Dikirim 0 Dokumen terkirim ke HR 0 0% Screening HR 0 Berkas lolos filter awal 0 0% Sesi Interview 0 Undangan wawancara 0 0% Offering Letter 0 Penawaran kerja resmi 0 0% Insight Konversi Seleksi: Belum ada dokumen lamaran terkirim. Catat lamaran pertamamu di Tracker untuk memantau rasio konversi seleksi. Analisis Detail Conversion Rate di Tracker"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Insight Konversi Seleksi:\n\nBelum ada dokumen lamaran terkirim.",
+          "Catat lamaran pertamamu di Tracker untuk memantau rasio konversi seleksi."
+        ],
+        "sentenceCount": 2,
+        "charCount": 136,
+        "text": "Insight Konversi Seleksi: Belum ada dokumen lamaran terkirim. Catat lamaran pertamamu di Tracker untuk memantau rasio konversi seleksi."
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Jadwal Terdekat\n0 Agenda\n\nAgenda interview, tes & deadline\n\nSemua\n\nTidak ada agenda mendesak\n\nJadwal interview dan batas waktu lamaran kamu akan muncul otomatis di sini.",
+          "Buka Tracker\nPanduan & Simulator Interview"
+        ],
+        "sentenceCount": 2,
+        "charCount": 213,
+        "text": "Jadwal Terdekat 0 Agenda Agenda interview, tes & deadline Semua Tidak ada agenda mendesak Jadwal interview dan batas waktu lamaran kamu akan muncul otomatis di sini. Buka Tracker Panduan & Simulator Interview"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Sprint Lamaran Minggu Ini\n\nTarget mingguan & konsistensi melamar\n\n0 Hari Streak\nProgres Minggu Ini\n0 / 10 Lamaran(0%)\nAKTIVITAS HARIAN (SENIN - MINGGU):\nBELUM ADA\n\nKirim minimal 5-10 lamaran per minggu secara konsisten untuk memperluas peluang dipanggil wawancara kerja.",
+          "Lihat Tracker\nLamar Loker"
+        ],
+        "sentenceCount": 2,
+        "charCount": 297,
+        "text": "Sprint Lamaran Minggu Ini Target mingguan & konsistensi melamar 0 Hari Streak Progres Minggu Ini 0 / 10 Lamaran(0%) AKTIVITAS HARIAN (SENIN - MINGGU): BELUM ADA Kirim minimal 5-10 lamaran per minggu secara konsisten untuk memperluas peluang dipanggil wawancara kerja. Lihat Tracker Lamar Loker"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Karier\n3 min baca\nCV vs.",
+          "Résumé: What&#8217;s the Difference?",
+          "When you're applying for a job, you'll often hear the terms CV and résumé .",
+          "But what's the difference between them?",
+          "While the two…"
+        ],
+        "sentenceCount": 5,
+        "charCount": 193,
+        "text": "Karier 3 min baca CV vs. Résumé: What&#8217;s the Difference? When you're applying for a job, you'll often hear the terms CV and résumé . But what's the difference between them? While the two…"
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "When you're applying for a job, you'll often hear the terms CV and résumé .",
+          "But what's the difference between them?",
+          "While the two…"
+        ],
+        "sentenceCount": 3,
+        "charCount": 130,
+        "text": "When you're applying for a job, you'll often hear the terms CV and résumé . But what's the difference between them? While the two…"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Karier\n3 min baca\nRemote or Office Work?",
+          "What to Consider When Choosing a Work Setup\n\nWhere you work can shape how you work.",
+          "For some professionals, working from home offers flexibility and less commuting.",
+          "For others…"
+        ],
+        "sentenceCount": 4,
+        "charCount": 217,
+        "text": "Karier 3 min baca Remote or Office Work? What to Consider When Choosing a Work Setup Where you work can shape how you work. For some professionals, working from home offers flexibility and less commuting. For others…"
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Where you work can shape how you work.",
+          "For some professionals, working from home offers flexibility and less commuting.",
+          "For others…"
+        ],
+        "sentenceCount": 3,
+        "charCount": 131,
+        "text": "Where you work can shape how you work. For some professionals, working from home offers flexibility and less commuting. For others…"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Karier\n5 min baca\n10 Questions Every Student Should Ask Before Accepting an Internship\n\nGetting an internship offer is exciting.",
+          "But before saying yes, take a moment to understand what you're signing up for.",
+          "An interns…"
+        ],
+        "sentenceCount": 3,
+        "charCount": 219,
+        "text": "Karier 5 min baca 10 Questions Every Student Should Ask Before Accepting an Internship Getting an internship offer is exciting. But before saying yes, take a moment to understand what you're signing up for. An interns…"
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Getting an internship offer is exciting.",
+          "But before saying yes, take a moment to understand what you're signing up for.",
+          "An interns…"
+        ],
+        "sentenceCount": 3,
+        "charCount": 131,
+        "text": "Getting an internship offer is exciting. But before saying yes, take a moment to understand what you're signing up for. An interns…"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Strategi Melamar\n1 min baca\nPanduan Lengkap Cara Melamar Kerja via Email & WA\n\nSelalu gunakan email profesional.",
+          "Gunakan subject yang jelas seperti \"Lamaran Pekerjaan - [Posisi] - [Nama]\".",
+          "Etika, penulisan sub…"
+        ],
+        "sentenceCount": 3,
+        "charCount": 210,
+        "text": "Strategi Melamar 1 min baca Panduan Lengkap Cara Melamar Kerja via Email & WA Selalu gunakan email profesional. Gunakan subject yang jelas seperti \"Lamaran Pekerjaan - [Posisi] - [Nama]\". Etika, penulisan sub…"
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Selalu gunakan email profesional.",
+          "Gunakan subject yang jelas seperti \"Lamaran Pekerjaan - [Posisi] - [Nama]\".",
+          "Etika, penulisan sub…"
+        ],
+        "sentenceCount": 3,
+        "charCount": 131,
+        "text": "Selalu gunakan email profesional. Gunakan subject yang jelas seperti \"Lamaran Pekerjaan - [Posisi] - [Nama]\". Etika, penulisan sub…"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Persiapan Interview\n1 min baca\n20 Pertanyaan Interview Tersering & Cara Menjawabnya\n\nGunakan teknik STAR (Situation, Task, Action, Result).",
+          "Jelaskan situasi yang pernah dialami, tugas yang diemban, serta hasil teruk…"
+        ],
+        "sentenceCount": 2,
+        "charCount": 216,
+        "text": "Persiapan Interview 1 min baca 20 Pertanyaan Interview Tersering & Cara Menjawabnya Gunakan teknik STAR (Situation, Task, Action, Result). Jelaskan situasi yang pernah dialami, tugas yang diemban, serta hasil teruk…"
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Gunakan teknik STAR (Situation, Task, Action, Result).",
+          "Jelaskan situasi yang pernah dialami, tugas yang diemban, serta hasil teruk…"
+        ],
+        "sentenceCount": 2,
+        "charCount": 131,
+        "text": "Gunakan teknik STAR (Situation, Task, Action, Result). Jelaskan situasi yang pernah dialami, tugas yang diemban, serta hasil teruk…"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Optimasi CV\n1 min baca\nCara Membuat CV ATS Friendly yang Lolos Screening HR\n\nSistem ATS memfilter ribuan CV berdasarkan kata kunci.",
+          "Gunakan font standar, hindari grafik kompleks, serta cantumkan kata kunci y…"
+        ],
+        "sentenceCount": 2,
+        "charCount": 208,
+        "text": "Optimasi CV 1 min baca Cara Membuat CV ATS Friendly yang Lolos Screening HR Sistem ATS memfilter ribuan CV berdasarkan kata kunci. Gunakan font standar, hindari grafik kompleks, serta cantumkan kata kunci y…"
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Sistem ATS memfilter ribuan CV berdasarkan kata kunci.",
+          "Gunakan font standar, hindari grafik kompleks, serta cantumkan kata kunci y…"
+        ],
+        "sentenceCount": 2,
+        "charCount": 131,
+        "text": "Sistem ATS memfilter ribuan CV berdasarkan kata kunci. Gunakan font standar, hindari grafik kompleks, serta cantumkan kata kunci y…"
+      },
+      {
+        "tag": "div",
+        "role": "general",
+        "sentences": [
+          "Karier\n3 min baca\nManajemen Talent Acquisition: Cara Meningkatkan Kualitas SDM lebih Efisien\n\nStrategi manajemen talent acquisition dalam meningkatkan kualitas SDM merupakan kunci utama perusahaan.",
+          "Di era digital , metode pe…"
+        ],
+        "sentenceCount": 2,
+        "charCount": 225,
+        "text": "Karier 3 min baca Manajemen Talent Acquisition: Cara Meningkatkan Kualitas SDM lebih Efisien Strategi manajemen talent acquisition dalam meningkatkan kualitas SDM merupakan kunci utama perusahaan. Di era digital , metode pe…"
+      },
+      {
+        "tag": "p",
+        "role": "general",
+        "sentences": [
+          "Strategi manajemen talent acquisition dalam meningkatkan kualitas SDM merupakan kunci utama perusahaan.",
+          "Di era digital , metode pe…"
+        ],
+        "sentenceCount": 2,
+        "charCount": 131,
+        "text": "Strategi manajemen talent acquisition dalam meningkatkan kualitas SDM merupakan kunci utama perusahaan. Di era digital , metode pe…"
+      }
+    ]
+  }
+]

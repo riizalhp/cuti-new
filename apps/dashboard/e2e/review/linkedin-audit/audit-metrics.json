@@ -1,0 +1,112 @@
+{
+  "mobileOverflow": {
+    "hasHorizontalScroll": false,
+    "docWidth": 375,
+    "scrollWidth": 375,
+    "overflowingCount": 1,
+    "sampleOverflow": [
+      {
+        "tagName": "IMG",
+        "className": "w-full h-full object-cover scale-[2.1] origin-top translate-y-1 group-hover:scale-[2.2] transition-transform duration-200",
+        "right": 381.2749938964844,
+        "docWidth": 375
+      }
+    ]
+  },
+  "domAudit": {
+    "headings": [
+      {
+        "level": "h2",
+        "text": "Link URL Profil LinkedIn"
+      }
+    ],
+    "buttons": [
+      {
+        "text": "",
+        "ariaLabel": "Tutup Menu",
+        "title": null,
+        "type": null,
+        "disabled": false
+      },
+      {
+        "text": "Keluar Akun",
+        "ariaLabel": null,
+        "title": null,
+        "type": "button",
+        "disabled": false
+      },
+      {
+        "text": "",
+        "ariaLabel": "Sembunyikan Sidebar",
+        "title": "Sembunyikan Sidebar",
+        "type": "button",
+        "disabled": false
+      },
+      {
+        "text": "Dark",
+        "ariaLabel": "Toggle Mode Terang / Gelap",
+        "title": "Beralih ke Mode Gelap",
+        "type": null,
+        "disabled": false
+      },
+      {
+        "text": "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+        "ariaLabel": "Notifikasi & Pengingat",
+        "title": null,
+        "type": "button",
+        "disabled": false
+      },
+      {
+        "text": "Budi Santoso",
+        "ariaLabel": "Menu Profil Pengguna",
+        "title": "Lihat & Pengaturan Profil Saya",
+        "type": null,
+        "disabled": false
+      },
+      {
+        "text": "Riwayat",
+        "ariaLabel": null,
+        "title": "Lihat riwayat hasil audit yang tersimpan",
+        "type": "button",
+        "disabled": false
+      },
+      {
+        "text": "Ekstrak & Audit Profil Sekarang",
+        "ariaLabel": null,
+        "title": null,
+        "type": "submit",
+        "disabled": true
+      },
+      {
+        "text": "",
+        "ariaLabel": "Tanya Herdi",
+        "title": "Tanya Herdi (Customer Service)",
+        "type": "button",
+        "disabled": false
+      }
+    ],
+    "inputs": [
+      {
+        "type": "text",
+        "placeholder": "linkedin.com/in/nama-kamu atau cukup nama-kamu",
+        "value": "",
+        "required": true,
+        "hasAssociatedLabel": true
+      }
+    ]
+  },
+  "consoleErrors": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    }
+  ]
+}

@@ -11,10 +11,8 @@ import {
   Bot,
   Mail,
   Briefcase,
-  Mic,
   Target,
   Users,
-  TrendingUp,
   Sparkles,
   ChevronRight,
   Settings,
@@ -29,12 +27,14 @@ import {
   Gift,
   User,
   Globe,
+  ShieldAlert,
+  Lightbulb,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { trackerApi } from '@/lib/api';
-import { useCareerReadiness } from '@/hooks/useCareerReadiness';
 import { getLearningUrl } from '@/lib/urls';
-import { getScoreProgressBarClass } from '@/lib/score-color';
+import { handleLogout } from '@/lib/auth';
 
 interface SidebarProps {
   onOpenUpgradeModal: () => void;
@@ -68,7 +68,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
 }) => {
   const pathname = usePathname();
-  const { score: readinessScore } = useCareerReadiness();
   const [trackerCount, setTrackerCount] = React.useState(0);
 
   React.useEffect(() => {
@@ -79,7 +78,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ).length;
         setTrackerCount(activeCount);
       }
-    });
+    }).catch(() => {});
   }, []);
 
   const categories: SidebarCategory[] = [
@@ -91,19 +90,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       ],
     },
     {
-      category: 'Profil & Dokumen',
-      icon: User,
+      category: 'Dokumen Karier',
+      icon: FileText,
       items: [
         { id: 'cv', label: 'CV Saya', href: '/cv', icon: FileText },
-        { id: 'cv-screener', label: 'Simulasi Screening', href: '/cv-screener', icon: Eye },
+        { id: 'cv-screener', label: 'Screening & Evaluasi ATS', href: '/cv-screener', icon: Eye },
         { id: 'linkedin', label: 'Optimasi LinkedIn', href: '/linkedin', icon: Linkedin },
-      ],
-    },
-    {
-      category: 'Career Intelligence',
-      icon: Compass,
-      items: [
-        { id: 'career-intelligence', label: 'Career Intelligence', href: '/career-intelligence', icon: Compass },
+        { id: 'career-intelligence', label: 'Career Intelligence', href: '/career-intelligence', icon: Compass, badge: 'PRO' },
       ],
     },
     {
@@ -111,10 +104,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Briefcase,
       items: [
         { id: 'tracker', label: 'Tracker Lamaran', href: '/tracker', icon: Briefcase, badge: trackerCount > 0 ? String(trackerCount) : null },
+        { id: 'loker', label: 'Eksplorasi Loker', href: '/loker', icon: Globe },
+        { id: 'match-cv', label: 'Komparasi Lowongan', href: '/match-cv', icon: Scale },
         { id: 'email-cover-letter', label: 'Email & Cover Letter', href: '/mailer', icon: Mail },
-        { id: 'scrape-jobs', label: 'Scraper Lowongan', href: '/scrape-jobs', icon: Globe },
-        { id: 'cari-lowongan', label: 'Cari Lowongan', href: 'https://loker.employr.id', icon: Compass },
-        { id: 'match-cv', label: 'Kecocokan Lowongan', href: '/match-cv', icon: Sparkles },
       ],
     },
     // Di-hide sementara sesuai permintaan:
@@ -122,7 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     //   category: 'Pengembangan',
     //   icon: Target,
     //   items: [
-    //     { id: 'interview', label: 'Panduan Interview', href: '/interview', icon: Mic },
+    //     { id: 'interview', label: 'Panduan Interview', href: '/interview', icon: Settings },
     //     { id: 'kursus', label: 'Kursus & Sertifikasi', href: getLearningUrl(), icon: BookOpen },
     //   ],
     // },
@@ -133,7 +125,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         // Di-hide sementara sesuai permintaan:
         // { id: 'misi-cuan', label: 'Misi & Cuan', href: '/misi-cuan', icon: Target },
         // { id: 'referral', label: 'Referral', href: '/referral', icon: Users },
-        { id: 'pengaturan', label: 'Pengaturan', href: '/pengaturan', icon: Settings },
+        { id: 'pengaturan', label: 'Pengaturan Akun', href: '/pengaturan', icon: Settings },
+        { id: 'saran-fitur', label: 'Saran Fitur', href: '/saran-fitur', icon: Lightbulb },
+        { id: 'lapor-bug', label: 'Lapor Kendala', href: '/lapor-bug', icon: ShieldAlert },
       ],
     },
   ];
@@ -154,8 +148,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         className={cn(
           'flex flex-col h-screen transition-all duration-300 ease-in-out z-50 overflow-hidden border-r border-slate-200 dark:border-slate-800 shadow-xl bg-white dark:bg-slate-950',
           // Desktop behavior
-          'md:sticky md:top-0 md:z-20 md:flex-shrink-0',
-          isCollapsed ? 'md:w-20' : 'md:w-64',
+          'md:sticky md:top-0 md:z-20 md:flex-shrink-0 md:h-full',
+          isCollapsed ? 'md:w-20' : 'md:w-72',
           // Mobile behavior: slide-over drawer
           'fixed inset-y-0 left-0 w-72 shadow-2xl md:shadow-none',
           isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
@@ -221,7 +215,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Navigation Section (Scrollable Middle Area) */}
-        <div className={cn('flex-1 overflow-y-auto no-scrollbar pt-4 pb-5 transition-all duration-300 ease-in-out', isCollapsed && !isMobileOpen ? 'px-2' : 'px-3')}>
+        <div className={cn('flex-1 overflow-y-auto sidebar-scrollbar pr-1 pt-4 pb-5 transition-all duration-300 ease-in-out', isCollapsed && !isMobileOpen ? 'px-2' : 'px-3')}>
           <nav className="space-y-4">
             {categories.map((categoryGroup) => {
               const isSingleItemCategory =
@@ -231,8 +225,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <div key={categoryGroup.category} className="space-y-1">
                   {/* Category Header */}
                   {!isSingleItemCategory && isExpanded && (
-                    <div className="px-3 pt-3 pb-1 flex items-center gap-2 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest shrink-0 select-none">
-                      {React.createElement(categoryGroup.icon, { className: 'w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0' })}
+                    <div className="px-3 pt-3 pb-1 flex items-center gap-2 text-caption font-bold text-slate-500 dark:text-slate-500 shrink-0 select-none">
+                      {React.createElement(categoryGroup.icon, { className: 'w-3.5 h-3.5 text-slate-500 dark:text-slate-500 shrink-0' })}
                       <span>{categoryGroup.category}</span>
                     </div>
                   )}
@@ -253,18 +247,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                       const isExternal = item.href.startsWith('http://') || item.href.startsWith('https://');
                       const linkClasses = cn(
-                        'w-full flex items-center rounded-[10px] text-xs font-bold transition-all duration-200 group relative cursor-pointer',
+                        'w-full flex items-center rounded-[10px] text-xs font-bold transition-all duration-200 group relative cursor-pointer forced-colors:border',
                         !isExpanded
                           ? 'justify-center p-3'
                           : 'justify-between px-3.5 py-2.5',
                         isActive
-                          ? 'bg-[#1738D1] text-white shadow-md shadow-[#1738D1]/20'
+                          ? 'bg-cobalt-500 text-white shadow-md shadow-cobalt-500/20 forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]'
                           : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
                       );
 
                       const linkContent = (
                         <>
-                          <div className="flex items-center gap-2.5 overflow-hidden">
+                          <div className="flex items-center gap-2.5 overflow-hidden min-w-0">
                             <Icon
                               className={cn(
                                 'w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-105',
@@ -276,7 +270,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                 'truncate transition-all duration-200 ease-in-out whitespace-nowrap',
                                 !isExpanded
                                   ? 'max-w-0 opacity-0 transform -translate-x-2 pointer-events-none'
-                                  : 'max-w-[160px] opacity-100 transform translate-x-0'
+                                  : 'max-w-[200px] opacity-100 transform translate-x-0'
                               )}
                             >
                               {item.label}
@@ -288,10 +282,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                               className={cn(
                                 'font-bold rounded-full transition-all duration-200 ease-in-out whitespace-nowrap',
                                 !isExpanded
-                                  ? 'absolute -top-1 -right-1 w-2 h-2 bg-[#1738D1] border border-white dark:border-slate-900 p-0 text-[0px]'
-                                  : 'px-2 py-0.5 text-[9px]',
+                                  ? 'absolute -top-1 -right-1 w-2 h-2 bg-cobalt-500 border border-white dark:border-slate-900 p-0 text-[0px]'
+                                  : 'px-2 py-0.5 text-caption',
                                 isExpanded && item.badge === 'Baru'
-                                  ? 'bg-[#1738D1] text-white font-extrabold shadow-sm'
+                                  ? 'bg-cobalt-500 text-white font-extrabold shadow-sm'
                                   : isExpanded && isActive
                                   ? 'bg-white/20 text-white backdrop-blur-md'
                                   : isExpanded
@@ -305,6 +299,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         </>
                       );
 
+                      const tourId =
+                        item.id === 'beranda'
+                          ? 'tour-beranda'
+                          : item.id === 'cv'
+                          ? 'tour-cv'
+                          : item.id === 'tracker'
+                          ? 'tour-tracker'
+                          : item.id === 'loker'
+                          ? 'tour-loker'
+                          : undefined;
+
                       if (isExternal) {
                         return (
                           <a
@@ -312,6 +317,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             href={item.href}
                             target="_blank"
                             rel="noopener noreferrer"
+                            data-tour={tourId}
                             onClick={() => {
                               if (onCloseMobile) onCloseMobile();
                             }}
@@ -327,6 +333,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <Link
                           key={item.id}
                           href={item.href}
+                          data-tour={tourId}
+                          aria-current={isActive ? 'page' : undefined}
                           onClick={() => {
                             if (onCloseMobile) onCloseMobile();
                           }}
@@ -344,80 +352,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </nav>
         </div>
 
-        {/* Bottom Section: Career Readiness (Sticky Bottom) */}
+        {/* Bottom Section: Keluar Akun (Sticky Bottom) */}
         <div className={cn('shrink-0 border-t border-slate-100 dark:border-slate-800 transition-all duration-300 ease-in-out overflow-hidden', isCollapsed && !isMobileOpen ? 'p-2' : 'p-3')}>
-          {/* Expanded Career Readiness Card */}
-          <div
-            className={cn(
-              'transition-all duration-300 ease-in-out',
-              isCollapsed && !isMobileOpen
-                ? 'max-h-0 opacity-0 p-0 border-0 pointer-events-none transform scale-95'
-                : 'max-h-60 opacity-100 transform scale-100'
-            )}
-          >
-            <Link
-              href="/readiness"
-              onClick={() => {
-                if (onCloseMobile) onCloseMobile();
-              }}
-              className={cn(
-                'group block p-3.5 rounded-[10px] border transition-all duration-200 cursor-pointer',
-                pathname === '/readiness' || pathname.startsWith('/readiness/')
-                  ? 'bg-orange-50/80 dark:bg-orange-950/30 border-orange-300 dark:border-orange-900/50 shadow-sm'
-                  : 'bg-slate-50/90 dark:bg-slate-900/80 border-slate-200/80 dark:border-slate-800 hover:border-orange-300 dark:hover:border-orange-700/60 hover:bg-white dark:hover:bg-slate-900 shadow-xs'
-              )}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-[8px] bg-orange-100 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 flex items-center justify-center border border-orange-200/60 dark:border-orange-900/40 shrink-0">
-                    <TrendingUp className="w-3.5 h-3.5" />
-                  </div>
-                  <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                    Career Readiness
-                  </span>
-                </div>
-                <span className="text-[11px] font-black text-orange-600 dark:text-orange-400 bg-orange-100/80 dark:bg-orange-950/60 px-2 py-0.5 rounded-[6px] border border-orange-200/50 dark:border-orange-900/30 font-mono">
-                  {readinessScore}%
-                </span>
-              </div>
-
-              {/* Horizontal Progress Bar */}
-              <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden mb-2">
-                <div
-                  className={`h-full rounded-full transition-all duration-500 ${getScoreProgressBarClass(readinessScore)}`}
-                  style={{ width: `${readinessScore}%` }}
-                />
-              </div>
-
-              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                <span>Tingkatkan Kesiapan</span>
-                <ChevronRight className="w-3.5 h-3.5 text-orange-500 group-hover:translate-x-0.5 transition-transform duration-200" />
-              </div>
-            </Link>
-          </div>
-
-          {/* Collapsed Career Readiness Icon Button */}
-          <Link
-            href="/readiness"
+          {/* Logout Action Button */}
+          <button
+            type="button"
             onClick={() => {
               if (onCloseMobile) onCloseMobile();
+              handleLogout();
             }}
-            title={`Career Readiness (${readinessScore}%)`}
+            title={!isExpanded ? 'Keluar Akun' : undefined}
             className={cn(
-              'w-full p-2.5 rounded-[10px] flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 ease-in-out border',
-              pathname === '/readiness' || pathname.startsWith('/readiness/')
-                ? 'bg-[#1738D1] text-white border-orange-600 shadow-md shadow-[#1738D1]/20'
-                : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800',
-              isCollapsed && !isMobileOpen
-                ? 'max-h-16 opacity-100 scale-100'
-                : 'max-h-0 opacity-0 scale-75 p-0 overflow-hidden pointer-events-none border-0'
+              'w-full flex items-center rounded-[10px] text-xs font-bold text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-all duration-200 group cursor-pointer border border-transparent hover:border-rose-200 dark:hover:border-rose-900/40',
+              !isExpanded ? 'justify-center p-2.5' : 'justify-start px-3 py-2 gap-2'
             )}
           >
-            <TrendingUp className="w-4 h-4 text-orange-500 dark:text-orange-400" />
-            <span className="text-[10px] font-black text-orange-600 dark:text-orange-400 leading-none font-mono">
-              {readinessScore}%
-            </span>
-          </Link>
+            <LogOut className="w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+            {isExpanded && (
+              <span className="truncate">Keluar Akun</span>
+            )}
+          </button>
         </div>
       </aside>
     </>

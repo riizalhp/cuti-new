@@ -5,69 +5,892 @@ import FooterPortal from '../../components/FooterPortal.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import SearchModal from '../../components/SearchModal.astro';
 import PageHero from '../../components/common/PageHero.astro';
-import { courseList, ensureData } from '../../data/mock';
+import SubsectionHeader from '../../components/common/SubsectionHeader.astro';
+import OrganicCardSmall from '../../components/common/OrganicCardSmall.astro';
+import {
+  courseList,
+  artikelList,
+  sertifikasiList,
+  lowonganList,
+  eventList,
+  ensureData,
+} from '../../data/mock';
+import { APP_URL, CV_BUILDER_URL } from '../../lib/urls';
 
 await ensureData();
 const courseListSnapshot = [...courseList];
+const artikelSnapshot = [...artikelList];
+const sertifikasiSnapshot = [...sertifikasiList];
+const lowonganSnapshot = [...lowonganList];
+const eventSnapshot = [...eventList];
 
-const title = "Direktori Kursus & Bootcamp Skill Digital | Employer Job";
-const description = "Daftar kursus, pelatihan, dan bootcamp pilihan untuk menguasai skill digital yang paling dicari perusahaan.";
+// Filter URL Parameters
+const rawQ = Astro.url.searchParams.get('q') || '';
+const query = rawQ.trim().toLowerCase();
+const rawLvl = Astro.url.searchParams.get('lvl') || '';
+const lvlFilter = rawLvl.trim().toLowerCase();
+const rawCat = Astro.url.searchParams.get('cat') || '';
+const catFilter = rawCat.trim().toLowerCase();
+
+let filteredCourses = [...courseListSnapshot];
+
+if (query) {
+  filteredCourses = filteredCourses.filter((c) => {
+    const matchTitle = (c.title || '').toLowerCase().includes(query);
+    const matchProv = (c.provider || '').toLowerCase().includes(query);
+    const matchDesc = (c.description || '').toLowerCase().includes(query);
+    const matchLvl = (c.level || '').toLowerCase().includes(query);
+    const matchCat = (c.category || '').toLowerCase().includes(query);
+    const matchBen = Array.isArray(c.benefits) && c.benefits.some((b) => b.toLowerCase().includes(query));
+    return matchTitle || matchProv || matchDesc || matchLvl || matchCat || matchBen;
+  });
+}
+
+if (lvlFilter) {
+  filteredCourses = filteredCourses.filter((c) =>
+    (c.level || '').toLowerCase().includes(lvlFilter)
+  );
+}
+
+if (catFilter) {
+  filteredCourses = filteredCourses.filter((c) => {
+    const cCat = (c.category || '').toLowerCase();
+    const cTitle = (c.title || '').toLowerCase();
+    const cDesc = (c.description || '').toLowerCase();
+    return cCat.includes(catFilter) || cTitle.includes(catFilter) || cDesc.includes(catFilter);
+  });
+}
+
+// Pagination Configuration (10 program per halaman agar seimbang dengan kolom samping dan tidak menyisakan ruang kosong)
+const ITEMS_PER_PAGE = 10;
+const totalItems = filteredCourses.length;
+const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
+const rawPage = parseInt(Astro.url.searchParams.get('page') || '1', 10);
+const currentPage = Number.isNaN(rawPage) ? 1 : Math.min(Math.max(1, rawPage), totalPages);
+const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+const paginatedCourses = filteredCourses.slice(startIndex, endIndex);
+
+// Bagi daftar halaman aktif menjadi 2 batch secara proporsional untuk menyisipkan In-Feed Ad di sela-sela daftar
+// Jika ada 8-10 kursus: 6 di batch 1 (3 baris), lalu in-feed ad, lalu sisanya di batch 2 (hingga 4 kursus / 2 baris)
+const splitIndex = paginatedCourses.length >= 8 ? 6 : paginatedCourses.length >= 4 ? 4 : paginatedCourses.length;
+const firstBatchCourses = paginatedCourses.slice(0, splitIndex);
+const secondBatchCourses = paginatedCourses.slice(splitIndex);
+
+// Helper pembentuk URL pagination dengan mempertahankan parameter filter aktif
+function buildPageUrl(pageNum: number): string {
+  const params = new URLSearchParams();
+  if (rawQ) params.set('q', rawQ);
+  if (rawLvl) params.set('lvl', rawLvl);
+  if (rawCat) params.set('cat', rawCat);
+  if (pageNum > 1) params.set('page', String(pageNum));
+  const qs = params.toString();
+  return qs ? `/course?${qs}` : '/course';
+}
+
+// Data Sidebar Kanan: Spotlight Course & Artikel Viral
+const spotlightCourse = courseListSnapshot.find(c => parseFloat(c.rating || '0') >= 4.8) || courseListSnapshot[0] || null;
+const viralArticles = artikelSnapshot.slice(0, 5);
+
+// Data Bagian Bawah: Baca Juga Artikel, Lowongan (dengan Ads di sela-sela), Sertifikasi & Event
+const readAlsoArticles = artikelSnapshot.slice(0, 3);
+const featuredJobs = lowonganSnapshot.slice(0, 4);
+const firstJobBatch = featuredJobs.slice(0, 2);
+const secondJobBatch = featuredJobs.slice(2, 4);
+const topSertifikasi = sertifikasiSnapshot.slice(0, 3);
+const topEvents = eventSnapshot.slice(0, 3);
+
+const isFiltered = Boolean(query || lvlFilter || catFilter);
+const displayTitle = query
+  ? `Hasil Pencarian Kursus: <em>"${rawQ}"</em>`
+  : lvlFilter
+  ? `Program Tingkat: <em>${rawLvl.charAt(0).toUpperCase() + rawLvl.slice(1)}</em>`
+  : catFilter
+  ? `Pelatihan Bidang: <em>${rawCat}</em>`
+  : "Kursus &amp; Pelatihan <em>Skill Masa Depan</em>";
+
+const title = rawQ
+  ? `Hasil Pencarian Kursus "${rawQ}" | Employr Portal`
+  : "Direktori Kursus & Bootcamp Skill Digital | Employr Portal";
+const description = "Daftar kursus, pelatihan, dan bootcamp pilihan untuk menguasai skill digital yang paling dicari perusahaan di Indonesia.";
+
+const popularCategories = [
+  { label: 'Semua Bidang', cat: '' },
+  { label: 'Web & Programming', cat: 'programming' },
+  { label: 'Data Science & AI', cat: 'data' },
+  { label: 'UI/UX & Desain', cat: 'design' },
+  { label: 'Digital Marketing', cat: 'marketing' },
+  { label: 'Produktivitas & Office', cat: 'excel' },
+];
 ---
 
 <BaseLayout title={title} description={description} canonicalUrl="http://localhost:3003/course">
   <Navbar />
 
-  <main class="bg-[#f4f3ee] min-h-screen pb-16">
+  <main class="bg-[#f4f3ee] min-h-screen pb-20">
+    <!-- Page Hero -->
     <PageHero
       eyebrow="Pelatihan &amp; Skill"
-      title="Kursus &amp; Pelatihan <em>Skill Masa Depan</em>"
-      description="Belajar pemrograman, desain produk, pemasaran digital, analisa data, dan produktivitas dari mentor terpercaya."
-      badge={{ text: `${courseListSnapshot.length} Program Tersedia`, bgColor: 'bg-purple-50', textColor: 'text-purple-700', borderColor: 'border border-purple-200' }}
+      title={displayTitle}
+      description={
+        isFiltered
+          ? `Menampilkan ${totalItems} program pelatihan yang sesuai dengan kriteria pencarian.`
+          : "Belajar pemrograman, analisa data, desain produk, pemasaran digital, dan manajemen dari mentor industri terpercaya."
+      }
+      badge={{
+        text: `${totalItems} Program Tersedia`,
+        bgColor: 'bg-purple-50',
+        textColor: 'text-purple-700',
+        borderColor: 'border border-purple-200',
+      }}
     >
-      <nav slot="breadcrumb" class="flex items-center gap-2 text-xs text-[#6e6d68] mb-4" aria-label="Breadcrumb">
-        <a href="/" class="hover:text-[#0000ff]">Beranda</a>
+      <nav slot="breadcrumb" class="flex items-center gap-2 text-xs text-[#55544f] mb-4" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-[#1738D1] transition focus-visible:outline-2 focus-visible:outline-[#1738D1]">Beranda</a>
         <span>/</span>
         <span class="text-[#101010] font-semibold">Kursus &amp; Pelatihan</span>
+        {rawQ && <span>/ Pencarian: "{rawQ}"</span>}
       </nav>
     </PageHero>
 
     <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6">
-      <AdSlot type="leaderboard" note="Rekomendasi kursus dan pelatihan dengan potongan beasiswa." />
+      <!-- Top Leaderboard Sponsor Ad Slot -->
+      <AdSlot type="leaderboard" note="Rekomendasi kursus, bootcamp, dan program beasiswa talenta digital." />
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
-        {courseListSnapshot.map((c) => (
-          <article class="bg-white rounded-2xl border border-[#d7d6cf] overflow-hidden hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:border-[#0000ff]/30 hover:-translate-y-1 transition duration-300 flex flex-col justify-between">
-            <div>
-              <div class="h-36 bg-[#eae8e0] overflow-hidden relative">
-                <img src={c.image} alt={c.title} class="w-full h-full object-cover" loading="lazy" />
-                <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-[#101010]/80 text-white text-[10px] font-semibold backdrop-blur-xs">
-                  {c.level}
-                </span>
-              </div>
-              <div class="p-5">
-                <div class="flex items-center gap-2 text-[11px] text-[#6e6d68] mb-1.5">
-                  <span class="font-semibold text-[#101010]">{c.provider}</span>
-                  <span>·</span>
-                  <span>{c.duration}</span>
-                  <span>·</span>
-                  <span class="text-amber-600 font-bold">Rating {c.rating}</span>
-                </div>
-                <h2 class="text-base font-semibold text-[#101010] hover:text-[#0000ff] transition leading-snug">
-                  <a href={`/course/${c.slug}`}>{c.title}</a>
-                </h2>
-                <p class="text-xs text-[#6e6d68] line-clamp-2 mt-2 leading-relaxed">{c.description}</p>
-              </div>
-            </div>
-            <div class="p-5 pt-0 border-t border-[#d7d6cf]/50">
-              <div class="flex items-center justify-between pt-3">
-                <span class="text-xs font-bold text-[#101010]">{c.price}</span>
-                <a href={`/course/${c.slug}`} class="px-4 py-2 rounded-full bg-[#0000ff] hover:bg-[#1738d1] text-white text-xs font-semibold transition shadow-xs">
-                  Detail Kursus →
+      <!-- =====================================================================
+           2-GRID LAYOUT:
+           KIRI (8 Kolom / ~67%): Pencarian, Filter, Daftar Kursus, In-Feed Ad, Pagination
+           KANAN (4 Kolom / ~33%): Spotlight Course, Artikel Viral, Ads Internal, Ads External
+           ===================================================================== -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mt-6">
+        
+        <!-- KOLOM KIRI (8 Kolom / ~67%) -->
+        <div class="lg:col-span-8 space-y-6 min-w-0">
+          
+          <!-- Search & Filter Bar Panel -->
+          <div class="bg-white rounded-2xl border border-[#d7d6cf] p-4 sm:p-5 shadow-xs space-y-4">
+            <!-- Form Pencarian -->
+            <form
+              action="/course"
+              method="GET"
+              class="bg-white border border-[#d7d6cf] focus-within:border-[#1738D1] focus-within:ring-4 focus-within:ring-blue-500/10 rounded-full shadow-2xs p-1.5 pl-4 flex items-center gap-2 transition"
+              role="search"
+            >
+              <label for="course-search-input" class="sr-only">Cari kursus atau keahlian</label>
+              <svg class="w-4 h-4 text-[#55544f] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              <input
+                id="course-search-input"
+                type="text"
+                name="q"
+                value={rawQ}
+                placeholder="Cari kursus (UI/UX, Data Science, Python, Digital Marketing)..."
+                class="min-w-0 flex-1 text-xs sm:text-sm text-[#101010] placeholder-[#6e6d68] outline-none bg-transparent font-medium"
+              />
+              {rawLvl && <input type="hidden" name="lvl" value={rawLvl} />}
+              {rawCat && <input type="hidden" name="cat" value={rawCat} />}
+              {isFiltered && (
+                <a
+                  href="/course"
+                  class="text-xs font-bold text-[#55544f] hover:text-[#101010] px-2 py-1.5 shrink-0 rounded-md focus-visible:outline-2 focus-visible:outline-[#1738D1]"
+                >
+                  Reset
+                </a>
+              )}
+              <button
+                type="submit"
+                class="min-h-[40px] px-5 py-2 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:ring-offset-2"
+              >
+                Cari
+              </button>
+            </form>
+
+            <!-- Filter Level Pills -->
+            <div class="space-y-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-[#55544f] block">
+                Tingkat Kemampuan:
+              </span>
+              <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs" role="navigation" aria-label="Filter Tingkat Kemampuan">
+                <a
+                  href={`/course${rawQ ? `?q=${encodeURIComponent(rawQ)}` : ''}${rawCat ? `${rawQ ? '&' : '?'}cat=${encodeURIComponent(rawCat)}` : ''}`}
+                  class={`min-h-[38px] inline-flex items-center px-4 py-1.5 rounded-full font-bold shrink-0 transition focus-visible:ring-2 focus-visible:ring-[#1738D1] ${
+                    !lvlFilter
+                      ? 'bg-[#101010] text-white shadow-xs'
+                      : 'bg-[#f4f3ee] text-[#55544f] border border-[#d7d6cf] hover:border-[#101010] hover:text-[#101010]'
+                  }`}
+                  aria-current={!lvlFilter ? "page" : undefined}
+                >
+                  Semua Level
+                </a>
+                <a
+                  href={`/course?lvl=pemula${rawQ ? `&q=${encodeURIComponent(rawQ)}` : ''}${rawCat ? `&cat=${encodeURIComponent(rawCat)}` : ''}`}
+                  class={`min-h-[38px] inline-flex items-center px-4 py-1.5 rounded-full font-bold shrink-0 transition focus-visible:ring-2 focus-visible:ring-[#1738D1] ${
+                    lvlFilter === 'pemula'
+                      ? 'bg-[#101010] text-white shadow-xs'
+                      : 'bg-[#f4f3ee] text-[#55544f] border border-[#d7d6cf] hover:border-[#101010] hover:text-[#101010]'
+                  }`}
+                  aria-current={lvlFilter === 'pemula' ? "page" : undefined}
+                >
+                  Pemula (Beginner)
+                </a>
+                <a
+                  href={`/course?lvl=menengah${rawQ ? `&q=${encodeURIComponent(rawQ)}` : ''}${rawCat ? `&cat=${encodeURIComponent(rawCat)}` : ''}`}
+                  class={`min-h-[38px] inline-flex items-center px-4 py-1.5 rounded-full font-bold shrink-0 transition focus-visible:ring-2 focus-visible:ring-[#1738D1] ${
+                    lvlFilter === 'menengah'
+                      ? 'bg-[#101010] text-white shadow-xs'
+                      : 'bg-[#f4f3ee] text-[#55544f] border border-[#d7d6cf] hover:border-[#101010] hover:text-[#101010]'
+                  }`}
+                  aria-current={lvlFilter === 'menengah' ? "page" : undefined}
+                >
+                  Menengah (Intermediate)
+                </a>
+                <a
+                  href={`/course?lvl=mahir${rawQ ? `&q=${encodeURIComponent(rawQ)}` : ''}${rawCat ? `&cat=${encodeURIComponent(rawCat)}` : ''}`}
+                  class={`min-h-[38px] inline-flex items-center px-4 py-1.5 rounded-full font-bold shrink-0 transition focus-visible:ring-2 focus-visible:ring-[#1738D1] ${
+                    lvlFilter === 'mahir'
+                      ? 'bg-[#101010] text-white shadow-xs'
+                      : 'bg-[#f4f3ee] text-[#55544f] border border-[#d7d6cf] hover:border-[#101010] hover:text-[#101010]'
+                  }`}
+                  aria-current={lvlFilter === 'mahir' ? "page" : undefined}
+                >
+                  Mahir (Advanced)
                 </a>
               </div>
             </div>
-          </article>
-        ))}
+
+            <!-- Filter Bidang / Topik Keahlian -->
+            <div class="pt-3 border-t border-[#d7d6cf]/60">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-[#55544f] block mb-2">
+                Kategori Populer:
+              </span>
+              <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs" role="navigation" aria-label="Filter Bidang Keahlian">
+                {popularCategories.map((item) => {
+                  const isActive = (!item.cat && !catFilter) || (item.cat && catFilter === item.cat);
+                  const hrefTarget = item.cat
+                    ? `/course?cat=${item.cat}${rawQ ? `&q=${encodeURIComponent(rawQ)}` : ''}${rawLvl ? `&lvl=${encodeURIComponent(rawLvl)}` : ''}`
+                    : `/course${rawQ ? `?q=${encodeURIComponent(rawQ)}` : ''}${rawLvl ? `${rawQ ? '&' : '?'}lvl=${encodeURIComponent(rawLvl)}` : ''}`;
+
+                  return (
+                    <a
+                      href={hrefTarget}
+                      class={`min-h-[36px] inline-flex items-center px-3.5 py-1.5 rounded-full font-medium shrink-0 transition focus-visible:ring-2 focus-visible:ring-[#1738D1] ${
+                        isActive
+                          ? 'bg-[#1738D1] text-white font-bold shadow-2xs'
+                          : 'bg-white text-[#55544f] border border-[#d7d6cf] hover:border-[#101010] hover:text-[#101010]'
+                      }`}
+                      aria-current={isActive ? "page" : undefined}
+                    >
+                      {item.label}
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Heading Daftar Kursus & Status Counter -->
+          <section aria-labelledby="heading-course-list" class="space-y-4">
+            <SubsectionHeader title="Katalog Program Kursus &amp; Pelatihan" level={2} rightContent={true}>
+              <span slot="right" class="text-xs text-[#55544f] font-semibold">
+                Menampilkan {paginatedCourses.length} dari {totalItems} Program
+                {totalPages > 1 && ` (Hal ${currentPage}/${totalPages})`}
+              </span>
+            </SubsectionHeader>
+
+            <!-- Kondisi 1: Tidak Ada Kursus yang Cocok -->
+            {filteredCourses.length === 0 ? (
+              <div class="bg-white rounded-2xl border border-[#d7d6cf] p-8 sm:p-12 text-center max-w-md mx-auto my-6 shadow-xs space-y-3">
+                <div class="w-12 h-12 rounded-full bg-purple-50 text-purple-700 border border-purple-200 mx-auto flex items-center justify-center font-bold text-sm">
+                  EDU
+                </div>
+                <h3 class="text-base font-bold text-[#101010]">Tidak ada kursus yang cocok</h3>
+                <p class="text-xs text-[#55544f] leading-relaxed">
+                  {rawQ
+                    ? `Tidak ditemukan kursus dengan kata kunci "${rawQ}". Coba cari bidang lain seperti Web, Data, Desain, atau hapus filter.`
+                    : 'Tidak ada kursus yang sesuai dengan kombinasi filter yang dipilih.'}
+                </p>
+                <div class="pt-2">
+                  <a
+                    href="/course"
+                    class="inline-block min-h-[40px] px-5 py-2.5 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold transition shadow-xs focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:ring-offset-2"
+                  >
+                    Tampilkan Semua Kursus
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <div class="space-y-6">
+                <!-- Batch 1: Kursus Pertama (Maksimal 4 kartu) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {firstBatchCourses.map((c) => (
+                    <OrganicCardSmall
+                      image={c.image}
+                      imageAlt={c.title}
+                      category={`${c.level} — ${c.provider}`}
+                      date={c.duration}
+                      title={c.title}
+                      href={`/course/${c.slug}`}
+                      description={c.description}
+                      price={c.price}
+                      actionText="Detail Kursus"
+                    />
+                  ))}
+                </div>
+
+                <!-- =========================================================
+                     IN-FEED AD DI SELA-SELA DAFTAR KURSUS
+                     Menghubungkan user ke program beasiswa pelatihan terverifikasi
+                     ========================================================= -->
+                <div class="bg-white rounded-2xl border border-dashed border-[#d7d6cf] p-5 sm:p-6 shadow-xs">
+                  <div class="flex items-center justify-between pb-3 mb-4 border-b border-[#101010]/8">
+                    <div class="flex items-center gap-2">
+                      <span class="inline-flex items-center text-[9px] font-extrabold uppercase tracking-wider bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf] px-2.5 py-0.5 rounded-full">
+                        MITRA KARIER &amp; EDUKASI
+                      </span>
+                      <span class="text-[11px] font-bold text-[#55544f]">Rekomendasi Akselerasi Karier</span>
+                    </div>
+                  </div>
+
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-start gap-3.5">
+                      <div class="w-12 h-12 rounded-full bg-blue-50 border border-blue-200 text-[#1738D1] flex items-center justify-center font-extrabold text-xs shrink-0 mt-0.5 sm:mt-0">
+                        PRO
+                      </div>
+                      <div>
+                        <h4 class="text-sm sm:text-base font-bold text-[#101010] leading-snug">
+                          Beasiswa Pelatihan Digital &amp; Akselerasi Penempatan Kerja 2026
+                        </h4>
+                        <p class="text-xs text-[#55544f] mt-1 leading-relaxed font-medium max-w-xl">
+                          Tingkatkan portofolio riil dengan bimbingan mentor industri terkemuka. Program intensif bersertifikasi untuk mempersiapkanmu menghadapi wawancara rekruter.
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href="/sertifikasi"
+                      class="min-h-[42px] px-5 py-2.5 rounded-full bg-[#101010] hover:bg-[#000000] text-white text-xs font-bold shrink-0 transition inline-flex items-center justify-center gap-1.5 self-start sm:self-auto shadow-xs focus-visible:ring-2 focus-visible:ring-[#101010] focus-visible:ring-offset-2"
+                    >
+                      <span>Lihat Syarat Beasiswa</span>
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Batch 2: Kursus Berikutnya (Jika ada) -->
+                {secondBatchCourses.length > 0 && (
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    {secondBatchCourses.map((c) => (
+                      <OrganicCardSmall
+                        image={c.image}
+                        imageAlt={c.title}
+                        category={`${c.level} — ${c.provider}`}
+                        date={c.duration}
+                        title={c.title}
+                        href={`/course/${c.slug}`}
+                        description={c.description}
+                        price={c.price}
+                        actionText="Detail Kursus"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <!-- =========================================================
+                 PAGINATION CONTROLS
+                 Membagi daftar kursus per halaman agar tidak scroll ke bawah terus menerus
+                 ========================================================= -->
+            {totalPages > 1 && (
+              <nav
+                class="bg-white rounded-2xl border border-[#d7d6cf] p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs mt-6"
+                aria-label="Navigasi Halaman Kursus"
+              >
+                <div class="text-xs text-[#55544f] font-medium text-center sm:text-left">
+                  Menampilkan <span class="font-bold text-[#101010]">{startIndex + 1}</span>–<span class="font-bold text-[#101010]">{endIndex}</span> dari <span class="font-bold text-[#101010]">{totalItems}</span> program
+                </div>
+
+                <div class="flex items-center gap-1.5 flex-wrap justify-center">
+                  <!-- Tombol Sebelumnya -->
+                  {currentPage > 1 ? (
+                    <a
+                      href={buildPageUrl(currentPage - 1)}
+                      class="min-h-[40px] px-3.5 py-2 rounded-full border border-[#d7d6cf] bg-white hover:bg-[#f4f3ee] text-[#101010] text-xs font-bold transition inline-flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-[#1738D1]"
+                      aria-label="Halaman Sebelumnya"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                      </svg>
+                      <span>Sebelumnya</span>
+                    </a>
+                  ) : (
+                    <span
+                      class="min-h-[40px] px-3.5 py-2 rounded-full border border-[#d7d6cf]/50 bg-[#f4f3ee] text-[#a5a5a1] text-xs font-bold inline-flex items-center gap-1 cursor-not-allowed select-none"
+                      aria-disabled="true"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                      </svg>
+                      <span>Sebelumnya</span>
+                    </span>
+                  )}
+
+                  <!-- Nomor Halaman -->
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+                    const isCurrent = p === currentPage;
+                    return (
+                      <a
+                        href={buildPageUrl(p)}
+                        class={`min-w-[40px] min-h-[40px] inline-flex items-center justify-center rounded-full text-xs font-bold transition focus-visible:ring-2 focus-visible:ring-[#1738D1] ${
+                          isCurrent
+                            ? 'bg-[#101010] text-white shadow-xs'
+                            : 'bg-white text-[#101010] border border-[#d7d6cf] hover:border-[#101010] hover:bg-[#f4f3ee]'
+                        }`}
+                        aria-current={isCurrent ? "page" : undefined}
+                        aria-label={`Buka Halaman ${p}`}
+                      >
+                        {p}
+                      </a>
+                    );
+                  })}
+
+                  <!-- Tombol Selanjutnya -->
+                  {currentPage < totalPages ? (
+                    <a
+                      href={buildPageUrl(currentPage + 1)}
+                      class="min-h-[40px] px-3.5 py-2 rounded-full border border-[#d7d6cf] bg-white hover:bg-[#f4f3ee] text-[#101010] text-xs font-bold transition inline-flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-[#1738D1]"
+                      aria-label="Halaman Selanjutnya"
+                    >
+                      <span>Selanjutnya</span>
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                      </svg>
+                    </a>
+                  ) : (
+                    <span
+                      class="min-h-[40px] px-3.5 py-2 rounded-full border border-[#d7d6cf]/50 bg-[#f4f3ee] text-[#a5a5a1] text-xs font-bold inline-flex items-center gap-1 cursor-not-allowed select-none"
+                      aria-disabled="true"
+                    >
+                      <span>Selanjutnya</span>
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                      </svg>
+                    </span>
+                  )}
+                </div>
+              </nav>
+            )}
+          </section>
+
+        </div>
+
+        <!-- =====================================================================
+             KOLOM KANAN (4 Kolom / ~33%):
+             1. Spotlight Program (Pilihan Mentor)
+             2. Artikel Viral & Tips Karier
+             3. Ads Internal (Evaluasi CV ATS)
+             4. Ads External (Sponsor & Mitra Pendidikan)
+             ===================================================================== -->
+        <aside class="lg:col-span-4 space-y-6" aria-label="Sidebar Rekomendasi & Sponsor">
+          
+          <!-- 1. SPOTLIGHT PROGRAM (KURSUS PILIHAN BULAN INI) -->
+          {spotlightCourse && (
+            <section
+              aria-labelledby="heading-spotlight-course"
+              class="bg-white rounded-2xl border border-[#d7d6cf] p-5 shadow-xs overflow-hidden relative"
+            >
+              <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#d7d6cf]/60">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
+                  <h3 id="heading-spotlight-course" class="text-xs font-bold uppercase tracking-wider text-[#101010]">
+                    Spotlight Program
+                  </h3>
+                </div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+                  PILIHAN EDITOR
+                </span>
+              </div>
+
+              <div class="space-y-3">
+                <div class="h-32 rounded-xl overflow-hidden bg-[#f4f3ee] border border-[#d7d6cf] relative">
+                  <img
+                    src={spotlightCourse.image}
+                    alt={spotlightCourse.title}
+                    class="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  <span class="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-[#101010]/80 text-white text-[10px] font-semibold backdrop-blur-xs">
+                    {spotlightCourse.level}
+                  </span>
+                  <span class="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-white/95 text-[#101010] text-[10px] font-bold shadow-xs">
+                    Rating {spotlightCourse.rating}
+                  </span>
+                </div>
+
+                <div>
+                  <div class="flex items-center gap-2 text-[11px] text-[#55544f] mb-1">
+                    <span class="font-bold text-[#101010]">{spotlightCourse.provider}</span>
+                    <span>·</span>
+                    <span>{spotlightCourse.duration}</span>
+                  </div>
+                  <h4 class="text-sm font-bold text-[#101010] hover:text-[#1738D1] transition leading-snug">
+                    <a href={`/course/${spotlightCourse.slug}`}>
+                      {spotlightCourse.title}
+                    </a>
+                  </h4>
+                  <p class="text-xs text-[#55544f] line-clamp-2 mt-1 leading-relaxed">
+                    {spotlightCourse.description}
+                  </p>
+                </div>
+
+                <!-- Benefit Bullets -->
+                <ul class="text-xs text-[#101010] space-y-1.5 pt-2 border-t border-[#d7d6cf]/50">
+                  <li class="flex items-center gap-2">
+                    <span class="text-emerald-700 font-bold">✓</span>
+                    <span>Kurikulum berbasis studi kasus industri nyata</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <span class="text-emerald-700 font-bold">✓</span>
+                    <span>Sertifikat kelulusan resmi untuk profil LinkedIn</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <span class="text-emerald-700 font-bold">✓</span>
+                    <span>Akses materi belajar dan mentoring intensif</span>
+                  </li>
+                </ul>
+
+                <div class="pt-3 flex items-center justify-between border-t border-[#d7d6cf]/50">
+                  <div>
+                    <span class="text-[10px] text-[#55544f] block uppercase tracking-wider font-semibold">Investasi</span>
+                    <span class="text-xs font-bold text-emerald-800">{spotlightCourse.price}</span>
+                  </div>
+                  <a
+                    href={`/course/${spotlightCourse.slug}`}
+                    class="min-h-[40px] px-4 py-2 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold transition inline-flex items-center gap-1 shadow-xs focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:ring-offset-2"
+                  >
+                    <span>Detail Program</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </section>
+          )}
+
+          <!-- 2. ARTIKEL VIRAL & TIPS KARIER POPULER -->
+          <section
+            aria-labelledby="heading-viral-articles"
+            class="bg-white rounded-2xl border border-[#d7d6cf] p-5 shadow-xs"
+          >
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#d7d6cf]/60">
+              <h3 id="heading-viral-articles" class="text-xs font-bold uppercase tracking-wider text-[#101010]">
+                Artikel Viral &amp; Tips Karier
+              </h3>
+              <span class="text-[10px] font-bold text-[#1738D1] uppercase">Trending</span>
+            </div>
+
+            <div class="divide-y divide-[#d7d6cf]/50">
+              {viralArticles.map((art, idx) => (
+                <article class="py-3 first:pt-0 last:pb-0 group">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="w-5 h-5 rounded-full bg-[#f4f3ee] text-[#101010] text-[10px] font-bold flex items-center justify-center shrink-0 border border-[#d7d6cf]">
+                      {idx + 1}
+                    </span>
+                    <span class="text-[10px] font-bold text-[#1738D1] uppercase tracking-wider truncate">
+                      {art.category}
+                    </span>
+                    <span class="text-[10px] text-[#55544f] ml-auto shrink-0">
+                      {art.readTime}
+                    </span>
+                  </div>
+                  <h4 class="text-xs sm:text-sm font-bold text-[#101010] group-hover:text-[#1738D1] transition leading-snug line-clamp-2">
+                    <a href={`/career/${art.slug}`} class="focus-visible:outline-2 focus-visible:outline-[#1738D1]">
+                      {art.title}
+                    </a>
+                  </h4>
+                </article>
+              ))}
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-[#d7d6cf]/60">
+              <a
+                href="/career"
+                class="min-h-[38px] w-full px-4 py-2 rounded-full border border-[#d7d6cf] hover:border-[#101010] bg-[#f4f3ee] hover:bg-white text-[#101010] text-xs font-bold transition flex items-center justify-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[#101010]"
+              >
+                <span>Lihat Semua Artikel Panduan</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+            </div>
+          </section>
+
+          <!-- 3. ADS INTERNAL (SOLUSI EVALUASI RESUME & CV ATS) -->
+          <section
+            aria-labelledby="heading-internal-ad"
+            class="bg-white rounded-2xl border border-[#d7d6cf] p-5 shadow-xs relative overflow-hidden"
+          >
+            <div class="flex items-center justify-between pb-2 mb-3 border-b border-[#101010]/8">
+              <span class="text-[9px] font-bold uppercase tracking-wider bg-orange-50 text-orange-700 border border-orange-200 px-2.5 py-0.5 rounded-full">
+                FITUR UNGGULAN
+              </span>
+            </div>
+
+            <div class="my-2 text-center">
+              <div class="w-12 h-12 rounded-full bg-orange-50 border border-orange-200 text-orange-700 font-extrabold text-xs flex items-center justify-center mx-auto mb-2.5">
+                ATS
+              </div>
+              <h4 id="heading-internal-ad" class="text-sm font-bold text-[#101010] mb-1.5 leading-snug">
+                Cek Skor &amp; Kesesuaian CV ATS Kamu
+              </h4>
+              <p class="text-xs text-[#55544f] leading-relaxed max-w-[240px] mx-auto font-medium">
+                Pastikan resume lamaranmu terstruktur rapi dan lolos penyaring otomatis sistem HRD perusahaan multinasional.
+              </p>
+            </div>
+
+            <div class="space-y-2 mt-4 pt-3 border-t border-[#d7d6cf]/60">
+              <a
+                href={`${APP_URL}/cv-screener`}
+                class="min-h-[42px] inline-flex items-center justify-center w-full py-2.5 px-4 rounded-full bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white text-xs font-bold transition shadow-xs focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
+              >
+                Evaluasi CV Gratis
+              </a>
+              <a
+                href={CV_BUILDER_URL}
+                class="min-h-[38px] inline-flex items-center justify-center w-full py-2 px-4 rounded-full bg-[#f4f3ee] hover:bg-white text-[#101010] border border-[#d7d6cf] text-xs font-bold transition focus-visible:ring-2 focus-visible:ring-[#101010]"
+              >
+                Buat CV Standar Industri
+              </a>
+            </div>
+          </section>
+
+          <!-- 4. ADS EXTERNAL (MREC & STICKY SKYSCRAPER SPONSOR) -->
+          <AdSlot
+            type="mrec"
+            className="my-0"
+            note="Tingkatkan nilai tawar kariermu melalui sertifikasi keahlian terstandarisasi."
+          />
+
+          <div class="sticky top-24">
+            <AdSlot
+              type="skyscraper"
+              note="Program bimbingan karier intensif dan penyaluran kerja mitra industri."
+            />
+          </div>
+
+        </aside>
+
+      </div>
+
+      <!-- =====================================================================
+           BAGIAN BAWAH HALAMAN: BACA JUGA ARTIKEL, SERTIFIKASI, LOWONGAN KERJA, DLL
+           ===================================================================== -->
+      <div class="mt-14 pt-10 border-t border-[#d7d6cf] space-y-12">
+        
+        <!-- Section Bawah 1: Baca Juga Artikel & Panduan Karier Pilihan -->
+        {readAlsoArticles.length > 0 && (
+          <section aria-labelledby="heading-read-also-articles" class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8 shadow-xs">
+            <div class="mb-6 pb-3 border-b border-[#d7d6cf]/60">
+              <SubsectionHeader
+                title="Baca Juga: Panduan Karier &amp; Tips Lolos Kerja"
+                level={2}
+                eyebrow="Wawasan &amp; Strategi Melamar"
+                eyebrowColor="text-rose-800"
+                rightContent={true}
+              >
+                <a slot="right" href="/career" class="text-xs font-bold text-[#1738D1] hover:underline shrink-0">
+                  Lihat Semua Artikel ({artikelSnapshot.length})
+                </a>
+              </SubsectionHeader>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {readAlsoArticles.map((art) => (
+                <OrganicCardSmall
+                  image={art.image}
+                  imageAlt={art.title}
+                  category={art.category}
+                  date={art.date ? `${art.date} · ${art.readTime}` : art.readTime}
+                  title={art.title}
+                  href={`/career/${art.slug}`}
+                  description={art.excerpt}
+                  actionText="Baca Artikel"
+                  surfaceColor="#f4f3ee"
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        <!-- Section Bawah 2: Sertifikasi Resmi & Kompetensi Industri yang Sedang Buka -->
+        {topSertifikasi.length > 0 && (
+          <section aria-labelledby="heading-related-certs" class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8 shadow-xs">
+            <div class="mb-6 pb-3 border-b border-[#d7d6cf]/60">
+              <SubsectionHeader
+                title="Sertifikasi Resmi &amp; Uji Kompetensi Terbuka"
+                level={2}
+                eyebrow="Validasi Keahlian di Resume"
+                eyebrowColor="text-emerald-800"
+                rightContent={true}
+              >
+                <a slot="right" href="/sertifikasi" class="text-xs font-bold text-[#1738D1] hover:underline shrink-0">
+                  Lihat Semua Sertifikasi ({sertifikasiSnapshot.length})
+                </a>
+              </SubsectionHeader>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {topSertifikasi.map((sert) => (
+                <OrganicCardSmall
+                  image={sert.image}
+                  imageAlt={sert.title}
+                  category={sert.issuer}
+                  date={sert.duration}
+                  title={sert.title}
+                  href={`/sertifikasi/${sert.slug}`}
+                  description={sert.description}
+                  price={sert.price}
+                  actionText="Cek Skema"
+                  surfaceColor="#f4f3ee"
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        <!-- Section Bawah 3: Daftar Lowongan Kerja Aktif + Ads di Sela-Sela Daftar Lowongannya -->
+        {featuredJobs.length > 0 && (
+          <section aria-labelledby="heading-related-jobs" class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8 shadow-xs">
+            <div class="mb-6 pb-3 border-b border-[#d7d6cf]/60">
+              <SubsectionHeader
+                title="Lowongan Kerja yang Sedang Membuka Pendaftaran"
+                level={2}
+                eyebrow="Peluang Karier Segar Terverifikasi"
+                eyebrowColor="text-[#1738D1]"
+                rightContent={true}
+              >
+                <a slot="right" href="/lowongan" class="text-xs font-bold text-[#1738D1] hover:underline shrink-0">
+                  Lihat Semua Lowongan ({lowonganSnapshot.length})
+                </a>
+              </SubsectionHeader>
+            </div>
+
+            <div class="space-y-4">
+              <!-- 2 Lowongan Pertama -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {firstJobBatch.map((job) => (
+                  <article class="rounded-2xl p-5 bg-[#f4f3ee] border border-[#d7d6cf] hover:border-[#1738D1]/50 transition flex flex-col justify-between gap-4">
+                    <div>
+                      <div class="flex items-center justify-between gap-2 flex-wrap mb-1.5">
+                        <span class="text-xs font-bold text-[#55544f] uppercase tracking-wider">{job.company}</span>
+                        <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[#1738D1] font-bold">{job.type}</span>
+                      </div>
+                      <h3 class="text-base font-bold text-[#101010] hover:text-[#1738D1] transition leading-snug">
+                        <a href={`/lowongan/${job.slug}`}>{job.title}</a>
+                      </h3>
+                      <p class="text-xs text-[#55544f] mt-1 line-clamp-2 leading-relaxed">
+                        {job.description}
+                      </p>
+                    </div>
+                    <div class="pt-3 border-t border-[#d7d6cf]/70 flex items-center justify-between gap-2 flex-wrap">
+                      <div class="text-xs">
+                        <span class="font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">{job.salary}</span>
+                        <span class="text-[#55544f] ml-2">{job.location}</span>
+                      </div>
+                      <a
+                        href={`/lowongan/${job.slug}`}
+                        class="min-h-[40px] px-4 py-2 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold inline-flex items-center justify-center transition shadow-xs focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
+                      >
+                        Lamar Sekarang
+                      </a>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <!-- In-Feed Ad di Sela-Sela Daftar Lowongan -->
+              <AdSlot
+                type="infeed"
+                className="my-3"
+                note="Kesesuaian kata kunci CV dan portofolio meningkatkan peluang lolos seleksi berkas hingga 3x lipat."
+              />
+
+              <!-- 2 Lowongan Berikutnya -->
+              {secondJobBatch.length > 0 && (
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {secondJobBatch.map((job) => (
+                    <article class="rounded-2xl p-5 bg-[#f4f3ee] border border-[#d7d6cf] hover:border-[#1738D1]/50 transition flex flex-col justify-between gap-4">
+                      <div>
+                        <div class="flex items-center justify-between gap-2 flex-wrap mb-1.5">
+                          <span class="text-xs font-bold text-[#55544f] uppercase tracking-wider">{job.company}</span>
+                          <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[#1738D1] font-bold">{job.type}</span>
+                        </div>
+                        <h3 class="text-base font-bold text-[#101010] hover:text-[#1738D1] transition leading-snug">
+                          <a href={`/lowongan/${job.slug}`}>{job.title}</a>
+                        </h3>
+                        <p class="text-xs text-[#55544f] mt-1 line-clamp-2 leading-relaxed">
+                          {job.description}
+                        </p>
+                      </div>
+                      <div class="pt-3 border-t border-[#d7d6cf]/70 flex items-center justify-between gap-2 flex-wrap">
+                        <div class="text-xs">
+                          <span class="font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">{job.salary}</span>
+                          <span class="text-[#55544f] ml-2">{job.location}</span>
+                        </div>
+                        <a
+                          href={`/lowongan/${job.slug}`}
+                          class="min-h-[40px] px-4 py-2 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold inline-flex items-center justify-center transition shadow-xs focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
+                        >
+                          Lamar Sekarang
+                        </a>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        <!-- Section Bawah 4: Agenda Event & Job Fair Terdekat -->
+        {topEvents.length > 0 && (
+          <section aria-labelledby="heading-related-events" class="bg-white rounded-2xl border border-[#d7d6cf] p-6 sm:p-8 shadow-xs">
+            <div class="mb-6 pb-3 border-b border-[#d7d6cf]/60">
+              <SubsectionHeader
+                title="Agenda Event &amp; Job Fair Terdekat"
+                level={2}
+                eyebrow="Networking &amp; Walk-In Interview"
+                eyebrowColor="text-amber-800"
+                rightContent={true}
+              >
+                <a slot="right" href="/event" class="text-xs font-bold text-[#1738D1] hover:underline shrink-0">
+                  Lihat Semua Event ({eventSnapshot.length})
+                </a>
+              </SubsectionHeader>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {topEvents.map((evt) => (
+                <OrganicCardSmall
+                  image={evt.image}
+                  imageAlt={evt.title}
+                  category={`${evt.format} — ${evt.type}`}
+                  date={`${evt.day} ${evt.month} 2026`}
+                  title={evt.title}
+                  href={`/event/${evt.slug}`}
+                  description={evt.description}
+                  location={evt.location}
+                  price={evt.price}
+                  actionText="Detail Event"
+                  surfaceColor="#f4f3ee"
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
       </div>
     </div>
   </main>

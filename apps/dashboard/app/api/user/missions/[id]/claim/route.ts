@@ -4,9 +4,20 @@ import { getAuthUser } from '@/lib/server-auth';
 import { createNotification } from '@/lib/notification-helper';
 import crypto from 'crypto';
 
+function isValidUUID(str?: string | null): boolean {
+  if (!str || typeof str !== 'string') return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
+
 export async function POST(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json(
+        { success: false, message: 'Misi tidak valid.' },
+        { status: 404 }
+      );
+    }
     const user = await getAuthUser(req);
     if (!user) {
       return NextResponse.json(

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@employr/db';
+import { prisma, decryptSecret } from '@employr/db';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -98,12 +98,13 @@ Tugasmu adalah melakukan ENTITY RESOLUTION & CLUSTERING:
 
     const endpoint = (provider.base_url || 'https://api.openai.com/v1').replace(/\/+$/, '');
     const model = provider.model || 'gpt-4o-mini';
+    const apiKey = provider.api_key ? decryptSecret(provider.api_key) : '';
     const res = await fetch(`${endpoint}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${provider.api_key}`,
-        'api-key': provider.api_key,
+        Authorization: `Bearer ${apiKey}`,
+        'api-key': apiKey,
       },
       body: JSON.stringify({
         model,

@@ -2,13 +2,19 @@ export type CvPurpose =
   | 'job'
   | 'internship'
   | 'fresh_graduate'
+  | 'smk_vokasi'
   | 'freelance'
   | 'remote'
   | 'career_switch'
   | 'promotion'
   | 'academic_scholarship'
   | 'overseas'
-  | 'general';
+  | 'general'
+  | 'volunteer_ngo'
+  | 'government'
+  | 'executive'
+  | 'startup_founder'
+  | 'career_break';
 
 export interface PurposeWeights {
   experience?: number;
@@ -46,7 +52,7 @@ export interface PurposeProfileConfig {
   title: string;
   badge: string;
   iconName: string;
-  category: 'career' | 'entry' | 'academic' | 'flexible';
+  category: 'career' | 'entry' | 'academic' | 'flexible' | 'social' | 'public' | 'leadership' | 'transition';
   objective: string;
   description: string;
   weights: PurposeWeights;

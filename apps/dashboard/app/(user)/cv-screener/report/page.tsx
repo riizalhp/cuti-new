@@ -7,6 +7,16 @@ export const metadata: Metadata = {
     'Laporan mendalam hasil evaluasi CV ATS, skor kompatibilitas kata kunci, dan rekomendasi perbaikan di Employr.',
 };
 
-export default function CvScreenerReportPage() {
-  return <AiCvScreenerView mode="report" />;
+export default async function CvScreenerReportPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ session?: string }>;
+}) {
+  const resolvedParams = searchParams ? await searchParams : undefined;
+  return (
+    <AiCvScreenerView
+      mode="report"
+      initialSessionId={resolvedParams?.session}
+    />
+  );
 }

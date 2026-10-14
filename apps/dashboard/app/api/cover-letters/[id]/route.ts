@@ -2,12 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 
+function isValidUUID(str?: string | null): boolean {
+  if (!str || typeof str !== 'string') return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json(
+        { success: false, message: 'Surat lamaran tidak ditemukan.' },
+        { status: 404 }
+      );
+    }
     const user = await getAuthUser(req);
     if (!user) {
       return NextResponse.json(
@@ -61,6 +72,12 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json(
+        { success: false, message: 'Surat lamaran tidak ditemukan.' },
+        { status: 404 }
+      );
+    }
     const user = await getAuthUser(req);
     if (!user) {
       return NextResponse.json(

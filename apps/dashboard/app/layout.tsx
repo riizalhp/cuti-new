@@ -1,6 +1,13 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Providers } from '@/components/Providers';
 import './globals.css';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  interactiveWidget: 'resizes-content',
+};
 
 export const metadata: Metadata = {
   title: {
@@ -83,7 +90,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-background text-foreground antialiased selection:bg-[#1738D1] selection:text-white font-sans">
+      <body className="h-full min-h-full bg-background text-foreground antialiased selection:bg-cobalt-500 selection:text-white font-sans">
         <Providers>{children}</Providers>
       </body>
     </html>

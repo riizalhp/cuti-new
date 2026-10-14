@@ -3,9 +3,18 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-sans: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  
+
+  /* Root 14px, zoom 0.8 di desktop. Komentar = hasil visual desktop. */
+  --text-caption: 0.8571rem;  /* 12px CSS → 9.6px  (metadata, badge) */
+  --text-xs: 0.9286rem;       /* 13px CSS → 10.4px (label tombol/tab) */
+  --text-xs--line-height: 1.25;
+  --text-sm: 1rem;            /* 14px CSS → 11.2px (isi) */
+  --text-sm--line-height: 1.45;
+
   --color-navy-50: #EEF2FF;
   --color-navy-100: #E0E7FF;
   --color-navy-200: #C7D2FE;
@@ -38,34 +47,315 @@
   --color-cobalt-800: #0B195C;
   --color-cobalt-900: #070F38;
   --color-cobalt: #1738D1;
+
+  --color-cta: var(--color-cobalt-500);
+  --color-cta-hover: var(--color-cobalt-600);
+  --color-text-muted: #64748B;
+  --color-text-muted-dark: #94A3B8;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-20: 80px;
+  --spacing-24: 96px;
 }
 
+/* Employr Design System Variables */
 :root {
   --background: #F8FAFC;
   --foreground: #0F172A;
+
+  /* Background Colors */
+  --bg-primary: #F8FAFC;
+  --glass-light: rgba(255, 255, 255, 0.7);
+  --glass-medium: rgba(255, 255, 255, 0.85);
+  --glass-heavy: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(226, 232, 240, 0.8);
+  --glass-border-emphasized: rgba(203, 213, 225, 0.9);
+
+  /* Brand & CTA Colors */
+  --brand-navy: #1F3578;
+  --brand-navy-light: #3B5CC4;
+  --brand-cobalt: #1738D1;
+  --cta-cobalt: #1738D1;
+  --cta-cobalt-hover: #132EA8;
+  --cta-orange: #1738D1;
+  --cta-orange-hover: #132EA8;
+
+  /* Text Colors */
+  --text-primary: #0F172A;
+  --text-secondary: #64748B;
+  --text-tertiary: #94A3B8;
+  --text-on-accent: #FFFFFF;
+
+  /* Status Colors */
+  --status-success: #10B981;
+  --status-warning: #F59E0B;
+  --status-error: #EF4444;
+  --status-info: #3B82F6;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Shadows */
+  --shadow-card: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  --shadow-button: 0 4px 6px rgba(99, 102, 241, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-button-hover: 0 6px 12px rgba(99, 102, 241, 0.3), 0 2px 4px rgba(0, 0, 0, 0.15);
+  --shadow-modal: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+  --shadow-navbar: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(0, 0, 0, 0.1);
+
+  /* Animation */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .dark {
-  --background: #020617;
-  --foreground: #F8FAFC;
+  --background: #0f1013;
+  --foreground: #f4f4f5;
+}
+
+@theme inline {
+  --color-primary: var(--bg-primary);
+  --color-accent-indigo: var(--accent-indigo);
+  --color-accent-violet: var(--accent-violet);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+}
+
+/* Global Styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 87.5%; /* 14px base rem (seragam dengan Dashboard Port 3000) */
+  height: 100%;
+  background-color: var(--background);
+  font-family: var(--font-sans);
+  scrollbar-width: thin;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbars */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+h1, h2, h3 {
+  letter-spacing: -0.015em;
 }
 
-/* Custom scrollbar for transcripts and content */
+/* ============================================================
+   Mobile Form Input Anti-Zoom (iOS Safari, Android Chrome)
+   ============================================================ */
+@media screen and (max-width: 1023px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]),
+  select,
+  textarea,
+  [contenteditable="true"] {
+    font-size: 16px !important;
+  }
+}
+
+input,
+select,
+textarea,
+button {
+  touch-action: manipulation;
+}
+
+/* Laptop & Desktop Viewport Adjustment: Zoom out 80% (Presisi Seragam Port 3000) */
+@media screen and (min-width: 1024px) {
+  html {
+    zoom: 0.8;
+  }
+}
+
+/* Dashboard Viewport Lock: Cegah window scrolling agar sidebar & layout selalu full-height ke dasar layar */
+html:has(#dashboard-root-layout) {
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+body:has(#dashboard-root-layout) {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#dashboard-root-layout {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Glassmorphism Luxury Utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06);
+}
+
+.dark .glass-panel {
+  background: rgba(18, 19, 22, 0.65);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+.glass-card {
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .glass-card {
+  border-radius: var(--radius-xl);
+  background: rgba(24, 24, 27, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.09);
+  transform: translateY(-2px);
+}
+
+.dark .glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+}
+
+/* ============================================================
+   Employr Design System — Sleek Global & Custom Scrollbars
+   ============================================================ */
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+}
+
+html.dark, .dark {
+  scrollbar-color: rgba(51, 65, 85, 0.7) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.75);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #1738D1;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.7);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.95);
+}
+
+.dark ::-webkit-scrollbar-thumb:active {
+  background: #3B82F6;
+}
+
+/* Custom Sleek Scrollbar for Sidebars & Drawers */
+@utility custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.45);
+    border-radius: 9999px;
+    transition: background-color 0.2s ease;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.8);
+  }
+  &::-webkit-scrollbar-thumb:active {
+    background: #1738D1;
+  }
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+}
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -74,36 +364,76 @@ body {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
-}
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: rgba(100, 116, 139, 0.8);
 }
 
-/* Print CSS for Certificate */
-@media print {
-  body * {
-    visibility: hidden;
+@utility sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  &:hover {
+    scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
   }
-  .print-certificate-area, .print-certificate-area * {
-    visibility: visible;
+  &::-webkit-scrollbar {
+    width: 4px;
   }
-  .print-certificate-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    background: white !important;
-    color: black !important;
-    box-shadow: none !important;
+  &::-webkit-scrollbar-track {
+    background: transparent;
   }
-  .no-print {
-    display: none !important;
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 9999px;
+    transition: background-color 0.2s ease;
   }
+  &:hover::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.45);
+  }
+}
+
+.sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.sidebar-scrollbar:hover {
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+}
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+.sidebar-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+}
+
+/* No Scrollbar Utility */
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Safe Area Bottom for iOS Devices */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }

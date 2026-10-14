@@ -1,3 +1,5 @@
+import { cleanBulletLine } from './cv-bullets';
+
 export interface ParsedCvExperience {
   id: string;
   role: string;
@@ -40,6 +42,14 @@ export interface ParsedCvCertification {
   issuer: string;
   issueDate?: string;
   credentialId?: string;
+}
+
+export interface ParsedCvCourse {
+  id: string;
+  courseName: string;
+  institution: string;
+  year?: string;
+  description?: string;
 }
 
 export interface ParsedCvReference {
@@ -98,11 +108,13 @@ export interface ParsedCvResult {
   experienceCompany: string;
   skills: string[];
   summary: string;
+  topAchievementSnippet?: string;
   experience?: ParsedCvExperience[];
   education?: ParsedCvEducation[];
   projects?: ParsedCvProject[];
   organizations?: ParsedCvOrganization[];
   certifications?: ParsedCvCertification[];
+  courses?: ParsedCvCourse[];
   references?: ParsedCvReference[];
   publications?: ParsedCvPublication[];
   awards?: ParsedCvAward[];
@@ -155,8 +167,7 @@ const BASE_SKILL_DICTIONARY = [
   'Data Entry', 'Data Analysis', 'Leadership', 'Problem Solving', 'Teamwork', 'Communication',
   'Public Speaking', 'Critical Thinking', 'Adaptability', 'Interpersonal', 'Time Management',
   'Accounting', 'Akuntansi', 'Taxation', 'Perpajakan', 'Administration', 'Administrasi',
-  'Human Resources', 'HRD', 'Recruitment', 'Sales', 'Pemasaran', 'Business Development',
-  'Bahasa Inggris', 'English', 'Bahasa Indonesia'
+  'Human Resources', 'HRD', 'Recruitment', 'Sales', 'Pemasaran', 'Business Development'
 ];
 
 function detectSectionType(line: string): string | null {
@@ -164,46 +175,51 @@ function detectSectionType(line: string): string | null {
   if (!trimmed || trimmed.length > 60) return null;
 
   const clean = trimmed
-    .replace(/^[\d\.\-\*\•\▪\—\–\:\s\[\]\(\)\#\>]+/, '')
-    .replace(/[\:\s\[\]\(\)\-\–—\#]+$/, '')
+    .replace(/^[\d\.\-\*\_\•\▪\—\–\:\s\[\]\(\)\#\>]+/, '')
+    .replace(/[\:\s\[\]\(\)\-\–—\#\*\_\>]+$/, '')
+    .replace(/[\*\_]+/g, '')
     .trim();
 
   if (!clean || clean.length > 50) return null;
 
-  if (/^(WORK\s*EXPERIENCES?|PROFESSIONAL\s*EXPERIENCES?|EMPLOYMENT\s*HISTORY|CAREER\s*HISTORY|EXPERIENCES?|PENGALAMAN\s*KERJA|RIWAYAT\s*PEKERJAAN)$/i.test(clean)) {
+  if (/^(PERSONAL\s*DATA|DATA\s*PRIBADI|DATA\s*DIRI|INFORMASI\s*PRIBADI|BIODATA|PERSONAL\s*DETAILS|PERSONAL\s*INFORMATION|IDENTITAS\s*DIRI|INFORMASI\s*KONTAK|CONTACT\s*INFORMATION|CONTACT\s*DETAILS)$/i.test(clean)) {
+    return 'PERSONAL_DATA';
+  }
+
+  if (/^(WORK\s*EXPERIENCES?|PROFESSIONAL\s*EXPERIENCES?|EMPLOYMENT\s*HISTORY|CAREER\s*HISTORY|WORK\s*HISTORY|WORKING\s*EXPERIENCES?|PROFESSIONAL\s*BACKGROUND|CAREER\s*BACKGROUND|EXPERIENCES?|PENGALAMAN\s*KERJA|PENGALAMAN\s*PROFESIONAL|PENGALAMAN\s*KEPELATIHAN|PENGALAMAN\s*MENGAJAR|RIWAYAT\s*PEKERJAAN|RIWAYAT\s*KERJA)$/i.test(clean)) {
     return 'EXPERIENCE';
   }
-  if (/^(PROJECTS?|PROYEK|PROYEK\s*UNGGULAN|PROYEK\s*UTAMA|PROYEK\s*PILIHAN|PORTFOLIO|PORTOPOLIO|PERSONAL\s*PROJECTS?|KEY\s*PROJECTS?|SELECTED\s*PROJECTS?|FEATURED\s*PROJECTS?|LAST\s*PROJECTS?|LAST\s*PROJECT|PROJECT\s*EXPERIENCES?)$/i.test(clean)) {
+  if (/^(PROJECTS?|PROYEK|PROYEK\s*UNGGULAN|PROYEK\s*UTAMA|PROYEK\s*PILIHAN|PROYEK\s*(?:DAN|&)\s*INISIATIF|PORTFOLIO|PORTOPOLIO|PERSONAL\s*PROJECTS?|KEY\s*PROJECTS?|SELECTED\s*PROJECTS?|FEATURED\s*PROJECTS?|LAST\s*PROJECTS?|LAST\s*PROJECT|PROJECT\s*EXPERIENCES?)$/i.test(clean)) {
     return 'PROJECT';
   }
-  if (/^(ORGANIZATIONAL\s*EXPERIENCES?|ORGANIZATIONS?|PENGALAMAN\s*ORGANISASI|ORGANISASI|LEADERSHIP\s*EXPERIENCES?|VOLUNTEERING?|VOLUNTEER\s*EXPERIENCES?)$/i.test(clean)) {
+  if (/^(ORGANIZATIONAL\s*EXPERIENCES?|ORGANIZATIONS?|PENGALAMAN\s*ORGANISASI|ORGANISASI|LEADERSHIP\s*EXPERIENCES?|VOLUNTEERING?|VOLUNTEER\s*EXPERIENCES?|KONTEN\s*(?:DAN|&)\s*KEGIATAN\s*KOMUNITAS|KEGIATAN\s*KOMUNITAS)$/i.test(clean)) {
     return 'ORGANIZATION';
   }
-  if (/^(SKILLS?|KEAHLIAN|KEAHLIAN\s*TEKNIS|KEAHLIAN\s*UTAMA|KOMPETENSI|KOMPETENSI\s*TEKNIS|TECHNICAL\s*SKILLS?|HARD\s*&\s*SOFT\s*SKILLS?|HARD\s*SKILLS?|SOFT\s*SKILLS?|SKILLS?\s*&\s*TOOLS?|TECH\s*STACK|CORE\s*COMPETENCIES|EXPERTISE)$/i.test(clean)) {
+  if (/^(SKILLS?|SKILLS?\s*(?:AND|&)\s*STRENGTHS?|SKILLS?\s*(?:AND|&)\s*ABILITIES|CORE\s*SKILLS?|KEY\s*SKILLS?|RELEVANT\s*SKILLS?|KEAHLIAN|KEAHLIAN\s*TEKNIS|KEAHLIAN\s*UTAMA|KOMPETENSI|KOMPETENSI\s*UTAMA|KOMPETENSI\s*TEKNIS|SPESIALISASI(?:\s*ROLE\s*(?:DAN|&)\s*POOL\s*HERO)?|TECHNICAL\s*SKILLS?|HARD\s*&\s*SOFT\s*SKILLS?|HARD\s*SKILLS?|SOFT\s*SKILLS?|SKILLS?\s*&\s*TOOLS?|TECH\s*STACK|CORE\s*COMPETENCIES|EXPERTISE)$/i.test(clean)) {
     return 'SKILLS';
   }
-  if (/^(SUMMARY|PROFESSIONAL\s*SUMMARY|PROFILES?|PROFIL|PROFIL\s*PROFESIONAL|ABOUT\s*ME|TENTANG\s*SAYA|RINGKASAN|RINGKASAN\s*PROFESIONAL|RINGKASAN\s*PRIBADI|TENTANG\s*DIRI|CAREER\s*OBJECTIVE|OBJECTIVE|EXECUTIVE\s*SUMMARY|DESKRIPSI\s*DIRI)$/i.test(clean)) {
+  if (/^(SUMMARY|PROFESSIONAL\s*SUMMARY|PROFESSIONAL\s*PROFILE|CAREER\s*PROFILE|PROFILES?|PROFIL|PROFIL\s*PROFESIONAL|PROFIL\s*SINGKAT|ABOUT\s*ME|ABOUT|TENTANG\s*SAYA|RINGKASAN|RINGKASAN\s*PROFIL|RINGKASAN\s*PROFESIONAL|RINGKASAN\s*PRIBADI|RINGKASAN\s*EKSEKUTIF|TENTANG\s*DIRI|CAREER\s*OBJECTIVE|OBJECTIVE|PERSONAL\s*STATEMENT|PERSONAL\s*SUMMARY|PROFILE\s*SUMMARY|SUMMARY\s*OF\s*QUALIFICATIONS|EXECUTIVE\s*SUMMARY|DESKRIPSI\s*DIRI)$/i.test(clean)) {
     return 'SUMMARY';
   }
-  if (/^(CERTIFICATIONS?|SERTIFIKASI|SERTIFIKAT|LICENSES?|LISENSI|CERTIFICATES?|PELATIHAN\s*&\s*SERTIFIKASI|PELATIHAN)$/i.test(clean)) {
+  if (/^(CERTIFICATIONS?|SERTIFIKASI|SERTIFIKAT|LICENSES?|LISENSI|CERTIFICATES?|CERTIFICATES?\s*&\s*LICENSES?|CERTIFICATIONS?\s*&\s*LICENSES?|LICENSES?\s*&\s*CERTIFICATIONS?|PELATIHAN\s*(?:&|DAN)\s*SERTIFIKASI|SERTIFIKASI\s*(?:&|DAN)\s*PELATIHAN|PELATIHAN)$/i.test(clean)) {
     return 'CERTIFICATION';
   }
   if (/^(REFERENCES?|REFERENSI|DAFTAR\s*REFERENSI|PROFESSIONAL\s*REFERENCES?|REKOMENDASI)$/i.test(clean)) {
     return 'REFERENCES';
   }
-  if (/^(EDUCATIONS?|RIWAYAT\s*PENDIDIKAN|PENDIDIKAN|ACADEMIC\s*BACKGROUND|LATAR\s*BELAKANG\s*PENDIDIKAN|ACADEMICS?)$/i.test(clean)) {
+  if (/^(EDUCATIONS?|RIWAYAT\s*PENDIDIKAN|PENDIDIKAN|ACADEMIC\s*BACKGROUND|EDUCATIONAL\s*BACKGROUND|EDUCATION\s*&\s*QUALIFICATIONS?|LATAR\s*BELAKANG\s*PENDIDIKAN|ACADEMICS?)$/i.test(clean)) {
     return 'EDUCATION';
   }
-  if (/^(COURSE\s*EXPERIENCES?|COURSES?|PELATIHAN|BOOTCAMPS?|TRAININGS?)$/i.test(clean)) {
+  if (/^(COURSE\s*EXPERIENCES?|COURSES?|COURSES?\s*(?:&|DAN|AND)\s*TRAININGS?|TRAININGS?\s*(?:&|DAN|AND)\s*WORKSHOPS?|PELATIHAN\s*(?:&|DAN)\s*KURSUS|KURSUS\s*(?:&|DAN)\s*PELATIHAN|BOOTCAMPS?|TRAININGS?)$/i.test(clean)) {
     return 'COURSE';
   }
-  if (/^(AWARDS?|HONORS?|ACHIEVEMENTS?|PENGHARGAAN|PRESTASI)$/i.test(clean)) {
+  if (/^(AWARDS?|HONORS?|ACHIEVEMENTS?|PENGHARGAAN|PRESTASI|PRESTASI\s*(?:&|DAN)\s*PENGHARGAAN)$/i.test(clean)) {
     return 'AWARDS';
   }
   if (/^(LANGUAGES?|BAHASA)$/i.test(clean)) {
     return 'LANGUAGES';
   }
-  if (/^(PUBLICATIONS?|PUBLIKASI)$/i.test(clean)) {
+  if (/^(PUBLICATIONS?|PUBLIKASI|PEMBICARA\s*(?:&|DAN)\s*PUBLIKASI)$/i.test(clean)) {
     return 'PUBLICATIONS';
   }
   if (/^(INTERESTS?|HOBBIES?|MINAT)$/i.test(clean)) {
@@ -249,6 +265,25 @@ function isValidSkillToken(token: string): boolean {
   return true;
 }
 
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function safeWordMatchRegex(token: string): RegExp | null {
+  try {
+    const trimmed = token.trim();
+    if (!trimmed) return null;
+    const escaped = escapeRegex(trimmed);
+    const startsWithWord = /^[a-zA-Z0-9_]/.test(trimmed);
+    const endsWithWord = /[a-zA-Z0-9_]$/.test(trimmed);
+    const prefix = startsWithWord ? '\\b' : '(?:^|\\s)';
+    const suffix = endsWithWord ? '\\b' : '(?:$|\\s)';
+    return new RegExp(`${prefix}${escaped}${suffix}`, 'i');
+  } catch {
+    return null;
+  }
+}
+
 export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDictionaries): ParsedCvResult {
   let cleanText = rawText
     .replace(/\r\n/g, '\n')
@@ -287,44 +322,205 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
   const phoneMatch = cleanText.match(phoneRegex);
   const phone = phoneMatch ? phoneMatch[0].replace(/[\s-]/g, '') : '';
 
-  // 4. Name Extraction (Header / Top 10 lines)
+  // 4. Name Extraction (Explicit Labels -> Delimited Headers -> Candidate Lines)
   let fullName = '';
-  const topLines = (sections['HEADER'] && sections['HEADER'].length > 0) ? sections['HEADER'] : lines.slice(0, 10);
-  for (const line of topLines) {
-    if (
-      emailRegex.test(line) ||
-      phoneRegex.test(line) ||
-      /https?:\/\/|www\.|curriculum|vitae|resume|biodata|autorecovered|page\s*\d+/i.test(line) ||
-      line.length < 2 ||
-      line.length > 50
-    ) {
-      continue;
+
+  const INVALID_NAME_OR_SECTION_WORDS = new Set([
+    'curriculum', 'vitae', 'resume', 'biodata', 'data', 'pribadi', 'diri', 'informasi',
+    'kontak', 'contact', 'details', 'personal', 'information', 'daftar', 'riwayat', 'hidup',
+    'profil', 'profile', 'tentang', 'saya', 'about', 'me', 'ringkasan', 'summary',
+    'pendidikan', 'education', 'pengalaman', 'kerja', 'experience', 'keahlian', 'skills', 'skill',
+    'sertifikasi', 'certifications', 'proyek', 'projects', 'project', 'organisasi', 'organizations',
+    'pelatihan', 'courses', 'course', 'bahasa', 'languages', 'language', 'prestasi', 'awards', 'award', 'referensi', 'references',
+    'fresh', 'graduate', 'graduated', 'lulusan', 'baru', 'magang', 'internship', 'intern',
+    'mahasiswa', 'student', 'pencari', 'job', 'seeker',
+    'indonesia', 'jakarta', 'surabaya', 'bandung', 'semarang', 'medan', 'yogyakarta', 'jogja',
+    'tangerang', 'bekasi', 'depok', 'bogor', 'malang', 'bali', 'denpasar',
+    'utara', 'selatan', 'barat', 'timur', 'pusat', 'kota', 'kabupaten', 'provinsi', 'daerah',
+    'developer', 'engineer', 'designer', 'manager', 'specialist', 'analyst', 'consultant',
+    'staf', 'staff', 'admin', 'administrasi', 'lead', 'head', 'director', 'officer',
+    'programmer', 'writer', 'creator', 'marketer', 'recruiter', 'accountant', 'executive',
+    'english', 'inggris', 'tools', 'tool', 'soft', 'hard', 'kompetensi', 'competencies',
+    'kemampuan', 'interests', 'hobbies', 'minat', 'hobi', 'relevant', 'relevan', 'skripsi',
+    'thesis', 'ipk', 'gpa', 'cumlaude', 'awardee', 'predikat', 'page', 'halaman'
+  ]);
+
+  const cleanExtractedCandidateName = (raw: string): string => {
+    if (!raw) return '';
+    let cleaned = raw
+      .replace(/^[\s\*\_\:\-\–—\|\•\·\t]+|[\s\*\_\:\-\–—\|\•\·\t]+$/g, '')
+      .replace(/^(Nama\s*Lengkap(?:\s*sesuai\s*KTP)?|Full\s*Name|Candidate\s*Name|Nama\s*Pelamar|Nama|Name)\s*[:\t\-=]\s*/i, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    // Strip trailing contact fragments if matched on same line (e.g. "Budi Santoso | budi@gmail.com")
+    cleaned = cleaned.split(/\s*[|•·]\s*|\s{3,}/)[0].trim();
+    // Strip non-name characters but preserve letters, dots, commas, apostrophes, hyphens, and spaces
+    cleaned = cleaned.replace(/[^a-zA-Z\s\.\,\'\-]/g, '').trim();
+    return cleaned;
+  };
+
+  const isInvalidCandidateName = (str: string): boolean => {
+    if (!str) return true;
+    const lower = str.toLowerCase().trim();
+    if (lower.length < 2 || lower.length > 55) return true;
+    if (lower.endsWith(':') || lower.startsWith(':')) return true;
+    const cleanTokens = lower.replace(/[^a-z\s]/g, '').split(/\s+/).filter(Boolean);
+    if (cleanTokens.length === 0 || cleanTokens.length > 6) return true;
+    
+    // Blokir jika memuat kata kunci section/kategori atau bahasa
+    if (cleanTokens.some((t) => [
+      'curriculum', 'vitae', 'resume', 'biodata', 'riwayat', 'hidup', 'pribadi', 
+      'pendidikan', 'education', 'pengalaman', 'keahlian', 'skills', 'skill',
+      'languages', 'language', 'bahasa', 'english', 'tools', 'tool',
+      'awards', 'award', 'prestasi', 'projects', 'project', 'proyek',
+      'certifications', 'certification', 'sertifikasi', 'organizations', 'organization',
+      'organisasi', 'courses', 'course', 'pelatihan', 'interests', 'hobbies',
+      'references', 'reference', 'referensi', 'contact', 'kontak', 'summary', 'profil', 'profile'
+    ].includes(t))) return true;
+
+    if (cleanTokens.every((t) => INVALID_NAME_OR_SECTION_WORDS.has(t))) return true;
+    if (cleanTokens.some((t) => [
+      'developer', 'engineer', 'designer', 'manager', 'specialist', 'analyst', 'consultant',
+      'staf', 'staff', 'admin', 'administrasi', 'lead', 'head', 'director', 'officer',
+      'intern', 'internship', 'magang', 'mahasiswa', 'student', 'freelance', 'freelancer',
+      'programmer', 'writer', 'creator', 'marketer', 'recruiter', 'accountant', 'executive'
+    ].includes(t))) return true;
+    return false;
+  };
+
+  // Helper untuk mengekstrak nama murni jika baris memuat kombinasi nama, jabatan, dan nomor telepon
+  const extractNameFromMixedHeaderChunk = (chunk: string): string => {
+    if (!chunk) return '';
+    let str = chunk.trim();
+    // 1. Bersihkan nomor telepon
+    str = str.replace(/(\+62|62|08)[0-9\s-]{8,15}/g, '').trim();
+    // 2. Bersihkan email atau URL jika ada
+    str = str.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '').trim();
+    str = str.replace(/https?:\/\/[^\s]+|www\.[^\s]+/g, '').trim();
+    str = str.replace(/^[\s\*\_\:\-\–—\|\•\·\t,]+|[\s\*\_\:\-\–—\|\•\·\t,]+$/g, '').trim();
+
+    // 3. Jika dipisahkan oleh 2+ spasi atau tab (misal: "Rizal Hanifa Pratama  Project Manager")
+    const multiSpaceParts = str.split(/\s{2,}|\t+/).map((s) => s.trim()).filter(Boolean);
+    if (multiSpaceParts.length > 1) {
+      const candidateFirst = cleanExtractedCandidateName(multiSpaceParts[0]);
+      if (candidateFirst && !isInvalidCandidateName(candidateFirst)) {
+        const words = candidateFirst.split(/\s+/);
+        if (words.length >= 1 && words.length <= 5) {
+          return candidateFirst;
+        }
+      }
     }
 
-    const words = line.split(/\s+/);
-    if (words.length >= 1 && words.length <= 5) {
-      const isCandidateName = words.every((w) => /^[A-Z][a-zA-B\.\,\'\-]*$/i.test(w));
-      if (isCandidateName && !/\d/.test(line) && !/^(Fresh\s*Graduated?|Junior|Senior|Internship)$/i.test(line)) {
-        fullName = line.replace(/[^a-zA-Za-zA-Z\s\.\,\']/g, '').trim();
-        break;
+    // 4. Jika digabungkan dengan kata kunci jabatan yang umum
+    const roleCutoff = /\s+(?:Project\s*Manager|Product\s*Manager|Software\s*Engineer|Frontend\s*Developer|Backend\s*Developer|Fullstack\s*Developer|UI\/UX\s*Designer|System\s*Analyst|Manager|Engineer|Developer|Designer|Specialist|Analyst|Lead|Coordinator)\b/i;
+    if (roleCutoff.test(str)) {
+      const nameOnly = str.split(roleCutoff)[0].trim();
+      const candidateOnly = cleanExtractedCandidateName(nameOnly);
+      if (candidateOnly && !isInvalidCandidateName(candidateOnly)) {
+        const words = candidateOnly.split(/\s+/);
+        if (words.length >= 1 && words.length <= 5) {
+          return candidateOnly;
+        }
+      }
+    }
+
+    return cleanExtractedCandidateName(str);
+  };
+
+  // 4a. Explicit Label Search across the whole document (High Precision)
+  const explicitNameRegex = /(?:^|\n)[ \t]*(?:Nama\s*Lengkap(?:\s*sesuai\s*KTP)?|Full\s*Name|Candidate\s*Name|Nama\s*Pelamar|Nama|Name)[ \t]*[:\t\-=][ \t]*([^\r\n]+)/i;
+  const explicitMatch = cleanText.match(explicitNameRegex);
+  if (explicitMatch && explicitMatch[1]) {
+    const candidate = cleanExtractedCandidateName(explicitMatch[1]);
+    if (candidate && !isInvalidCandidateName(candidate)) {
+      fullName = candidate;
+    }
+  }
+
+  // 4b. Table row with Name (e.g. Nama \t Budi Santoso without colon)
+  if (!fullName) {
+    const tableRowRegex = /(?:^|\n)[ \t]*(?:Nama\s*Lengkap|Full\s*Name|Nama|Name)[ \t]+([A-Z][a-zA-Z\s\.\,\'\-]{2,40})/i;
+    const tableMatch = cleanText.match(tableRowRegex);
+    if (tableMatch && tableMatch[1]) {
+      const candidate = cleanExtractedCandidateName(tableMatch[1]);
+      if (candidate && !isInvalidCandidateName(candidate)) {
+        fullName = candidate;
       }
     }
   }
+
+  // 4c. Top lines candidate matching (Header section, Personal Data section, or top 25 lines)
+  const candidateTopLines = [
+    ...(sections['HEADER'] || []),
+    ...(sections['PERSONAL_DATA'] || []),
+    ...lines.slice(0, 25),
+  ];
+
+  if (!fullName) {
+    for (const line of candidateTopLines) {
+      const cleanLine = line.replace(/[\*\_]+/g, '').trim();
+      if (!cleanLine) continue;
+
+      // Handle piped / bullet separated contact lines: "Budi Santoso | budi@gmail.com | 08123456789"
+      if (/[|•·\t]/.test(cleanLine)) {
+        const parts = cleanLine.split(/[|•·\t]/).map((p) => p.trim()).filter(Boolean);
+        const firstPart = extractNameFromMixedHeaderChunk(parts[0]);
+        if (
+          firstPart &&
+          !isInvalidCandidateName(firstPart) &&
+          !emailRegex.test(firstPart) &&
+          !phoneRegex.test(firstPart)
+        ) {
+          const words = firstPart.split(/\s+/);
+          if (words.length >= 1 && words.length <= 6) {
+            fullName = firstPart;
+            break;
+          }
+        }
+      }
+
+      // Check mixed header line without pipe (misal nama + jabatan + hp dalam 1 baris)
+      const extractedDirect = extractNameFromMixedHeaderChunk(cleanLine);
+      if (extractedDirect && !isInvalidCandidateName(extractedDirect)) {
+        const words = extractedDirect.split(/\s+/);
+        if (words.length >= 1 && words.length <= 6 && words.every((w) => /^[a-zA-Z\.\,\'\-]+$/.test(w))) {
+          fullName = extractedDirect;
+          break;
+        }
+      }
+
+      if (isInvalidCandidateName(cleanLine)) continue;
+      if (emailRegex.test(cleanLine) || phoneRegex.test(cleanLine) || /https?:\/\/|www\./i.test(cleanLine)) continue;
+      if (cleanLine.endsWith(':') || cleanLine.startsWith(':')) continue;
+      if (/\d/.test(cleanLine)) continue;
+
+      const words = cleanLine.split(/\s+/);
+      if (words.length >= 1 && words.length <= 6) {
+        const isAllAlpha = words.every((w) => /^[a-zA-Z\.\,\'\-]+$/.test(w));
+        if (isAllAlpha && !isInvalidCandidateName(cleanLine)) {
+          fullName = cleanExtractedCandidateName(cleanLine);
+          break;
+        }
+      }
+    }
+  }
+
+  const topLines = (sections['HEADER'] && sections['HEADER'].length > 0) ? sections['HEADER'] : lines.slice(0, 10);
 
   // 5. Location Extraction (Prioritize Header / Top lines)
   let location = '';
   const headerText = topLines.join(' ');
   for (const city of allCities) {
-    const cityRegex = new RegExp(`\\b${city}\\b`, 'i');
-    if (cityRegex.test(headerText)) {
+    const cityRegex = safeWordMatchRegex(city);
+    if (cityRegex && cityRegex.test(headerText)) {
       location = city.includes('Jakarta') ? 'Jakarta, Indonesia' : `${city}, Indonesia`;
       break;
     }
   }
   if (!location) {
     for (const city of allCities) {
-      const cityRegex = new RegExp(`\\b${city}\\b`, 'i');
-      if (cityRegex.test(cleanText)) {
+      const cityRegex = safeWordMatchRegex(city);
+      if (cityRegex && cityRegex.test(cleanText)) {
         location = city.includes('Jakarta') ? 'Jakarta, Indonesia' : `${city}, Indonesia`;
         break;
       }
@@ -370,9 +566,8 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
     const targetHaystack = eduText || cleanText;
     for (const inst of allInstitutions) {
       if (inst && inst.trim().length >= 3) {
-        const escaped = inst.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const instRegex = new RegExp(`\\b${escaped}\\b`, 'i');
-        if (instRegex.test(targetHaystack)) {
+        const instRegex = safeWordMatchRegex(inst);
+        if (instRegex && instRegex.test(targetHaystack)) {
           institutionName = inst.trim();
           if (!educationLevel) {
             if (/\b(SMA|Sekolah Menengah Atas|SLTA|MA)\b/i.test(inst)) educationLevel = 'SMA';
@@ -402,12 +597,20 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
   if (summaryLines.length > 0) {
     summaryText = summaryLines.join(' ');
   } else {
-    const headerRemainingLines = (sections['HEADER'] || []).filter((line) => {
-      if (emailRegex.test(line) || phoneRegex.test(line)) return false;
-      if (/https?:\/\/|www\.|curriculum|vitae|resume|biodata|autorecovered|page\s*\d+/i.test(line)) return false;
-      if (line === fullName || line === location) return false;
-      return line.split(/\s+/).length >= 5;
-    });
+    const headerRemainingLines: string[] = [];
+    const rawHeader = sections['HEADER'] || [];
+    for (const line of rawHeader) {
+      if (emailRegex.test(line) || phoneRegex.test(line)) continue;
+      if (/https?:\/\/|www\.|curriculum|vitae|resume|biodata|autorecovered|page\s*\d+/i.test(line)) continue;
+      if (line === fullName || line === location) continue;
+      // Stop if encountering bullet points, date ranges, or company markers
+      if (/^[•●▪\*\-–—]/.test(line) || /\b(?:19|20)\d\d\b/.test(line) || /\b(?:PT\.?|CV\.?|Inc|Ltd)\b/i.test(line)) break;
+      if (line.split(/\s+/).length >= 5) {
+        headerRemainingLines.push(line);
+      }
+      // A summary paragraph shouldn't exceed ~3 lines or ~80 words
+      if (headerRemainingLines.length >= 3 || headerRemainingLines.join(' ').split(/\s+/).length >= 80) break;
+    }
     if (headerRemainingLines.length > 0) {
       summaryText = headerRemainingLines.join(' ');
     }
@@ -420,16 +623,16 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
   let experienceTitle = '';
   for (const pos of allPositions) {
     if (pos === 'Admin' || pos === 'Staf Administrasi') continue;
-    const posRegex = new RegExp(`\\b${pos.replace(/\./g, '\\.')}\\b`, 'i');
-    if (posRegex.test(priorityRoleText)) {
+    const posRegex = safeWordMatchRegex(pos);
+    if (posRegex && posRegex.test(priorityRoleText)) {
       experienceTitle = pos;
       break;
     }
   }
   if (!experienceTitle) {
     for (const pos of allPositions) {
-      const posRegex = new RegExp(`\\b${pos.replace(/\./g, '\\.')}\\b`, 'i');
-      if (posRegex.test(cleanText)) {
+      const posRegex = safeWordMatchRegex(pos);
+      if (posRegex && posRegex.test(cleanText)) {
         experienceTitle = pos;
         break;
       }
@@ -472,15 +675,15 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
 
     const skillBlockText = skillsLines.join(' ');
     for (const skill of allSkills) {
-      const skillRegex = new RegExp(`\\b${skill.replace(/\./g, '\\.')}\\b`, 'i');
-      if (skillRegex.test(skillBlockText)) {
+      const skillRegex = safeWordMatchRegex(skill);
+      if (skillRegex && skillRegex.test(skillBlockText)) {
         rawSkillsSet.add(skill);
       }
     }
   } else {
     for (const skill of allSkills) {
-      const skillRegex = new RegExp(`\\b${skill.replace(/\./g, '\\.')}\\b`, 'i');
-      if (skillRegex.test(cleanText)) {
+      const skillRegex = safeWordMatchRegex(skill);
+      if (skillRegex && skillRegex.test(cleanText)) {
         rawSkillsSet.add(skill);
       }
     }
@@ -498,22 +701,39 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
 
   // 9. Experience & Projects Separation
   const MONTH_NAMES = '(?:Jan(?:uari)?|Feb(?:ruari)?|Mar(?:et)?|Apr(?:il)?|May|Mei|Jun(?:i|e)?|Jul(?:i|y)?|Aug(?:ustus)?|Agu(?:stus)?|Sep(?:tember)?|Oct(?:ober)?|Okt(?:ober)?|Nov(?:ember)?|Dec(?:ember)?|Des(?:ember)?)';
-  const DATE_REGEX = new RegExp(`(?:${MONTH_NAMES}\\s+)?\\d{4}\\s*[-–—]\\s*(?:${MONTH_NAMES}\\s+\\d{4}|\\d{4}|present|sekarang|saat\\s*ini)`, 'i');
+  const DATE_RANGE_REGEX = new RegExp(`(?:${MONTH_NAMES}\\s*,?\\s*)?\\d{4}\\s*[-–—]\\s*(?:${MONTH_NAMES}\\s*,?\\s*\\d{4}|\\d{4}|present|sekarang|saat\\s*ini)`, 'i');
+  const SINGLE_DATE_REGEX = new RegExp(`(?:${MONTH_NAMES}\\s*,?\\s*\\d{4}|\\d{4}\\s*,?\\s*${MONTH_NAMES})`, 'i');
+  const PRESENT_REGEX = /\b(present|sekarang|saat\s*ini)\b/i;
+  const ANY_DATE_REGEX = new RegExp(`(?:${DATE_RANGE_REGEX.source}|${SINGLE_DATE_REGEX.source}|${PRESENT_REGEX.source})`, 'i');
+  const DATE_REGEX = ANY_DATE_REGEX;
 
   function isPureDateLine(text: string): boolean {
     const trimmed = text.trim();
-    const match = trimmed.match(DATE_REGEX);
+    const match = trimmed.match(ANY_DATE_REGEX);
     if (!match) return false;
-    const remaining = trimmed.replace(DATE_REGEX, '').trim();
+    const remaining = trimmed.replace(ANY_DATE_REGEX, '').trim();
     return remaining.length < 15;
   }
 
   function isHeadingLine(line: string, nextLine?: string): boolean {
-    const isBullet = /^[•●▪\*\-–—]\s*/.test(line);
+    const trimmed = line.trim();
+    if (/^#+\s+/.test(trimmed)) return true;
+
+    const isBullet = /^[•●▪\*\-–—]\s*/.test(trimmed);
     if (isBullet) return false;
 
-    if (DATE_REGEX.test(line)) {
+    if (ANY_DATE_REGEX.test(trimmed)) {
       return true;
+    }
+
+    if (/^(\*\*|__)[^\*]+(\*\*|__)$/.test(trimmed)) {
+      return true;
+    }
+
+    if (nextLine && /^[•●▪\*\-–—]\s*/.test(nextLine)) {
+      if (trimmed.length > 0 && trimmed.length < 120 && !/[\.\!\?]$/.test(trimmed)) {
+        return true;
+      }
     }
 
     if (nextLine && isPureDateLine(nextLine)) {
@@ -526,8 +746,52 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
     return false;
   }
 
-  const rawWorkExpLines = sections['EXPERIENCE'] || [];
-  const rawProjectLines = sections['PROJECT'] || [];
+  // Pre-normalize lines inside each section to stitch wrapped bullet points and prevent split sentences
+  const normalizeSectionLines = (secLines: string[]): string[] => {
+    const result: string[] = [];
+    const bulletRegex = /^[•●▪\*\-–—]\s*/;
+    const dateRegex = /(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|present|sekarang|202\d|201\d)/i;
+
+    for (let i = 0; i < secLines.length; i++) {
+      const line = secLines[i].replace(/^[\|\:\-\–—\s]+|[\|\:\-\–—\s]+$/g, '').trim();
+      if (!line || /^--\s*\d+\s*of\s*\d+\s*--/i.test(line) || /^[\|\:\-\–—\s]+$/.test(line)) continue;
+
+      const nextLine = i + 1 < secLines.length ? secLines[i + 1].trim() : '';
+      const nextHasDate = nextLine && dateRegex.test(nextLine);
+
+      if (result.length > 0) {
+        const prev = result[result.length - 1];
+        const prevIsBullet = bulletRegex.test(prev);
+        const currIsBullet = bulletRegex.test(line);
+
+        if (prevIsBullet && !currIsBullet) {
+          const prevEndsIncomplete = /[,;:–—]\s*$|\b(held by|by|at|and|or|of|in|to|for|with|from|whereas|pada|di|dan|atau|oleh|dengan|sebagai)\s*(\d+)?\s*$|\b(SMA|SMK|SMP|SD|Universitas|Institut)\s*(Negeri)?\s*\d*\s*$/i.test(prev);
+          const currStartsContinuation = /^[a-z]/.test(line) || /^(and|or|of|in|to|for|with|from|whereas|at|by|dan|atau|di|ke|dari|untuk|dengan|pada|using|yang|serta)\b/i.test(line);
+          const currHasDate = dateRegex.test(line);
+
+          if (prevEndsIncomplete) {
+            result[result.length - 1] = `${prev} ${line}`;
+            continue;
+          }
+
+          if (nextHasDate && !currStartsContinuation) {
+            result.push(line);
+            continue;
+          }
+
+          if (currStartsContinuation || (!prev.endsWith('.') && !currHasDate && !nextHasDate)) {
+            result[result.length - 1] = `${prev} ${line}`;
+            continue;
+          }
+        }
+      }
+      result.push(line);
+    }
+    return result;
+  };
+
+  const rawWorkExpLines = normalizeSectionLines(sections['EXPERIENCE'] || []);
+  const rawProjectLines = normalizeSectionLines(sections['PROJECT'] || []);
   const parsedExperiences: ParsedCvExperience[] = [];
   const parsedProjects: ParsedCvProject[] = [];
 
@@ -593,9 +857,9 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
       };
     } else if (currentExp) {
       if (isBullet) {
-        const cleanBullet = line.replace(/^[•●▪\*\-–—]\s*/, '').trim();
+        const cleanBullet = cleanBulletLine(line);
         if (cleanBullet && !/^--\s*\d+\s*of\s*\d+\s*--/i.test(cleanBullet)) {
-          currentExp.bullets.push(`• ${cleanBullet}`);
+          currentExp.bullets.push(cleanBullet);
         }
       } else if (currentExp.bullets.length > 0) {
         currentExp.bullets[currentExp.bullets.length - 1] += ` ${line.trim()}`;
@@ -626,8 +890,10 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
     const line = rawProjectLines[i];
     const nextLine = i + 1 < rawProjectLines.length ? rawProjectLines[i + 1] : '';
     const isBullet = /^[•●▪\*\-–—]\s*/.test(line);
+    const nextIsBullet = nextLine ? /^[•●▪\*\-–—]\s*/.test(nextLine) : false;
+    const isAwardOrMetadata = /^(?:Awards?|Honors?|Achievements?|Prestasi|Penghargaan|Relevant|Relevant\s*Courses?|Relevant\s*Coursework|Judul\s*Skripsi|Skripsi|Thesis)\s*[:\-]/i.test(line);
 
-    if (isHeadingLine(line, nextLine)) {
+    if (!isBullet && !isAwardOrMetadata && (ANY_DATE_REGEX.test(line) || nextIsBullet || (nextLine && isPureDateLine(nextLine)))) {
       if (currentProj) {
         currentProj.description = currentProj.bullets.join('\n').replace(/\s*Last\s*Project\s*$/i, '').trim();
         delete currentProj.bullets;
@@ -637,13 +903,13 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
       let name = line;
       let period = '';
 
-      if (DATE_REGEX.test(line)) {
-        const dateMatch = line.match(DATE_REGEX);
+      if (ANY_DATE_REGEX.test(line)) {
+        const dateMatch = line.match(ANY_DATE_REGEX);
         period = dateMatch ? dateMatch[0].trim() : '';
-        name = line.replace(DATE_REGEX, '').trim().replace(/^[-–—:,]\s*/, '').replace(/[-–—:,]\s*$/, '').trim();
+        name = line.replace(ANY_DATE_REGEX, '').trim().replace(/^[-–—:,]\s*/, '').replace(/[-–—:,]\s*$/, '').trim();
       } else if (nextLine && isPureDateLine(nextLine)) {
         name = line.trim();
-        const dateMatch = nextLine.match(DATE_REGEX);
+        const dateMatch = nextLine.match(ANY_DATE_REGEX);
         period = dateMatch ? dateMatch[0].trim() : '';
         i++;
       }
@@ -657,12 +923,13 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
       };
     } else if (currentProj) {
       if (isBullet) {
-        const cleanBullet = line.replace(/^[•●▪\*\-–—]\s*/, '').trim();
+        const cleanBullet = cleanBulletLine(line);
         if (cleanBullet && !/^--\s*\d+\s*of\s*\d+\s*--/i.test(cleanBullet)) {
-          currentProj.bullets.push(`• ${cleanBullet}`);
+          currentProj.bullets.push(cleanBullet);
         }
-      } else if (currentProj.bullets.length > 0) {
-        currentProj.bullets[currentProj.bullets.length - 1] += ` ${line.trim()}`;
+      } else {
+        // Baris metadata atau kelanjutan deskripsi
+        currentProj.bullets.push(line.trim());
       }
     }
   }
@@ -674,7 +941,7 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
   }
 
   // 10. Organizations Parsing
-  const orgSectionLines = sections['ORGANIZATION'] || [];
+  const orgSectionLines = normalizeSectionLines(sections['ORGANIZATION'] || []);
   const parsedOrganizations: ParsedCvOrganization[] = [];
   let currentOrg: any = null;
 
@@ -682,46 +949,74 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
     const line = orgSectionLines[i];
     const nextLine = i + 1 < orgSectionLines.length ? orgSectionLines[i + 1] : '';
     const isBullet = /^[•●▪\*\-–—]\s*/.test(line);
+    const nextIsBullet = nextLine ? /^[•●▪\*\-–—]\s*/.test(nextLine) : false;
 
-    if (isHeadingLine(line, nextLine)) {
-      if (currentOrg) {
-        currentOrg.description = currentOrg.bullets.join('\n');
-        delete currentOrg.bullets;
-        parsedOrganizations.push(currentOrg);
-      }
-
-      let name = line;
-      let period = '';
+    if (!isBullet) {
+      let name = '';
       let role = '';
+      let period = '';
 
-      if (DATE_REGEX.test(line)) {
-        const dateMatch = line.match(DATE_REGEX);
-        period = dateMatch ? dateMatch[0].trim() : '';
-        name = line.replace(DATE_REGEX, '').trim().replace(/^[-–—:,]\s*/, '').replace(/[-–—:,]\s*$/, '').trim();
-      } else if (nextLine && isPureDateLine(nextLine)) {
+      // Pattern A: Line 1 is Organization Name, Line 2 is Role + Date
+      if (nextLine && !nextIsBullet && ANY_DATE_REGEX.test(nextLine)) {
+        if (currentOrg) {
+          currentOrg.description = currentOrg.bullets.join('\n');
+          delete currentOrg.bullets;
+          parsedOrganizations.push(currentOrg);
+        }
         name = line.trim();
-        const dateMatch = nextLine.match(DATE_REGEX);
+        const dateMatch = nextLine.match(ANY_DATE_REGEX);
         period = dateMatch ? dateMatch[0].trim() : '';
-        i++;
+        role = nextLine.replace(ANY_DATE_REGEX, '').trim().replace(/^[-–—:,]\s*/, '').replace(/[-–—:,]\s*$/, '').trim();
+        i++; // advance past role/date line
+
+        currentOrg = {
+          id: `org-${Date.now()}-${parsedOrganizations.length}`,
+          name: name || 'Organisasi',
+          role: role || 'Pengurus',
+          period,
+          bullets: []
+        };
+        continue;
       }
 
-      if (i + 1 < orgSectionLines.length && !/^[•●▪\*\-–—]/.test(orgSectionLines[i + 1]) && !DATE_REGEX.test(orgSectionLines[i + 1])) {
-        role = orgSectionLines[i + 1].trim();
-        i++;
-      }
+      // Pattern B: Line itself has date OR followed immediately by bullets
+      if (ANY_DATE_REGEX.test(line) || nextIsBullet) {
+        if (currentOrg) {
+          currentOrg.description = currentOrg.bullets.join('\n');
+          delete currentOrg.bullets;
+          parsedOrganizations.push(currentOrg);
+        }
 
-      currentOrg = {
-        id: `org-${Date.now()}-${parsedOrganizations.length}`,
-        name: name || 'Organisasi',
-        role: role || 'Anggota',
-        period: period || '',
-        bullets: []
-      };
-    } else if (currentOrg) {
+        const endMatch = line.match(/(?:(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,–—\-\/]*\d{4}|(?:19|20)\d{2})\s*[-–—to至]\s*)?(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,–—\-\/]*\d{4}|(?:19|20)\d{2}|present|sekarang|saat\s*ini)\s*$/i);
+        const dateMatch = endMatch || line.match(ANY_DATE_REGEX);
+        period = dateMatch ? dateMatch[0].trim() : '';
+        const textWithoutDate = dateMatch ? line.replace(dateMatch[0], '').trim().replace(/^[-–—:,]\s*/, '').replace(/[-–—:,]\s*$/, '').trim() : line;
+
+        const splitParts = textWithoutDate.split(/\s*[-–—]\s*/);
+        if (splitParts.length >= 2) {
+          name = splitParts[0].trim();
+          role = splitParts.slice(1).join(' - ').trim();
+        } else {
+          name = textWithoutDate;
+          role = 'Pengurus';
+        }
+
+        currentOrg = {
+          id: `org-${Date.now()}-${parsedOrganizations.length}`,
+          name: name || 'Organisasi',
+          role: role || 'Anggota',
+          period,
+          bullets: []
+        };
+        continue;
+      }
+    }
+
+    if (currentOrg) {
       if (isBullet) {
-        const cleanBullet = line.replace(/^[•●▪\*\-–—]\s*/, '').trim();
+        const cleanBullet = cleanBulletLine(line);
         if (cleanBullet && !/^--\s*\d+\s*of\s*\d+\s*--/i.test(cleanBullet)) {
-          currentOrg.bullets.push(`• ${cleanBullet}`);
+          currentOrg.bullets.push(cleanBullet);
         }
       } else if (currentOrg.bullets.length > 0) {
         currentOrg.bullets[currentOrg.bullets.length - 1] += ` ${line.trim()}`;
@@ -740,37 +1035,173 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
   const parsedCertifications: ParsedCvCertification[] = [];
 
   for (let i = 0; i < certSectionLines.length; i++) {
-    const line = certSectionLines[i].trim();
-    if (!line || /^--\s*\d+\s*of\s*\d+\s*--/i.test(line) || /^[•●▪]\s*Credential\s*(ID|URL)/i.test(line)) continue;
+    let line = certSectionLines[i].replace(/^[\|\:\-\–—\s]+|[\|\:\-\–—\s]+$/g, '').trim();
+    if (!line || /^--\s*\d+\s*of\s*\d+\s*--/i.test(line) || /^[•●▪]\s*Credential\s*(ID|URL)/i.test(line) || /^[\|\:\-\–—\s]+$/.test(line)) continue;
 
     let name = line;
     let issuer = '';
     let issueDate = '';
 
-    if (line.includes(' – ') || line.includes(' - ') || line.includes(',')) {
-      const parts = line.split(/[–—,-]/).map((s) => s.trim()).filter(Boolean);
-      name = parts[0];
-      issuer = parts.slice(1).join(', ').trim();
-    } else if (i + 1 < certSectionLines.length && !/^[•●▪]/.test(certSectionLines[i + 1])) {
-      issuer = certSectionLines[i + 1].trim();
-      i++;
+    // Check if line itself is ONLY a date (e.g. "Aug 2025" or "2024")
+    const dateOnlyMatch = line.match(/^(?:(?:Jan(?:uari)?|Feb(?:ruari)?|Mar(?:et)?|Apr(?:il)?|May|Mei|Jun(?:i|e)?|Jul(?:i|y)?|Aug(?:ustus)?|Agu(?:stus)?|Sep(?:tember)?|Oct(?:ober)?|Okt(?:ober)?|Nov(?:ember)?|Dec(?:ember)?|Des(?:ember)?)\s+\d{4}|\b(19|20)\d{2}\b)$/i);
+
+    if (dateOnlyMatch) {
+      issueDate = dateOnlyMatch[0].trim();
+      // Look forward to find the next valid line containing the certificate name & issuer
+      if (i + 1 < certSectionLines.length) {
+        const nextValid = certSectionLines[i + 1].replace(/^[\|\:\-\–—\s]+|[\|\:\-\–—\s]+$/g, '').trim();
+        if (nextValid && !/^[•●▪]\s*Credential/i.test(nextValid) && !/^[\|\:\-\–—\s]+$/.test(nextValid)) {
+          line = nextValid;
+          i++; // consume next line
+        }
+      }
     }
 
+    // Handle tab-separated cells or pipe-separated cells within a line (from Word tables)
+    if (line.includes('\t') || line.includes(' | ')) {
+      const parts = line.split(/[\t|]/).map((s) => s.trim()).filter(Boolean);
+      // Find date part if any
+      const dIdx = parts.findIndex((p) => /(Jan(?:uari)?|Feb(?:ruari)?|Mar(?:et)?|Apr(?:il)?|May|Mei|Jun(?:i|e)?|Jul(?:i|y)?|Aug(?:ustus)?|Agu(?:stus)?|Sep(?:tember)?|Oct(?:ober)?|Okt(?:ober)?|Nov(?:ember)?|Dec(?:ember)?|Des(?:ember)?)\s+\d{4}|\b(19|20)\d{2}\b/i.test(p));
+      if (dIdx !== -1) {
+        if (!issueDate) issueDate = parts[dIdx].trim();
+        parts.splice(dIdx, 1);
+      }
+      if (parts.length >= 2) {
+        name = parts[0];
+        issuer = parts.slice(1).join(', ').trim();
+      } else if (parts.length === 1) {
+        line = parts[0];
+      }
+    }
+
+    if (!issuer) {
+      if (line.includes(' – ') || line.includes(' - ') || line.includes(',')) {
+        const parts = line.split(/[–—,-]/).map((s) => s.trim()).filter(Boolean);
+        name = parts[0];
+        issuer = parts.slice(1).join(', ').trim();
+      } else if (i + 1 < certSectionLines.length && !/^[•●▪]/.test(certSectionLines[i + 1])) {
+        const peekNext = certSectionLines[i + 1].replace(/^[\|\:\-\–—\s]+|[\|\:\-\–—\s]+$/g, '').trim();
+        if (peekNext && !/^[\|\:\-\–—\s]+$/.test(peekNext)) {
+          issuer = peekNext;
+          i++;
+        }
+      } else {
+        name = line;
+      }
+    }
+
+    // Extract any embedded date in issuer or name if not already extracted
     const certDateMatch = (issuer || line).match(/(Jan(?:uari)?|Feb(?:ruari)?|Mar(?:et)?|Apr(?:il)?|May|Mei|Jun(?:i|e)?|Jul(?:i|y)?|Aug(?:ustus)?|Agu(?:stus)?|Sep(?:tember)?|Oct(?:ober)?|Okt(?:ober)?|Nov(?:ember)?|Dec(?:ember)?|Des(?:ember)?)\s+\d{4}|\b(19|20)\d{2}\b/i);
-    if (certDateMatch) {
+    if (certDateMatch && !issueDate) {
       issueDate = certDateMatch[0].trim();
       issuer = issuer.replace(certDateMatch[0], '').trim().replace(/^[-–—,]\s*/, '').replace(/[-–—,]\s*$/, '').trim();
     }
+
+    // Clean name and issuer
+    name = name.replace(/^[\|\:\-\–—,\s]+|[\|\:\-\–—,\s]+$/g, '').trim();
+    issuer = issuer.replace(/^[\|\:\-\–—,\s]+|[\|\:\-\–—,\s]+$/g, '').trim();
+
+    // Skip empty or garbage single-symbol names
+    if (!name || name === '|' || name === '-' || name === '•') continue;
 
     parsedCertifications.push({
       id: `cert-${Date.now()}-${parsedCertifications.length}`,
       name,
       issuer: issuer || 'Penerbit Sertifikat',
-      issueDate
+      issueDate,
     });
   }
 
-  // 12. References Parsing
+  // 12. Courses / Pelatihan Parsing
+  const rawCourseLines = normalizeSectionLines(sections['COURSE'] || []);
+  const parsedCourses: ParsedCvCourse[] = [];
+  let currentCrs: any = null;
+
+  for (let i = 0; i < rawCourseLines.length; i++) {
+    const line = rawCourseLines[i];
+    const nextLine = i + 1 < rawCourseLines.length ? rawCourseLines[i + 1] : '';
+    const isBullet = /^[•●▪\*\-–—]\s*/.test(line);
+    const nextIsBullet = nextLine ? /^[•●▪\*\-–—]\s*/.test(nextLine) : false;
+
+    if (!isBullet) {
+      let courseName = '';
+      let institution = '';
+      let year = '';
+
+      // Pattern A: Line 1 = Institution, Line 2 = Course Name + Date
+      if (nextLine && !nextIsBullet && ANY_DATE_REGEX.test(nextLine)) {
+        if (currentCrs) {
+          currentCrs.description = currentCrs.bullets.join('\n');
+          delete currentCrs.bullets;
+          parsedCourses.push(currentCrs);
+        }
+        institution = line.trim();
+        const dateMatch = nextLine.match(ANY_DATE_REGEX);
+        year = dateMatch ? dateMatch[0].trim() : '';
+        courseName = nextLine.replace(ANY_DATE_REGEX, '').trim().replace(/^[-–—:,]\s*/, '').replace(/[-–—:,]\s*$/, '').trim();
+        i++;
+
+        currentCrs = {
+          id: `crs-${Date.now()}-${parsedCourses.length}`,
+          courseName: courseName || institution,
+          institution: institution || 'Lembaga Pelatihan',
+          year,
+          bullets: []
+        };
+        continue;
+      }
+
+      // Pattern B: Line itself has date OR followed by bullet
+      if (ANY_DATE_REGEX.test(line) || nextIsBullet) {
+        if (currentCrs) {
+          currentCrs.description = currentCrs.bullets.join('\n');
+          delete currentCrs.bullets;
+          parsedCourses.push(currentCrs);
+        }
+
+        const dateMatch = line.match(ANY_DATE_REGEX);
+        year = dateMatch ? dateMatch[0].trim() : '';
+        const textWithoutDate = line.replace(ANY_DATE_REGEX, '').trim().replace(/^[-–—:,]\s*/, '').replace(/[-–—:,]\s*$/, '').trim();
+
+        const splitParts = textWithoutDate.split(/\s*[-–—]\s*/);
+        if (splitParts.length >= 2) {
+          institution = splitParts[0].trim();
+          courseName = splitParts.slice(1).join(' - ').trim();
+        } else {
+          courseName = textWithoutDate;
+          institution = 'Pelatihan / Kursus';
+        }
+
+        currentCrs = {
+          id: `crs-${Date.now()}-${parsedCourses.length}`,
+          courseName: courseName || 'Pelatihan',
+          institution: institution || '',
+          year,
+          bullets: []
+        };
+        continue;
+      }
+    }
+
+    if (currentCrs) {
+      if (isBullet) {
+        const cleanBullet = cleanBulletLine(line);
+        if (cleanBullet && !/^--\s*\d+\s*of\s*\d+\s*--/i.test(cleanBullet)) {
+          currentCrs.bullets.push(cleanBullet);
+        }
+      } else if (currentCrs.bullets.length > 0) {
+        currentCrs.bullets[currentCrs.bullets.length - 1] += ` ${line.trim()}`;
+      }
+    }
+  }
+
+  if (currentCrs) {
+    currentCrs.description = currentCrs.bullets.join('\n');
+    delete currentCrs.bullets;
+    parsedCourses.push(currentCrs);
+  }
+
+  // 13. References Parsing
   const refSectionLines = sections['REFERENCES'] || [];  const parsedReferences: ParsedCvReference[] = [];
 
   for (let i = 0; i < refSectionLines.length; i++) {
@@ -944,7 +1375,14 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
       });
   }
 
-  // 13. Education Array
+  // 13. Education Array & Auto-Routing dari Proyek
+  const gpaMatch = (eduText || cleanText).match(/(?:IPK|GPA|CGPA)\s*[:\s]?\s*([0-9][.,][0-9]{1,2}(?:\s*\/\s*[0-9][.,][0-9]{1,2})?)/i);
+  const detectedGpa = gpaMatch ? gpaMatch[1].replace(',', '.') : '';
+
+  const eduYearMatch = (eduText || cleanText).match(/\b((?:19|20)\d{2}\s*[-–—至to]\s*(?:(?:19|20)\d{2}|Sekarang|Present|Saat\s*ini))\b/i) ||
+                       (eduText || cleanText).match(/\b((?:19|20)\d{2})\b/);
+  const detectedYear = eduYearMatch ? eduYearMatch[1] : '';
+
   const parsedEducation: ParsedCvEducation[] = institutionName
     ? [
         {
@@ -952,12 +1390,51 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
           institution: institutionName,
           degree: `${educationLevel} ${major}`.trim() || 'Sarjana',
           location: location || '',
-          year: '2021 - 2025',
-          gpa: '3.52 / 4.00',
+          year: detectedYear || '2021 - 2025',
+          gpa: detectedGpa || '',
           description: ''
         }
       ]
     : [];
+
+  // Re-routing cerdas: Pindahkan entitas akademik yang tidak sengaja masuk ke parsedProjects
+  const filteredProjects: ParsedCvProject[] = [];
+  for (const proj of parsedProjects) {
+    const isAcademic = /(Universitas|University|Institut|Institute|Politeknik|Polytechnic|Sekolah Tinggi|STMIK|Akademi|Academy|SMA|SMK|MAN)\b/i.test(proj.name);
+    const hasAcademicDegree = /(Bachelor of|Master of|Sarjana|Diploma|Informatics|Teknik Informatika|Skripsi|Thesis|Tesis|GPA|IPK)\b/i.test(proj.name + ' ' + (proj.description || ''));
+    const isAwardOrMetadata = /^(?:Awards?|Honors?|Achievements?|Prestasi|Penghargaan|Relevant|Relevant\s*Courses?|Relevant\s*Coursework)\s*[:\-]/i.test(proj.name);
+
+    if (isAcademic || hasAcademicDegree) {
+      const cleanInstName = proj.name.replace(/^Last\s*Project\s*/i, '').trim();
+      const existingEdu = parsedEducation.find((e) => e.institution.toLowerCase().includes(cleanInstName.toLowerCase()) || cleanInstName.toLowerCase().includes(e.institution.toLowerCase()));
+      if (existingEdu) {
+        if (proj.period && (!existingEdu.year || existingEdu.year === '2021 - 2025')) existingEdu.year = proj.period;
+        if (proj.description && !existingEdu.description) existingEdu.description = proj.description;
+      } else {
+        parsedEducation.push({
+          id: `edu-routed-${Date.now()}-${parsedEducation.length}`,
+          institution: cleanInstName,
+          degree: `${educationLevel || 'S1'} ${major || ''}`.trim() || 'Sarjana',
+          location: location || '',
+          year: proj.period || detectedYear || '',
+          gpa: detectedGpa || '',
+          description: proj.description || ''
+        });
+      }
+      continue;
+    }
+
+    if (isAwardOrMetadata) {
+      if (parsedEducation.length > 0) {
+        parsedEducation[0].description = [parsedEducation[0].description, proj.name].filter(Boolean).join('\n');
+      }
+      continue;
+    }
+
+    filteredProjects.push(proj);
+  }
+  parsedProjects.length = 0;
+  parsedProjects.push(...filteredProjects);
 
   const hasExpKeywords = /\b(Pengalaman Kerja|Work Experience|Experience|Riwayat Pekerjaan|Employment History|PROJECT|ORGANIZATIONAL EXPERIENCE)\b/i.test(cleanText);
   const hasWorkExperience = parsedExperiences.length > 0 || hasExpKeywords || /\b(PT\.|PT|CV\.|Inc|Ltd|Corp)\b/i.test(cleanText);
@@ -977,7 +1454,7 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
   if (contactInfo) cvConfidenceScore += 15;
   if (phone) cvConfidenceScore += 10;
   if (educationLevel || institutionName || parsedEducation.length > 0) cvConfidenceScore += 25;
-  if (parsedExperiences.length > 0 || parsedProjects.length > 0 || parsedOrganizations.length > 0 || hasWorkExperience) cvConfidenceScore += 25;
+  if (parsedExperiences.length > 0 || parsedProjects.length > 0 || parsedOrganizations.length > 0 || parsedCourses.length > 0 || hasWorkExperience) cvConfidenceScore += 25;
   if (deduplicatedSkills.length > 0) cvConfidenceScore += 15;
   if (fullName && fullName.length >= 3) cvConfidenceScore += 10;
 
@@ -1142,6 +1619,7 @@ export function extractCvDataWithNLP(rawText: string, dynamicDicts?: DynamicDict
     projects: parsedProjects,
     organizations: parsedOrganizations,
     certifications: parsedCertifications,
+    courses: parsedCourses,
     references: parsedReferences,
     publications: parsedPublications,
     awards: parsedAwards,

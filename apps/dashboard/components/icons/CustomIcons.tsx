@@ -2,6 +2,8 @@ import React from 'react';
 
 export interface IconProps extends React.SVGProps<SVGSVGElement> {
   size?: number | string;
+  color?: string;
+  strokeWidth?: number | string;
   className?: string;
 }
 
@@ -300,6 +302,27 @@ export function DollarSignIcon({ size = 16, className = '', ...props }: IconProp
     >
       <line x1="12" x2="12" y1="2" y2="22" />
       <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+  );
+}
+
+export function BanknoteIcon({ size = 16, className = '', ...props }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      {...props}
+    >
+      <rect width="20" height="12" x="2" y="6" rx="2" />
+      <circle cx="12" cy="12" r="2" />
+      <path d="M6 12h.01M18 12h.01" />
     </svg>
   );
 }

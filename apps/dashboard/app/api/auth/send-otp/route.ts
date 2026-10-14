@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { prisma, logSecurityEvent, logApp, extractRequestContext } from '@employr/db';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { sendVerificationOtpEmail } from '@/lib/mailer/otp-service';
@@ -96,21 +96,29 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Kirim email OTP
-    const mailResult = await sendVerificationOtpEmail({
-      to: cleanEmail,
-      name: name || '',
-      otp: rawOtp,
-    });
+    // Kirim email OTP di background via after() agar respons API instan (<50ms)
+    after(async () => {
+      try {
+        const mailResult = await sendVerificationOtpEmail({
+          to: cleanEmail,
+          name: name || '',
+          otp: rawOtp,
+        });
 
-    logApp({
-      source: 'AUTH',
-      level: 'INFO',
-      message: `OTP sent to ${cleanEmail}`,
-      ip: ctx.ip,
-      endpoint: '/api/auth/send-otp',
-      method: 'POST',
-      statusCode: 200,
+        logApp({
+          source: 'AUTH',
+          level: mailResult.success ? 'INFO' : 'WARNING',
+          message: mailResult.success
+            ? `OTP sent to ${cleanEmail}`
+            : `Failed to deliver OTP to ${cleanEmail}: ${mailResult.error}`,
+          ip: ctx.ip,
+          endpoint: '/api/auth/send-otp',
+          method: 'POST',
+          statusCode: mailResult.success ? 200 : 500,
+        });
+      } catch (err: any) {
+        console.error('[AUTH OTP Background Error]:', err?.message || err);
+      }
     });
 
     return NextResponse.json(
@@ -118,7 +126,6 @@ export async function POST(req: NextRequest) {
         success: true,
         message: 'Kode verifikasi telah dikirim ke email kamu.',
         expiresInSeconds: 300,
-        mailDelivered: mailResult.success,
       },
       { status: 200, headers: corsHeaders }
     );

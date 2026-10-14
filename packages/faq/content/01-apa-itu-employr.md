@@ -35,11 +35,11 @@ Employr adalah **Career Operating System** untuk pencari kerja muda Indonesia (s
 
 ## Apakah Employr gratis?
 
-Ya! Saat ini seluruh fitur di Employr dapat kamu akses dan gunakan secara **100% gratis** tanpa pungutan biaya apa pun. Kamu bisa menyusun CV ATS, mengevaluasi CV, memantau lamaran di tracker, latihan wawancara, hingga mengerjakan latihan soal secara leluasa untuk mempersiapkan kariermu.
+Saat ini seluruh fitur utama di Employr dapat kamu gunakan secara gratis. Kamu dapat membuat CV ATS, mengevaluasi dokumen lamaran, mencatat progres di papan tracker, hingga berlatih wawancara kerja tanpa dipungut biaya.
 
-## Teknologi di balik layar
+## Teknologi dan keamanan data
 
-Platform ini dibangun dengan Next.js, NestJS, PostgreSQL, dan Tailwind CSS. Data CV-mu tersimpan aman di database dan hanya dipakai untuk kebutuhan rekomendasi & evaluasi karirmu.
+Platform ini dibangun menggunakan arsitektur web modern dengan basis data PostgreSQL yang terenkripsi. Berkas dan informasi profilmu tersimpan aman dan hanya digunakan untuk keperluan evaluasi serta persiapan kariermu sendiri.
 
 - Mulai dari [Cara Daftar & Masuk](/artikel/daftar-dan-masuk)
-- Atau langsung lihat [Panduan CV Builder](/artikel/panduan-cv-builder)
+- Lihat alur pembuatan dokumen di [Panduan CV Builder](/artikel/panduan-cv-builder)

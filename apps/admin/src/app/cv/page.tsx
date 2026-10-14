@@ -4,7 +4,8 @@ import { useState, useEffect, useMemo } from "react"
 import { DataTable } from "@/components/admin/DataTable"
 import { StatsCard } from "@/components/admin/StatsCard"
 import { SidebarToggle } from "@/components/admin/SidebarToggle"
-import { motion } from "framer-motion"
+import { AdminPageWrapper } from "@/components/admin/AdminPageWrapper"
+import { SkeletonStatsGrid, SkeletonChart, Skeleton } from "@/components/admin/Skeleton"
 import {
   Search,
   FileText,
@@ -367,11 +368,7 @@ export default function CVPage() {
   const isGlobalLoading = isLoadingCV && isLoadingStats
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
+    <AdminPageWrapper>
       {/* Page Header */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-5">
         <div className="flex items-center gap-3.5">
@@ -397,52 +394,56 @@ export default function CVPage() {
       </div>
 
       {/* Top 4 KPI Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        <StatsCard
-          title="Total CV Dibuat"
-          value={templateStats ? templateStats.summary.totalCvCreated.toLocaleString("id-ID") : "..."}
-          change="Penggunaan semua template"
-          icon={Layers}
-          trend="up"
-        />
-        <StatsCard
-          title="Total CV Di-download"
-          value={templateStats ? templateStats.summary.totalCvDownloaded.toLocaleString("id-ID") : "..."}
-          change="Unduhan dokumen (PDF/DOCX)"
-          icon={Download}
-          trend="up"
-        />
-        <StatsCard
-          title="Tujuan CV Terpopuler"
-          value={
-            templateStats?.summary.topPurpose
-              ? templateStats.summary.topPurpose.title
-              : "Lamar Kerja"
-          }
-          change={
-            templateStats?.summary.topPurpose
-              ? `${templateStats.summary.topPurpose.count} CV (${templateStats.summary.topPurpose.percentage}%)`
-              : "0 CV dipilih"
-          }
-          icon={Target}
-          trend="up"
-        />
-        <StatsCard
-          title="Template Terpopuler"
-          value={
-            templateStats?.summary.topDownloadedTemplate
-              ? templateStats.summary.topDownloadedTemplate.name
-              : "ATS Modern"
-          }
-          change={
-            templateStats?.summary.topDownloadedTemplate
-              ? `${templateStats.summary.topDownloadedTemplate.downloadCount} kali di-download`
-              : "0 kali di-download"
-          }
-          icon={Flame}
-          trend="up"
-        />
-      </div>
+      {isLoadingStats && !templateStats ? (
+        <SkeletonStatsGrid count={4} columns={4} />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+          <StatsCard
+            title="Total CV Dibuat"
+            value={templateStats ? templateStats.summary.totalCvCreated.toLocaleString("id-ID") : "0"}
+            change="Penggunaan semua template"
+            icon={Layers}
+            trend="up"
+          />
+          <StatsCard
+            title="Total CV Di-download"
+            value={templateStats ? templateStats.summary.totalCvDownloaded.toLocaleString("id-ID") : "0"}
+            change="Unduhan dokumen (PDF/DOCX)"
+            icon={Download}
+            trend="up"
+          />
+          <StatsCard
+            title="Tujuan CV Terpopuler"
+            value={
+              templateStats?.summary.topPurpose
+                ? templateStats.summary.topPurpose.title
+                : "Lamar Kerja"
+            }
+            change={
+              templateStats?.summary.topPurpose
+                ? `${templateStats.summary.topPurpose.count} CV (${templateStats.summary.topPurpose.percentage}%)`
+                : "0 CV dipilih"
+            }
+            icon={Target}
+            trend="up"
+          />
+          <StatsCard
+            title="Template Terpopuler"
+            value={
+              templateStats?.summary.topDownloadedTemplate
+                ? templateStats.summary.topDownloadedTemplate.name
+                : "ATS Modern"
+            }
+            change={
+              templateStats?.summary.topDownloadedTemplate
+                ? `${templateStats.summary.topDownloadedTemplate.downloadCount} kali di-download`
+                : "0 kali di-download"
+            }
+            icon={Flame}
+            trend="up"
+          />
+        </div>
+      )}
 
       {/* Tab Navigation (3 Tabs) */}
       <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 mb-6 pb-2 overflow-x-auto">
@@ -1267,21 +1268,16 @@ export default function CVPage() {
 
           {/* DataTable */}
           <div>
-            {isLoadingCV ? (
-              <div className="p-12 text-center text-slate-400 font-medium text-sm">
-                <RefreshCw size={24} className="animate-spin text-orange-500 mx-auto mb-2" />
-                Memuat data CV dari database...
-              </div>
-            ) : filteredCVs.length === 0 ? (
+            {!isLoadingCV && filteredCVs.length === 0 ? (
               <div className="p-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-center text-slate-400 text-sm">
                 Tidak ada data CV yang sesuai dengan kriteria pencarian dan filter.
               </div>
             ) : (
-              <DataTable data={filteredCVs} columns={cvColumns} />
+              <DataTable data={filteredCVs} columns={cvColumns} isLoading={isLoadingCV} />
             )}
           </div>
         </div>
       )}
-    </motion.div>
+    </AdminPageWrapper>
   )
 }

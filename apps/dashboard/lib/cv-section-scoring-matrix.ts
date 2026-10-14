@@ -113,6 +113,18 @@ const PURPOSE_SECTION_WEIGHTS: Record<CvPurpose, Partial<Record<CvSectionKey, nu
     education: 5, certifications: 4, courses: 3, skills: 4, languages: 1, scholarships: 0,
     publications: 0, awards: 2, portfolioLinks: 3, otherRelevant: 2, references: 1, hobbies: 0,
   },
+  // 4.6b Lulusan SMK & Vokasi
+  smk_vokasi: {
+    summary: 4, experience: 2, internships: 5, projects: 4, organizations: 2, volunteers: 1,
+    education: 4, certifications: 5, courses: 4, skills: 5, languages: 1, scholarships: 0,
+    publications: 0, awards: 3, portfolioLinks: 3, otherRelevant: 2, references: 2, hobbies: 0,
+  },
+  // 4.6c Tenaga Kesehatan & Medis
+  healthcare: {
+    summary: 5, experience: 5, internships: 4, projects: 2, organizations: 3, volunteers: 3,
+    education: 5, certifications: 5, courses: 4, skills: 5, languages: 2, scholarships: 0,
+    publications: 2, awards: 3, portfolioLinks: 1, otherRelevant: 3, references: 3, hobbies: 0,
+  },
   // 4.7 Freelance
   freelance: {
     summary: 4, experience: 2, internships: 0, projects: 5, organizations: 1, volunteers: 1,

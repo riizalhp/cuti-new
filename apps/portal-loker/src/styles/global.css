@@ -1,12 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,300..800&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:ital,wght@0,300..900;1,300..900&family=Manrope:wght@400..800&display=swap');
-
 @tailwind base;
 @tailwind components;
 
 /* ============================================================
    EMPLOYER JOB — Design System (Port 4321 Matched)
    Palet: warm paper (#f4f3ee), deep ink (#101010), Employr blue (#0000ff / #1738d1)
-   Tipografi: DM Sans + Inter Tight + Instrument Serif (italic em)
+   Tipografi: Inter Tight + DM Sans + Instrument Serif (italic em) + Caveat
    Mikro-interaksi & Bentuk: Pill (rounded-full), signature .section-label
    ============================================================ */
 
@@ -24,14 +22,14 @@
   --periwinkle: #c9d0ff;
   --periwinkle-soft: #f0f2ff;
   --lime: #c8f55b;
-  --muted: #6e6d68;
-  --faint: #a5a5a1;
+  --muted: #55544f;
+  --faint: #8e8d88;
   --border: #d7d6cf;
   --border-light: rgba(16, 16, 16, 0.08);
   --line: rgba(16, 16, 16, 0.12);
 
   /* Typography */
-  --sans: 'Inter Tight', 'Manrope', 'DM Sans', system-ui, sans-serif;
+  --sans: 'Inter Tight', 'DM Sans', system-ui, sans-serif;
   --display: 'DM Sans', 'Inter Tight', sans-serif;
   --serif: 'Instrument Serif', Georgia, serif;
   --doodle: 'Caveat', cursive, sans-serif;
@@ -56,6 +54,10 @@
 html {
   scroll-behavior: smooth;
   background: var(--paper);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 16, 16, 0.25) transparent;
+  overflow-x: clip;
+  max-width: 100vw;
 }
 
 body {
@@ -65,7 +67,8 @@ body {
   font-family: var(--sans);
   font-size: 15px;
   line-height: 1.55;
-  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100vw;
 }
 
 ::selection {
@@ -125,9 +128,8 @@ h1 em, h2 em, h3 em, em {
   color: var(--faint);
 }
 .caps {
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 10px;
+  letter-spacing: 0.04em;
+  font-size: 11px;
   font-weight: 700;
   color: var(--blue);
 }
@@ -135,14 +137,13 @@ h1 em, h2 em, h3 em, em {
 /* Signature Section Label — Port 4321 */
 .section-label {
   align-items: center;
-  color: #75746e;
+  color: #55544f;
   display: flex;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   gap: 9px;
-  letter-spacing: .145em;
-  line-height: 1;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
 }
 .section-label i {
   background: var(--blue);
@@ -153,7 +154,7 @@ h1 em, h2 em, h3 em, em {
   flex-shrink: 0;
 }
 .section-label--inverse {
-  color: #a5a5a1;
+  color: #d7d6cf;
 }
 .section-label--inverse i {
   background: #ffffff;
@@ -315,11 +316,72 @@ h1 em, h2 em, h3 em, em {
   border: 1px solid var(--border);
 }
 
-/* Hide scrollbars for pills container */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+/* ============================================================
+   Employr Design System — Sleek Global & Custom Scrollbars
+   Editorial Paper & Ink Aesthetic
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-.no-scrollbar {
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 16, 16, 0.2);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 16, 16, 0.45);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--cobalt, #1738d1);
+}
+
+/* Custom Sleek Scrollbar Utility */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 16, 16, 0.25) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(16, 16, 16, 0.22);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 16, 16, 0.45);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background: var(--cobalt, #1738d1);
+}
+
+/* Hide Scrollbars Utilities */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.no-scrollbar,
+.scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }

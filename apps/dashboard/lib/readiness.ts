@@ -1,6 +1,10 @@
+import { calculateAtsScore } from './ats-score';
+
 export interface ChecklistItem {
+  id?: string;
   label: string;
   status: boolean;
+  score?: number;
   detail: string;
 }
 
@@ -59,6 +63,9 @@ export interface DiagnosticInsight {
 
 export interface HolisticReadinessEvaluation {
   score: number;
+  objectiveScore: number;
+  diagnosticScore: number | null;
+  isCalibrated: boolean;
   tier: 'good' | 'medium' | 'low' | 'empty';
   badge: {
     label: string;
@@ -78,6 +85,7 @@ export interface HolisticReadinessEvaluation {
 
 export const READINESS_STORAGE_KEY = 'employr_career_readiness_score';
 export const LEGACY_READINESS_STORAGE_KEY = 'cuti_career_readiness_score';
+export const DIAGNOSTIC_QUIZ_STORAGE_KEY = 'employr_diagnostic_quiz_score';
 export const READINESS_EVENT_NAME = 'employr_readiness_updated';
 
 export function getStoredReadinessScore(): number | null {
@@ -112,6 +120,7 @@ export function clearStoredReadinessScore(): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.removeItem(READINESS_STORAGE_KEY);
+    localStorage.removeItem(LEGACY_READINESS_STORAGE_KEY);
     window.dispatchEvent(
       new CustomEvent(READINESS_EVENT_NAME, { detail: { score: null } })
     );
@@ -137,8 +146,8 @@ export function getReadinessBadge(score: number): {
   if (score >= 80) {
     return {
       label: 'Sangat Siap Kerja (Job Ready Plus)',
-      color: 'bg-emerald-500 text-white font-bold',
-      strokeColor: 'text-emerald-500',
+      color: 'bg-emerald-700 text-white font-bold',
+      strokeColor: 'text-emerald-700 dark:text-emerald-400',
       tier: 'good',
     };
   }
@@ -146,7 +155,7 @@ export function getReadinessBadge(score: number): {
     return {
       label: 'Siap Melamar (Job Ready)',
       color: 'bg-blue-600 text-white font-bold',
-      strokeColor: 'text-blue-500',
+      strokeColor: 'text-blue-600 dark:text-blue-400',
       tier: 'medium',
     };
   }
@@ -154,160 +163,67 @@ export function getReadinessBadge(score: number): {
     return {
       label: 'Perlu Optimasi (Needs Polish)',
       color: 'bg-amber-500 text-slate-950 font-bold',
-      strokeColor: 'text-amber-500',
+      strokeColor: 'text-amber-700 dark:text-amber-400',
       tier: 'medium',
     };
   }
   if (score > 0) {
     return {
       label: 'Fondasi Awal (Getting Started)',
-      color: 'bg-rose-500 text-white font-bold',
-      strokeColor: 'text-rose-500',
+      color: 'bg-rose-600 text-white font-bold',
+      strokeColor: 'text-rose-700 dark:text-rose-400',
       tier: 'low',
     };
   }
   return {
     label: 'Belum Ada Data Profil',
     color: 'bg-slate-500 text-white font-bold',
-    strokeColor: 'text-slate-400',
+    strokeColor: 'text-slate-500 dark:text-slate-400',
     tier: 'empty',
   };
 }
 
-export function calculateReadinessScore(
-  cvs: any[] | null | undefined,
-  apps?: any[] | null | undefined
-): ReadinessEvaluation {
-  const isCvArray = Array.isArray(cvs) && cvs.length > 0;
-  const isAppsArray = Array.isArray(apps) && apps.length > 0;
-
-  if (!isCvArray) {
-    const emptyChecklist: ChecklistItem[] = [
-      {
-        label: 'Kontak & Ringkasan Diri',
-        status: false,
-        detail: 'Lengkapi kontak aktif dan ringkasan profesional',
-      },
-      {
-        label: 'Riwayat Pendidikan',
-        status: false,
-        detail: 'Tambahkan data sekolah atau universitas',
-      },
-      {
-        label: 'Pengalaman & Portofolio',
-        status: false,
-        detail: 'Tambahkan minimal 1 pengalaman kerja, magang, atau proyek',
-      },
-      {
-        label: 'Keahlian Terfokus',
-        status: false,
-        detail: 'Tambahkan minimal 4 skill relevan industri',
-      },
-      {
-        label: 'Format Standar ATS',
-        status: false,
-        detail: 'Buat CV teroptimasi sistem di CV Builder',
-      },
-    ];
-
-    return {
-      score: 0,
-      checklist: emptyChecklist,
-      avgAtsScore: 0,
-      completedCount: 0,
-      totalItems: 5,
-    };
+/**
+ * Resolusi skor ATS dengan dynamic fallback:
+ * Jika primaryCv.atsScore belum di-scan manual, hitung otomatis via calculateAtsScore.
+ */
+export function resolveAtsScore(primaryCv: any): number {
+  if (!primaryCv) return 0;
+  if (typeof primaryCv.atsScore === 'number' && primaryCv.atsScore > 0) {
+    return Math.min(100, Math.round(primaryCv.atsScore));
   }
-
-  let totalContacts = 0;
-  let totalSummaries = 0;
-  let totalEdu = 0;
-  let totalExp = 0;
-  let totalProjects = 0;
-  let totalInternships = 0;
-  let totalSkills = 0;
-  let totalAtsScore = 0;
-
-  cvs.forEach((cv: any) => {
-    if (cv.fullName && cv.email && cv.phone) totalContacts++;
-    if (cv.summary && cv.summary.trim().length >= 20) totalSummaries++;
-    if (Array.isArray(cv.education) && cv.education.length > 0) totalEdu += cv.education.length;
-    if (Array.isArray(cv.experience)) totalExp += cv.experience.length;
-    if (Array.isArray(cv.projects)) totalProjects += cv.projects.length;
-    if (Array.isArray(cv.internships)) totalInternships += cv.internships.length;
-    if (Array.isArray(cv.skills)) totalSkills += cv.skills.length;
-    totalAtsScore += typeof cv.atsScore === 'number' ? cv.atsScore : 0;
-  });
-
-  const avgAtsScore = Math.round(totalAtsScore / cvs.length);
-  const hasContact = totalContacts > 0;
-  const hasSummary = totalSummaries > 0;
-  const contactSummaryStatus = hasContact && hasSummary;
-  const hasEdu = totalEdu > 0;
-  const hasExperience = totalExp + totalProjects + totalInternships > 0;
-  const hasSkills = totalSkills >= 4;
-  const isAtsOptimal = avgAtsScore >= 75;
-
-  const checklist: ChecklistItem[] = [
-    {
-      label: 'Kontak & Ringkasan Diri',
-      status: contactSummaryStatus,
-      detail: contactSummaryStatus
-        ? 'Kontak dan ringkasan profesional lengkap'
-        : 'Lengkapi nomor kontak dan ringkasan profil',
-    },
-    {
-      label: 'Riwayat Pendidikan',
-      status: hasEdu,
-      detail: hasEdu
-        ? `${totalEdu} riwayat pendidikan terdata`
-        : 'Belum menambahkan data pendidikan',
-    },
-    {
-      label: 'Pengalaman & Portofolio',
-      status: hasExperience,
-      detail: hasExperience
-        ? `${totalExp + totalProjects + totalInternships} pengalaman atau proyek terdaftar`
-        : 'Tambahkan minimal 1 pengalaman kerja, magang, atau proyek',
-    },
-    {
-      label: 'Keahlian Terfokus',
-      status: hasSkills,
-      detail: hasSkills
-        ? `${totalSkills} keahlian relevan terpasang`
-        : `${totalSkills} keahlian (target minimal 4 skill relevan)`,
-    },
-    {
-      label: 'Format Standar ATS',
-      status: isAtsOptimal,
-      detail: isAtsOptimal
-        ? `Rata-rata skor ATS ${avgAtsScore}/100 (Format siap lolos screening)`
-        : `Rata-rata skor ATS ${avgAtsScore}/100 (Perlu pengayaan kata kunci industri)`,
-    },
-  ];
-
-  const completedCount = checklist.filter((c) => c.status).length;
-  const totalItems = checklist.length;
-
-  // Base CV Readiness: 50% kelengkapan 5 item + 30% bobot ATS Score
-  let baseScore = (completedCount / totalItems) * 50 + (avgAtsScore / 100) * 30;
-
-  // Bonus Momentum Tracker: 20%
-  if (isAppsArray) {
-    const totalApps = apps.length;
-    const trackerBonus = Math.min(20, Math.round((totalApps / 5) * 20));
-    baseScore += trackerBonus;
+  try {
+    const dynamicRes = calculateAtsScore(primaryCv);
+    if (dynamicRes && typeof dynamicRes.totalScore === 'number' && dynamicRes.totalScore > 0) {
+      return Math.min(100, Math.round(dynamicRes.totalScore));
+    }
+  } catch {
+    // Dynamic calculate fallback error
   }
+  return 0;
+}
 
-  const calculatedScore = Math.min(100, Math.max(0, Math.round(baseScore)));
+/**
+ * Menghitung jam terbang riil secara inklusif:
+ * Mendukung pengalaman kerja, magang/PKL (SMK), portofolio proyek, dan organisasi.
+ */
+export function calculateTotalExperiences(primaryCv: any): {
+  workCount: number;
+  internshipCount: number;
+  projectCount: number;
+  orgCount: number;
+  totalCount: number;
+} {
+  if (!primaryCv) {
+    return { workCount: 0, internshipCount: 0, projectCount: 0, orgCount: 0, totalCount: 0 };
+  }
+  const workCount = Array.isArray(primaryCv.experience) ? primaryCv.experience.length : 0;
+  const internshipCount = Array.isArray(primaryCv.internships) ? primaryCv.internships.length : 0;
+  const projectCount = Array.isArray(primaryCv.projects) ? primaryCv.projects.length : 0;
+  const orgCount = Array.isArray(primaryCv.organizations) ? primaryCv.organizations.length : 0;
+  const totalCount = workCount + internshipCount + projectCount + orgCount;
 
-  return {
-    score: calculatedScore,
-    checklist,
-    avgAtsScore,
-    completedCount,
-    totalItems,
-  };
+  return { workCount, internshipCount, projectCount, orgCount, totalCount };
 }
 
 export function calculatePillars(
@@ -316,7 +232,6 @@ export function calculatePillars(
 ): PillarEvaluation[] {
   const isCvArray = Array.isArray(cvs) && cvs.length > 0;
   const isAppsArray = Array.isArray(apps) && apps.length > 0;
-
   const primaryCv = isCvArray ? cvs.find((c: any) => c.isPrimary) || cvs[0] : null;
 
   // ----------------------------------------------------
@@ -324,13 +239,29 @@ export function calculatePillars(
   // ----------------------------------------------------
   let cvPillar: PillarEvaluation;
   if (primaryCv) {
-    const ats = primaryCv.atsScore ?? 0;
-    const cvScore = Math.min(100, Math.max(0, ats));
+    const ats = resolveAtsScore(primaryCv);
+    const exps = calculateTotalExperiences(primaryCv);
+    const hasSummary = Boolean(primaryCv.summary && primaryCv.summary.trim().length >= 20);
+    const skillCount = Array.isArray(primaryCv.skills) ? primaryCv.skills.length : 0;
+    const eduCount = Array.isArray(primaryCv.education) ? primaryCv.education.length : 0;
+
+    // Komposit skor kualitas berkas (ATS + kelengkapan riwayat)
+    let completenessPts = 0;
+    if (hasSummary) completenessPts += 20;
+    if (skillCount >= 4) completenessPts += 25;
+    else completenessPts += skillCount * 6;
+    if (exps.totalCount >= 1) completenessPts += 35;
+    if (eduCount >= 1) completenessPts += 20;
+
+    // Nilai akhir dimensi 1: kombinasi ATS (60%) dan kelengkapan struktur (40%)
+    // atau gunakan skor ATS jika sudah lebih tinggi
+    const blendedCvScore = Math.round(ats * 0.6 + completenessPts * 0.4);
+    const cvScore = Math.min(100, Math.max(ats > 0 ? ats : 0, blendedCvScore));
 
     const needsImprovements: string[] = [];
-    if (!primaryCv.summary || primaryCv.summary.trim().length < 20) needsImprovements.push('ringkasan');
-    if (!primaryCv.skills || primaryCv.skills.length < 4) needsImprovements.push('skill');
-    if (!primaryCv.experience || primaryCv.experience.length === 0) needsImprovements.push('pengalaman');
+    if (!hasSummary) needsImprovements.push('ringkasan profesional');
+    if (skillCount < 4) needsImprovements.push('keahlian industri');
+    if (exps.totalCount === 0) needsImprovements.push('pengalaman/PKL/proyek');
 
     cvPillar = {
       id: 'cv_ats',
@@ -339,34 +270,37 @@ export function calculatePillars(
       status: getStatusFromScore(cvScore),
       desc:
         cvScore >= 80
-          ? 'CV telah menggunakan struktur terstandarisasi dengan kepadatan kata kunci industri yang baik.'
+          ? 'CV telah menggunakan struktur terstandarisasi dengan kepadatan kata kunci industri dan jam terbang yang jelas.'
           : needsImprovements.length > 0
           ? `Perlu penguatan di bagian: ${needsImprovements.join(', ')} untuk menembus seleksi HR.`
           : 'Format CV perlu dioptimalkan agar mudah dipindai oleh sistem rekrutmen.',
       recommendation:
         cvScore >= 85
-          ? 'Pertahankan format dan tambahkan metrik angka capaian pada deskripsi pengalaman.'
+          ? 'Pertahankan format dan tambahkan metrik angka capaian pada deskripsi pengalaman atau PKL.'
           : needsImprovements.length > 0
           ? `Lengkapi bagian ${needsImprovements[0]} melalui CV Builder untuk menaikkan skor ATS.`
-          : 'Uji CV Anda di Simulasi Screening untuk mendeteksi kata kunci yang kurang.',
+          : 'Uji CV kamu di Simulasi Screening untuk mendeteksi kata kunci industri yang kurang.',
       actionTab: 'cv',
       actionPath: '/cv',
       actionLabel: 'Buka CV Builder',
       metrics: [
         {
-          label: 'Skor ATS Terkini',
-          value: `${cvScore}/100`,
-          passed: cvScore >= 75,
+          label: 'Skor Keterbacaan ATS',
+          value: `${ats > 0 ? ats : cvScore}/100`,
+          passed: (ats > 0 ? ats : cvScore) >= 70,
         },
         {
-          label: 'Ringkasan Diri',
-          value: primaryCv.summary && primaryCv.summary.trim().length >= 20 ? 'Lengkap' : 'Perlu Diisi',
-          passed: Boolean(primaryCv.summary && primaryCv.summary.trim().length >= 20),
+          label: 'Ringkasan Profesional',
+          value: hasSummary ? 'Lengkap & Terstruktur' : 'Perlu Diisi',
+          passed: hasSummary,
         },
         {
-          label: 'Daftar Pengalaman',
-          value: Array.isArray(primaryCv.experience) ? `${primaryCv.experience.length} riwayat` : '0 riwayat',
-          passed: Boolean(Array.isArray(primaryCv.experience) && primaryCv.experience.length > 0),
+          label: 'Pengalaman & Portofolio',
+          value:
+            exps.totalCount > 0
+              ? `${exps.totalCount} riwayat (${exps.workCount} kerja, ${exps.internshipCount} magang/PKL, ${exps.projectCount + exps.orgCount} proyek/org)`
+              : 'Belum ada data',
+          passed: exps.totalCount > 0,
         },
       ],
     };
@@ -376,7 +310,7 @@ export function calculatePillars(
       title: 'Kualitas Berkas & Skor ATS',
       score: 0,
       status: 'Belum Ada Data',
-      desc: 'Belum ada CV yang tersimpan. Buat CV pertama Anda untuk memulai kalkulasi kesiapan.',
+      desc: 'Belum ada CV yang tersimpan. Buat CV pertamamu untuk memulai kalkulasi kesiapan.',
       recommendation: 'Mulai buat CV standar industri di menu CV Builder.',
       actionTab: 'cv',
       actionPath: '/cv',
@@ -390,43 +324,61 @@ export function calculatePillars(
   }
 
   // ----------------------------------------------------
-  // Dimensi 2: Riset & Kecocokan Lowongan (Bobot 25%)
+  // Dimensi 2: Spesifikasi & Kecocokan Peran (Bobot 25%)
   // ----------------------------------------------------
   let matchPillar: PillarEvaluation;
   if (primaryCv) {
-    let matchFactors = 0;
-    const totalMatchFactors = 4;
-
-    const hasTargetRole = Boolean(primaryCv.jobTitle || primaryCv.targetRole);
-    if (hasTargetRole) matchFactors++;
+    let matchScorePts = 0;
+    const hasTargetRole = Boolean(
+      (primaryCv.jobTitle && primaryCv.jobTitle.trim().length > 0) ||
+      (primaryCv.targetRole && primaryCv.targetRole.trim().length > 0)
+    );
+    if (hasTargetRole) matchScorePts += 30;
 
     const skillCount = Array.isArray(primaryCv.skills) ? primaryCv.skills.length : 0;
-    if (skillCount >= 4) matchFactors++;
-    if (skillCount >= 6) matchFactors++;
+    if (skillCount >= 5) matchScorePts += 30;
+    else if (skillCount >= 3) matchScorePts += 20;
+    else matchScorePts += skillCount * 5;
 
-    const hasSummaryKeywords =
-      primaryCv.summary && primaryCv.summary.trim().length >= 40;
-    if (hasSummaryKeywords) matchFactors++;
+    const hasSummaryKeywords = Boolean(
+      primaryCv.summary && primaryCv.summary.trim().length >= 40
+    );
+    if (hasSummaryKeywords) matchScorePts += 20;
 
-    const matchScore = Math.round((matchFactors / totalMatchFactors) * 100);
+    // Evaluasi alignment: Jika ada target role dan lamaran di tracker cocok
+    const targetRoleLower = (primaryCv.jobTitle || primaryCv.targetRole || '').toLowerCase();
+    const hasTrackerMatch =
+      isAppsArray &&
+      apps.some((a: any) => {
+        const pos = (a.position || '').toLowerCase();
+        return targetRoleLower && (pos.includes(targetRoleLower) || targetRoleLower.includes(pos));
+      });
+
+    if (hasTrackerMatch) {
+      matchScorePts += 20;
+    } else if (hasTargetRole && skillCount >= 4) {
+      matchScorePts += 15;
+    }
+
+    const matchScore = Math.min(100, Math.max(0, matchScorePts));
 
     matchPillar = {
       id: 'job_match',
-      title: 'Riset & Kecocokan Lowongan',
+      title: 'Spesifikasi & Relevansi Peran',
       score: matchScore,
       status: getStatusFromScore(matchScore),
       desc:
         matchScore >= 75
-          ? 'Profil Anda memiliki spesifikasi peran yang jelas dengan padanan keahlian industri yang terarah.'
+          ? 'Profilmu memiliki spesifikasi peran yang jelas dengan padanan keahlian industri yang terarah.'
           : matchScore >= 50
           ? 'Posisi target sudah mulai terdefinisi, namun padanan kata kunci skill masih perlu diperkaya.'
           : 'Profil masih terlalu umum. Tentukan peran yang dituju agar relevansi lamaran meningkat.',
       recommendation:
         !hasTargetRole
-          ? 'Cantumkan target posisi atau spesialisasi di profil CV Anda.'
+          ? 'Cantumkan target posisi atau spesialisasi di profil CV kamu.'
           : skillCount < 5
-          ? 'Perkaya daftar keahlian teknis sesuai deskripsi lowongan di pasar kerja.'
-          : 'Gunakan fitur Kecocokan Lowongan untuk mencocokkan CV Anda dengan kualifikasi loker riil.',
+          ? 'Perkaya daftar keahlian teknis sesuai deskripsi loker di pasar kerja.'
+          : 'Gunakan fitur Kecocokan Lowongan untuk mencocokkan CV kamu dengan kualifikasi loker riil.',
       actionTab: 'match-cv',
       actionPath: '/match-cv',
       actionLabel: 'Uji Kecocokan Lowongan',
@@ -438,24 +390,24 @@ export function calculatePillars(
         },
         {
           label: 'Kepadatan Skill Terdaftar',
-          value: `${skillCount} keahlian`,
+          value: `${skillCount} keahlian industri`,
           passed: skillCount >= 4,
         },
         {
           label: 'Spesifikasi Ringkasan',
           value: hasSummaryKeywords ? 'Tajam & Terarah' : 'Perlu Dipertegas',
-          passed: Boolean(hasSummaryKeywords),
+          passed: hasSummaryKeywords,
         },
       ],
     };
   } else {
     matchPillar = {
       id: 'job_match',
-      title: 'Riset & Kecocokan Lowongan',
+      title: 'Spesifikasi & Relevansi Peran',
       score: 0,
       status: 'Belum Ada Data',
-      desc: 'Tentukan posisi kerja target dan bandingkan kecocokan keahlian Anda.',
-      recommendation: 'Buat CV dan uji kecocokan dengan deskripsi lowongan kerja impian.',
+      desc: 'Tentukan posisi kerja target dan bandingkan kecocokan keahlianmu.',
+      recommendation: 'Buat CV dan uji kecocokan dengan deskripsi loker impian.',
       actionTab: 'match-cv',
       actionPath: '/match-cv',
       actionLabel: 'Buka Match CV',
@@ -472,24 +424,33 @@ export function calculatePillars(
   // ----------------------------------------------------
   let adminPillar: PillarEvaluation;
   if (primaryCv) {
-    let adminFactors = 0;
-    const totalAdminFactors = 4;
+    let adminPts = 0;
 
+    // Kontak lengkap: Email & Telepon/WA (30%)
     const hasFullContact = Boolean(primaryCv.fullName && primaryCv.email && primaryCv.phone);
-    if (hasFullContact) adminFactors++;
+    if (hasFullContact) adminPts += 30;
 
+    // Domisili jelas (25%)
     const hasCity = Boolean(primaryCv.city || primaryCv.address || primaryCv.location);
-    if (hasCity) adminFactors++;
+    if (hasCity) adminPts += 25;
 
-    const hasOnlinePresence = Boolean(
+    // Kredensial pendukung inklusif (25%):
+    // Memiliki LinkedIn/Website/GitHub/Portofolio ATAU Sertifikasi/Pelatihan ATAU Riwayat Pendidikan
+    const hasOnlineLink = Boolean(
       primaryCv.linkedin || primaryCv.website || primaryCv.github || primaryCv.portfolio
     );
-    if (hasOnlinePresence) adminFactors++;
+    const hasCert = Boolean(
+      (Array.isArray(primaryCv.certifications) && primaryCv.certifications.length > 0) ||
+      (Array.isArray(primaryCv.courses) && primaryCv.courses.length > 0)
+    );
+    const hasCredentials = hasOnlineLink || hasCert || (Array.isArray(primaryCv.education) && primaryCv.education.length > 0);
+    if (hasCredentials) adminPts += 25;
 
+    // Kesiapan berkas pengantar (20%)
     const hasSummaryReady = Boolean(primaryCv.summary && primaryCv.summary.trim().length >= 30);
-    if (hasSummaryReady) adminFactors++;
+    if (hasSummaryReady) adminPts += 20;
 
-    const adminScore = Math.round((adminFactors / totalAdminFactors) * 100);
+    const adminScore = Math.min(100, Math.max(0, adminPts));
 
     adminPillar = {
       id: 'application_kit',
@@ -498,13 +459,13 @@ export function calculatePillars(
       status: getStatusFromScore(adminScore),
       desc:
         adminScore >= 75
-          ? 'Paket berkas lamaran Anda lengkap: kontak valid, domisili jelas, dan tautan profil profesional siap dikirim.'
-          : 'Beberapa elemen administratif seperti kontak, domisili, atau tautan profil pendukung belum lengkap.',
+          ? 'Paket berkas lamaranmu lengkap: kontak valid, domisili jelas, dan kredensial profesional siap dikirim.'
+          : 'Beberapa elemen administratif seperti kontak WhatsApp, domisili, atau kredensial pendukung belum lengkap.',
       recommendation:
         !hasFullContact
-          ? 'Pastikan nomor telepon WhatsApp aktif dan email profesional terisi.'
-          : !hasOnlinePresence
-          ? 'Sematkan tautan profil LinkedIn atau portofolio kerja pada profil CV.'
+          ? 'Pastikan nomor WhatsApp aktif dan email profesional terisi di CV.'
+          : !hasCredentials
+          ? 'Sematkan tautan profil LinkedIn atau data sertifikat pelatihan ke dalam CV.'
           : 'Susun draf surat pengantar profesional di menu Email & Cover Letter sebelum melamar.',
       actionTab: 'mailer',
       actionPath: '/mailer',
@@ -521,9 +482,9 @@ export function calculatePillars(
           passed: hasCity,
         },
         {
-          label: 'Tautan Portofolio / LinkedIn',
-          value: hasOnlinePresence ? 'Tersedia' : 'Belum Ada',
-          passed: hasOnlinePresence,
+          label: 'Kredensial & Portofolio',
+          value: hasOnlineLink ? 'Tautan Aktif' : hasCert ? 'Sertifikat Terdata' : hasCredentials ? 'Terdata' : 'Belum Ada',
+          passed: hasCredentials,
         },
       ],
     };
@@ -541,7 +502,7 @@ export function calculatePillars(
       metrics: [
         { label: 'Kontak Valid', value: 'Belum ada', passed: false },
         { label: 'Domisili', value: 'Belum ada', passed: false },
-        { label: 'Tautan Portofolio', value: 'Belum ada', passed: false },
+        { label: 'Kredensial Pendukung', value: 'Belum ada', passed: false },
       ],
     };
   }
@@ -550,9 +511,10 @@ export function calculatePillars(
   // Dimensi 4: Momentum Pelamaran & Tracker (Bobot 20%)
   // ----------------------------------------------------
   let trackerPillar: PillarEvaluation;
+  const isCvReady = primaryCv && resolveAtsScore(primaryCv) >= 65;
+
   if (isAppsArray) {
     const totalApps = apps.length;
-
     const now = new Date();
     const thirtyDaysAgo = new Date(now);
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -566,10 +528,11 @@ export function calculatePillars(
       ['Screening', 'Interview', 'Offering'].includes(a.status)
     ).length;
 
-    // Skor berbasis aktivitas konsisten: target 8 lamaran terfokus = 70 poin + status pipeline
-    const appPoints = Math.min(70, Math.round((recentApps / 8) * 70));
-    const pipelinePoints = advancedStages > 0 ? 30 : Math.min(20, totalApps * 5);
-    const momentumScore = Math.min(100, Math.max(0, appPoints + pipelinePoints));
+    // Nilai terukur: volume (50%) + kemajuan pipeline (30%) + baseline berkas siap (20%)
+    const appPoints = Math.min(50, Math.round((recentApps / 5) * 50));
+    const pipelinePoints = advancedStages > 0 ? 30 : Math.min(15, totalApps * 3);
+    const cvReadyBonus = isCvReady ? 20 : 10;
+    const momentumScore = Math.min(100, Math.max(0, appPoints + pipelinePoints + cvReadyBonus));
 
     trackerPillar = {
       id: 'tracker_momentum',
@@ -577,16 +540,16 @@ export function calculatePillars(
       score: momentumScore,
       status: getStatusFromScore(momentumScore),
       desc:
-        recentApps >= 8
-          ? `Momentum sangat baik: ${recentApps} lamaran dikirim dan terpantau dalam 30 hari terakhir.`
+        recentApps >= 5
+          ? `Momentum sangat baik: ${recentApps} lamaran terpantau aktif dalam 30 hari terakhir.`
           : recentApps > 0
           ? `${recentApps} lamaran tercatat dalam 30 hari terakhir. Jaga ritme melamar minimal 3 lamaran per minggu.`
-          : 'Belum ada catatan aktivitas lamaran dalam 30 hari terakhir di Tracker.',
+          : 'Belum ada aktivitas lamaran dalam 30 hari terakhir. Perbarui status lamaranmu di Tracker.',
       recommendation:
         recentApps < 3
           ? 'Kirimkan minimal 3 lamaran kerja terfokus minggu ini dan catat di Tracker Lamaran.'
-          : recentApps < 8
-          ? 'Perluas jangkauan dan selalu perbarui status perkembangan lamaran Anda.'
+          : recentApps < 5
+          ? 'Perluas jangkauan dan selalu perbarui status perkembangan lamaranmu.'
           : 'Pertahankan kedisiplinan pelacakan dan evaluasi respon rekruter di Tracker.',
       actionTab: 'tracker',
       actionPath: '/tracker',
@@ -595,7 +558,7 @@ export function calculatePillars(
         {
           label: 'Lamaran Aktif (30 Hari)',
           value: `${recentApps} lamaran`,
-          passed: recentApps >= 5,
+          passed: recentApps >= 3,
         },
         {
           label: 'Total Tercatat di Tracker',
@@ -610,20 +573,27 @@ export function calculatePillars(
       ],
     };
   } else {
+    // Akun baru belum punya lamaran di tracker:
+    // Berikan baseline wajar (35 poin jika berkas siap) agar tidak langsung mengunci skor 0
+    const baselineScore = isCvReady ? 35 : 0;
+
     trackerPillar = {
       id: 'tracker_momentum',
       title: 'Momentum Pelamaran & Tracker',
-      score: 0,
-      status: 'Belum Ada Data',
-      desc: 'Pantau kemajuan karier Anda dengan mencatat setiap lowongan yang dilamar.',
-      recommendation: 'Mulai tambahkan lamaran pertama Anda di Tracker Lamaran.',
+      score: baselineScore,
+      status: baselineScore > 0 ? 'Siap Melamar' : 'Belum Ada Data',
+      desc:
+        baselineScore > 0
+          ? 'Berkas CV kamu sudah siap. Mulai kirim lamaran kerja dan pantau perkembangannya di Tracker.'
+          : 'Pantau kemajuan kariermu dengan mencatat setiap lowongan yang kamu lamar di Tracker.',
+      recommendation: 'Mulai tambahkan lamaran pertamamu di Tracker Lamaran.',
       actionTab: 'tracker',
       actionPath: '/tracker',
       actionLabel: 'Tambah Lamaran di Tracker',
       metrics: [
         { label: 'Lamaran Terkirim', value: '0 lamaran', passed: false },
-        { label: 'Ritme Mingguan', value: 'Belum aktif', passed: false },
-        { label: 'Status Pipeline', value: 'Kosong', passed: false },
+        { label: 'Status Pipeline', value: baselineScore > 0 ? 'Siap Eksekusi' : 'Kosong', passed: baselineScore > 0 },
+        { label: 'Kedisiplinan Melamar', value: 'Belum aktif', passed: false },
       ],
     };
   }
@@ -631,22 +601,47 @@ export function calculatePillars(
   return [cvPillar, matchPillar, adminPillar, trackerPillar];
 }
 
+/**
+ * Single Unified Calculation Engine
+ * Menghasilkan indeks kesiapan kerja holistik 4 dimensi dengan opsi kalibrasi kuis diagnostik.
+ */
 export function calculateHolisticReadiness(
   cvs: any[] | null | undefined,
-  apps: any[] | null | undefined
+  apps: any[] | null | undefined,
+  diagnosticScoreInput?: number | null
 ): HolisticReadinessEvaluation {
   const dimensions = calculatePillars(cvs, apps);
-  const evaluation = calculateReadinessScore(cvs, apps);
+  const isCvArray = Array.isArray(cvs) && cvs.length > 0;
+  const primaryCv = isCvArray ? cvs.find((c: any) => c.isPrimary) || cvs[0] : null;
+  const avgAtsScore = resolveAtsScore(primaryCv);
 
-  // Bobot: Dimensi 1 (35%), Dimensi 2 (25%), Dimensi 3 (20%), Dimensi 4 (20%)
-  const weightedScore = Math.round(
-    dimensions[0].score * 0.35 +
-      dimensions[1].score * 0.25 +
-      dimensions[2].score * 0.20 +
-      dimensions[3].score * 0.20
+  // Bobot 4 Dimensi Objektif: 35% CV & ATS, 25% Job Match, 20% Admin, 20% Tracker
+  const objectiveScore = Math.min(
+    100,
+    Math.max(
+      0,
+      Math.round(
+        dimensions[0].score * 0.35 +
+        dimensions[1].score * 0.25 +
+        dimensions[2].score * 0.20 +
+        dimensions[3].score * 0.20
+      )
+    )
   );
 
-  const finalScore = Math.min(100, Math.max(0, weightedScore));
+  // Kalibrasi diagnostik mandiri (85% Objektif + 15% Evaluasi Mandiri jika kuis sudah diisi)
+  const diagScore =
+    typeof diagnosticScoreInput === 'number' &&
+    !isNaN(diagnosticScoreInput) &&
+    diagnosticScoreInput > 0
+      ? Math.min(100, Math.max(0, diagnosticScoreInput))
+      : null;
+
+  const isCalibrated = diagScore !== null;
+  const finalScore = isCalibrated
+    ? Math.min(100, Math.max(0, Math.round(objectiveScore * 0.85 + diagScore * 0.15)))
+    : objectiveScore;
+
   const badge = getReadinessBadge(finalScore);
 
   // Cari Superpower (dimensi skor tertinggi) dan Bottleneck (dimensi skor terendah)
@@ -658,32 +653,76 @@ export function calculateHolisticReadiness(
     title: bestDimension.score > 0 ? bestDimension.title : 'Menunggu Analisis Berkas',
     desc:
       bestDimension.score >= 75
-        ? `Kekuatan utama Anda berada pada ${bestDimension.title} dengan skor ${bestDimension.score}/100. Kualitas aspek ini sudah melampaui rata-rata pelamar entry-level.`
+        ? `Kekuatan utamamu ada pada ${bestDimension.title} (${bestDimension.score}/100) — sudah melampaui rata-rata pelamar.`
         : bestDimension.score > 0
-        ? `Aspek terbaik saat ini adalah ${bestDimension.title} (${bestDimension.score}/100). Terus tingkatkan agar menjadi nilai jual utama.`
-        : 'Lengkapi profil dan buat CV pertamamu untuk menemukan kekuatan terbaikmu.',
+        ? `Aspek terbaik saat ini adalah ${bestDimension.title} (${bestDimension.score}/100) — terus asah untuk daya saing maksimal.`
+        : 'Lengkapi profil dan buat CV pertamamu untuk menemukan keunggulan terbaikmu.',
   };
 
   const bottleneck: DiagnosticInsight = {
     title: lowestDimension.score < 75 ? lowestDimension.title : 'Semua Pilar Optimal',
     desc:
       lowestDimension.score < 60
-        ? `Fokus perbaikan mendesak: ${lowestDimension.title} (${lowestDimension.score}/100). Mengoptimalkan bagian ini akan meningkatkan kesiapan kerja Anda secara signifikan.`
+        ? `Fokus utama: Optimalkan ${lowestDimension.title} (${lowestDimension.score}/100) untuk mendongkrak peluang lolos kerjamu.`
         : lowestDimension.score < 80
-        ? `${lowestDimension.title} masih berpeluang ditingkatkan dari ${lowestDimension.score}/100 ke standar keunggulan 85+.`
-        : 'Luar biasa! Seluruh pilar kesiapan kerja Anda berada pada level prima dan siap bersaing.',
+        ? `${lowestDimension.title} sudah baik (${lowestDimension.score}/100) dan masih bisa ditingkatkan ke standar prima.`
+        : 'Seluruh pilar kesiapan kerja kamu berada di level prima dan siap bersaing.',
     actionPath: lowestDimension.actionPath,
     actionLabel: lowestDimension.actionLabel,
   };
 
-  // Hitung Dynamic Roadmap Milestones
-  const isCvArray = Array.isArray(cvs) && cvs.length > 0;
-  const primaryCv = isCvArray ? cvs.find((c: any) => c.isPrimary) || cvs[0] : null;
-  const isAppsArray = Array.isArray(apps) && apps.length > 0;
+  // Checklist 4 Dimensi Terpadu (Sinkron 1:1 dengan kartu Beranda & Dimensi Detail)
+  const checklist: ChecklistItem[] = [
+    {
+      id: 'cv_ats',
+      label: 'Kualitas Berkas & ATS',
+      status: dimensions[0].score >= 65,
+      score: dimensions[0].score,
+      detail:
+        dimensions[0].score >= 65
+          ? `Skor ${dimensions[0].score}/100 — format ATS terstruktur & ramah pemindai`
+          : `Skor ${dimensions[0].score}/100 — lengkapi ringkasan, skill, dan pengalaman`,
+    },
+    {
+      id: 'job_match',
+      label: 'Spesifikasi & Relevansi Peran',
+      status: dimensions[1].score >= 65,
+      score: dimensions[1].score,
+      detail:
+        dimensions[1].score >= 65
+          ? `Target posisi terarah dengan ${primaryCv?.skills?.length || 0} keahlian industri`
+          : 'Tentukan target posisi spesifik dan cantumkan minimal 4 keahlian',
+    },
+    {
+      id: 'application_kit',
+      label: 'Administrasi & Berkas Lamaran',
+      status: dimensions[2].score >= 65,
+      score: dimensions[2].score,
+      detail:
+        dimensions[2].score >= 65
+          ? 'Kontak valid, domisili jelas, dan kredensial profesional terdata'
+          : 'Lengkapi kontak aktif, domisili, atau kredensial pendukung',
+    },
+    {
+      id: 'tracker_momentum',
+      label: 'Momentum Pelamaran & Tracker',
+      status: dimensions[3].score >= 50,
+      score: dimensions[3].score,
+      detail:
+        dimensions[3].score >= 50
+          ? `${Array.isArray(apps) ? apps.length : 0} lamaran tercatat & aktif dipantau di Tracker`
+          : 'Catat minimal 1–3 lamaran kerja di Tracker untuk membangun ritme',
+    },
+  ];
 
+  const completedCount = checklist.filter((c) => c.status).length;
+  const totalItems = checklist.length;
+
+  // Hitung Dynamic Roadmap Milestones
+  const exps = calculateTotalExperiences(primaryCv);
   const m1Task1 = Boolean(primaryCv && primaryCv.fullName && primaryCv.email && primaryCv.phone);
   const m1Task2 = Boolean(primaryCv && Array.isArray(primaryCv.education) && primaryCv.education.length > 0);
-  const m1Task3 = Boolean(primaryCv && (primaryCv.atsScore ?? 0) >= 75);
+  const m1Task3 = Boolean(primaryCv && avgAtsScore >= 70);
   const m1Completed = m1Task1 && m1Task2 && m1Task3;
   const m1Progress = Math.round(((Number(m1Task1) + Number(m1Task2) + Number(m1Task3)) / 3) * 100);
 
@@ -693,12 +732,20 @@ export function calculateHolisticReadiness(
   const m2Completed = m2Task1 && m2Task2 && m2Task3;
   const m2Progress = Math.round(((Number(m2Task1) + Number(m2Task2) + Number(m2Task3)) / 3) * 100);
 
-  const m3Task1 = Boolean(primaryCv && (primaryCv.linkedin || primaryCv.portfolio || primaryCv.website));
+  const hasCredentials = Boolean(
+    primaryCv &&
+    (primaryCv.linkedin ||
+      primaryCv.portfolio ||
+      primaryCv.website ||
+      (Array.isArray(primaryCv.certifications) && primaryCv.certifications.length > 0) ||
+      exps.internshipCount > 0)
+  );
+  const m3Task1 = hasCredentials;
   const m3Task2 = Boolean(primaryCv && (primaryCv.city || primaryCv.location));
   const m3Completed = m3Task1 && m3Task2;
   const m3Progress = Math.round(((Number(m3Task1) + Number(m3Task2)) / 2) * 100);
 
-  const appCount = isAppsArray ? apps.length : 0;
+  const appCount = Array.isArray(apps) ? apps.length : 0;
   const m4Task1 = appCount >= 1;
   const m4Task2 = appCount >= 3;
   const m4Completed = m4Task1 && m4Task2;
@@ -710,7 +757,8 @@ export function calculateHolisticReadiness(
       step: 1,
       title: 'Fondasi Berkas & Standar ATS',
       subtitle: 'Kelengkapan Profil & Format Screening',
-      description: 'Pastikan informasi identitas, riwayat pendidikan, dan format CV lolos pemindaian ATS dengan skor minimum 75.',
+      description:
+        'Pastikan informasi identitas, riwayat pendidikan, dan format CV lolos pemindaian ATS dengan skor minimum 70.',
       status: m1Completed ? 'completed' : m1Progress > 0 ? 'in_progress' : 'pending',
       progressPercent: m1Progress,
       actionPath: '/cv',
@@ -718,7 +766,7 @@ export function calculateHolisticReadiness(
       tasks: [
         { label: 'Data kontak (WhatsApp & email) terverifikasi', completed: m1Task1 },
         { label: 'Riwayat pendidikan minimal 1 tingkatan tercantum', completed: m1Task2 },
-        { label: 'Skor ATS CV mencapai minimal 75/100', completed: m1Task3 },
+        { label: 'Skor ATS CV mencapai minimal 70/100', completed: m1Task3 },
       ],
     },
     {
@@ -726,7 +774,8 @@ export function calculateHolisticReadiness(
       step: 2,
       title: 'Spesifikasi & Relevansi Peran',
       subtitle: 'Target Posisi & Kepadatan Keahlian',
-      description: 'Pertajam target posisi pekerjaan dan lengkapi minimal 4 keahlian teknis relevan agar CV mudah ditemukan rekruter.',
+      description:
+        'Pertajam target posisi pekerjaan dan lengkapi minimal 4 keahlian teknis relevan agar CV mudah ditemukan rekruter.',
       status: m2Completed ? 'completed' : m2Progress > 0 ? 'in_progress' : 'pending',
       progressPercent: m2Progress,
       actionPath: '/match-cv',
@@ -741,14 +790,15 @@ export function calculateHolisticReadiness(
       id: 'm3',
       step: 3,
       title: 'Paket Administrasi & Pendukung',
-      subtitle: 'Tautan Portofolio & Domisili Terdata',
-      description: 'Lengkapi kredensial pelengkap seperti domisili tempat tinggal dan tautan portofolio/LinkedIn agar profil meyakinkan.',
+      subtitle: 'Kredensial Portofolio & Domisili Terdata',
+      description:
+        'Lengkapi kredensial pelengkap seperti domisili tempat tinggal dan sertifikasi/tautan profil agar profil meyakinkan.',
       status: m3Completed ? 'completed' : m3Progress > 0 ? 'in_progress' : 'pending',
       progressPercent: m3Progress,
       actionPath: '/mailer',
       actionLabel: 'Siapkan Surat Lamaran',
       tasks: [
-        { label: 'Tautan portofolio kerja / LinkedIn terpasang', completed: m3Task1 },
+        { label: 'Kredensial pendukung (sertifikat / magang / LinkedIn) terpasang', completed: m3Task1 },
         { label: 'Domisili kota tempat tinggal terdata jelas', completed: m3Task2 },
       ],
     },
@@ -757,7 +807,8 @@ export function calculateHolisticReadiness(
       step: 4,
       title: 'Eksekusi & Momentum Pelamaran',
       subtitle: 'Pencatatan & Kedisiplinan Melamar',
-      description: 'Kirimkan lamaran kerja secara konsisten dan gunakan Tracker Lamaran untuk memantau status hingga tahap panggilan kerja.',
+      description:
+        'Kirimkan lamaran kerja secara konsisten dan gunakan Tracker Lamaran untuk memantau status hingga tahap panggilan kerja.',
       status: m4Completed ? 'completed' : m4Progress > 0 ? 'in_progress' : 'pending',
       progressPercent: m4Progress,
       actionPath: '/tracker',
@@ -771,15 +822,36 @@ export function calculateHolisticReadiness(
 
   return {
     score: finalScore,
+    objectiveScore,
+    diagnosticScore: diagScore,
+    isCalibrated,
     tier: badge.tier,
     badge,
     dimensions,
     superpower,
     bottleneck,
     milestones,
-    checklist: evaluation.checklist,
-    avgAtsScore: evaluation.avgAtsScore,
-    completedCount: evaluation.completedCount,
-    totalItems: evaluation.totalItems,
+    checklist,
+    avgAtsScore,
+    completedCount,
+    totalItems,
+  };
+}
+
+/**
+ * Kompatibilitas mundur untuk pemanggil legacy calculateReadinessScore.
+ * Sekarang langsung mengembalikan hasil perhitungan single engine.
+ */
+export function calculateReadinessScore(
+  cvs: any[] | null | undefined,
+  apps?: any[] | null | undefined
+): ReadinessEvaluation {
+  const holistic = calculateHolisticReadiness(cvs, apps);
+  return {
+    score: holistic.score,
+    checklist: holistic.checklist,
+    avgAtsScore: holistic.avgAtsScore,
+    completedCount: holistic.completedCount,
+    totalItems: holistic.totalItems,
   };
 }

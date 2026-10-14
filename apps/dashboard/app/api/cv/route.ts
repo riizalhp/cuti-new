@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma, learnedRoleService } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 import { calculateAtsScore } from '@/lib/ats-score';
+import { syncUserCvEmbedding } from '@/lib/user-career-embedding';
 import crypto from 'crypto';
 
 function isValidUUID(str: string) {
@@ -40,6 +41,7 @@ export async function GET(req: NextRequest) {
       orderBy: { updated_at: 'desc' },
     });
 
+    const slugUsage = new Map<string, number>();
     const mappedCvs = projects.map((p) => {
       const parsedData = (typeof p.data === 'object' && p.data !== null ? p.data : {}) as Record<string, any>;
       const resolvedFullName = parsedData.fullName || user.name || '';
@@ -60,9 +62,16 @@ export async function GET(req: NextRequest) {
         ? parsedData.atsScore
         : (computedScore > 0 ? computedScore : 0);
 
+      const title = p.title || parsedData.title || 'CV ATS';
+      const rawSlug = parsedData.slug || title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '') || 'cv-ats';
+      const occurrence = slugUsage.get(rawSlug) || 0;
+      slugUsage.set(rawSlug, occurrence + 1);
+      const uniqueSlug = occurrence === 0 ? rawSlug : `${rawSlug}-${occurrence + 1}`;
+
       return {
         ...fullData,
-        title: p.title || parsedData.title || 'CV ATS',
+        title,
+        slug: uniqueSlug,
         templateId: p.template_id || parsedData.templateId || 'ats-modern-standard',
         atsScore: finalAtsScore,
         updatedAt: formatIndonesianDate(p.updated_at),
@@ -95,9 +104,12 @@ export async function POST(req: NextRequest) {
     const templateId = body.templateId || 'ats-modern-standard';
     const targetPosition = body.headline || body.target_position || 'Professional';
 
+    const slug = body.slug || title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '') || 'cv-ats';
+
     const fullCvData = {
       ...body,
       id: newId,
+      slug,
       updatedAt: 'Hari ini',
     };
 
@@ -115,36 +127,41 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // ── Self-Learning Engine: Rekam target peran dan keahlian dari CV secara non-blocking ──
-    try {
-      const candidateSkills = Array.isArray(body.skills) ? body.skills : [];
-      const primaryTarget = (body.headline || targetPosition || '').trim();
-      if (primaryTarget && candidateSkills.length > 0) {
-        learnedRoleService.recordEntry({
-          role_name: primaryTarget,
-          skills: candidateSkills,
-          education_level: body.educations?.[0]?.degree || body.educationLevel || null,
-          major: body.educations?.[0]?.major || body.major || null,
-          user_id: user.id,
-        }).catch(() => {});
-      }
+    // ── Background Tasks: Dijadwalkan via setImmediate agar respon HTTP kembali seketika ──
+    setImmediate(() => {
+      try {
+        const candidateSkills = Array.isArray(body.skills) ? body.skills : [];
+        const primaryTarget = (body.headline || targetPosition || '').trim();
+        if (primaryTarget && candidateSkills.length > 0) {
+          learnedRoleService.recordEntry({
+            role_name: primaryTarget,
+            skills: candidateSkills,
+            education_level: body.educations?.[0]?.degree || body.educationLevel || null,
+            major: body.educations?.[0]?.major || body.major || null,
+            user_id: user.id,
+          }).catch(() => {});
+        }
 
-      // Rekam juga posisi pengalaman kerja nyata jika ada
-      if (Array.isArray(body.experiences)) {
-        for (const exp of body.experiences) {
-          const expRole = (exp.role || exp.position || '').trim();
-          if (expRole && candidateSkills.length > 0) {
-            learnedRoleService.recordEntry({
-              role_name: expRole,
-              skills: candidateSkills,
-              user_id: user.id,
-            }).catch(() => {});
+        // Rekam juga posisi pengalaman kerja nyata jika ada
+        if (Array.isArray(body.experiences)) {
+          for (const exp of body.experiences) {
+            const expRole = (exp.role || exp.position || '').trim();
+            if (expRole && candidateSkills.length > 0) {
+              learnedRoleService.recordEntry({
+                role_name: expRole,
+                skills: candidateSkills,
+                user_id: user.id,
+              }).catch(() => {});
+            }
           }
         }
+
+        // Sinkronisasi vektor embedding profil karier pengguna
+        syncUserCvEmbedding(user.id, fullCvData, newCv.id).catch(() => {});
+      } catch (bgErr) {
+        console.warn('[POST /api/cv] Background task error:', bgErr);
       }
-    } catch (learnErr) {
-      // Non-blocking, continue CV flow
-    }
+    });
 
     return NextResponse.json({
       success: true,

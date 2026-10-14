@@ -2,11 +2,12 @@ import type { FaqArticle, FaqSearchResult, SearchHit } from "./types";
 import { loadArticles } from "./loader";
 import { markdownToPlainText } from "./markdown";
 import { getCategoryLabel } from "./categories";
+import { expandTokensWithSlang } from "./slang";
 
 /**
- * Mesin pencari berbasis IR klasik (TF-IDF + cosine similarity).
- * BUKAN LLM / AI generatif — murni pencocokan statistik kata kunci,
- * sehingga cepat, gratis, deterministik, dan offline.
+ * Mesin pencari berbasis IR klasik (TF-IDF + cosine similarity) + Kamus Slang/Sinonim Bahasa Indonesia.
+ * BUKAN LLM / AI generatif — murni pencocokan statistik kata kunci & normalisasi leksikal,
+ * sehingga cepat (<2ms), gratis, deterministik, dan offline.
  */
 
 // Stopword Bahasa Indonesia umum (kata tugas yang tidak informatif)
@@ -19,12 +20,14 @@ const STOPWORDS = new Set(
 const TERM_RE = /[a-z0-9]+(?:[-'][a-z0-9]+)*/g;
 
 function tokenize(text: string): string[] {
-  const tokens = text
+  const rawTokens = text
     .toLowerCase()
     .match(TERM_RE)
     ?.filter((t) => t.length > 1 && !STOPWORDS.has(t));
-  return tokens ?? [];
+  if (!rawTokens || rawTokens.length === 0) return [];
+  return expandTokensWithSlang(rawTokens);
 }
+
 
 function countTokens(tokens: string[]): Map<string, number> {
   const map = new Map<string, number>();

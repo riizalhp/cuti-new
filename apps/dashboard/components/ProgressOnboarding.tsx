@@ -31,7 +31,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
       subtitle: 'Isi riwayat kerja untuk generate CV lolos screening HRD',
       status: 'completed', // 'completed', 'in_progress', 'pending'
       icon: FileText,
-      color: 'text-emerald-500 bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-400',
+      color: 'text-emerald-700 bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-400',
       badge: null,
     },
     {
@@ -40,7 +40,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
       subtitle: 'Coba AI Unlimited, Auto-Lamar & Simulator Wawancara HRD',
       status: 'in_progress',
       icon: Crown,
-      color: 'text-amber-500 bg-amber-100 dark:bg-amber-950/60 dark:text-amber-400',
+      color: 'text-amber-700 bg-amber-100 dark:bg-amber-950/60 dark:text-amber-400',
       badge: 'Coba Gratis',
     },
     {
@@ -49,7 +49,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
       subtitle: 'Kirim lamaran kerja instan menggunakan CV ATS AI kamu',
       status: 'pending',
       icon: Briefcase,
-      color: 'text-orange-500 bg-orange-100 dark:bg-orange-950/60 dark:text-orange-400',
+      color: 'text-orange-700 bg-orange-100 dark:bg-orange-950/60 dark:text-orange-400',
       badge: null,
     },
   ]);
@@ -83,7 +83,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-[10px] text-[11px] font-bold bg-[#1738D1]/30 text-orange-200 border border-orange-400/30 flex items-center gap-1">
+                <span className="px-2.5 py-0.5 rounded-[10px] text-caption font-bold bg-cobalt-500/30 text-orange-200 border border-orange-400/30 flex items-center gap-1">
                   <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                   Panduan Pengguna Baru
                 </span>
@@ -100,7 +100,7 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
           {/* Progress Bar */}
           <div className="w-full bg-slate-900/80 rounded-full h-2.5 overflow-hidden border border-white/10 p-0.5">
             <div
-              className="bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400 h-full rounded-full transition-all duration-500 shadow-sm shadow-[#1738D1]/40"
+              className="bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400 h-full rounded-full transition-all duration-500 shadow-sm shadow-cobalt-500/40"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -130,12 +130,12 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
                     <div className="flex items-center justify-between gap-1">
                       <span className="text-xs font-bold truncate">{step.title}</span>
                       {step.badge && (
-                        <span className="px-1.5 py-0.5 rounded-[10px] text-[9px] font-black bg-amber-400 text-slate-950 uppercase shrink-0">
+                        <span className="px-1.5 py-0.5 rounded-[10px] text-caption font-black bg-amber-400 text-slate-950 uppercase shrink-0">
                           {step.badge}
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-300 leading-snug mt-0.5 line-clamp-2">
+                    <p className="text-caption text-slate-300 leading-snug mt-0.5 line-clamp-2">
                       {step.subtitle}
                     </p>
                   </div>
@@ -159,12 +159,12 @@ export const ProgressOnboarding: React.FC<ProgressOnboardingProps> = ({
                   <h3 className="text-xs font-black text-amber-300 uppercase tracking-wider">
                     Eksklusif Member Baru
                   </h3>
-                  <p className="text-[10px] text-orange-200">
+                  <p className="text-caption text-orange-200">
                     Peluang Lolos HRD Naik +85%
                   </p>
                 </div>
               </div>
-              <span className="px-2 py-0.5 rounded-[10px] text-[9px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              <span className="px-2 py-0.5 rounded-[10px] text-caption font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 Akses Ditolak HRD: 0%
               </span>
             </div>

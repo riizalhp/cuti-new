@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" fill="none">
+  <defs>
+    <linearGradient id="dataBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064E3B" />
+      <stop offset="50%" stop-color="#065F46" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="emeraldAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+    <pattern id="dataGrid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="rgba(255, 255, 255, 0.05)" stroke-width="1" />
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#dataBg)" />
+  <rect width="800" height="500" fill="url(#dataGrid)" />
+  <circle cx="400" cy="210" r="150" fill="#10B981" opacity="0.3" filter="blur(50px)" />
+  
+  <g transform="translate(350, 140)">
+    <rect x="0" y="0" width="100" height="90" rx="16" fill="rgba(6, 78, 59, 0.85)" stroke="rgba(255, 255, 255, 0.2)" stroke-width="2" />
+    <path d="M16 68 L16 48" stroke="url(#emeraldAccent)" stroke-width="5" stroke-linecap="round" />
+    <path d="M38 68 L38 34" stroke="url(#emeraldAccent)" stroke-width="5" stroke-linecap="round" />
+    <path d="M60 68 L60 24" stroke="url(#emeraldAccent)" stroke-width="5" stroke-linecap="round" />
+    <path d="M82 68 L82 40" stroke="url(#emeraldAccent)" stroke-width="5" stroke-linecap="round" />
+    <path d="M16 46 L38 32 L60 22 L82 38" stroke="#FBBF24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+
+  <g transform="translate(400, 310)">
+    <rect x="-115" y="0" width="230" height="32" rx="16" fill="rgba(255, 255, 255, 0.12)" stroke="rgba(255, 255, 255, 0.25)" stroke-width="1" />
+    <text x="0" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">DATA &amp; SPREADSHEET</text>
+  </g>
+  <text x="400" y="370" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="500" fill="rgba(255, 255, 255, 0.75)" text-anchor="middle">Analisis Praktis Industri &amp; Bisnis</text>
+</svg>

@@ -6,7 +6,6 @@ import {
   Zap,
   Target,
   FileCheck2,
-  Mic,
   Coins,
   ChevronRight,
   X,
@@ -16,6 +15,12 @@ import {
   Layers,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface WhatsNewModalProps {
   isOpen: boolean;
@@ -43,7 +48,7 @@ const NEW_FEATURES: FeatureItem[] = [
     description: 'Analisis struktur CV secara mendalam, deteksi kata kunci industri relevan, dan rekomendasi perbaikan instan.',
     icon: FileCheck2,
     iconBg: 'bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-800',
-    iconColor: 'text-[#1738D1] dark:text-blue-400',
+    iconColor: 'text-cobalt-500 dark:text-blue-400',
   },
   {
     id: 'job-tracker',
@@ -53,17 +58,7 @@ const NEW_FEATURES: FeatureItem[] = [
     description: 'Kelola alur lamaran kerja mulai dari Terkirim, Screening, hingga Offering dengan pengingat jadwal otomatis.',
     icon: Target,
     iconBg: 'bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800',
-    iconColor: 'text-amber-600 dark:text-amber-400',
-  },
-  {
-    id: 'interview-sim',
-    tag: 'BARU',
-    tagColor: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-    title: 'Simulasi Interview Cerdas',
-    description: 'Latihan tanya jawab wawancara kerja berbasis skenario HR dan user dengan feedback performa.',
-    icon: Mic,
-    iconBg: 'bg-purple-50 dark:bg-purple-950/60 border-purple-200 dark:border-purple-800',
-    iconColor: 'text-purple-600 dark:text-purple-400',
+    iconColor: 'text-amber-700 dark:text-amber-400',
   },
   {
     id: 'misi-reward',
@@ -73,7 +68,7 @@ const NEW_FEATURES: FeatureItem[] = [
     description: 'Selesaikan misi persiapan karir harian untuk mengumpulkan reward saldo yang dapat dicairkan.',
     icon: Coins,
     iconBg: 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800',
-    iconColor: 'text-emerald-600 dark:text-emerald-400',
+    iconColor: 'text-emerald-700 dark:text-emerald-400',
   },
 ];
 
@@ -102,22 +97,17 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({
   };
 
   return (
-    <div
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          handleDismiss();
-        }
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) handleDismiss();
       }}
-      className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-xl relative overflow-hidden flex flex-col max-h-[90vh]"
-      >
+      <DialogContent hideCloseButton size="md" className="p-0 overflow-hidden max-h-[90vh] flex flex-col max-w-xl">
         {/* Top Decorative Header Banner */}
         <div className="relative bg-navy-700 p-6 text-white overflow-hidden shrink-0">
           {/* Subtle Glow Backdrop */}
-          <div className="absolute top-0 right-0 -mr-12 -mt-12 w-40 h-40 bg-[#1738D1]/30 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute top-0 right-0 -mr-12 -mt-12 w-40 h-40 bg-cobalt-500/30 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 -ml-12 -mb-12 w-40 h-40 bg-orange-500/20 rounded-full blur-2xl pointer-events-none" />
 
           {/* Close Button */}
@@ -130,20 +120,20 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({
           </button>
 
           {/* Header Title & Version Badge */}
-          <div className="relative z-10 space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-[11px] font-extrabold uppercase tracking-wider bg-orange-500 text-white shadow-md">
+          <DialogHeader className="relative z-10 space-y-2 text-left">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-caption font-extrabold uppercase tracking-wider bg-orange-700 text-white shadow-md w-fit">
               <Rocket className="w-3.5 h-3.5" />
               <span>What&apos;s New in Employr</span>
             </div>
 
-            <h3 className="text-2xl font-black tracking-tight text-white leading-tight">
+            <DialogTitle className="text-2xl font-black tracking-tight text-white leading-tight">
               Pembaruan &amp; Fitur Terbaru
-            </h3>
+            </DialogTitle>
 
             <p className="text-xs text-slate-100 font-medium leading-relaxed max-w-md">
               Jelajahi deretan fitur baru untuk mempercepat persiapan karir dan melipatgandakan peluang panggilan kerjamu.
             </p>
-          </div>
+          </DialogHeader>
         </div>
 
         {/* Modal Scrollable Feature List */}
@@ -153,7 +143,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({
             return (
               <div
                 key={item.id}
-                className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 hover:border-[#1738D1]/40 transition-colors flex items-start gap-3.5"
+                className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 hover:border-cobalt-500/40 transition-colors flex items-start gap-3.5"
               >
                 <div
                   className={`w-10 h-10 rounded-[10px] border ${item.iconBg} flex items-center justify-center shrink-0 mt-0.5`}
@@ -167,7 +157,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({
                       {item.title}
                     </h4>
                     <span
-                      className={`px-2 py-0.5 rounded-[10px] text-[10px] font-black uppercase tracking-wider border ${item.tagColor}`}
+                      className={`px-2 py-0.5 rounded-[10px] text-caption font-black uppercase tracking-wider border ${item.tagColor}`}
                     >
                       {item.tag}
                     </span>
@@ -185,7 +175,8 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({
         <div className="p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 shrink-0 space-y-3">
           <Button
             onClick={handlePrimaryAction}
-            className="w-full py-2.5 h-auto rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition cursor-pointer flex items-center justify-center gap-2"
+            className="w-full py-2.5 h-auto"
+            variant="primary"
           >
             <Sparkles className="w-4 h-4 text-amber-300" />
             <span>Mulai Jelajahi Fitur</span>
@@ -193,25 +184,25 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({
           </Button>
 
           <div className="flex items-center justify-between pt-0.5">
-            <label className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 cursor-pointer select-none">
+            <label className="flex items-center gap-2 text-caption text-slate-500 dark:text-slate-400 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={dontShowToday}
                 onChange={(e) => setDontShowToday(e.target.checked)}
-                className="rounded-[10px] border-slate-300 dark:border-slate-700 text-[#1738D1] focus:ring-[#1738D1] w-3.5 h-3.5"
+                className="rounded-[10px] border-slate-300 dark:border-slate-700 text-cobalt-500 focus:ring-cobalt-500 w-3.5 h-3.5"
               />
               <span>Jangan tampilkan selama 7 hari</span>
             </label>
 
             <button
               onClick={handleDismiss}
-              className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer"
+              className="text-caption font-semibold text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer dark:text-slate-400"
             >
               Tutup
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

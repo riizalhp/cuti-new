@@ -14,7 +14,7 @@ const {
   title,
   level = 2,
   eyebrow,
-  eyebrowColor = 'text-[#0000ff]',
+  eyebrowColor = 'text-[#1738D1]',
   rightContent = false,
   className = ''
 } = Astro.props;
@@ -25,10 +25,10 @@ const headingSize = level === 2 ? 'text-xl sm:text-2xl font-bold' : 'text-lg sm:
 
 <div class={`subsection-header flex items-center ${rightContent ? 'justify-between' : ''} gap-3 pb-3 ${className}`}>
   <div class="flex items-center gap-2.5 min-w-0 flex-1">
-    <span class="w-1.5 h-4 bg-[#0000ff] rounded-xs shrink-0"></span>
+    <span class="w-1.5 h-4 bg-[#1738D1] rounded-xs shrink-0"></span>
     <div class="min-w-0 flex-1">
       {eyebrow && (
-        <span class={`text-[10px] font-bold uppercase tracking-wider ${eyebrowColor} block mb-0.5`}>
+        <span class={`text-[11px] font-bold tracking-wide ${eyebrowColor} block mb-0.5`}>
           {eyebrow}
         </span>
       )}

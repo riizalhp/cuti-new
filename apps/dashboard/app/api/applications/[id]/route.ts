@@ -23,12 +23,23 @@ function formatIndonesianDate(date: Date): string {
   return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
 }
 
+function isValidUUID(str?: string | null): boolean {
+  if (!str || typeof str !== 'string') return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json(
+        { success: false, message: 'Lamaran tidak ditemukan.' },
+        { status: 404 }
+      );
+    }
     const user = await getAuthUser(req);
     if (!user) {
       return NextResponse.json(
@@ -100,6 +111,12 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json(
+        { success: false, message: 'Lamaran tidak ditemukan.' },
+        { status: 404 }
+      );
+    }
     const user = await getAuthUser(req);
     if (!user) {
       return NextResponse.json(
@@ -276,6 +293,12 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json(
+        { success: false, message: 'Lamaran tidak ditemukan.' },
+        { status: 404 }
+      );
+    }
     const user = await getAuthUser(req);
     if (!user) {
       return NextResponse.json(

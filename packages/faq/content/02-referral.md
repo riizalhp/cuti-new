@@ -1,41 +1,41 @@
 ---
-title: Program Referral — Ajak Teman, Dapatkan Bonus
-description: Cara menggunakan kode dan link referral Employr untuk mengundang teman, memantau status undangan, dan menerima bonus.
+title: Program Referral: Ajak Teman dan Dapatkan Bonus
+description: Penggunaan tautan dan kode referral Employr, pemantauan status undangan, dan pencairan bonus.
 category: misi-reward
 order: 2
-updatedAt: 2026-08-18
+updatedAt: 2026-09-26
 keywords: referral, kode referral, link referral, undang teman, bonus referral, komisi, invite, reff, ref, share
 ---
 
-Program **Referral** (/referral) memberimu bonus setiap kali teman mendaftar melalui kode undanganmu.
+Program **Referral** (/referral) memberikan apresiasi saldo setiap kali rekanmu mendaftar dan menggunakan platform melalui kode undanganmu.
 
-## Kode & link referral kamu
+## Kode dan tautan referral milikmu
 
-Di halaman Referral kamu akan menemukan:
+Pada menu Referral tersedia dua pilihan:
 
-- **Kode referral** — contoh format: `EMPLOYR-NAMATAHUN` (kode unik per akun).
-- **Link referral** — contoh format: `https://employr.id/ref/EMPLOYR-NAMATAHUN`.
+- **Kode Referral**: format unik per pengguna, misalnya `EMPLOYR-NAMATAHUN`.
+- **Tautan Langsung**: URL khusus pendaftaran, misalnya `https://employr.id/ref/EMPLOYR-NAMATAHUN`.
 
-Dua-duanya bisa **disalin** dengan satu klik (tombol *Salin*).
+Kedua informasi tersebut dapat disalin langsung menggunakan tombol salin di samping kolom.
 
-## Cara mengundang teman
+## Alur mengajak teman
 
-1. Buka menu **Referral**.
-2. **Salin kode** atau **link referral** kamu.
-3. Bagikan ke teman pencari kerja — lewat WhatsApp, Instagram, email, atau media sosial.
-4. Teman mendaftar menggunakan kode/link tersebut.
-5. Setelah teman terdaftar (dan memenuhi syarat), **bonus** tercatat ke akunmu.
+1. Buka menu **Referral** pada dashboard.
+2. Salin kode atau tautan referral milikmu.
+3. Bagikan kepada rekan pencari kerja melalui WhatsApp, media sosial, atau pesan singkat.
+4. Rekanmu melakukan registrasi akun baru menggunakan tautan tersebut.
+5. Setelah akun baru terverifikasi, catatan bonus akan langsung masuk ke ringkasan akunmu.
 
-## Memantau undangan
+## Memantau riwayat undangan
 
-- Daftar **Teman yang Diundang** menampilkan nama, tanggal bergabung, dan status (misal *Pending* → *Terdaftar* → *Rewarded*).
-- **Total bonus** yang sudah kamu peroleh tampil di ringkasan.
+- Tabel riwayat merangkum nama akun, tanggal pendaftaran, dan status reward.
+- Total saldo yang terkumpul tercatat di kartu ringkasan dan dapat ditarik setelah mencapai batas minimum penarikan.
 
 ## Pertanyaan umum
 
-- **Berapa bonus per teman?** Nominal bonus mengikuti ketentuan program yang berlaku — cek di halaman Referral.
-- **Kapan bonus masuk?** Setelah status teman terverifikasi (biasanya setelah terdaftar dan memenuhi syarat program).
-- **Bisa undang teman yang sudah punya akun?** Tidak — program berlaku untuk pendaftaran baru lewat link/kode kamu.
-- **Kode referral bisa diubah?** Kode dibuat otomatis untuk akunmu; gunakan apa adanya atau hubungi CS jika ada kendala.
+- **Berapa nominal bonus per pendaftaran?** Nilai reward mengikuti ketentuan aktif program referral yang tercantum pada kartu ringkasan dashboard.
+- **Kapan bonus mulai tercatat?** Bonus masuk segera setelah pendaftaran rekanmu selesai dan lolos verifikasi sistem.
+- **Apakah kode berlaku untuk pengguna lama?** Program referral hanya berlaku untuk registrasi akun baru.
+- **Apakah saya bisa mengganti kode referral?** Kode dibuat otomatis secara unik per akun untuk menjaga integritas data sistem.
 
 Lanjut baca: [Misi & Cuan](/artikel/misi-cuan) dan [Keamanan Akun](/artikel/keamanan-akun).

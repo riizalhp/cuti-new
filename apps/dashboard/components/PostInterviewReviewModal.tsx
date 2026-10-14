@@ -28,6 +28,16 @@ import { TrackerDatePicker, fromISODate } from '@/components/ui/TrackerDatePicke
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { ApplicationItem } from './TrackerView';
 import { getDayDiff, parseIndonesianDate, getReminderTemplateText } from '@/lib/trackerReminders';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetBody,
+  SheetFooter,
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 
 interface PostInterviewReviewModalProps {
   isOpen: boolean;
@@ -203,48 +213,39 @@ export const PostInterviewReviewModal: React.FC<PostInterviewReviewModalProps> =
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[10px] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-6">
-        {/* Header */}
-        <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-[10px] bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/20 shrink-0 mt-0.5">
-              <CheckCircle2 className="w-5 h-5" />
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent side="right" className="p-0 flex flex-col justify-between h-full w-full max-w-md sm:max-w-xl overflow-hidden">
+        {/* Header Drawer */}
+        <SheetHeader className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex flex-row items-start justify-between gap-3 text-left">
+          <div className="flex items-start gap-3 min-w-0 pr-8">
+            <div className="size-10 rounded-[10px] bg-amber-700 text-white flex items-center justify-center shadow-md shadow-amber-500/20 shrink-0 mt-0.5">
+              <CheckCircle2 className="size-5" />
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
+                <SheetTitle className="text-base font-extrabold text-slate-900 dark:text-white pr-0">
                   Evaluasi &amp; Hasil Wawancara
-                </h3>
-                <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-800 shrink-0">
+                </SheetTitle>
+                <span className="px-2 py-0.5 rounded-[10px] text-caption font-extrabold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-800 shrink-0">
                   {daysAgoText}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 mt-1 font-medium truncate">
+              <SheetDescription className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium truncate">
                 <span className="font-bold text-slate-900 dark:text-slate-200">{app.company}</span>
                 <span>•</span>
                 <span className="truncate">{app.position}</span>
-              </div>
+              </SheetDescription>
             </div>
           </div>
+        </SheetHeader>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-[8px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
-            title="Tutup"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="p-5 space-y-5 max-h-[75vh] overflow-y-auto">
+        {/* Drawer Body */}
+        <SheetBody className="p-5 space-y-5 flex-1 overflow-y-auto">
           {/* Section 1: 1-Click Status Outcome Picker */}
           <div className="space-y-2.5">
             <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
               <span>Bagaimana sesi wawancara kamu?</span>
-              <span className="text-[10px] font-normal text-slate-500">Pilih salah satu status</span>
+              <span className="text-caption font-normal text-slate-500">Pilih salah satu status</span>
             </label>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -260,16 +261,16 @@ export const PostInterviewReviewModal: React.FC<PostInterviewReviewModalProps> =
               >
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 font-bold text-xs text-emerald-700 dark:text-emerald-300">
-                    <Trophy className="w-3.5 h-3.5 text-emerald-500" />
+                    <Trophy className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
                     <span>Lolos &amp; Dapat Offering!</span>
                   </span>
                   <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                    selectedOutcome === 'offering' ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300 dark:border-slate-700'
+                    selectedOutcome === 'offering' ? 'border-emerald-500 bg-emerald-700 text-white' : 'border-slate-300 dark:border-slate-700'
                   }`}>
                     {selectedOutcome === 'offering' && <Check className="w-2.5 h-2.5" />}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                <p className="text-caption text-slate-600 dark:text-slate-400 leading-snug">
                   Selamat! Pindahkan kartu lamaran ini langsung ke kolom <strong>Offering</strong>.
                 </p>
               </button>
@@ -280,22 +281,22 @@ export const PostInterviewReviewModal: React.FC<PostInterviewReviewModalProps> =
                 onClick={() => setSelectedOutcome(selectedOutcome === 'next_round' ? null : 'next_round')}
                 className={`p-3 rounded-[10px] border text-left transition cursor-pointer flex flex-col justify-between gap-1.5 ${
                   selectedOutcome === 'next_round'
-                    ? 'border-[#1738D1] bg-blue-50 dark:bg-blue-950/60 ring-2 ring-[#1738D1]/20 shadow-xs'
+                    ? 'border-cobalt-500 bg-blue-50 dark:bg-blue-950/60 ring-2 ring-cobalt-500/20 shadow-xs'
                     : 'border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-800 bg-white dark:bg-slate-850'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 font-bold text-xs text-[#1738D1] dark:text-blue-400">
-                    <RotateCcw className="w-3.5 h-3.5 text-[#1738D1]" />
+                  <span className="flex items-center gap-1.5 font-bold text-xs text-cobalt-500 dark:text-blue-400">
+                    <RotateCcw className="w-3.5 h-3.5 text-cobalt-500" />
                     <span>Ada Interview Lanjutan</span>
                   </span>
                   <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                    selectedOutcome === 'next_round' ? 'border-[#1738D1] bg-[#1738D1] text-white' : 'border-slate-300 dark:border-slate-700'
+                    selectedOutcome === 'next_round' ? 'border-cobalt-500 bg-cobalt-500 text-white' : 'border-slate-300 dark:border-slate-700'
                   }`}>
                     {selectedOutcome === 'next_round' && <Check className="w-2.5 h-2.5" />}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                <p className="text-caption text-slate-600 dark:text-slate-400 leading-snug">
                   Lolos ke sesi User, Technical, atau Direksi berikutnya.
                 </p>
               </button>
@@ -312,16 +313,16 @@ export const PostInterviewReviewModal: React.FC<PostInterviewReviewModalProps> =
               >
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 font-bold text-xs text-amber-700 dark:text-amber-300">
-                    <Clock3 className="w-3.5 h-3.5 text-amber-500" />
+                    <Clock3 className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                     <span>Menunggu Kabar HRD</span>
                   </span>
                   <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                    selectedOutcome === 'waiting' ? 'border-amber-500 bg-amber-500 text-white' : 'border-slate-300 dark:border-slate-700'
+                    selectedOutcome === 'waiting' ? 'border-amber-500 bg-amber-700 text-white' : 'border-slate-300 dark:border-slate-700'
                   }`}>
                     {selectedOutcome === 'waiting' && <Check className="w-2.5 h-2.5" />}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                <p className="text-caption text-slate-600 dark:text-slate-400 leading-snug">
                   Tetap di kolom Interview &amp; siapkan follow-up sopan ke recruiter.
                 </p>
               </button>
@@ -338,16 +339,16 @@ export const PostInterviewReviewModal: React.FC<PostInterviewReviewModalProps> =
               >
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 font-bold text-xs text-rose-700 dark:text-rose-300">
-                    <HeartCrack className="w-3.5 h-3.5 text-rose-500" />
+                    <HeartCrack className="w-3.5 h-3.5 text-rose-700 dark:text-rose-400" />
                     <span>Belum Rezeki / Ditolak</span>
                   </span>
                   <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                    selectedOutcome === 'rejected' ? 'border-rose-500 bg-rose-500 text-white' : 'border-slate-300 dark:border-slate-700'
+                    selectedOutcome === 'rejected' ? 'border-rose-500 bg-rose-600 text-white' : 'border-slate-300 dark:border-slate-700'
                   }`}>
                     {selectedOutcome === 'rejected' && <Check className="w-2.5 h-2.5" />}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                <p className="text-caption text-slate-600 dark:text-slate-400 leading-snug">
                   Belum lolos kali ini. Jangan menyerah, jadikan bahan evaluasi lamaran selanjutnya!
                 </p>
               </button>
@@ -357,14 +358,14 @@ export const PostInterviewReviewModal: React.FC<PostInterviewReviewModalProps> =
           {/* Sub-section jika memilih "Ada Interview Lanjutan" */}
           {selectedOutcome === 'next_round' && (
             <div className="p-3.5 rounded-[10px] bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/70 space-y-3 animate-in fade-in duration-200">
-              <div className="flex items-center gap-2 text-xs font-bold text-[#1738D1] dark:text-blue-300">
+              <div className="flex items-center gap-2 text-xs font-bold text-cobalt-500 dark:text-blue-300">
                 <CalendarCheck className="w-4 h-4" />
                 <span>Atur Jadwal Interview Babak Berikutnya:</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="text-caption font-semibold text-slate-700 dark:text-slate-300">
                     Tanggal Wawancara Lanjutan
                   </label>
                   <TrackerDatePicker
@@ -375,7 +376,7 @@ export const PostInterviewReviewModal: React.FC<PostInterviewReviewModalProps> =
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="text-caption font-semibold text-slate-700 dark:text-slate-300">
                     Jam &amp; Zona Waktu
                   </label>
                   <div className="flex items-center gap-2">
@@ -403,15 +404,15 @@ export const PostInterviewReviewModal: React.FC<PostInterviewReviewModalProps> =
 
               {/* Popular time pills */}
               <div className="flex items-center gap-1 overflow-x-auto pt-0.5">
-                <span className="text-[10px] text-slate-500 font-medium shrink-0">Waktu umum:</span>
+                <span className="text-caption text-slate-500 font-medium shrink-0">Waktu umum:</span>
                 {POPULAR_TIMES.map((time) => (
                   <button
                     key={time}
                     type="button"
                     onClick={() => setNextTime(time)}
-                    className={`px-2 py-0.5 rounded text-[10px] font-mono transition cursor-pointer ${
+                    className={`px-2 py-0.5 rounded text-caption font-mono transition cursor-pointer ${
                       nextTime === time
-                        ? 'bg-[#1738D1] text-white font-bold'
+                        ? 'bg-cobalt-500 text-white font-bold'
                         : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100'
                     }`}
                   >
@@ -426,13 +427,13 @@ export const PostInterviewReviewModal: React.FC<PostInterviewReviewModalProps> =
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-orange-500" />
+                <FileText className="w-3.5 h-3.5 text-orange-700 dark:text-orange-400" />
                 <span>Catatan &amp; Evaluasi Wawancara</span>
               </label>
-              <span className="text-[10px] text-slate-400">Arsip belajar pribadi</span>
+              <span className="text-caption text-slate-500 dark:text-slate-400">Arsip belajar pribadi</span>
             </div>
 
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+            <p className="text-caption text-slate-500 dark:text-slate-400 leading-snug">
               Catat pertanyaan yang sempat ditanyakan, jawaban yang perlu diperbaiki, atau kisaran gaji yang dibahas agar jadi bekal berharga untuk interview berikutnya.
             </p>
 
@@ -441,25 +442,25 @@ export const PostInterviewReviewModal: React.FC<PostInterviewReviewModalProps> =
               <button
                 type="button"
                 onClick={() => handleInsertSnippet('Pertanyaan yang Ditanyakan:\n- ')}
-                className="px-2.5 py-1.5 rounded-[8px] text-[11px] font-semibold bg-slate-100/90 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 transition cursor-pointer flex items-center gap-1.5"
+                className="px-2.5 py-1.5 rounded-[8px] text-caption font-semibold bg-slate-100/90 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 transition cursor-pointer flex items-center gap-1.5"
               >
-                <HelpCircle className="w-3.5 h-3.5 text-[#1738D1] dark:text-blue-400 shrink-0" />
+                <HelpCircle className="w-3.5 h-3.5 text-cobalt-500 dark:text-blue-400 shrink-0" />
                 <span>Pertanyaan Wawancara</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleInsertSnippet('Evaluasi & Refleksi Diri:\n- ')}
-                className="px-2.5 py-1.5 rounded-[8px] text-[11px] font-semibold bg-slate-100/90 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 transition cursor-pointer flex items-center gap-1.5"
+                className="px-2.5 py-1.5 rounded-[8px] text-caption font-semibold bg-slate-100/90 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 transition cursor-pointer flex items-center gap-1.5"
               >
-                <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <Lightbulb className="w-3.5 h-3.5 text-amber-700 shrink-0 dark:text-amber-400" />
                 <span>Refleksi Diri</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleInsertSnippet('Pembahasan Gaji & Benefit:\n- ')}
-                className="px-2.5 py-1.5 rounded-[8px] text-[11px] font-semibold bg-slate-100/90 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 transition cursor-pointer flex items-center gap-1.5"
+                className="px-2.5 py-1.5 rounded-[8px] text-caption font-semibold bg-slate-100/90 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 transition cursor-pointer flex items-center gap-1.5"
               >
-                <Banknote className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <Banknote className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
                 <span>Gaji &amp; Benefit</span>
               </button>
             </div>
@@ -486,21 +487,21 @@ export const PostInterviewReviewModal: React.FC<PostInterviewReviewModalProps> =
               className="w-full p-3 flex items-center justify-between text-left hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition cursor-pointer"
             >
               <div className="flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+                <Sparkles className="w-3.5 h-3.5 text-orange-700 dark:text-orange-400" />
                 <span className="font-bold text-xs text-slate-800 dark:text-slate-200">
                   Butuh draf follow-up sopan ke HRD?
                 </span>
               </div>
               {showFollowUpBox ? (
-                <ChevronUp className="w-4 h-4 text-slate-400" />
+                <ChevronUp className="w-4 h-4 text-slate-500 dark:text-slate-400" />
               ) : (
-                <ChevronDown className="w-4 h-4 text-slate-400" />
+                <ChevronDown className="w-4 h-4 text-slate-500 dark:text-slate-400" />
               )}
             </button>
 
             {showFollowUpBox && (
               <div className="p-3 border-t border-slate-200 dark:border-slate-800 space-y-2.5 bg-white dark:bg-slate-900">
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                <p className="text-caption text-slate-500 dark:text-slate-400">
                   Gunakan pesan ini jika sudah beberapa hari atau minggu belum ada kabar:
                 </p>
                 <textarea
@@ -511,13 +512,13 @@ export const PostInterviewReviewModal: React.FC<PostInterviewReviewModalProps> =
                     e.target.style.height = 'auto';
                     e.target.style.height = `${e.target.scrollHeight + 6}px`;
                   }}
-                  className="w-full p-3 rounded-[8px] text-xs font-sans bg-slate-50/90 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 resize-none leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#1738D1]/20 focus:border-[#1738D1] overflow-hidden transition-all select-all block"
+                  className="w-full p-3 rounded-[8px] text-xs font-sans bg-slate-50/90 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 resize-none leading-relaxed focus:outline-none focus:ring-2 focus:ring-cobalt-500/20 focus:border-cobalt-500 overflow-hidden transition-all select-all block"
                 />
                 <div className="flex justify-end">
                   <button
                     type="button"
                     onClick={handleCopyFollowUp}
-                    className="px-3 py-1.5 rounded-[8px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] text-white transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                    className="px-3 py-1.5 rounded-[8px] text-xs font-bold bg-cobalt-500 hover:bg-cobalt-600 text-white transition flex items-center gap-1.5 shadow-xs cursor-pointer"
                   >
                     {isCopiedFollowUp ? (
                       <>
@@ -535,45 +536,49 @@ export const PostInterviewReviewModal: React.FC<PostInterviewReviewModalProps> =
               </div>
             )}
           </div>
-        </div>
+        </SheetBody>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between gap-3">
+        <SheetFooter className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={onClose}
-              className="px-3.5 py-2 rounded-[10px] text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
             >
               Batal
-            </button>
+            </Button>
             {onEditSchedule && (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => {
                   onClose();
                   onEditSchedule(app);
                 }}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-[#1738D1] dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                className="hidden sm:inline-flex text-slate-600 dark:text-slate-300 hover:text-cobalt-500 dark:hover:text-blue-400"
                 title="Buka form untuk melihat atau mengubah jadwal & checklist persiapan interview"
               >
-                <CalendarCheck className="w-3.5 h-3.5" />
+                <CalendarCheck className="size-3.5" />
                 <span>Ubah Jadwal &amp; Persiapan</span>
-              </button>
+              </Button>
             )}
           </div>
 
-          <button
+          <Button
             type="button"
-            disabled={isSaving}
+            variant="primary"
+            size="sm"
+            loading={isSaving}
             onClick={handleSubmit}
-            className="px-5 py-2 rounded-[10px] text-xs font-bold bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white transition shadow-md shadow-orange-500/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
-            <Check className="w-4 h-4" />
-            <span>{isSaving ? 'Menyimpan...' : selectedOutcome ? 'Simpan & Perbarui Status' : 'Simpan Catatan Evaluasi'}</span>
-          </button>
-        </div>
-      </div>
-    </div>
+            <Check className="size-4" />
+            <span>{selectedOutcome ? 'Simpan & Perbarui Status' : 'Simpan Catatan Evaluasi'}</span>
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 };

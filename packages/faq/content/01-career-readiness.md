@@ -1,45 +1,45 @@
 ---
-title: Career Readiness — Ukur Skor Kesiapan Kerjamu
-description: Skor kesiapan kerja dari 4 dimensi strategis (CV ATS, kecocokan peran, administrasi berkas, dan momentum pelamaran), asesmen diagnostik, dan sertifikat Job Ready Certified.
+title: Career Readiness: Ukur Skor Kesiapan Kerja
+description: Parameter kesiapan kerja dari 4 pilar (kualitas CV, kecocokan peran, berkas administrasi, dan konsistensi lamaran), asesmen diagnostik, serta lencana Job Ready.
 category: pengembangan-karier
 order: 1
-updatedAt: 2026-09-17
+updatedAt: 2026-09-26
 keywords: career readiness, kesiapan kerja, skor kesiapan, readiness, job ready, badge, sertifikat kesiapan, asesmen, 4 dimensi, match cv, tracker lamaran
 ---
 
-**Career Readiness** (/readiness) mengukur seberapa siap kamu memasuki dunia kerja, dalam skor 0-100. Skor ini juga tampil di kartu Beranda dan pengingat sidebar dashboard.
+Fitur **Career Readiness** (/readiness) mengukur tingkat kesiapanmu memasuki dunia kerja dalam skala 0 sampai 100. Indikator ini tampil di halaman Beranda dan panel navigasi akun.
 
-## 4 Dimensi Penilaian
+## Empat pilar penilaian
 
-1. **Kualitas Berkas & ATS** — kelengkapan profil dan skor ATS CV-mu agar lolos sistem seleksi HR.
-2. **Riset & Kecocokan Lowongan** — ketajaman target posisi dan relevansi keahlian industri (terhubung dengan fitur [Match CV](/match-cv)).
-3. **Administrasi & Berkas Lamaran** — kesiapan surat pengantar profesional ([Email & Cover Letter](/mailer)), kontak aktif, dan tautan portofolio.
-4. **Momentum Pelamaran & Tracker** — konsistensi melamar dan pemantauan status di [Tracker Lamaran](/tracker).
+1. **Kualitas Berkas & ATS**: kelengkapan profil dan keterbacaan CV oleh sistem pemindai perusahaan.
+2. **Riset & Kecocokan Lowongan**: kesesuaian keahlianmu dengan persyaratan posisi target (terhubung dengan fitur [Match CV](/match-cv)).
+3. **Administrasi Berkas Lamaran**: ketersediaan surat pengantar profesional ([Email & Cover Letter](/mailer)), kontak aktif, dan tautan portofolio pendukung.
+4. **Konsistensi Pelamaran**: keaktifan mengirimkan berkas dan pembaruan berkala di [Tracker Lamaran](/tracker).
 
-Skor dihitung secara transparan dari kondisi data nyata akunmu.
+Perhitungan berjalan otomatis berdasarkan data riil akunmu tanpa penilaian subjektif.
 
-## Cara Memperbarui Skor
+## Langkah memperbarui skor
 
 1. Buka menu **Career Readiness**.
-2. Periksa skor pada tab **4 Dimensi Kesiapan** untuk melihat aspek yang perlu ditingkatkan.
-3. Ikuti **Roadmap Pencapaian** untuk melengkapi langkah yang belum selesai secara bertahap.
-4. Kamu juga dapat mencoba **Asesmen Diagnostik Cepat** (5 pertanyaan reflektif) untuk mengevaluasi strategi pencarian kerjamu.
-5. Skor tersimpan dan otomatis tersinkronisasi di seluruh dashboard.
+2. Masuk ke tab **4 Dimensi Kesiapan** untuk melihat rincian aspek yang masih perlu dilengkapi.
+3. Buka **Roadmap Pencapaian** untuk menyelesaikan langkah rekomendasi secara bertahap.
+4. Kamu juga dapat mengisi **Asesmen Diagnostik Cepat** (5 pertanyaan terstruktur) guna mengevaluasi efektivitas strategimu melamar kerja.
+5. Skor baru akan tersimpan dan otomatis diperbarui di seluruh dashboard.
 
-## Sertifikat & Badge Job Ready
+## Status dan sertifikat Job Ready
 
-- Pengguna dengan skor **≥ 80/100** berhak mendapat status **Job Ready Plus (Sangat Siap Kerja)**.
-- Kamu dapat mencetak **Sertifikat Digital Kesiapan Kerja** atau menyalin badge verifikasi untuk dipasang di LinkedIn.
+- Pengguna dengan perolehan skor **≥ 80** mendapatkan predikat **Job Ready Plus**.
+- Kamu dapat mengunduh **Sertifikat Digital Kesiapan Kerja** atau menyalin kode badge verifikasi untuk profil LinkedIn.
 
-## Menaikkan Skor Kesiapan
+## Cara meningkatkan kesiapan kerja
 
-- **Lengkapi CV** di CV Builder — pastikan kontak, ringkasan, pendidikan, pengalaman, dan minimal 4 keahlian terisi.
-- **Uji kata kunci** di Simulasi Screening dan sesuaikan dengan lowongan target.
-- **Siapkan surat lamaran** profesional di menu Email & Cover Letter sebelum melamar.
-- **Jaga ritme melamar** minimal 3–5 lamaran terfokus per minggu dan catat di Tracker Lamaran.
+- Lengkapi seluruh kolom di CV Builder, terutama riwayat pengalaman kerja dan minimal 4 keahlian inti.
+- Uji kesesuaian kata kunci pada menu Simulasi Screening sebelum mengirimkan berkas.
+- Siapkan draf pengantar lamaran melalui fitur Cover Letter sebelum mendaftar ke portal lowongan.
+- Pertahankan ritme melamar secara konsisten, setidaknya 3 hingga 5 lowongan terfokus setiap minggu.
 
-## Pertanyaan Umum
+## Pertanyaan umum
 
-- **Mengapa skor saya berubah?** Skor mengikuti data CV, penyesuaian lowongan, dan aktivitas pelamaran terbaru secara real-time.
-- **Apakah sertifikat bisa diunduh?** Ya, sertifikat digital resmi dapat langsung dicetak atau disimpan dalam format PDF dari tab Sertifikat Kesiapan.
-- **Berapa skor yang dianggap siap kerja?** Targetkan **≥ 75–80** (Job Ready). Skor di bawah 65 menandakan masih ada berkas dasar atau konsistensi melamar yang perlu dibenahi.
+- **Mengapa skor saya berubah?** Skor diperbarui secara dinamis mengikuti penambahan data CV, keahlian baru, dan aktivitas terbaru di tracker lamaran.
+- **Apakah sertifikat dapat diunduh dalam bentuk berkas?** Ya, sertifikat digital resmi dapat langsung dicetak atau disimpan dalam format PDF melalui tab Sertifikat Kesiapan.
+- **Berapa skor minimal yang dianjurkan?** Targetkan skor minimal **75 sampai 80**. Skor di bawah 65 menandakan berkas dasar atau konsistensi melamar masih perlu ditingkatkan.

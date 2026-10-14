@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="id">
+<!-- Made with Bang Motion skill v1.19.0 (https://github.com/bangtutorial/bang-motion) -->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employr — Product Tour 9:16</title>
+<!--
+  ===== STYLE BRIEF =====
+  Tema/Produk + 3 sifat  : Employr Career OS — Terarah, Muda, Terpercaya
+  Konsep (opener-konsep)  : #5 Perjalanan di dalam UI — kamera terbang di dalam antarmuka raksasa
+  Sidik jari struktur     : fly-through-UI · 6 momen · logo-build → beranda-widget → CV-compose → tracker-kanban → offering-popup → logo-CTA · pembuka: logo partikel merakit · penutup: logo utuh + tagline
+  Palet (dari brand)      : Cobalt #1738D1 (logo) · Ink #101114 (logotype) · Paper #F5F6F2 (turunan: netral hangat) · Lime #C8F55B (aksen sukses) · Periwinkle #C9D0FF (turunan: permukaan kartu)
+  Font display/pendamping : Geist 700/800 (khas produk — konsep klaim→cara→hasil boleh font UI sendiri) + Instrument Serif italic (aksen emosional)
+  Penekanan teks          : tanpa sorotan kata — penekanan dari ukuran shot, jeda, dan objek di samping kata
+  Bahasa latar (1 arah)   : #8 Grid bernapas (skala/opacity 1.0↔1.04, cocok SaaS/dashboard)
+  Tanda tangan gerak      : Kartu UI yang terangkat dari permukaan (translateZ + bayangan melebar) lalu mendarat
+  Gerak latar (§7c)       : #8 Grid bernapas + #2 Gradien Cobalt berpindah pelan
+  Permukaan latar (§7d)   : Gradien radial Cobalt→Ink di horizon bawah + grid titik halus
+  Gaya render objek (§7e) : Flat clean (UI produk apa adanya)
+  Transisi (§4c, ≥2 jenis): #8 Koreografi beririsan (elemen lama keluar sambil baru masuk) + #2 Kartu berputar masuk (rotateY)
+  Momen istimewa          : Detik 14: kartu offering meledak dari kedalaman (rotateY -35°→0 + scale 0.6→1.1→1.0 + glow pulse)
+  =======================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<style>
+:root{
+  --cobalt:#1738D1;--cobalt-deep:#0E1F8A;--cobalt-glow:rgba(23,56,209,.35);
+  --ink:#101114;--ink-mid:#3A3D47;--ink-muted:#6B7080;
+  --paper:#F5F6F2;--card:#FFFFFF;--periwinkle:#C9D0FF;
+  --lime:#C8F55B;--lime-glow:rgba(200,245,91,.4);
+  --emerald:#10B981;--amber:#F59E0B;--rose:#E11D48;
+  --sans:"Geist",-apple-system,BlinkMacSystemFont,sans-serif;
+  --serif:"Instrument Serif",Georgia,serif;
+  --ui:"Inter",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#060709;overflow:hidden;
+  font-family:var(--sans);-webkit-font-smoothing:antialiased}
+
+#stage{position:fixed;left:50%;top:50%;width:1080px;height:1920px;
+  transform:translate(-50%,-50%) scale(1);overflow:hidden;
+  background:var(--ink);border-radius:36px;
+  box-shadow:0 30px 100px rgba(0,0,0,.7)}
+
+/* LATAR: grid titik bernapas + gradien cobalt horizon */
+.dot-grid{position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(201,208,255,.12) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:1}
+.horizon-glow{position:absolute;left:0;right:0;bottom:-200px;height:800px;
+  background:radial-gradient(ellipse 120% 80% at 50% 100%,
+    rgba(23,56,209,.22) 0%,rgba(23,56,209,.08) 40%,transparent 70%);
+  pointer-events:none;z-index:1;filter:blur(40px)}
+.gradient-shift{position:absolute;inset:0;
+  background:radial-gradient(ellipse 90% 70% at 30% 20%,
+    rgba(201,208,255,.06) 0%,transparent 60%);
+  pointer-events:none;z-index:1}
+
+/* KAMERA */
+#cam{position:absolute;inset:0;transform-origin:540px 960px;will-change:transform;z-index:5}
+
+/* DUNIA UI RAKSASA — elemen berserakan di kanvas besar */
+#ui-world{position:absolute;left:0;top:0;width:3200px;height:5400px;
+  transform-origin:0 0}
+
+/* LOGO EMPLOYR */
+.logo-float{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:460px;height:auto;opacity:0;filter:drop-shadow(0 20px 60px var(--cobalt-glow));
+  z-index:10}
+
+/* KLAIM TEKS */
+.claim{position:absolute;font-family:var(--sans);font-weight:700;
+  color:var(--paper);letter-spacing:-.03em;opacity:0;
+  text-shadow:0 4px 30px rgba(0,0,0,.6);z-index:10;
+  white-space:nowrap}
+.claim em{font-family:var(--serif);font-weight:400;font-style:italic;
+  color:var(--lime)}
+
+/* KARTU UI PRODUK — permukaan yang diterbangkan kamera */
+.ui-card{position:absolute;background:var(--card);border:1px solid rgba(16,17,20,.08);
+  border-radius:28px;box-shadow:0 12px 40px rgba(16,17,20,.1);
+  padding:36px;opacity:0;transform-style:preserve-3d;
+  perspective:1200px;z-index:8}
+.ui-card.dark{background:var(--ink);border-color:rgba(255,255,255,.08);
+  color:var(--paper);box-shadow:0 16px 50px rgba(0,0,0,.4)}
+
+/* WIDGET BERANDA */
+.widget-greeting{font-size:32px;font-weight:800;color:var(--ink);margin-bottom:16px}
+.widget-greeting em{font-family:var(--serif);font-style:italic;color:var(--cobalt)}
+.widget-stats{display:flex;gap:16px;margin-top:20px}
+.stat-box{flex:1;background:#F8F9FB;border:1px solid rgba(16,17,20,.06);
+  border-radius:18px;padding:20px;text-align:center}
+.stat-num{font-size:36px;font-weight:800;color:var(--cobalt)}
+.stat-label{font-size:16px;color:var(--ink-muted);font-weight:600;margin-top:4px}
+
+/* CV COMPOSE */
+.cv-section-label{font-size:18px;font-weight:700;color:var(--cobalt);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px}
+.cv-section-label::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--cobalt)}
+.cv-field{background:#F8F9FB;border:1px solid rgba(16,17,20,.06);
+  border-radius:14px;padding:16px 20px;font-size:22px;color:var(--ink);
+  font-weight:600;margin-bottom:12px;font-family:var(--ui)}
+.cv-field.typing{border-color:var(--cobalt);box-shadow:0 0 0 3px rgba(23,56,209,.12)}
+.cv-field .cursor{display:inline-block;width:2px;height:1.1em;background:var(--cobalt);
+  vertical-align:text-bottom;margin-left:2px}
+.cv-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.cv-chip{background:rgba(23,56,209,.08);color:var(--cobalt);
+  padding:8px 18px;border-radius:100px;font-size:18px;font-weight:700;
+  border:1px solid rgba(23,56,209,.15)}
+.ats-meter{width:100%;height:14px;background:rgba(16,17,20,.06);
+  border-radius:100px;overflow:hidden;margin-top:18px}
+.ats-fill{height:100%;width:0;border-radius:100px;
+  background:linear-gradient(90deg,var(--cobalt),var(--lime))}
+.ats-score{font-size:20px;font-weight:800;color:var(--lime);margin-top:8px;text-align:right}
+
+/* TRACKER KANBAN */
+.kanban{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.kanban-col{background:#F8F9FB;border-radius:18px;padding:16px;
+  border:1px solid rgba(16,17,20,.06)}
+.kanban-title{font-size:15px;font-weight:700;color:var(--ink-muted);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;
+  display:flex;align-items:center;justify-content:space-between}
+.kanban-dot{width:8px;height:8px;border-radius:50%}
+.kanban-dot.blue{background:var(--cobalt)}
+.kanban-dot.amber{background:var(--amber)}
+.kanban-dot.green{background:var(--emerald)}
+.job-mini{background:#FFFFFF;border:1px solid rgba(16,17,20,.06);
+  border-radius:14px;padding:14px;margin-bottom:10px;
+  box-shadow:0 2px 8px rgba(16,17,20,.04)}
+.job-mini:last-child{margin-bottom:0}
+.job-mini-title{font-size:18px;font-weight:800;color:var(--ink)}
+.job-mini-co{font-size:14px;color:var(--ink-muted);font-weight:500;margin-top:2px}
+
+/* OFFERING CARD */
+.offering-inner{text-align:center}
+.offering-icon{width:80px;height:80px;border-radius:50%;
+  background:var(--lime);margin:0 auto 24px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:40px;font-weight:900;color:var(--ink);
+  box-shadow:0 8px 30px var(--lime-glow)}
+.offering-title{font-size:42px;font-weight:800;color:var(--paper);
+  letter-spacing:-.02em;line-height:1.15;margin-bottom:12px}
+.offering-title em{font-family:var(--serif);font-style:italic;color:var(--lime)}
+.offering-company{font-size:22px;color:rgba(255,255,255,.7);font-weight:500}
+
+/* MISI PILL */
+.misi-float{position:absolute;right:40px;bottom:40px;
+  background:rgba(200,245,91,.15);backdrop-filter:blur(12px);
+  border:1px solid rgba(200,245,91,.3);padding:12px 22px;border-radius:100px;
+  display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;
+  color:var(--lime);opacity:0}
+
+/* OUTRO */
+.outro{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;z-index:30;opacity:0;
+  padding:80px 60px;text-align:center}
+.outro-logo{width:380px;height:auto;margin-bottom:48px;
+  filter:drop-shadow(0 16px 48px var(--cobalt-glow));opacity:0}
+.outro-tagline{font-size:48px;font-weight:700;color:var(--paper);
+  letter-spacing:-.03em;line-height:1.2;margin-bottom:16px;opacity:0}
+.outro-tagline em{font-family:var(--serif);font-style:italic;color:var(--lime)}
+.outro-sub{font-size:26px;color:var(--ink-muted);font-weight:500;
+  margin-bottom:48px;opacity:0}
+.outro-cta{background:var(--cobalt);color:#fff;font-size:30px;font-weight:700;
+  padding:22px 56px;border-radius:100px;border:none;
+  box-shadow:0 12px 40px var(--cobalt-glow);letter-spacing:-.01em;opacity:0}
+
+/* KONFETI DETERMINISTIK */
+#confetti{position:absolute;inset:0;pointer-events:none;z-index:20}
+.conf{position:absolute;border-radius:3px;opacity:0}
+
+/* DEBUG */
+#dbg{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);
+  display:none;align-items:center;gap:14px;padding:12px 22px;
+  border-radius:100px;background:rgba(16,17,20,.92);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.12);font:14px/1 var(--ui);color:#fff;z-index:100}
+#dbg.on{display:flex}
+#dbg button{background:#252836;color:#fff;border:none;padding:7px 16px;
+  border-radius:100px;font-weight:600;cursor:pointer;font:inherit}
+#dbg input[type=range]{width:280px;accent-color:var(--lime)}
+#dbg .t{font-variant-numeric:tabular-nums;font-weight:700;color:var(--lime);min-width:56px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="dot-grid" id="dotgrid"></div>
+  <div class="horizon-glow"></div>
+  <div class="gradient-shift" id="gradshift"></div>
+
+  <div id="cam">
+    <!-- LOGO CENTER — pembuka -->
+    <img class="logo-float" id="logo-open" alt="Employr"
+      src="data:image/webp;base64,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">
+
+    <!-- KLAIM 1: Hook -->
+    <div class="claim" id="cl1" style="left:540px;top:880px;font-size:72px;transform:translate(-50%,-50%)">
+      Satu app, semua <em>kariermu</em>
+    </div>
+
+    <!-- UI WORLD -->
+    <div id="ui-world">
+      <!-- KARTU 1: BERANDA -->
+      <div class="ui-card" id="card-home" style="left:120px;top:220px;width:840px">
+        <div class="widget-greeting">Hai, <em>Rizky</em> 👋</div>
+        <p style="font-size:20px;color:var(--ink-muted);font-weight:500;margin-bottom:20px">
+          Yuk lanjutkan perjalanan kariermu hari ini
+        </p>
+        <div class="widget-stats">
+          <div class="stat-box">
+            <div class="stat-num">3</div>
+            <div class="stat-label">CV Dibuat</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num">12</div>
+            <div class="stat-label">Lamaran</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num" style="color:var(--emerald)">2</div>
+            <div class="stat-label">Interview</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KLAIM 2 -->
+      <div class="claim" id="cl2" style="left:540px;top:680px;font-size:54px;transform:translateX(-50%)">
+        CV standar industri, siap dalam <em>hitungan menit</em>
+      </div>
+
+      <!-- KARTU 2: CV BUILDER -->
+      <div class="ui-card" id="card-cv" style="left:80px;top:780px;width:920px">
+        <div class="cv-section-label">Pengalaman</div>
+        <div class="cv-field typing" id="cv-typing">
+          <span id="cv-text"></span><span class="cursor" id="cv-cursor"></span>
+        </div>
+        <div class="cv-section-label" style="margin-top:24px">Keahlian</div>
+        <div class="cv-chips" id="cv-chips">
+          <div class="cv-chip">React.js</div>
+          <div class="cv-chip">TypeScript</div>
+          <div class="cv-chip">Next.js</div>
+          <div class="cv-chip">Tailwind</div>
+        </div>
+        <div class="ats-meter"><div class="ats-fill" id="ats-fill"></div></div>
+        <div class="ats-score" id="ats-score">0%</div>
+      </div>
+
+      <!-- KLAIM 3 -->
+      <div class="claim" id="cl3" style="left:540px;top:1420px;font-size:54px;transform:translateX(-50%)">
+        Pantau semua lamaran, <em>tanpa tercecer</em>
+      </div>
+
+      <!-- KARTU 3: TRACKER KANBAN -->
+      <div class="ui-card" id="card-tracker" style="left:40px;top:1520px;width:1000px">
+        <div class="kanban">
+          <div class="kanban-col">
+            <div class="kanban-title"><span>Terkirim</span><div class="kanban-dot blue"></div></div>
+            <div class="job-mini"><div class="job-mini-title">Frontend Dev</div><div class="job-mini-co">PT Teknologi</div></div>
+            <div class="job-mini"><div class="job-mini-title">UI Designer</div><div class="job-mini-co">Studio Digital</div></div>
+          </div>
+          <div class="kanban-col">
+            <div class="kanban-title"><span>Interview</span><div class="kanban-dot amber"></div></div>
+            <div class="job-mini" id="job-fly"><div class="job-mini-title">Fullstack</div><div class="job-mini-co">Fintech ID</div></div>
+          </div>
+          <div class="kanban-col">
+            <div class="kanban-title"><span>Offering</span><div class="kanban-dot green"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KARTU 4: OFFERING (MOMEN ISTIMEWA) -->
+      <div class="ui-card dark" id="card-offer" style="left:160px;top:2200px;width:760px;
+        background:linear-gradient(135deg,#101114 0%,#1738D1 100%);
+        box-shadow:0 24px 70px rgba(23,56,209,.4);border-radius:36px;padding:48px">
+        <div class="offering-inner">
+          <div class="offering-icon">✓</div>
+          <div class="offering-title">Selamat!<br>Kamu <em>Diterima</em></div>
+          <div class="offering-company">PT Fintech Indonesia — Fullstack Engineer</div>
+        </div>
+        <div class="misi-float" id="misi-pill">
+          <span style="font-size:16px">🪙</span>
+          <span>+Rp50.000 Cuan Misi</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KONFETI -->
+  <div id="confetti"></div>
+
+  <!-- OUTRO -->
+  <div class="outro" id="outro">
+    <img class="outro-logo" id="outro-logo" alt="Employr"
+      src="data:image/webp;base64,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">
+    <div class="outro-tagline" id="outro-tag">Langkah awal <em>kariermu</em></div>
+    <div class="outro-sub" id="outro-sub">Sekali bayar · Milikmu selamanya</div>
+    <button class="outro-cta" id="outro-cta">Mulai sekarang</button>
+  </div>
+</div>
+
+<div id="dbg">
+  <button id="bp">Jeda</button><button id="br">Ulang</button>
+  <input type="range" id="scrub" min="0" max="2000" value="0">
+  <span class="t" id="clk">00.00</span>
+</div>
+
+<script>
+const DUR=20;
+const W=1080,H=1920;
+
+/* RESIZE */
+const stage=document.getElementById("stage");
+function fit(){const s=Math.min(innerWidth/W,innerHeight/H)*.95;
+  stage.style.transform=`translate(-50%,-50%) scale(${s})`;}
+addEventListener("resize",fit);fit();
+
+/* KONFETI DETERMINISTIK */
+const confBox=document.getElementById("confetti");
+const confCols=["#C8F55B","#1738D1","#10B981","#F97316","#C9D0FF","#FFFFFF"];
+const confs=[];
+for(let i=0;i<32;i++){
+  const d=document.createElement("div");d.className="conf";
+  const w=6+((i*7)%10),h=w*(1+((i*3)%3)*.5);
+  d.style.width=w+"px";d.style.height=h+"px";
+  d.style.background=confCols[i%confCols.length];
+  d.style.borderRadius=((i%3===0)?"50%":"3px");
+  const ang=(i/32)*Math.PI*2;
+  d.dataset.dx=Math.cos(ang)*(140+((i*31)%200));
+  d.dataset.dy=Math.sin(ang)*(120+((i*23)%180))-100;
+  d.dataset.rot=(i*47)%360;
+  confBox.appendChild(d);confs.push(d);
+}
+
+/* KETIKAN DETERMINISTIK */
+const cvText=document.getElementById("cv-text");
+const cvCursor=document.getElementById("cv-cursor");
+const typeStr="Intern Frontend Developer di PT Teknologi Bangsa";
+function setTyping(progress){
+  const n=Math.min(Math.floor(progress*typeStr.length),typeStr.length);
+  cvText.textContent=typeStr.slice(0,n);
+  cvCursor.style.opacity=(Math.sin(progress*20)>0)?"1":"0";
+}
+
+/* GSAP TIMELINE */
+const cam=document.getElementById("cam");
+const tl=gsap.timeline({paused:false,repeat:-1,defaults:{ease:"power3.out"}});
+
+/* elements */
+const logoOpen=document.getElementById("logo-open");
+const cl1=document.getElementById("cl1");
+const cl2=document.getElementById("cl2");
+const cl3=document.getElementById("cl3");
+const cardHome=document.getElementById("card-home");
+const cardCv=document.getElementById("card-cv");
+const cardTracker=document.getElementById("card-tracker");
+const cardOffer=document.getElementById("card-offer");
+const atsFill=document.getElementById("ats-fill");
+const atsScore=document.getElementById("ats-score");
+const jobFly=document.getElementById("job-fly");
+const misiPill=document.getElementById("misi-pill");
+const outro=document.getElementById("outro");
+const outroLogo=document.getElementById("outro-logo");
+const outroTag=document.getElementById("outro-tag");
+const outroSub=document.getElementById("outro-sub");
+const outroCta=document.getElementById("outro-cta");
+const dotgrid=document.getElementById("dotgrid");
+const gradshift=document.getElementById("gradshift");
+
+/* KAMERA BERNAPAS: grid + gradien bergeser */
+tl.to(dotgrid,{backgroundPosition:"20px 20px",duration:DUR,ease:"none",repeat:0},0);
+tl.to(gradshift,{backgroundPosition:"60% 80%",duration:DUR,ease:"sine.inOut"},0);
+
+/* === DETIK 0–3.5: LOGO BUILD + HOOK === */
+tl.set(cam,{scale:1,x:0,y:0},0)
+  .set([cl1,cl2,cl3],{opacity:0},0)
+  .set([cardHome,cardCv,cardTracker,cardOffer],{opacity:0},0)
+  .set(outro,{opacity:0},0)
+  .set(logoOpen,{opacity:0,scale:.5,rotation:-8},0)
+
+  /* Logo assembles */
+  .to(logoOpen,{opacity:1,scale:1,rotation:0,duration:1.2,ease:"back.out(1.6)"},0.3)
+  /* Pulse glow */
+  .to(logoOpen,{filter:"drop-shadow(0 20px 80px rgba(23,56,209,.6))",duration:.6,yoyo:true,repeat:1},1.0)
+  /* Klaim hook fades in below logo */
+  .to(cl1,{opacity:1,y:0,duration:.8},1.4)
+  .from(cl1,{y:40,duration:.8,immediateRender:false},1.4)
+
+  /* Logo + klaim keluar — kamera mulai terbang */
+  .to(logoOpen,{opacity:0,scale:1.3,duration:.6,ease:"power2.in"},3.0)
+  .to(cl1,{opacity:0,y:-30,duration:.5,ease:"power2.in"},3.0)
+
+/* === DETIK 3.5–6.5: BERANDA WIDGET → KAMERA TERBANG KE CV === */
+  /* Kartu beranda muncul dari bawah */
+  .to(cardHome,{opacity:1,duration:.01},3.4)
+  .from(cardHome,{y:80,rotateX:-8,duration:1.0,ease:"back.out(1.4)",immediateRender:false},3.4)
+  /* Kamera pan ke beranda (zoom sedikit ke widget stats) */
+  .to(cam,{y:-220,scale:1.05,duration:1.5,ease:"power2.inOut"},3.5)
+
+  /* Klaim CV muncul */
+  .to(cl2,{opacity:1,duration:.01},5.0)
+  .from(cl2,{y:30,duration:.7,immediateRender:false},5.0)
+
+  /* Kamera terus turun — beranda menjauh, CV mendekat */
+  .to(cardHome,{opacity:.3,duration:.8,ease:"power2.in"},5.5)
+  .to(cam,{y:-780,scale:1.08,duration:1.6,ease:"power2.inOut"},5.5)
+  .to(cl2,{opacity:0,y:-20,duration:.4,ease:"power2.in"},6.0)
+
+/* === DETIK 6.5–10.5: CV BUILDER — KETIKAN + ATS METER === */
+  .to(cardCv,{opacity:1,duration:.01},6.3)
+  .from(cardCv,{y:60,rotateX:-6,duration:1.0,ease:"back.out(1.2)",immediateRender:false},6.3)
+  /* Kamera zoom ke CV card (medium close-up) */
+  .to(cam,{y:-800,scale:1.15,duration:1.2,ease:"power2.inOut"},6.8)
+
+  /* Typing animation (deterministik) */
+  .fromTo({p:0},{p:1,duration:2.5,ease:"power1.inOut",
+    onUpdate:function(){setTyping(this.targets()[0].p);}},7.0)
+
+  /* ATS meter fills */
+  .to(atsFill,{width:"92%",duration:2.0,ease:"power2.out"},8.0)
+  .to({v:0},{v:92,duration:2.0,ease:"power2.out",
+    onUpdate:function(){atsScore.textContent=Math.round(this.targets()[0].v)+"%";}},8.0)
+  /* ATS score pulse */
+  .to(atsScore,{scale:1.2,duration:.25,yoyo:true,repeat:1,ease:"power1.inOut"},9.8)
+
+/* === DETIK 10.5–14: TRACKER KANBAN + JOB CARD TERBANG === */
+  .to(cl3,{opacity:1,duration:.01},10.2)
+  .from(cl3,{y:30,duration:.7,immediateRender:false},10.2)
+  /* Kamera mundur sedikit (wide) lalu turun ke tracker */
+  .to(cam,{y:-1520,scale:1.04,duration:1.8,ease:"power2.inOut"},10.5)
+  .to(cl3,{opacity:0,y:-20,duration:.4,ease:"power2.in"},10.8)
+  .to(cardCv,{opacity:.2,duration:.8},10.8)
+
+  .to(cardTracker,{opacity:1,duration:.01},10.8)
+  .from(cardTracker,{y:60,rotateX:-5,duration:1.0,ease:"back.out(1.2)",immediateRender:false},10.8)
+  /* Kamera zoom ke tracker (close-up) */
+  .to(cam,{y:-1560,scale:1.12,duration:1.0,ease:"power2.inOut"},11.5)
+
+  /* Job card terbang dari Interview ke Offering */
+  .to(jobFly,{scale:1.1,boxShadow:"0 16px 40px rgba(23,56,209,.3)",duration:.3},12.0)
+  .to(jobFly,{x:320,duration:1.0,ease:"back.out(1.5)"},12.3)
+  .to(jobFly,{scale:1,boxShadow:"0 2px 8px rgba(16,17,20,.04)",duration:.3},13.1)
+
+/* === DETIK 14–17: MOMEN ISTIMEWA — OFFERING CARD MELEDAK DARI KEDALAMAN === */
+  .to(cardTracker,{opacity:.15,duration:.6},13.6)
+  .to(cam,{y:-2200,scale:1.06,duration:1.4,ease:"power3.inOut"},13.6)
+
+  /* Offering masuk berputar dari kedalaman — tanda tangan gerak */
+  .to(cardOffer,{opacity:1,duration:.01},13.8)
+  .from(cardOffer,{rotateY:-35,scale:.6,x:200,duration:1.2,
+    ease:"back.out(1.4)",immediateRender:false},13.8)
+
+  /* Glow pulse pada offering */
+  .to(cardOffer,{boxShadow:"0 32px 100px rgba(23,56,209,.6)",duration:.5,
+    yoyo:true,repeat:1,ease:"power1.inOut"},14.6)
+
+  /* Konfeti deterministic burst */
+  .call(()=>{
+    confs.forEach(c=>{
+      gsap.set(c,{left:540,top:1000,x:0,y:0,opacity:1,scale:1,rotation:0});
+      gsap.to(c,{x:c.dataset.dx,y:c.dataset.dy,opacity:0,scale:.3,
+        rotation:c.dataset.rot,duration:1.6,ease:"power2.out"});
+    });
+  },null,14.8)
+
+  /* Misi cuan pop */
+  .to(misiPill,{opacity:1,duration:.01},15.2)
+  .from(misiPill,{scale:.6,y:20,duration:.5,ease:"back.out(2.5)",immediateRender:false},15.2)
+
+/* === DETIK 17–20: OUTRO — LOGO UTUH + TAGLINE + CTA === */
+  .to(cam,{scale:.9,opacity:.15,duration:1.0,ease:"power2.inOut"},17.0)
+  .to(outro,{opacity:1,duration:.8,ease:"power2.out"},17.2)
+  .to(outroLogo,{opacity:1,duration:.6},17.4)
+  .from(outroLogo,{scale:.6,rotation:-6,duration:.8,ease:"back.out(1.6)",immediateRender:false},17.4)
+  .to(outroTag,{opacity:1,duration:.5},17.8)
+  .from(outroTag,{y:20,duration:.5,immediateRender:false},17.8)
+  .to(outroSub,{opacity:1,duration:.4},18.1)
+  .from(outroSub,{y:15,duration:.4,immediateRender:false},18.1)
+  .to(outroCta,{opacity:1,duration:.5,ease:"back.out(2)"},18.4)
+  .from(outroCta,{scale:.8,duration:.5,immediateRender:false},18.4)
+  /* Hold */
+  .to({},{ duration:1.4},18.6);
+
+/* DEBUG */
+const dbg=document.getElementById("dbg");
+const scrub=document.getElementById("scrub");
+const clk=document.getElementById("clk");
+const bp=document.getElementById("bp");
+const br=document.getElementById("br");
+
+if(new URLSearchParams(location.search).get("debug")==="1") dbg.classList.add("on");
+
+tl.eventCallback("onUpdate",()=>{
+  const t=tl.time();
+  scrub.value=String(t/DUR*2000);
+  clk.textContent=t.toFixed(2);
+});
+scrub.addEventListener("input",()=>{tl.pause();tl.time(scrub.value/2000*DUR);bp.textContent="Putar";});
+bp.onclick=()=>{if(tl.paused()){tl.play();bp.textContent="Jeda";}else{tl.pause();bp.textContent="Putar";}};
+br.onclick=()=>{tl.restart();bp.textContent="Jeda";};
+addEventListener("keydown",e=>{
+  if(e.code==="Space"){e.preventDefault();bp.click();}
+  if(e.key==="r"||e.key==="R"){tl.restart();bp.textContent="Jeda";}
+});
+</script>
+</body>
+</html>

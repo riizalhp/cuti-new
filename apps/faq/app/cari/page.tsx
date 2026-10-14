@@ -49,7 +49,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+    <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-8 space-y-8">
       <div className="space-y-3">
         <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
           <Search className="w-5 h-5 text-cobalt-600 dark:text-blue-300" />
@@ -77,7 +77,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
       )}
 
       {query && hits.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-5">
           {hits.map((hit) => (
             <div key={hit.article.slug} className="flex flex-col">
               <ArticleCard article={hit.article} />

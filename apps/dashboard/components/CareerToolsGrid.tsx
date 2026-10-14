@@ -6,7 +6,6 @@ import {
   FileText,
   MessageSquare,
   Mail,
-  Mic,
   Sparkles,
   ArrowRight,
   X,
@@ -16,6 +15,13 @@ import {
   Zap,
   Linkedin,
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 export const CareerToolsGrid: React.FC = () => {
   const [activeTool, setActiveTool] = useState<string | null>(null);
@@ -38,7 +44,7 @@ export const CareerToolsGrid: React.FC = () => {
       name: 'Cover Letter Builder',
       desc: 'Buat surat lamaran kerja profesional terstruktur dan rapi.',
       icon: FileText,
-      color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/80 dark:text-emerald-400',
+      color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400',
       badge: 'Otomatis',
     },
     {
@@ -46,7 +52,7 @@ export const CareerToolsGrid: React.FC = () => {
       name: 'WA Builder',
       desc: 'Draf pesan WhatsApp sopan & profesional untuk follow-up HR.',
       icon: MessageSquare,
-      color: 'bg-teal-50 text-teal-600 dark:bg-teal-950/80 dark:text-teal-400',
+      color: 'bg-teal-50 text-teal-700 dark:bg-teal-950/80 dark:text-teal-400',
       badge: 'Pesan Instan',
     },
     {
@@ -54,16 +60,8 @@ export const CareerToolsGrid: React.FC = () => {
       name: 'Email Builder',
       desc: 'Format email lamaran lengkap subject, isi & lampiran rapi.',
       icon: Mail,
-      color: 'bg-orange-50 text-orange-600 dark:bg-orange-950/80 dark:text-orange-400',
+      color: 'bg-orange-50 text-orange-700 dark:bg-orange-950/80 dark:text-orange-400',
       badge: 'Standard HR',
-    },
-    {
-      id: 'interview-guide',
-      name: 'Interview Guide',
-      desc: 'Simulasi & kisi-kisi jawaban pertanyaan wawancara tersering.',
-      icon: Mic,
-      color: 'bg-amber-50 text-amber-600 dark:bg-amber-950/80 dark:text-amber-400',
-      badge: 'Simulator Wawancara',
     },
     {
       id: 'linkedin-analyzer',
@@ -144,7 +142,7 @@ export const CareerToolsGrid: React.FC = () => {
           </p>
         </div>
         <span className="px-3 py-1 rounded-[10px] text-xs font-black bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 backdrop-blur-md flex items-center gap-1.5">
-          <Zap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          <Zap className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
           6 Fitur Siap Pakai
         </span>
       </div>
@@ -163,18 +161,18 @@ export const CareerToolsGrid: React.FC = () => {
                   <div className={`p-2.5 rounded-[10px] ${t.color} backdrop-blur-sm shadow-xs`}>
                     <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-[10px] font-extrabold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-[10px] border border-slate-200 dark:border-slate-700">
+                  <span className="text-caption font-extrabold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-[10px] border border-slate-200 dark:border-slate-700">
                     {t.badge}
                   </span>
                 </div>
                 <h4 className="font-extrabold text-xs text-slate-900 dark:text-white mb-1 group-hover:text-orange-500 dark:group-hover:text-orange-400 transition">
                   {t.name}
                 </h4>
-                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                <p className="text-caption text-slate-600 dark:text-slate-400 leading-snug">
                   {t.desc}
                 </p>
               </div>
-              <div className="mt-4 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] font-bold text-orange-600 dark:text-orange-400">
+              <div className="mt-4 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-caption font-bold text-orange-700 dark:text-orange-400">
                 <span>Gunakan Tool</span>
                 <span className="w-5 h-5 rounded-full bg-orange-50 dark:bg-orange-950/80 flex items-center justify-center group-hover:scale-110 transition">
                   <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition" />
@@ -186,92 +184,92 @@ export const CareerToolsGrid: React.FC = () => {
       </div>
 
       {/* Interactive Tool Modal */}
-      {activeTool && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="glass-card border border-white/30 dark:border-white/10 shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden rounded-[10px] bg-white/95 dark:bg-slate-900/95">
-            {/* Modal Header */}
-            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="p-2 rounded-[10px] bg-[#1738D1]/20 text-orange-600 dark:text-orange-400">
-                  <Sparkles className="w-5 h-5" />
-                </span>
-                <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                  {tools.find((t) => t.id === activeTool)?.name}
-                </h3>
-              </div>
-              <button
-                onClick={() => setActiveTool(null)}
-                className="p-2 rounded-[10px] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-6 space-y-4 overflow-y-auto flex-1">
-              <div>
-                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-2">
-                  Masukkan Informasi / Deskripsi Lowongan:
-                </label>
-                <textarea
-                  rows={4}
-                  value={inputVal}
-                  onChange={(e) => setInputVal(e.target.value)}
-                  placeholder="Contoh: Lowongan Admin Penjualan di PT Maju Bersama, kualifikasi: Menguasai Excel, komunikasi baik, lokasi Jakarta Pusat..."
-                  className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-[10px] p-3.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1738D1] resize-none"
-                ></textarea>
-              </div>
-
-              <button
-                onClick={handleGenerateTool}
-                disabled={loading || !inputVal.trim()}
-                className="w-full py-3 px-4 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white text-xs font-bold shadow-md shadow-[#1738D1]/20 flex items-center justify-center gap-2 disabled:opacity-50 transition cursor-pointer border-0"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Sedang Menyusun Draf...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    <span>Siapkan Draf Otomatis</span>
-                  </>
-                )}
-              </button>
-
-              {outputVal && (
-                <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                      Hasil Rekomendasi:
-                    </span>
-                    <button
-                      onClick={handleCopy}
-                      className="flex items-center gap-1.5 text-xs text-orange-600 dark:text-orange-400 font-bold hover:underline cursor-pointer"
-                    >
-                      {copied ? (
-                        <>
-                          <Check className="w-3.5 h-3.5" />
-                          <span>Tersalin!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5" />
-                          <span>Salin Hasil</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed">
-                    {outputVal}
-                  </div>
-                </div>
-              )}
-            </div>
+      <Dialog
+        open={Boolean(activeTool)}
+        onOpenChange={(open) => {
+          if (!open) setActiveTool(null);
+        }}
+      >
+        <DialogContent size="lg" className="p-0 overflow-hidden max-h-[90vh] flex flex-col">
+          {/* Modal Header */}
+          <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <DialogHeader className="flex flex-row items-center gap-2.5 space-y-0 text-left">
+              <span className="p-2 rounded-[10px] bg-cobalt-500/20 text-orange-600 dark:text-orange-400">
+                <Sparkles className="w-5 h-5" />
+              </span>
+              <DialogTitle className="font-extrabold text-base text-slate-900 dark:text-white">
+                {tools.find((t) => t.id === activeTool)?.name}
+              </DialogTitle>
+            </DialogHeader>
           </div>
-        </div>
-      )}
+
+          {/* Modal Content */}
+          <div className="p-6 space-y-4 overflow-y-auto flex-1">
+            <div>
+              <label htmlFor="tool-input-desc" className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-2">
+                Masukkan Informasi / Deskripsi Lowongan:
+              </label>
+              <textarea
+                id="tool-input-desc"
+                rows={4}
+                value={inputVal}
+                onChange={(e) => setInputVal(e.target.value)}
+                placeholder="Contoh: Lowongan Admin Penjualan di PT Maju Bersama, kualifikasi: Menguasai Excel, komunikasi baik, lokasi Jakarta Pusat..."
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-[10px] p-3.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt-500 resize-none"
+              />
+            </div>
+
+            <Button
+              onClick={handleGenerateTool}
+              disabled={loading || !inputVal.trim()}
+              className="w-full py-3"
+              variant="primary"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Sedang Menyusun Draf...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  <span>Siapkan Draf Otomatis</span>
+                </>
+              )}
+            </Button>
+
+            {outputVal && (
+              <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                    Hasil Rekomendasi:
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="flex items-center gap-1.5 text-xs text-orange-700 dark:text-orange-400 font-bold hover:underline cursor-pointer"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Tersalin!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Salin Hasil</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed">
+                  {outputVal}
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

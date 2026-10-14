@@ -108,7 +108,7 @@ export const AuthReviewsCarousel: React.FC<AuthReviewsCarouselProps> = ({
               {/* Quote section */}
               <blockquote className="relative m-0 p-0">
                 <span
-                  className="absolute -top-3 -left-0.5 font-sans font-bold text-4xl leading-none text-[#1738D1]/20 select-none pointer-events-none"
+                  className="absolute -top-3 -left-0.5 font-sans font-bold text-4xl leading-none text-cobalt-500/20 select-none pointer-events-none"
                   aria-hidden="true"
                 >
                   “
@@ -121,14 +121,14 @@ export const AuthReviewsCarousel: React.FC<AuthReviewsCarouselProps> = ({
               {/* Card footer */}
               <figcaption className="mt-2.5 pt-2.5 border-t border-slate-200/80 flex items-center justify-between gap-2.5">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-full bg-[#1738D1] text-white font-bold text-[10px] flex items-center justify-center shrink-0">
+                  <div className="w-7 h-7 rounded-full bg-cobalt-500 text-white font-bold text-caption flex items-center justify-center shrink-0">
                     {review.initials}
                   </div>
                   <div className="flex flex-col gap-0.5 min-w-0">
                     <span className="text-xs font-bold text-[#101010] tracking-[-0.02em] leading-tight truncate">
                       {review.author}
                     </span>
-                    <span className="text-[10px] font-medium text-[#706f6a] leading-tight truncate">
+                    <span className="text-caption font-medium text-[#706f6a] leading-tight truncate">
                       {review.title}
                     </span>
                   </div>

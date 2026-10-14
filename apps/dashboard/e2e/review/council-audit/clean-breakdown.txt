@@ -1,0 +1,648 @@
+
+======================================================
+PAGE: [Masuk Akun] (/login)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\login.png
+Total UI copy panjang: 3
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: body]
+    Jumlah Kalimat: 4 | Karakter: 214
+    Konten: "Masuk ke Akun Kelola CV, lamaran kerja, dan pantau progres kariermu. Email * Kata Sandi * Ingat saya Lupa kata sandi? Masuk Sekarang atau Lanjutkan dengan Google Belum punya akun? Daftar sekarang © 2026 Employr"
+
+  • #2 [Tag: <div> | Role: body]
+    Jumlah Kalimat: 2 | Karakter: 166
+    Konten: "Semua urusan kariermu, siap di satu ruang kerja. Bikin CV lolos ATS, cocokan keahlian dengan kriteria lowongan, dan pantau setiap tahapan wawancara secara real-time."
+
+  • #3 [Tag: <div> | Role: body]
+    Jumlah Kalimat: 4 | Karakter: 541
+    Konten: "“ “Employr bikin proses bikin CV dan tracking lamaran jadi jauh lebih cepat dan terstruktur. Diterima kerja dalam 3 minggu!” RP Rian Pratama Software Engineer di Tech Company “ “Fitur pelacak lamaran dan tips penyesuaian CV sangat membantu. Semua tahapan teratur rapi sampai dapat offering letter!” SR Siti Rahmadani Vocational Accounting Graduate · Surabaya “ “Bisa simpan beberapa versi CV tanpa repot copy-paste manual. Sangat praktis dan langsung lolos sortir awal!” DA Dimas Arya Nugraha Final-Year Management Student · Yogyakarta"
+
+
+======================================================
+PAGE: [Lupa Password] (/forgot-password)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\forgot-password.png
+Total UI copy panjang: 1
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: body]
+    Jumlah Kalimat: 2 | Karakter: 160
+    Konten: "Lupa Kata Sandi Masukkan alamat email akun kamu untuk menerima tautan pengaturan ulang kata sandi. Email Terdaftar Kirim Tautan Reset Kembali ke Halaman Masuk"
+
+
+======================================================
+PAGE: [Reset Password] (/reset-password?token=test_token_audit)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\reset-password.png
+Total UI copy panjang: 3
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: body]
+    Jumlah Kalimat: 4 | Karakter: 273
+    Konten: "Atur Kata Sandi Baru Buat kata sandi baru untuk mengamankan akun Employr kamu. Tautan pengaturan ulang kata sandi tidak lengkap atau tautan yang kamu buka salah. Silakan ajukan tautan baru melalui halaman lupa kata sandi. Minta Tautan Reset Baru Kembali ke Halaman Masuk"
+
+  • #2 [Tag: <div> | Role: body]
+    Jumlah Kalimat: 3 | Karakter: 167
+    Konten: "Tautan pengaturan ulang kata sandi tidak lengkap atau tautan yang kamu buka salah. Silakan ajukan tautan baru melalui halaman lupa kata sandi. Minta Tautan Reset Baru"
+
+  • #3 [Tag: <div> | Role: body]
+    Jumlah Kalimat: 2 | Karakter: 142
+    Konten: "Tautan pengaturan ulang kata sandi tidak lengkap atau tautan yang kamu buka salah. Silakan ajukan tautan baru melalui halaman lupa kata sandi."
+
+
+======================================================
+PAGE: [Onboarding] (/onboarding)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\onboarding.png
+Total UI copy panjang: 3
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: onboarding-step]
+    Jumlah Kalimat: 3 | Karakter: 318
+    Konten: "KETENTUAN LAYANAN Selamat datang di Sebelum mulai, harap baca dan setujui ketentuan layanan kami. Saya menyetujui seluruh ketentuan layanan dan kebijakan privasi Employr untuk rekomendasi lowongan kerja & layanan pembuatan CV. Syarat & Ketentuan ↗ • Kebijakan Privasi ↗ Mulai Sekarang Data kamu aman bersama Employr"
+
+  • #2 [Tag: <div> | Role: onboarding-step]
+    Jumlah Kalimat: 3 | Karakter: 268
+    Konten: "Selamat datang di Sebelum mulai, harap baca dan setujui ketentuan layanan kami. Saya menyetujui seluruh ketentuan layanan dan kebijakan privasi Employr untuk rekomendasi lowongan kerja & layanan pembuatan CV. Syarat & Ketentuan ↗ • Kebijakan Privasi ↗ Mulai Sekarang"
+
+  • #3 [Tag: <div> | Role: onboarding-step]
+    Jumlah Kalimat: 2 | Karakter: 171
+    Konten: "Saya menyetujui seluruh ketentuan layanan dan kebijakan privasi Employr untuk rekomendasi lowongan kerja & layanan pembuatan CV. Syarat & Ketentuan ↗ • Kebijakan Privasi ↗"
+
+
+======================================================
+PAGE: [Beranda] (/beranda)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\beranda.png
+Total UI copy panjang: 19
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 156
+    Konten: "AKTIVITAS UTAMA Selamat pagi, Budi Dashboard kariermu siap digunakan Jelajahi Fitur Semua prioritas terselesaikan! Tidak ada prioritas mendesak saat ini"
+
+  • #2 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 453
+    Konten: "Progress & Funnel Lamaran 4 Tahapan Rasio konversi tiap tahap seleksi Detail Tracker Lamaran Dikirim 0 Dokumen terkirim ke HR 0 0% Screening HR 0 Berkas lolos filter awal 0 0% Sesi Interview 0 Undangan wawancara 0 0% Offering Letter 0 Penawaran kerja resmi 0 0% Insight Konversi Seleksi: Belum ada dokumen lamaran terkirim. Catat lamaran pertamamu di Tracker untuk memantau rasio konversi seleksi. Analisis Detail Conversion Rate di Tracker"
+
+  • #3 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 136
+    Konten: "Insight Konversi Seleksi: Belum ada dokumen lamaran terkirim. Catat lamaran pertamamu di Tracker untuk memantau rasio konversi seleksi."
+
+  • #4 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 213
+    Konten: "Jadwal Terdekat 0 Agenda Agenda interview, tes & deadline Semua Tidak ada agenda mendesak Jadwal interview dan batas waktu lamaran kamu akan muncul otomatis di sini. Buka Tracker Panduan & Simulator Interview"
+
+  • #5 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 297
+    Konten: "Sprint Lamaran Minggu Ini Target mingguan & konsistensi melamar 0 Hari Streak Progres Minggu Ini 0 / 10 Lamaran(0%) AKTIVITAS HARIAN (SENIN - MINGGU): BELUM ADA Kirim minimal 5-10 lamaran per minggu secara konsisten untuk memperluas peluang dipanggil wawancara kerja. Lihat Tracker Lamar Loker"
+
+  • #6 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 5 | Karakter: 193
+    Konten: "Karier 3 min baca CV vs. Résumé: What&#8217;s the Difference? When you're applying for a job, you'll often hear the terms CV and résumé . But what's the difference between them? While the two…"
+
+  • #7 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 130
+    Konten: "When you're applying for a job, you'll often hear the terms CV and résumé . But what's the difference between them? While the two…"
+
+  • #8 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 4 | Karakter: 217
+    Konten: "Karier 3 min baca Remote or Office Work? What to Consider When Choosing a Work Setup Where you work can shape how you work. For some professionals, working from home offers flexibility and less commuting. For others…"
+
+  • #9 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 131
+    Konten: "Where you work can shape how you work. For some professionals, working from home offers flexibility and less commuting. For others…"
+
+  • #10 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 219
+    Konten: "Karier 5 min baca 10 Questions Every Student Should Ask Before Accepting an Internship Getting an internship offer is exciting. But before saying yes, take a moment to understand what you're signing up for. An interns…"
+
+  • #11 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 131
+    Konten: "Getting an internship offer is exciting. But before saying yes, take a moment to understand what you're signing up for. An interns…"
+
+  • #12 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 210
+    Konten: "Strategi Melamar 1 min baca Panduan Lengkap Cara Melamar Kerja via Email & WA Selalu gunakan email profesional. Gunakan subject yang jelas seperti "Lamaran Pekerjaan - [Posisi] - [Nama]". Etika, penulisan sub…"
+
+  • #13 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 131
+    Konten: "Selalu gunakan email profesional. Gunakan subject yang jelas seperti "Lamaran Pekerjaan - [Posisi] - [Nama]". Etika, penulisan sub…"
+
+  • #14 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 216
+    Konten: "Persiapan Interview 1 min baca 20 Pertanyaan Interview Tersering & Cara Menjawabnya Gunakan teknik STAR (Situation, Task, Action, Result). Jelaskan situasi yang pernah dialami, tugas yang diemban, serta hasil teruk…"
+
+  • #15 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 131
+    Konten: "Gunakan teknik STAR (Situation, Task, Action, Result). Jelaskan situasi yang pernah dialami, tugas yang diemban, serta hasil teruk…"
+
+  • #16 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 208
+    Konten: "Optimasi CV 1 min baca Cara Membuat CV ATS Friendly yang Lolos Screening HR Sistem ATS memfilter ribuan CV berdasarkan kata kunci. Gunakan font standar, hindari grafik kompleks, serta cantumkan kata kunci y…"
+
+  • #17 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 131
+    Konten: "Sistem ATS memfilter ribuan CV berdasarkan kata kunci. Gunakan font standar, hindari grafik kompleks, serta cantumkan kata kunci y…"
+
+  • #18 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 225
+    Konten: "Karier 3 min baca Manajemen Talent Acquisition: Cara Meningkatkan Kualitas SDM lebih Efisien Strategi manajemen talent acquisition dalam meningkatkan kualitas SDM merupakan kunci utama perusahaan. Di era digital , metode pe…"
+
+  • #19 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 131
+    Konten: "Strategi manajemen talent acquisition dalam meningkatkan kualitas SDM merupakan kunci utama perusahaan. Di era digital , metode pe…"
+
+
+======================================================
+PAGE: [CV Saya] (/cv)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\cv.png
+Total UI copy panjang: 4
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 346
+    Konten: "Dashboard CV Saya Dark Notifikasi, 3 belum dibaca 0 1 2 3 4 5 6 Budi Santoso CV BUILDER TOTAL CV: 0 SKOR TERTINGGI: 0/100 RATA-RATA ATS: 0/100 Menampilkan 0 dokumen CV Belum Ada CV Tersimpan Buat CV pertamamu sekarang — pilih template terverifikasi ATS dan lengkapi data profil kamu untuk optimasi screening recruiter terbaik. Buat CV Mandiri"
+
+  • #2 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 267
+    Konten: "CV BUILDER TOTAL CV: 0 SKOR TERTINGGI: 0/100 RATA-RATA ATS: 0/100 Menampilkan 0 dokumen CV Belum Ada CV Tersimpan Buat CV pertamamu sekarang — pilih template terverifikasi ATS dan lengkapi data profil kamu untuk optimasi screening recruiter terbaik. Buat CV Mandiri"
+
+  • #3 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 201
+    Konten: "Menampilkan 0 dokumen CV Belum Ada CV Tersimpan Buat CV pertamamu sekarang — pilih template terverifikasi ATS dan lengkapi data profil kamu untuk optimasi screening recruiter terbaik. Buat CV Mandiri"
+
+  • #4 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 176
+    Konten: "Belum Ada CV Tersimpan Buat CV pertamamu sekarang — pilih template terverifikasi ATS dan lengkapi data profil kamu untuk optimasi screening recruiter terbaik. Buat CV Mandiri"
+
+
+======================================================
+PAGE: [Screening ATS] (/cv-screener)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\cv-screener.png
+Total UI copy panjang: 3
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 378
+    Konten: "1 PROFIL CV & TARGET PEKERJAAN Posisi Umum Target Lowongan Profil CV Aktif CV AKTIF: Belum ada CV tersimpan Buat CV terlebih dahulu di CV ATS Builder untuk mengevaluasi. Buat CV di Builder Nama Posisi Pekerjaan Target * Tingkat Senioritas Entry-Level (0 - 1 Tahun) Recruiter aktif: Startup (Fast-Paced & Impact) • 5 Modul Evaluasi Otomatis Mulai Simulasi Screening CV (1-Klik)"
+
+  • #2 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 207
+    Konten: "Profil CV Aktif CV AKTIF: Belum ada CV tersimpan Buat CV terlebih dahulu di CV ATS Builder untuk mengevaluasi. Buat CV di Builder Nama Posisi Pekerjaan Target * Tingkat Senioritas Entry-Level (0 - 1 Tahun)"
+
+  • #3 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 131
+    Konten: "Profil CV Aktif CV AKTIF: Belum ada CV tersimpan Buat CV terlebih dahulu di CV ATS Builder untuk mengevaluasi. Buat CV di Builder"
+
+
+======================================================
+PAGE: [Tracker Lamaran] (/tracker)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\tracker.png
+Total UI copy panjang: 3
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 523
+    Konten: "BERANDA Beranda PROFIL & DOKUMEN CV Saya Screening & Evaluasi ATS Optimasi LinkedIn CAREER INTELLIGENCE Career Intelligence LAMARAN Tracker Lamaran Email & Cover Letter Loker LAINNYA Pengaturan Saran Fitur Lapor Kendala Career Readiness 0% Tingkatkan Kesiapan 0% Keluar Akun Dashboard Tracker Lamaran Dark Notifikasi, 3 belum dibaca 0 1 2 3 4 5 6 Budi Santoso JOB TRACKER TOTAL: – SCREENING: – INTERVIEW: – OFFERING: – Pengingat 1 Tambah Lamaran Gagal memuat daftar lamaran. Periksa koneksi internet Anda. Coba lagi Tutup"
+
+  • #2 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 161
+    Konten: "JOB TRACKER TOTAL: – SCREENING: – INTERVIEW: – OFFERING: – Pengingat 1 Tambah Lamaran Gagal memuat daftar lamaran. Periksa koneksi internet Anda. Coba lagi Tutup"
+
+  • #3 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 75
+    Konten: "Gagal memuat daftar lamaran. Periksa koneksi internet Anda. Coba lagi Tutup"
+
+
+======================================================
+PAGE: [Career Intelligence] (/career-intelligence)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\career-intelligence.png
+Total UI copy panjang: 14
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 248
+    Konten: "STANDAR INDUSTRI Diperbarui: 6 Oktober 2026 Career Intelligence Eksplorasi standar acuan kompetensi pasar kerja untuk posisi Staff Administrasi & Operasional. Target: Staff Administrasi & Operasional (Administrasi) + Ganti / Tambah Posisi Lain..."
+
+  • #2 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 4 | Karakter: 353
+    Konten: "MODE STANDAR INDUSTRI Peta Acuan Kompetensi Perekrut Anda belum memiliki dokumen CV atau keahlian tersimpan. Di bawah ini adalah peta radar kompetensi standar industri yang disyaratkan untuk posisi Staff Administrasi & Operasional. Jadikan standar ini sebagai acuan saat menyusun dokumen lamaran pertama Anda. Susun CV Staff Administrasi & Operasional"
+
+  • #3 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 310
+    Konten: "MODE STANDAR INDUSTRI Peta Acuan Kompetensi Perekrut Anda belum memiliki dokumen CV atau keahlian tersimpan. Di bawah ini adalah peta radar kompetensi standar industri yang disyaratkan untuk posisi Staff Administrasi & Operasional. Jadikan standar ini sebagai acuan saat menyusun dokumen lamaran pertama Anda."
+
+  • #4 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 256
+    Konten: "Anda belum memiliki dokumen CV atau keahlian tersimpan. Di bawah ini adalah peta radar kompetensi standar industri yang disyaratkan untuk posisi Staff Administrasi & Operasional. Jadikan standar ini sebagai acuan saat menyusun dokumen lamaran pertama Anda."
+
+  • #5 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 155
+    Konten: "KESIAPAN KARIER 10% Data Lengkap 0% Career Readiness Berdasarkan kelengkapan CV, keahlian terdata, dan riwayat lamaran yang aktif. Periksa Pilar Kesiapan"
+
+  • #6 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 315
+    Konten: "REKOMENDASI LANGKAH TERBAIK Susun CV Pertama Anda untuk Posisi Staff Administrasi & Operasional Gunakan standar industri ini sebagai panduan. Cantumkan keahlian Aplikasi Perkantoran & Spreadsheet & Ketelitian & Pengelolaan Data pada dokumen CV Anda. Buat CV Staff Administrasi & Operasional Lihat Lowongan Terbuka"
+
+  • #7 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 250
+    Konten: "REKOMENDASI LANGKAH TERBAIK Susun CV Pertama Anda untuk Posisi Staff Administrasi & Operasional Gunakan standar industri ini sebagai panduan. Cantumkan keahlian Aplikasi Perkantoran & Spreadsheet & Ketelitian & Pengelolaan Data pada dokumen CV Anda."
+
+  • #8 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 153
+    Konten: "Gunakan standar industri ini sebagai panduan. Cantumkan keahlian Aplikasi Perkantoran & Spreadsheet & Ketelitian & Pengelolaan Data pada dokumen CV Anda."
+
+  • #9 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 6 | Karakter: 196
+    Konten: "Peta Radar Kompetensi 5 Area Kunci Aplikasi Perkant.. Ketelitian & Pen.. Komunikasi Bisni.. Koordinasi Opera.. Penyelesaian Mas.. Profil Anda Standar Role Target Buka Rincian Nilai & Bukti Lengkap"
+
+  • #10 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 6 | Karakter: 126
+    Konten: "Aplikasi Perkant.. Ketelitian & Pen.. Komunikasi Bisni.. Koordinasi Opera.. Penyelesaian Mas.. Profil Anda Standar Role Target"
+
+  • #11 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 5 | Karakter: 94
+    Konten: "Aplikasi Perkant.. Ketelitian & Pen.. Komunikasi Bisni.. Koordinasi Opera.. Penyelesaian Mas.."
+
+  • #12 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 534
+    Konten: "Kekuatan Terbesar Anda Nilai Tertinggi Aplikasi Perkantoran & Spreadsheet Standar role: 85 0 Bukti Ketelitian & Pengelolaan Data Standar role: 80 0 Bukti Komunikasi Bisnis & Korespondensi Standar role: 75 0 Bukti Kesenjangan Skill Prioritas Lihat Semua Aplikasi Perkantoran & Spreadsheet 0 → 85 Pelajari formula esensial (VLOOKUP, Pivot Table) dan cantumkan bukti projek mini rekap data di CV. Ketelitian & Pengelolaan Data 0 → 80 Tuliskan pengalaman organisasi atau kepanitiaan di CV yang melibatkan pendataan berkas dan presensi."
+
+  • #13 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 321
+    Konten: "Kesenjangan Skill Prioritas Lihat Semua Aplikasi Perkantoran & Spreadsheet 0 → 85 Pelajari formula esensial (VLOOKUP, Pivot Table) dan cantumkan bukti projek mini rekap data di CV. Ketelitian & Pengelolaan Data 0 → 80 Tuliskan pengalaman organisasi atau kepanitiaan di CV yang melibatkan pendataan berkas dan presensi."
+
+  • #14 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 281
+    Konten: "Aplikasi Perkantoran & Spreadsheet 0 → 85 Pelajari formula esensial (VLOOKUP, Pivot Table) dan cantumkan bukti projek mini rekap data di CV. Ketelitian & Pengelolaan Data 0 → 80 Tuliskan pengalaman organisasi atau kepanitiaan di CV yang melibatkan pendataan berkas dan presensi."
+
+
+======================================================
+PAGE: [Misi Cuan] (/misi-cuan)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\misi-cuan.png
+Total UI copy panjang: 0
+------------------------------------------------------
+  (Aman - tidak ada teks/subteks > 2 kalimat)
+
+======================================================
+PAGE: [Referral] (/referral)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\referral.png
+Total UI copy panjang: 3
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 217
+    Konten: "KODE REFERRAL UNIK KAMU Teman kamu akan mendapatkan potongan harga khusus saat memilih paket CV pertama mereka. LINK BAGIKAN LANGSUNG Bagikan link ini langsung ke grup WhatsApp alumni, LinkedIn, atau Telegram kamu."
+
+  • #2 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 327
+    Konten: "Cara Kerja Program Referral (3 Langkah) 1 Bagikan Kode Unik Kirim kode atau link referral kamu ke teman pencari kerja. 2 Teman Daftar & Beli Paket Teman mendaftar akun dan membeli paket membership pilihan mereka. 3 Dapatkan Komisi Tunai Dapatkan komisi tunai Rp2.500 yang langsung masuk ke saldo akunmu per teman berhasil."
+
+  • #3 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 287
+    Konten: "1 Bagikan Kode Unik Kirim kode atau link referral kamu ke teman pencari kerja. 2 Teman Daftar & Beli Paket Teman mendaftar akun dan membeli paket membership pilihan mereka. 3 Dapatkan Komisi Tunai Dapatkan komisi tunai Rp2.500 yang langsung masuk ke saldo akunmu per teman berhasil."
+
+
+======================================================
+PAGE: [Pengaturan] (/pengaturan)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\pengaturan.png
+Total UI copy panjang: 4
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 197
+    Konten: "BIODATA DIRI Nama lengkap dan identitas resmi untuk berkas lamaran. Nama Lengkap Budi Santoso Headline Profesional Belum diisi Jenis Kelamin Belum ditentukan Tanggal Lahir Belum ditentukan"
+
+  • #2 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 237
+    Konten: "KONTAK & DOMISILI Kontak yang akan dicantumkan di header CV dan notifikasi lamaran. Email Utama Terverifikasi budi.santoso@gmail.com Nomor WhatsApp / HP Belum diisi Kota & Provinsi Domisili Belum diisi Alamat Singkat Belum diisi"
+
+  • #3 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 220
+    Konten: "TENTANG SAYA Paragraf pembuka singkat (3-5 kalimat) yang menonjolkan keunggulan utama dan target karir kamu. Belum ada ringkasan diri Klik di sini untuk menulis deskripsi singkat tentang latar belakang dan keahlianmu."
+
+  • #4 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 246
+    Konten: "PORTOFOLIO & MEDIA SOSIAL Tautkan profil online agar recruiter dapat mengecek karya nyata dan rekam jejak kamu. LinkedIn Belum ditambahkan GitHub / Repo Belum ditambahkan Website Pribadi Belum ditambahkan Dribbble / Portofolio Belum ditambahkan"
+
+
+======================================================
+PAGE: [Kesiapan Kerja (Readiness)] (/readiness)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\readiness.png
+Total UI copy panjang: 8
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 240
+    Konten: "INDEKS KESIAPAN KERJA EMPLOYR Career Readiness Index Evaluasi komprehensif mengukur kesiapan berkas lamaran, riset peran target, administrasi dokumen, dan momentum pelacakan karier Anda. 0% STATUS KESIAPAN Sinkronkan Belum Ada Data Profil"
+
+  • #2 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 4 | Karakter: 369
+    Konten: "KEUNGGULAN UTAMA (SUPERPOWER) Menunggu Analisis Berkas Lengkapi profil dan buat CV pertamamu untuk menemukan kekuatan terbaikmu. PRIORITAS PENINGKATAN (BOTTLENECK) Momentum Pelamaran & Tracker Fokus perbaikan mendesak: Momentum Pelamaran & Tracker (0/100). Mengoptimalkan bagian ini akan meningkatkan kesiapan kerja Anda secara signifikan. Tambah Lamaran di Tracker"
+
+  • #3 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 238
+    Konten: "PRIORITAS PENINGKATAN (BOTTLENECK) Momentum Pelamaran & Tracker Fokus perbaikan mendesak: Momentum Pelamaran & Tracker (0/100). Mengoptimalkan bagian ini akan meningkatkan kesiapan kerja Anda secara signifikan. Tambah Lamaran di Tracker"
+
+  • #4 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 146
+    Konten: "Fokus perbaikan mendesak: Momentum Pelamaran & Tracker (0/100). Mengoptimalkan bagian ini akan meningkatkan kesiapan kerja Anda secara signifikan."
+
+  • #5 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 4 | Karakter: 317
+    Konten: "Kualitas Berkas & Skor ATS Status: Belum Ada Data 0 / 100 Belum ada CV yang tersimpan. Buat CV pertama Anda untuk memulai kalkulasi kesiapan. INDIKATOR PENILAIAN RIIL: Skor ATS 0/100 Ringkasan Diri Kosong Pengalaman Belum ada Rekomendasi Tindakan: Mulai buat CV standar industri di menu CV Builder. Buat CV Sekarang"
+
+  • #6 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 334
+    Konten: "Riset & Kecocokan Lowongan Status: Belum Ada Data 0 / 100 Tentukan posisi kerja target dan bandingkan kecocokan keahlian Anda. INDIKATOR PENILAIAN RIIL: Target Posisi Belum ada Keahlian Kunci 0 skill Relevansi Industri Belum diuji Rekomendasi Tindakan: Buat CV dan uji kecocokan dengan deskripsi lowongan kerja impian. Buka Match CV"
+
+  • #7 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 337
+    Konten: "Administrasi & Berkas Lamaran Status: Belum Ada Data 0 / 100 Lengkapi identitas diri dan siapkan surat pengantar lamaran profesional. INDIKATOR PENILAIAN RIIL: Kontak Valid Belum ada Domisili Belum ada Tautan Portofolio Belum ada Rekomendasi Tindakan: Lengkapi data identitas di CV dan buat draf surat lamaran pertama. Buka Menu Mailer"
+
+  • #8 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 343
+    Konten: "Momentum Pelamaran & Tracker Status: Belum Ada Data 0 / 100 Pantau kemajuan karier Anda dengan mencatat setiap lowongan yang dilamar. INDIKATOR PENILAIAN RIIL: Lamaran Terkirim 0 lamaran Ritme Mingguan Belum aktif Status Pipeline Kosong Rekomendasi Tindakan: Mulai tambahkan lamaran pertama Anda di Tracker Lamaran. Tambah Lamaran di Tracker"
+
+
+======================================================
+PAGE: [Email & Surat Lamaran] (/mailer)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\mailer.png
+Total UI copy panjang: 6
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 264
+    Konten: "Langkah 1 Siapkan Draf Surat Lamaran / Isi Email Pilih template cepat di bawah atau susun secara cerdas. Kamu cukup klik Salin Teks untuk kirim manual, atau klik Lanjut Kirim Otomatis untuk kirim instan ke HRD. Pilihan kamu: Salin Bebas (Manual) / Kirim Otomatis"
+
+  • #2 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 211
+    Konten: "Langkah 1 Siapkan Draf Surat Lamaran / Isi Email Pilih template cepat di bawah atau susun secara cerdas. Kamu cukup klik Salin Teks untuk kirim manual, atau klik Lanjut Kirim Otomatis untuk kirim instan ke HRD."
+
+  • #3 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 161
+    Konten: "Pilih template cepat di bawah atau susun secara cerdas. Kamu cukup klik Salin Teks untuk kirim manual, atau klik Lanjut Kirim Otomatis untuk kirim instan ke HRD."
+
+  • #4 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 4 | Karakter: 501
+    Konten: "Kustomisasi Parameter Surat Sesuaikan manual, atau tempel seluruh teks loker untuk pengisian otomatis. Tempel Teks Loker Pilih CV Saya (Basis Kualifikasi) Belum ada CV di akunmu. Buat CV Perusahaan Target * Posisi Pekerjaan * Kualifikasi Loker (Deskripsi Posisi) Tempel Lengkap Direkomendasikan Sistem menyelaraskan syarat lowongan ini dengan keahlian di CV-mu. Nama Recruiter (Opsional) Gaya Bahasa / Tone Formal (Bahasa Indonesia) Highlight Pengalaman Kunci (Opsional) Susun Surat Lamaran Cerdas"
+
+  • #5 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 221
+    Konten: "Hasil Susunan Surat Live Sinkron Draf surat siap disalin atau diedit langsung. Salin Cepat Teks di atas dapat langsung kamu ketik/edit sesuai kebutuhan. 767 karakter Salin Teks (Manual) Simpan Draf Lanjut Kirim Otomatis"
+
+  • #6 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 196
+    Konten: "Daftar Surat Lamaran Tersimpan (0) Dapat disalin langsung atau dimuat ke editor kapan saja Belum ada surat lamaran yang disimpan. Buat surat baru dan klik "Simpan Draf" untuk menyimpannya di sini."
+
+
+======================================================
+PAGE: [Pencarian Loker] (/scrape-jobs)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\scrape-jobs.png
+Total UI copy panjang: 17
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 3 | Karakter: 372
+    Konten: "Mode Explore (Semua Terbaru):Klik tombol 'Semua Terbaru' untuk meraup feed lowongan terbaru lintas bidang dari 24+ portal publik. Refresh Status DB: Cek dan perbarui status lowongan yang sudah ada di database tanpa scrape ulang portal (lebih hemat waktu). Cron Otomatis: Scrape harian jam 01.00 WIB menjalankan Mode Explore diikuti klaster profesi lengkap secara otomatis."
+
+  • #2 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 155
+    Konten: "Konten Tersimpan (DB) 16 ARTIKEL 3 EVENT 7 SERTIFIKASI Artikel & sertifikasi ikut disinkronkan cron harian 01.00 WIB. Scraper event menyusul (sumber SPA)."
+
+  • #3 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 206
+    Konten: "DB TERSIMPAN Aktif Power Planner & Maintenance Officer at PT Kawasan Industri Terpadu Batang member of PT Danareksa Persero Danareksa. Batang, Central Java (Jawa Tengah), Indonesia - 5 hari lalu Sumber Asli"
+
+  • #4 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 182
+    Konten: "DB TERSIMPAN Aktif Power Planner & Maintenance Officer at PT Kawasan Industri Terpadu Batang member of PT Danareksa Persero Danareksa. Batang, Central Java (Jawa Tengah), Indonesia -"
+
+  • #5 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 133
+    Konten: "DB TERSIMPAN Aktif Staff Gudang PT. Evo Manufacturing Indonesia Surabaya, East Java (Jawa Timur), Indonesia - 5 hari lalu Sumber Asli"
+
+  • #6 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 154
+    Konten: "DB TERSIMPAN Aktif Operator Batching Plant PT. Evo Manufacturing Indonesia Palembang, South Sumatra (Sumatra Selatan), Indonesia - 5 hari lalu Sumber Asli"
+
+  • #7 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 132
+    Konten: "DB TERSIMPAN Aktif Operator Premix PT. Evo Manufacturing Indonesia Banyu Asin, Sumatera Selatan, Indonesia - 5 hari lalu Sumber Asli"
+
+  • #8 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 149
+    Konten: "DB TERSIMPAN Aktif Operator Excavator PT. Evo Manufacturing Indonesia Palembang, South Sumatra (Sumatra Selatan), Indonesia - 5 hari lalu Sumber Asli"
+
+  • #9 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 148
+    Konten: "DB TERSIMPAN Aktif Operator Forklift PT. Evo Manufacturing Indonesia Banyuasin, South Sumatra (Sumatra Selatan), Indonesia - 5 hari lalu Sumber Asli"
+
+  • #10 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 159
+    Konten: "DB TERSIMPAN Aktif General Affairs Admin Intern PT. Evo Manufacturing Indonesia Palembang, South Sumatra (Sumatra Selatan), Indonesia - 5 hari lalu Sumber Asli"
+
+  • #11 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 135
+    Konten: "DB TERSIMPAN Aktif General Affairs Admin Intern PT. Evo Manufacturing Indonesia Palembang, South Sumatra (Sumatra Selatan), Indonesia -"
+
+  • #12 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 156
+    Konten: "DB TERSIMPAN Aktif Warehouse Sparepart Admin PT. Evo Manufacturing Indonesia Banyuasin, South Sumatra (Sumatra Selatan), Indonesia - 5 hari lalu Sumber Asli"
+
+  • #13 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 132
+    Konten: "DB TERSIMPAN Aktif Warehouse Sparepart Admin PT. Evo Manufacturing Indonesia Banyuasin, South Sumatra (Sumatra Selatan), Indonesia -"
+
+  • #14 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 140
+    Konten: "DB TERSIMPAN Aktif SITE ENGINEER (PROJECT) PT. Evo Manufacturing Indonesia Banyu Asin, Sumatera Selatan, Indonesia - 6 hari lalu Sumber Asli"
+
+  • #15 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 148
+    Konten: "DB TERSIMPAN Aktif Customer Experience Officer PT Prodia Widyahusada Tbk. (Prodia) Central Jakarta, DKI Jakarta, Indonesia - 6 hari lalu Sumber Asli"
+
+  • #16 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 164
+    Konten: "DB TERSIMPAN Aktif Loker Operation & Maintenance Staff Jakarta Selatan (Gaji s/d Rp6.500.000) – PT. Bayu Buana Gemilang Perusahaan Jakarta - 6 hari lalu Sumber Asli"
+
+  • #17 [Tag: <div> | Role: card-subtext]
+    Jumlah Kalimat: 2 | Karakter: 140
+    Konten: "DB TERSIMPAN Aktif Loker Operation & Maintenance Staff Jakarta Selatan (Gaji s/d Rp6.500.000) – PT. Bayu Buana Gemilang Perusahaan Jakarta -"
+
+
+======================================================
+PAGE: [Simulasi Interview] (/interview)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\interview.png
+Total UI copy panjang: 4
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 425
+    Konten: "Pengaturan Sesi Simulasi Posisi / Peran Pekerjaan Software Engineer / Developer Digital Marketing Specialist Data Analyst & BI Human Resources Specialist Product Manager Tingkat / Jenis Interview HR Screening & Behavioral User / Managerial & Technical Director / Final Board Interview Petunjuk Simulasi Ketik jawaban seolah-olah Anda sedang di depan pewawancara asli. Sistem akan menganalisis poin kekuatan & area perbaikan."
+
+  • #2 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 400
+    Konten: "Posisi / Peran Pekerjaan Software Engineer / Developer Digital Marketing Specialist Data Analyst & BI Human Resources Specialist Product Manager Tingkat / Jenis Interview HR Screening & Behavioral User / Managerial & Technical Director / Final Board Interview Petunjuk Simulasi Ketik jawaban seolah-olah Anda sedang di depan pewawancara asli. Sistem akan menganalisis poin kekuatan & area perbaikan."
+
+  • #3 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 140
+    Konten: "Petunjuk Simulasi Ketik jawaban seolah-olah Anda sedang di depan pewawancara asli. Sistem akan menganalisis poin kekuatan & area perbaikan."
+
+  • #4 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 338
+    Konten: "PERTANYAAN #1 (SOFTWARE ENGINEER) Ganti Pertanyaan "Ceritakan pengalaman Anda saat menangani bug kritis di lingkungan produksi (production) yang berdampak pada pengguna." Tips Jawaban: Gunakan metode STAR (Situation, Task, Action, Result) dan sebutkan langkah mitigasi jangka panjang. Jawaban Anda: 0 karakter Bersihkan Evaluasi Jawaban"
+
+
+======================================================
+PAGE: [Latihan Soal] (/latihan-soal)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\latihan-soal.png
+Total UI copy panjang: 8
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 201
+    Konten: "BUMN & CPNS GRATIS Simulasi TKD BUMN & Core Values AKHLAK 2026 Latihan soal standar BUMN terbaru mencakup Verbal, Numerik, Logika, dan Core Values AKHLAK BUMN. 15 Mins 5 Soal HOTS Mulai Kerjakan Soal"
+
+  • #2 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 181
+    Konten: "BUMN & CPNS GRATIS Simulasi TKD BUMN & Core Values AKHLAK 2026 Latihan soal standar BUMN terbaru mencakup Verbal, Numerik, Logika, dan Core Values AKHLAK BUMN. 15 Mins 5 Soal HOTS"
+
+  • #3 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 210
+    Konten: "TECH & CODING GRATIS Frontend React.js & Modern JavaScript Assessment Uji pemahaman Hook, State Management, Virtual DOM, dan ES6+ untuk persiapan technical interview. 20 Mins 4 Soal Sedang Mulai Kerjakan Soal"
+
+  • #4 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 190
+    Konten: "TECH & CODING GRATIS Frontend React.js & Modern JavaScript Assessment Uji pemahaman Hook, State Management, Virtual DOM, dan ES6+ untuk persiapan technical interview. 20 Mins 4 Soal Sedang"
+
+  • #5 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 200
+    Konten: "BUMN & CPNS GRATIS SKD CPNS 2026 — Tes Wawasan Kebangsaan (TWK) Latihan soal TWK mencakup Pancasila, UUD 1945, NKRI, Bhinneka Tunggal Ika, dan Nasionalisme. 15 Mins 4 Soal Sedang Mulai Kerjakan Soal"
+
+  • #6 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 180
+    Konten: "BUMN & CPNS GRATIS SKD CPNS 2026 — Tes Wawasan Kebangsaan (TWK) Latihan soal TWK mencakup Pancasila, UUD 1945, NKRI, Bhinneka Tunggal Ika, dan Nasionalisme. 15 Mins 4 Soal Sedang"
+
+  • #7 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 214
+    Konten: "BAHASA & TOEFL GRATIS TOEFL Structure & Written Expression Practice Latihan soal Grammar, Subject-Verb Agreement, Inversion, dan Error Identification untuk skor TOEFL 550+. 10 Mins 3 Soal HOTS Mulai Kerjakan Soal"
+
+  • #8 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 194
+    Konten: "BAHASA & TOEFL GRATIS TOEFL Structure & Written Expression Practice Latihan soal Grammar, Subject-Verb Agreement, Inversion, dan Error Identification untuk skor TOEFL 550+. 10 Mins 3 Soal HOTS"
+
+
+======================================================
+PAGE: [Saran Fitur] (/saran-fitur)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\saran-fitur.png
+Total UI copy panjang: 5
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 485
+    Konten: "Formulir Pengajuan Fitur Berikan rincian ide dengan jelas agar tim pengembang dapat memahaminya dengan mudah. Judul Saran Fitur * Area / Bagian Terkait * CV Builder & Desain CV Kendala yang Dihadapi & Manfaat Fitur * Ekspektasi Cara Kerja / Alur Fitur Opsional Referensi Mockup / Gambar Sketsa Opsional (Maks. 5 gambar, bisa paste Ctrl+V) Pilih gambar atau seret ke sini, atau tekan Ctrl+V untuk tempel PNG, JPG, WEBP hingga 5MB per file Nama Pengaju Email Kontak Kirim Saran Fitur"
+
+  • #2 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 177
+    Konten: "Referensi Mockup / Gambar Sketsa Opsional (Maks. 5 gambar, bisa paste Ctrl+V) Pilih gambar atau seret ke sini, atau tekan Ctrl+V untuk tempel PNG, JPG, WEBP hingga 5MB per file"
+
+  • #3 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 345
+    Konten: "Tips Menyampaikan Saran 1 Fokus pada masalah: Jelaskan apa yang saat ini memakan waktu atau menyulitkanmu saat melamar kerja. 2 Beri contoh konkret: Contoh skenario nyata mempermudah tim kami dalam merancang solusinya. 3 Pantau tanggapan tim: Tim pengembang akan meninjau setiap usulan dan memberikan respon berkala langsung di tab Riwayat."
+
+  • #4 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 321
+    Konten: "1 Fokus pada masalah: Jelaskan apa yang saat ini memakan waktu atau menyulitkanmu saat melamar kerja. 2 Beri contoh konkret: Contoh skenario nyata mempermudah tim kami dalam merancang solusinya. 3 Pantau tanggapan tim: Tim pengembang akan meninjau setiap usulan dan memberikan respon berkala langsung di tab Riwayat."
+
+  • #5 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 5 | Karakter: 333
+    Konten: "Tahapan Ide Fitur Ditinjau Tim Sedang dipelajari oleh tim produk. Direncanakan Telah disetujui dan masuk daftar rencana rilis. Sedang Dibuat Tim teknis sedang mengembangkan fitur ini. Sudah Rilis Fitur telah selesai dibuat dan bisa digunakan! Belum Memungkinkan Belum sesuai dengan prioritas atau arah pengembangan saat ini."
+
+
+======================================================
+PAGE: [Lapor Kendala] (/lapor-bug)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\lapor-bug.png
+Total UI copy panjang: 5
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 6 | Karakter: 447
+    Konten: "Apa kendala yang kamu temukan? * Halaman Tempat Kendala Terjadi Beranda (/beranda) Ceritakan Kendalanya * Tangkapan Layar / Screenshot (Opsional) Lampirkan gambar tampilan yang error jika ada. Maks. 3 file Klik untuk memilih gambar atau seret file ke sini Bisa juga langsung tekan Ctrl + V di mana saja pada halaman ini untuk menempelkan screenshot. Laporanmu akan langsung ditinjau oleh tim kami untuk segera diperbaiki. Kirim Laporan Kendala"
+
+  • #2 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 245
+    Konten: "Tangkapan Layar / Screenshot (Opsional) Lampirkan gambar tampilan yang error jika ada. Maks. 3 file Klik untuk memilih gambar atau seret file ke sini Bisa juga langsung tekan Ctrl + V di mana saja pada halaman ini untuk menempelkan screenshot."
+
+  • #3 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 101
+    Konten: "Tangkapan Layar / Screenshot (Opsional) Lampirkan gambar tampilan yang error jika ada. Maks. 3 file"
+
+  • #4 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 228
+    Konten: "INFO SISTEM KAMU Sertakan Data ini otomatis diambil dari browsermu untuk membantu developer mereproduksi kendala dengan cepat. Browser Microsoft Edge Sistem Operasi Windows Resolusi Layar 1440 x 900 (1x) Status Jaringan Online"
+
+  • #5 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 242
+    Konten: "TIPS PELAPORAN EFEKTIF Sebutkan apa yang kamu klik: Ceritakan kronologi sebelum error muncul. Lampirkan screenshot: Gambar tampilan rusak sangat mempercepat penanganan. Pantau balasan admin: Tim kami akan membalas langsung di tiket laporanmu."
+
+
+======================================================
+PAGE: [Pembayaran / Membership] (/pembayaran)
+Screenshot: D:\cuti\apps\dashboard\e2e\review\council-audit\pembayaran.png
+Total UI copy panjang: 19
+------------------------------------------------------
+  • #1 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 156
+    Konten: "AKTIVITAS UTAMA Selamat pagi, Budi Dashboard kariermu siap digunakan Jelajahi Fitur Semua prioritas terselesaikan! Tidak ada prioritas mendesak saat ini"
+
+  • #2 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 453
+    Konten: "Progress & Funnel Lamaran 4 Tahapan Rasio konversi tiap tahap seleksi Detail Tracker Lamaran Dikirim 0 Dokumen terkirim ke HR 0 0% Screening HR 0 Berkas lolos filter awal 0 0% Sesi Interview 0 Undangan wawancara 0 0% Offering Letter 0 Penawaran kerja resmi 0 0% Insight Konversi Seleksi: Belum ada dokumen lamaran terkirim. Catat lamaran pertamamu di Tracker untuk memantau rasio konversi seleksi. Analisis Detail Conversion Rate di Tracker"
+
+  • #3 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 136
+    Konten: "Insight Konversi Seleksi: Belum ada dokumen lamaran terkirim. Catat lamaran pertamamu di Tracker untuk memantau rasio konversi seleksi."
+
+  • #4 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 213
+    Konten: "Jadwal Terdekat 0 Agenda Agenda interview, tes & deadline Semua Tidak ada agenda mendesak Jadwal interview dan batas waktu lamaran kamu akan muncul otomatis di sini. Buka Tracker Panduan & Simulator Interview"
+
+  • #5 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 297
+    Konten: "Sprint Lamaran Minggu Ini Target mingguan & konsistensi melamar 0 Hari Streak Progres Minggu Ini 0 / 10 Lamaran(0%) AKTIVITAS HARIAN (SENIN - MINGGU): BELUM ADA Kirim minimal 5-10 lamaran per minggu secara konsisten untuk memperluas peluang dipanggil wawancara kerja. Lihat Tracker Lamar Loker"
+
+  • #6 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 5 | Karakter: 193
+    Konten: "Karier 3 min baca CV vs. Résumé: What&#8217;s the Difference? When you're applying for a job, you'll often hear the terms CV and résumé . But what's the difference between them? While the two…"
+
+  • #7 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 130
+    Konten: "When you're applying for a job, you'll often hear the terms CV and résumé . But what's the difference between them? While the two…"
+
+  • #8 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 4 | Karakter: 217
+    Konten: "Karier 3 min baca Remote or Office Work? What to Consider When Choosing a Work Setup Where you work can shape how you work. For some professionals, working from home offers flexibility and less commuting. For others…"
+
+  • #9 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 131
+    Konten: "Where you work can shape how you work. For some professionals, working from home offers flexibility and less commuting. For others…"
+
+  • #10 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 219
+    Konten: "Karier 5 min baca 10 Questions Every Student Should Ask Before Accepting an Internship Getting an internship offer is exciting. But before saying yes, take a moment to understand what you're signing up for. An interns…"
+
+  • #11 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 131
+    Konten: "Getting an internship offer is exciting. But before saying yes, take a moment to understand what you're signing up for. An interns…"
+
+  • #12 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 210
+    Konten: "Strategi Melamar 1 min baca Panduan Lengkap Cara Melamar Kerja via Email & WA Selalu gunakan email profesional. Gunakan subject yang jelas seperti "Lamaran Pekerjaan - [Posisi] - [Nama]". Etika, penulisan sub…"
+
+  • #13 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 3 | Karakter: 131
+    Konten: "Selalu gunakan email profesional. Gunakan subject yang jelas seperti "Lamaran Pekerjaan - [Posisi] - [Nama]". Etika, penulisan sub…"
+
+  • #14 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 216
+    Konten: "Persiapan Interview 1 min baca 20 Pertanyaan Interview Tersering & Cara Menjawabnya Gunakan teknik STAR (Situation, Task, Action, Result). Jelaskan situasi yang pernah dialami, tugas yang diemban, serta hasil teruk…"
+
+  • #15 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 131
+    Konten: "Gunakan teknik STAR (Situation, Task, Action, Result). Jelaskan situasi yang pernah dialami, tugas yang diemban, serta hasil teruk…"
+
+  • #16 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 208
+    Konten: "Optimasi CV 1 min baca Cara Membuat CV ATS Friendly yang Lolos Screening HR Sistem ATS memfilter ribuan CV berdasarkan kata kunci. Gunakan font standar, hindari grafik kompleks, serta cantumkan kata kunci y…"
+
+  • #17 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 131
+    Konten: "Sistem ATS memfilter ribuan CV berdasarkan kata kunci. Gunakan font standar, hindari grafik kompleks, serta cantumkan kata kunci y…"
+
+  • #18 [Tag: <div> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 225
+    Konten: "Karier 3 min baca Manajemen Talent Acquisition: Cara Meningkatkan Kualitas SDM lebih Efisien Strategi manajemen talent acquisition dalam meningkatkan kualitas SDM merupakan kunci utama perusahaan. Di era digital , metode pe…"
+
+  • #19 [Tag: <p> | Role: general]
+    Jumlah Kalimat: 2 | Karakter: 131
+    Konten: "Strategi manajemen talent acquisition dalam meningkatkan kualitas SDM merupakan kunci utama perusahaan. Di era digital , metode pe…"

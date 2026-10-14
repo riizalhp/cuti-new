@@ -1,4 +1,4 @@
-import { prisma } from './index.ts';
+import { prisma } from './client.ts';
 import crypto from 'crypto';
 
 export interface LearnedBlueprintRecord {
@@ -9,6 +9,19 @@ export interface LearnedBlueprintRecord {
   top_nicetohave_skills: string[];
   category: string;
   is_promoted: boolean;
+  details?: {
+    role_id?: string;
+    target_education?: string | null;
+    experience?: string | null;
+    market_aliases_and_slang?: string[];
+    responsibilities?: string[];
+    tools_and_platforms?: string[];
+    local_context_requirements?: string[];
+    transferable_experience_bridges?: Array<{
+      informal_experience: string;
+      cv_bullets: string[];
+    }>;
+  } | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -163,7 +176,7 @@ export const learnedRoleService = {
   async getActiveLearnedBlueprints(): Promise<LearnedBlueprintRecord[]> {
     try {
       const blueprints = await prisma.$queryRaw<LearnedBlueprintRecord[]>`
-        SELECT id, role_name, entry_count, top_essential_skills, top_nicetohave_skills, category, is_promoted, created_at, updated_at
+        SELECT id, role_name, entry_count, top_essential_skills, top_nicetohave_skills, category, is_promoted, details, created_at, updated_at
         FROM learned_role_blueprints
         WHERE entry_count >= 3 OR is_promoted = true
         ORDER BY entry_count DESC

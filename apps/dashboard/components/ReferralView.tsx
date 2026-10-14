@@ -17,6 +17,8 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { userApi } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { IconButton } from '@/components/ui/icon-button';
 import { UserAvatar } from './UserAvatar';
 
 export const ReferralView: React.FC = () => {
@@ -66,8 +68,8 @@ export const ReferralView: React.FC = () => {
     <div className="space-y-6">
       {/* Header Standardized */}
       <PageHeader
-        title="Program Undag Teman & Referral"
-        subtitle="Ajak teman pencari kerja bergabung! Dapatkan akses Premium Gratis + Saldo Koin Karier untuk setiap teman yang mendaftar."
+        title="Program Undang Teman & Referral"
+        subtitle="Ajak rekan dan teman bergabung ke Employr! Dapatkan komisi tunai Rp2.500 untuk setiap teman yang mendaftar dan membeli paket."
         icon={Users}
         badge="Referral"
         stats={[
@@ -75,24 +77,27 @@ export const ReferralView: React.FC = () => {
             label: 'Total Bonus Kamu',
             value: totalBonus,
             icon: Award,
-            colorClass: 'text-amber-500',
+            colorClass: 'text-amber-400',
+            isPrimary: true,
           },
           {
             label: 'Teman Diundang',
             value: invitedFriends.length,
             icon: Users,
-            colorClass: 'text-indigo-600 dark:text-indigo-400',
+            colorClass: 'text-indigo-300',
           },
         ]}
         actions={
-          <button
+          <Button
             type="button"
+            variant="primary"
+            size="sm"
             onClick={handleCopyLink}
-            className="px-3.5 py-2 rounded-[10px] bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-black text-xs shadow-md shadow-orange-500/30 transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 border-0"
+            className="w-full sm:w-auto min-h-[40px] md:min-h-[34px] flex items-center justify-center gap-1.5"
           >
             {isLinkCopied ? <CheckCircle2 className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4" />}
             <span>{isLinkCopied ? 'Link Tersalin!' : 'Bagikan Link'}</span>
-          </button>
+          </Button>
         }
       />
 
@@ -104,19 +109,23 @@ export const ReferralView: React.FC = () => {
             Kode Referral Unik Kamu
           </span>
           <div className="flex items-center gap-2">
-            <div className="flex-1 p-3 rounded-[10px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center font-mono font-black text-lg text-orange-600 dark:text-orange-400 tracking-wider">
+            <div className="flex-1 p-3 rounded-[10px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center font-mono font-black text-lg text-orange-700 dark:text-orange-400 tracking-wider">
               {referralCode}
             </div>
-            <button
+            <IconButton
+              type="button"
+              variant="primary"
+              size="md"
               onClick={handleCopyCode}
-              className="px-4 py-3 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition flex items-center gap-1.5 shadow-xs"
+              label={isCodeCopied ? 'Kode tersalin' : 'Salin kode referral'}
+              title={isCodeCopied ? 'Tersalin!' : 'Salin Kode Referral'}
+              className="h-[52px] w-[52px]"
             >
-              {isCodeCopied ? <CheckCircle2 className="w-4 h-4 text-amber-300" /> : <Copy className="w-4 h-4" />}
-              <span>{isCodeCopied ? 'Tersalin' : 'Salin Kode'}</span>
-            </button>
+              {isCodeCopied ? <CheckCircle2 className="w-5 h-5 text-amber-300" /> : <Copy className="w-5 h-5" />}
+            </IconButton>
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            Teman kamu akan mendapatkan <strong className="text-slate-800 dark:text-slate-200">Diskon 50% Premium Pass</strong> saat memasukkan kode ini.
+          <p className="text-caption text-slate-500 dark:text-slate-400">
+            Teman kamu akan mendapatkan <strong className="text-slate-800 dark:text-slate-200">potongan harga khusus</strong> saat memilih paket CV pertama mereka.
           </p>
         </div>
 
@@ -132,15 +141,19 @@ export const ReferralView: React.FC = () => {
               value={referralLink}
               className="flex-1 p-2.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 truncate"
             />
-            <button
+            <IconButton
+              type="button"
+              variant="secondary"
+              size="md"
               onClick={handleCopyLink}
-              className="px-4 py-2.5 rounded-[10px] bg-slate-800 dark:bg-slate-700 hover:bg-slate-700 dark:hover:bg-slate-600 text-white font-bold text-xs transition flex items-center gap-1.5 shrink-0"
+              label={isLinkCopied ? 'Link tersalin' : 'Salin link undangan'}
+              title={isLinkCopied ? 'Tersalin!' : 'Salin Link Undangan'}
+              className="shrink-0"
             >
-              {isLinkCopied ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
-              <span>{isLinkCopied ? 'Tersalin' : 'Salin Link'}</span>
-            </button>
+              {isLinkCopied ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+            </IconButton>
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+          <p className="text-caption text-slate-500 dark:text-slate-400">
             Bagikan link ini langsung ke grup WhatsApp alumni, LinkedIn, atau Telegram kamu.
           </p>
         </div>
@@ -149,38 +162,38 @@ export const ReferralView: React.FC = () => {
       {/* How It Works - 3 Step Guide */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-xs space-y-4">
         <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-amber-500" />
+          <Sparkles className="w-4 h-4 text-amber-700 dark:text-amber-400" />
           Cara Kerja Program Referral (3 Langkah)
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
-            <div className="w-8 h-8 rounded-[10px] bg-orange-100 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 font-black text-sm flex items-center justify-center">
+            <div className="w-8 h-8 rounded-[10px] bg-orange-100 dark:bg-orange-950/80 text-orange-700 dark:text-orange-400 font-black text-sm flex items-center justify-center">
               1
             </div>
             <h4 className="font-bold text-xs text-slate-900 dark:text-white">Bagikan Kode Unik</h4>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            <p className="text-caption text-slate-500 dark:text-slate-400">
               Kirim kode atau link referral kamu ke teman pencari kerja.
             </p>
           </div>
 
           <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
-            <div className="w-8 h-8 rounded-[10px] bg-orange-100 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 font-black text-sm flex items-center justify-center">
+            <div className="w-8 h-8 rounded-[10px] bg-orange-100 dark:bg-orange-950/80 text-orange-700 dark:text-orange-400 font-black text-sm flex items-center justify-center">
               2
             </div>
-            <h4 className="font-bold text-xs text-slate-900 dark:text-white">Teman Daftar & Pakai</h4>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Teman mendaftar akun dan menyelesaikan onboarding pembuatan CV pertama.
+            <h4 className="font-bold text-xs text-slate-900 dark:text-white">Teman Daftar & Beli Paket</h4>
+            <p className="text-caption text-slate-500 dark:text-slate-400">
+              Teman mendaftar akun dan membeli paket membership pilihan mereka.
             </p>
           </div>
 
           <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
-            <div className="w-8 h-8 rounded-[10px] bg-orange-100 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 font-black text-sm flex items-center justify-center">
+            <div className="w-8 h-8 rounded-[10px] bg-orange-100 dark:bg-orange-950/80 text-orange-700 dark:text-orange-400 font-black text-sm flex items-center justify-center">
               3
             </div>
-            <h4 className="font-bold text-xs text-slate-900 dark:text-white">Dapatkan Hadiah</h4>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Kamu otomatis mendapatkan +14 Hari Pass Premium & Saldo Koin per teman.
+            <h4 className="font-bold text-xs text-slate-900 dark:text-white">Dapatkan Komisi Tunai</h4>
+            <p className="text-caption text-slate-500 dark:text-slate-400">
+              Dapatkan komisi tunai Rp2.500 yang langsung masuk ke saldo akunmu per teman berhasil.
             </p>
           </div>
         </div>
@@ -190,11 +203,11 @@ export const ReferralView: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-            <Users className="w-4 h-4 text-orange-600" />
+            <Users className="w-4 h-4 text-orange-700 dark:text-orange-400" />
             Daftar Teman yang Bergabung ({invitedFriends.length})
           </h3>
-          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/80 px-2.5 py-1 rounded-[10px] border border-emerald-200 dark:border-emerald-800/40">
-            Status Rewards Aktif
+          <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/80 px-2.5 py-1 rounded-[10px] border border-emerald-200 dark:border-emerald-800/40">
+            Program Komisi Aktif
           </span>
         </div>
 
@@ -209,12 +222,12 @@ export const ReferralView: React.FC = () => {
                 />
                 <div>
                   <h4 className="font-bold text-slate-900 dark:text-white">{friend.name}</h4>
-                  <p className="text-[11px] text-slate-400">Bergabung: {friend.date}</p>
+                  <p className="text-caption text-slate-500 dark:text-slate-400">Bergabung: {friend.date}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 text-right">
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                <span className="text-caption text-slate-500 dark:text-slate-400 font-medium">
                   {friend.status}
                 </span>
                 <span className="px-2.5 py-1 rounded-[10px] text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40">
@@ -226,7 +239,7 @@ export const ReferralView: React.FC = () => {
             <div className="py-8 text-center">
               <Users className="w-10 h-10 mx-auto text-slate-300 dark:text-slate-700 mb-2" />
               <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Belum ada teman yang bergabung</p>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Bagikan kode referral kamu untuk mulai mengundang teman</p>
+              <p className="text-caption text-slate-500 dark:text-slate-500 mt-1">Bagikan kode referral kamu untuk mulai mengundang teman</p>
             </div>
           )}
         </div>

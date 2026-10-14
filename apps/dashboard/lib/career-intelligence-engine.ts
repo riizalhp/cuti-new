@@ -5,6 +5,8 @@
  * dan riwayat lamaran untuk menghasilkan evaluasi berbasis bukti (evidence-based).
  */
 
+import { getLokerUrl } from './urls';
+
 export interface EvidenceItem {
   source: 'cv_experience' | 'cv_project' | 'cv_skill' | 'cv_education' | 'profile' | 'tracker';
   title: string;
@@ -970,6 +972,15 @@ export function evaluateCareerIntelligence(
     }
   });
 
+  // Prioritas 3: Jika alternatif masih kurang dari 3, sertakan role acuan dari katalog umum untuk pembanding
+  if (relevantAlternativeRoles.length < 3) {
+    ROLE_TAXONOMY.forEach((r) => {
+      if (r.id !== targetRole.id && !relevantAlternativeRoles.some((ar) => ar.id === r.id)) {
+        relevantAlternativeRoles.push(r);
+      }
+    });
+  }
+
   const careerDirections: CareerDirectionItem[] = relevantAlternativeRoles.map((altRole) => {
     let altTotalScore = 0;
     let altTotalWeights = 0;
@@ -1022,7 +1033,7 @@ export function evaluateCareerIntelligence(
     description: `Gunakan standar industri ini sebagai panduan. Cantumkan keahlian ${targetRole.competencies.slice(0, 2).map((c) => c.name).join(' & ')} pada dokumen CV Anda.`,
     actionUrl: `/cv`,
     actionLabel: `Buat CV ${targetRole.title}`,
-    secondaryActionUrl: 'https://loker.employr.id',
+    secondaryActionUrl: getLokerUrl(),
     secondaryActionLabel: 'Lihat Lowongan Terbuka',
   };
 
@@ -1035,14 +1046,14 @@ export function evaluateCareerIntelligence(
         description: `Kesenjangan nilai saat ini (${topGap.currentScore} dari target ${topGap.requiredScore}) perlu ditutup untuk meningkatkan daya saing di posisi ${targetRole.title}. ${topGap.suggestedAction}`,
         actionUrl: targetCv ? `/cv` : '/cv',
         actionLabel: targetCv ? `Sesuaikan ${targetCv.title}` : 'Sesuaikan CV Saya',
-        secondaryActionUrl: 'https://loker.employr.id',
+        secondaryActionUrl: getLokerUrl(),
         secondaryActionLabel: 'Cari Lowongan Serupa',
       };
     } else {
       nextMove = {
         title: `Dokumen ${targetCv ? `"${targetCv.title}"` : 'Karier Anda'} Sangat Kompetitif untuk Posisi ${targetRole.title}`,
         description: `Kecocokan role mencapai ${roleFitScore}%. Manfaatkan momentum ini untuk mengirim lamaran ke lowongan kerja yang relevan.`,
-        actionUrl: 'https://loker.employr.id',
+        actionUrl: getLokerUrl(),
         actionLabel: 'Jelajahi Lowongan Kerja',
         secondaryActionUrl: '/tracker',
         secondaryActionLabel: 'Buka Tracker Lamaran',

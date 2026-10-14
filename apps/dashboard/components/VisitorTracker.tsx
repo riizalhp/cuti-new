@@ -10,6 +10,7 @@ import {
   initClientTelemetry,
   getOrCreateVisitorId,
 } from '@/lib/visitor-tracker';
+import { getStoredSession } from '@/lib/auth';
 
 interface VisitorTrackerProps {
   userId?: string | null;
@@ -24,39 +25,46 @@ function getModuleName(path: string): string {
   return 'BERANDA';
 }
 
+function isValidUUID(str?: string | null): boolean {
+  if (!str || typeof str !== 'string') return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
+
 export function VisitorTracker({ userId }: VisitorTrackerProps) {
+  const safeUserId = isValidUUID(userId) ? userId : null;
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastPathRef = useRef<string>('');
+  const lastLinkedUserRef = useRef<string | null>(null);
 
   // 0. Global Client Telemetry (Errors, Web Vitals, Print)
   useEffect(() => {
-    initClientTelemetry(userId);
-  }, [userId]);
+    initClientTelemetry(safeUserId);
+  }, [safeUserId]);
 
   // 1. Initial & Route Change Tracking
   useEffect(() => {
     const fullPath = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '');
     
-    // Track user linking if userId is supplied or in cookie/localStorage
-    if (userId) {
-      trackLinkUser(userId);
-    } else {
-      try {
-        const storedUser = localStorage.getItem('employr_user');
-        if (storedUser) {
-          const parsed = JSON.parse(storedUser);
-          if (parsed?.id) trackLinkUser(parsed.id);
-        }
-      } catch {}
-    }
-
+    // Always trigger page view first so Visitor and VisitorSession are initialized in DB
     if (fullPath !== lastPathRef.current) {
       lastPathRef.current = fullPath;
-      trackPageView(document.title || pathname, userId);
+      trackPageView(document.title || pathname, safeUserId);
     }
-  }, [pathname, searchParams, userId]);
+
+    // Track user linking if userId is supplied or in session (deduplicated per user session)
+    const rawUserId = safeUserId || getStoredSession()?.id;
+    const effectiveUserId = isValidUUID(rawUserId) ? rawUserId : null;
+    if (effectiveUserId && lastLinkedUserRef.current !== effectiveUserId) {
+      lastLinkedUserRef.current = effectiveUserId;
+      // Brief timeout to ensure page_view session record exists in database
+      const linkTimer = setTimeout(() => {
+        trackLinkUser(effectiveUserId);
+      }, 300);
+      return () => clearTimeout(linkTimer);
+    }
+  }, [pathname, searchParams, safeUserId]);
 
   // 2. Heartbeat Timer (every 25 seconds if document is visible)
   useEffect(() => {
@@ -64,9 +72,9 @@ export function VisitorTracker({ userId }: VisitorTrackerProps) {
 
     const runHeartbeat = () => {
       if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
-        trackHeartbeat(25, userId);
+        trackHeartbeat(25, safeUserId);
         const mod = getModuleName(pathname);
-        trackModuleDuration(mod, 25, userId);
+        trackModuleDuration(mod, 25, safeUserId);
       }
     };
 

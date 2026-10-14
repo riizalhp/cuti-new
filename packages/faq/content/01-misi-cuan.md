@@ -1,43 +1,43 @@
 ---
-title: Misi & Cuan — Kumpulkan Koin, XP, dan Reward
-description: Cara kerja program Misi & Cuan: check-in harian, kerjakan misi, kumpulkan Koin & XP, klaim reward, dan naikkan level kariermu.
+title: Misi & Cuan: Kumpulkan Koin, XP, dan Reward
+description: Alur program Misi & Cuan: check-in harian, penyelesaian misi terverifikasi, perolehan Koin dan XP, serta penukaran saldo.
 category: misi-reward
 order: 1
-updatedAt: 2026-08-18
+updatedAt: 2026-09-26
 keywords: misi cuan, misi, cuan, koin, xp, level, check-in harian, reward, leaderboard, klaim misi, submit bukti, saldo koin, penukaran reward, gamification
 ---
 
-**Misi & Cuan** (/misi-cuan) adalah program gamifikasi Employr: setiap aktivitas produktif mencari kerja memberimu **Koin Karier** dan **XP** yang bisa ditukar dengan reward — saldo e-wallet, pulsa, hingga akses membership.
+Fitur **Misi & Cuan** (/misi-cuan) mengapresiasi aktivitas persiapan karier dengan memberikan **Koin Karier** dan **XP**. Saldo koin yang terkumpul dapat ditukarkan menjadi saldo e-wallet atau pulsa.
 
-## Koin, XP, dan Level
+## Sistem Koin, XP, dan Level
 
-- **Saldo Koin** — ditampilkan di header halaman; inilah "mata uang" untuk menukar reward.
-- **Level Karier** — XP yang terkumpul menaikkan levelmu. Setiap level membutuhkan lebih banyak XP (level × 600 XP).
-- **Leaderboard** — bandingkan peringkatmu dengan pengguna lain berdasarkan koin & level.
+- **Saldo Koin**: jumlah koin aktif yang tampil di bagian atas halaman untuk penukaran reward.
+- **Level Karier**: akumulasi XP yang merefleksikan keaktifan akunmu. Kebutuhan XP meningkat seiring bertambahnya tingkatan level.
+- **Peringkat (Leaderboard)**: urutan keaktifan pengguna berdasarkan total perolehan koin dan level.
 
 ## Check-in harian
 
-- Setiap hari kamu bisa mengambil **bonus check-in** senilai **+1.000 Koin + 100 XP**.
-- Klik **Ambil Bonus Check-In** — setelah diklaim, tombol berubah menjadi *"Sudah Check-In Hari Ini"* dan baru bisa diambil lagi besok.
+- Kamu dapat mengklaim bonus harian sebesar **+1.000 Koin dan +100 XP** setiap 24 jam.
+- Klik tombol **Ambil Bonus Check-In**. Tombol akan terkunci hingga jadwal klaim hari berikutnya.
 
-## Mengerjakan misi
+## Cara menyelesaikan misi
 
 1. Buka tab **Daftar Misi Aktif**.
-2. Pilih misi — lihat **target**, **reward koin/XP**, dan **deadline**-nya.
-3. Kerjakan misinya (misalnya mendaftar akun tertentu, mengisi survei, atau aktivitas sosial).
-4. **Submit bukti pengerjaan** — bisa berupa **screenshot**, **link**, atau **teks**, sesuai ketentuan misi.
-5. Status berubah menjadi *Menunggu Review* → setelah disetujui admin, reward ditambahkan ke saldomu dan misi tercatat selesai.
+2. Pilih kartu misi untuk melihat target pengerjaan, batas waktu, dan nilai reward.
+3. Selesaikan instruksi yang diminta (seperti melengkapi profil, survei karier, atau aktivitas edukasi).
+4. Unggah bukti pengerjaan berupa tangkapan layar, tautan, atau penjelasan singkat sesuai ketentuan.
+5. Status pengerjaan akan masuk ke tahap verifikasi tim admin. Setelah disetujui, saldo koin langsung bertambah.
 
-## Riwayat & penukaran
+## Riwayat dan pencairan saldo
 
-- Tab **Riwayat** menampilkan log misi yang disetujui serta pencairan reward.
-- Koin yang terkumpul bisa ditukar dengan **Saldo E-Wallet** atau **Pulsa** (opsi penukaran sesuai ketersediaan program).
+- Tab **Riwayat** mencatat seluruh log verifikasi misi serta riwayat penarikan reward.
+- Koin dapat dicairkan ke saldo e-wallet (DANA, GoPay, OVO) atau pulsa setelah melewati ambang batas minimum pencairan.
 
 ## Pertanyaan umum
 
-- **Kapan reward masuk?** Setelah admin menyetujui bukti pengerjaan misi.
-- **Bisa ikut misi yang sama dua kali?** Umumnya setiap misi hanya sekali per akun (per user & misi).
-- **Koin hangus?** Koin tersimpan di saldo akunmu; aturan kedaluwarsa mengikuti ketentuan program.
-- **Check-in lupa satu hari?** Tidak apa-apa, kamu hanya kehilangan bonus hari itu dan bisa lanjut besok.
+- **Kapan reward masuk ke saldo akun?** Saldo otomatis masuk setelah bukti pengerjaan disetujui oleh tim verifikator.
+- **Apakah satu misi bisa dikerjakan berulang kali?** Setiap misi hanya dapat diselesaikan satu kali per akun kecuali tertera label berkala.
+- **Apakah saldo koin memiliki masa kedaluwarsa?** Koin tetap tersimpan selama akun aktif dan mengikuti syarat ketentuan program.
+- **Apa akibatnya jika terlewat check-in harian?** Terlewat check-in hanya menghentikan bonus pada hari tersebut, dan kamu dapat melanjutkan klaim seperti biasa keesokan harinya.
 
-Lanjut baca: [Referral](/artikel/referral) dan [Panduan CV Builder](/artikel/panduan-cv-builder).
+Lanjut baca: [Program Referral](/artikel/referral) dan [Panduan CV Builder](/artikel/panduan-cv-builder).

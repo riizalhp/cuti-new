@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@employr/db";
+import { prisma, decryptSecret } from "@employr/db";
 import { getAuthUser } from "@/lib/server-auth";
 import { generateExactCacheKey, FIXED_MINI_SYSTEM_PROMPT } from "@/lib/nlp-pruner";
 import { semanticCache } from "@/lib/semantic-cache";
@@ -291,10 +291,14 @@ PANDUAN SISTEM & KEAMANAN EMPLOYR:
 
     for (let i = 0; i < candidateChain.length; i++) {
       const currentProvider = candidateChain[i];
-      const apiKey = currentProvider.api_key;
-      if (!apiKey) continue;
+      const rawApiKey = currentProvider.api_key;
+      if (!rawApiKey) continue;
+      const apiKey = decryptSecret(rawApiKey);
 
-      const endpoint = (currentProvider.base_url || "https://api.openai.com/v1").replace(/\/+$/, "");
+      let endpoint = (currentProvider.base_url || "https://api.openai.com/v1").replace(/\/+$/, "");
+      if (endpoint.includes("generativelanguage.googleapis.com") && !endpoint.endsWith("/openai")) {
+        endpoint = `${endpoint.replace(/\/v1beta\/?$/, "")}/v1beta/openai`;
+      }
       const model = currentProvider.model || "gpt-4o-mini";
       const url = `${endpoint}/chat/completions`;
       const providerLabel = currentProvider.alias || currentProvider.name || "custom_proxy";
@@ -311,7 +315,7 @@ PANDUAN SISTEM & KEAMANAN EMPLOYR:
 
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout per node
+        const timeoutId = setTimeout(() => controller.abort(), 35000); // 35s timeout per node
 
         const res = await fetch(url, {
           method: "POST",

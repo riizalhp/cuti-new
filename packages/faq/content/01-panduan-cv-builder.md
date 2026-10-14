@@ -12,15 +12,13 @@ Menu **CV Saya** (/cv) adalah editor CV lengkap dengan tampilan **preview A4 liv
 ## Membuat CV baru
 
 1. Buka **CV Saya** → klik **+ Buat CV Baru**.
-2. **Pilih template** yang kamu suka. Tersedia banyak pilihan, di antaranya:
+2. **Pilih template** yang kamu suka. Tersedia 6 pilihan resmi ATS:
    - **ATS Modern Standard**: 1 kolom, paling optimal untuk sistem ATS BUMN & multinasional.
    - **Ketat Ruled Serif**: formal, cocok untuk Perbankan, Hukum & BUMN.
    - **Luasa Airy Minimalist**: lega dan bersih, cocok untuk profesional & manager.
-   - **Tebal Bold Statement**: nama besar, mencolok tanpa mengorbankan parser ATS.
-   - **Harvard Modern Black**: layout 2 kolom bergaya Harvard Business School.
+   - **Harvard Modern Grid**: layout 2 kolom date-content terinspirasi Harvard Business School.
    - **Rezi Classic Serif**: klasik untuk akademis, legal, dan consulting.
    - **Minimalist Executive**: ringkas & elegan untuk posisi manajerial.
-   - **Creative Tech & Digital**: untuk industri kreatif & teknologi.
 3. Isi **judul CV** dan **posisi target**, lalu mulai mengisi data.
 
 ## Section yang bisa diisi

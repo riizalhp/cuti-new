@@ -2,23 +2,32 @@
 // NewsletterBanner.astro - Full Width Newsletter + 4 Feature Highlight Pills
 ---
 
-<section id="lead-magnet-cv" class="py-12 sm:py-16 bg-[#f4f3ee] scroll-mt-24">
+<section id="lead-magnet-cv" class="py-8 sm:py-16 bg-[#f4f3ee] scroll-mt-24">
   <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
     <!-- Big Banner -->
-    <div class="relative bg-[#101010] text-[#f4f3ee] border border-[#222222] rounded-3xl p-6 sm:p-10 lg:p-12 overflow-hidden shadow-xl">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+    <div class="relative bg-[#101010] text-[#f4f3ee] border border-[#222222] rounded-3xl p-5 sm:p-10 lg:p-12 overflow-hidden shadow-xl">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
         <!-- Left Content -->
         <div class="lg:col-span-7 z-10">
-          <div class="section-label section-label--inverse mb-3"><i></i>NEWSLETTER &amp; CV STARTER PACK</div>
-          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white tracking-tight leading-tight mb-3">
+          <div class="section-label section-label--inverse mb-2.5 sm:mb-3">
+            <span>BULETIN &amp; PANDUAN CV</span>
+            <i></i>
+          </div>
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white tracking-tight leading-tight mb-2.5 sm:mb-3">
             Dapatkan Paket Template CV ATS &amp; <em>Buletin Karier 2026</em>
           </h2>
-          <p class="text-sm sm:text-base text-[#a3a299] leading-relaxed max-w-lg mb-6">
+          <p class="text-xs sm:text-base text-[#a3a299] leading-relaxed max-w-lg mb-5 sm:mb-6 font-normal">
             Daftarkan email kamu untuk mengunduh bundel template CV ATS siap pakai (format DOCX &amp; Google Docs) serta kurasi lowongan kerja terverifikasi dan beasiswa setiap pekan.
           </p>
 
           <!-- Input Email Form -->
-          <form class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 max-w-md mb-3" onsubmit="alert('Terima kasih! Link unduh Paket Template CV ATS 2026 telah dikirimkan ke email kamu.'); return false;">
+          <div id="newsletter-success" class="hidden p-3 rounded-xl bg-emerald-950/80 border border-emerald-800 text-xs text-emerald-300 font-medium mb-3">
+            ✓ Link unduh Paket Template CV ATS 2026 telah dikirimkan ke email kamu.
+          </div>
+          <div id="newsletter-error" class="hidden p-3 rounded-xl bg-rose-950/80 border border-rose-800 text-xs text-rose-300 font-medium mb-3">
+            Format email tidak valid atau terjadi kendala.
+          </div>
+          <form id="newsletter-form" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 max-w-md mb-3">
             <div class="relative flex-1">
               <span class="absolute left-3.5 top-3.5 text-[#777]">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,106 +35,164 @@
                 </svg>
               </span>
               <input
+                id="newsletter-email"
                 type="email"
                 placeholder="Masukkan alamat email aktif kamu"
                 required
-                class="w-full pl-10 pr-4 py-3.5 rounded-full border border-[#333] bg-[#1a1a1a] text-xs sm:text-sm text-white placeholder-[#777] outline-none focus:border-[#0000ff] shadow-inner"
+                class="w-full min-w-0 pl-10 pr-4 py-3 sm:py-3.5 rounded-full border border-[#333] bg-[#1a1a1a] text-xs sm:text-sm text-white placeholder-[#777] outline-none focus:border-[#1738D1] shadow-inner"
               />
             </div>
             <button
               type="submit"
-              class="px-6 py-3.5 rounded-full bg-[#0000ff] hover:bg-[#1738d1] text-white text-xs sm:text-sm font-semibold transition shadow-md shadow-[#0000ff]/30 shrink-0 cursor-pointer text-center"
+              class="px-6 py-3 sm:py-3.5 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs sm:text-sm font-semibold transition shadow-md shadow-[#1738D1]/30 shrink-0 cursor-pointer text-center"
             >
-              Klaim Template Gratis →
+              Unduh Template
             </button>
           </form>
 
-          <div class="flex items-center gap-1.5 text-[11px] text-[#a3a299]">
-            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#a3a299]">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
-            <span>Privasi terjaga 100%. Template langsung dikirim ke email kamu tanpa biaya.</span>
+            <span>Email kamu aman. Template langsung dikirim tanpa biaya.</span>
           </div>
         </div>
 
         <!-- Right Side: Graphic Photo -->
-        <div class="lg:col-span-5 relative flex justify-center lg:justify-end">
-          <div class="relative w-64 sm:w-72 aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border-4 border-[#222] bg-[#1a1a1a]">
+        <div class="lg:col-span-5 relative flex justify-center lg:justify-end mt-2 sm:mt-0">
+          <div class="relative w-56 sm:w-72 aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border-4 border-[#222] bg-[#1a1a1a]">
             <img
               src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80"
               alt="Talenta muda menyongsong masa depan"
               class="w-full h-full object-cover"
               loading="lazy"
+              onerror="this.onerror=null;this.src='/images/hero-job.webp';"
             />
           </div>
 
           <!-- Floating Template Badge -->
-          <div class="absolute -bottom-3 -left-4 sm:left-4 z-20 bg-[#1a1a1a]/95 backdrop-blur-md p-3.5 rounded-2xl border border-[#333] shadow-xl max-w-[210px] flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-xl bg-emerald-950/60 border border-emerald-800/60 text-emerald-400 flex items-center justify-center shrink-0">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="absolute -bottom-2 sm:-bottom-3 -left-2 sm:left-4 z-20 bg-[#1a1a1a]/95 backdrop-blur-md p-3 sm:p-3.5 rounded-2xl border border-[#333] shadow-xl max-w-[200px] sm:max-w-[210px] flex items-center gap-2.5">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-950/60 border border-emerald-800/60 text-emerald-400 flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
             </div>
             <div>
-              <span class="text-[11px] text-white font-bold block leading-tight">
+              <span class="text-[10px] sm:text-[11px] text-white font-bold block leading-tight">
                 Paket Template 2026
               </span>
-              <span class="text-[10px] text-[#a3a299]">CV ATS + Cover Letter</span>
+              <span class="text-[9px] sm:text-[10px] text-[#a3a299]">CV ATS + Cover Letter</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 4 Highlight Value Pills Below Banner -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-      <div class="p-4 rounded-2xl bg-white border border-[#d7d6cf] flex items-center gap-3.5 shadow-sm hover:border-[#0000ff]/30 transition">
-        <div class="w-10 h-10 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#0000ff] flex items-center justify-center shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <!-- 4 Highlight Value Pills Below Banner (2-cols on mobile, 4-cols on lg) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mt-6 sm:mt-8">
+      <div class="p-3.5 sm:p-6 rounded-2xl bg-white border border-[#d7d6cf] flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-4 shadow-paper hover:border-[#1738D1]/40 hover:-translate-y-0.5 transition duration-200">
+        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#1738D1] flex items-center justify-center shrink-0">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
           </svg>
         </div>
         <div>
-          <h4 class="text-xs sm:text-sm font-semibold text-[#101010]">Update Lowongan</h4>
-          <p class="text-[11px] text-[#6e6d68] mt-0.5">Lowongan kerja terbaru setiap hari langsung ke email.</p>
+          <h4 class="text-xs sm:text-sm font-bold text-[#101010] leading-snug">Update Lowongan</h4>
+          <p class="text-[10px] sm:text-[11px] text-[#6e6d68] mt-0.5 font-medium leading-relaxed line-clamp-2">Lowongan kerja harian langsung ke email.</p>
         </div>
       </div>
 
-      <div class="p-4 rounded-2xl bg-white border border-[#d7d6cf] flex items-center gap-3.5 shadow-sm hover:border-[#0000ff]/30 transition">
-        <div class="w-10 h-10 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#0000ff] flex items-center justify-center shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="p-3.5 sm:p-6 rounded-2xl bg-white border border-[#d7d6cf] flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-4 shadow-paper hover:border-[#1738D1]/40 hover:-translate-y-0.5 transition duration-200">
+        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#1738D1] flex items-center justify-center shrink-0">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
           </svg>
         </div>
         <div>
-          <h4 class="text-xs sm:text-sm font-semibold text-[#101010]">Info Job Fair &amp; Event</h4>
-          <p class="text-[11px] text-[#6e6d68] mt-0.5">Jadwal bursa kerja, webinar, &amp; walk-in interview.</p>
+          <h4 class="text-xs sm:text-sm font-bold text-[#101010] leading-snug">Job Fair &amp; Event</h4>
+          <p class="text-[10px] sm:text-[11px] text-[#6e6d68] mt-0.5 font-medium leading-relaxed line-clamp-2">Jadwal bursa kerja &amp; webinar berkala.</p>
         </div>
       </div>
 
-      <div class="p-4 rounded-2xl bg-white border border-[#d7d6cf] flex items-center gap-3.5 shadow-sm hover:border-[#0000ff]/30 transition">
-        <div class="w-10 h-10 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#0000ff] flex items-center justify-center shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="p-3.5 sm:p-6 rounded-2xl bg-white border border-[#d7d6cf] flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-4 shadow-paper hover:border-[#1738D1]/40 hover:-translate-y-0.5 transition duration-200">
+        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#1738D1] flex items-center justify-center shrink-0">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
           </svg>
         </div>
         <div>
-          <h4 class="text-xs sm:text-sm font-semibold text-[#101010]">Tips CV &amp; Interview</h4>
-          <p class="text-[11px] text-[#6e6d68] mt-0.5">Trik lolos screening HRD &amp; negosiasi gaji teruji.</p>
+          <h4 class="text-xs sm:text-sm font-bold text-[#101010] leading-snug">Tips CV &amp; Interview</h4>
+          <p class="text-[10px] sm:text-[11px] text-[#6e6d68] mt-0.5 font-medium leading-relaxed line-clamp-2">Trik lolos screening HRD &amp; negosiasi gaji.</p>
         </div>
       </div>
 
-      <div class="p-4 rounded-2xl bg-white border border-[#d7d6cf] flex items-center gap-3.5 shadow-sm hover:border-[#0000ff]/30 transition">
-        <div class="w-10 h-10 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#0000ff] flex items-center justify-center shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="p-3.5 sm:p-6 rounded-2xl bg-white border border-[#d7d6cf] flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-4 shadow-paper hover:border-[#1738D1]/40 hover:-translate-y-0.5 transition duration-200">
+        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#1738D1] flex items-center justify-center shrink-0">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
           </svg>
         </div>
         <div>
-          <h4 class="text-xs sm:text-sm font-semibold text-[#101010]">Beasiswa &amp; Sertifikasi</h4>
-          <p class="text-[11px] text-[#6e6d68] mt-0.5">Peluang sertifikasi gratis &amp; kursus bersubsidi.</p>
+          <h4 class="text-xs sm:text-sm font-bold text-[#101010] leading-snug">Beasiswa &amp; Kursus</h4>
+          <p class="text-[10px] sm:text-[11px] text-[#6e6d68] mt-0.5 font-medium leading-relaxed line-clamp-2">Sertifikasi gratis &amp; kursus bersubsidi.</p>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<script is:inline>
+  const newsletterForm = document.getElementById('newsletter-form');
+  const newsletterSuccess = document.getElementById('newsletter-success');
+  const newsletterError = document.getElementById('newsletter-error');
+  const emailInput = document.getElementById('newsletter-email');
+
+  if (newsletterForm && emailInput) {
+    newsletterForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = emailInput.value?.trim();
+      if (!email) return;
+
+      const submitBtn = newsletterForm.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn ? submitBtn.innerText : 'Unduh Template';
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Memproses...';
+      }
+      if (newsletterError) newsletterError.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/newsletter/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, source: 'BANNER_TEMPLATE_CV' }),
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          if (newsletterSuccess) {
+            newsletterSuccess.innerText = `✓ ${data.message || 'Paket Template CV ATS dan Buletin Karier telah aktif dikirimkan!'}`;
+            newsletterSuccess.classList.remove('hidden');
+          }
+          newsletterForm.classList.add('hidden');
+        } else {
+          if (newsletterError) {
+            newsletterError.innerText = data.message || 'Gagal memproses pendaftaran email.';
+            newsletterError.classList.remove('hidden');
+          }
+        }
+      } catch (err) {
+        if (newsletterError) {
+          newsletterError.innerText = 'Terjadi kesalahan jaringan. Silakan coba lagi.';
+          newsletterError.classList.remove('hidden');
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = originalBtnText;
+        }
+      }
+    });
+  }
+</script>

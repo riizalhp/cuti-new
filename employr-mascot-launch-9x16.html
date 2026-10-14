@@ -1,0 +1,1441 @@
+<!doctype html>
+<html lang="id">
+<!-- 
+  ==========================================================================
+  EMPLOYR PRODUCT LAUNCH (9:16) — BANG MOTION v1.19.0
+  https://github.com/bangtutorial/bang-motion
+  
+  REVISI TOTAL:
+  - ZERO OVERLAP: Pemisahan zona spasial ketat (Header, Headline, Stage, Cards, CTA, VO)
+  - MASCOT DYNAMIC RIG: Karakter bergerak aktif (Squash & stretch, lompat, miring, tap tablet,
+    head-turn, pose presenter, winks, glint, debu landing, dan pose jempol heroik).
+  ==========================================================================
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employr — Launching Video Bermaskot (9:16)</title>
+
+<!-- GOOGLE FONTS -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+<!-- GSAP 3.12.5 -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+<style>
+:root {
+  --cobalt: #1738D1;
+  --cobalt-dark: #0E248C;
+  --cobalt-light: #3D61FF;
+  --navy: #1F3578;
+  --paper: #F6F7F3;
+  --card-bg: #FFFFFF;
+  --ink: #101114;
+  --ink-muted: #525766;
+  --lime: #C8F55B;
+  --emerald: #10B981;
+  --amber: #F59E0B;
+  --rose: #EF4444;
+  --border: rgba(16, 17, 20, 0.1);
+  --sans: "Inter Tight", -apple-system, BlinkMacSystemFont, sans-serif;
+  --serif: "Instrument Serif", Georgia, serif;
+  --mono: "Geist", monospace, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #050608;
+  overflow: hidden;
+  font-family: var(--sans);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   STAGE CONTAINER 9:16 (1080 x 1920) — STRICT PROPORTION & AUTO-FIT
+   ========================================================================== */
+#stage {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 1080px;
+  height: 1920px;
+  transform: translate(-50%, -50%) scale(1);
+  overflow: hidden;
+  background: var(--paper);
+  border-radius: 48px;
+  box-shadow: 0 40px 140px rgba(0, 0, 0, 0.8);
+  transform-origin: center center;
+}
+
+/* LATAR GRID TEKNIS & AMBIENT GLOW */
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle, rgba(16, 17, 20, 0.08) 1.5px, transparent 1.5px);
+  background-size: 44px 44px;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.ambient-bloom {
+  position: absolute;
+  width: 900px;
+  height: 900px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(23, 56, 209, 0.16) 0%, rgba(200, 245, 91, 0.1) 40%, transparent 70%);
+  filter: blur(120px);
+  pointer-events: none;
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+/* ==========================================================================
+   ZONA 1: TOP HEADER (Y: 60px - 160px)
+   ========================================================================== */
+.top-header {
+  position: absolute;
+  top: 60px;
+  left: 64px;
+  right: 64px;
+  height: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 80;
+}
+.brand-pill {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  padding: 12px 28px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+.brand-icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--cobalt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 900;
+  font-size: 20px;
+}
+.brand-text {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.header-tag {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cobalt);
+  background: rgba(23, 56, 209, 0.08);
+  padding: 12px 24px;
+  border-radius: 100px;
+  border: 1px solid rgba(23, 56, 209, 0.18);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   ZONA 2: KINETIC HEADLINE (Y: 180px - 440px) — ZERO OVERLAP DENGAN KARTU
+   ========================================================================== */
+.text-stage {
+  position: absolute;
+  top: 180px;
+  left: 60px;
+  right: 60px;
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 70;
+  pointer-events: none;
+}
+.caption-beat {
+  position: absolute;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(24px) scale(0.96);
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+}
+.caption-beat em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--cobalt);
+}
+.highlight-pill {
+  display: inline-block;
+  background: var(--lime);
+  color: var(--ink);
+  padding: 2px 22px;
+  border-radius: 100px;
+  box-shadow: 0 4px 20px rgba(200, 245, 91, 0.45);
+}
+
+/* ==========================================================================
+   ZONA 3: MASCOT RIG STAGE (Y: 480px - 1420px) — DYNAMIC ANCHOR
+   ========================================================================== */
+#mascot-anchor {
+  position: absolute;
+  left: 50%;
+  top: 960px;
+  transform: translate(-50%, -50%);
+  width: 700px;
+  height: 700px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* ROOT WRAPPER UNTUK SQUASH & STRETCH DARI KAKI (50% 88%) */
+.mascot-image-wrapper {
+  position: relative;
+  width: 660px;
+  height: 660px;
+  transform-origin: 50% 88%;
+}
+
+.mascot-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 25px 45px rgba(23, 56, 209, 0.24));
+  user-select: none;
+}
+
+/* BAYANGAN DI LANTAI (IKUT MENGECIL SAAT LOMPAT) */
+.mascot-shadow {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 420px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(16, 17, 20, 0.28) 0%, transparent 72%);
+  filter: blur(8px);
+  z-index: -1;
+  transform-origin: center center;
+}
+
+/* LANDING DUST RINGS */
+.dust-ring {
+  position: absolute;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.2);
+  width: 380px;
+  height: 38px;
+  border-radius: 50%;
+  border: 4px solid var(--cobalt);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* EKSPRESI: KEDIP MATA */
+.mascot-eye-wink {
+  position: absolute;
+  top: 26.5%;
+  left: 36.2%;
+  width: 66px;
+  height: 12px;
+  border-radius: 12px;
+  background: #17244D;
+  opacity: 0;
+  transform-origin: center;
+  z-index: 45;
+}
+.mascot-eye-wink.right {
+  left: 56.4%;
+}
+
+/* KILATAN KACAMATA (GLINT) */
+.glasses-glint {
+  position: absolute;
+  top: 24%;
+  left: 39%;
+  width: 28px;
+  height: 28px;
+  background: #FFFFFF;
+  border-radius: 50%;
+  opacity: 0;
+  filter: blur(1px) drop-shadow(0 0 14px #FFFFFF);
+  transform: scale(0);
+  pointer-events: none;
+  z-index: 46;
+}
+
+/* KERINGAT BINGUNG (BABAK 1) */
+.sweat-drop {
+  position: absolute;
+  top: 18%;
+  right: 28%;
+  font-size: 42px;
+  opacity: 0;
+  transform: scale(0);
+  z-index: 48;
+}
+
+/* SINAR ENERGI JEMPOL (THUMB BURST) */
+.thumb-rays {
+  position: absolute;
+  top: 36%;
+  right: 5%;
+  width: 130px;
+  height: 130px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 42;
+}
+.ray-line {
+  position: absolute;
+  background: var(--cobalt);
+  border-radius: 4px;
+}
+.ray-1 { width: 34px; height: 7px; top: 12px; right: 12px; transform: rotate(45deg); }
+.ray-2 { width: 40px; height: 7px; top: 50px; right: -6px; transform: rotate(10deg); }
+.ray-3 { width: 32px; height: 7px; top: 92px; right: 12px; transform: rotate(-25deg); }
+
+/* ==========================================================================
+   ZONA 4: INTERACTIVE PROPS & CARDS (ZERO OVERLAP DENGAN MASKOT)
+   ========================================================================== */
+
+/* BABAK 1: KERTAS DILEMA DI SAMPING MASKOT */
+.floating-paper {
+  position: absolute;
+  background: #FFFFFF;
+  border: 2px dashed rgba(239, 68, 68, 0.4);
+  border-radius: 20px;
+  padding: 16px 26px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--rose);
+  z-index: 35;
+  opacity: 0;
+  pointer-events: none;
+}
+.paper-p1 { left: 50px; top: 620px; transform: rotate(-10deg); }
+.paper-p2 { right: 50px; top: 640px; transform: rotate(12deg); }
+.paper-p3 { left: 70px; top: 1140px; transform: rotate(-6deg); }
+
+.confused-mark {
+  position: absolute;
+  font-size: 72px;
+  font-weight: 900;
+  color: var(--cobalt);
+  z-index: 36;
+  opacity: 0;
+}
+
+/* BABAK 3: KARTU CV ATS — DITEMPATKAN DI SISI KIRI (MASKOT SLIDE KE KANAN) */
+#card-cv-ats {
+  position: absolute;
+  left: 60px;
+  top: 680px;
+  width: 480px;
+  background: #FFFFFF;
+  border-radius: 30px;
+  padding: 34px;
+  border: 2px solid rgba(16, 17, 20, 0.1);
+  box-shadow: 0 30px 80px rgba(23, 56, 209, 0.22);
+  z-index: 55;
+  opacity: 0;
+  transform: scale(0.6) rotate(-3deg);
+  pointer-events: none;
+}
+.cv-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.cv-candidate {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.cv-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--cobalt);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 22px;
+}
+.cv-name { font-size: 22px; font-weight: 800; color: var(--ink); }
+.cv-role { font-size: 15px; font-weight: 600; color: var(--ink-muted); }
+
+.ats-stamp {
+  background: var(--lime);
+  color: var(--ink);
+  font-size: 19px;
+  font-weight: 900;
+  padding: 8px 18px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0px var(--ink);
+  transform: rotate(-4deg);
+}
+.cv-skeleton-line {
+  height: 12px;
+  background: #EEF1F6;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.cv-skeleton-line.short { width: 55%; }
+.cv-skeleton-line.mid { width: 85%; }
+
+/* BABAK 4: TIGA KARTU ORBIT DI SEKELILING MASKOT (SEGITIGA SEIMBANG, ZERO OVERLAP) */
+.orbit-card {
+  position: absolute;
+  border-radius: 24px;
+  padding: 20px 28px;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 55;
+  opacity: 0;
+  pointer-events: none;
+}
+/* KIRI ATAS */
+.orbit-kanban {
+  left: 64px;
+  top: 540px;
+  border-left: 8px solid var(--emerald);
+}
+.orbit-kanban .card-val { font-size: 22px; font-weight: 800; color: var(--ink); }
+.orbit-kanban .card-sub { font-size: 14px; font-weight: 800; color: var(--emerald); text-transform: uppercase; }
+
+/* KANAN ATAS */
+.orbit-cuan {
+  right: 64px;
+  top: 570px;
+  border: 2px solid var(--lime);
+}
+.coin-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--lime);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--ink);
+  box-shadow: 0 4px 14px rgba(200, 245, 91, 0.6);
+}
+.cuan-val { font-size: 24px; font-weight: 900; color: var(--ink); }
+.cuan-sub { font-size: 14px; font-weight: 800; color: #166534; }
+
+/* BAWAH TENGAH */
+.orbit-loker {
+  left: 50%;
+  transform: translateX(-50%);
+  top: 1300px;
+  background: #1F3578;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.orbit-loker .loker-val { font-size: 22px; font-weight: 800; color: #FFFFFF; }
+.orbit-loker .loker-sub { font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.85); }
+
+/* BABAK 5: LIFETIME BADGE DI BAWAH MASKOT (MASKOT NAIK KE ATAS) */
+#card-lifetime {
+  position: absolute;
+  left: 50%;
+  top: 1100px;
+  transform: translateX(-50%) scale(0.7);
+  width: 720px;
+  background: #101114;
+  color: #FFFFFF;
+  padding: 34px 50px;
+  border-radius: 36px;
+  border: 3px solid var(--lime);
+  box-shadow: 0 35px 90px rgba(0, 0, 0, 0.5), 0 0 50px rgba(200, 245, 91, 0.35);
+  text-align: center;
+  z-index: 55;
+  opacity: 0;
+  pointer-events: none;
+}
+.lifetime-badge-tag {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--lime);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+}
+.lifetime-title {
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: #FFFFFF;
+}
+.lifetime-title em {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--lime);
+}
+.lifetime-sub {
+  margin-top: 12px;
+  font-size: 20px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* ==========================================================================
+   ZONA 5: FINAL CTA STAGE (Y: 1360px - 1560px)
+   ========================================================================== */
+.bottom-cta-stage {
+  position: absolute;
+  top: 1380px;
+  left: 60px;
+  right: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 70;
+  pointer-events: none;
+}
+.cta-button-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  width: 100%;
+  max-width: 680px;
+  background: var(--cobalt);
+  color: #FFFFFF;
+  padding: 28px 48px;
+  border-radius: 100px;
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  box-shadow: 0 20px 60px rgba(23, 56, 209, 0.45);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  transform: translateY(30px) scale(0.9);
+  opacity: 0;
+  pointer-events: auto;
+}
+.cta-subtext {
+  margin-top: 18px;
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink-muted);
+  opacity: 0;
+  letter-spacing: 0.06em;
+}
+
+/* CONFETTI CONTAINER */
+#confetti-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+}
+.confetti-dot {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+/* ==========================================================================
+   ZONA 6: TELEPROMPTER / SUBTITLE BAR (Y: 1760px - 1860px)
+   ========================================================================== */
+#vo-bar {
+  position: absolute;
+  bottom: 40px;
+  left: 60px;
+  right: 60px;
+  background: rgba(16, 17, 20, 0.92);
+  backdrop-filter: blur(20px);
+  padding: 16px 32px;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 90;
+  font-family: var(--sans);
+  font-size: 21px;
+  font-weight: 600;
+  color: #FFFFFF;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+#vo-bar em {
+  font-style: normal;
+  color: var(--lime);
+  font-weight: 800;
+  margin-right: 10px;
+}
+
+/* ==========================================================================
+   DEBUG CONTROLS (?debug=1)
+   ========================================================================== */
+#debug-ui {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  display: none;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 28px;
+  border-radius: 100px;
+  background: rgba(16, 17, 20, 0.96);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 16px;
+  color: #FFFFFF;
+  z-index: 999;
+  font-family: var(--mono);
+}
+#debug-ui.on { display: flex; }
+#debug-ui button {
+  background: var(--cobalt);
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 100px;
+  font-weight: 700;
+  cursor: pointer;
+}
+#scrub {
+  width: 340px;
+  accent-color: var(--lime);
+  cursor: pointer;
+}
+#time-clock {
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  min-width: 60px;
+  color: var(--lime);
+}
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <!-- BACKGROUND LAYERS -->
+  <div class="bg-grid"></div>
+  <div class="ambient-bloom" id="bloom"></div>
+
+  <!-- ZONA 1: TOP HEADER -->
+  <div class="top-header">
+    <div class="brand-pill">
+      <div class="brand-icon-circle">e</div>
+      <div class="brand-text">employr</div>
+    </div>
+    <div class="header-tag">Career OS</div>
+  </div>
+
+  <!-- ZONA 2: KINETIC HEADLINE BEATS -->
+  <div class="text-stage">
+    <div class="caption-beat" id="beat-1">
+      Mau lamar kerja,<br><em>tapi bingung</em> mulai?
+    </div>
+    <div class="caption-beat" id="beat-2">
+      Kenalin, <span class="highlight-pill">Employr</span><br>
+      Teman setia <em>kariermu.</em>
+    </div>
+    <div class="caption-beat" id="beat-3">
+      Bikin CV <span class="highlight-pill">Standar HR</span><br>
+      Sat-set &amp; rapi.
+    </div>
+    <div class="caption-beat" id="beat-4">
+      <span class="highlight-pill">Lacak Lamaran</span><br>
+      Plus misi berhadiah.
+    </div>
+    <div class="caption-beat" id="beat-5">
+      Sekali Gabung,<br>
+      <em>Aktif Selamanya.</em>
+    </div>
+    <div class="caption-beat" id="beat-6">
+      Mulai Sekarang.<br>
+      <span class="highlight-pill">employr.id</span>
+    </div>
+  </div>
+
+  <!-- ZONA 3: MASCOT RIG STAGE -->
+  <div id="mascot-anchor">
+    <div class="dust-ring" id="dust"></div>
+    <div class="mascot-image-wrapper" id="mascot-wrap">
+      <img src="assets/employr-mascot.png" alt="Employr Mascot" class="mascot-img" id="mascot-main">
+      
+      <!-- Eye Blink Overlays -->
+      <div class="mascot-eye-wink left" id="wink-l"></div>
+      <div class="mascot-eye-wink right" id="wink-r"></div>
+      
+      <!-- Glasses Sparkle Glint -->
+      <div class="glasses-glint" id="glint"></div>
+
+      <!-- Sweat Drop Confusion -->
+      <div class="sweat-drop" id="sweat">💦</div>
+
+      <!-- Thumbs Up Speedline Burst -->
+      <div class="thumb-rays" id="thumb-burst">
+        <div class="ray-line ray-1"></div>
+        <div class="ray-line ray-2"></div>
+        <div class="ray-line ray-3"></div>
+      </div>
+    </div>
+    <div class="mascot-shadow" id="shadow"></div>
+  </div>
+
+  <!-- ZONA 4: INTERACTIVE SCENE PROPS (ZERO OVERLAP) -->
+  
+  <!-- BABAK 1: KERTAS DILEMA -->
+  <div class="floating-paper paper-p1" id="p1">✕ Format Berantakan</div>
+  <div class="floating-paper paper-p2" id="p2">✕ Belum Lolos ATS</div>
+  <div class="floating-paper paper-p3" id="p3">✕ Lupa Status Lamaran</div>
+  <div class="confused-mark" id="q1" style="left: 170px; top: 520px;">?</div>
+  <div class="confused-mark" id="q2" style="right: 170px; top: 500px;">?</div>
+
+  <!-- BABAK 3: KARTU CV ATS (SISI KIRI) -->
+  <div id="card-cv-ats">
+    <div class="cv-header-row">
+      <div class="cv-candidate">
+        <div class="cv-avatar">e</div>
+        <div>
+          <div class="cv-name">Andi Pratama</div>
+          <div class="cv-role">Fresh Graduate • SMK / S1</div>
+        </div>
+      </div>
+      <div class="ats-stamp">✓ ATS 98%</div>
+    </div>
+    <div class="cv-skeleton-line short"></div>
+    <div class="cv-skeleton-line mid"></div>
+    <div class="cv-skeleton-line" style="width: 100%;"></div>
+    <div class="cv-skeleton-line short"></div>
+  </div>
+
+  <!-- BABAK 4: TIGA KARTU ORBIT -->
+  <div class="orbit-card orbit-kanban" id="orbit-1">
+    <div style="font-size: 32px;">📑</div>
+    <div>
+      <div class="card-val">PT Maju Bersama</div>
+      <div class="card-sub">✓ Offering Diterima</div>
+    </div>
+  </div>
+
+  <div class="orbit-card orbit-cuan" id="orbit-2">
+    <div class="coin-icon">Rp</div>
+    <div>
+      <div class="cuan-val">+Rp25.000</div>
+      <div class="cuan-sub">Misi Disetujui</div>
+    </div>
+  </div>
+
+  <div class="orbit-card orbit-loker" id="orbit-3">
+    <div style="font-size: 28px;">🎯</div>
+    <div>
+      <div class="loker-val">1.200+ Loker Terverifikasi</div>
+      <div class="loker-sub">Khusus Entry-Level</div>
+    </div>
+  </div>
+
+  <!-- BABAK 5: LIFETIME ACCESS BADGE (DI BAWAH MASKOT) -->
+  <div id="card-lifetime">
+    <div class="lifetime-badge-tag">No Subscription</div>
+    <div class="lifetime-title">Sekali Bayar.<br><em>Selamanya Punya.</em></div>
+    <div class="lifetime-sub">Tanpa Biaya Bulanan / Tahunan</div>
+  </div>
+
+  <!-- ZONA 5: FINAL CTA BUTTON -->
+  <div class="bottom-cta-stage">
+    <a href="https://www.employr.id" target="_blank" class="cta-button-pill" id="cta-btn">
+      <span>Mulai di employr.id</span>
+      <span style="color: var(--lime);">→</span>
+    </a>
+    <div class="cta-subtext" id="cta-sub">KARIER PERTAMAMU DIMULAI DI SINI</div>
+  </div>
+
+  <!-- CELEBRATION CONFETTI -->
+  <div id="confetti-container"></div>
+
+  <!-- ZONA 6: TELEPROMPTER SUBTITLE -->
+  <div id="vo-bar">
+    <em>VO:</em> <span id="vo-text">"Mau lamar kerja pertama, tapi bingung mulai dari mana?"</span>
+  </div>
+</div>
+
+<!-- DEBUG SCRUBBER BAR -->
+<div id="debug-ui">
+  <button id="btn-toggle">Jeda</button>
+  <button id="btn-replay">Ulang (R)</button>
+  <input type="range" id="scrub" min="0" max="25" step="0.05" value="0">
+  <span id="time-clock">00:00</span>
+</div>
+
+<!-- ==========================================================================
+     TIMELINE GSAP & AUDIO ENGINE
+     ========================================================================== -->
+<script>
+/* --- RESPONSIVE AUTO-SCALE 9:16 --- */
+function adjustScale() {
+  const stage = document.getElementById("stage");
+  const winW = window.innerWidth;
+  const winH = window.innerHeight;
+  const scale = Math.min((winW - 24) / 1080, (winH - 24) / 1920);
+  stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+}
+window.addEventListener("resize", adjustScale);
+adjustScale();
+
+/* --- WEB AUDIO SYNTHESIZER --- */
+class SynthFX {
+  constructor() {
+    this.ctx = null;
+    this.init();
+  }
+  init() {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) this.ctx = new AudioCtx();
+  }
+  ensure() {
+    if (this.ctx && this.ctx.state === "suspended") this.ctx.resume();
+  }
+  pop(freq = 440, duration = 0.08) {
+    if (!this.ctx) return;
+    this.ensure();
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq * 1.5, this.ctx.currentTime + duration);
+    gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + duration);
+  }
+  chime() {
+    if (!this.ctx) return;
+    this.ensure();
+    [523.25, 659.25, 783.99, 1046.50].forEach((f, idx) => {
+      setTimeout(() => this.pop(f, 0.18), idx * 70);
+    });
+  }
+  coin() {
+    if (!this.ctx) return;
+    this.ensure();
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(987.77, now);
+    osc.frequency.setValueAtTime(1318.51, now + 0.08);
+    gain.gain.setValueAtTime(0.14, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(now + 0.35);
+  }
+  whoosh() {
+    if (!this.ctx) return;
+    this.ensure();
+    const bufferSize = this.ctx.sampleRate * 0.22;
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(320, this.ctx.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(1900, this.ctx.currentTime + 0.14);
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(0.09, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.22);
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.ctx.destination);
+    noise.start();
+  }
+  thud() {
+    if (!this.ctx) return;
+    this.ensure();
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(45, now + 0.18);
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(now + 0.18);
+  }
+}
+const sfx = new SynthFX();
+window.addEventListener("click", () => sfx.ensure(), { once: true });
+
+/* --- PREPARE CONFETTI DOTS --- */
+const confettiContainer = document.getElementById("confetti-container");
+const confettiDots = [];
+const confettiColors = ["#1738D1", "#C8F55B", "#10B981", "#F59E0B", "#EF4444", "#3D61FF"];
+
+for (let i = 0; i < 48; i++) {
+  const dot = document.createElement("div");
+  dot.className = "confetti-dot";
+  dot.style.background = confettiColors[i % confettiColors.length];
+  const angle = (i / 48) * Math.PI * 2;
+  const dist = 220 + (i % 8) * 45;
+  dot.dataset.dx = Math.cos(angle) * dist;
+  dot.dataset.dy = Math.sin(angle) * dist;
+  confettiContainer.appendChild(dot);
+  confettiDots.push(dot);
+}
+
+/* ==========================================================================
+   GSAP TIMELINE (0.00s - 25.00s) — ULTRA DYNAMIC MASCOT MOVEMENT
+   ========================================================================== */
+const tl = gsap.timeline({
+  repeat: -1,
+  defaults: { ease: "power2.out" }
+});
+
+const mascotWrap = document.getElementById("mascot-wrap");
+const mascotAnchor = document.getElementById("mascot-anchor");
+const shadow = document.getElementById("shadow");
+const glint = document.getElementById("glint");
+const sweat = document.getElementById("sweat");
+const dust = document.getElementById("dust");
+const thumbBurst = document.getElementById("thumb-burst");
+const voText = document.getElementById("vo-text");
+
+/* ==========================================================================
+   BABAK 1: DETIK 0.00 - 04.00 (HOOK DILEMA)
+   Maskot bingung, garuk kepala, goyang panik, keringat dingin, kertas kusut
+   ========================================================================== */
+tl.set(mascotAnchor, { x: 0, y: 0, scale: 1.0 })
+  .set(mascotWrap, { scaleX: 1, scaleY: 1, rotation: 0 })
+  .set(shadow, { scaleX: 1, scaleY: 1, opacity: 0.8 })
+  .set("#beat-1", { opacity: 0, y: 24 })
+  .set("#p1, #p2, #p3", { opacity: 0, scale: 0.5 })
+  .set(sweat, { opacity: 0, scale: 0 })
+  .call(() => {
+    voText.textContent = '"Mau lamar kerja pertama, tapi bingung mulai dari mana?"';
+    sfx.whoosh();
+  }, null, 0.05)
+
+  // Masuk Teks Beat 1
+  .to("#beat-1", { opacity: 1, y: 0, duration: 0.7, ease: "back.out(1.4)" }, 0.2)
+
+  // Maskot Gerak Bingung: Shiver / Wobble kiri kanan berulang
+  .to(mascotWrap, {
+    keyframes: [
+      { rotation: -8, scaleX: 0.96, scaleY: 1.04, duration: 0.35, ease: "power1.inOut" },
+      { rotation: 7, scaleX: 1.02, scaleY: 0.98, duration: 0.4, ease: "power1.inOut" },
+      { rotation: -6, scaleX: 0.98, scaleY: 1.02, duration: 0.35, ease: "power1.inOut" },
+      { rotation: 5, scaleX: 1.01, scaleY: 0.99, duration: 0.35, ease: "power1.inOut" },
+      { rotation: -3, scaleX: 0.97, scaleY: 1.03, duration: 0.3, ease: "power1.inOut" },
+      { rotation: 0, scaleX: 1.0, scaleY: 1.0, duration: 0.3, ease: "power1.out" }
+    ]
+  }, 0.3)
+
+  // Keringat dingin muncul dan menetes
+  .fromTo(sweat,
+    { opacity: 0, scale: 0, y: 0 },
+    { opacity: 1, scale: 1.3, duration: 0.3, ease: "back.out(2)" },
+    0.6
+  )
+  .to(sweat, { y: 60, opacity: 0, duration: 0.7, ease: "power1.in" }, 1.0)
+
+  // Kertas Kusut Melayang Masuk dari Sisi
+  .to("#p1", { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.5)" }, 0.7)
+  .call(() => sfx.pop(300), null, 0.7)
+  .to("#p2", { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.5)" }, 1.3)
+  .call(() => sfx.pop(260), null, 1.3)
+  .to("#p3", { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.5)" }, 1.9)
+  .call(() => sfx.pop(220), null, 1.9)
+
+  // Tanda Tanya Melompat
+  .fromTo("#q1", { opacity: 0, scale: 0, rotation: -20 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.4, ease: "back.out(2)" }, 0.9)
+  .fromTo("#q2", { opacity: 0, scale: 0, rotation: 20 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.4, ease: "back.out(2)" }, 1.5)
+
+  // Maskot mengangkat bahu / shrug bingung
+  .to(mascotWrap, { y: -25, scaleY: 1.08, scaleX: 0.94, duration: 0.4, yoyo: true, repeat: 1, ease: "power1.inOut" }, 2.4)
+
+/* ==========================================================================
+   BABAK 2: DETIK 04.00 - 09.00 (PERKENALAN EMPLOYR & LOMPATAN HEROIK)
+   Maskot SQUASH lalu LOMPAT TINGGI ke udara, debu mendarat, kacamata berkilau
+   ========================================================================== */
+  .to("#beat-1", { opacity: 0, y: -24, duration: 0.35 }, 3.85)
+  // Hempas semua kertas dilema keluar panggung
+  .to("#p1, #p2, #p3, #q1, #q2", {
+    opacity: 0,
+    y: 120,
+    scale: 0.3,
+    duration: 0.4,
+    stagger: 0.05,
+    ease: "power2.in"
+  }, 3.8)
+
+  .call(() => {
+    voText.textContent = '"Kenalin, Employr. Teman setia perjalanan kariermu."';
+    sfx.chime();
+  }, null, 4.0)
+
+  // Masuk Teks Beat 2
+  .to("#beat-2", { opacity: 1, y: 0, duration: 0.7, ease: "back.out(1.5)" }, 4.1)
+
+  // --- SQUASH & STRETCH JUMP ---
+  // 1. Antisipasi: Squash jongkok sebelum melompat
+  .to(mascotWrap, {
+    scaleY: 0.82,
+    scaleX: 1.18,
+    y: 35,
+    duration: 0.25,
+    ease: "power2.in"
+  }, 3.9)
+  // 2. Melompat ke udara (Stretch vertikal)
+  .to(mascotWrap, {
+    scaleY: 1.16,
+    scaleX: 0.9,
+    y: -140,
+    duration: 0.45,
+    ease: "power1.out"
+  }, 4.15)
+  .call(() => sfx.whoosh(), null, 4.15)
+  // Bayangan mengecil saat di udara
+  .to(shadow, {
+    scaleX: 0.45,
+    scaleY: 0.45,
+    opacity: 0.25,
+    duration: 0.45,
+    ease: "power1.out"
+  }, 4.15)
+
+  // 3. Mendarat dengan hentakan (Land squash)
+  .to(mascotWrap, {
+    scaleY: 0.86,
+    scaleX: 1.14,
+    y: 15,
+    duration: 0.22,
+    ease: "power2.in"
+  }, 4.6)
+  .to(shadow, {
+    scaleX: 1.2,
+    scaleY: 1.2,
+    opacity: 0.9,
+    duration: 0.22,
+    ease: "power2.in"
+  }, 4.6)
+  .call(() => sfx.thud(), null, 4.8)
+
+  // Ring debu meletup saat mendarat
+  .fromTo(dust,
+    { opacity: 0.9, scale: 0.2 },
+    { opacity: 0, scale: 1.6, duration: 0.5, ease: "power2.out" },
+    4.82
+  )
+
+  // 4. Rebound ke posisi percaya diri
+  .to(mascotWrap, {
+    scaleY: 1.0,
+    scaleX: 1.0,
+    y: 0,
+    duration: 0.35,
+    ease: "back.out(2)"
+  }, 4.82)
+  .to(shadow, {
+    scaleX: 1.0,
+    scaleY: 1.0,
+    opacity: 0.8,
+    duration: 0.35
+  }, 4.82)
+
+  // Thumbs-up ray aktif dengan denting
+  .fromTo(thumbBurst, 
+    { opacity: 0, scale: 0.3 },
+    { opacity: 1, scale: 1.3, duration: 0.35, ease: "back.out(2.5)" },
+    4.9
+  )
+  .to(thumbBurst, { opacity: 0, scale: 1.6, duration: 0.45 }, 5.5)
+
+  // Kilatan kacamata membesar dan berputar
+  .fromTo(glint, 
+    { scale: 0, opacity: 0, rotation: 0 },
+    { scale: 1.6, opacity: 1, rotation: 90, duration: 0.35, ease: "back.out(2)" },
+    5.1
+  )
+  .to(glint, { scale: 0, opacity: 0, duration: 0.3 }, 5.6)
+
+  // Kedip ramah (winks ganda)
+  .to("#wink-l, #wink-r", { opacity: 1, scaleY: 1.3, duration: 0.12, yoyo: true, repeat: 1 }, 6.2)
+  .to("#wink-r", { opacity: 1, scaleY: 1.3, duration: 0.14, yoyo: true, repeat: 1 }, 7.5)
+
+  // Goyangan santai percaya diri
+  .to(mascotWrap, { rotation: 3, duration: 1.0, ease: "sine.inOut" }, 6.0)
+  .to(mascotWrap, { rotation: -3, duration: 1.0, ease: "sine.inOut" }, 7.0)
+  .to(mascotWrap, { rotation: 0, duration: 0.8, ease: "sine.inOut" }, 8.0)
+
+/* ==========================================================================
+   BABAK 3: DETIK 09.00 - 13.00 (CV STANDAR ATS & POSE PRESENTER)
+   Maskot geser ke KANAN, tap tablet, kartu CV meletup di KIRI (ZERO OVERLAP!)
+   ========================================================================== */
+  .to("#beat-2", { opacity: 0, y: -24, duration: 0.35 }, 8.85)
+  .call(() => {
+    voText.textContent = '"Bikin CV standar industri, rapi dalam hitungan menit."';
+    sfx.whoosh();
+  }, null, 9.0)
+
+  // Masuk Teks Beat 3
+  .to("#beat-3", { opacity: 1, y: 0, duration: 0.7, ease: "back.out(1.4)" }, 9.1)
+
+  // Maskot bergeser ke sisi KANAN layar dengan pose presenter yang jelas
+  .to(mascotAnchor, {
+    x: 220,
+    y: -20,
+    scale: 0.88,
+    duration: 0.8,
+    ease: "power2.inOut"
+  }, 9.1)
+
+  // Maskot mencondongkan badan & tap tablet (2x tap lincah)
+  .to(mascotWrap, {
+    keyframes: [
+      { rotation: -6, scaleX: 0.95, scaleY: 1.05, duration: 0.25 },
+      { rotation: 4, scaleX: 1.04, scaleY: 0.96, duration: 0.15 }, // tap 1
+      { rotation: -2, scaleX: 0.98, scaleY: 1.02, duration: 0.15 },
+      { rotation: 5, scaleX: 1.05, scaleY: 0.95, duration: 0.15 }, // tap 2
+      { rotation: -4, scaleX: 1.0, scaleY: 1.0, duration: 0.3 }    // pose pamer
+    ]
+  }, 9.3)
+  .call(() => sfx.pop(600), null, 9.55)
+  .call(() => sfx.pop(750), null, 9.85)
+
+  // Kartu CV ATS meletup dari tablet ke SISI KIRI (Zero collision dengan maskot!)
+  .fromTo("#card-cv-ats",
+    { opacity: 0, scale: 0.5, x: 80, rotation: -8 },
+    { opacity: 1, scale: 1.0, x: 0, rotation: -2, duration: 0.75, ease: "back.out(1.6)" },
+    9.7
+  )
+
+  // Stempel ATS 98% meletup keras
+  .fromTo(".ats-stamp",
+    { scale: 2.4, opacity: 0, rotation: -25 },
+    { scale: 1, opacity: 1, rotation: -4, duration: 0.45, ease: "bounce.out" },
+    10.4
+  )
+  .call(() => sfx.pop(920), null, 10.4)
+
+  // Maskot mengangguk bangga melihat skor CV
+  .to(mascotWrap, {
+    keyframes: [
+      { y: -18, scaleY: 1.06, duration: 0.3 },
+      { y: 0, scaleY: 1.0, duration: 0.3 },
+      { y: -14, scaleY: 1.04, duration: 0.3 },
+      { y: 0, scaleY: 1.0, duration: 0.3 }
+    ]
+  }, 10.8)
+
+/* ==========================================================================
+   BABAK 4: DETIK 13.00 - 18.00 (✦ MOMEN ISTIMEWA: TRACKER & CUAN)
+   Maskot kembali ke tengah, 3 kartu orbit membentuk segitiga rapi (ZERO OVERLAP!)
+   Maskot toleh kiri (lihat offering), toleh kanan (lihat cuan), joget gembira
+   ========================================================================== */
+  .to("#beat-3", { opacity: 0, y: -24, duration: 0.35 }, 12.85)
+  .to("#card-cv-ats", { opacity: 0, scale: 0.4, x: -80, duration: 0.45, ease: "power2.in" }, 12.8)
+
+  .call(() => {
+    voText.textContent = '"Pantau semua lamaran, plus selesaikan misi berhadiah."';
+    sfx.chime();
+  }, null, 13.0)
+
+  // Masuk Teks Beat 4
+  .to("#beat-4", { opacity: 1, y: 0, duration: 0.7, ease: "back.out(1.4)" }, 13.1)
+
+  // Kembalikan maskot ke tengah dengan skala pas (tidak bertabrakan dengan orbit cards)
+  .to(mascotAnchor, {
+    x: 0,
+    y: 40,
+    scale: 0.88,
+    duration: 0.7,
+    ease: "back.out(1.4)"
+  }, 13.0)
+
+  // 1. Kartu Kiri Atas (Kanban Offering) meletup
+  .fromTo("#orbit-1",
+    { opacity: 0, scale: 0.4, x: -60 },
+    { opacity: 1, scale: 1.0, x: 0, duration: 0.55, ease: "back.out(1.8)" },
+    13.3
+  )
+  .call(() => sfx.pop(540), null, 13.3)
+  // Maskot menoleh ke KIRI melihat kartu offering!
+  .to(mascotWrap, { rotation: -12, x: -20, scaleX: 0.96, duration: 0.35, ease: "power2.out" }, 13.3)
+
+  // 2. Kartu Kanan Atas (Cuan Rp25.000) meletup
+  .fromTo("#orbit-2",
+    { opacity: 0, scale: 0.4, x: 60 },
+    { opacity: 1, scale: 1.0, x: 0, duration: 0.55, ease: "back.out(1.8)" },
+    14.0
+  )
+  .call(() => sfx.coin(), null, 14.0)
+  // Maskot langsung menoleh ke KANAN dengan mata berbinar melihat cuan!
+  .to(mascotWrap, { rotation: 12, x: 20, scaleX: 1.04, scaleY: 1.04, duration: 0.35, ease: "power2.out" }, 14.0)
+
+  // 3. Kartu Bawah Tengah (1.200+ Loker) meletup
+  .fromTo("#orbit-3",
+    { opacity: 0, scale: 0.4, y: 60 },
+    { opacity: 1, scale: 1.0, y: 0, duration: 0.55, ease: "back.out(1.8)" },
+    14.6
+  )
+  .call(() => sfx.pop(640), null, 14.6)
+  .to(mascotWrap, { rotation: 0, x: 0, duration: 0.3 }, 14.6)
+
+  // Maskot Happy Dance: Hop berulang gembira
+  .to(mascotWrap, {
+    keyframes: [
+      { y: -35, rotation: -6, duration: 0.25, ease: "power1.out" },
+      { y: 0, rotation: 0, duration: 0.2, ease: "power2.in" },
+      { y: -35, rotation: 6, duration: 0.25, ease: "power1.out" },
+      { y: 0, rotation: 0, duration: 0.2, ease: "power2.in" },
+      { y: -45, scaleY: 1.12, duration: 0.3, ease: "power1.out" },
+      { y: 0, scaleY: 1.0, duration: 0.25, ease: "back.out(2)" }
+    ]
+  }, 14.8)
+
+  // Ledakan Confetti Partikel Melingkar
+  .call(() => {
+    confettiDots.forEach((p) => {
+      gsap.set(p, {
+        left: 540,
+        top: 980,
+        x: 0,
+        y: 0,
+        opacity: 1,
+        scale: 1
+      });
+      gsap.to(p, {
+        x: p.dataset.dx,
+        y: p.dataset.dy,
+        opacity: 0,
+        scale: 0.25,
+        duration: 1.6,
+        ease: "power2.out"
+      });
+    });
+  }, null, 14.9)
+
+/* ==========================================================================
+   BABAK 5: DETIK 18.00 - 22.00 (VALUE: LIFETIME ACCESS)
+   Maskot NAIK KE ATAS, busungkan dada, Badge Lifetime muncul di BAWAH (ZERO OVERLAP!)
+   ========================================================================== */
+  .to("#beat-4", { opacity: 0, y: -24, duration: 0.35 }, 17.85)
+  // Sapu ketiga kartu orbit
+  .to("#orbit-1, #orbit-2, #orbit-3", {
+    opacity: 0,
+    scale: 0.2,
+    duration: 0.4,
+    stagger: 0.06,
+    ease: "power2.in"
+  }, 17.8)
+
+  .call(() => {
+    voText.textContent = '"Sekali gabung, aktif selamanya tanpa ribet langganan."';
+    sfx.whoosh();
+  }, null, 18.0)
+
+  // Masuk Teks Beat 5
+  .to("#beat-5", { opacity: 1, y: 0, duration: 0.7, ease: "back.out(1.4)" }, 18.1)
+
+  // Maskot NAIK KE ATAS memberi panggung luas untuk Badge Lifetime di bawah
+  .to(mascotAnchor, {
+    x: 0,
+    y: -140,
+    scale: 0.82,
+    duration: 0.75,
+    ease: "power2.out"
+  }, 18.1)
+
+  // Maskot membusungkan dada bangga
+  .to(mascotWrap, {
+    scaleX: 1.1,
+    scaleY: 1.05,
+    duration: 0.4,
+    ease: "back.out(1.8)"
+  }, 18.2)
+
+  // Badge Lifetime Muncul Bersih di Bawah Maskot
+  .fromTo("#card-lifetime",
+    { opacity: 0, scale: 0.5, y: 80 },
+    { opacity: 1, scale: 1.0, y: 0, duration: 0.75, ease: "back.out(1.6)" },
+    18.3
+  )
+  .call(() => sfx.pop(780), null, 18.3)
+
+  // Kilau Badge Lifetime
+  .to("#card-lifetime", {
+    boxShadow: "0 35px 100px rgba(0, 0, 0, 0.6), 0 0 65px rgba(200, 245, 91, 0.65)",
+    duration: 0.5,
+    yoyo: true,
+    repeat: 1
+  }, 19.3)
+
+  // Maskot mengangguk mantap beberapa kali
+  .to(mascotWrap, {
+    keyframes: [
+      { rotation: 4, y: 8, duration: 0.25 },
+      { rotation: -3, y: -6, duration: 0.25 },
+      { rotation: 2, y: 4, duration: 0.25 },
+      { rotation: 0, y: 0, duration: 0.25 }
+    ]
+  }, 19.5)
+
+/* ==========================================================================
+   BABAK 6: DETIK 22.00 - 25.00 (END CARD & CTA)
+   Maskot CHARGE FORWARD (Scale Up ke Center), Thumbs Up Burst, CTA Button Pop
+   ========================================================================== */
+  .to("#beat-5", { opacity: 0, y: -24, duration: 0.35 }, 21.85)
+  .to("#card-lifetime", { opacity: 0, scale: 0.5, y: 60, duration: 0.45, ease: "power2.in" }, 21.8)
+
+  .call(() => {
+    voText.textContent = '"Mulai sekarang di employr.id!"';
+    sfx.chime();
+  }, null, 22.0)
+
+  // Maskot MAJU KE DEPAN (Hero Stance)
+  .to(mascotAnchor, {
+    x: 0,
+    y: -30,
+    scale: 1.06,
+    duration: 0.75,
+    ease: "back.out(1.6)"
+  }, 22.0)
+
+  // Masuk Teks Beat 6
+  .to("#beat-6", { opacity: 1, y: 0, duration: 0.7, ease: "back.out(1.4)" }, 22.1)
+
+  // CTA Button Pop-In
+  .to("#cta-btn", { opacity: 1, y: 0, scale: 1.0, duration: 0.6, ease: "back.out(2)" }, 22.3)
+  .to("#cta-sub", { opacity: 1, duration: 0.4 }, 22.6)
+
+  // Pose Pamungkas: Thumbs Up Burst + Kedip Ramah
+  .fromTo(thumbBurst,
+    { opacity: 0, scale: 0.4 },
+    { opacity: 1, scale: 1.35, duration: 0.4, ease: "back.out(2.5)" },
+    22.5
+  )
+  .to("#wink-r", { opacity: 1, scaleY: 1.3, duration: 0.16, yoyo: true, repeat: 1 }, 22.9)
+
+  // Button Pulse lembut
+  .to("#cta-btn", {
+    scale: 1.04,
+    boxShadow: "0 25px 70px rgba(23, 56, 209, 0.6)",
+    duration: 0.6,
+    yoyo: true,
+    repeat: 1,
+    ease: "sine.inOut"
+  }, 23.3)
+
+  // Hold sampai detik 25.00
+  .to({}, { duration: 1.5 }, 23.5);
+
+/* ==========================================================================
+   DEBUG CONTROLS & INSPECTOR (?debug=1)
+   ========================================================================== */
+const debugUI = document.getElementById("debug-ui");
+const btnToggle = document.getElementById("btn-toggle");
+const btnReplay = document.getElementById("btn-replay");
+const scrub = document.getElementById("scrub");
+const timeClock = document.getElementById("time-clock");
+
+if (new URLSearchParams(window.location.search).get("debug") === "1") {
+  debugUI.classList.add("on");
+}
+
+tl.eventCallback("onUpdate", () => {
+  const t = tl.time();
+  scrub.value = t;
+  const m = Math.floor(t / 60).toString().padStart(2, "0");
+  const s = Math.floor(t % 60).toString().padStart(2, "0");
+  timeClock.textContent = `${m}:${s}`;
+});
+
+scrub.addEventListener("input", () => {
+  tl.pause();
+  tl.time(parseFloat(scrub.value));
+  btnToggle.textContent = "Putar";
+});
+
+btnToggle.addEventListener("click", () => {
+  if (tl.paused()) {
+    tl.play();
+    btnToggle.textContent = "Jeda";
+  } else {
+    tl.pause();
+    btnToggle.textContent = "Putar";
+  }
+});
+
+btnReplay.addEventListener("click", () => {
+  tl.restart();
+  btnToggle.textContent = "Jeda";
+});
+
+// HOTKEYS: Space (Jeda/Lanjut), R (Ulang)
+window.addEventListener("keydown", (e) => {
+  if (e.code === "Space") {
+    e.preventDefault();
+    if (tl.paused()) { tl.play(); btnToggle.textContent = "Jeda"; }
+    else { tl.pause(); btnToggle.textContent = "Putar"; }
+  } else if (e.key === "r" || e.key === "R") {
+    tl.restart();
+    btnToggle.textContent = "Jeda";
+  }
+});
+</script>
+</body>
+</html>

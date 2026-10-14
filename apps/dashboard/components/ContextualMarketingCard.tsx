@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FileTextIcon, TargetIcon, CloseIcon } from '@/components/icons/CustomIcons';
 import { cvApi, jobsApi } from '@/lib/api';
+import { getStoredSession } from '@/lib/auth';
+import { getLokerUrl } from '@/lib/urls';
 
 export const ContextualMarketingCard: React.FC = () => {
   const router = useRouter();
@@ -14,18 +16,11 @@ export const ContextualMarketingCard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const sessionStr = localStorage.getItem('cuti_user_session');
-        if (sessionStr) {
-          const parsed = JSON.parse(sessionStr);
-          setUserIntent(parsed.intent || null);
-          if (typeof parsed.hasCv === 'boolean') {
-            setHasCv(parsed.hasCv);
-          }
-        }
-      } catch (e) {
-        console.warn('Failed to parse cuti_user_session', e);
+    const session = getStoredSession();
+    if (session) {
+      setUserIntent((session as any).intent || null);
+      if (typeof (session as any).hasCv === 'boolean') {
+        setHasCv((session as any).hasCv);
       }
     }
 
@@ -60,18 +55,18 @@ export const ContextualMarketingCard: React.FC = () => {
   // Case 1: User belum punya CV (Intent Buat CV or marked no CV)
   if (!hasCv || userIntent === 'buat_cv') {
     return (
-      <div className="relative overflow-hidden rounded-[10px] bg-orange-500 text-white p-5 shadow-xs border border-orange-600">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
-          <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-[10px] bg-white/20 text-white flex items-center justify-center shrink-0">
-              <FileTextIcon size={20} />
+      <div className="relative overflow-hidden rounded-[10px] bg-orange-700 text-white p-3 sm:p-3.5 shadow-xs border border-orange-600">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10">
+          <div className="flex items-start gap-2.5">
+            <div className="w-8 h-8 rounded-[8px] bg-white/20 text-white flex items-center justify-center shrink-0">
+              <FileTextIcon size={16} />
             </div>
             <div>
-              <h4 className="text-sm font-extrabold text-white flex items-center gap-1.5">
+              <h4 className="text-xs sm:text-sm font-extrabold text-white flex items-center gap-1.5">
                 <span>Kamu belum punya CV</span>
               </h4>
-              <p className="text-xs text-orange-50 mt-0.5 max-w-lg leading-relaxed">
-                Banyak perusahaan dan lowongan membutuhkan CV standar ATS untuk proses seleksi pertama.
+              <p className="text-caption sm:text-xs text-orange-50 mt-0.5 max-w-lg leading-relaxed">
+                Banyak perusahaan dan loker membutuhkan CV standar ATS untuk proses seleksi pertama.
               </p>
             </div>
           </div>
@@ -79,16 +74,16 @@ export const ContextualMarketingCard: React.FC = () => {
           <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
             <button
               onClick={() => router.push('/cv')}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-white hover:bg-orange-50 text-orange-600 font-extrabold text-xs shadow-xs transition flex items-center justify-center cursor-pointer"
+              className="w-full sm:w-auto px-4 py-2 min-h-[32px] rounded-[10px] bg-white hover:bg-orange-50 text-orange-700 font-extrabold text-xs shadow-xs transition flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-orange-500 dark:text-orange-400"
             >
               <span>Buat CV Gratis</span>
             </button>
             <button
               onClick={() => setIsVisible(false)}
-              className="p-2 text-white/80 hover:text-white transition cursor-pointer"
+              className="h-8 w-8 min-h-[32px] min-w-[32px] rounded-[8px] flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               aria-label="Tutup Banner"
             >
-              <CloseIcon size={16} />
+              <CloseIcon size={14} />
             </button>
           </div>
         </div>
@@ -99,37 +94,37 @@ export const ContextualMarketingCard: React.FC = () => {
   // Case 2: User sudah punya CV tapi intent Cari Kerja
   if (userIntent === 'cari_kerja') {
     return (
-      <div className="relative overflow-hidden rounded-[10px] bg-slate-900 dark:bg-slate-900 text-white p-5 shadow-xs border border-slate-800">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
-          <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
-              <TargetIcon size={20} />
+      <div className="relative overflow-hidden rounded-[10px] bg-slate-900 dark:bg-slate-900 text-white p-3 sm:p-3.5 shadow-xs border border-slate-800">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10">
+          <div className="flex items-start gap-2.5">
+            <div className="w-8 h-8 rounded-[8px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+              <TargetIcon size={16} />
             </div>
             <div>
-              <h4 className="text-sm font-extrabold text-white flex items-center gap-1.5">
-                <span>CV sudah siap. Sekarang cari lowongan yang cocok</span>
+              <h4 className="text-xs sm:text-sm font-extrabold text-white flex items-center gap-1.5">
+                <span>CV sudah siap. Sekarang cari loker yang cocok</span>
               </h4>
-              <p className="text-xs text-slate-300 mt-0.5 max-w-lg leading-relaxed">
+              <p className="text-caption sm:text-xs text-slate-300 mt-0.5 max-w-lg leading-relaxed">
                 {matchingJobsCount > 0
-                  ? `Ada ${matchingJobsCount} lowongan aktif yang sesuai dengan profilmu.`
-                  : 'Jelajahi lowongan terbaru yang sesuai dengan profilmu.'}
+                  ? `Ada ${matchingJobsCount} loker aktif yang sesuai dengan profilmu.`
+                  : 'Jelajahi loker terbaru yang sesuai dengan profilmu.'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
             <button
-              onClick={() => router.push('/scrape-jobs')}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs shadow-xs transition flex items-center justify-center cursor-pointer"
+              onClick={() => window.open(getLokerUrl(), '_blank')}
+              className="w-full sm:w-auto px-4 py-2 min-h-[32px] rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 text-white font-extrabold text-xs shadow-xs transition flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
             >
-              <span>Cari Lowongan</span>
+              <span>Cari Loker</span>
             </button>
             <button
               onClick={() => setIsVisible(false)}
-              className="p-2 text-slate-400 hover:text-white transition cursor-pointer"
+              className="h-8 w-8 min-h-[32px] min-w-[32px] rounded-[8px] flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 dark:text-slate-400"
               aria-label="Tutup Banner"
             >
-              <CloseIcon size={16} />
+              <CloseIcon size={14} />
             </button>
           </div>
         </div>

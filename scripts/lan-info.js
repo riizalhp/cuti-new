@@ -27,11 +27,12 @@ const primaryIp = ips.length > 0 ? ips[0].ip : 'localhost';
 
 const apps = [
   { name: 'Dashboard (User)', port: 3000 },
+  { name: 'Backend API', port: 3001 },
   { name: 'Admin Panel', port: 3002 },
+  { name: 'Portal Loker', port: 3003 },
   { name: 'Learning Academy', port: 3004 },
   { name: 'FAQ / Pusat Bantuan', port: 3005 },
   { name: 'Landing Web', port: 4321 },
-  { name: 'Backend API', port: 3001 },
 ];
 
 console.log('\n' + '='.repeat(58));

@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Employr — Asisten Profil LinkedIn",
+  "version": "1.0.0",
+  "description": "Ekstrak profil LinkedIn dalam 1-klik untuk dianalisis langsung di Employr Career Intelligence.",
+  "permissions": ["activeTab"],
+  "host_permissions": [
+    "*://*.linkedin.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Employr LinkedIn Assistant"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.linkedin.com/in/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

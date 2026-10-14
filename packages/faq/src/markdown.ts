@@ -112,6 +112,32 @@ export function renderMarkdown(md: string): string {
       continue;
     }
 
+    // table
+    if (line.trim().startsWith("|") && lines[i + 1]?.trim().match(/^\|\s*[-:]+[-| :]*\|$/)) {
+      const headerCells = line
+        .trim()
+        .slice(1, -1)
+        .split("|")
+        .map((c) => c.trim());
+      out.push('<div class="faq-table-wrapper"><table class="faq-table"><thead><tr>');
+      headerCells.forEach((c) => out.push(`<th>${renderInline(c)}</th>`));
+      out.push("</tr></thead><tbody>");
+      i += 2; // skip header and delimiter
+      while (i < lines.length && lines[i].trim().startsWith("|")) {
+        const cells = lines[i]
+          .trim()
+          .slice(1, -1)
+          .split("|")
+          .map((c) => c.trim());
+        out.push("<tr>");
+        cells.forEach((c) => out.push(`<td>${renderInline(c)}</td>`));
+        out.push("</tr>");
+        i++;
+      }
+      out.push("</tbody></table></div>");
+      continue;
+    }
+
     // blank line
     if (!line.trim()) {
       i++;
@@ -127,7 +153,8 @@ export function renderMarkdown(md: string): string {
         /^(#{1,4})\s+/.test(l) ||
         /^\s*```/.test(l) ||
         /^\s*([-*+]|\d+\.)\s+/.test(l) ||
-        l.trim().startsWith(">")
+        l.trim().startsWith(">") ||
+        l.trim().startsWith("|")
       ) {
         break;
       }

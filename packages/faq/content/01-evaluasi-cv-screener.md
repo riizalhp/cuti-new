@@ -1,52 +1,52 @@
 ---
 title: Evaluasi CV dengan 11 Persona Recruiter
-description: Simulasikan penilaian CV oleh berbagai tipe recruiter — heatmap pandangan HRD, skor ATS, konsensus multi-screener, dan rekomendasi perbaikan.
+description: Simulasi penilaian CV oleh berbagai tipe recruiter: visualisasi area baca HRD, kompatibilitas ATS, konsensus screener, dan rekomendasi perbaikan kalimat.
 category: evaluasi-optimasi
 order: 1
-updatedAt: 2026-08-18
+updatedAt: 2026-09-26
 keywords: evaluasi cv, cv screener, persona recruiter, heatmap, recruiter vision, ats matrix, konsensus, hiring forecast, auto improvement, rekomendasi cv, lolos screening
 ---
 
-Fitur **Evaluasi CV** (/cv-screener) mensimulasikan bagaimana CV-mu dinilai oleh berbagai tipe recruiter dan mesin ATS — lengkap dengan laporan visual dan rekomendasi perbaikan.
+Fitur **Evaluasi CV** (/cv-screener) mensimulasikan bagaimana berkas lamaranmu dinilai dari sudut pandang berbagai profil recruiter dan sistem ATS, lengkap dengan diagnosis visual dan rekomendasi konkret.
 
-## Langkah 1: Siapkan input
+## Langkah 1: Siapkan berkas dan target
 
-- **Pilih CV** — dari CV tersimpan di akunmu, atau **unggah berkas** CV yang sudah ada.
-- **Nama Posisi Target** — misalnya *Senior Fullstack Engineer*.
-- **Tingkat Senioritas** — Entry (0-1 th), Junior (1-3 th), Mid (3-5 th), atau Senior (5+ th).
+- **Pilih CV**: gunakan CV yang sudah tersimpan di akunmu, atau unggah dokumen CV yang sudah ada.
+- **Nama Posisi Target**: jabatan yang ingin dilamar, misalnya *Senior Fullstack Engineer*.
+- **Tingkat Pengalaman**: pilih jenjang yang sesuai (Entry 0-1 th, Junior 1-3 th, Mid 3-5 th, atau Senior 5+ th).
 
-## Langkah 2: Pilih persona recruiter
+## Langkah 2: Tentukan profil recruiter
 
-Ada **11 persona** yang bisa kamu pilih, masing-masing punya fokus penilaian berbeda:
+Tersedia **11 persona recruiter** dengan parameter evaluasi spesifik:
 
-- **Jenis perusahaan**: Startup, Unicorn, Corporate, Product Company, Consulting.
-- **Wilayah/global**: Remote US, Australia, Jepang, Cina.
-- **Khusus**: Fresh Graduate, BUMN.
+- **Karakter Perusahaan**: Startup, Unicorn, Corporate, Product Company, Consulting.
+- **Pasar Regional & Global**: Remote US, Australia, Jepang, Cina.
+- **Kategori Khusus**: Fresh Graduate, BUMN.
 
-Setiap persona menampilkan **skor kecocokan dinamis** dengan isi CV-mu — jadi kamu bisa tahu CV-mu paling cocok untuk tipe perusahaan apa. Ada juga penanda **Top Match** untuk persona dengan skor tertinggi.
+Setiap persona menghitung skor kecocokan berdasarkan isi berkasmu. Penanda **Top Match** menyoroti persona perusahaan yang paling relevan dengan profilmu saat ini.
 
-## Langkah 3: Jalankan pipeline evaluasi (5 modul)
+## Langkah 3: Modul evaluasi
 
-- **Recruiter Vision** — prediksi area yang dilihat HRD dalam 6 detik pertama, ditampilkan sebagai **heatmap** di atas preview CV (mode: Heatmap, F-Pattern, Bounding Box, ATS Matrix).
-- **ATS Compatibility Matrix** — uji kata kunci & format terhadap mesin ATS.
-- **Simulasi Multi-Screener** — evaluasi konsensus beberapa recruiter; menghasilkan **verdict**: *Interview*, *Maybe*, atau *Reject*.
-- **Hiring Forecast** — prediksi pertanyaan wawancara yang mungkin muncul.
-- **Auto Improvement** — langkah perbaikan kalimat CV secara instan.
+- **Recruiter Vision**: memprediksi bagian CV yang paling cepat menarik perhatian HRD dalam 6 detik pertama (tersedia mode Heatmap, F-Pattern, Bounding Box, dan ATS Matrix).
+- **ATS Compatibility Matrix**: memeriksa keterbacaan kata kunci industri, format tanggal, dan tata letak dokumen.
+- **Simulasi Multi-Screener**: menggabungkan penilaian beberapa evaluator sekaligus untuk menghasilkan rekomendasi status (*Interview*, *Maybe*, atau *Reject*).
+- **Hiring Forecast**: memetakan kemungkinan pertanyaan wawancara teknis berdasarkan pengalaman yang tertulis.
+- **Auto Improvement**: saran revisi kalimat aktif yang dapat kamu terapkan langsung ke CV.
 
-## Hasil laporan
+## Laporan evaluasi
 
-- **Skor konsensus** (0-100) dan status kelulusan.
-- **Heatmap** — area yang paling disorot recruiter saat membaca CV.
-- **Red flags** — misalnya gap pengalaman, riwayat kerja sering pindah, atau typo.
-- **Rekomendasi perbaikan** — tiap rekomendasi bisa langsung **Apply**, atau gunakan tombol **Optimalkan CV Saya** untuk menerapkan semuanya.
-- **Chat dengan recruiter** — tanyakan hal spesifik tentang hasil evaluasi (bukan AI eksternal; menjawab berdasarkan hasil analisis).
-- **Riwayat laporan** — semua evaluasi tersimpan dan bisa dibuka kembali.
+- **Skor Konsensus (0-100)**: ringkasan tingkat kesiapan berkas secara menyeluruh.
+- **Area Perhatian HRD**: visualisasi letak kelebihan dan poin penting dalam dokumenmu.
+- **Deteksi Kendala**: catatan penting seperti jeda kerja (employment gap), inkonsistensi data, atau salah ketik.
+- **Rekomendasi Revisi**: kamu dapat meninjau rekomendasi satu per satu atau memilih tombol terapkan untuk memperbarui draf CV secara langsung.
+- **Tanya Jawab Evaluasi**: tanyakan penjelasan teknis mengenai hasil skor melalui sesi tanya jawab yang merujuk pada temuan laporan.
+- **Riwayat Evaluasi**: seluruh hasil tersimpan di browser akunmu dan dapat dibuka kembali kapan saja.
 
 ## Pertanyaan umum
 
-- **Apakah fitur evaluasi CV ini gratis?** Ya, seluruh simulasi dan evaluasi persona recruiter dapat kamu gunakan langsung secara gratis melalui dashboard tanpa biaya.
-- **Hasil evaluasi disimpan di mana?** Di riwayat per akun (localStorage per pengguna), sehingga bisa dilihat kapan saja.
-- **CV saya aman?** Ya, CV hanya dipakai untuk analisis di akunmu.
-- **Kenapa skor persona berubah?** Karena skor dihitung dinamis dari isi CV-mu (skill, pengalaman, pendidikan, metrik), bukan angka acak.
+- **Apakah simulasi ini berbayar?** Tidak, fitur evaluasi CV dapat digunakan tanpa biaya dari dashboard akunmu.
+- **Di mana laporan tersimpan?** Laporan tersimpan di penyimpanan lokal akun perambanmu sehingga riwayat dapat kamu buka kembali sewaktu-waktu.
+- **Apakah data CV saya aman?** Berkas hanya diproses untuk evaluasi pada akunmu dan tidak dibagikan ke pihak luar.
+- **Mengapa skor berbeda pada tiap persona?** Setiap jenis perusahaan memiliki kriteria bobot yang berlainan; startup lebih mengutamakan kecepatan eksekusi dan portofolio, sedangkan korporasi besar atau BUMN menekankan struktur formal dan latar belakang pendidikan.
 
 Lanjut baca: [Kecocokan Lowongan](/artikel/kecocokan-lowongan) dan [Memahami Skor ATS](/artikel/skor-ats-cv).

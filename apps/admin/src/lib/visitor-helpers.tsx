@@ -27,7 +27,7 @@ export interface DomainMeta {
 export function getDomainInfo(domain?: string | null): DomainMeta {
   const d = (domain || '').toLowerCase();
 
-  if (d.includes('app.ambilcuti.id') || d.includes('app.employr.id') || d.includes('3000')) {
+  if (d.includes('app.employr.id') || d.includes('app.ambilcuti.id') || d.includes('3000')) {
     return {
       label: 'Dashboard User',
       sublabel: 'app.employr.id',
@@ -38,7 +38,7 @@ export function getDomainInfo(domain?: string | null): DomainMeta {
     };
   }
 
-  if (d.includes('loker.ambilcuti.id') || d.includes('loker.employr.id') || d.includes('3003')) {
+  if (d.includes('loker.employr.id') || d.includes('loker.ambilcuti.id') || d.includes('3003')) {
     return {
       label: 'Portal Loker',
       sublabel: 'loker.employr.id',
@@ -49,7 +49,7 @@ export function getDomainInfo(domain?: string | null): DomainMeta {
     };
   }
 
-  if (d.includes('learning.ambilcuti.id') || d.includes('learning.employr.id') || d.includes('3004')) {
+  if (d.includes('learning.employr.id') || d.includes('learning.ambilcuti.id') || d.includes('3004')) {
     return {
       label: 'Learning',
       sublabel: 'learning.employr.id',
@@ -60,7 +60,7 @@ export function getDomainInfo(domain?: string | null): DomainMeta {
     };
   }
 
-  if (d.includes('faq.ambilcuti.id') || d.includes('faq.employr.id') || d.includes('3005')) {
+  if (d.includes('faq.employr.id') || d.includes('faq.ambilcuti.id') || d.includes('3005')) {
     return {
       label: 'FAQ / Bantuan',
       sublabel: 'faq.employr.id',
@@ -71,7 +71,7 @@ export function getDomainInfo(domain?: string | null): DomainMeta {
     };
   }
 
-  if (d.includes('admin-employr-rahasia.employr.id') || d.includes('masterdata.ambilcuti.id') || d.includes('masterdata.employr.id') || d.includes('admin') || d.includes('3002')) {
+  if (d.includes('admin-employr-rahasia.employr.id') || d.includes('masterdata.employr.id') || d.includes('masterdata.ambilcuti.id') || d.includes('admin') || d.includes('3002')) {
     return {
       label: 'Admin Panel',
       sublabel: 'admin-employr-rahasia.employr.id',

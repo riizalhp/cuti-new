@@ -5,13 +5,196 @@ import FooterPortal from '../../components/FooterPortal.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import SearchModal from '../../components/SearchModal.astro';
 import PageHero from '../../components/common/PageHero.astro';
-import { sertifikasiList, ensureData } from '../../data/mock';
+import SubsectionHeader from '../../components/common/SubsectionHeader.astro';
+import OrganicCardSmall from '../../components/common/OrganicCardSmall.astro';
+import {
+  sertifikasiList,
+  artikelList,
+  lowonganList,
+  courseList,
+  eventList,
+  ensureData,
+} from '../../data/mock';
+import { CV_BUILDER_URL } from '../../lib/urls';
 
 await ensureData();
 const sertifikasiListSnapshot = [...sertifikasiList];
+const artikelListSnapshot = [...artikelList];
+const lowonganListSnapshot = [...lowonganList];
+const courseListSnapshot = [...courseList];
+const eventListSnapshot = [...eventList];
 
-const title = "Direktori Sertifikasi Profesional & Industri | Employer Job";
+// Pembersihan teks dari em-dash, en-dash, dan istilah terlarang
+function sanitizeText(raw = ''): string {
+  if (!raw) return '';
+  return raw
+    .replace(/[—–]/g, '-')
+    .replace(/\bArtificial Intelligence\b/gi, 'Kecerdasan Terapan')
+    .replace(/\bMachine Learning\b/gi, 'Pembelajaran Data')
+    .replace(/\bAI\b/g, 'Teknologi Cerdas')
+    .replace(/\bPrompting\b/gi, 'Penyusunan Instruksi')
+    .replace(/\bPrompt\b/gi, 'Instruksi')
+    .replace(/\bGenerated\b/gi, 'Disusun')
+    .replace(/\bGenerate\b/gi, 'Susun')
+    .replace(/\bSubscription\b/gi, 'Paket Akses')
+    .replace(/\bLangganan\b/gi, 'Paket Akses');
+}
+
+function sanitizeCompanyName(raw = ''): string {
+  if (!raw) return '';
+  const cleaned = sanitizeText(raw).trim();
+  if (cleaned.length > 3 && cleaned === cleaned.toUpperCase()) {
+    return cleaned
+      .toLowerCase()
+      .split(' ')
+      .map((word) => {
+        if (['pt', 'cv', 'tbk', 'ltd', 'fa', 'ud', 'ksp'].includes(word)) return word.toUpperCase();
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join(' ');
+  }
+  return cleaned;
+}
+
+// Parameter pencarian, kategori, dan paginasi
+const rawQ = Astro.url.searchParams.get('q') || '';
+const query = rawQ.trim().toLowerCase();
+const rawCat = Astro.url.searchParams.get('cat') || 'semua';
+const category = rawCat.trim().toLowerCase();
+const rawPage = Astro.url.searchParams.get('page') || '1';
+const pageNum = parseInt(rawPage, 10) || 1;
+
+// 1. Filter Kategori
+let filteredCerts = sertifikasiListSnapshot;
+
+if (category && category !== 'semua') {
+  filteredCerts = filteredCerts.filter((c) => {
+    const combined = `${c.title} ${c.issuer} ${c.description} ${(c.skills || []).join(' ')} ${c.level} ${c.price}`.toLowerCase();
+    if (category === 'gratis') {
+      return (c.price || '').toLowerCase().includes('gratis') || (c.price || '').includes('0');
+    }
+    if (category === 'bnsp') {
+      return combined.includes('bnsp') || combined.includes('lsp') || combined.includes('badan nasional');
+    }
+    if (category === 'tech') {
+      return (
+        combined.includes('google') ||
+        combined.includes('aws') ||
+        combined.includes('microsoft') ||
+        combined.includes('cloud') ||
+        combined.includes('data') ||
+        combined.includes('developer') ||
+        combined.includes('cisco') ||
+        combined.includes('cyber') ||
+        combined.includes('teknologi')
+      );
+    }
+    if (category === 'bahasa') {
+      return (
+        combined.includes('ielts') ||
+        combined.includes('toefl') ||
+        combined.includes('toeic') ||
+        combined.includes('bahasa') ||
+        combined.includes('english') ||
+        combined.includes('mandarin')
+      );
+    }
+    if (category === 'industri') {
+      return (
+        combined.includes('k3') ||
+        combined.includes('iso') ||
+        combined.includes('ahli') ||
+        combined.includes('teknik') ||
+        combined.includes('keselamatan') ||
+        combined.includes('manajemen') ||
+        combined.includes('operasi') ||
+        combined.includes('industri')
+      );
+    }
+    return true;
+  });
+}
+
+// 2. Filter Pencarian Teks
+if (query) {
+  filteredCerts = filteredCerts.filter((c) => {
+    const matchTitle = (c.title || '').toLowerCase().includes(query);
+    const matchProv = (c.provider || '').toLowerCase().includes(query);
+    const matchIss = (c.issuer || '').toLowerCase().includes(query);
+    const matchDesc = (c.description || '').toLowerCase().includes(query);
+    const matchLvl = (c.level || '').toLowerCase().includes(query);
+    const matchSkills = Array.isArray(c.skills) && c.skills.some((s) => s.toLowerCase().includes(query));
+    return matchTitle || matchProv || matchIss || matchDesc || matchLvl || matchSkills;
+  });
+}
+
+// 3. Logika Paginasi (Maksimal 6 item per halaman agar tidak lelah scroll)
+const PER_PAGE = 6;
+const totalItems = filteredCerts.length;
+const totalPages = Math.max(1, Math.ceil(totalItems / PER_PAGE));
+const currentPage = Math.min(Math.max(1, pageNum), totalPages);
+const startIdx = (currentPage - 1) * PER_PAGE;
+const endIdx = startIdx + PER_PAGE;
+const paginatedCerts = filteredCerts.slice(startIdx, endIdx);
+
+// Pembagian item untuk in-feed ads (4 item pertama, lalu ads, lalu sisa 2 item)
+const topCerts = paginatedCerts.slice(0, 4);
+const bottomCerts = paginatedCerts.slice(4, 6);
+
+// Helper URL Paginasi & Filter yang mempertahankan query parameter
+function getPageUrl(targetPage: number) {
+  const params = new URLSearchParams();
+  if (query) params.set('q', rawQ);
+  if (category && category !== 'semua') params.set('cat', category);
+  if (targetPage > 1) params.set('page', String(targetPage));
+  const qs = params.toString();
+  return `/sertifikasi${qs ? `?${qs}` : ''}`;
+}
+
+function getCategoryUrl(targetCat: string) {
+  const params = new URLSearchParams();
+  if (query) params.set('q', rawQ);
+  if (targetCat !== 'semua') params.set('cat', targetCat);
+  const qs = params.toString();
+  return `/sertifikasi${qs ? `?${qs}` : ''}`;
+}
+
+const isFiltered = Boolean(query || (category && category !== 'semua'));
+const displayTitle = query
+  ? `Hasil Pencarian Sertifikasi: <em>"${sanitizeText(rawQ)}"</em>`
+  : "Sertifikasi Profesional &amp; <em>Industri Terakreditasi</em>";
+
+const title = rawQ
+  ? `Hasil Pencarian Sertifikasi "${sanitizeText(rawQ)}" | Employr Portal`
+  : "Direktori Sertifikasi Profesional & Industri | Employr Portal";
 const description = "Kurasi sertifikasi standar nasional dan internasional dari Google, Microsoft, BNSP, AWS, dan lembaga terkemuka.";
+
+// Sidebar: Spotlight Sertifikasi
+const spotlightCert = sertifikasiListSnapshot.find((c) =>
+  c.issuer.toLowerCase().includes('google') ||
+  c.title.toLowerCase().includes('data') ||
+  c.issuer.toLowerCase().includes('bnsp')
+) || sertifikasiListSnapshot[0];
+
+// Sidebar: 5 Artikel Viral / Terpopuler
+const topViralArticles = artikelListSnapshot.slice(0, 5);
+
+// Cross-Content Hub (Bagian Bawah)
+const relatedArticles = artikelListSnapshot.slice(0, 3);
+const otherCerts = sertifikasiListSnapshot.filter((c) => !paginatedCerts.some((p) => p.slug === c.slug)).slice(0, 3);
+const relatedJobs = lowonganListSnapshot.slice(0, 3);
+const relatedCourses = courseListSnapshot.slice(0, 3);
+const relatedEvents = eventListSnapshot.slice(0, 3);
+
+// Daftar Filter Kategori
+const filterChips = [
+  { id: 'semua', label: 'Semua Kategori' },
+  { id: 'gratis', label: 'Gratis & Beasiswa' },
+  { id: 'bnsp', label: 'BNSP Resmi' },
+  { id: 'tech', label: 'Cloud & Data Global' },
+  { id: 'bahasa', label: 'Bahasa & Akademik' },
+  { id: 'industri', label: 'K3 & Industri' },
+];
 ---
 
 <BaseLayout title={title} description={description} canonicalUrl="http://localhost:3003/sertifikasi">
@@ -20,44 +203,559 @@ const description = "Kurasi sertifikasi standar nasional dan internasional dari 
   <main class="bg-[#f4f3ee] min-h-screen pb-16">
     <PageHero
       eyebrow="Sertifikasi Profesional"
-      title="Sertifikasi Profesional &amp; <em>Industri Terakreditasi</em>"
-      description="Tingkatkan kredibilitas CV dan portofoliomu dengan sertifikasi yang diakui industri global dan nasional."
-      badge={{ text: `${sertifikasiListSnapshot.length} Skema Tersedia`, bgColor: 'bg-emerald-50', textColor: 'text-emerald-700', borderColor: 'border border-emerald-200' }}
+      title={displayTitle}
+      description={isFiltered ? `Menampilkan ${totalItems} skema sertifikasi (Halaman ${currentPage} dari ${totalPages}).` : "Tingkatkan kredibilitas CV dan portofoliomu dengan sertifikasi yang diakui industri global dan nasional."}
+      badge={{
+        text: `${totalItems} Skema Tersedia`,
+        bgColor: 'bg-emerald-50',
+        textColor: 'text-emerald-700',
+        borderColor: 'border border-emerald-200',
+      }}
     >
-      <nav slot="breadcrumb" class="flex items-center gap-2 text-xs text-[#6e6d68] mb-4" aria-label="Breadcrumb">
-        <a href="/" class="hover:text-[#0000ff] transition">Beranda</a>
+      <nav slot="breadcrumb" class="flex items-center gap-2 text-xs text-[#52514c] mb-4" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-[#1738D1] transition min-h-[44px] min-w-[44px] inline-flex items-center justify-center px-1">Beranda</a>
         <span>/</span>
-        <span class="text-[#101010] font-semibold">Sertifikasi</span>
+        <span class="text-[#101010] font-semibold min-h-[44px] flex items-center">Sertifikasi</span>
       </nav>
     </PageHero>
 
     <div class="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6">
-      <AdSlot type="leaderboard" note="Rekomendasi program pelatihan dan bimbingan sertifikasi." />
+      <!-- Search Input Bar & Reset -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-4">
+        <form action="/sertifikasi" method="GET" class="bg-white border border-[#b8b7af] focus-within:border-[#1738D1] focus-within:ring-4 focus-within:ring-blue-500/10 rounded-full shadow-xs p-1.5 pl-4 flex items-center gap-2 flex-1 max-w-xl">
+          <svg class="w-4 h-4 text-[#52514c] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input
+            type="text"
+            name="q"
+            value={rawQ}
+            placeholder="Cari skema sertifikasi (BNSP, Google, AWS, Microsoft, Data)..."
+            class="min-w-0 flex-1 min-h-[44px] text-xs sm:text-sm text-[#101010] placeholder-[#52514c] outline-none bg-transparent font-medium"
+          />
+          {category !== 'semua' && (
+            <input type="hidden" name="cat" value={category} />
+          )}
+          {isFiltered && (
+            <a href="/sertifikasi" class="min-h-[44px] flex items-center text-xs font-bold text-[#52514c] hover:text-[#101010] px-2 shrink-0">
+              Reset
+            </a>
+          )}
+          <button
+            type="submit"
+            class="min-h-[44px] px-5 py-2.5 rounded-full bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition cursor-pointer shrink-0 flex items-center justify-center"
+          >
+            Cari
+          </button>
+        </form>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
-        {sertifikasiListSnapshot.map((sert) => (
-          <article class="bg-white rounded-2xl border border-[#d7d6cf] overflow-hidden hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:border-[#0000ff]/30 hover:-translate-y-1 transition duration-300 flex flex-col justify-between">
-            <div class="p-5">
-              <div class="flex items-center justify-between gap-2 mb-3">
-                <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold">{sert.issuer}</span>
-                <span class="text-[11px] font-medium text-[#6e6d68]">{sert.duration}</span>
+        <p class="text-xs font-medium text-[#52514c] shrink-0 self-end sm:self-center">
+          Menampilkan <span class="font-bold text-[#101010]">{totalItems > 0 ? startIdx + 1 : 0}-{Math.min(endIdx, totalItems)}</span> dari <span class="font-bold text-[#101010]">{totalItems}</span> skema
+        </p>
+      </div>
+
+      <!-- Kategori Filter Chips (Min Tap Target 44px) -->
+      <nav aria-label="Filter kategori sertifikasi" class="flex items-center gap-2 overflow-x-auto pb-3 pt-1 scrollbar-none mb-6">
+        {filterChips.map((chip) => {
+          const isActive = category === chip.id;
+          return (
+            <a
+              href={getCategoryUrl(chip.id)}
+              class={`min-h-[44px] px-4 py-2.5 rounded-full text-xs font-bold transition flex items-center justify-center shrink-0 border ${
+                isActive
+                  ? 'bg-[#101010] text-white border-[#101010] shadow-xs'
+                  : 'bg-white text-[#52514c] border-[#b8b7af] hover:text-[#101010] hover:border-[#101010]'
+              }`}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              {chip.label}
+            </a>
+          );
+        })}
+      </nav>
+
+      <!-- Banner Leaderboard Ads -->
+      <AdSlot type="leaderboard" note="Rekomendasi program pelatihan dan bimbingan sertifikasi persiapan karier." />
+
+      <!-- Layout 2 Kolom: Kiri Daftar Sertifikasi, Kanan Sidebar Modul -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
+        <!-- Kolom Kiri: Daftar Skema Sertifikasi & In-Feed Ads & Paginasi (8 Kolom) -->
+        <section class="lg:col-span-8 flex flex-col justify-between" aria-label="Daftar Sertifikasi">
+          <div>
+            <SubsectionHeader
+              title="Daftar Skema Sertifikasi Terverifikasi"
+              level={2}
+              eyebrow="Katalog Direktori"
+              rightContent={true}
+              className="mb-4"
+            >
+              <div slot="right" class="text-xs font-medium text-[#52514c] hidden sm:block">
+                Halaman {currentPage} dari {totalPages}
               </div>
-              <h2 class="text-base font-semibold text-[#101010] hover:text-[#0000ff] transition leading-snug">
-                <a href={`/sertifikasi/${sert.slug}`}>{sert.title}</a>
-              </h2>
-              <p class="text-xs text-[#6e6d68] line-clamp-3 mt-2 leading-relaxed">{sert.description}</p>
-            </div>
-            <div class="p-5 pt-0 border-t border-[#d7d6cf]/50 mt-3">
-              <div class="flex items-center justify-between pt-3">
-                <span class="text-xs font-bold text-[#101010]">{sert.price}</span>
-                <a href={`/sertifikasi/${sert.slug}`} class="px-4 py-2 rounded-full bg-[#0000ff] hover:bg-[#1738d1] text-white text-xs font-semibold transition shadow-xs">
-                  Lihat Detail →
+            </SubsectionHeader>
+
+            {totalItems === 0 ? (
+              <div class="bg-white rounded-2xl border border-[#b8b7af] p-8 text-center max-w-md mx-auto my-12 shadow-xs">
+                <p class="text-base font-bold text-[#101010] mb-1.5">Tidak ada sertifikasi yang cocok</p>
+                <p class="text-xs text-[#52514c] mb-5 leading-relaxed font-medium">
+                  Coba gunakan kata kunci lain seperti BNSP, Google, atau pilih kategori Semua.
+                </p>
+                <a
+                  href="/sertifikasi"
+                  class="min-h-[44px] inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-[#1738D1] text-white text-xs font-bold hover:bg-[#132EA8] transition shadow-xs"
+                >
+                  Tampilkan Semua Sertifikasi
+                </a>
+              </div>
+            ) : (
+              <div class="space-y-6">
+                <!-- Grid 2 Kolom untuk Kartu Sertifikasi -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+                  {topCerts.map((sert) => (
+                    <OrganicCardSmall
+                      image={sert.image}
+                      imageAlt={sanitizeText(sert.title)}
+                      category={sanitizeText(sert.issuer)}
+                      date={sanitizeText(sert.duration)}
+                      title={sanitizeText(sert.title)}
+                      href={`/sertifikasi/${sert.slug}`}
+                      description={sanitizeText(sert.description)}
+                      price={sanitizeText(sert.price)}
+                      actionText="Lihat Detail"
+                    />
+                  ))}
+
+                  <!-- In-Feed Ads diletakkan di sela-sela daftar sertifikasi (span 2 kolom) -->
+                  <div class="col-span-1 sm:col-span-2">
+                    <AdSlot
+                      type="infeed"
+                      title="Beasiswa Sertifikasi & Pelatihan Bersertifikat Industri"
+                      note="Dapatkan sertifikasi kompetensi resmi untuk memperkuat kualifikasi lamaran kerja."
+                      ctaText="Lihat Program Beasiswa"
+                      ctaHref="/course"
+                    />
+                  </div>
+
+                  {bottomCerts.map((sert) => (
+                    <OrganicCardSmall
+                      image={sert.image}
+                      imageAlt={sanitizeText(sert.title)}
+                      category={sanitizeText(sert.issuer)}
+                      date={sanitizeText(sert.duration)}
+                      title={sanitizeText(sert.title)}
+                      href={`/sertifikasi/${sert.slug}`}
+                      description={sanitizeText(sert.description)}
+                      price={sanitizeText(sert.price)}
+                      actionText="Lihat Detail"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <!-- Navigasi Paginasi (Mengatasi Scroll Panjang Berlebihan) -->
+          {totalPages > 1 && (
+            <nav
+              aria-label="Navigasi halaman sertifikasi"
+              class="flex flex-wrap items-center justify-between gap-3 pt-6 border-t border-[#b8b7af] mt-8 bg-transparent"
+            >
+              <div class="flex items-center gap-1.5">
+                {currentPage > 1 ? (
+                  <a
+                    href={getPageUrl(currentPage - 1)}
+                    class="min-h-[44px] px-4 py-2.5 rounded-xl border border-[#b8b7af] bg-white hover:bg-[#f4f3ee] text-xs font-bold text-[#101010] transition flex items-center gap-1.5 shadow-xs"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <span>Sebelumnya</span>
+                  </a>
+                ) : (
+                  <span
+                    class="min-h-[44px] px-4 py-2.5 rounded-xl border border-[#d7d6cf] bg-[#f4f3ee] text-xs font-bold text-[#8e8d86] cursor-not-allowed flex items-center gap-1.5"
+                    aria-disabled="true"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <span>Sebelumnya</span>
+                  </span>
+                )}
+              </div>
+
+              <!-- Angka Halaman -->
+              <div class="flex items-center gap-1.5 flex-wrap">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+                  const isCurrent = p === currentPage;
+                  return (
+                    <a
+                      href={getPageUrl(p)}
+                      class={`min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center border ${
+                        isCurrent
+                          ? 'bg-[#101010] text-white border-[#101010] shadow-xs'
+                          : 'bg-white text-[#52514c] border-[#b8b7af] hover:text-[#101010] hover:border-[#101010]'
+                      }`}
+                      aria-current={isCurrent ? 'page' : undefined}
+                      aria-label={`Buka halaman ${p}`}
+                    >
+                      {p}
+                    </a>
+                  );
+                })}
+              </div>
+
+              <div class="flex items-center gap-1.5">
+                {currentPage < totalPages ? (
+                  <a
+                    href={getPageUrl(currentPage + 1)}
+                    class="min-h-[44px] px-4 py-2.5 rounded-xl border border-[#b8b7af] bg-white hover:bg-[#f4f3ee] text-xs font-bold text-[#101010] transition flex items-center gap-1.5 shadow-xs"
+                  >
+                    <span>Berikutnya</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </a>
+                ) : (
+                  <span
+                    class="min-h-[44px] px-4 py-2.5 rounded-xl border border-[#d7d6cf] bg-[#f4f3ee] text-xs font-bold text-[#8e8d86] cursor-not-allowed flex items-center gap-1.5"
+                    aria-disabled="true"
+                  >
+                    <span>Berikutnya</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                )}
+              </div>
+            </nav>
+          )}
+        </section>
+
+        <!-- Kolom Kanan: Sidebar Modul (Spotlight, Ads Internal, Viral Articles, Ads External) (4 Kolom) -->
+        <aside class="lg:col-span-4 space-y-6" aria-label="Modul Rekomendasi dan Sorotan">
+          <!-- 1. Spotlight Sertifikasi Pilihan -->
+          {spotlightCert && (
+            <div class="bg-white border border-[#b8b7af] rounded-2xl p-5 shadow-xs">
+              <div class="flex items-center justify-between pb-3 mb-3.5 border-b border-[#d7d6cf]">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-[#1738D1]"></span>
+                  <h2 class="text-xs font-bold text-[#101010]">Spotlight Pilihan</h2>
+                </div>
+                <span class="text-[11px] font-bold text-[#1738D1] bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
+                  Paling Diminati
+                </span>
+              </div>
+
+              <div class="space-y-3">
+                <div class="flex items-start gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 text-[#1738D1] flex items-center justify-center font-bold text-sm shrink-0">
+                    CERT
+                  </div>
+                  <div class="min-w-0">
+                    <span class="text-[11px] font-bold text-[#52514c] block">
+                      {sanitizeText(spotlightCert.issuer)}
+                    </span>
+                    <h3 class="text-sm font-bold text-[#101010] leading-snug line-clamp-2">
+                      {sanitizeText(spotlightCert.title)}
+                    </h3>
+                  </div>
+                </div>
+
+                <p class="text-xs text-[#52514c] leading-relaxed font-medium line-clamp-3">
+                  {sanitizeText(spotlightCert.description)}
+                </p>
+
+                <!-- Value Highlights -->
+                <div class="bg-[#f4f3ee] border border-[#d7d6cf] rounded-xl p-3 space-y-2 text-xs text-[#101010]">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[#52514c] font-medium">Durasi Belajar</span>
+                    <span class="font-bold">{sanitizeText(spotlightCert.duration)}</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-[#52514c] font-medium">Investasi / Biaya</span>
+                    <span class="font-bold text-emerald-700">{sanitizeText(spotlightCert.price)}</span>
+                  </div>
+                </div>
+
+                <a
+                  href={`/sertifikasi/${spotlightCert.slug}`}
+                  class="min-h-[44px] w-full px-4 py-2.5 rounded-full bg-[#101010] hover:bg-[#1738D1] active:scale-[0.98] text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
+                >
+                  <span>Pelajari Skema Spotlight</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
                 </a>
               </div>
             </div>
-          </article>
-        ))}
+          )}
+
+          <!-- 2. Ads Internal: Bedah & Pembuatan CV ATS -->
+          <AdSlot
+            type="mrec"
+            title="Review & Bedah CV Standar ATS"
+            note="Optimalkan resume lamaranmu agar lolos sistem penyaring otomatis rekruter perusahaan."
+            ctaText="Buat CV Standar ATS"
+            ctaHref={CV_BUILDER_URL}
+          />
+
+          <!-- 3. Artikel Viral & Paling Banyak Dibaca (01 - 05) -->
+          <div class="bg-white border border-[#b8b7af] rounded-2xl p-5 shadow-xs">
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#d7d6cf]">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                <h2 class="text-xs font-bold text-[#101010]">Artikel Karier Terpopuler</h2>
+              </div>
+              <span class="text-[11px] font-semibold text-[#52514c]">Viral Pekan Ini</span>
+            </div>
+
+            <div class="divide-y divide-[#d7d6cf]">
+              {topViralArticles.map((art, idx) => (
+                <a
+                  href={`/artikel/${art.slug}`}
+                  class="group flex items-start gap-3.5 py-3 first:pt-1 last:pb-1 hover:bg-[#f4f3ee] px-2 rounded-xl transition min-h-[44px]"
+                >
+                  <span class="text-base font-extrabold text-[#1738D1] group-hover:scale-105 transition shrink-0 w-6 pt-0.5">
+                    0{idx + 1}
+                  </span>
+                  <div class="min-w-0 flex-1">
+                    <h3 class="text-xs sm:text-sm font-bold text-[#101010] group-hover:text-[#1738D1] transition leading-snug line-clamp-2">
+                      {sanitizeText(art.title)}
+                    </h3>
+                    <div class="flex items-center gap-2 mt-1 text-[11px] text-[#52514c] font-medium">
+                      <span>{sanitizeText(art.category)}</span>
+                      <span>·</span>
+                      <span>{art.readTime}</span>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+
+            <div class="pt-3 mt-2 border-t border-[#d7d6cf]">
+              <a
+                href="/artikel"
+                class="min-h-[44px] w-full px-4 py-2 rounded-xl border border-[#b8b7af] bg-[#f4f3ee] hover:bg-white text-xs font-bold text-[#101010] transition flex items-center justify-center gap-1.5 shadow-xs"
+              >
+                <span>Lihat Seluruh Panduan Artikel</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- 4. Ads External / Mitra Sponsor (Skyscraper Sticky) -->
+          <div class="sticky top-20">
+            <AdSlot
+              type="skyscraper"
+              note="Tingkatkan kualifikasi dengan program sertifikasi dan bimbingan karier intensif bersama praktisi industri."
+            />
+          </div>
+        </aside>
       </div>
+
+      <!-- Cross-Content Hub: Rekomendasi Terkait di Bagian Bawah -->
+      <section class="mt-16 pt-12 border-t border-[#b8b7af] space-y-12" aria-label="Rekomendasi Terkait">
+        <!-- 1. Baca Juga Artikel & Tips Karier -->
+        <div>
+          <SubsectionHeader
+            title="Baca Juga Artikel &amp; Tips Karier"
+            level={2}
+            eyebrow="Wawasan &amp; Panduan Rekruter"
+            rightContent={true}
+            className="mb-6"
+          >
+            <a slot="right" href="/artikel" class="min-h-[44px] inline-flex items-center gap-1 text-xs font-bold text-[#1738D1] hover:underline">
+              <span>Semua Artikel</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </SubsectionHeader>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {relatedArticles.map((art) => (
+              <OrganicCardSmall
+                image={art.image}
+                imageAlt={sanitizeText(art.title)}
+                category={sanitizeText(art.category)}
+                date={art.date}
+                title={sanitizeText(art.title)}
+                href={`/artikel/${art.slug}`}
+                description={sanitizeText(art.excerpt)}
+                actionText="Baca Artikel"
+              />
+            ))}
+          </div>
+        </div>
+
+        <!-- 2. Rekomendasi Sertifikasi Terkait Lainnya -->
+        <div>
+          <SubsectionHeader
+            title="Rekomendasi Sertifikasi Terkait Lainnya"
+            level={2}
+            eyebrow="Pengembangan Kualifikasi"
+            rightContent={true}
+            className="mb-6"
+          >
+            <a slot="right" href="/sertifikasi" class="min-h-[44px] inline-flex items-center gap-1 text-xs font-bold text-[#1738D1] hover:underline">
+              <span>Semua Skema</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </SubsectionHeader>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {otherCerts.map((sert) => (
+              <OrganicCardSmall
+                image={sert.image}
+                imageAlt={sanitizeText(sert.title)}
+                category={sanitizeText(sert.issuer)}
+                date={sanitizeText(sert.duration)}
+                title={sanitizeText(sert.title)}
+                href={`/sertifikasi/${sert.slug}`}
+                description={sanitizeText(sert.description)}
+                price={sanitizeText(sert.price)}
+                actionText="Lihat Detail"
+              />
+            ))}
+          </div>
+        </div>
+
+        <!-- 3. Lowongan Kerja Aktif Terkait -->
+        <div>
+          <SubsectionHeader
+            title="Lowongan Kerja Aktif Terkait"
+            level={2}
+            eyebrow="Peluang Kerja Terbuka"
+            rightContent={true}
+            className="mb-6"
+          >
+            <a slot="right" href="/loker" class="min-h-[44px] inline-flex items-center gap-1 text-xs font-bold text-[#1738D1] hover:underline">
+              <span>Semua Lowongan</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </SubsectionHeader>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {relatedJobs.map((job) => (
+              <div class="bg-white border border-[#b8b7af] rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-[#1738D1] transition group">
+                <div>
+                  <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#d7d6cf]">
+                    <span class="text-xs font-bold text-[#101010] truncate max-w-[160px]">
+                      {sanitizeCompanyName(job.company)}
+                    </span>
+                    <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                      {sanitizeText(job.type)}
+                    </span>
+                  </div>
+
+                  <h3 class="text-sm font-bold text-[#101010] group-hover:text-[#1738D1] transition leading-snug line-clamp-2 mb-2">
+                    {sanitizeText(job.title)}
+                  </h3>
+
+                  <div class="space-y-1.5 text-xs text-[#52514c] font-medium mb-4">
+                    <div class="flex items-center gap-1.5">
+                      <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      </svg>
+                      <span class="truncate">{sanitizeText(job.location)}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-[#101010] font-bold">
+                      <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span>{sanitizeText(job.salary)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <a
+                  href={`/loker/${job.slug}`}
+                  class="min-h-[44px] w-full px-4 py-2 rounded-xl border border-[#b8b7af] bg-[#f4f3ee] group-hover:bg-[#101010] group-hover:text-white group-hover:border-[#101010] text-xs font-bold text-[#101010] transition flex items-center justify-center gap-1.5 shadow-xs"
+                >
+                  <span>Lihat Lowongan</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- 4. Pelatihan & Kursus Rekomendasi -->
+        <div>
+          <SubsectionHeader
+            title="Pelatihan &amp; Kursus Rekomendasi"
+            level={2}
+            eyebrow="Pengembangan Keterampilan Kerja"
+            rightContent={true}
+            className="mb-6"
+          >
+            <a slot="right" href="/course" class="min-h-[44px] inline-flex items-center gap-1 text-xs font-bold text-[#1738D1] hover:underline">
+              <span>Semua Kursus</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </SubsectionHeader>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {relatedCourses.map((course) => (
+              <OrganicCardSmall
+                image={course.image}
+                imageAlt={sanitizeText(course.title)}
+                category={sanitizeText(course.provider)}
+                date={sanitizeText(course.duration)}
+                title={sanitizeText(course.title)}
+                href={`/course/${course.slug}`}
+                description={sanitizeText(course.description)}
+                price={sanitizeText(course.price)}
+                actionText="Lihat Kursus"
+              />
+            ))}
+          </div>
+        </div>
+
+        <!-- 5. Agenda Event & Job Fair -->
+        <div>
+          <SubsectionHeader
+            title="Agenda Event &amp; Job Fair Mendatang"
+            level={2}
+            eyebrow="Networking &amp; Rekrutmen Langsung"
+            rightContent={true}
+            className="mb-6"
+          >
+            <a slot="right" href="/event" class="min-h-[44px] inline-flex items-center gap-1 text-xs font-bold text-[#1738D1] hover:underline">
+              <span>Semua Agenda</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </SubsectionHeader>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {relatedEvents.map((event) => (
+              <OrganicCardSmall
+                image={event.image}
+                imageAlt={sanitizeText(event.title)}
+                category={sanitizeText(event.organizer)}
+                date={sanitizeText(event.date)}
+                title={sanitizeText(event.title)}
+                href={`/event/${event.slug}`}
+                description={sanitizeText(event.description)}
+                actionText="Daftar Event"
+              />
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   </main>
 

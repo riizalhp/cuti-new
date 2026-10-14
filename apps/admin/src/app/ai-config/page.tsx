@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { AdminPageWrapper } from "@/components/admin/AdminPageWrapper"
 import { SidebarToggle } from "@/components/admin/SidebarToggle"
 import {
   Cpu,
@@ -40,6 +41,7 @@ import {
   Search,
   ChevronDown,
 } from "lucide-react"
+import { AiLiveTrackerView } from "@/components/admin/AiLiveTrackerView"
 
 // ============ TYPES ============
 
@@ -117,6 +119,14 @@ interface CustomChainItem {
 
 const DEFAULT_MODELS_BY_PROVIDER: Record<string, string[]> = {
   openai: ["gpt-4o-mini", "gpt-4o", "gpt-4o-2024-08-06", "gpt-4-turbo", "gpt-3.5-turbo"],
+  google: [
+    "gemini-2.5-flash",
+    "gemini-2.5-pro",
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-lite",
+    "gemini-1.5-flash",
+    "gemini-1.5-pro",
+  ],
   groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768", "gemma2-9b-it"],
   azure: ["gpt-4o-deployment", "gpt-4o-mini-deployment"],
   custom_proxy: ["deepseek-r1", "deepseek-v3", "qwen2.5-coder-32b", "gpt-4o-mini", "gemini-1.5-flash"],
@@ -183,10 +193,10 @@ function formatRupiah(n: number): string {
 // ============ MAIN COMPONENT ============
 
 export default function AiConfigPage() {
-  const [activeTab, setActiveTab] = useState<"config" | "usage">("config")
+  const [activeTab, setActiveTab] = useState<"config" | "usage" | "live">("config")
 
   return (
-    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="space-y-6">
+    <AdminPageWrapper className="space-y-6">
       {/* Header */}
       <div className="border-b border-slate-200/80 dark:border-slate-800 pb-5">
         <div className="flex items-center gap-3.5">
@@ -227,11 +237,28 @@ export default function AiConfigPage() {
           <BarChart3 size={14} />
           Usage & Cost
         </button>
+        <button
+          onClick={() => setActiveTab("live")}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+            activeTab === "live"
+              ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-50 shadow-xs"
+              : "text-slate-500 hover:text-slate-700"
+          }`}
+        >
+          <Activity size={14} className="text-emerald-500 animate-pulse" />
+          Live Realtime
+        </button>
       </div>
 
       {/* Tab Content */}
-      {activeTab === "config" ? <ConfigTab /> : <UsageTab />}
-    </motion.div>
+      {activeTab === "config" ? (
+        <ConfigTab />
+      ) : activeTab === "usage" ? (
+        <UsageTab />
+      ) : (
+        <AiLiveTrackerView />
+      )}
+    </AdminPageWrapper>
   )
 }
 
@@ -250,13 +277,14 @@ function ConfigTab() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingPackageId, setEditingPackageId] = useState<string | null>(null)
   const [formName, setFormName] = useState("")
-  const [formProvider, setFormProvider] = useState<"openai" | "azure" | "custom_proxy" | "ollama">("openai")
+  const [formProvider, setFormProvider] = useState<"openai" | "google" | "azure" | "custom_proxy" | "ollama">("openai")
   const [formEndpoint, setFormEndpoint] = useState("https://api.openai.com/v1")
   const [formApiKey, setFormApiKey] = useState("")
   const [formModel, setFormModel] = useState("gpt-4o-mini")
   const [formPriority, setFormPriority] = useState<number>(10)
   const [formAvailableModels, setFormAvailableModels] = useState<string[]>(DEFAULT_MODELS_BY_PROVIDER.openai)
   const [isFetchingModels, setIsFetchingModels] = useState(false)
+  const [isSavingNode, setIsSavingNode] = useState(false)
   const [modalMessage, setModalMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [modelSearchQuery, setModelSearchQuery] = useState("")
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false)
@@ -341,6 +369,27 @@ function ConfigTab() {
     loadFeatureMappings()
     loadChains()
   }, [])
+
+  // Close drawer or modal on ESC
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        if (isModelDropdownOpen) {
+          setIsModelDropdownOpen(false)
+        } else if (isModalOpen) {
+          setIsModalOpen(false)
+        } else if (isChainModalOpen) {
+          setIsChainModalOpen(false)
+        } else if (playgroundPackage) {
+          setPlaygroundPackage(null)
+        } else if (deleteTarget) {
+          setDeleteTarget(null)
+        }
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [isModelDropdownOpen, isModalOpen, isChainModalOpen, playgroundPackage, deleteTarget])
 
   const loadChains = async () => {
     setLoadingChains(true)
@@ -585,7 +634,7 @@ function ConfigTab() {
 
   const handleOpenAddModal = () => {
     setEditingPackageId(null)
-    setFormName("")
+    setFormName("OpenAI Primary Node")
     setFormProvider("openai")
     const defaultEndpoint = "https://api.openai.com/v1"
     setFormEndpoint(defaultEndpoint)
@@ -676,8 +725,23 @@ function ConfigTab() {
   }
 
   const handleSavePackageModal = async () => {
-    if (!formName.trim() || !formEndpoint.trim() || !formModel.trim()) return
+    const resolvedName = formName.trim() || (formProvider === "google" ? "Google Gemini Node" : `${formProvider.toUpperCase()} Node`)
 
+    if (!formEndpoint.trim()) {
+      setModalMessage({ type: "error", text: "Endpoint URL wajib diisi." })
+      return
+    }
+    if (!formModel.trim()) {
+      setModalMessage({ type: "error", text: "Model AI wajib dipilih." })
+      return
+    }
+    if (!editingPackageId && !formApiKey.trim() && formProvider !== "ollama") {
+      setModalMessage({ type: "error", text: "API Key wajib diisi untuk provider ini." })
+      return
+    }
+
+    setIsSavingNode(true)
+    setModalMessage(null)
     try {
       // Simpan model aktif dan seluruh opsi model ke cache lokal agar tidak hilang
       saveCachedModelsForEndpoint(formEndpoint.trim(), formProvider, [formModel.trim(), ...formAvailableModels])
@@ -685,8 +749,8 @@ function ConfigTab() {
       if (editingPackageId && !editingPackageId.startsWith("pkg-")) {
         // Direct DB Update via PUT
         const payload: any = {
-          name: formName.trim(),
-          label: formName.trim(),
+          name: resolvedName,
+          label: resolvedName,
           endpointUrl: formEndpoint.trim(),
           model: formModel.trim(),
           alias: formProvider,
@@ -697,19 +761,24 @@ function ConfigTab() {
           payload.apiKey = formApiKey.trim()
         }
 
-        await fetch(`/api/ai-providers/${editingPackageId}`, {
+        const res = await fetch(`/api/ai-providers/${editingPackageId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         })
+        const resData = await res.json().catch(() => null)
+        if (!res.ok || !resData?.success) {
+          setModalMessage({ type: "error", text: resData?.message || `Gagal memperbarui node (${res.status}).` })
+          return
+        }
       } else {
         // Direct DB Create via POST
-        await fetch("/api/ai-providers", {
+        const res = await fetch("/api/ai-providers", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: formName.trim(),
-            label: formName.trim(),
+            name: resolvedName,
+            label: resolvedName,
             endpointUrl: formEndpoint.trim(),
             apiKey: formApiKey.trim() || (formProvider === "ollama" ? "ollama" : "sk-placeholder"),
             model: formModel.trim(),
@@ -718,11 +787,18 @@ function ConfigTab() {
             alias: formProvider,
           }),
         })
+        const resData = await res.json().catch(() => null)
+        if (!res.ok || !resData?.success) {
+          setModalMessage({ type: "error", text: resData?.message || `Gagal membuat node (${res.status}).` })
+          return
+        }
       }
       setIsModalOpen(false)
       await loadProviders()
-    } catch (err) {
-      setModalMessage({ type: "error", text: "Gagal menyimpan ke database." })
+    } catch (err: any) {
+      setModalMessage({ type: "error", text: `Gagal menyimpan ke database: ${err.message || "Network Error"}` })
+    } finally {
+      setIsSavingNode(false)
     }
   }
 
@@ -1130,8 +1206,14 @@ function ConfigTab() {
                         <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-50">{pkg.name}</h3>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                          {pkg.provider}
+                        <span
+                          className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase ${
+                            pkg.provider === "google"
+                              ? "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
+                              : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                          }`}
+                        >
+                          {pkg.provider === "google" ? "Google Gemini" : pkg.provider}
                         </span>
                         <span className="text-[10px] font-mono text-slate-400">
                           (Pri: {pkg.priority})
@@ -1650,292 +1732,381 @@ function ConfigTab() {
         </div>
       </div>
 
-      {/* Create/Edit Modal */}
+      {/* Create/Edit Node Provider Drawer (Slide in from Right) */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end">
+            {/* Backdrop */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-xl p-6 space-y-5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsModalOpen(false)}
+              className="absolute inset-0 cursor-pointer"
+            />
+
+            {/* Right Drawer Box */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 26, stiffness: 260 }}
+              className="relative z-10 w-full max-w-xl h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                <h3 className="text-base font-extrabold flex items-center gap-2">
-                  <Cpu size={20} className="text-orange-500" />
-                  {editingPackageId ? "Edit Node Provider" : "Tambah Node Provider Baru"}
-                </h3>
-                <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 font-bold cursor-pointer">
-                  ✕
+              {/* Drawer Header */}
+              <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-500 border border-orange-500/20">
+                    <Cpu size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-50">
+                      {editingPackageId ? "Edit Node Provider" : "Tambah Node Provider Baru"}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      Konfigurasi endpoint, API key, model AI, dan prioritas failover
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                  title="Tutup (Esc)"
+                >
+                  <X size={20} />
                 </button>
               </div>
 
-              {modalMessage && (
-                <div
-                  className={`p-3 rounded-xl border text-xs font-semibold flex items-center gap-2 ${
-                    modalMessage.type === "success" ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-rose-50 border-rose-200 text-rose-700"
-                  }`}
-                >
-                  {modalMessage.type === "success" ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
-                  {modalMessage.text}
-                </div>
-              )}
-
-              <div className="space-y-4 text-xs">
-                <div>
-                  <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Nama Node / Label</label>
-                  <input
-                    type="text"
-                    placeholder="misal: OpenAI Primary Node"
-                    value={formName}
-                    onChange={(e) => setFormName(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold focus:outline-none focus:border-orange-500"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Provider</label>
-                    <select
-                      value={formProvider}
-                      onChange={(e) => {
-                        const v = e.target.value as any
-                        setFormProvider(v)
-                        const models = getCachedModelsForEndpoint(formEndpoint, v)
-                        setFormAvailableModels(models)
-                        setFormModel(models[0] || "gpt-4o-mini")
-                      }}
-                      className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] text-xs font-bold focus:outline-none focus:border-orange-500"
-                    >
-                      <option value="openai">OpenAI</option>
-                      <option value="azure">Azure OpenAI</option>
-                      <option value="custom_proxy">Custom Proxy / Router</option>
-                      <option value="ollama">Ollama Local</option>
-                    </select>
+              {/* Drawer Scrollable Content */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-5 min-h-0">
+                {modalMessage && (
+                  <div
+                    className={`p-3.5 rounded-xl border text-xs font-semibold flex items-center gap-2 ${
+                      modalMessage.type === "success"
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/40 dark:border-emerald-900 dark:text-emerald-300"
+                        : "bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300"
+                    }`}
+                  >
+                    {modalMessage.type === "success" ? <CheckCircle2 size={16} className="shrink-0" /> : <AlertTriangle size={16} className="shrink-0" />}
+                    <span>{modalMessage.text}</span>
                   </div>
+                )}
 
+                <div className="space-y-4 text-xs">
                   <div>
-                    <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Endpoint URL</label>
+                    <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Nama Node / Label</label>
                     <input
                       type="text"
-                      value={formEndpoint}
-                      onChange={(e) => setFormEndpoint(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] text-xs font-mono focus:outline-none focus:border-orange-500"
+                      placeholder={formProvider === "google" ? "misal: Google Gemini Node" : "misal: OpenAI Primary Node"}
+                      value={formName}
+                      onChange={(e) => setFormName(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold focus:outline-none focus:border-orange-500"
                     />
                   </div>
-                </div>
 
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">API Key</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Provider</label>
+                      <select
+                        value={formProvider}
+                        onChange={(e) => {
+                          const v = e.target.value as any
+                          setFormProvider(v)
+                          let newEndpoint = formEndpoint
+                          if (v === "google") {
+                            if (
+                              !formEndpoint ||
+                              formEndpoint === "https://api.openai.com/v1" ||
+                              formEndpoint === "http://localhost:11434/v1"
+                            ) {
+                              newEndpoint = "https://generativelanguage.googleapis.com/v1beta/openai"
+                              setFormEndpoint(newEndpoint)
+                            }
+                            if (!formName || formName.includes("Node") || formName.includes("OpenAI")) {
+                              setFormName("Google Gemini Node")
+                            }
+                          } else if (v === "openai") {
+                            if (
+                              !formEndpoint ||
+                              formEndpoint === "https://generativelanguage.googleapis.com/v1beta/openai" ||
+                              formEndpoint === "http://localhost:11434/v1"
+                            ) {
+                              newEndpoint = "https://api.openai.com/v1"
+                              setFormEndpoint(newEndpoint)
+                            }
+                            if (!formName || formName.includes("Node") || formName.includes("Gemini")) {
+                              setFormName("OpenAI Primary Node")
+                            }
+                          } else if (v === "ollama") {
+                            if (
+                              !formEndpoint ||
+                              formEndpoint === "https://api.openai.com/v1" ||
+                              formEndpoint === "https://generativelanguage.googleapis.com/v1beta/openai"
+                            ) {
+                              newEndpoint = "http://localhost:11434/v1"
+                              setFormEndpoint(newEndpoint)
+                            }
+                            if (!formName || formName.includes("Node")) {
+                              setFormName("Ollama Local Node")
+                            }
+                          }
+                          const models = getCachedModelsForEndpoint(newEndpoint, v)
+                          setFormAvailableModels(models)
+                          setFormModel(models[0] || (v === "google" ? "gemini-2.5-flash" : "gpt-4o-mini"))
+                        }}
+                        className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] text-xs font-bold focus:outline-none focus:border-orange-500"
+                      >
+                        <option value="openai">OpenAI</option>
+                        <option value="google">Google (AI Studio / Gemini)</option>
+                        <option value="azure">Azure OpenAI</option>
+                        <option value="custom_proxy">Custom Proxy / Router</option>
+                        <option value="ollama">Ollama Local</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Endpoint URL</label>
+                      <input
+                        type="text"
+                        value={formEndpoint}
+                        onChange={(e) => setFormEndpoint(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] text-xs font-mono focus:outline-none focus:border-orange-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">API Key</label>
+                      {editingPackageId && (
+                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                          <CheckCircle2 size={12} /> Key tersimpan aman di DB
+                        </span>
+                      )}
+                    </div>
+                    <input
+                      type="password"
+                      value={formApiKey}
+                      onChange={(e) => setFormApiKey(e.target.value)}
+                      placeholder={
+                        editingPackageId
+                          ? "•••••••• (Tersimpan di DB — kosongkan jika tidak ingin mengubah)"
+                          : formProvider === "google"
+                          ? "AIzaSy... (Google AI Studio API Key)"
+                          : formProvider === "ollama"
+                          ? "Opsional untuk Ollama / Local AI"
+                          : "sk-proj-..."
+                      }
+                      className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] text-xs font-mono focus:outline-none focus:border-orange-500 transition"
+                    />
                     {editingPackageId && (
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
-                        <CheckCircle2 size={12} /> Key tersimpan aman di DB
-                      </span>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+                        Biarkan kosong jika tidak ingin mengubah API Key. Sistem otomatis memakai key yang sudah tersimpan saat load model maupun request AI.
+                      </p>
                     )}
                   </div>
-                  <input
-                    type="password"
-                    value={formApiKey}
-                    onChange={(e) => setFormApiKey(e.target.value)}
-                    placeholder={
-                      editingPackageId
-                        ? "•••••••• (Tersimpan di DB — kosongkan jika tidak ingin mengubah)"
-                        : formProvider === "ollama"
-                        ? "Opsional untuk Ollama / Local AI"
-                        : "sk-proj-..."
-                    }
-                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] text-xs font-mono focus:outline-none focus:border-orange-500 transition"
-                  />
-                  {editingPackageId && (
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
-                      Biarkan kosong jika tidak ingin mengubah API Key. Sistem otomatis memakai key yang sudah tersimpan saat load model maupun request AI.
-                    </p>
-                  )}
-                </div>
 
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Pilih Model AI</label>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-[6px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                        {formAvailableModels.length} Model
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleFetchModelsFromEndpoint}
-                      disabled={isFetchingModels}
-                      className="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 text-[11px] font-bold flex items-center gap-1 cursor-pointer transition"
-                    >
-                      <RefreshCw size={12} className={isFetchingModels ? "animate-spin" : ""} />
-                      <span>{isFetchingModels ? "Memuat Model..." : "Muat Model dari Endpoint"}</span>
-                    </button>
-                  </div>
-
-                  {/* Searchable Dropdown Model Container (Design System compliant) */}
-                  <div className="relative" ref={modelDropdownRef}>
-                    {/* Trigger Button */}
-                    <button
-                      type="button"
-                      onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
-                      className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center justify-between hover:border-slate-300 dark:hover:border-slate-700 transition cursor-pointer shadow-2xs focus:outline-none focus:border-orange-500"
-                    >
-                      <div className="flex items-center gap-2 truncate">
-                        <Cpu size={14} className="text-orange-500 shrink-0" />
-                        <span className="font-mono font-bold truncate text-slate-900 dark:text-slate-100">
-                          {formModel || "Pilih model AI..."}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Pilih Model AI</label>
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-[6px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                          {formAvailableModels.length} Model
                         </span>
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0 text-slate-400">
-                        <ChevronDown
-                          size={14}
-                          className={`transition-transform duration-200 ${isModelDropdownOpen ? "rotate-180 text-orange-500" : ""}`}
-                        />
-                      </div>
-                    </button>
+                      <button
+                        type="button"
+                        onClick={handleFetchModelsFromEndpoint}
+                        disabled={isFetchingModels}
+                        className="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 text-[11px] font-bold flex items-center gap-1 cursor-pointer transition"
+                      >
+                        <RefreshCw size={12} className={isFetchingModels ? "animate-spin" : ""} />
+                        <span>{isFetchingModels ? "Memuat Model..." : "Muat Model dari Endpoint"}</span>
+                      </button>
+                    </div>
 
-                    {/* Dropdown Menu Panel */}
-                    {isModelDropdownOpen && (
-                      <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] shadow-xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150">
-                        {/* Search Input Header */}
-                        <div className="p-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40">
-                          <div className="relative flex items-center">
-                            <Search size={14} className="text-slate-400 absolute left-2.5" />
-                            <input
-                              type="text"
-                              autoFocus
-                              value={modelSearchQuery}
-                              onChange={(e) => setModelSearchQuery(e.target.value)}
-                              placeholder="Cari atau ketik nama model baru..."
-                              className="w-full pl-8 pr-7 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[8px] text-xs font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 transition"
-                            />
-                            {modelSearchQuery && (
-                              <button
-                                type="button"
-                                onClick={() => setModelSearchQuery("")}
-                                className="absolute right-2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
-                              >
-                                <X size={12} />
-                              </button>
-                            )}
-                          </div>
+                    {/* Searchable Dropdown Model Container (Design System compliant) */}
+                    <div className="relative" ref={modelDropdownRef}>
+                      {/* Trigger Button */}
+                      <button
+                        type="button"
+                        onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
+                        className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center justify-between hover:border-slate-300 dark:hover:border-slate-700 transition cursor-pointer shadow-2xs focus:outline-none focus:border-orange-500"
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <Cpu size={14} className="text-orange-500 shrink-0" />
+                          <span className="font-mono font-bold truncate text-slate-900 dark:text-slate-100">
+                            {formModel || "Pilih model AI..."}
+                          </span>
                         </div>
+                        <div className="flex items-center gap-1.5 shrink-0 text-slate-400">
+                          <ChevronDown
+                            size={14}
+                            className={`transition-transform duration-200 ${isModelDropdownOpen ? "rotate-180 text-orange-500" : ""}`}
+                          />
+                        </div>
+                      </button>
 
-                        {/* Custom Model Quick Adder if query doesn't match an existing model */}
-                        {modelSearchQuery.trim() &&
-                          !formAvailableModels.some(
-                            (m) => m.toLowerCase() === modelSearchQuery.trim().toLowerCase()
-                          ) && (
-                            <div className="p-1 border-b border-slate-100 dark:border-slate-800 bg-orange-50/50 dark:bg-orange-950/20">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const customModel = modelSearchQuery.trim()
-                                  const updated = Array.from(new Set([customModel, ...formAvailableModels]))
-                                  setFormAvailableModels(updated)
-                                  setFormModel(customModel)
-                                  saveCachedModelsForEndpoint(formEndpoint.trim(), formProvider, updated)
-                                  setModelSearchQuery("")
-                                  setIsModelDropdownOpen(false)
-                                }}
-                                className="w-full text-left px-2.5 py-2 rounded-[8px] hover:bg-orange-100/70 dark:hover:bg-orange-950/50 text-orange-600 dark:text-orange-400 font-bold text-xs flex items-center justify-between transition cursor-pointer"
-                              >
-                                <div className="flex items-center gap-1.5 truncate">
-                                  <Plus size={13} className="shrink-0" />
-                                  <span className="truncate">
-                                    Gunakan model <span className="font-mono underline">"{modelSearchQuery.trim()}"</span>
-                                  </span>
-                                </div>
-                                <span className="text-[10px] px-1.5 py-0.5 rounded-[4px] bg-orange-200/60 dark:bg-orange-900/60 text-orange-700 dark:text-orange-300 shrink-0">
-                                  Kustom
-                                </span>
-                              </button>
-                            </div>
-                          )}
-
-                        {/* Model Items List */}
-                        <div className="max-h-52 overflow-y-auto p-1.5 space-y-0.5">
-                          {(() => {
-                            const filtered = formAvailableModels.filter((m) =>
-                              m.toLowerCase().includes(modelSearchQuery.trim().toLowerCase())
-                            )
-                            if (filtered.length === 0) {
-                              return (
-                                <div className="px-3 py-4 text-center text-xs text-slate-400">
-                                  Tidak ada model yang cocok dengan kata kunci.
-                                </div>
-                              )
-                            }
-                            return filtered.map((m) => {
-                              const isSelected = m === formModel
-                              return (
+                      {/* Dropdown Menu Panel */}
+                      {isModelDropdownOpen && (
+                        <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] shadow-xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150">
+                          {/* Search Input Header */}
+                          <div className="p-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40">
+                            <div className="relative flex items-center">
+                              <Search size={14} className="text-slate-400 absolute left-2.5" />
+                              <input
+                                type="text"
+                                autoFocus
+                                value={modelSearchQuery}
+                                onChange={(e) => setModelSearchQuery(e.target.value)}
+                                placeholder="Cari atau ketik nama model baru..."
+                                className="w-full pl-8 pr-7 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-[8px] text-xs font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 transition"
+                              />
+                              {modelSearchQuery && (
                                 <button
-                                  key={m}
+                                  type="button"
+                                  onClick={() => setModelSearchQuery("")}
+                                  className="absolute right-2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                                >
+                                  <X size={12} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Custom Model Quick Adder if query doesn't match an existing model */}
+                          {modelSearchQuery.trim() &&
+                            !formAvailableModels.some(
+                              (m) => m.toLowerCase() === modelSearchQuery.trim().toLowerCase()
+                            ) && (
+                              <div className="p-1 border-b border-slate-100 dark:border-slate-800 bg-orange-50/50 dark:bg-orange-950/20">
+                                <button
                                   type="button"
                                   onClick={() => {
-                                    setFormModel(m)
-                                    setIsModelDropdownOpen(false)
+                                    const customModel = modelSearchQuery.trim()
+                                    const updated = Array.from(new Set([customModel, ...formAvailableModels]))
+                                    setFormAvailableModels(updated)
+                                    setFormModel(customModel)
+                                    saveCachedModelsForEndpoint(formEndpoint.trim(), formProvider, updated)
                                     setModelSearchQuery("")
-                                    saveCachedModelsForEndpoint(formEndpoint.trim(), formProvider, [m, ...formAvailableModels])
+                                    setIsModelDropdownOpen(false)
                                   }}
-                                  className={`w-full text-left px-3 py-2 rounded-[8px] text-xs flex items-center justify-between transition cursor-pointer ${
-                                    isSelected
-                                      ? "bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 font-bold border border-orange-200/60 dark:border-orange-800/40"
-                                      : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80"
-                                  }`}
+                                  className="w-full text-left px-2.5 py-2 rounded-[8px] hover:bg-orange-100/70 dark:hover:bg-orange-950/50 text-orange-600 dark:text-orange-400 font-bold text-xs flex items-center justify-between transition cursor-pointer"
                                 >
-                                  <span className="font-mono truncate">{m}</span>
-                                  {isSelected && <Check size={14} className="text-orange-600 dark:text-orange-400 shrink-0" />}
+                                  <div className="flex items-center gap-1.5 truncate">
+                                    <Plus size={13} className="shrink-0" />
+                                    <span className="truncate">
+                                      Gunakan model <span className="font-mono underline">"{modelSearchQuery.trim()}"</span>
+                                    </span>
+                                  </div>
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded-[4px] bg-orange-200/60 dark:bg-orange-900/60 text-orange-700 dark:text-orange-300 shrink-0">
+                                    Kustom
+                                  </span>
                                 </button>
+                              </div>
+                            )}
+
+                          {/* Model Items List */}
+                          <div className="max-h-52 overflow-y-auto p-1.5 space-y-0.5">
+                            {(() => {
+                              const filtered = formAvailableModels.filter((m) =>
+                                m.toLowerCase().includes(modelSearchQuery.trim().toLowerCase())
                               )
-                            })
-                          })()}
-                        </div>
+                              if (filtered.length === 0) {
+                                return (
+                                  <div className="px-3 py-4 text-center text-xs text-slate-400">
+                                    Tidak ada model yang cocok dengan kata kunci.
+                                  </div>
+                                )
+                              }
+                              return filtered.map((m) => {
+                                const isSelected = m === formModel
+                                return (
+                                  <button
+                                    key={m}
+                                    type="button"
+                                    onClick={() => {
+                                      setFormModel(m)
+                                      setIsModelDropdownOpen(false)
+                                      setModelSearchQuery("")
+                                      saveCachedModelsForEndpoint(formEndpoint.trim(), formProvider, [m, ...formAvailableModels])
+                                    }}
+                                    className={`w-full text-left px-3 py-2 rounded-[8px] text-xs flex items-center justify-between transition cursor-pointer ${
+                                      isSelected
+                                        ? "bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 font-bold border border-orange-200/60 dark:border-orange-800/40"
+                                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80"
+                                    }`}
+                                  >
+                                    <span className="font-mono truncate">{m}</span>
+                                    {isSelected && <Check size={14} className="text-orange-600 dark:text-orange-400 shrink-0" />}
+                                  </button>
+                                )
+                              })
+                            })()}
+                          </div>
 
-                        {/* Dropdown Footer */}
-                        <div className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 flex items-center justify-between">
-                          <span>Model otomatis tersimpan di cache</span>
-                          <span className="font-mono">{formAvailableModels.length} pilihan</span>
+                          {/* Dropdown Footer */}
+                          <div className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 flex items-center justify-between">
+                            <span>Model otomatis tersimpan di cache</span>
+                            <span className="font-mono">{formAvailableModels.length} pilihan</span>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                      Prioritas Urutan Failover (Angka)
-                    </label>
-                    <span className="text-[10px] text-slate-400">
-                      Nilai lebih tinggi dieksekusi lebih dulu
-                    </span>
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                        Prioritas Urutan Failover (Angka)
+                      </label>
+                      <span className="text-[10px] text-slate-400">
+                        Nilai lebih tinggi dieksekusi lebih dulu
+                      </span>
+                    </div>
+                    <input
+                      type="number"
+                      value={formPriority}
+                      onChange={(e) => setFormPriority(parseInt(e.target.value) || 0)}
+                      placeholder="misal: 100"
+                      className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] text-xs font-mono font-bold focus:outline-none focus:border-orange-500"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">
+                      {formPriority >= (packages[0]?.priority || 10)
+                        ? "Node ini akan berada di urutan prioritas teratas pool."
+                        : "Node ini akan bertindak sebagai cadangan otomatis saat node sebelumnya error."}
+                    </p>
                   </div>
-                  <input
-                    type="number"
-                    value={formPriority}
-                    onChange={(e) => setFormPriority(parseInt(e.target.value) || 0)}
-                    placeholder="misal: 100"
-                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] text-xs font-mono font-bold focus:outline-none focus:border-orange-500"
-                  />
-                  <p className="text-[10px] text-slate-500 mt-1">
-                    {formPriority >= (packages[0]?.priority || 10)
-                      ? "Node ini akan berada di urutan prioritas teratas pool."
-                      : "Node ini akan bertindak sebagai cadangan otomatis saat node sebelumnya error."}
-                  </p>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 cursor-pointer">
+              {/* Drawer Sticky Footer */}
+              <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-end gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 cursor-pointer"
+                >
                   Batal
                 </button>
                 <button
+                  type="button"
+                  disabled={isSavingNode}
                   onClick={handleSavePackageModal}
-                  className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-[10px] shadow-sm transition-all cursor-pointer"
+                  className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
                 >
-                  {editingPackageId ? "Simpan Perubahan" : "Tambah Node"}
+                  {isSavingNode ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      <span>Menyimpan...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save size={14} />
+                      <span>{editingPackageId ? "Simpan Perubahan" : "Tambah Node"}</span>
+                    </>
+                  )}
                 </button>
               </div>
             </motion.div>
@@ -2035,14 +2206,14 @@ function ConfigTab() {
       {/* Create/Edit Chain Drawer (Slide in from Right) */}
       <AnimatePresence>
         {isChainModalOpen && (
-          <div className="fixed inset-0 z-50 overflow-hidden">
+          <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsChainModalOpen(false)}
-              className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs cursor-pointer"
+              className="absolute inset-0 cursor-pointer"
             />
 
             {/* Right Drawer Box */}
@@ -2051,7 +2222,7 @@ function ConfigTab() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 26, stiffness: 260 }}
-              className="absolute inset-y-0 right-0 w-full max-w-xl bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col z-10 overflow-hidden"
+              className="relative z-10 w-full max-w-xl h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden"
             >
               {/* Drawer Header */}
               <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
@@ -2077,7 +2248,7 @@ function ConfigTab() {
               </div>
 
               {/* Drawer Scrollable Content */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
                 {chainModalError && (
                   <div className="p-3.5 rounded-xl border border-rose-200 bg-rose-50 dark:bg-rose-950/40 dark:border-rose-900 text-xs font-semibold text-rose-700 dark:text-rose-300 flex items-center gap-2">
                     <AlertTriangle size={16} className="shrink-0" />
@@ -2287,14 +2458,14 @@ function ConfigTab() {
       {/* Playground Drawer (Slide in from Right) */}
       <AnimatePresence>
         {playgroundPackage && (
-          <div className="fixed inset-0 z-50 overflow-hidden">
+          <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setPlaygroundPackage(null)}
-              className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs cursor-pointer"
+              className="absolute inset-0 cursor-pointer"
             />
 
             {/* Right Drawer Box */}
@@ -2303,7 +2474,7 @@ function ConfigTab() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 26, stiffness: 260 }}
-              className="absolute inset-y-0 right-0 w-full max-w-2xl bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col z-10 overflow-hidden"
+              className="relative z-10 w-full max-w-2xl h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden"
             >
               {/* Drawer Header */}
               <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
@@ -2330,7 +2501,7 @@ function ConfigTab() {
               </div>
 
               {/* Drawer Scrollable Content */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
                 {/* Configuration Bar */}
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-4">
                   <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">

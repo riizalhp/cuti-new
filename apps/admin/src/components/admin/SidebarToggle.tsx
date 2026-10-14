@@ -1,7 +1,7 @@
 "use client"
 
 import { useSidebar } from "@/context/SidebarContext"
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react"
+import { PanelLeftClose, PanelLeftOpen, Menu } from "lucide-react"
 
 interface SidebarToggleProps {
   className?: string
@@ -18,11 +18,19 @@ export function SidebarToggle({ className = "" }: SidebarToggleProps) {
       title={collapsed ? "Perluas Sidebar" : "Perkecil Sidebar"}
       aria-label={collapsed ? "Perluas Sidebar" : "Perkecil Sidebar"}
     >
-      {collapsed ? (
-        <PanelLeftOpen size={20} className="transition-transform duration-200 group-hover:scale-105" />
-      ) : (
-        <PanelLeftClose size={20} className="transition-transform duration-200 group-hover:scale-105" />
-      )}
+      {/* Mobile Icon */}
+      <span className="md:hidden flex items-center justify-center">
+        <Menu size={20} className="transition-transform duration-200 group-hover:scale-105" />
+      </span>
+
+      {/* Desktop Icon */}
+      <span className="hidden md:flex items-center justify-center">
+        {collapsed ? (
+          <PanelLeftOpen size={20} className="transition-transform duration-200 group-hover:scale-105" />
+        ) : (
+          <PanelLeftClose size={20} className="transition-transform duration-200 group-hover:scale-105" />
+        )}
+      </span>
     </button>
   )
 }

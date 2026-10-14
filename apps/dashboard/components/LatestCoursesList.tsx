@@ -71,7 +71,7 @@ export const LatestCoursesList: React.FC = () => {
     <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-[10px] bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
+          <div className="p-2 rounded-[10px] bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400">
             <GraduationCap className="w-5 h-5" />
           </div>
           <div>
@@ -96,7 +96,7 @@ export const LatestCoursesList: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span
-                    className={`px-2 py-0.5 rounded-[10px] text-[10px] font-bold ${
+                    className={`px-2 py-0.5 rounded-[10px] text-caption font-bold ${
                       c.type === 'Gratis'
                         ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                         : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
@@ -104,7 +104,7 @@ export const LatestCoursesList: React.FC = () => {
                   >
                     {c.type}
                   </span>
-                  <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                  <span className="text-caption text-slate-500 flex items-center gap-1 dark:text-slate-400">
                     <Clock className="w-3 h-3" />
                     {c.duration}
                   </span>
@@ -113,10 +113,10 @@ export const LatestCoursesList: React.FC = () => {
                 <h4 className="font-bold text-xs text-slate-900 dark:text-white mb-1">
                   {c.title}
                 </h4>
-                <p className="text-[11px] font-semibold text-orange-600 dark:text-orange-400 mb-2">
+                <p className="text-caption font-semibold text-orange-700 dark:text-orange-400 mb-2">
                   {c.provider} • {c.level}
                 </p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                <p className="text-caption text-slate-500 dark:text-slate-400 leading-snug">
                   {c.desc}
                 </p>
               </div>
@@ -127,7 +127,7 @@ export const LatestCoursesList: React.FC = () => {
                 className={`mt-4 w-full flex items-center justify-center gap-1.5 py-2 rounded-[10px] font-bold text-xs transition ${
                   isEnrolled
                     ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                    : 'bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-sm'
+                    : 'bg-cobalt-500 hover:bg-cobalt-600 text-white shadow-sm'
                 }`}
               >
                 {isEnrolled ? (

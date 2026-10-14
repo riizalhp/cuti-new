@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@employr/db';
+import { prisma, encryptSecret } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 import { verifySmtpConnection } from '@/lib/mailer/email-service';
 
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
         port: Number(port),
         secure: Boolean(secure),
         username,
-        password,
+        password: encryptSecret(cleanPassword),
         from_name: from_name || user.name || 'Pelamar',
         from_email: from_email || username,
         daily_limit: Number(daily_limit) || 500,
@@ -128,10 +128,12 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    const { password: _pw, ...safeAccount } = newAccount;
+
     return NextResponse.json({
       success: true,
       message: 'Akun SMTP berhasil disimpan dan diverifikasi!',
-      data: newAccount,
+      data: safeAccount,
     });
   } catch (error: any) {
     console.error('[API /mailer/smtp POST] Error:', error);

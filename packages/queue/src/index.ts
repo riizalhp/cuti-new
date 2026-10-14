@@ -1,5 +1,4 @@
 import PgBoss from 'pg-boss';
-import { registerScrapeJobs } from './jobs/scrape-jobs.ts';
 import { registerContentSync } from './jobs/content-sync.ts';
 import { registerCvUnlock } from './jobs/cv-unlock.ts';
 import { registerNotificationSend } from './jobs/notification-send.ts';
@@ -48,7 +47,6 @@ export async function startWorkers(): Promise<void> {
   const queue = getQueue();
   
   await Promise.all([
-    registerScrapeJobs(queue),
     registerContentSync(queue),
     registerCvUnlock(queue),
     registerNotificationSend(queue),

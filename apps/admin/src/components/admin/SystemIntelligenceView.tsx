@@ -369,7 +369,7 @@ const ALL_FEATURES: FeatureDetail[] = [
     thresholds: "Tersedia 3 tingkat kesulitan (Junior, Mid, Senior) yang mengatur kedalaman pertanyaan jebakan.",
     inputPipeline: "Peran Target & Level -> AI Question Generator -> Jawaban Kandidat -> STAR Evaluator.",
     outputImpact: "Kandidat dapat berlatih wawancara tanpa rasa takut dan mengetahui kelemahan jawabannya sebelum sesi nyata.",
-    codeFiles: ["apps/dashboard/components/InterviewView.tsx"],
+    codeFiles: ["apps/dashboard/components/InterviewScheduleModal.tsx"],
   },
   {
     id: "job_matcher",
@@ -427,26 +427,6 @@ const ALL_FEATURES: FeatureDetail[] = [
     inputPipeline: "Modul Belajar -> Ruang Kelas Belajar -> Drawer Tanya Coach -> Respon Terarah.",
     outputImpact: "Siswa yang bingung dapat langsung bertanya dan memahami konsep sulit tanpa harus menunggu instruktur.",
     codeFiles: ["apps/learning/app/kursus/[slug]/belajar/[lessonId]/page.tsx"],
-  },
-  {
-    id: "growth_studio",
-    name: "Growth Experiment Studio",
-    pillar: "adaptive",
-    pillarName: "Pilar 2: Adaptive Context Intelligence",
-    description: "Pengujian konten organik berbasis metode ilmiah untuk menguji narasi edukasi karier yang paling diminati.",
-    status: "AKTIF",
-    metric: "Metode Ilmiah",
-    note: "Hipotesis -> Eksperimen -> Keputusan",
-    iconName: "FlaskConical",
-    algorithm: "Hypothesis-Driven Growth Experimentation Loop",
-    formula: "Siklus: Hipotesis Variabel -> Publikasi Konten (Threads/LinkedIn) -> Agregasi Metrik -> Keputusan (KEEP/ITERATE/KILL).",
-    thresholds: "Eksperimen dievaluasi setelah mencapai minimal 1.000 impresi atau 7 hari penayangan.",
-    inputPipeline: "Generator Konten AI Persona Khusus -> Catat UTM & Reaksi -> Evaluasi Jurnal Pembelajaran.",
-    outputImpact: "Membantu tim menemukan pesan komunikasi yang paling resonan bagi pencari kerja muda Indonesia.",
-    codeFiles: [
-      "apps/admin/src/app/growth/page.tsx",
-      "apps/admin/src/app/api/growth/posts/route.ts",
-    ],
   },
   {
     id: "ml_correlation",
@@ -1251,33 +1231,35 @@ export function SystemIntelligenceView({ initialData }: { initialData: SystemInt
               className="relative z-10 w-full max-w-md sm:max-w-xl h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden"
             >
               {/* Drawer Header */}
-              <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">
+              <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-slate-800/30 gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-[10px] bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 flex items-center justify-center shrink-0 shadow-xs">
                     {(() => {
                       const Icon = getIcon(selectedFeature.iconName);
                       return <Icon size={20} />;
                     })()}
                   </div>
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-base text-slate-900 dark:text-slate-50 truncate">
                       {selectedFeature.name}
                     </h3>
-                    <span className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+                    <span className="text-xs text-indigo-600 dark:text-indigo-400 font-medium truncate block">
                       {selectedFeature.pillarName}
                     </span>
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setSelectedFeature(null)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                  aria-label="Tutup panel"
+                  className="p-2 rounded-[10px] text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
                 >
                   <X size={18} />
                 </button>
               </div>
 
               {/* Drawer Body (Scrollable) */}
-              <div className="p-6 overflow-y-auto space-y-6 flex-1 text-slate-700 dark:text-slate-300 text-xs">
+              <div className="p-6 overflow-y-auto space-y-6 flex-1 min-h-0 text-slate-700 dark:text-slate-300 text-xs">
                 {/* Status & Metrics Badge */}
                 <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60">
                   <div>
@@ -1369,7 +1351,7 @@ export function SystemIntelligenceView({ initialData }: { initialData: SystemInt
               </div>
 
               {/* Drawer Footer */}
-              <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between">
+              <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between shrink-0">
                 <span className="text-[11px] text-slate-400">Employr Core Architecture</span>
                 <button
                   onClick={() => setSelectedFeature(null)}

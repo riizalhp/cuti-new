@@ -4,6 +4,146 @@ import { checkRateLimit } from '@/lib/rate-limiter';
 
 export const dynamic = 'force-dynamic';
 
+interface EnsureContext {
+  visitor_id: string;
+  session_id: string;
+  user_id?: string | null;
+  path?: string;
+  title?: string;
+  domain?: string | null;
+  hostname?: string | null;
+  device?: any;
+  traffic?: any;
+  ip: string;
+  now: Date;
+}
+
+function isValidUUID(str?: string | null): boolean {
+  if (!str || typeof str !== 'string') return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
+
+async function ensureVisitorAndSession(ctx: EnsureContext) {
+  const {
+    visitor_id,
+    session_id,
+    user_id,
+    path,
+    title,
+    domain,
+    hostname,
+    device,
+    traffic,
+    ip,
+    now,
+  } = ctx;
+
+  const safeUserId = isValidUUID(user_id) ? user_id : null;
+
+  try {
+    await (prisma as any).visitor.upsert({
+      where: { visitor_id },
+      create: {
+        visitor_id,
+        user_id: safeUserId,
+        first_seen: now,
+        last_seen: now,
+        is_active: true,
+        current_page: path || '/',
+        current_title: title || 'Home',
+        domain: domain || null,
+        hostname: hostname || null,
+        total_visits: 1,
+        total_pageviews: 1,
+        device_type: device?.device_type || 'Desktop',
+        browser: device?.browser || 'Unknown',
+        browser_version: device?.browser_version || '',
+        os: device?.os || 'Unknown',
+        screen_resolution: device?.screen_resolution || '',
+        ip_address: ip,
+        first_referrer: traffic?.referrer || null,
+        traffic_source: traffic?.traffic_source || 'Direct',
+        utm_source: traffic?.utm_source || null,
+        utm_medium: traffic?.utm_medium || null,
+        utm_campaign: traffic?.utm_campaign || null,
+        utm_content: traffic?.utm_content || null,
+        utm_term: traffic?.utm_term || null,
+      },
+      update: {
+        last_seen: now,
+        is_active: true,
+        ...(safeUserId ? { user_id: safeUserId } : {}),
+      },
+    });
+  } catch {
+    // Ignore concurrent insert race
+  }
+
+  try {
+    await (prisma as any).visitorSession.upsert({
+      where: { session_id },
+      create: {
+        session_id,
+        visitor_id,
+        user_id: safeUserId,
+        started_at: now,
+        last_active_at: now,
+        duration_sec: 0,
+        entry_page: path || '/',
+        exit_page: path || '/',
+        pageviews_count: 1,
+        domain: domain || null,
+        hostname: hostname || null,
+        referrer: traffic?.referrer || null,
+        traffic_source: traffic?.traffic_source || 'Direct',
+        utm_source: traffic?.utm_source || null,
+        utm_medium: traffic?.utm_medium || null,
+        utm_campaign: traffic?.utm_campaign || null,
+        device_type: device?.device_type || 'Desktop',
+        browser: device?.browser || 'Unknown',
+        os: device?.os || 'Unknown',
+        ip_address: ip,
+      },
+      update: {
+        last_active_at: now,
+        ...(safeUserId ? { user_id: safeUserId } : {}),
+      },
+    });
+  } catch {
+    // Ignore concurrent insert race
+  }
+}
+
+async function safeCreateActivity(
+  data: {
+    visitor_id: string;
+    session_id: string;
+    user_id?: string | null;
+    activity_type: string;
+    activity_name: string;
+    page_path: string;
+    metadata?: any;
+    created_at: Date;
+  },
+  ensureCtx?: EnsureContext
+) {
+  const safeData = {
+    ...data,
+    user_id: isValidUUID(data.user_id) ? data.user_id : null,
+  };
+  try {
+    return await (prisma as any).visitorActivity.create({ data: safeData });
+  } catch (err: any) {
+    if (err?.code === 'P2003' || String(err?.message).includes('Foreign key constraint')) {
+      if (ensureCtx) {
+        await ensureVisitorAndSession(ensureCtx);
+        return await (prisma as any).visitorActivity.create({ data: safeData }).catch(() => null);
+      }
+    }
+    return null;
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const payload = await req.json();
@@ -54,6 +194,21 @@ export async function POST(req: NextRequest) {
     const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : '127.0.0.1';
 
     const now = new Date();
+    const cleanUserId = isValidUUID(user_id) ? user_id : null;
+
+    const ctx: EnsureContext = {
+      visitor_id,
+      session_id,
+      user_id: cleanUserId,
+      path,
+      title,
+      domain: detectedDomain,
+      hostname: detectedHostname,
+      device,
+      traffic,
+      ip,
+      now,
+    };
 
     if (action === 'page_view') {
       // 1. Check or Upsert Visitor
@@ -66,7 +221,7 @@ export async function POST(req: NextRequest) {
           await (prisma as any).visitor.create({
             data: {
               visitor_id,
-              user_id: user_id || null,
+              user_id: cleanUserId,
               first_seen: now,
               last_seen: now,
               is_active: true,
@@ -115,7 +270,7 @@ export async function POST(req: NextRequest) {
             domain: detectedDomain || (existingVisitor as any).domain,
             hostname: detectedHostname || (existingVisitor as any).hostname,
             total_pageviews: { increment: 1 },
-            user_id: user_id || existingVisitor.user_id,
+            user_id: cleanUserId || existingVisitor.user_id,
             device_type: device?.device_type || existingVisitor.device_type,
             browser: device?.browser || existingVisitor.browser,
             os: device?.os || existingVisitor.os,
@@ -134,7 +289,7 @@ export async function POST(req: NextRequest) {
           data: {
             session_id,
             visitor_id,
-            user_id: user_id || null,
+            user_id: cleanUserId,
             started_at: now,
             last_active_at: now,
             duration_sec: 0,
@@ -170,7 +325,7 @@ export async function POST(req: NextRequest) {
             domain: detectedDomain || (existingSession as any).domain,
             hostname: detectedHostname || (existingSession as any).hostname,
             pageviews_count: { increment: 1 },
-            user_id: user_id || existingSession.user_id,
+            user_id: cleanUserId || existingSession.user_id,
           },
         });
       }
@@ -191,11 +346,11 @@ export async function POST(req: NextRequest) {
       });
 
       // 4. Create Activity record
-      await prisma.visitorActivity.create({
-        data: {
+      await safeCreateActivity(
+        {
           visitor_id,
           session_id,
-          user_id: user_id || null,
+          user_id: cleanUserId,
           activity_type: 'PAGE_VIEW',
           activity_name: `Buka Halaman: ${title || path || '/'}`,
           page_path: path || '/',
@@ -206,7 +361,8 @@ export async function POST(req: NextRequest) {
           },
           created_at: now,
         },
-      });
+        ctx
+      );
 
       return NextResponse.json({ success: true, action: 'page_view_recorded' });
     }
@@ -224,7 +380,7 @@ export async function POST(req: NextRequest) {
           ...(detectedDomain ? { domain: detectedDomain } : {}),
           ...(detectedHostname ? { hostname: detectedHostname } : {}),
           total_duration_sec: { increment: incrementSec },
-          ...(user_id ? { user_id } : {}),
+          ...(cleanUserId ? { user_id: cleanUserId } : {}),
         },
       });
 
@@ -236,7 +392,7 @@ export async function POST(req: NextRequest) {
           ...(detectedDomain ? { domain: detectedDomain } : {}),
           ...(detectedHostname ? { hostname: detectedHostname } : {}),
           duration_sec: { increment: incrementSec },
-          ...(user_id ? { user_id } : {}),
+          ...(cleanUserId ? { user_id: cleanUserId } : {}),
         },
       });
 
@@ -244,18 +400,20 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'activity') {
-      await (prisma as any).visitorActivity.create({
-        data: {
+      await ensureVisitorAndSession(ctx);
+      await safeCreateActivity(
+        {
           visitor_id,
           session_id,
-          user_id: user_id || null,
+          user_id: cleanUserId,
           activity_type: activity_type || 'CUSTOM_EVENT',
           activity_name: activity_name || 'Aktivitas Pengguna',
           page_path: path || '/',
           metadata: metadata || null,
           created_at: now,
         },
-      });
+        ctx
+      );
 
       await (prisma as any).visitor.updateMany({
         where: { visitor_id },
@@ -264,7 +422,7 @@ export async function POST(req: NextRequest) {
           is_active: true,
           ...(detectedDomain ? { domain: detectedDomain } : {}),
           ...(detectedHostname ? { hostname: detectedHostname } : {}),
-          ...(user_id ? { user_id } : {}),
+          ...(cleanUserId ? { user_id: cleanUserId } : {}),
         },
       });
 
@@ -272,106 +430,117 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'link_user') {
-      if (!user_id) {
-        return NextResponse.json({ success: false, message: 'user_id is required' }, { status: 400 });
+      if (!cleanUserId) {
+        return NextResponse.json({ success: true, message: 'Skipped invalid user UUID' });
       }
+
+      await ensureVisitorAndSession(ctx);
 
       await prisma.visitor.updateMany({
         where: { visitor_id },
-        data: { user_id },
+        data: { user_id: cleanUserId },
       });
 
       await prisma.visitorSession.updateMany({
         where: { visitor_id, user_id: null },
-        data: { user_id },
+        data: { user_id: cleanUserId },
       });
 
       await prisma.visitorActivity.updateMany({
         where: { visitor_id, user_id: null },
-        data: { user_id },
+        data: { user_id: cleanUserId },
       });
 
       // Also record an activity
-      await prisma.visitorActivity.create({
-        data: {
+      await safeCreateActivity(
+        {
           visitor_id,
           session_id,
-          user_id,
+          user_id: cleanUserId,
           activity_type: 'USER_LINKED',
           activity_name: 'Akun Terhubung (Login / Register)',
           page_path: path || '/',
           created_at: now,
         },
-      });
+        ctx
+      );
 
       return NextResponse.json({ success: true, action: 'user_linked' });
     }
 
     if (action === 'module_heartbeat') {
       const inc = duration_increment_sec || 25;
-      await (prisma as any).visitorActivity.create({
-        data: {
+      await ensureVisitorAndSession(ctx);
+      await safeCreateActivity(
+        {
           visitor_id,
           session_id,
-          user_id: user_id || null,
+          user_id: cleanUserId,
           activity_type: 'MODULE_DURATION',
           activity_name: `Aktivitas Modul: ${module_name || 'UMUM'}`,
           page_path: path || '/',
           metadata: { module: module_name || 'UMUM', duration_sec: inc },
           created_at: now,
         },
-      });
+        ctx
+      );
 
       return NextResponse.json({ success: true, action: 'module_heartbeat_recorded' });
     }
 
     if (action === 'cv_funnel_step') {
-      await (prisma as any).visitorActivity.create({
-        data: {
+      await ensureVisitorAndSession(ctx);
+      await safeCreateActivity(
+        {
           visitor_id,
           session_id,
-          user_id: user_id || null,
+          user_id: cleanUserId,
           activity_type: 'CV_FUNNEL_STEP',
           activity_name: activity_name || 'CV Funnel Step',
           page_path: path || '/cv',
           metadata: metadata || null,
           created_at: now,
         },
-      });
+        ctx
+      );
 
       return NextResponse.json({ success: true, action: 'cv_funnel_step_recorded' });
     }
 
     if (action === 'print_telemetry') {
-      await (prisma as any).visitorActivity.create({
-        data: {
+      await ensureVisitorAndSession(ctx);
+      await safeCreateActivity(
+        {
           visitor_id,
           session_id,
-          user_id: user_id || null,
+          user_id: cleanUserId,
           activity_type: 'PRINT_EXPORT',
           activity_name: 'Cetak / Unduh CV (PDF/Print)',
           page_path: path || '/cv',
           metadata: metadata || null,
           created_at: now,
         },
-      });
+        ctx
+      );
 
       return NextResponse.json({ success: true, action: 'print_telemetry_recorded' });
     }
 
     if (action === 'ats_score_log') {
-      await (prisma as any).visitorActivity.create({
-        data: {
+      await ensureVisitorAndSession(ctx);
+      await safeCreateActivity(
+        {
           visitor_id,
           session_id,
-          user_id: user_id || null,
+          user_id: cleanUserId,
           activity_type: 'ATS_SCORE_EVALUATION',
           activity_name: `Skor Evaluasi ATS: ${metadata?.score || 0}/100`,
           page_path: path || '/',
           metadata: metadata || null,
           created_at: now,
         },
-      });
+        ctx
+      );
 
       return NextResponse.json({ success: true, action: 'ats_score_log_recorded' });
     }
@@ -380,18 +549,20 @@ export async function POST(req: NextRequest) {
       const errorMsg = error_details?.message || 'Unknown Client Error';
 
       // 1. Record as visitor activity
-      await (prisma as any).visitorActivity.create({
-        data: {
+      await ensureVisitorAndSession(ctx);
+      await safeCreateActivity(
+        {
           visitor_id,
           session_id,
-          user_id: user_id || null,
+          user_id: cleanUserId,
           activity_type: 'CLIENT_ERROR',
           activity_name: `[Error Browser] ${errorMsg.slice(0, 100)}`,
           page_path: path || '/',
           metadata: { ...error_details, url },
           created_at: now,
         },
-      });
+        ctx
+      );
 
       // 2. Also log to app_logs for admin monitoring
       try {
@@ -405,7 +576,7 @@ export async function POST(req: NextRequest) {
               error_details,
               visitor_id,
               session_id,
-              user_id,
+              user_id: cleanUserId,
               path,
               url,
               ip,
@@ -421,22 +592,20 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'web_vitals') {
-      try {
-        await (prisma as any).visitorActivity.create({
-          data: {
-            visitor_id,
-            session_id,
-            user_id: user_id || null,
-            activity_type: 'WEB_VITALS',
-            activity_name: `Page Speed: ${vitals?.pageLoadMs || 0}ms`,
-            page_path: path || '/',
-            metadata: vitals || null,
-            created_at: now,
-          },
-        });
-      } catch (vitalErr: any) {
-        // Silently skip if visitor record hasn't synced yet
-      }
+      await ensureVisitorAndSession(ctx);
+      await safeCreateActivity(
+        {
+          visitor_id,
+          session_id,
+          user_id: cleanUserId,
+          activity_type: 'WEB_VITALS',
+          activity_name: `Page Speed: ${vitals?.pageLoadMs || 0}ms`,
+          page_path: path || '/',
+          metadata: vitals || null,
+          created_at: now,
+        },
+        ctx
+      );
 
       return NextResponse.json({ success: true, action: 'web_vitals_recorded' });
     }

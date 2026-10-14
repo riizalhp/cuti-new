@@ -13,10 +13,10 @@ export const ATSScoreBadge: React.FC<ATSScoreBadgeProps> = ({ atsResult, onClick
   const { totalScore, stateLabel, state, issues, potentialScore, isEmptyOrDefault } = atsResult;
 
   const getScoreColor = () => {
-    if (isEmptyOrDefault || totalScore === 0) return 'text-slate-400 border-slate-200 bg-slate-50 dark:bg-slate-800 dark:border-slate-700';
-    if (totalScore >= 75) return 'text-emerald-600 border-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 dark:border-emerald-800 dark:text-emerald-300';
-    if (totalScore >= 60) return 'text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-950/50 dark:border-amber-800 dark:text-amber-300';
-    return 'text-rose-600 border-rose-300 bg-rose-50 dark:bg-rose-950/50 dark:border-rose-800 dark:text-rose-300';
+    if (isEmptyOrDefault || totalScore === 0) return 'text-slate-500 border-slate-200 bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400';
+    if (totalScore >= 75) return 'text-emerald-700 border-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 dark:border-emerald-800 dark:text-emerald-300';
+    if (totalScore >= 60) return 'text-amber-700 border-amber-300 bg-amber-50 dark:bg-amber-950/50 dark:border-amber-800 dark:text-amber-300';
+    return 'text-rose-700 border-rose-300 bg-rose-50 dark:bg-rose-950/50 dark:border-rose-800 dark:text-rose-300';
   };
 
   const getProgressColor = () => {
@@ -38,12 +38,12 @@ export const ATSScoreBadge: React.FC<ATSScoreBadgeProps> = ({ atsResult, onClick
             <span className="text-xs font-black tracking-tight text-slate-600 dark:text-slate-300">
               {stateLabel === 'Draft Contoh' ? 'Contoh' : 'Draft'}
             </span>
-            <span className="text-[10px] font-bold opacity-60">0/100</span>
+            <span className="text-caption font-bold opacity-60">0/100</span>
           </div>
         ) : (
           <>
             <span className="text-lg font-black tracking-tight">{totalScore}</span>
-            <span className="text-[10px] font-bold opacity-60">/100</span>
+            <span className="text-caption font-bold opacity-60">/100</span>
           </>
         )}
       </div>
@@ -53,11 +53,11 @@ export const ATSScoreBadge: React.FC<ATSScoreBadgeProps> = ({ atsResult, onClick
         <div className="flex items-center gap-1.5">
           <span className="text-xs font-extrabold">{stateLabel}</span>
           {isEmptyOrDefault ? (
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200/80 text-slate-700 dark:bg-slate-700 dark:text-slate-300">
+            <span className="px-1.5 py-0.5 rounded-full text-caption font-bold bg-slate-200/80 text-slate-700 dark:bg-slate-700 dark:text-slate-300">
               Belum Dianalisis
             </span>
           ) : issues.length > 0 ? (
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200">
+            <span className="px-1.5 py-0.5 rounded-full text-caption font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200">
               {issues.length} opsi optimasi
             </span>
           ) : null}
@@ -73,7 +73,7 @@ export const ATSScoreBadge: React.FC<ATSScoreBadgeProps> = ({ atsResult, onClick
 
       {/* Potential Score Gain Chip */}
       {potentialScore > totalScore && !isEmptyOrDefault && (
-        <div className="hidden md:flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold border border-emerald-500/20">
+        <div className="hidden md:flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-caption font-bold border border-emerald-500/20">
           <TrendingUp className="w-3 h-3" />
           <span>Potensi: {potentialScore}</span>
         </div>

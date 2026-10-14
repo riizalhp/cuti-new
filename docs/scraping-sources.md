@@ -1,8 +1,7 @@
 # Daftar Sumber Scraping (Acuan Link)
 
 Dokumen ini adalah acuan utama untuk bot scraper Employr. Semua link di bawah
-adalah sumber data yang akan di-scrape secara berkala (cron 01.00 WIB) untuk
-konten berbasis artikel: **lowongan kerja, event/job fair, artikel blog, dan
+adalah sumber data untuk konten berbasis artikel: **lowongan kerja, event/job fair, artikel blog, dan
 sertifikasi/pelatihan**.
 
 Aturan umum:
@@ -135,8 +134,7 @@ Detail feed RSS:
 > daftar ini, tapi bukan itu yang dimaksud — sumber yang diminta adalah
 > **disnakerja.com** (bagian C).
 
-1. **Jadwal:** cron hybrid manual, jam **01.00 WIB** setiap hari (bisa
-   di-trigger manual juga dari admin).
+1. **Jadwal:** manual on-demand (cron otomatis jam 01.00 WIB dinonaktifkan/dihapus sesuai arahan bisnis, pemicu penarikan data 100% via aksi Admin).
 2. **Cakupan:** lowongan kerja, event/job fair, artikel blog, sertifikasi —
    semua konten berbasis artikel.
 3. **Dedupe:** kunci unik = `external_url` / slug per sumber. Jangan simpan
@@ -158,8 +156,8 @@ Detail feed RSS:
 | Scraper portal | `apps/dashboard/lib/job-scraper.ts` | 24 portal publik + 6 portal sesi + Disnakerja (RSS khusus) |
 | Sync ke DB | `apps/dashboard/lib/job-sync.ts` | Upsert dedupe by `source`+`external_url`, auto-nonaktif lowongan tutup |
 | Scraper konten | `apps/dashboard/lib/content-scraper.ts` | Artikel (Kalibrr blog + Disnakerja RSS) & sertifikasi (BNSP) → tabel `articles`/`certifications` |
-| Cron harian | `apps/dashboard/instrumentation.ts` | Scrape 5 kata kunci umum + sync lowongan + konten tiap **01.00 WIB** saat server jalan |
-| API sync | `apps/dashboard/app/api/job-sync/route.ts` | `GET` statistik audit, `POST` sinkronisasi manual (bisa dipanggil cron eksternal) |
+| Sinkronisasi DB | `apps/dashboard/lib/job-sync.ts` | Sinkronisasi data scrape manual via panel dashboard |
+| API sync | `apps/dashboard/app/api/job-sync/route.ts` | `GET` statistik audit, `POST` sinkronisasi manual |
 | API konten | `apps/dashboard/app/api/content-sync/route.ts` | `GET` statistik artikel/event/sertifikasi, `POST` sync konten manual |
 | Halaman audit | `apps/dashboard/app/(user)/scrape-jobs/page.tsx` → `components/JobScraperView.tsx` | Baca DB, trigger sync manual, unduh JSON |
 | Skema DB | `packages/db/prisma/schema.prisma` | `jobs`, `articles`, `events`, `certifications`: kolom `source` (default `manual`) + `last_synced_at` + index `[source, external_url]` |
@@ -172,9 +170,7 @@ Catatan implementasi:
 - Auto-nonaktif: lowongan scraping yang tidak muncul lagi di hasil scrape
   terbaru dianggap tutup → `is_active = false` (bukan delete hard, agar data
   lamaran yang terhubung tetap utuh).
-- Cron: dijadwalkan via `instrumentation.ts` (cek tiap 5 menit, jalan sekali
-  per hari pada jam 17:00 UTC = 01:00 WIB). Alternatif: cron eksternal dapat
-  memanggil `POST /api/job-sync` dengan kata kunci tersendiri.
+- Cron otomatis: sistem cron otomatis (jam 01:00 WIB) telah dihapus/dinonaktifkan sepenuhnya. Sinkronisasi dilakukan secara manual atas inisiatif Admin.
 - Artikel: feed WordPress `neo-blog.kalibrr.com/blog/id/feed` (tips karier) +
   feed utama Disnakerja; dedupe by `source`+`external_url`, `is_published=true`.
 - Sertifikasi: beranda BNSP (link berisi `skema`/`sertifikasi`); harga & durasi

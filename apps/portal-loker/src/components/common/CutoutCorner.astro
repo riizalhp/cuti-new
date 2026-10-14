@@ -1,0 +1,31 @@
+---
+// CutoutCorner.astro - Composable SVG Inverted Corner geometry for Cult UI Cutout Card
+interface Props {
+  class?: string;
+  size?: number;
+  viewBox?: string;
+  style?: string;
+}
+
+const {
+  class: className = '',
+  size = 32,
+  viewBox = '0 0 200 200',
+  style,
+} = Astro.props;
+
+const CORNER_PATH = "M0 200C155.996 199.961 200.029 156.308 200 0V200H0Z";
+---
+
+<svg
+  aria-hidden="true"
+  class={className}
+  style={style}
+  data-slot="cutout-corner"
+  height={size}
+  width={size}
+  viewBox={viewBox}
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path d={CORNER_PATH} fill="currentColor" />
+</svg>

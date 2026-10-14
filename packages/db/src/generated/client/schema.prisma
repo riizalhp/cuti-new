@@ -225,6 +225,7 @@ model articles {
   content            String
   cover_image_url    String?
   author             String
+  tags               String[]            @default([])
   is_published       Boolean             @default(false)
   published_at       DateTime?
   source             String              @default("manual")
@@ -267,6 +268,7 @@ model certifications {
   external_url    String
   source          String    @default("manual")
   last_synced_at  DateTime?
+  tags            String[]  @default([])
   is_active       Boolean   @default(true)
   created_at      DateTime  @default(now())
 
@@ -277,7 +279,6 @@ model companies {
   id       String  @id @default(uuid()) @db.Uuid
   name     String
   slug     String  @unique
-  logo_url String?
   website  String?
   industry String?
   location String?
@@ -295,6 +296,7 @@ model courses {
   level           String
   price           Int      @default(0)
   external_url    String
+  tags            String[] @default([])
   is_active       Boolean  @default(true)
   created_at      DateTime @default(now())
 }
@@ -353,6 +355,7 @@ model events {
   external_url    String
   source          String    @default("manual")
   last_synced_at  DateTime?
+  tags            String[]  @default([])
   is_active       Boolean   @default(true)
   created_at      DateTime  @default(now())
 
@@ -372,6 +375,7 @@ model jobs {
   salary_period  SalaryPeriod   @default(MONTH)
   requirements   Json?
   external_url   String
+  tags           String[]       @default([])
   is_active      Boolean        @default(true)
   deadline       DateTime?
   source         String         @default("manual")
@@ -702,6 +706,7 @@ enum NotificationCategory {
   REFERRAL
   DRAFT
   OPPORTUNITY
+  SYSTEM
 }
 
 enum NotificationPriority {
@@ -860,6 +865,38 @@ model EarlyTester {
   updated_at   DateTime @updatedAt
 
   @@map("early_testers")
+}
+
+model NewsletterSubscriber {
+  id              String    @id @default(uuid()) @db.Uuid
+  email           String    @unique
+  name            String?
+  source          String    @default("PORTAL_LOKER") // PORTAL_LOKER, CAREER_INDEX, BANNER_TEMPLATE, DASHBOARD
+  is_active       Boolean   @default(true)
+  token           String    @unique @default(uuid())
+  subscribed_at   DateTime  @default(now())
+  unsubscribed_at DateTime?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  @@index([email])
+  @@index([is_active])
+  @@map("newsletter_subscribers")
+}
+
+model NewsletterCampaign {
+  id               String   @id @default(uuid()) @db.Uuid
+  title            String
+  subject          String
+  content_type     String   @default("ARTICLE") // ARTICLE, JOB, WEEKLY_DIGEST
+  reference_id     String?  @db.Uuid
+  total_recipients Int      @default(0)
+  sent_count       Int      @default(0)
+  failed_count     Int      @default(0)
+  status           String   @default("COMPLETED") // QUEUED, SENDING, COMPLETED, FAILED
+  created_at       DateTime @default(now())
+
+  @@map("newsletter_campaigns")
 }
 
 model Visitor {
@@ -1151,4 +1188,107 @@ model UserBehaviorProfile {
   user                 User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("user_behavior_profiles")
+}
+
+model LearnedRoleEntry {
+  id              String   @id @default(uuid()) @db.Uuid
+  role_name       String   @db.VarChar(150)
+  skills          String[]
+  education_level String?  @db.VarChar(50)
+  major           String?  @db.VarChar(150)
+  user_id         String?  @db.Uuid
+  created_at      DateTime @default(now())
+
+  @@index([role_name])
+  @@index([created_at])
+  @@map("learned_role_entries")
+}
+
+model LearnedRoleBlueprint {
+  id                    String   @id @default(uuid()) @db.Uuid
+  role_name             String   @unique @db.VarChar(150)
+  entry_count           Int      @default(0)
+  top_essential_skills  String[]
+  top_nicetohave_skills String[]
+  category              String   @default("other") @db.VarChar(50)
+  is_promoted           Boolean  @default(false)
+  details               Json?
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  @@index([role_name])
+  @@index([entry_count])
+  @@index([is_promoted])
+  @@map("learned_role_blueprints")
+}
+
+model scraper_providers {
+  id             String         @id @default(uuid()) @db.Uuid
+  provider       String // "apify" | "rapidapi" | "scrapingdog" | "linkdapi" | "brightdata"
+  label          String // e.g. "Apify Akun 1 (Rizal)"
+  api_key        String
+  extra_config   Json? // actor_id, host, dataset_id, zone
+  priority       Int            @default(1)
+  is_active      Boolean        @default(true)
+  status         String         @default("active") // "active" | "cooldown" | "exhausted" | "error"
+  requests_total Int            @default(0)
+  requests_month Int            @default(0)
+  success_count  Int            @default(0)
+  fail_count     Int            @default(0)
+  last_used_at   DateTime?
+  last_error     String?
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+  logs           scraper_logs[]
+
+  @@index([provider])
+  @@index([priority])
+  @@index([is_active])
+  @@map("scraper_providers")
+}
+
+model scraper_logs {
+  id             String            @id @default(uuid()) @db.Uuid
+  provider_id    String            @db.Uuid
+  provider_name  String // "apify" | "rapidapi" | "scrapingdog" | "linkdapi" | "brightdata"
+  provider_label String // "Apify Akun 1"
+  user_id        String?           @db.Uuid
+  user_name      String?           @default("Tamu")
+  user_email     String?
+  target_url     String // e.g. "https://www.linkedin.com/in/riizalhp"
+  target_name    String? // e.g. "Rizal Hanifa Pratama"
+  status         String // "SUCCESS" | "FAILED" | "EXHAUSTED"
+  http_status    Int?
+  latency_ms     Int?
+  error_message  String?
+  created_at     DateTime          @default(now())
+  provider       scraper_providers @relation(fields: [provider_id], references: [id], onDelete: Cascade)
+
+  @@index([provider_id, created_at])
+  @@index([created_at])
+  @@map("scraper_logs")
+}
+
+model job_embeddings {
+  id           String                     @id @default(uuid()) @db.Uuid
+  job_id       String                     @unique @db.Uuid
+  embedding    Unsupported("vector(384)")
+  content_hash String                     @db.VarChar(64)
+  created_at   DateTime                   @default(now())
+  updated_at   DateTime                   @updatedAt
+
+  @@index([job_id])
+  @@map("job_embeddings")
+}
+
+model user_career_embeddings {
+  id           String                     @id @default(uuid()) @db.Uuid
+  user_id      String                     @unique @db.Uuid
+  cv_id        String?                    @db.Uuid
+  embedding    Unsupported("vector(384)")
+  content_hash String                     @db.VarChar(64)
+  updated_at   DateTime                   @updatedAt
+
+  @@index([user_id])
+  @@map("user_career_embeddings")
 }

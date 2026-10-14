@@ -1,0 +1,947 @@
+<!doctype html>
+<html lang="id">
+<!-- Made with Bang Motion skill v1.19.0 (https://github.com/bangtutorial/bang-motion) -->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employr — Video Pengenalan Produk (9:16)</title>
+
+<!--
+  ===== STYLE BRIEF =====
+  Tema/Produk          : Employr — Career Operating System untuk talenta muda Indonesia
+  3 Kata Sifat         : Pasti, Bergerak Maju, Siap Kerja
+  Konsep               : 19 / 5 — Tur Produk Bento Vertikal (Continuous World & Living UI)
+  Sidik Jari Struktur  : bento-tur-vertikal · 5 momen · hook tipografi, kartu CV ATS, Kanban tracker, momen offering, logo CTA · pembuka monogram & hook · penutup logo phone-mockup
+  Palet                : Cobalt #1738D1 · Paper #F5F6F2 · Ink #101114 · Lime #C8F55B · Emerald #10B981
+  Font Display/Body    : Geist (Sans 700/800) + Instrument Serif (Aksen) + Inter (UI)
+  Bahasa Latar         : Editorial Modern + Paper Grid halus + Ambient Cobalt Bloom
+  Tanda Tangan Gerak   : Snap-tilt kamera vertikal antar modul bento terhubung + micro-interaction nyata
+  Momen Istimewa       : Detik 13–16: Status lamaran melompat ke "OFFERING ACCEPTED" dengan kembang api partikel SVG deterministik
+  =======================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+<style>
+:root {
+  --cobalt: #1738D1;
+  --cobalt-dark: #0E248C;
+  --cobalt-light: #4869FF;
+  --paper: #F5F6F2;
+  --paper-card: #FFFFFF;
+  --ink: #101114;
+  --ink-muted: #5A5E6B;
+  --ink-light: #8E93A4;
+  --lime: #C8F55B;
+  --emerald: #10B981;
+  --emerald-bg: #ECFDF5;
+  --border: rgba(16, 17, 20, 0.1);
+  --border-strong: rgba(16, 17, 20, 0.2);
+  --sans: "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
+  --serif: "Instrument Serif", Georgia, serif;
+  --ui-font: "Inter", sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #090A0D;
+  overflow: hidden;
+  font-family: var(--sans);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* STAGE 9:16 (1080 x 1920) */
+#stage {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 1080px;
+  height: 1920px;
+  transform: translate(-50%, -50%) scale(1);
+  overflow: hidden;
+  background: var(--paper);
+  border-radius: 40px;
+  box-shadow: 0 25px 90px rgba(0, 0, 0, 0.6);
+  perspective: 1600px;
+}
+
+/* LATAR BERTEKSTUR & GRID TEKNIS */
+.grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(16, 17, 20, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(16, 17, 20, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+.ambient-glow {
+  position: absolute;
+  width: 900px;
+  height: 900px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(23, 56, 209, 0.18) 0%, rgba(200, 245, 91, 0.08) 45%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+  left: 50%;
+  top: 30%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+/* TOP STATUS BAR (MOBILE PHONE FRAME) */
+.mobile-top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 90px;
+  padding: 0 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--ui-font);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--ink);
+  z-index: 30;
+}
+.brand-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  padding: 8px 20px;
+  border-radius: 100px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.brand-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--cobalt);
+}
+
+/* RIG KAMERA KONTINU */
+#world {
+  position: absolute;
+  inset: 0;
+  transform-origin: 540px 960px;
+  will-change: transform;
+  z-index: 5;
+}
+
+/* SECTIONS / CARDS CONTAINER */
+.bento-container {
+  position: absolute;
+  left: 60px;
+  top: 130px;
+  width: 960px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+/* MOMEN 1: HOOK HEADLINE */
+.scene-hook {
+  width: 100%;
+  padding: 60px 40px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+}
+.badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--ink);
+  color: var(--lime);
+  padding: 10px 24px;
+  border-radius: 100px;
+  font-size: 24px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.hook-title {
+  font-size: 88px;
+  line-height: 0.94;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+.hook-title em {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--cobalt);
+  font-size: 1.08em;
+}
+.hook-sub {
+  font-size: 32px;
+  line-height: 1.35;
+  color: var(--ink-muted);
+  font-weight: 500;
+  max-width: 820px;
+}
+
+/* KARTU BENTO 1: CV BUILDER & ATS */
+.bento-card {
+  background: var(--paper-card);
+  border: 1px solid var(--border);
+  border-radius: 36px;
+  padding: 48px;
+  box-shadow: 0 16px 48px rgba(16, 17, 20, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+.card-kicker {
+  font-size: 22px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--cobalt);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-kicker::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cobalt);
+}
+.ats-badge-pill {
+  background: var(--lime);
+  color: var(--ink);
+  padding: 10px 22px;
+  border-radius: 100px;
+  font-weight: 800;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(200, 245, 91, 0.4);
+}
+
+.cv-preview-box {
+  background: #F8F9FA;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.cv-name {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--ink);
+}
+.cv-role {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--cobalt);
+}
+.cv-meter-bar {
+  width: 100%;
+  height: 18px;
+  background: rgba(16, 17, 20, 0.08);
+  border-radius: 100px;
+  overflow: hidden;
+  position: relative;
+}
+.cv-meter-fill {
+  height: 100%;
+  width: 45%;
+  background: linear-gradient(90deg, var(--cobalt), var(--lime));
+  border-radius: 100px;
+}
+.cv-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.cv-chip {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  padding: 10px 20px;
+  border-radius: 100px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.cv-chip.highlight {
+  background: rgba(23, 56, 209, 0.08);
+  color: var(--cobalt);
+  border-color: rgba(23, 56, 209, 0.2);
+}
+
+/* KARTU BENTO 2: KANBAN TRACKER */
+.kanban-board {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.kanban-col {
+  background: #F8F9FA;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.col-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.col-count {
+  background: rgba(16, 17, 20, 0.08);
+  padding: 2px 10px;
+  border-radius: 100px;
+  font-size: 18px;
+}
+.job-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 4px 12px rgba(16, 17, 20, 0.04);
+  position: relative;
+}
+.job-card.active-drag {
+  border-color: var(--cobalt);
+  box-shadow: 0 16px 36px rgba(23, 56, 209, 0.2);
+  z-index: 10;
+}
+.job-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.job-company {
+  font-size: 20px;
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+.job-status-pill {
+  margin-top: 14px;
+  display: inline-flex;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 18px;
+  font-weight: 700;
+  background: #EBF1FF;
+  color: var(--cobalt);
+}
+.job-status-pill.success {
+  background: var(--emerald-bg);
+  color: var(--emerald);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* KARTU BENTO 3: CELEBRATION / OFFERING */
+.celebration-card {
+  background: linear-gradient(135deg, #101114 0%, #1738D1 100%);
+  color: #FFFFFF;
+  border-radius: 36px;
+  padding: 56px 48px;
+  box-shadow: 0 24px 64px rgba(23, 56, 209, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+.celebration-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--lime);
+  color: var(--ink);
+  padding: 10px 24px;
+  border-radius: 100px;
+  font-weight: 800;
+  font-size: 22px;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+}
+.celebration-title {
+  font-size: 56px;
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 16px;
+}
+.celebration-title em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--lime);
+}
+.celebration-sub {
+  font-size: 26px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.4;
+}
+
+/* KARTU CUAN MISI MINI */
+.misi-pill-float {
+  position: absolute;
+  right: 48px;
+  bottom: 48px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 16px 28px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+.misi-koin {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--lime);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  font-weight: 900;
+  font-size: 20px;
+}
+
+/* FINAL LOGO & OUTRO OVERLAY */
+.outro-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 60px;
+  text-align: center;
+  z-index: 25;
+  opacity: 0;
+  pointer-events: none;
+}
+.outro-logo-mark {
+  width: 140px;
+  height: 140px;
+  border-radius: 40px;
+  background: var(--cobalt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-family: var(--serif);
+  font-size: 96px;
+  font-weight: 400;
+  margin-bottom: 40px;
+  box-shadow: 0 20px 60px rgba(23, 56, 209, 0.5);
+}
+.outro-brand-name {
+  font-size: 84px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: 20px;
+}
+.outro-tagline {
+  font-size: 36px;
+  line-height: 1.3;
+  color: var(--ink-light);
+  max-width: 800px;
+  margin-bottom: 48px;
+}
+.outro-tagline em {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--lime);
+}
+.outro-price-pill {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 14px 32px;
+  border-radius: 100px;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--lime);
+  margin-bottom: 50px;
+}
+.outro-cta-btn {
+  background: var(--cobalt);
+  color: #FFFFFF;
+  font-size: 32px;
+  font-weight: 700;
+  padding: 24px 64px;
+  border-radius: 100px;
+  border: none;
+  box-shadow: 0 16px 40px rgba(23, 56, 209, 0.4);
+  letter-spacing: -0.02em;
+}
+
+/* DETERMINISTIC PARTICLES CONTAINER */
+#particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+.confetti-dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+/* DEBUG SCRUB BAR */
+#ui {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  display: none;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  border-radius: 100px;
+  background: rgba(16, 17, 20, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 16px;
+  color: #FFFFFF;
+  z-index: 100;
+  font-family: var(--ui-font);
+}
+#ui.on { display: flex; }
+#ui button {
+  background: #252836;
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 100px;
+  font-weight: 600;
+  cursor: pointer;
+}
+#scrub {
+  width: 320px;
+  accent-color: var(--lime);
+  cursor: pointer;
+}
+#clock {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  min-width: 60px;
+  color: var(--lime);
+}
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div class="grid-bg"></div>
+  <div class="ambient-glow" id="glow"></div>
+
+  <!-- TOP MOBILE BAR -->
+  <div class="mobile-top-bar">
+    <div class="brand-pill">
+      <div class="brand-dot"></div>
+      <span>Employr</span>
+    </div>
+    <div style="font-weight: 700; color: var(--ink-muted); font-size: 20px;">
+      Career OS
+    </div>
+  </div>
+
+  <!-- WORLD CAMERA RIG -->
+  <div id="world">
+    <div class="bento-container">
+      
+      <!-- 01. HOOK SECTION -->
+      <section class="scene-hook" id="hook">
+        <div class="badge-tag">Platform Karier #1</div>
+        <h1 class="hook-title">
+          Semua urusan<br>
+          <em>kariermu,</em> di satu tempat.
+        </h1>
+        <p class="hook-sub">
+          Dari SMA, SMK, sampai mahasiswa. Bikin CV standar industri, pantau lamaran, dan raih pekerjaan impianmu.
+        </p>
+      </section>
+
+      <!-- 02. KARTU CV BUILDER & ATS -->
+      <div class="bento-card" id="card-cv">
+        <div class="card-header-row">
+          <div class="card-kicker">CV Siap Lamar</div>
+          <div class="ats-badge-pill" id="ats-pill">
+            <span>ATS Score:</span>
+            <strong id="ats-val">45%</strong>
+          </div>
+        </div>
+        
+        <div class="cv-preview-box">
+          <div class="cv-name">Rizky Pratama</div>
+          <div class="cv-role">Junior Frontend Engineer</div>
+          <div class="cv-meter-bar">
+            <div class="cv-meter-fill" id="meter-fill"></div>
+          </div>
+          <div class="cv-chips">
+            <div class="cv-chip highlight">React.js</div>
+            <div class="cv-chip highlight">TypeScript</div>
+            <div class="cv-chip">Tailwind CSS</div>
+            <div class="cv-chip highlight">Next.js 15</div>
+            <div class="cv-chip">Git & GitHub</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03. KARTU TRACKER LAMARAN (KANBAN) -->
+      <div class="bento-card" id="card-tracker">
+        <div class="card-header-row">
+          <div class="card-kicker">Tracker Lamaran</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--ink-muted);">
+            4 Lamaran Aktif
+          </div>
+        </div>
+
+        <div class="kanban-board">
+          <!-- Kolom Terkirim -->
+          <div class="kanban-col" id="col-sent">
+            <div class="col-title">
+              <span>Terkirim</span>
+              <span class="col-count" id="count-sent">2</span>
+            </div>
+            <div class="job-card" id="job-hero">
+              <div class="job-title">Frontend Dev</div>
+              <div class="job-company">PT Teknologi Bangsa</div>
+              <div class="job-status-pill" id="job-pill">Review HR</div>
+            </div>
+          </div>
+
+          <!-- Kolom Interview -->
+          <div class="kanban-col" id="col-interview">
+            <div class="col-title">
+              <span>Interview</span>
+              <span class="col-count" id="count-interview">1</span>
+            </div>
+            <div class="job-card">
+              <div class="job-title">UI Designer</div>
+              <div class="job-company">Studio Digital</div>
+              <div class="job-status-pill">Besok 10:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 04. KARTU CELEBRATION & OFFERING (MOMEN ISTIMEWA) -->
+      <div class="celebration-card" id="card-offering">
+        <div class="celebration-badge" id="offering-badge">Offering Letter</div>
+        <h2 class="celebration-title">
+          Selamat! Kamu<br>
+          <em>Diterima Kerja.</em>
+        </h2>
+        <p class="celebration-sub">
+          Dari bingung kirim puluhan CV, sekarang pegang penawaran resmi pertama kamu.
+        </p>
+
+        <div class="misi-pill-float" id="misi-float">
+          <div class="misi-koin">Rp</div>
+          <span>+Rp50.000 Cuan Misi</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DETERMINISTIC PARTICLES -->
+  <div id="particles"></div>
+
+  <!-- OUTRO FINAL BRAND SCREEN -->
+  <div class="outro-overlay" id="outro">
+    <div class="outro-logo-mark">E</div>
+    <div class="outro-brand-name">Employr</div>
+    <div class="outro-tagline">
+      Langkah awal kariermu, <em>dimulai hari ini.</em>
+    </div>
+    <div class="outro-price-pill">
+      Sekali Bayar · Milikmu Selamanya
+    </div>
+    <button class="outro-cta-btn">Mulai di employr.id</button>
+  </div>
+
+</div>
+
+<!-- DEBUG & SCRUB PANEL (?debug=1) -->
+<div id="ui">
+  <button id="btn-toggle">Jeda</button>
+  <button id="btn-replay">Ulang</button>
+  <input type="range" id="scrub" min="0" max="20" step="0.02" value="0">
+  <div id="clock">00:00</div>
+</div>
+
+<script>
+/* ==========================================================================
+   DETERMINISTIC PARTICLES GENERATOR (Tanpa Math.random() di runtime timeline)
+   ========================================================================== */
+const particlesContainer = document.getElementById("particles");
+const confettiColors = ["#C8F55B", "#1738D1", "#10B981", "#F97316", "#FFFFFF"];
+const particleCount = 28;
+const particleElements = [];
+
+for (let i = 0; i < particleCount; i++) {
+  const p = document.createElement("div");
+  p.className = "confetti-dot";
+  p.style.backgroundColor = confettiColors[i % confettiColors.length];
+  // Posisi pseudo-random deterministik berbasis index
+  const angle = (i / particleCount) * Math.PI * 2;
+  const dist = 180 + ((i * 37) % 240);
+  p.dataset.dx = Math.cos(angle) * dist;
+  p.dataset.dy = Math.sin(angle) * dist - 80;
+  particlesContainer.appendChild(p);
+  particleElements.push(p);
+}
+
+/* ==========================================================================
+   RESPONSIVE STAGE SCALING
+   ========================================================================== */
+function resizeStage() {
+  const stage = document.getElementById("stage");
+  const scale = Math.min(window.innerWidth / 1080, window.innerHeight / 1920);
+  stage.style.transform = `translate(-50%, -50%) scale(${scale * 0.95})`;
+}
+window.addEventListener("resize", resizeStage);
+resizeStage();
+
+/* ==========================================================================
+   MASTER GSAP TIMELINE (20 DETIK DETERMINISTIK)
+   ========================================================================== */
+const world = document.getElementById("world");
+const glow = document.getElementById("glow");
+const atsVal = document.getElementById("ats-val");
+const meterFill = document.getElementById("meter-fill");
+const jobHero = document.getElementById("job-hero");
+const jobPill = document.getElementById("job-pill");
+const countSent = document.getElementById("count-sent");
+const countInterview = document.getElementById("count-interview");
+const colInterview = document.getElementById("col-interview");
+const cardOffering = document.getElementById("card-offering");
+const offeringBadge = document.getElementById("offering-badge");
+const misiFloat = document.getElementById("misi-float");
+const outro = document.getElementById("outro");
+
+const tl = gsap.timeline({
+  paused: false,
+  repeat: -1,
+  defaults: { ease: "power3.out" }
+});
+
+/* --- DETIK 0.00 - 03.50: HOOK & INTRO --- */
+tl.set(world, { y: 0, scale: 1 })
+  .set("#hook", { opacity: 0, y: 30 })
+  .set("#card-cv", { opacity: 0, y: 80, scale: 0.96 })
+  .set("#card-tracker", { opacity: 0, y: 80, scale: 0.96 })
+  .set("#card-offering", { opacity: 0, y: 80, scale: 0.96 })
+  .set(outro, { opacity: 0 })
+
+  // Fade in Hook Text
+  .to("#hook", { opacity: 1, y: 0, duration: 1.0, ease: "power2.out" }, 0.2)
+  .to("#card-cv", { opacity: 1, y: 0, scale: 1, duration: 1.2, ease: "back.out(1.2)" }, 0.8)
+
+/* --- DETIK 03.50 - 07.50: MOMEN CV BUILDER & ATS SCAN --- */
+  // Kamera fokus turun & zoom sedikit ke kartu CV
+  .to(world, { y: -140, scale: 1.04, duration: 1.5, ease: "power2.inOut" }, 3.5)
+  .to(glow, { top: "45%", duration: 1.5 }, 3.5)
+  // ATS Meter naik dari 45% -> 94%
+  .to(meterFill, { width: "94%", duration: 2.0, ease: "power2.out" }, 4.0)
+  .to({ val: 45 }, {
+    val: 94,
+    duration: 2.0,
+    ease: "power2.out",
+    onUpdate: function() {
+      atsVal.textContent = Math.round(this.targets()[0].val) + "%";
+    }
+  }, 4.0)
+  .to("#ats-pill", { scale: 1.15, duration: 0.3, yoyo: true, repeat: 1, ease: "power1.inOut" }, 5.8)
+
+/* --- DETIK 07.50 - 12.00: MOMEN TRACKER & KANBAN INTERACTION --- */
+  // Munculkan kartu tracker
+  .to("#card-tracker", { opacity: 1, y: 0, scale: 1, duration: 1.0 }, 7.2)
+  // Kamera geser ke kartu Tracker
+  .to(world, { y: -720, scale: 1.06, duration: 1.6, ease: "power2.inOut" }, 7.5)
+  
+  // Job Card diangkat & digeser dari kolom Terkirim ke Interview
+  .to(jobHero, {
+    scale: 1.08,
+    boxShadow: "0 24px 48px rgba(23, 56, 209, 0.25)",
+    duration: 0.4,
+    ease: "power2.out"
+  }, 9.0)
+  .to(jobHero, {
+    x: 460, // geser ke kolom kanan
+    duration: 1.2,
+    ease: "back.out(1.4)"
+  }, 9.4)
+  .call(() => {
+    // Ubah status dan hitungan kolom
+    jobPill.textContent = "Interview HR";
+    jobPill.className = "job-status-pill success";
+    countSent.textContent = "1";
+    countInterview.textContent = "2";
+  }, null, 10.4)
+  .to(jobHero, {
+    scale: 1.0,
+    boxShadow: "0 4px 12px rgba(16, 17, 20, 0.04)",
+    duration: 0.4
+  }, 10.6)
+
+/* --- DETIK 12.00 - 16.50: MOMEN ISTIMEWA (OFFERING & CELEBRATION) --- */
+  .to("#card-offering", { opacity: 1, y: 0, scale: 1, duration: 1.0 }, 11.8)
+  // Kamera turun ke kartu Offering
+  .to(world, { y: -1300, scale: 1.08, duration: 1.5, ease: "power3.inOut" }, 12.2)
+  
+  // Badge Offering meloncat
+  .to(offeringBadge, {
+    scale: 1.2,
+    backgroundColor: "#FFFFFF",
+    color: "#1738D1",
+    duration: 0.4,
+    yoyo: true,
+    repeat: 1,
+    ease: "power2.out"
+  }, 13.5)
+
+  // Ledakan Confetti Partikel Deterministik
+  .call(() => {
+    const rect = cardOffering.getBoundingClientRect();
+    const stageRect = document.getElementById("stage").getBoundingClientRect();
+    const originX = 540;
+    const originY = 1450;
+
+    particleElements.forEach((p) => {
+      gsap.set(p, {
+        left: originX,
+        top: originY,
+        x: 0,
+        y: 0,
+        opacity: 1,
+        scale: 1
+      });
+      gsap.to(p, {
+        x: p.dataset.dx,
+        y: p.dataset.dy,
+        opacity: 0,
+        scale: 0.4,
+        duration: 1.4,
+        ease: "power2.out"
+      });
+    });
+  }, null, 13.6)
+
+  // Pop Cuan Misi
+  .fromTo(misiFloat, 
+    { scale: 0.7, opacity: 0, y: 30 },
+    { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: "back.out(2)" },
+    14.2
+  )
+
+/* --- DETIK 16.50 - 20.00: OUTRO & FINAL CTA --- */
+  // Kamera zoom-out elegan, Outro overlay muncul
+  .to(world, { scale: 0.92, opacity: 0.2, duration: 1.2, ease: "power2.inOut" }, 16.5)
+  .to(outro, { opacity: 1, pointerEvents: "auto", duration: 1.0, ease: "power2.out" }, 16.8)
+  .from(".outro-logo-mark", { scale: 0.5, rotation: -12, duration: 0.8, ease: "back.out(1.8)" }, 17.0)
+  .from(".outro-brand-name", { y: 30, opacity: 0, duration: 0.6 }, 17.2)
+  .from(".outro-tagline", { y: 20, opacity: 0, duration: 0.6 }, 17.4)
+  .from(".outro-cta-btn", { scale: 0.85, opacity: 0, duration: 0.6, ease: "back.out(2)" }, 17.6)
+
+  // Hold hingga detik 20.00
+  .to({}, { duration: 1.8 }, 18.2);
+
+/* ==========================================================================
+   CONTROLS & DEBUG INSPECTOR (?debug=1)
+   ========================================================================== */
+const ui = document.getElementById("ui");
+const btnToggle = document.getElementById("btn-toggle");
+const btnReplay = document.getElementById("btn-replay");
+const scrub = document.getElementById("scrub");
+const clock = document.getElementById("clock");
+
+if (new URLSearchParams(window.location.search).get("debug") === "1") {
+  ui.classList.add("on");
+}
+
+tl.eventCallback("onUpdate", () => {
+  const t = tl.time();
+  scrub.value = t;
+  const m = Math.floor(t / 60).toString().padStart(2, "0");
+  const s = Math.floor(t % 60).toString().padStart(2, "0");
+  clock.textContent = `${m}:${s}`;
+});
+
+scrub.addEventListener("input", () => {
+  tl.pause();
+  tl.time(parseFloat(scrub.value));
+  btnToggle.textContent = "Putar";
+});
+
+btnToggle.addEventListener("click", () => {
+  if (tl.paused()) {
+    tl.play();
+    btnToggle.textContent = "Jeda";
+  } else {
+    tl.pause();
+    btnToggle.textContent = "Putar";
+  }
+});
+
+btnReplay.addEventListener("click", () => {
+  tl.restart();
+  btnToggle.textContent = "Jeda";
+});
+
+// HOTKEYS: Space (Jeda/Lanjut), R (Ulang)
+window.addEventListener("keydown", (e) => {
+  if (e.code === "Space") {
+    e.preventDefault();
+    if (tl.paused()) { tl.play(); btnToggle.textContent = "Jeda"; }
+    else { tl.pause(); btnToggle.textContent = "Putar"; }
+  } else if (e.key === "r" || e.key === "R") {
+    tl.restart();
+    btnToggle.textContent = "Jeda";
+  }
+});
+</script>
+</body>
+</html>

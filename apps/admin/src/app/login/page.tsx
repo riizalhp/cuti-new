@@ -21,9 +21,19 @@ export default function AdminLoginPage() {
       .find((c) => c.trim().startsWith("employr_admin_session=") || c.trim().startsWith("cuti_admin_session="))
     if (session) {
       try {
-        const val = JSON.parse(decodeURIComponent(session.split("=")[1]))
-        if (val?.role === "ADMIN") {
-          router.replace("/")
+        const rawVal = decodeURIComponent(session.split("=")[1])
+        if (rawVal.includes(".")) {
+          const payloadB64 = rawVal.split(".")[0]
+          const payloadStr = atob(payloadB64.replace(/-/g, "+").replace(/_/g, "/"))
+          const val = JSON.parse(payloadStr)
+          if (val?.role === "ADMIN") {
+            router.replace("/")
+          }
+        } else {
+          const val = JSON.parse(rawVal)
+          if (val?.role === "ADMIN") {
+            router.replace("/")
+          }
         }
       } catch {}
     }
@@ -63,7 +73,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 px-4">
+    <div className="min-h-full flex-1 flex items-center justify-center bg-slate-50 dark:bg-slate-950 px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -127,10 +137,13 @@ export default function AdminLoginPage() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+                  aria-pressed={showPassword}
+                  className="absolute right-0 top-0 bottom-0 w-11 flex items-center justify-center rounded-r-xl text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 touch-manipulation cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
                 </button>
               </div>
             </div>

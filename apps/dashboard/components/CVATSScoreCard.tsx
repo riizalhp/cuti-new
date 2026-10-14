@@ -14,8 +14,6 @@ import {
 } from '@/components/icons/CustomIcons';
 import { calculateAtsScore, getAtsStatusLabel, getScoreColorTokens } from '@/lib/ats-score';
 import { calculateDynamicAtsScore } from '@/lib/ats-score-engine';
-import { FeedbackWidget } from '@/components/ui/FeedbackWidget';
-import { getStoredSession } from '@/lib/auth';
 
 interface CVATSScoreCardProps {
   onOptimizeClick?: () => void;
@@ -27,18 +25,14 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
 }) => {
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
   const [atsScore, setAtsScore] = useState<number | null>(null);
-
-  useEffect(() => {
-    const session = getStoredSession();
-    if (session?.id) setUserId(session.id);
-  }, []);
   const [cvTitle, setCvTitle] = useState<string>('Memuat data CV...');
-  const [accuracyRate, setAccuracyRate] = useState<number>(0);
   const [recommendationsCount, setRecommendationsCount] = useState<number>(0);
   const [hasCv, setHasCv] = useState<boolean>(true);
   const [isEmptyOrDefault, setIsEmptyOrDefault] = useState<boolean>(false);
+  const [totalCvsCount, setTotalCvsCount] = useState<number>(0);
+  const [emptyDraftsCount, setEmptyDraftsCount] = useState<number>(0);
+  const [isPrimarySelected, setIsPrimarySelected] = useState<boolean>(false);
   const [penalties, setPenalties] = useState<string[]>([]);
   const [bonuses, setBonuses] = useState<string[]>([]);
   const [breakdown, setBreakdown] = useState([
@@ -48,7 +42,7 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
     { name: 'Content Integrity (15%)', score: 0, status: 'Memuat...' },
   ]);
 
-  const applyCvData = (cv: any) => {
+  const applyCvData = (cv: any, totalCount = 1, emptyCount = 0) => {
     if (!cv) {
       setHasCv(false);
       setAtsScore(0);
@@ -57,12 +51,17 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
     }
 
     setHasCv(true);
-    setCvTitle(cv.title || 'CV ATS - Modern Standard');
+    setIsPrimarySelected(Boolean(cv.isPrimary));
+    const titleLabel = cv.title || 'CV ATS Modern';
+    if (totalCount > 1) {
+      setCvTitle(cv.isPrimary ? `${titleLabel} (CV Utama)` : `${titleLabel} (Default)`);
+    } else {
+      setCvTitle(titleLabel);
+    }
 
     const dyn = calculateDynamicAtsScore(cv);
     const resolvedScore = dyn.totalScore > 0 ? dyn.totalScore : (cv.atsScore && cv.atsScore > 0 ? cv.atsScore : 0);
     setAtsScore(resolvedScore);
-    setAccuracyRate(Math.min(99, Math.max(70, Math.round(resolvedScore * 1.05))));
     setRecommendationsCount(dyn.issues.length);
     setIsEmptyOrDefault(resolvedScore === 0 ? true : dyn.isEmptyOrDefault);
     setPenalties(dyn.issues.map((i) => i.message));
@@ -91,53 +90,24 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
   useEffect(() => {
     cvApi.getAll().then((cvs) => {
       if (Array.isArray(cvs) && cvs.length > 0) {
-        if (cvs.length === 1) {
-          const cv = cvs[0];
-          applyCvData(cv);
-        } else {
-          const dynResults = cvs.map((cv: any) => calculateDynamicAtsScore(cv));
-          const totalScore = dynResults.reduce((sum, r) => sum + r.totalScore, 0);
-          const avgScore = Math.round(totalScore / cvs.length);
+        // Fokus evaluasi pada CV Utama (Primary CV)
+        const primaryCv = cvs.find((c: any) => c.isPrimary) || cvs[0];
+        const emptyCount = cvs.filter((c: any) => {
+          const dyn = calculateDynamicAtsScore(c);
+          return dyn.isEmptyOrDefault || dyn.totalScore === 0 || !c.atsScore || c.atsScore === 0;
+        }).length;
 
-          setHasCv(true);
-          setCvTitle(`${cvs.length} CV - Rata-rata ATS Score`);
-          setAtsScore(avgScore);
-
-          const avgCq = Math.round(dynResults.reduce((sum, r) => sum + r.engines.contentQuality.score, 0) / cvs.length);
-          const avgAr = Math.round(dynResults.reduce((sum, r) => sum + r.engines.atsReadability.score, 0) / cvs.length);
-          const avgComp = Math.round(dynResults.reduce((sum, r) => sum + r.engines.completeness.score, 0) / cvs.length);
-          const avgCi = Math.round(dynResults.reduce((sum, r) => sum + r.engines.contentIntegrity.score, 0) / cvs.length);
-
-          const getStatusText = (val: number) => {
-            if (val >= 90) return 'Sangat Baik';
-            if (val >= 75) return 'Baik';
-            if (val >= 60) return 'Cukup';
-            return 'Perlu Revisi';
-          };
-
-          setBreakdown([
-            { name: 'Content Quality (40%)', score: avgCq, status: getStatusText(avgCq) },
-            { name: 'ATS Readability (25%)', score: avgAr, status: getStatusText(avgAr) },
-            { name: 'Completeness (20%)', score: avgComp, status: getStatusText(avgComp) },
-            { name: 'Content Integrity (15%)', score: avgCi, status: getStatusText(avgCi) },
-          ]);
-
-          const avgAccuracy = Math.min(99, Math.max(70, Math.round(avgScore * 1.05)));
-          const allIssues = dynResults.flatMap((r) => r.issues);
-          setAccuracyRate(avgAccuracy);
-          setRecommendationsCount(allIssues.length);
-
-          setIsEmptyOrDefault(dynResults.every((r) => r.isEmptyOrDefault));
-          setPenalties([...new Set(allIssues.map((i) => i.message))]);
-          setBonuses(['Analisis multi-faktor ATS aktif']);
-        }
+        setTotalCvsCount(cvs.length);
+        setEmptyDraftsCount(emptyCount);
+        applyCvData(primaryCv, cvs.length, emptyCount);
       } else {
         setHasCv(false);
         setAtsScore(0);
         setCvTitle('Belum ada dokumen CV');
-        setAccuracyRate(0);
         setRecommendationsCount(0);
         setIsEmptyOrDefault(true);
+        setTotalCvsCount(0);
+        setEmptyDraftsCount(0);
         setPenalties([]);
         setBonuses([]);
         setBreakdown([
@@ -155,51 +125,59 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
   const scoreTokens = getScoreColorTokens(hasCv ? displayScore : 0, isEmptyOrDefault || !hasCv);
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-full transition-all space-y-4">
+    <div className="bg-white dark:bg-slate-900 rounded-[10px] p-3.5 sm:p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-full transition-all space-y-3">
       <div>
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center border transition-colors ${scoreTokens.iconWrapper}`}>
-              <FileTextIcon size={16} />
+        <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-start gap-2">
+            <div className={`w-7 h-7 rounded-[8px] flex items-center justify-center border transition-colors shrink-0 mt-0.5 ${scoreTokens.iconWrapper}`}>
+              <FileTextIcon size={14} />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+              <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
                 CV ATS Score
               </h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[140px] sm:max-w-none font-medium">
+              <p className="text-caption text-slate-500 dark:text-slate-400 truncate max-w-[140px] sm:max-w-none font-medium">
                 {cvTitle}
               </p>
             </div>
           </div>
 
           <div className="text-right flex items-center gap-2">
-            <span className={`text-xl font-black font-mono transition-colors ${scoreTokens.text}`}>
+            <span className={`text-lg font-black font-mono transition-colors ${scoreTokens.text}`}>
               {atsScore !== null ? `${displayScore}/100` : '...'}
             </span>
           </div>
         </div>
 
         {/* Score Summary Badge Box */}
-        <div className={`flex items-center justify-between p-3 rounded-[10px] border my-3 transition-colors ${scoreTokens.bgBox} ${scoreTokens.border}`}>
+        <div className={`flex items-center justify-between p-2 sm:p-2.5 rounded-[8px] border my-2.5 transition-colors ${scoreTokens.bgBox} ${scoreTokens.border}`}>
           <div className="flex items-center gap-2">
             {scoreTokens.tier === 'good' && (
-              <CheckCircleIcon size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <CheckCircleIcon size={16} className="text-emerald-700 dark:text-emerald-400 shrink-0" />
             )}
             {scoreTokens.tier === 'medium' && (
-              <AlertTriangleIcon size={16} className="text-amber-600 dark:text-amber-400 shrink-0" />
+              <AlertTriangleIcon size={16} className="text-amber-700 dark:text-amber-400 shrink-0" />
             )}
             {scoreTokens.tier === 'low' && (
-              <AlertCircleIcon size={16} className="text-rose-600 dark:text-rose-400 shrink-0" />
+              <AlertCircleIcon size={16} className="text-rose-700 dark:text-rose-400 shrink-0" />
             )}
             {scoreTokens.tier === 'empty' && (
-              <FileTextIcon size={16} className="text-slate-400 dark:text-slate-500 shrink-0" />
+              <FileTextIcon size={16} className="text-slate-500 dark:text-slate-500 shrink-0" />
             )}
             <span className="text-xs font-bold text-slate-900 dark:text-white">
-              Status ATS: Terbaca {accuracyRate}% Akurat
+              {!hasCv
+                ? 'Status Format: Belum Ada Dokumen'
+                : isEmptyOrDefault
+                ? 'Status Format: Draf Belum Terisi'
+                : atsScore !== null && atsScore >= 80
+                ? 'Status Format: Sangat Optimal'
+                : atsScore !== null && atsScore >= 60
+                ? 'Status Format: Siap Screening'
+                : 'Status Format: Perlu Dioptimalkan'}
             </span>
           </div>
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-[10px] border transition-colors ${scoreTokens.badge}`}>
+          <span className={`text-caption font-bold px-2 py-0.5 rounded-[10px] border transition-colors ${scoreTokens.badge}`}>
             {statusLabel}
           </span>
         </div>
@@ -210,28 +188,53 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
             {!hasCv
               ? 'Buat CV untuk melihat skor ATS kamu'
               : isEmptyOrDefault
-              ? 'CV masih kosong atau template default: isi data asli kamu terlebih dahulu'
+              ? totalCvsCount > 1
+                ? 'CV Utama masih berupa draf kosong: isi data asli kamu terlebih dahulu'
+                : 'CV masih kosong atau template default: isi data asli kamu terlebih dahulu'
               : recommendationsCount > 0
               ? `${recommendationsCount} penalti aktif, ${bonuses.length} bonus didapat`
               : 'Format CV optimal & siap screening HR'}
           </span>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className={`font-bold hover:underline flex items-center gap-0.5 cursor-pointer transition-colors ${scoreTokens.text}`}
+            aria-expanded={isExpanded}
+            aria-controls="ats-breakdown-details"
+            className={`font-bold hover:underline flex items-center gap-0.5 cursor-pointer transition-colors px-2 py-1 min-h-[30px] hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-[6px] ${scoreTokens.text}`}
           >
             <span>{isExpanded ? 'Tutup Detail' : 'Lihat Detail'}</span>
             {isExpanded ? <ChevronUpIcon size={14} /> : <ChevronDownIcon size={14} />}
           </button>
         </div>
 
+        {/* Informative Notice for Multiple CVs / Empty Drafts */}
+        {totalCvsCount > 1 && (
+          <div className="my-2.5 p-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-start gap-2 text-caption leading-relaxed">
+            {emptyDraftsCount > 0 ? (
+              <AlertTriangleIcon size={14} className="text-amber-700 shrink-0 mt-0.5 dark:text-amber-400" />
+            ) : (
+              <FileTextIcon size={14} className="text-blue-600 shrink-0 mt-0.5 dark:text-blue-400" />
+            )}
+            <div className="text-slate-600 dark:text-slate-300">
+              <span>
+                Skor dihitung dari <strong>{isPrimarySelected ? 'CV Utama' : 'CV Pertama'}</strong> ({totalCvsCount} CV tersimpan).{' '}
+              </span>
+              {emptyDraftsCount > 0 && (
+                <span className="text-amber-700 dark:text-amber-400 font-medium">
+                  Ada {emptyDraftsCount} draf CV yang masih kosong di menu CV Saya.
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Expandable Breakdown Section */}
         {isExpanded && (
-          <div className="space-y-3 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 animate-in fade-in duration-200">
+          <div id="ats-breakdown-details" className="space-y-3 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 animate-in fade-in duration-200">
             {/* Daftar Penalti / Pengurangan Skor */}
             {penalties.length > 0 && (
               <div className="space-y-1 bg-red-50/70 dark:bg-red-950/30 p-2.5 rounded-[10px] border border-red-100 dark:border-red-900/40">
-                <p className="text-[11px] font-bold text-red-700 dark:text-red-300">Pengurangan Skor (Penalti):</p>
-                <ul className="text-[10px] text-red-600 dark:text-red-400 space-y-0.5 pl-3 list-disc">
+                <p className="text-xs font-bold text-red-700 dark:text-red-300">Pengurangan Skor (Penalti):</p>
+                <ul className="text-xs text-red-700 dark:text-red-400 space-y-0.5 pl-3 list-disc">
                   {penalties.map((p, idx) => (
                     <li key={idx}>{p}</li>
                   ))}
@@ -242,8 +245,8 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
             {/* Daftar Bonus / Penambahan Skor */}
             {bonuses.length > 0 && (
               <div className="space-y-1 bg-emerald-50/70 dark:bg-emerald-950/30 p-2.5 rounded-[10px] border border-emerald-100 dark:border-emerald-900/40">
-                <p className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">Penambahan Skor (Bonus):</p>
-                <ul className="text-[10px] text-emerald-600 dark:text-emerald-400 space-y-0.5 pl-3 list-disc">
+                <p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">Penambahan Skor (Bonus):</p>
+                <ul className="text-xs text-emerald-700 dark:text-emerald-400 space-y-0.5 pl-3 list-disc">
                   {bonuses.map((b, idx) => (
                     <li key={idx}>{b}</li>
                   ))}
@@ -261,7 +264,14 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
                     {c.score}% ({c.status})
                   </span>
                 </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                <div
+                  role="progressbar"
+                  aria-valuenow={c.score}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`Skor ${c.name}`}
+                  className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden"
+                >
                   <div
                     className={`h-1.5 rounded-full transition-all duration-500 ${
                       c.score >= 75
@@ -283,14 +293,9 @@ export const CVATSScoreCard: React.FC<CVATSScoreCardProps> = ({
 
       {/* Action Button */}
       <div className="flex flex-col gap-3">
-        {userId && (
-          <div className="flex justify-end">
-            <FeedbackWidget feature="ats_score" userId={userId} />
-          </div>
-        )}
         <button
           onClick={onOptimizeClick || (() => router.push('/cv'))}
-          className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition cursor-pointer border-0"
+          className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-cobalt-500/20 transition cursor-pointer border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-cobalt-500 dark:focus-visible:ring-offset-slate-900"
         >
           <SlidersIcon size={14} />
           <span>Optimalkan CV Sekarang</span>

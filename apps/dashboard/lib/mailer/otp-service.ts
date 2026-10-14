@@ -83,6 +83,29 @@ export function generateOtpEmailHtml(name: string, otp: string): { subject: stri
   return { subject, html, text };
 }
 
+let cachedTransporter: nodemailer.Transporter | null = null;
+
+function getTransporter() {
+  if (cachedTransporter) return cachedTransporter;
+  const config = getSmtpConfig();
+  cachedTransporter = nodemailer.createTransport({
+    pool: true,
+    maxConnections: 3,
+    maxMessages: 100,
+    host: config.host,
+    port: config.port,
+    secure: config.secure,
+    auth: config.user ? {
+      user: config.user,
+      pass: config.pass,
+    } : undefined,
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+  return cachedTransporter;
+}
+
 export async function sendVerificationOtpEmail({ to, name = '', otp }: SendOtpOptions): Promise<{ success: boolean; messageId?: string; error?: string }> {
   // Always log to terminal console in development for convenient testing
   console.log(`\n======================================================`);
@@ -104,18 +127,7 @@ export async function sendVerificationOtpEmail({ to, name = '', otp }: SendOtpOp
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      host: config.host,
-      port: config.port,
-      secure: config.secure,
-      auth: config.user ? {
-        user: config.user,
-        pass: config.pass,
-      } : undefined,
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
+    const transporter = getTransporter();
 
     const info = await transporter.sendMail({
       from: config.from,

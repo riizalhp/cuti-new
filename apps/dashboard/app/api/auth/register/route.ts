@@ -224,7 +224,7 @@ export async function POST(req: NextRequest) {
     // Set UI display cookie with onboarded: false
     response.cookies.set({
       name: 'employr_user_session',
-      value: encodeURIComponent(JSON.stringify(userData)),
+      value: JSON.stringify(userData),
       maxAge: thirtyDaysInSeconds,
       path: '/',
       sameSite: 'lax',
@@ -232,7 +232,7 @@ export async function POST(req: NextRequest) {
     });
     response.cookies.set({
       name: 'cuti_user_session',
-      value: encodeURIComponent(JSON.stringify(userData)),
+      value: JSON.stringify(userData),
       maxAge: thirtyDaysInSeconds,
       path: '/',
       sameSite: 'lax',

@@ -8,7 +8,8 @@ type NotificationCategory =
   | 'CAREER'
   | 'REFERRAL'
   | 'DRAFT'
-  | 'OPPORTUNITY';
+  | 'OPPORTUNITY'
+  | 'SYSTEM';
 
 type NotificationPriority = 'CRITICAL' | 'IMPORTANT' | 'INFORMATIONAL' | 'SUCCESS';
 

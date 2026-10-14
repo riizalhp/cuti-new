@@ -9,18 +9,17 @@ import SertifikatSection from '../components/SertifikatSection.astro';
 import KursusSection from '../components/KursusSection.astro';
 import EventPortalSection from '../components/EventPortalSection.astro';
 import EditorialHubSection from '../components/EditorialHubSection.astro';
-import NewsletterBanner from '../components/NewsletterBanner.astro';
 import FooterPortal from '../components/FooterPortal.astro';
 import SearchModal from '../components/SearchModal.astro';
-import { ensureData } from '../data/mock';
+import { ensureData, sertifikasiList, courseList, eventList } from '../data/mock';
 
 // Muat data DB (jobs, sertifikasi, course, event, artikel) sebelum render section
 await ensureData();
 ---
 
 <BaseLayout
-  title="Employer Job: Portal Informasi Lowongan Kerja, Sertifikasi & Karier Terlengkap"
-  description="Media informasi dan kurasi lowongan kerja, sertifikasi resmi, kursus skill digital, event job fair, dan tips karier terpercaya untuk generasi muda Indonesia."
+  title="Employr: Portal Informasi Loker, Sertifikasi & Karier"
+  description="Media informasi dan kurasi loker, sertifikasi resmi, kursus skill digital, event job fair, dan tips karier untuk generasi muda Indonesia."
   canonicalUrl="http://localhost:3003/"
 >
   <!-- 1. Global Navbar (Logo Terpadu + Menu Ringkas + Akses B2B & Masuk) -->
@@ -29,7 +28,7 @@ await ensureData();
   <!-- Sub-Navigasi Lengket & Floating Back to Top (Mengatasi Scroll Fatigue) -->
   <StickyAnchorBar />
 
-  <main class="bg-[#f4f3ee] min-h-screen">
+  <main class="bg-[#f4f3ee] min-h-screen overflow-x-hidden">
     <!-- 2. Hero Section (Value Proposition + Bilah Pencarian Tunggal Terpadu) -->
     <HeroPortal />
 
@@ -40,17 +39,14 @@ await ensureData();
     <StatsTicker />
 
     <!-- 5. Pengembangan Diri: Sertifikasi & Course (Upskilling Modular + Native Partner Placement) -->
-    <SertifikatSection />
-    <KursusSection />
+    {sertifikasiList.length > 0 && <SertifikatSection />}
+    {courseList.length > 0 && <KursusSection />}
 
     <!-- 6. Agenda & Bursa Kerja: Event (Kalender Interaktif & Pendaftaran - Bebas Duplikasi) -->
-    <EventPortalSection />
+    {eventList.length > 0 && <EventPortalSection />}
 
     <!-- 7. Editorial Hub: Artikel & Tips (Konsolidasi Tabbed Hub Terpadu) -->
     <EditorialHubSection />
-
-    <!-- Lead Magnet Konversi Buletin Email (Template CV ATS & Surat Lamaran 2026) -->
-    <NewsletterBanner />
   </main>
 
   <!-- 8. Footer Bersih (Navigasi Fungsional & Legal Tanpa Duplikasi Identitas) -->

@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@employr/db";
+import { sendArticleNewsletterBlast } from "@/lib/newsletter-service";
 
-function slugify(text: string): string {
-  return text
+function slugify(text: string, maxLen = 100): string {
+  const raw = text
+    .toString()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  if (!raw) return "artikel";
+  if (raw.length <= maxLen) return raw;
+  const cut = raw.slice(0, maxLen);
+  const lastDash = cut.lastIndexOf("-");
+  return (lastDash > 20 ? cut.slice(0, lastDash) : cut).replace(/-+$/g, "");
 }
 
 export async function GET() {
@@ -79,6 +86,12 @@ export async function POST(req: NextRequest) {
       },
       include: { article_categories: true },
     });
+
+    if (article.is_published) {
+      sendArticleNewsletterBlast(article.id).catch((err) => {
+        console.error('[Newsletter Blast Error on Create]:', err);
+      });
+    }
 
     return NextResponse.json({
       success: true,

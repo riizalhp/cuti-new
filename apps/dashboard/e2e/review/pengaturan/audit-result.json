@@ -1,0 +1,974 @@
+{
+  "url": "http://localhost:3000/pengaturan",
+  "timestamp": "2026-10-09T02:41:42.218Z",
+  "desktop": {
+    "profil": {
+      "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\pengaturan\\desktop-profil.png",
+      "measures": {
+        "controls": 10,
+        "ctlFont": {
+          "10.4": 4
+        },
+        "paddingCombos": 1,
+        "weights": "700",
+        "icons": {
+          "49.2": 1,
+          "16.0": 1,
+          "9.6": 1,
+          "12.8": 9
+        },
+        "under24": 0,
+        "tiny": [],
+        "noName": 0,
+        "unnamed": [],
+        "textBuckets": {
+          ">=12": 1,
+          "9-10": 25,
+          "10-11": 27,
+          "11-12": 2
+        },
+        "contrast": "0/55",
+        "worst": [],
+        "hScroll": 0
+      }
+    },
+    "karir": {
+      "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\pengaturan\\desktop-karir.png",
+      "measures": {
+        "controls": 10,
+        "ctlFont": {
+          "10.4": 4
+        },
+        "paddingCombos": 1,
+        "weights": "700",
+        "icons": {
+          "49.2": 1,
+          "16.0": 1,
+          "9.6": 1,
+          "12.8": 9
+        },
+        "under24": 0,
+        "tiny": [],
+        "noName": 0,
+        "unnamed": [],
+        "textBuckets": {
+          ">=12": 1,
+          "9-10": 23,
+          "10-11": 26,
+          "11-12": 2
+        },
+        "contrast": "0/52",
+        "worst": [],
+        "hScroll": 0
+      }
+    },
+    "keamanan": {
+      "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\pengaturan\\desktop-keamanan.png",
+      "measures": {
+        "controls": 10,
+        "ctlFont": {
+          "10.4": 4
+        },
+        "paddingCombos": 1,
+        "weights": "700",
+        "icons": {
+          "49.2": 1,
+          "16.0": 1,
+          "9.6": 1,
+          "12.8": 9
+        },
+        "under24": 0,
+        "tiny": [],
+        "noName": 0,
+        "unnamed": [],
+        "textBuckets": {
+          ">=12": 1,
+          "9-10": 23,
+          "10-11": 26,
+          "11-12": 2
+        },
+        "contrast": "0/52",
+        "worst": [],
+        "hScroll": 0
+      }
+    },
+    "pengaturan": {
+      "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\pengaturan\\desktop-pengaturan.png",
+      "measures": {
+        "controls": 10,
+        "ctlFont": {
+          "10.4": 4
+        },
+        "paddingCombos": 1,
+        "weights": "700",
+        "icons": {
+          "49.2": 1,
+          "16.0": 1,
+          "9.6": 1,
+          "12.8": 9
+        },
+        "under24": 0,
+        "tiny": [],
+        "noName": 0,
+        "unnamed": [],
+        "textBuckets": {
+          ">=12": 1,
+          "9-10": 23,
+          "10-11": 26,
+          "11-12": 2
+        },
+        "contrast": "0/52",
+        "worst": [],
+        "hScroll": 0
+      }
+    }
+  },
+  "mobile": {
+    "profil": {
+      "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\pengaturan\\mobile-profil.png",
+      "under44": [
+        {
+          "tag": "a",
+          "text": "A",
+          "size": "219x32",
+          "className": "relative flex items-center justify-center group w-"
+        },
+        {
+          "tag": "button",
+          "text": "Tutup Menu",
+          "size": "31x31",
+          "className": "md:hidden absolute right-3.5 top-1/2 -translate-y-"
+        },
+        {
+          "tag": "a",
+          "text": "Beranda",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "CV Saya",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Screening & Evaluasi ATS",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Optimasi LinkedIn",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Career Intelligence",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Tracker Lamaran",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Email & Cover Letter",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Eksplorasi Loker",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Pengaturan",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Saran Fitur",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Lapor Kendala",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "button",
+          "text": "Keluar Akun",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "button",
+          "text": "Toggle Mode Terang / Gelap",
+          "size": "42x29",
+          "className": "flex items-center gap-2 p-1.5 px-3 rounded-[10px] "
+        },
+        {
+          "tag": "button",
+          "text": "Notifikasi & Pengingat",
+          "size": "36x36",
+          "className": "relative grid place-items-center rounded-full outl"
+        },
+        {
+          "tag": "button",
+          "text": "Menu Profil Pengguna",
+          "size": "48x42",
+          "className": "flex items-center gap-2.5 pl-1.5 py-1 pr-2.5 round"
+        },
+        {
+          "tag": "button",
+          "text": "Ubah data profil",
+          "size": "324x40",
+          "className": "h-10 sm:h-auto px-4 py-2.5 sm:p-2.5 rounded-[10px]"
+        },
+        {
+          "tag": "button",
+          "text": "Profil",
+          "size": "77x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "button",
+          "text": "Karir",
+          "size": "77x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "button",
+          "text": "Keamanan",
+          "size": "103x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "button",
+          "text": "Sistem",
+          "size": "80x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "button",
+          "text": "Ubah data identitas",
+          "size": "32x32",
+          "className": "h-8 w-8 min-h-[32px] min-w-[32px] flex items-cente"
+        },
+        {
+          "tag": "button",
+          "text": "Ubah kontak & domisili",
+          "size": "32x32",
+          "className": "h-8 w-8 min-h-[32px] min-w-[32px] flex items-cente"
+        },
+        {
+          "tag": "button",
+          "text": "Ubah ringkasan diri",
+          "size": "32x32",
+          "className": "h-8 w-8 min-h-[32px] min-w-[32px] flex items-cente"
+        },
+        {
+          "tag": "button",
+          "text": "Ubah tautan portofolio",
+          "size": "32x32",
+          "className": "h-8 w-8 min-h-[32px] min-w-[32px] flex items-cente"
+        }
+      ],
+      "hScroll": 0
+    },
+    "karir": {
+      "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\pengaturan\\mobile-karir.png",
+      "under44": [
+        {
+          "tag": "a",
+          "text": "A",
+          "size": "219x32",
+          "className": "relative flex items-center justify-center group w-"
+        },
+        {
+          "tag": "button",
+          "text": "Tutup Menu",
+          "size": "31x31",
+          "className": "md:hidden absolute right-3.5 top-1/2 -translate-y-"
+        },
+        {
+          "tag": "a",
+          "text": "Beranda",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "CV Saya",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Screening & Evaluasi ATS",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Optimasi LinkedIn",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Career Intelligence",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Tracker Lamaran",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Email & Cover Letter",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Eksplorasi Loker",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Pengaturan",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Saran Fitur",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Lapor Kendala",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "button",
+          "text": "Keluar Akun",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "button",
+          "text": "Toggle Mode Terang / Gelap",
+          "size": "42x29",
+          "className": "flex items-center gap-2 p-1.5 px-3 rounded-[10px] "
+        },
+        {
+          "tag": "button",
+          "text": "Notifikasi & Pengingat",
+          "size": "36x36",
+          "className": "relative grid place-items-center rounded-full outl"
+        },
+        {
+          "tag": "button",
+          "text": "Menu Profil Pengguna",
+          "size": "48x42",
+          "className": "flex items-center gap-2.5 pl-1.5 py-1 pr-2.5 round"
+        },
+        {
+          "tag": "button",
+          "text": "Ubah data profil",
+          "size": "324x40",
+          "className": "h-10 sm:h-auto px-4 py-2.5 sm:p-2.5 rounded-[10px]"
+        },
+        {
+          "tag": "button",
+          "text": "Profil",
+          "size": "77x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "button",
+          "text": "Karir",
+          "size": "77x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "button",
+          "text": "Keamanan",
+          "size": "103x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "button",
+          "text": "Sistem",
+          "size": "80x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "button",
+          "text": "Ubah posisi & industri",
+          "size": "32x32",
+          "className": "h-8 w-8 min-h-[32px] min-w-[32px] flex items-cente"
+        },
+        {
+          "tag": "button",
+          "text": "Ubah ekspektasi kompensasi",
+          "size": "32x32",
+          "className": "h-8 w-8 min-h-[32px] min-w-[32px] flex items-cente"
+        },
+        {
+          "tag": "button",
+          "text": "Ubah format & penempatan kerja",
+          "size": "32x32",
+          "className": "h-8 w-8 min-h-[32px] min-w-[32px] flex items-cente"
+        },
+        {
+          "tag": "button",
+          "text": "Ubah status ketersediaan",
+          "size": "32x32",
+          "className": "h-8 w-8 min-h-[32px] min-w-[32px] flex items-cente"
+        }
+      ],
+      "hScroll": 0
+    },
+    "keamanan": {
+      "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\pengaturan\\mobile-keamanan.png",
+      "under44": [
+        {
+          "tag": "a",
+          "text": "A",
+          "size": "219x32",
+          "className": "relative flex items-center justify-center group w-"
+        },
+        {
+          "tag": "button",
+          "text": "Tutup Menu",
+          "size": "31x31",
+          "className": "md:hidden absolute right-3.5 top-1/2 -translate-y-"
+        },
+        {
+          "tag": "a",
+          "text": "Beranda",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "CV Saya",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Screening & Evaluasi ATS",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Optimasi LinkedIn",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Career Intelligence",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Tracker Lamaran",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Email & Cover Letter",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Eksplorasi Loker",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Pengaturan",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Saran Fitur",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Lapor Kendala",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "button",
+          "text": "Keluar Akun",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "button",
+          "text": "Toggle Mode Terang / Gelap",
+          "size": "42x29",
+          "className": "flex items-center gap-2 p-1.5 px-3 rounded-[10px] "
+        },
+        {
+          "tag": "button",
+          "text": "Notifikasi & Pengingat",
+          "size": "36x36",
+          "className": "relative grid place-items-center rounded-full outl"
+        },
+        {
+          "tag": "button",
+          "text": "Menu Profil Pengguna",
+          "size": "48x42",
+          "className": "flex items-center gap-2.5 pl-1.5 py-1 pr-2.5 round"
+        },
+        {
+          "tag": "button",
+          "text": "Ubah data profil",
+          "size": "324x40",
+          "className": "h-10 sm:h-auto px-4 py-2.5 sm:p-2.5 rounded-[10px]"
+        },
+        {
+          "tag": "button",
+          "text": "Profil",
+          "size": "77x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "button",
+          "text": "Karir",
+          "size": "77x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "button",
+          "text": "Keamanan",
+          "size": "103x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "button",
+          "text": "Sistem",
+          "size": "80x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "input",
+          "text": "INPUT",
+          "size": "332x44",
+          "className": "w-full px-3.5 py-2.5 text-base sm:text-xs rounded-"
+        },
+        {
+          "tag": "input",
+          "text": "INPUT",
+          "size": "332x44",
+          "className": "w-full px-3.5 py-2.5 text-base sm:text-xs rounded-"
+        },
+        {
+          "tag": "input",
+          "text": "INPUT",
+          "size": "332x44",
+          "className": "w-full px-3.5 py-2.5 text-base sm:text-xs rounded-"
+        },
+        {
+          "tag": "button",
+          "text": "Perbarui Kata Sandi",
+          "size": "198x34",
+          "className": "px-6 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-"
+        },
+        {
+          "tag": "button",
+          "text": "Keluar / Logout",
+          "size": "332x34",
+          "className": "px-5 py-2.5 rounded-[10px] bg-rose-600 hover:bg-ro"
+        }
+      ],
+      "hScroll": 0
+    },
+    "pengaturan": {
+      "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\pengaturan\\mobile-pengaturan.png",
+      "under44": [
+        {
+          "tag": "a",
+          "text": "A",
+          "size": "219x32",
+          "className": "relative flex items-center justify-center group w-"
+        },
+        {
+          "tag": "button",
+          "text": "Tutup Menu",
+          "size": "31x31",
+          "className": "md:hidden absolute right-3.5 top-1/2 -translate-y-"
+        },
+        {
+          "tag": "a",
+          "text": "Beranda",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "CV Saya",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Screening & Evaluasi ATS",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Optimasi LinkedIn",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Career Intelligence",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Tracker Lamaran",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Email & Cover Letter",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Eksplorasi Loker",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Pengaturan",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Saran Fitur",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "a",
+          "text": "Lapor Kendala",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "button",
+          "text": "Keluar Akun",
+          "size": "227x34",
+          "className": "w-full flex items-center rounded-[10px] text-xs fo"
+        },
+        {
+          "tag": "button",
+          "text": "Toggle Mode Terang / Gelap",
+          "size": "42x29",
+          "className": "flex items-center gap-2 p-1.5 px-3 rounded-[10px] "
+        },
+        {
+          "tag": "button",
+          "text": "Notifikasi & Pengingat",
+          "size": "36x36",
+          "className": "relative grid place-items-center rounded-full outl"
+        },
+        {
+          "tag": "button",
+          "text": "Menu Profil Pengguna",
+          "size": "48x42",
+          "className": "flex items-center gap-2.5 pl-1.5 py-1 pr-2.5 round"
+        },
+        {
+          "tag": "button",
+          "text": "Ubah data profil",
+          "size": "324x40",
+          "className": "h-10 sm:h-auto px-4 py-2.5 sm:p-2.5 rounded-[10px]"
+        },
+        {
+          "tag": "button",
+          "text": "Profil",
+          "size": "77x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "button",
+          "text": "Karir",
+          "size": "77x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "button",
+          "text": "Keamanan",
+          "size": "103x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "button",
+          "text": "Sistem",
+          "size": "80x40",
+          "className": "inline-flex items-center justify-center whitespace"
+        },
+        {
+          "tag": "button",
+          "text": "Simpan Pengaturan",
+          "size": "332x34",
+          "className": "px-4 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-"
+        },
+        {
+          "tag": "input",
+          "text": "INPUT",
+          "size": "13x16",
+          "className": "w-4 h-4 text-cobalt-500 rounded-[6px] accent-[#173"
+        },
+        {
+          "tag": "input",
+          "text": "INPUT",
+          "size": "13x16",
+          "className": "w-4 h-4 text-cobalt-500 rounded-[6px] accent-[#173"
+        },
+        {
+          "tag": "input",
+          "text": "INPUT",
+          "size": "13x16",
+          "className": "w-4 h-4 text-cobalt-500 rounded-[6px] accent-[#173"
+        },
+        {
+          "tag": "input",
+          "text": "INPUT",
+          "size": "13x16",
+          "className": "w-4 h-4 text-cobalt-500 rounded-[6px] accent-[#173"
+        },
+        {
+          "tag": "select",
+          "text": "Bahasa Indonesia (ID)\nEnglish ",
+          "size": "332x40",
+          "className": "w-full p-2.5 pr-8 rounded-[10px] border border-sla"
+        },
+        {
+          "tag": "select",
+          "text": "Asia/Jakarta (WIB - GMT+7)\nAsi",
+          "size": "332x40",
+          "className": "w-full p-2.5 pr-8 rounded-[10px] border border-sla"
+        },
+        {
+          "tag": "select",
+          "text": "IDR - Rupiah Indonesia (Rp)\nUS",
+          "size": "332x40",
+          "className": "w-full p-2.5 pr-8 rounded-[10px] border border-sla"
+        },
+        {
+          "tag": "button",
+          "text": "Simpan Pengaturan",
+          "size": "332x34",
+          "className": "w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-cob"
+        },
+        {
+          "tag": "button",
+          "text": "Unduh Data Saya (.JSON)",
+          "size": "218x34",
+          "className": "px-4 py-2.5 rounded-[10px] bg-slate-900 hover:bg-s"
+        },
+        {
+          "tag": "button",
+          "text": "Mulai Tur Interaktif",
+          "size": "162x32",
+          "className": "px-3.5 py-2 rounded-[8px] bg-cobalt-500 hover:bg-c"
+        },
+        {
+          "tag": "button",
+          "text": "Buka Tiket Laporan",
+          "size": "165x34",
+          "className": "px-3.5 py-2 rounded-[8px] bg-white dark:bg-slate-9"
+        },
+        {
+          "tag": "button",
+          "text": "Kirim Saran & Wishlist",
+          "size": "184x34",
+          "className": "px-3.5 py-2 rounded-[8px] bg-white dark:bg-slate-9"
+        },
+        {
+          "tag": "button",
+          "text": "Hapus Akun Permanen",
+          "size": "201x34",
+          "className": "px-4 py-2.5 rounded-[10px] bg-rose-600 hover:bg-ro"
+        }
+      ],
+      "hScroll": 0
+    }
+  },
+  "darkMode": {
+    "profil": {
+      "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\pengaturan\\dark-profil.png",
+      "measures": {
+        "controls": 10,
+        "ctlFont": {
+          "10.4": 4
+        },
+        "paddingCombos": 1,
+        "weights": "700",
+        "icons": {
+          "49.2": 1,
+          "16.0": 1,
+          "9.6": 1,
+          "12.8": 9
+        },
+        "under24": 0,
+        "tiny": [],
+        "noName": 0,
+        "unnamed": [],
+        "textBuckets": {
+          ">=12": 1,
+          "9-10": 25,
+          "10-11": 27,
+          "11-12": 2
+        },
+        "contrast": "0/55",
+        "worst": [],
+        "hScroll": 0
+      }
+    },
+    "karir": {
+      "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\pengaturan\\dark-karir.png",
+      "measures": {
+        "controls": 10,
+        "ctlFont": {
+          "10.4": 4
+        },
+        "paddingCombos": 1,
+        "weights": "700",
+        "icons": {
+          "49.2": 1,
+          "16.0": 1,
+          "9.6": 1,
+          "12.8": 9
+        },
+        "under24": 0,
+        "tiny": [],
+        "noName": 0,
+        "unnamed": [],
+        "textBuckets": {
+          ">=12": 1,
+          "9-10": 23,
+          "10-11": 26,
+          "11-12": 2
+        },
+        "contrast": "0/52",
+        "worst": [],
+        "hScroll": 0
+      }
+    },
+    "keamanan": {
+      "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\pengaturan\\dark-keamanan.png",
+      "measures": {
+        "controls": 11,
+        "ctlFont": {
+          "10.4": 9
+        },
+        "paddingCombos": 3,
+        "weights": "700",
+        "icons": {
+          "49.2": 1,
+          "16.0": 1,
+          "9.6": 1,
+          "12.8": 7
+        },
+        "under24": 0,
+        "tiny": [],
+        "noName": 0,
+        "unnamed": [],
+        "textBuckets": {
+          ">=12": 1,
+          "9-10": 17,
+          "10-11": 22,
+          "11-12": 3
+        },
+        "contrast": "0/43",
+        "worst": [],
+        "hScroll": 0
+      }
+    },
+    "pengaturan": {
+      "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\pengaturan\\dark-pengaturan.png",
+      "measures": {
+        "controls": 23,
+        "ctlFont": {
+          "10.4": 14,
+          "11.2": 7
+        },
+        "paddingCombos": 5,
+        "weights": "400,600,700",
+        "icons": {
+          "49.2": 1,
+          "16.0": 5,
+          "9.6": 4,
+          "12.8": 8,
+          "9.8": 1
+        },
+        "under24": 0,
+        "tiny": [],
+        "noName": 0,
+        "unnamed": [],
+        "textBuckets": {
+          ">=12": 1,
+          "9-10": 25,
+          "10-11": 39,
+          "11-12": 3
+        },
+        "contrast": "0/68",
+        "worst": [],
+        "hScroll": 0
+      }
+    }
+  },
+  "drawers": {},
+  "dialogs": {},
+  "forbiddenTerms": [],
+  "emojiFindings": [],
+  "touchTargetViolations": [],
+  "contrastViolations": [],
+  "unnamedControls": [],
+  "errors": []
+}

@@ -1,0 +1,503 @@
+{
+  "beranda": {
+    "title": "Beranda: Pusat Aktivitas Karier | Employr",
+    "url": "http://localhost:3000/beranda",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\screenshots\\beranda.png",
+    "headings": [
+      {
+        "tag": "h1",
+        "text": "Hi, Budi"
+      },
+      {
+        "tag": "h2",
+        "text": "Selamat pagi, Budi"
+      },
+      {
+        "tag": "h4",
+        "text": "Kamu belum punya CV"
+      },
+      {
+        "tag": "h3",
+        "text": "Ringkasan Lamaran Kerja"
+      },
+      {
+        "tag": "h3",
+        "text": "Progress & Funnel Lamaran\n4 Tahapan"
+      },
+      {
+        "tag": "h4",
+        "text": "Lamaran Dikirim"
+      },
+      {
+        "tag": "h4",
+        "text": "Screening HR"
+      },
+      {
+        "tag": "h4",
+        "text": "Sesi Interview"
+      },
+      {
+        "tag": "h4",
+        "text": "Offering Letter"
+      },
+      {
+        "tag": "h3",
+        "text": "Jadwal Terdekat\n0 Agenda"
+      },
+      {
+        "tag": "h3",
+        "text": "Career Readiness"
+      },
+      {
+        "tag": "h3",
+        "text": "CV ATS Score"
+      },
+      {
+        "tag": "h3",
+        "text": "Aktivitas Terbaru"
+      },
+      {
+        "tag": "h3",
+        "text": "Sprint Lamaran Minggu Ini"
+      },
+      {
+        "tag": "h3",
+        "text": "Rekomendasi Loker"
+      },
+      {
+        "tag": "h4",
+        "text": "Social Media Writer"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer Service Associate: 3 Month Contract"
+      },
+      {
+        "tag": "h4",
+        "text": "Supervisor - RnD"
+      },
+      {
+        "tag": "h3",
+        "text": "Pengembangan Karier & Skill"
+      },
+      {
+        "tag": "h4",
+        "text": "CV vs. Résumé: What&#8217;s the Difference?"
+      },
+      {
+        "tag": "h4",
+        "text": "Remote or Office Work? What to Consider When Choosing a Work Setup"
+      },
+      {
+        "tag": "h4",
+        "text": "10 Questions Every Student Should Ask Before Accepting an Internship"
+      },
+      {
+        "tag": "h4",
+        "text": "Panduan Lengkap Cara Melamar Kerja via Email & WA"
+      },
+      {
+        "tag": "h4",
+        "text": "20 Pertanyaan Interview Tersering & Cara Menjawabnya"
+      },
+      {
+        "tag": "h4",
+        "text": "Cara Membuat CV ATS Friendly yang Lolos Screening HR"
+      },
+      {
+        "tag": "h4",
+        "text": "Hire Employees in Indonesia with Kalibrr EOR: 7 Best Practices for Hiring Succesfully"
+      },
+      {
+        "tag": "h4",
+        "text": "Cara Pasang Lowongan Kerja di Kalibrr: Easy Guide dalam 6 Langkah"
+      },
+      {
+        "tag": "h4",
+        "text": "Cara Membuat Akun Perusahaan di Kalibrr: 5 Langkah agar Rekrutmen Lebih Efektif"
+      }
+    ],
+    "bannedTerms": [
+      {
+        "term": "ai",
+        "snippet": "ai"
+      }
+    ],
+    "credentialOrJargonLeaks": [],
+    "redundantSnippets": [
+      {
+        "text": "Insight Konversi Seleksi:\n\nBelum ada dokumen lamaran terkirim. Catat lamaran pertamamu di Tracker untuk memantau rasio konversi seleksi.",
+        "count": 3
+      },
+      {
+        "text": "Aktivitas Terbaru\n\nRiwayat jejak lamaran & interaksi HR",
+        "count": 3
+      },
+      {
+        "text": "Gaji dirahasiakan\n+ Tracker",
+        "count": 3
+      },
+      {
+        "text": "Baca Panduan\n(buka di tab baru)",
+        "count": 9
+      }
+    ],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Jelajahi Fitur",
+      "Buat CV Gratis",
+      "Tracker Detail",
+      "Detail Tracker",
+      "Analisis Detail Conversion Rate di Tracker",
+      "Semua",
+      "Buka Tracker",
+      "Panduan & Simulator Interview",
+      "Lihat Detail",
+      "Tingkatkan Kesiapan Karier",
+      "Optimalkan CV Sekarang",
+      "Lihat Selengkapnya di Tracker",
+      "Lihat Tracker",
+      "Lamar Loker",
+      "Cari Semua Loker",
+      "+ Tracker",
+      "Artikel Karier\n9",
+      "Kursus & Skills\n3",
+      "Sertifikasi\n7",
+      "Event Job Fair\n3"
+    ]
+  },
+  "tracker": {
+    "title": "Tracker Lamaran Kerja | Employr",
+    "url": "http://localhost:3000/tracker",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\screenshots\\tracker.png",
+    "headings": [
+      {
+        "tag": "h1",
+        "text": "Hi, Budi"
+      }
+    ],
+    "bannedTerms": [
+      {
+        "term": "ai",
+        "snippet": "ai"
+      }
+    ],
+    "credentialOrJargonLeaks": [],
+    "redundantSnippets": [],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Pengingat\n1",
+      "Sinkronisasi",
+      "Tambah Lamaran",
+      "Coba lagi",
+      "Tutup"
+    ]
+  },
+  "cv": {
+    "title": "CV ATS Builder | Employr",
+    "url": "http://localhost:3000/cv",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\screenshots\\cv.png",
+    "headings": [
+      {
+        "tag": "h1",
+        "text": "Hi, Budi"
+      },
+      {
+        "tag": "h3",
+        "text": "Belum Ada CV Tersimpan"
+      }
+    ],
+    "bannedTerms": [
+      {
+        "term": "ai",
+        "snippet": "ai"
+      }
+    ],
+    "credentialOrJargonLeaks": [],
+    "redundantSnippets": [],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Buat CV Mandiri"
+    ]
+  },
+  "pengaturan": {
+    "title": "Pengaturan Akun & Profil | Employr",
+    "url": "http://localhost:3000/pengaturan",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\screenshots\\pengaturan.png",
+    "headings": [
+      {
+        "tag": "h1",
+        "text": "Hi, Budi"
+      },
+      {
+        "tag": "h2",
+        "text": "Budi Santoso"
+      },
+      {
+        "tag": "h3",
+        "text": "Informasi Biodata & Kontak Pribadi"
+      },
+      {
+        "tag": "h4",
+        "text": "1. DATA IDENTITAS DIRI"
+      },
+      {
+        "tag": "h4",
+        "text": "2. KONTAK RESMI & WILAYAH DOMISILI"
+      },
+      {
+        "tag": "h4",
+        "text": "3. RINGKASAN DIRI (ABOUT ME)"
+      },
+      {
+        "tag": "h4",
+        "text": "4. TAUTAN PORTOFOLIO & JEJARING PROFESIONAL"
+      }
+    ],
+    "bannedTerms": [
+      {
+        "term": "ai",
+        "snippet": "ai"
+      }
+    ],
+    "credentialOrJargonLeaks": [
+      "Keamanan & Akun"
+    ],
+    "redundantSnippets": [
+      {
+        "text": "KELENGKAPAN PROFIL\n17%",
+        "count": 3
+      },
+      {
+        "text": "Informasi Biodata & Kontak Pribadi\n\nData ini digunakan sebagai basis otomatis saat menyusun CV ATS, melamar lowongan, dan personalisasi cover letter.",
+        "count": 3
+      },
+      {
+        "text": "LinkedIn\nBelum ditambahkan",
+        "count": 3
+      },
+      {
+        "text": "GitHub / Repo\nBelum ditambahkan",
+        "count": 3
+      },
+      {
+        "text": "Website Pribadi\nBelum ditambahkan",
+        "count": 3
+      },
+      {
+        "text": "Dribbble / Portofolio\nBelum ditambahkan",
+        "count": 3
+      }
+    ],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Profil & Kontak",
+      "Preferensi Karir",
+      "Keamanan & Akun",
+      "Tampilan & Sistem"
+    ]
+  },
+  "referral": {
+    "title": "Program Referral & Komisi | Employr",
+    "url": "http://localhost:3000/referral",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\screenshots\\referral.png",
+    "headings": [
+      {
+        "tag": "h1",
+        "text": "Hi, Budi"
+      },
+      {
+        "tag": "h3",
+        "text": "Cara Kerja Program Referral (3 Langkah)"
+      },
+      {
+        "tag": "h4",
+        "text": "Bagikan Kode Unik"
+      },
+      {
+        "tag": "h4",
+        "text": "Teman Daftar & Pakai"
+      },
+      {
+        "tag": "h4",
+        "text": "Dapatkan Hadiah"
+      },
+      {
+        "tag": "h3",
+        "text": "Daftar Teman yang Bergabung (0)"
+      }
+    ],
+    "bannedTerms": [
+      {
+        "term": "ai",
+        "snippet": "ai"
+      }
+    ],
+    "credentialOrJargonLeaks": [],
+    "redundantSnippets": [],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi",
+      "Budi Santoso",
+      "Bagikan Link",
+      "Salin Kode",
+      "Salin Link"
+    ]
+  },
+  "misi-cuan": {
+    "title": "Misi & Cuan Tambahan | Employr",
+    "url": "http://localhost:3000/misi-cuan",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\screenshots\\misi-cuan.png",
+    "headings": [
+      {
+        "tag": "h1",
+        "text": "Hi, Budi"
+      },
+      {
+        "tag": "h3",
+        "text": "Misi Karir & Pengerjaan"
+      },
+      {
+        "tag": "h4",
+        "text": "Tidak ada misi dalam kategori/status ini"
+      }
+    ],
+    "bannedTerms": [
+      {
+        "term": "ai",
+        "snippet": "ai"
+      }
+    ],
+    "credentialOrJargonLeaks": [],
+    "redundantSnippets": [],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Bonus Check-In (+1.000)",
+      "Daftar Misi Aktif",
+      "Riwayat Misi Diselesaikan & Penukaran",
+      "Semua",
+      "Sedang Berjalan",
+      "Sedang Ditinjau",
+      "Selesai",
+      "Harian",
+      "Mingguan",
+      "Spesial"
+    ]
+  },
+  "career-intelligence": {
+    "title": "Career Intelligence | Employr",
+    "url": "http://localhost:3000/career-intelligence",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\screenshots\\career-intelligence.png",
+    "headings": [
+      {
+        "tag": "h1",
+        "text": "Hi, Pengguna"
+      }
+    ],
+    "bannedTerms": [
+      {
+        "term": "ai",
+        "snippet": "ai"
+      }
+    ],
+    "credentialOrJargonLeaks": [],
+    "redundantSnippets": [],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi",
+      "Pengguna Employr"
+    ]
+  },
+  "readiness": {
+    "title": "Career Readiness Index | Employr",
+    "url": "http://localhost:3000/readiness",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\screenshots\\readiness.png",
+    "headings": [
+      {
+        "tag": "h1",
+        "text": "Hi, Budi"
+      },
+      {
+        "tag": "h1",
+        "text": "Career Readiness Index"
+      },
+      {
+        "tag": "h3",
+        "text": "Kualitas Berkas & Skor ATS"
+      },
+      {
+        "tag": "h3",
+        "text": "Riset & Kecocokan Lowongan"
+      },
+      {
+        "tag": "h3",
+        "text": "Administrasi & Berkas Lamaran"
+      },
+      {
+        "tag": "h3",
+        "text": "Momentum Pelamaran & Tracker"
+      }
+    ],
+    "bannedTerms": [
+      {
+        "term": "ai",
+        "snippet": "ai"
+      },
+      {
+        "term": "bot",
+        "snippet": "bot"
+      }
+    ],
+    "credentialOrJargonLeaks": [],
+    "redundantSnippets": [
+      {
+        "text": "Tambah Lamaran di Tracker",
+        "count": 3
+      },
+      {
+        "text": "4 Dimensi Kesiapan\nAsesmen Diagnostik Cepat\nRoadmap Pencapaian\nSertifikat Kesiapan",
+        "count": 3
+      },
+      {
+        "text": "Status: Belum Ada Data",
+        "count": 4
+      },
+      {
+        "text": "INDIKATOR PENILAIAN RIIL:",
+        "count": 4
+      }
+    ],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Sinkronkan",
+      "Tambah Lamaran di Tracker",
+      "4 Dimensi Kesiapan",
+      "Asesmen Diagnostik Cepat",
+      "Roadmap Pencapaian",
+      "Sertifikat Kesiapan",
+      "Buat CV Sekarang",
+      "Buka Match CV",
+      "Buka Menu Mailer"
+    ]
+  }
+}

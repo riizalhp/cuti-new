@@ -3,7 +3,11 @@ import { prisma } from "@employr/db";
 
 export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const limit = Math.min(parseInt(searchParams.get("limit") || "100", 10), 500);
+
     const users = await prisma.user.findMany({
+      take: limit,
       orderBy: { created_at: "desc" },
       select: {
         id: true,

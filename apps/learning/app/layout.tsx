@@ -1,11 +1,35 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Providers } from '@/components/Providers';
 import './globals.css';
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  interactiveWidget: 'resizes-content',
+};
+
 export const metadata: Metadata = {
-  title: 'Employr Learning — Career Courses & Digital Certification',
+  title: {
+    default: 'Employr Learning — Career Courses & Digital Certification',
+    template: '%s | Employr Learning',
+  },
   description:
     'Tingkatkan keterampilan kerja dan raih sertifikat profesional terverifikasi dari universitas dan perusahaan global.',
+  applicationName: 'Employr Learning',
+  keywords: [
+    'Employr Learning',
+    'Kursus Online',
+    'Sertifikasi Digital',
+    'Karier Indonesia',
+    'Pelatihan Kerja',
+    'Upskilling',
+  ],
+  authors: [{ name: 'Employr Team' }],
+  creator: 'Employr',
+  publisher: 'Employr Indonesia',
   icons: {
     icon: [
       { url: '/favicon.ico', type: 'image/x-icon' },
@@ -30,11 +54,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;600;700&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] text-slate-900 dark:text-slate-50 antialiased selection:bg-[#1738D1] selection:text-white font-sans">
+      <body className="h-full min-h-full bg-background text-foreground antialiased selection:bg-cobalt-500 selection:text-white font-sans">
         <Providers>{children}</Providers>
       </body>
     </html>

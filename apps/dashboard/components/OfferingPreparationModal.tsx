@@ -19,6 +19,17 @@ import {
 import { TrackerDatePicker } from '@/components/ui/TrackerDatePicker';
 import { AutoResizeTextarea } from '@/components/ui/AutoResizeTextarea';
 import { ApplicationItem } from './TrackerView';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetBody,
+  SheetFooter,
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 export interface OfferingChecklistItem {
   id: string;
@@ -126,18 +137,6 @@ export const OfferingPreparationModal: React.FC<OfferingPreparationModalProps> =
       setCopiedTemplateId(null);
     }
   }, [app, isOpen]);
-
-  // Handle tombol ESC untuk keluar
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
 
   if (!isOpen || !app) return null;
 
@@ -254,48 +253,33 @@ Salam hormat,
   ];
 
   return (
-    <div
-      className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200"
-      onClick={onClose}
-    >
-      <div
-        className="relative z-10 w-full max-w-3xl my-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] shadow-2xl flex flex-col max-h-[92vh] overflow-hidden animate-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header Modal */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between gap-3 bg-gradient-to-r from-emerald-50/50 via-white to-orange-50/30 dark:from-emerald-950/20 dark:via-slate-900 dark:to-slate-900">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 shadow-xs shrink-0">
-              <Sparkles className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent side="right" className="p-0 flex flex-col justify-between h-full w-full max-w-md sm:max-w-xl overflow-hidden">
+        {/* Header Drawer */}
+        <SheetHeader className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex flex-row items-start justify-between gap-3 bg-slate-50/70 dark:bg-slate-800/40 text-left">
+          <div className="flex items-center gap-3 pr-8 min-w-0">
+            <div className="size-10 rounded-[10px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 shadow-xs shrink-0">
+              <Sparkles className="size-5 text-emerald-700 dark:text-emerald-400" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight truncate">
+                <SheetTitle className="truncate pr-0">
                   Persiapan Masuk Offering
-                </h3>
-                <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0">
+                </SheetTitle>
+                <span className="px-2 py-0.5 rounded-[10px] text-caption font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0">
                   Tahap Akhir
                 </span>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1.5 mt-0.5">
-                <Building2 className="w-3.5 h-3.5 text-[#1738D1] shrink-0" />
+              <SheetDescription className="flex items-center gap-1.5 mt-0.5 truncate">
+                <Building2 className="size-3.5 text-cobalt-500 shrink-0" />
                 <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">{app.company}</span>
-                <span className="text-slate-400">•</span>
-                <Briefcase className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span className="text-slate-500 dark:text-slate-400">•</span>
+                <Briefcase className="size-3.5 text-slate-500 shrink-0 dark:text-slate-400" />
                 <span className="truncate">{app.position}</span>
-              </p>
+              </SheetDescription>
             </div>
           </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-[8px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
-            title="Tutup (Esc)"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        </SheetHeader>
 
         {/* Tab Navigation */}
         <div className="flex items-center px-4 sm:px-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 gap-2 overflow-x-auto">
@@ -304,13 +288,13 @@ Salam hormat,
             onClick={() => setActiveTab('checklist')}
             className={`py-2.5 px-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
               activeTab === 'checklist'
-                ? 'border-emerald-600 text-emerald-600 dark:border-emerald-400 dark:text-emerald-400'
+                ? 'border-emerald-600 text-emerald-700 dark:border-emerald-400 dark:text-emerald-400'
                 : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <CheckSquare className="w-3.5 h-3.5" />
             <span>Checklist &amp; Telaah Kontrak</span>
-            <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+            <span className="ml-1 px-1.5 py-0.5 rounded-full text-caption bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
               {completedCount}/{totalCount}
             </span>
           </button>
@@ -320,7 +304,7 @@ Salam hormat,
             onClick={() => setActiveTab('details')}
             className={`py-2.5 px-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
               activeTab === 'details'
-                ? 'border-emerald-600 text-emerald-600 dark:border-emerald-400 dark:text-emerald-400'
+                ? 'border-emerald-600 text-emerald-700 dark:border-emerald-400 dark:text-emerald-400'
                 : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
@@ -333,7 +317,7 @@ Salam hormat,
             onClick={() => setActiveTab('templates')}
             className={`py-2.5 px-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
               activeTab === 'templates'
-                ? 'border-emerald-600 text-emerald-600 dark:border-emerald-400 dark:text-emerald-400'
+                ? 'border-emerald-600 text-emerald-700 dark:border-emerald-400 dark:text-emerald-400'
                 : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
@@ -342,8 +326,8 @@ Salam hormat,
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-4 sm:p-5 space-y-5 overflow-y-auto flex-1 text-xs text-slate-700 dark:text-slate-300 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        {/* Drawer Body (Scrollable with Design System Sleek Scrollbar) */}
+        <SheetBody className="p-4 sm:p-5 space-y-5 flex-1 text-xs text-slate-700 dark:text-slate-300 custom-scrollbar">
           {/* TAB 1: CHECKLIST & TELAAH KONTRAK */}
           {activeTab === 'checklist' && (
             <div className="space-y-4">
@@ -352,11 +336,11 @@ Salam hormat,
                 <div>
                   <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <span>Kelengkapan Telaah Offering</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold">
+                    <span className="text-caption px-2 py-0.5 rounded-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold">
                       {progressPercent}% Siap
                     </span>
                   </p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  <p className="text-caption text-slate-500 dark:text-slate-400 mt-0.5">
                     Centang hal-hal yang sudah kamu periksa sebelum menandatangani surat penawaran kerja.
                   </p>
                 </div>
@@ -370,19 +354,19 @@ Salam hormat,
 
               {/* Warning Alert Box: Penahanan Ijazah */}
               <div className="p-3.5 rounded-[10px] bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 flex items-start gap-3 text-rose-800 dark:text-rose-200">
-                <ShieldAlert className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+                <ShieldAlert className="w-5 h-5 text-rose-700 dark:text-rose-400 shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <p className="text-xs font-bold text-rose-900 dark:text-rose-100">
                     Aturan Emas Fresh Graduate: Jangan Mau Ijazah Asli Ditahan
                   </p>
-                  <p className="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
+                  <p className="text-caption text-rose-700 dark:text-rose-300 leading-relaxed">
                     Perusahaan profesional dan berizin resmi <strong>tidak akan pernah</strong> menahan ijazah asli sebagai jaminan kerja. Jika ada klausul penahanan dokumen asli atau denda resign jutaan rupiah yang tidak wajar, cermati dan tolak secara tegas sebelum tanda tangan.
                   </p>
                 </div>
               </div>
 
-              {/* Checklist Items */}
-              <div className="space-y-2.5">
+              {/* Checklist Items (Microsoft Fluent Style - No Strikethrough) */}
+              <div className="space-y-2">
                 {DEFAULT_OFFERING_CHECKLIST.map((item) => {
                   const isChecked = checklist.includes(item.id);
                   const isCritical = item.alertLevel === 'critical';
@@ -391,28 +375,32 @@ Salam hormat,
                     <div
                       key={item.id}
                       onClick={() => toggleChecklistItem(item.id)}
-                      className={`p-3.5 rounded-[10px] border transition cursor-pointer flex items-start gap-3 select-none ${
+                      className={`p-3 rounded-[8px] border transition cursor-pointer flex items-start gap-3 select-none ${
                         isChecked
-                          ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-300/80 dark:border-emerald-800/80'
+                          ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-300/80 dark:border-emerald-800/80'
                           : isCritical
                           ? 'bg-rose-50/20 dark:bg-rose-950/10 border-rose-200/80 dark:border-rose-800/50 hover:border-rose-400'
                           : 'bg-white dark:bg-slate-800/40 border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                       }`}
                     >
-                      <div className="shrink-0 mt-0.5">
-                        {isChecked ? (
-                          <CheckSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                        ) : (
-                          <Square className={`w-4 h-4 ${isCritical ? 'text-rose-400' : 'text-slate-400'}`} />
-                        )}
+                      <div
+                        className={`size-4 rounded-[4px] border shrink-0 mt-0.5 flex items-center justify-center transition ${
+                          isChecked
+                            ? 'bg-emerald-600 border-emerald-600 text-white'
+                            : isCritical
+                            ? 'border-rose-400 dark:border-rose-600 bg-white dark:bg-slate-900'
+                            : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900'
+                        }`}
+                      >
+                        {isChecked && <Check className="size-3 stroke-[3]" />}
                       </div>
 
                       <div className="flex-1 min-w-0 space-y-1">
                         <div className="flex items-center justify-between gap-2">
                           <span
-                            className={`text-xs font-bold ${
+                            className={`text-xs font-semibold leading-snug ${
                               isChecked
-                                ? 'line-through text-slate-400 dark:text-slate-500'
+                                ? 'text-slate-700 dark:text-slate-300'
                                 : isCritical
                                 ? 'text-rose-900 dark:text-rose-200'
                                 : 'text-slate-900 dark:text-white'
@@ -421,7 +409,7 @@ Salam hormat,
                             {item.label}
                           </span>
                           <span
-                            className={`px-2 py-0.5 rounded-[8px] text-[10px] font-bold border shrink-0 ${
+                            className={`px-2 py-0.5 rounded-[6px] text-[10px] font-bold border shrink-0 ${
                               isCritical
                                 ? 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
@@ -446,13 +434,13 @@ Salam hormat,
             <div className="space-y-4">
               <div className="p-3.5 rounded-[10px] bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
-                  <Banknote className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <Banknote className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                   <span>Kompensasi &amp; Batas Waktu Offering</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    <label className="block text-caption font-semibold text-slate-600 dark:text-slate-400 mb-1">
                       Nominal Gaji Ditawarkan
                     </label>
                     <input
@@ -460,12 +448,12 @@ Salam hormat,
                       placeholder="cth: Rp 4.500.000 / bulan (Gross)"
                       value={offeringSalary}
                       onChange={(e) => setOfferingSalary(e.target.value)}
-                      className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
+                      className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cobalt-500 transition"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    <label className="block text-caption font-semibold text-slate-600 dark:text-slate-400 mb-1">
                       Tenggat Waktu Konfirmasi (Deadline)
                     </label>
                     <TrackerDatePicker
@@ -477,7 +465,7 @@ Salam hormat,
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  <label className="block text-caption font-semibold text-slate-600 dark:text-slate-400 mb-1">
                     Estimasi Tanggal Mulai Kerja (Start Date)
                   </label>
                   <TrackerDatePicker
@@ -490,21 +478,21 @@ Salam hormat,
 
               {/* Catatan Tambahan Khusus Kontrak */}
               <div className="p-3.5 rounded-[10px] bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2">
-                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                <label className="block text-caption font-semibold text-slate-600 dark:text-slate-400">
                   Catatan Pribadi Mengenai Penawaran / Benefit Lain
                 </label>
                 <AutoResizeTextarea
                   value={offeringNotes}
                   onChange={(e) => setOfferingNotes(e.target.value)}
                   placeholder="Catat poin penting dari kontrak, misal: Masa probation 3 bulan dievaluasi berkala, tunjangan makan Rp 25.000/hari, laptop kantor disediakan..."
-                  className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1] transition"
+                  className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cobalt-500 transition"
                 />
               </div>
 
               {/* Edukasi Singkat: Gross vs Nett */}
               <div className="p-3.5 rounded-[10px] bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 flex items-start gap-2.5 text-blue-900 dark:text-blue-200">
                 <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                <div className="text-[11px] leading-relaxed space-y-1">
+                <div className="text-caption leading-relaxed space-y-1">
                   <p className="font-bold">Tips Membaca Slip Gaji Pertama:</p>
                   <p>
                     <strong>Gaji Gross</strong> adalah total sebelum potongan wajib BPJS Ketenagakerjaan (biasanya ~3%), BPJS Kesehatan (1%), dan PPh 21 (jika di atas PTKP). Sedangkan <strong>Gaji Nett</strong> adalah nominal bersih yang langsung masuk ke rekening bankmu.
@@ -517,7 +505,7 @@ Salam hormat,
           {/* TAB 3: TEMPLATE BALASAN EMAIL HRD */}
           {activeTab === 'templates' && (
             <div className="space-y-4">
-              <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400">
+              <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 text-caption text-slate-600 dark:text-slate-400">
                 Pilih draf respons yang sesuai dengan keputusanmu. Klik <strong>Salin Draf</strong> untuk langsung menyalin ke clipboard dan gunakan saat membalas email HRD.
               </div>
 
@@ -535,17 +523,17 @@ Salam hormat,
                           <p className="text-xs font-bold text-slate-900 dark:text-white">
                             {template.title}
                           </p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          <p className="text-caption text-slate-500 dark:text-slate-400 mt-0.5">
                             {template.description}
                           </p>
                         </div>
                         <button
                           type="button"
                           onClick={() => copyToClipboard(`Subject: ${template.subject}\n\n${template.body}`, template.id)}
-                          className={`px-3 py-1.5 rounded-[8px] text-[11px] font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                          className={`px-3 py-1.5 rounded-[8px] text-caption font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
                             isCopied
-                              ? 'bg-emerald-600 text-white shadow-xs'
-                              : 'bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-xs'
+                              ? 'bg-emerald-700 text-white shadow-xs'
+                              : 'bg-cobalt-500 hover:bg-cobalt-600 text-white shadow-xs'
                           }`}
                         >
                           {isCopied ? (
@@ -574,33 +562,37 @@ Salam hormat,
               </div>
             </div>
           )}
-        </div>
+        </SheetBody>
 
         {/* Footer Actions */}
-        <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 bg-slate-50/60 dark:bg-slate-800/30">
+        <SheetFooter className="p-3.5 sm:p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 bg-slate-50/80 dark:bg-slate-900/80">
           <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
             Semua checklist &amp; catatan tersimpan otomatis di Job Tracker.
           </p>
 
-          <div className="flex items-center gap-2 ml-auto">
-            <button
+          <div className="flex items-center gap-2 ml-auto shrink-0">
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={onClose}
-              className="px-3.5 py-2 rounded-[10px] text-xs font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition cursor-pointer"
+              className="px-3"
             >
               Tutup
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="primary"
+              size="sm"
               onClick={handleSave}
-              className="px-4 py-2 rounded-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 active:scale-[0.98] transition flex items-center gap-1.5 cursor-pointer"
+              className="px-4 font-bold shrink-0 whitespace-nowrap bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20"
             >
-              <Check className="w-4 h-4" />
+              <Check className="size-3.5" />
               <span>Simpan Persiapan</span>
-            </button>
+            </Button>
           </div>
-        </div>
-      </div>
-    </div>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 };

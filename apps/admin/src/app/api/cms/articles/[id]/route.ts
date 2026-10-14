@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@employr/db";
+import { sendArticleNewsletterBlast } from "@/lib/newsletter-service";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -71,6 +72,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       data,
       include: { article_categories: true },
     });
+
+    // Jika artikel baru dipublikasikan (sebelumnya draft / belum published)
+    if (isPublished === true && !existing.is_published) {
+      sendArticleNewsletterBlast(article.id).catch((err) => {
+        console.error('[Newsletter Blast Error on Publish]:', err);
+      });
+    }
 
     return NextResponse.json({
       success: true,

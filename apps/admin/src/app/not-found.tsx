@@ -1,7 +1,8 @@
 "use client"
 
-import React from "react"
+import React, { useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import {
@@ -17,12 +18,46 @@ import {
   Activity,
   AlertTriangle,
 } from "lucide-react"
+import { useSidebar } from "@/context/SidebarContext"
 
 export default function AdminNotFound() {
   const router = useRouter()
+  const { setHideSidebar } = useSidebar()
+
+  useEffect(() => {
+    setHideSidebar(true)
+    return () => setHideSidebar(false)
+  }, [setHideSidebar])
 
   return (
-    <div className="max-w-4xl mx-auto py-8 sm:py-12 space-y-6">
+    <div className="min-h-screen w-full flex flex-col bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-50">
+      {/* Top Header */}
+      <header className="w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-2.5">
+            <Image
+              src="/logo.webp"
+              alt="Employr Logo"
+              width={120}
+              height={30}
+              className="h-7 w-auto object-contain dark:brightness-0 dark:invert"
+            />
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 uppercase tracking-wider">
+              Master Data
+            </span>
+          </Link>
+        </div>
+        <Link
+          href="/"
+          className="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 transition"
+        >
+          <LayoutDashboard className="w-3.5 h-3.5" />
+          <span>Dashboard Utama</span>
+        </Link>
+      </header>
+
+      {/* Main Content Area */}
+      <div className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
       {/* Main Alert Card */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -208,6 +243,7 @@ export default function AdminNotFound() {
             <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition" />
           </Link>
         </div>
+      </div>
       </div>
     </div>
   )

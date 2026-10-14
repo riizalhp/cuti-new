@@ -7,35 +7,34 @@ updatedAt: 2026-08-18
 keywords: cetak cv, download cv, pdf, print, ctrl p, save as pdf, a4, export cv, docx
 ---
 
-CV di Employr dicetak langsung oleh browser dalam format **A4 (210 × 297 mm)** — tanpa server, cepat, dan hasilnya persis seperti preview.
+CV di Employr dicetak langsung melalui mesin render peramban dalam format standar **A4 (210 × 297 mm)** sehingga tata letak berkas persis seperti yang tampil pada layar pratinjau.
 
-## Cara download PDF
+## Langkah mengunduh PDF
 
-1. Buka menu **CV Saya**, lalu pilih CV yang ingin dicetak.
-2. Klik tombol **Download PDF** (ada di daftar CV dan di editor CV).
-3. Kotak dialog print browser akan terbuka. Lakukan pengaturan:
-   - **Tujuan / Destination:** pilih **Save as PDF**.
-   - **Ukuran kertas:** **A4**.
-   - **Margin:** **None / Tanpa batas** (layout CV sudah mengatur margin sendiri).
-   - **Opsi "Background graphics"**: **aktifkan** agar warna dan aksen CV ikut tercetak.
-   - Hapus centang **Header & Footer** bawaan browser (judul halaman & URL) agar hasil bersih.
-4. Klik **Save / Simpan**, tentukan lokasi file, dan selesai.
+1. Buka menu **CV Saya** dan pilih dokumen CV yang ingin diunduh.
+2. Klik tombol **Download PDF**.
+3. Kotak dialog cetak peramban akan muncul. Sesuaikan konfigurasi berikut:
+   - **Tujuan (Destination)**: pilih **Save as PDF**.
+   - **Ukuran Kertas**: pastikan memilih **A4**.
+   - **Margin**: atur ke **None** atau **Tanpa Margin** karena tata letak dokumen sudah memiliki margin bawaan.
+   - **Background Graphics**: pastikan dicentang agar warna garis dan aksen desain ikut tercetak.
+   - **Header and Footer**: hilangkan centang agar judul tab peramban dan tanggal cetak tidak muncul di sudut halaman.
+4. Klik **Save**, pilih folder penyimpanan di komputermu, dan berkas siap digunakan.
 
-> Tips: Gunakan browser **Google Chrome** atau **Microsoft Edge** untuk hasil terbaik.
+> Rekomendasi: Gunakan peramban Google Chrome atau Microsoft Edge untuk akurasi cetak terbaik.
 
-## Format lain
+## Opsi format lain
 
-- Editor CV juga menyediakan opsi **DOCX** — pilih format di menu download jika kamu butuh file yang bisa diedit di Word.
+Editor CV juga menyediakan ekspor dokumen dalam format **DOCX** jika kamu membutuhkan berkas yang dapat disunting kembali di Microsoft Word.
 
-## Kenapa hasil cetak tidak rapi?
+## Panduan mengatasi kendala cetak
 
-- **Background tidak muncul** → nyalakan opsi *Background graphics* di dialog print.
-- **Halaman terpotong / jadi 2 halaman** → pastikan margin di dialog print **None**, dan di editor gunakan preset margin **Normal**.
-- **Ukuran huruf kecil sekali** → cek pengaturan *Zoom* di dialog print (atur ke **100%** atau *Fit to page*).
-- **CV lebih dari 1 halaman** → ringkas isi section, kurangi spasi antar section, atau ganti preset margin ke *Narrow*.
+- **Warna latar atau garis aksen hilang**: aktifkan pilihan *Background graphics* pada pengaturan lanjutan dialog cetak.
+- **Halaman terpotong menjadi 2 lembar**: pastikan pilihan margin disetel ke *None*. Pada editor CV, gunakan setelan margin *Narrow* atau ringkas kalimat deskripsi pengalaman.
+- **Ukuran teks terlalu kecil**: pastikan skala zoom pada dialog cetak berada di posisi *100%* atau *Default*.
 
 ## Pertanyaan umum
 
-- **Apakah saya bisa cetak tanpa login?** Tidak — semua CV tersimpan per akun, jadi harus login dulu.
-- **Kenapa tombolnya membuka dialog print, bukan langsung mengunduh?** Karena itu cara paling akurat mempertahankan layout A4. Cukup pilih *Save as PDF* di dialog tersebut.
-- **File PDF-nya bisa dipakai melamar?** Bisa — formatnya ATS-friendly dan siap diunggah ke portal lamaran mana pun.
+- **Apakah saya bisa mencetak dokumen tanpa masuk ke akun?** Berkas tersimpan di akun pengguna, sehingga kamu perlu masuk terlebih dahulu sebelum mengakses tombol cetak.
+- **Mengapa tombol unduh membuka jendela print?** Peramban modern menghasilkan berkas PDF berbasis vektor paling presisi dan tajam melalui fungsi cetak native.
+- **Apakah berkas PDF siap diunggah ke portal lowongan?** Ya, berkas PDF yang dihasilkan memiliki lapisan teks digital (text layer) penuh yang ramah sistem ATS.

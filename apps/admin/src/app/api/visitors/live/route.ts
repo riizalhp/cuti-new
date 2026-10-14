@@ -7,6 +7,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const domainFilter = searchParams.get('domain') || 'all';
+    const countOnly = searchParams.get('countOnly') === 'true';
 
     const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
 
@@ -19,6 +20,17 @@ export async function GET(req: NextRequest) {
         { domain: { contains: domainFilter, mode: 'insensitive' } },
         { hostname: { contains: domainFilter, mode: 'insensitive' } },
       ];
+    }
+
+    if (countOnly) {
+      const count = await (prisma as any).visitor.count({ where });
+      return NextResponse.json({
+        success: true,
+        data: {
+          count,
+          visitors: [],
+        },
+      });
     }
 
     const liveVisitors = await (prisma as any).visitor.findMany({

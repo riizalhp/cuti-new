@@ -19,7 +19,7 @@ export default function PembayaranLayout({ children }: { children: React.ReactNo
   }, [pathname, router]);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans antialiased selection:bg-[#1738D1] selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans antialiased selection:bg-cobalt-500 selection:text-white">
       {/* Top Standalone Checkout Navigation */}
       <header className="sticky top-0 z-50 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -37,14 +37,14 @@ export default function PembayaranLayout({ children }: { children: React.ReactNo
             <div className="h-5 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block" />
 
             <Link href="/beranda" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 rounded-[10px] bg-[#1738D1] text-white font-black text-sm flex items-center justify-center shadow-md shadow-[#1738D1]/20 group-hover:scale-105 transition-transform">
+              <div className="w-8 h-8 rounded-[10px] bg-cobalt-500 text-white font-black text-sm flex items-center justify-center shadow-md shadow-cobalt-500/20 group-hover:scale-105 transition-transform">
                 E
               </div>
               <div className="flex flex-col">
                 <span className="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white leading-none">
-                  Employ<span className="text-[#1738D1] dark:text-blue-400">r</span>
+                  Employ<span className="text-cobalt-500 dark:text-blue-400">r</span>
                 </span>
-                <span className="text-[10px] font-semibold text-slate-400 leading-tight">
+                <span className="text-caption font-semibold text-slate-500 leading-tight dark:text-slate-400">
                   Checkout &amp; Aktivasi
                 </span>
               </div>
@@ -53,14 +53,14 @@ export default function PembayaranLayout({ children }: { children: React.ReactNo
 
           {/* Security & Verification Badges */}
           <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 text-caption font-bold text-emerald-700 dark:text-emerald-300">
+              <ShieldCheck className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
               <span>Garansi 100% Aman</span>
             </div>
 
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300">
-              <Lock className="w-3.5 h-3.5 text-[#1738D1] dark:text-blue-400" />
-              <span className="font-mono text-[11px] font-bold">SSL 256-bit</span>
+              <Lock className="w-3.5 h-3.5 text-cobalt-500 dark:text-blue-400" />
+              <span className="font-mono text-caption font-bold">SSL 256-bit</span>
             </div>
           </div>
         </div>
@@ -77,15 +77,15 @@ export default function PembayaranLayout({ children }: { children: React.ReactNo
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
             <div className="space-y-1">
               <p className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-center md:justify-start gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                 <span>Pembayaran Resmi &amp; Terverifikasi Employr</span>
               </p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-lg">
+              <p className="text-caption text-slate-500 dark:text-slate-400 max-w-lg">
                 Seluruh transaksi diproses secara terenkripsi melalui payment gateway berlisensi Bank Indonesia (Midtrans, QRIS, &amp; Jaringan ATM Bersama).
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-2 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+            <div className="flex flex-wrap items-center justify-center gap-2 text-caption font-semibold text-slate-500 dark:text-slate-400">
               <span className="px-2 py-1 rounded-[6px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">QRIS</span>
               <span className="px-2 py-1 rounded-[6px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">BCA</span>
               <span className="px-2 py-1 rounded-[6px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Mandiri</span>
@@ -97,12 +97,12 @@ export default function PembayaranLayout({ children }: { children: React.ReactNo
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2">
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-caption text-slate-500 gap-2 dark:text-slate-400">
             <span>&copy; {new Date().getFullYear()} Employr. Hak Cipta Dilindungi Undang-Undang.</span>
             <div className="flex items-center gap-4">
               <Link href="/beranda" className="hover:text-slate-600 dark:hover:text-slate-300">Dashboard</Link>
               <span>&bull;</span>
-              <span className="text-slate-400">Butuh Bantuan? Hubungi help.employr@outlook.com</span>
+              <span className="text-slate-500 dark:text-slate-400">Butuh Bantuan? Hubungi help.employr@outlook.com</span>
             </div>
           </div>
         </div>

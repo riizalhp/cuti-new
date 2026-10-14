@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, ApplicationStatus, ApplicationSource } from '@employr/db';
+import { prisma, ApplicationStatus, ApplicationSource, decryptSecret } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 import { dispatchEmail, SmtpConfig, EmailPayload } from '@/lib/mailer/email-service';
 import crypto from 'crypto';
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
         port: activeSmtp.port,
         secure: activeSmtp.secure,
         username: activeSmtp.username,
-        password: activeSmtp.password,
+        password: decryptSecret(activeSmtp.password),
         fromName: activeSmtp.from_name,
         fromEmail: activeSmtp.from_email,
       };

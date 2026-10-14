@@ -39,6 +39,24 @@ import {
   FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 
 // --- DATA TYPES ---
 export interface QuestionOption {
@@ -624,14 +642,14 @@ export const LatihanSoalView: React.FC = () => {
         {/* Exam Header */}
         <header className="bg-slate-950 border-b border-slate-800 px-4 md:px-8 py-3 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-[10px] bg-[#1738D1]/20 text-orange-400 border border-[#1738D1]/30">
+            <div className="p-2 rounded-[10px] bg-cobalt-500/20 text-orange-400 border border-cobalt-500/30">
               <GraduationCap className="w-5 h-5" />
             </div>
             <div>
               <h1 className="font-black text-sm md:text-base text-white truncate max-w-xs md:max-w-md">
                 {activeQuizPackage.title}
               </h1>
-              <span className="text-[11px] text-slate-400 font-medium">
+              <span className="text-caption text-slate-500 font-medium dark:text-slate-400">
                 Soal {currentQuestionIdx + 1} dari {activeQuizPackage.questions.length} • {activeQuizPackage.category}
               </span>
             </div>
@@ -642,7 +660,7 @@ export const LatihanSoalView: React.FC = () => {
             <div
               className={`flex items-center gap-2 px-3 py-1.5 rounded-[10px] border font-mono font-bold text-xs ${
                 secondsRemaining < 180
-                  ? 'bg-rose-950/80 border-rose-500 text-rose-300 animate-pulse'
+                  ? 'bg-rose-950/80 border-rose-500 text-rose-300 animate-pulse motion-reduce:animate-none'
                   : 'bg-slate-900 border-slate-700 text-amber-300'
               }`}
             >
@@ -653,7 +671,7 @@ export const LatihanSoalView: React.FC = () => {
             <Button
               size="sm"
               onClick={() => setConfirmSubmitModalOpen(true)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-4 rounded-[10px] cursor-pointer shadow-md"
+              className="bg-emerald-700 hover:bg-emerald-500 text-white font-extrabold text-xs px-4 rounded-[10px] cursor-pointer shadow-md"
             >
               <CheckCircle2 className="w-4 h-4 mr-1.5" />
               <span>Selesaikan Test</span>
@@ -713,14 +731,14 @@ export const LatihanSoalView: React.FC = () => {
                           onClick={() => handleAnswerSelect(currentQ.id, opt.id)}
                           className={`p-4 rounded-[10px] border transition-all cursor-pointer flex items-center gap-3 ${
                             isSelected
-                              ? 'bg-[#1738D1]/20 border-[#1738D1] text-white ring-2 ring-[#1738D1]/40 shadow-lg'
+                              ? 'bg-cobalt-500/20 border-cobalt-500 text-white ring-2 ring-cobalt-500/40 shadow-lg'
                               : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-900'
                           }`}
                         >
                           <div
                             className={`w-8 h-8 rounded-[10px] font-black text-xs flex items-center justify-center shrink-0 border ${
                               isSelected
-                                ? 'bg-[#1738D1] text-white border-orange-400'
+                                ? 'bg-cobalt-500 text-white border-orange-400'
                                 : 'bg-slate-800 text-slate-400 border-slate-700'
                             }`}
                           >
@@ -759,14 +777,14 @@ export const LatihanSoalView: React.FC = () => {
                           onClick={handleCheckboxToggle}
                           className={`p-4 rounded-[10px] border transition-all cursor-pointer flex items-center gap-3 ${
                             isChecked
-                              ? 'bg-[#1738D1]/20 border-[#1738D1] text-white ring-2 ring-[#1738D1]/40'
+                              ? 'bg-cobalt-500/20 border-cobalt-500 text-white ring-2 ring-cobalt-500/40'
                               : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700'
                           }`}
                         >
                           <div
                             className={`w-6 h-6 rounded-[10px] flex items-center justify-center shrink-0 border ${
                               isChecked
-                                ? 'bg-[#1738D1] border-orange-400 text-white'
+                                ? 'bg-cobalt-500 border-orange-400 text-white'
                                 : 'bg-slate-800 border-slate-700 text-transparent'
                             }`}
                           >
@@ -790,7 +808,7 @@ export const LatihanSoalView: React.FC = () => {
                       value={String(userAnswers[currentQ.id] || '')}
                       onChange={(e) => handleAnswerSelect(currentQ.id, e.target.value)}
                       placeholder="Masukkan teks/angka jawaban..."
-                      className="w-full px-4 py-3.5 rounded-[10px] bg-slate-900 border border-slate-700 text-white placeholder-slate-500 font-mono text-sm focus:outline-none focus:border-[#1738D1] focus:ring-2 focus:ring-[#1738D1]/30"
+                      className="w-full px-4 py-3.5 rounded-[10px] bg-slate-900 border border-slate-700 text-white placeholder-slate-500 font-mono text-sm focus:outline-none focus:border-cobalt-500 focus:ring-2 focus:ring-cobalt-500/30"
                     />
                   </div>
                 )}
@@ -809,14 +827,14 @@ export const LatihanSoalView: React.FC = () => {
                 <span>Sebelumnya</span>
               </Button>
 
-              <span className="text-xs text-slate-400 font-bold hidden sm:inline">
+              <span className="text-xs text-slate-500 font-bold hidden sm:inline dark:text-slate-400">
                 {answeredCount} dari {activeQuizPackage.questions.length} Soal Terjawab
               </span>
 
               {currentQuestionIdx < activeQuizPackage.questions.length - 1 ? (
                 <Button
                   onClick={() => setCurrentQuestionIdx((prev) => prev + 1)}
-                  className="bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs px-5 rounded-[10px] cursor-pointer"
+                  className="bg-cobalt-500 hover:bg-cobalt-600 text-white font-extrabold text-xs px-5 rounded-[10px] cursor-pointer"
                 >
                   <span>Selanjutnya</span>
                   <ChevronRight className="w-4 h-4 ml-1" />
@@ -824,7 +842,7 @@ export const LatihanSoalView: React.FC = () => {
               ) : (
                 <Button
                   onClick={() => setConfirmSubmitModalOpen(true)}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-5 rounded-[10px] cursor-pointer shadow-md"
+                  className="bg-emerald-700 hover:bg-emerald-500 text-white font-extrabold text-xs px-5 rounded-[10px] cursor-pointer shadow-md"
                 >
                   <span>Selesai &amp; Kirim</span>
                   <CheckCircle2 className="w-4 h-4 ml-1" />
@@ -840,13 +858,13 @@ export const LatihanSoalView: React.FC = () => {
                 <Layers className="w-4 h-4 text-orange-400" />
                 <span>Navigasi Soal</span>
               </h3>
-              <p className="text-[11px] text-slate-400 mt-0.5">
+              <p className="text-caption text-slate-500 mt-0.5 dark:text-slate-400">
                 Klik nomor soal untuk melompat langsung.
               </p>
             </div>
 
             {/* Color Legend */}
-            <div className="grid grid-cols-3 gap-1.5 text-[10px] font-bold border-y border-slate-800 py-3">
+            <div className="grid grid-cols-3 gap-1.5 text-caption font-bold border-y border-slate-800 py-3">
               <div className="flex items-center gap-1.5 text-slate-300">
                 <span className="w-3 h-3 rounded-[10px] bg-emerald-500 shrink-0" />
                 <span>Terjawab</span>
@@ -872,7 +890,7 @@ export const LatihanSoalView: React.FC = () => {
                 if (isFlagged) {
                   btnStyle = 'bg-amber-500 text-slate-950 font-black border-amber-400';
                 } else if (isAnswered) {
-                  btnStyle = 'bg-emerald-600 text-white font-black border-emerald-400';
+                  btnStyle = 'bg-emerald-700 text-white font-black border-emerald-400';
                 }
 
                 if (isCurrent) {
@@ -903,42 +921,41 @@ export const LatihanSoalView: React.FC = () => {
         </div>
 
         {/* Confirmation Submit Modal */}
-        {confirmSubmitModalOpen && (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-[10px] p-6 max-w-md w-full space-y-4 shadow-2xl">
-              <div className="flex items-center gap-3 text-amber-400">
-                <AlertCircle className="w-6 h-6" />
-                <h3 className="text-lg font-black text-white">Konfirmasi Selesai Ujian</h3>
-              </div>
+        <AlertDialog open={confirmSubmitModalOpen} onOpenChange={setConfirmSubmitModalOpen}>
+          <AlertDialogContent className="max-w-md p-6 space-y-4">
+            <AlertDialogHeader className="flex flex-row items-center gap-3 text-amber-700 space-y-0 text-left dark:text-amber-400">
+              <AlertCircle className="w-6 h-6 shrink-0" />
+              <AlertDialogTitle className="text-lg font-black text-slate-900 dark:text-white">
+                Konfirmasi Selesai Ujian
+              </AlertDialogTitle>
+            </AlertDialogHeader>
 
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Anda telah menjawab <span className="font-extrabold text-white">{answeredCount}</span> dari{' '}
-                <span className="font-extrabold text-white">{activeQuizPackage.questions.length}</span> soal.
-                {flaggedQuestions.length > 0 && (
-                  <span className="block mt-1 text-amber-400 font-bold">
-                    Masih ada {flaggedQuestions.length} soal dengan status Ragu-Ragu.
-                  </span>
-                )}
-              </p>
+            <AlertDialogDescription className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Anda telah menjawab <span className="font-extrabold text-slate-900 dark:text-white">{answeredCount}</span> dari{' '}
+              <span className="font-extrabold text-slate-900 dark:text-white">{activeQuizPackage.questions.length}</span> soal.
+              {flaggedQuestions.length > 0 && (
+                <span className="block mt-1 text-amber-700 dark:text-amber-400 font-bold">
+                  Masih ada {flaggedQuestions.length} soal dengan status Ragu-Ragu.
+                </span>
+              )}
+            </AlertDialogDescription>
 
-              <div className="flex items-center justify-end gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setConfirmSubmitModalOpen(false)}
-                  className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 rounded-[10px] text-xs font-bold cursor-pointer"
-                >
-                  Kembali Periksa
-                </Button>
-                <Button
-                  onClick={handleFinishExam}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-[10px] text-xs font-extrabold cursor-pointer"
-                >
-                  Kirim Jawaban
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+            <AlertDialogFooter className="flex items-center justify-end gap-2 pt-2">
+              <AlertDialogCancel
+                autoFocus
+                onClick={() => setConfirmSubmitModalOpen(false)}
+              >
+                Kembali Periksa
+              </AlertDialogCancel>
+              <AlertDialogAction
+                variant="primary"
+                onClick={handleFinishExam}
+              >
+                Kirim Jawaban
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     );
   }
@@ -979,13 +996,13 @@ export const LatihanSoalView: React.FC = () => {
 
           {/* Big Score Badge */}
           <div className="flex flex-col items-center justify-center p-6 rounded-[10px] bg-slate-950/60 border border-white/10 shrink-0 z-10 min-w-[160px]">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+            <span className="text-caption font-bold text-slate-500 uppercase tracking-widest dark:text-slate-400">
               SKOR AKHIR
             </span>
             <span className={`text-4xl md:text-5xl font-black ${isPassed ? 'text-emerald-400' : 'text-amber-400'}`}>
               {score}
             </span>
-            <span className="text-xs text-slate-400 mt-1 font-bold">dari 100</span>
+            <span className="text-xs text-slate-500 mt-1 font-bold dark:text-slate-400">dari 100</span>
           </div>
         </div>
 
@@ -1006,7 +1023,7 @@ export const LatihanSoalView: React.FC = () => {
           <div className="flex items-center gap-2">
             <Button
               onClick={() => handleStartQuiz(activeQuizPackage)}
-              className="bg-[#1738D1] hover:bg-[#132EA8] text-white rounded-[10px] font-bold text-xs cursor-pointer"
+              className="bg-cobalt-500 hover:bg-cobalt-600 text-white rounded-[10px] font-bold text-xs cursor-pointer"
             >
               <RotateCcw className="w-4 h-4 mr-1.5" />
               <span>Coba Latihan Lagi</span>
@@ -1017,7 +1034,7 @@ export const LatihanSoalView: React.FC = () => {
         {/* Detailed Question Reviews with AI Pembahasan */}
         <div className="space-y-4">
           <h3 className="font-extrabold text-lg text-slate-900 dark:text-white flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-orange-500 dark:text-orange-400" />
+            <Sparkles className="w-5 h-5 text-orange-700 dark:text-orange-400" />
             <span>Pembahasan Lengkap &amp; Kunci Jawaban</span>
           </h3>
 
@@ -1051,12 +1068,12 @@ export const LatihanSoalView: React.FC = () => {
                     >
                       {isUserCorrect ? (
                         <>
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
                           <span>Jawaban Benar (+20 Poin)</span>
                         </>
                       ) : (
                         <>
-                          <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                          <XCircle className="w-3.5 h-3.5 text-rose-700 dark:text-rose-400" />
                           <span>Jawaban Salah / Kurang Tepat</span>
                         </>
                       )}
@@ -1074,7 +1091,7 @@ export const LatihanSoalView: React.FC = () => {
                       <span className="font-bold text-slate-500">Jawaban Anda:</span>
                       <span
                         className={`font-mono font-black ${
-                          isUserCorrect ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                          isUserCorrect ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'
                         }`}
                       >
                         {Array.isArray(userAns) ? userAns.join(', ') : userAns || '(Tidak Dijawab)'}
@@ -1083,7 +1100,7 @@ export const LatihanSoalView: React.FC = () => {
 
                     <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-700">
                       <span className="font-bold text-slate-500">Kunci Jawaban Benar:</span>
-                      <span className="font-mono font-black text-orange-600 dark:text-orange-400">
+                      <span className="font-mono font-black text-orange-700 dark:text-orange-400">
                         {Array.isArray(correctAnswer) ? correctAnswer.join(', ') : correctAnswer || '-'}
                       </span>
                     </div>
@@ -1092,7 +1109,7 @@ export const LatihanSoalView: React.FC = () => {
                   {/* Detailed Explanation */}
                   <div className="p-4 rounded-[10px] bg-orange-50/70 dark:bg-orange-950/40 border border-orange-100 dark:border-orange-900/60 space-y-2 text-xs">
                     <div className="flex items-center gap-1.5 text-orange-900 dark:text-orange-300 font-extrabold">
-                      <BookOpen className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                      <BookOpen className="w-4 h-4 text-orange-700 dark:text-orange-400" />
                       <span>Pembahasan Soal:</span>
                     </div>
                     <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
@@ -1101,7 +1118,7 @@ export const LatihanSoalView: React.FC = () => {
 
                     {aiTip && (
                       <div className="mt-2 pt-2 border-t border-orange-200/60 dark:border-orange-800/60 flex items-start gap-2 text-amber-900 dark:text-amber-300 font-semibold">
-                        <Zap className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                        <Zap className="w-4 h-4 text-amber-700 shrink-0 mt-0.5 dark:text-amber-400" />
                         <span>Saran Strategis: {aiTip}</span>
                       </div>
                     )}
@@ -1120,10 +1137,10 @@ export const LatihanSoalView: React.FC = () => {
     <div className="space-y-6 w-full pb-12">
       {/* Top Banner Header */}
       <div className="relative overflow-hidden rounded-[10px] bg-navy-700 p-6 md:p-8 text-white shadow-xl border border-navy-800">
-        <div className="absolute top-0 right-0 -mr-10 -mt-10 w-48 h-48 bg-[#1738D1]/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 -mr-10 -mt-10 w-48 h-48 bg-cobalt-500/20 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 space-y-3 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] text-xs font-extrabold uppercase tracking-wider bg-[#1738D1] text-white shadow-md">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] text-xs font-extrabold uppercase tracking-wider bg-cobalt-500 text-white shadow-md">
             <GraduationCap className="w-4 h-4 fill-current" />
             <span>Bank Soal &amp; Try Out Interaktif</span>
           </div>
@@ -1138,36 +1155,14 @@ export const LatihanSoalView: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Sub-Navigation Tabs */}
+      {/* Main Sub-Navigation Tabs (Gooey Nav) */}
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setActiveSubTab('catalog')}
-            className={`px-4 py-2.5 rounded-[10px] text-xs font-extrabold transition flex items-center gap-2 cursor-pointer ${
-              activeSubTab === 'catalog'
-                ? 'bg-[#1738D1] text-white shadow-md shadow-[#1738D1]/20'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-            }`}
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>Daftar Latihan Soal (Katalog)</span>
-          </button>
-
-          <button
-            onClick={() => setActiveSubTab('my-quizzes')}
-            className={`px-4 py-2.5 rounded-[10px] text-xs font-extrabold transition flex items-center gap-2 cursor-pointer ${
-              activeSubTab === 'my-quizzes'
-                ? 'bg-[#1738D1] text-white shadow-md shadow-[#1738D1]/20'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-            }`}
-          >
-            <FileCheck2 className="w-4 h-4" />
-            <span>Latihan Soal Saya</span>
-            <span className="px-1.5 py-0.5 rounded-[10px] text-[10px] bg-white/20 font-black">
-              {myQuizzes.length}
-            </span>
-          </button>
-        </div>
+        <Tabs value={activeSubTab} onValueChange={(value) => setActiveSubTab(value as any)}>
+          <TabsList variant="pill">
+            <TabsTrigger value="catalog" size="sm"><BookOpen className="size-4" />Katalog</TabsTrigger>
+            <TabsTrigger value="my-quizzes" size="sm"><FileCheck2 className="size-4" />Latihan Soal Saya <span className="ml-1 px-1.5 py-0.5 rounded-full text-caption bg-current/10 font-semibold">{myQuizzes.length}</span></TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* --- SUB TAB 1: DAFTAR LATIHAN SOAL (CATALOG) --- */}
@@ -1177,32 +1172,24 @@ export const LatihanSoalView: React.FC = () => {
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative flex-1">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Cari topik latihan (misal: BUMN, React, CPNS, TOEFL)..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[#1738D1] shadow-xs"
+                className="w-full pl-10 pr-4 py-2.5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-cobalt-500 focus:ring-2 focus:ring-cobalt-500 shadow-xs"
               />
             </div>
 
-            {/* Category Filter Chips */}
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
-              {['Semua', 'BUMN & CPNS', 'Tech & Coding', 'Bahasa & TOEFL'].map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-2 rounded-[10px] text-xs font-bold shrink-0 transition cursor-pointer ${
-                    selectedCategory === cat
-                      ? 'bg-slate-900 text-white dark:bg-[#1738D1]'
-                      : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
+            {/* Category Filter Chips (Gooey Nav) */}
+            <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
+              <TabsList variant="pill">
+                {['Semua', 'BUMN & CPNS', 'Tech & Coding', 'Bahasa & TOEFL'].map((category) => (
+                  <TabsTrigger key={category} value={category} size="sm">{category}</TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
           </div>
 
           {/* Quiz Cards Grid */}
@@ -1220,12 +1207,12 @@ export const LatihanSoalView: React.FC = () => {
                   <div className="space-y-3">
                     {/* Badge & Category */}
                     <div className="flex items-center justify-between">
-                      <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase tracking-wide bg-navy-100 text-navy-700 dark:bg-navy-950 dark:text-navy-300 border border-navy-200 dark:border-navy-800">
+                      <span className="px-2.5 py-0.5 rounded-[10px] text-caption font-extrabold uppercase tracking-wide bg-navy-100 text-navy-700 dark:bg-navy-950 dark:text-navy-300 border border-navy-200 dark:border-navy-800">
                         {quiz.category}
                       </span>
 
-                      <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 flex items-center gap-1">
-                        <Unlock className="w-3 h-3 text-emerald-600" />
+                      <span className="px-2.5 py-0.5 rounded-[10px] text-caption font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 flex items-center gap-1">
+                        <Unlock className="w-3 h-3 text-emerald-700 dark:text-emerald-400" />
                         <span>GRATIS</span>
                       </span>
                     </div>
@@ -1241,7 +1228,7 @@ export const LatihanSoalView: React.FC = () => {
                     </div>
 
                     {/* Stats Specs */}
-                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-300 font-semibold">
+                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-caption text-slate-600 dark:text-slate-300 font-semibold">
                       <div className="flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5 text-navy-600 dark:text-navy-400" />
                         <span>{quiz.durationMinutes} Mins</span>
@@ -1251,7 +1238,7 @@ export const LatihanSoalView: React.FC = () => {
                         <span>{quiz.questionCount} Soal</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Flame className="w-3.5 h-3.5 text-amber-500" />
+                        <Flame className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                         <span>{quiz.difficulty}</span>
                       </div>
                     </div>
@@ -1260,7 +1247,7 @@ export const LatihanSoalView: React.FC = () => {
                     {hasAttempted && (
                       <div className="p-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
                         <span className="font-bold text-slate-500">Skor Terakhir:</span>
-                        <span className="font-black text-emerald-600 dark:text-emerald-400">
+                        <span className="font-black text-emerald-700 dark:text-emerald-400">
                           {lastScore} / 100
                         </span>
                       </div>
@@ -1270,7 +1257,7 @@ export const LatihanSoalView: React.FC = () => {
                   {/* CTA Action Button */}
                   <Button
                     onClick={() => handleStartQuiz(quiz)}
-                    className="w-full py-2.5 rounded-[10px] font-extrabold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-xs"
+                    className="w-full py-2.5 rounded-[10px] font-extrabold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 bg-cobalt-500 hover:bg-cobalt-600 text-white shadow-xs"
                   >
                     <Play className="w-3.5 h-3.5 fill-current" />
                     <span>Mulai Kerjakan Soal</span>
@@ -1306,15 +1293,15 @@ export const LatihanSoalView: React.FC = () => {
                 >
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-navy-100 text-navy-700 dark:bg-navy-950 dark:text-navy-300">
+                      <span className="px-2 py-0.5 rounded-[10px] text-caption font-bold bg-navy-100 text-navy-700 dark:bg-navy-950 dark:text-navy-300">
                         {quiz.category}
                       </span>
                       {isCompleted ? (
-                        <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200">
+                        <span className="px-2 py-0.5 rounded-[10px] text-caption font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200">
                           Selesai • Skor {attempt?.score}%
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300">
+                        <span className="px-2 py-0.5 rounded-[10px] text-caption font-bold bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300">
                           Belum Dikerjakan
                         </span>
                       )}
@@ -1336,7 +1323,7 @@ export const LatihanSoalView: React.FC = () => {
                   <div className="flex items-center gap-2 shrink-0">
                     <Button
                       onClick={() => handleStartQuiz(quiz)}
-                      className="bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs px-4 rounded-[10px] cursor-pointer"
+                      className="bg-cobalt-500 hover:bg-cobalt-600 text-white font-extrabold text-xs px-4 rounded-[10px] cursor-pointer"
                     >
                       <Play className="w-3.5 h-3.5 mr-1 fill-current" />
                       <span>{isCompleted ? 'Coba Ulangi' : 'Kerjakan Sekarang'}</span>
@@ -1350,31 +1337,30 @@ export const LatihanSoalView: React.FC = () => {
       )}
 
       {/* --- PAYMENT MODAL CHECKOUT FLOW --- */}
-      {paymentModalOpen && selectedQuizForPayment && (
-        <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full overflow-hidden flex flex-col">
-            {/* Payment Header */}
-            <div className="p-5 bg-navy-700 text-white flex items-center justify-between border-b border-navy-800">
-              <div className="space-y-0.5">
-                <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Pembayaran Aman Employr</span>
-                </span>
-                <h3 className="font-extrabold text-lg text-white">Pembelian Paket Soal</h3>
-              </div>
-              <button
-                onClick={() => setPaymentModalOpen(false)}
-                className="p-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 text-white transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      <Dialog
+        open={Boolean(paymentModalOpen && selectedQuizForPayment)}
+        onOpenChange={setPaymentModalOpen}
+      >
+        <DialogContent size="md" className="max-w-lg p-0 overflow-hidden flex flex-col">
+          {/* Payment Header */}
+          <DialogHeader className="p-5 bg-navy-700 text-white flex flex-row items-center justify-between border-b border-navy-800 space-y-0 pr-12 text-left">
+            <div className="space-y-0.5">
+              <span className="text-caption font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                <span>Pembayaran Aman Employr</span>
+              </span>
+              <DialogTitle className="font-extrabold text-lg text-white">
+                Pembelian Paket Soal
+              </DialogTitle>
             </div>
+          </DialogHeader>
 
-            {/* Payment Body */}
+          {selectedQuizForPayment && (
+            /* Payment Body */
             <div className="p-6 space-y-5 bg-white dark:bg-slate-900 flex-1 overflow-y-auto no-scrollbar">
               {paymentSuccess ? (
                 <div className="text-center py-8 space-y-3">
-                  <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400 flex items-center justify-center mx-auto border border-emerald-300 animate-bounce">
+                  <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 flex items-center justify-center mx-auto border border-emerald-300 animate-bounce">
                     <CheckCircle2 className="w-10 h-10" />
                   </div>
                   <h4 className="text-xl font-extrabold text-slate-900 dark:text-white">
@@ -1388,7 +1374,7 @@ export const LatihanSoalView: React.FC = () => {
                 <>
                   {/* Item Detail */}
                   <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2">
-                    <span className="text-[10px] font-bold text-orange-600 uppercase">
+                    <span className="text-caption font-bold text-orange-700 uppercase dark:text-orange-400">
                       {selectedQuizForPayment.category}
                     </span>
                     <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">
@@ -1406,13 +1392,13 @@ export const LatihanSoalView: React.FC = () => {
                     </label>
                     <div className="flex items-center gap-2">
                       <div className="relative flex-1">
-                        <Tag className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <Tag className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
                         <input
                           type="text"
                           value={promoCode}
                           onChange={(e) => setPromoCode(e.target.value)}
                           placeholder="Masukkan kode promo..."
-                          className="w-full pl-9 pr-3 py-2 rounded-[10px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono font-bold uppercase text-slate-900 dark:text-white"
+                          className="w-full pl-9 pr-3 py-2 rounded-[10px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono font-bold uppercase text-slate-900 dark:text-white focus:outline-none focus:border-cobalt-500 focus:ring-2 focus:ring-cobalt-500/20"
                         />
                       </div>
                       <Button
@@ -1424,7 +1410,7 @@ export const LatihanSoalView: React.FC = () => {
                       </Button>
                     </div>
                     {appliedDiscount > 0 && (
-                      <p className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
+                      <p className="text-caption font-bold text-emerald-700 flex items-center gap-1 dark:text-emerald-400">
                         <Check className="w-3.5 h-3.5" />
                         <span>Kode promo berhasil! Diskon {appliedDiscount * 100}% diterapkan.</span>
                       </p>
@@ -1452,11 +1438,11 @@ export const LatihanSoalView: React.FC = () => {
                             onClick={() => setPaymentMethod(pm.id as any)}
                             className={`p-3 rounded-[10px] border text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
                               isSelected
-                                ? 'bg-orange-50 dark:bg-orange-950 border-[#1738D1] text-orange-700 dark:text-orange-300'
+                                ? 'bg-orange-50 dark:bg-orange-950 border-cobalt-500 text-orange-700 dark:text-orange-300'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
                             }`}
                           >
-                            <Icon className="w-4 h-4 text-orange-500 shrink-0" />
+                            <Icon className="w-4 h-4 text-orange-700 shrink-0 dark:text-orange-400" />
                             <span className="truncate">{pm.label}</span>
                           </button>
                         );
@@ -1471,14 +1457,14 @@ export const LatihanSoalView: React.FC = () => {
                       <span>Rp {selectedQuizForPayment.price.toLocaleString('id-ID')}</span>
                     </div>
                     {appliedDiscount > 0 && (
-                      <div className="flex justify-between text-emerald-600 font-bold">
+                      <div className="flex justify-between text-emerald-700 font-bold dark:text-emerald-400">
                         <span>Diskon ({appliedDiscount * 100}%):</span>
                         <span>- Rp {(selectedQuizForPayment.price * appliedDiscount).toLocaleString('id-ID')}</span>
                       </div>
                     )}
                     <div className="flex justify-between font-extrabold text-sm text-slate-900 dark:text-white pt-1.5 border-t border-slate-200 dark:border-slate-700">
                       <span>Total Pembayaran:</span>
-                      <span className="text-orange-600 dark:text-orange-400">
+                      <span className="text-orange-700 dark:text-orange-400">
                         Rp {(selectedQuizForPayment.price * (1 - appliedDiscount)).toLocaleString('id-ID')}
                       </span>
                     </div>
@@ -1488,7 +1474,7 @@ export const LatihanSoalView: React.FC = () => {
                   <Button
                     onClick={handleExecutePayment}
                     disabled={isProcessingPayment}
-                    className="w-full py-3 h-auto rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-extrabold text-xs shadow-md transition cursor-pointer flex items-center justify-center gap-2 border-0"
+                    className="w-full py-3 h-auto rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white font-extrabold text-xs shadow-md transition cursor-pointer flex items-center justify-center gap-2 border-0"
                   >
                     {isProcessingPayment ? (
                       <span>Memproses Pembayaran...</span>
@@ -1502,9 +1488,9 @@ export const LatihanSoalView: React.FC = () => {
                 </>
               )}
             </div>
-          </div>
-        </div>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

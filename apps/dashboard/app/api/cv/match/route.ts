@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
         : 'Perjelas pencapaian dengan metrik angka terukur pada riwayat kerja.',
     ];
 
-    let actionableBullet = `Mengoptimalkan operasional dan alur kerja ${position} dengan mengaplikasikan ${matchedKeywords[0] || 'metode terstruktur'}, meningkatkan efisiensi tim sebesar 15%.`;
+    let actionableBullet = `Menjalankan tugas operasional ${position} dengan memanfaatkan ${matchedKeywords[0] || 'prosedur standar'}, menyelesaikan seluruh tanggung jawab harian secara rapi dan tepat waktu.`;
     let summaryVerdict = computedScore >= 75 ? 'Profil kamu sangat potensial untuk posisi ini.' : 'Perlu sedikit penyesuaian kata kunci untuk memperbesar peluang lolos ATS.';
 
     try {
@@ -144,7 +144,9 @@ ${jobDescription.slice(0, 1500)}
 Tugasmu:
 1. Berikan 2 poin kekuatan nyata pelamar yang paling selaras dengan kualifikasi lowongan ini (strengths).
 2. Berikan 2 poin kekurangan/gap kualifikasi yang paling krusial dan perlu diperbaiki pelamar (improvements).
-3. Buatkan 1 contoh revisi kalimat pengalaman kerja (actionableBullet) dengan formula Google XYZ (Tindakan terukur + Metrik angka/dampak + Cara pencapaian) yang relevan untuk dimasukkan pelamar ke CV-nya agar lolos screening lowongan ini.
+3. Buatkan 1 contoh revisi kalimat pengalaman kerja (actionableBullet) yang terukur dan membumi untuk pelamar entry-level (usia 16–24 tahun / SMK / fresh graduate).
+   - Gunakan format terukur: Kata Kerja Aksi Kuat + Rincian Tugas Nyata + Bukti Kuantitas/Ketelitian (misalnya: volume harian seperti "melayani 50+ transaksi per hari", skala kegiatan seperti "kegiatan 200+ peserta", frekuensi mingguan, atau akurasi rekonsiliasi 100%).
+   - DILARANG mengarang persentase bisnis fiktif (seperti "meningkatkan omzet 25%" atau "efisiensi tim 20%") yang tidak realistis untuk posisi staf pemula/magang/organisasi. Gunakan angka volume atau ketelitian riil yang masuk akal.
 4. Berikan 1 kalimat kesimpulan tingkat kecocokan (summaryVerdict).
 
 Kembalikan HANYA format JSON murni:

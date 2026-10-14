@@ -219,6 +219,16 @@ export type EmailBatchJob = $Result.DefaultSelection<Prisma.$EmailBatchJobPayloa
  */
 export type EarlyTester = $Result.DefaultSelection<Prisma.$EarlyTesterPayload>
 /**
+ * Model NewsletterSubscriber
+ * 
+ */
+export type NewsletterSubscriber = $Result.DefaultSelection<Prisma.$NewsletterSubscriberPayload>
+/**
+ * Model NewsletterCampaign
+ * 
+ */
+export type NewsletterCampaign = $Result.DefaultSelection<Prisma.$NewsletterCampaignPayload>
+/**
  * Model Visitor
  * 
  */
@@ -293,6 +303,26 @@ export type LearnedRoleEntry = $Result.DefaultSelection<Prisma.$LearnedRoleEntry
  * 
  */
 export type LearnedRoleBlueprint = $Result.DefaultSelection<Prisma.$LearnedRoleBlueprintPayload>
+/**
+ * Model scraper_providers
+ * 
+ */
+export type scraper_providers = $Result.DefaultSelection<Prisma.$scraper_providersPayload>
+/**
+ * Model scraper_logs
+ * 
+ */
+export type scraper_logs = $Result.DefaultSelection<Prisma.$scraper_logsPayload>
+/**
+ * Model job_embeddings
+ * 
+ */
+export type job_embeddings = $Result.DefaultSelection<Prisma.$job_embeddingsPayload>
+/**
+ * Model user_career_embeddings
+ * 
+ */
+export type user_career_embeddings = $Result.DefaultSelection<Prisma.$user_career_embeddingsPayload>
 
 /**
  * Enums
@@ -399,7 +429,8 @@ export const NotificationCategory: {
   CAREER: 'CAREER',
   REFERRAL: 'REFERRAL',
   DRAFT: 'DRAFT',
-  OPPORTUNITY: 'OPPORTUNITY'
+  OPPORTUNITY: 'OPPORTUNITY',
+  SYSTEM: 'SYSTEM'
 };
 
 export type NotificationCategory = (typeof NotificationCategory)[keyof typeof NotificationCategory]
@@ -1181,6 +1212,26 @@ export class PrismaClient<
   get earlyTester(): Prisma.EarlyTesterDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.newsletterSubscriber`: Exposes CRUD operations for the **NewsletterSubscriber** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more NewsletterSubscribers
+    * const newsletterSubscribers = await prisma.newsletterSubscriber.findMany()
+    * ```
+    */
+  get newsletterSubscriber(): Prisma.NewsletterSubscriberDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.newsletterCampaign`: Exposes CRUD operations for the **NewsletterCampaign** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more NewsletterCampaigns
+    * const newsletterCampaigns = await prisma.newsletterCampaign.findMany()
+    * ```
+    */
+  get newsletterCampaign(): Prisma.NewsletterCampaignDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.visitor`: Exposes CRUD operations for the **Visitor** model.
     * Example usage:
     * ```ts
@@ -1329,6 +1380,46 @@ export class PrismaClient<
     * ```
     */
   get learnedRoleBlueprint(): Prisma.LearnedRoleBlueprintDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.scraper_providers`: Exposes CRUD operations for the **scraper_providers** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Scraper_providers
+    * const scraper_providers = await prisma.scraper_providers.findMany()
+    * ```
+    */
+  get scraper_providers(): Prisma.scraper_providersDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.scraper_logs`: Exposes CRUD operations for the **scraper_logs** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Scraper_logs
+    * const scraper_logs = await prisma.scraper_logs.findMany()
+    * ```
+    */
+  get scraper_logs(): Prisma.scraper_logsDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.job_embeddings`: Exposes CRUD operations for the **job_embeddings** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Job_embeddings
+    * const job_embeddings = await prisma.job_embeddings.findMany()
+    * ```
+    */
+  get job_embeddings(): Prisma.job_embeddingsDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.user_career_embeddings`: Exposes CRUD operations for the **user_career_embeddings** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more User_career_embeddings
+    * const user_career_embeddings = await prisma.user_career_embeddings.findMany()
+    * ```
+    */
+  get user_career_embeddings(): Prisma.user_career_embeddingsDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1811,6 +1902,8 @@ export namespace Prisma {
     SmtpAccount: 'SmtpAccount',
     EmailBatchJob: 'EmailBatchJob',
     EarlyTester: 'EarlyTester',
+    NewsletterSubscriber: 'NewsletterSubscriber',
+    NewsletterCampaign: 'NewsletterCampaign',
     Visitor: 'Visitor',
     VisitorSession: 'VisitorSession',
     VisitorPageView: 'VisitorPageView',
@@ -1825,7 +1918,11 @@ export namespace Prisma {
     AnalyticsDailySummary: 'AnalyticsDailySummary',
     UserBehaviorProfile: 'UserBehaviorProfile',
     LearnedRoleEntry: 'LearnedRoleEntry',
-    LearnedRoleBlueprint: 'LearnedRoleBlueprint'
+    LearnedRoleBlueprint: 'LearnedRoleBlueprint',
+    scraper_providers: 'scraper_providers',
+    scraper_logs: 'scraper_logs',
+    job_embeddings: 'job_embeddings',
+    user_career_embeddings: 'user_career_embeddings'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1844,7 +1941,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "membership" | "accounts" | "ai_prompts" | "ai_providers" | "ai_feature_mappings" | "ai_usage_logs" | "ai_generation_history" | "ai_semantic_cache" | "application_notes" | "applications" | "article_categories" | "articles" | "audit_logs" | "certifications" | "companies" | "courses" | "cv_projects" | "cv_sections" | "cv_templates" | "events" | "jobs" | "misi" | "misi_submissions" | "notifications" | "cover_letters" | "orders" | "referrals" | "reminders" | "sessions" | "security_events" | "app_logs" | "system_settings" | "transactions" | "verifications" | "cv_learning_dictionary" | "withdrawals" | "workshops" | "smtpAccount" | "emailBatchJob" | "earlyTester" | "visitor" | "visitorSession" | "visitorPageView" | "visitorActivity" | "quiz_packages" | "quiz_questions" | "quiz_attempts" | "growth_posts" | "growth_experiments" | "growth_journal" | "userFeedback" | "analyticsDailySummary" | "userBehaviorProfile" | "learnedRoleEntry" | "learnedRoleBlueprint"
+      modelProps: "user" | "membership" | "accounts" | "ai_prompts" | "ai_providers" | "ai_feature_mappings" | "ai_usage_logs" | "ai_generation_history" | "ai_semantic_cache" | "application_notes" | "applications" | "article_categories" | "articles" | "audit_logs" | "certifications" | "companies" | "courses" | "cv_projects" | "cv_sections" | "cv_templates" | "events" | "jobs" | "misi" | "misi_submissions" | "notifications" | "cover_letters" | "orders" | "referrals" | "reminders" | "sessions" | "security_events" | "app_logs" | "system_settings" | "transactions" | "verifications" | "cv_learning_dictionary" | "withdrawals" | "workshops" | "smtpAccount" | "emailBatchJob" | "earlyTester" | "newsletterSubscriber" | "newsletterCampaign" | "visitor" | "visitorSession" | "visitorPageView" | "visitorActivity" | "quiz_packages" | "quiz_questions" | "quiz_attempts" | "growth_posts" | "growth_experiments" | "growth_journal" | "userFeedback" | "analyticsDailySummary" | "userBehaviorProfile" | "learnedRoleEntry" | "learnedRoleBlueprint" | "scraper_providers" | "scraper_logs" | "job_embeddings" | "user_career_embeddings"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4882,6 +4979,154 @@ export namespace Prisma {
           }
         }
       }
+      NewsletterSubscriber: {
+        payload: Prisma.$NewsletterSubscriberPayload<ExtArgs>
+        fields: Prisma.NewsletterSubscriberFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.NewsletterSubscriberFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterSubscriberPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.NewsletterSubscriberFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterSubscriberPayload>
+          }
+          findFirst: {
+            args: Prisma.NewsletterSubscriberFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterSubscriberPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.NewsletterSubscriberFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterSubscriberPayload>
+          }
+          findMany: {
+            args: Prisma.NewsletterSubscriberFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterSubscriberPayload>[]
+          }
+          create: {
+            args: Prisma.NewsletterSubscriberCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterSubscriberPayload>
+          }
+          createMany: {
+            args: Prisma.NewsletterSubscriberCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.NewsletterSubscriberCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterSubscriberPayload>[]
+          }
+          delete: {
+            args: Prisma.NewsletterSubscriberDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterSubscriberPayload>
+          }
+          update: {
+            args: Prisma.NewsletterSubscriberUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterSubscriberPayload>
+          }
+          deleteMany: {
+            args: Prisma.NewsletterSubscriberDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.NewsletterSubscriberUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.NewsletterSubscriberUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterSubscriberPayload>[]
+          }
+          upsert: {
+            args: Prisma.NewsletterSubscriberUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterSubscriberPayload>
+          }
+          aggregate: {
+            args: Prisma.NewsletterSubscriberAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNewsletterSubscriber>
+          }
+          groupBy: {
+            args: Prisma.NewsletterSubscriberGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NewsletterSubscriberGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.NewsletterSubscriberCountArgs<ExtArgs>
+            result: $Utils.Optional<NewsletterSubscriberCountAggregateOutputType> | number
+          }
+        }
+      }
+      NewsletterCampaign: {
+        payload: Prisma.$NewsletterCampaignPayload<ExtArgs>
+        fields: Prisma.NewsletterCampaignFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.NewsletterCampaignFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterCampaignPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.NewsletterCampaignFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterCampaignPayload>
+          }
+          findFirst: {
+            args: Prisma.NewsletterCampaignFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterCampaignPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.NewsletterCampaignFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterCampaignPayload>
+          }
+          findMany: {
+            args: Prisma.NewsletterCampaignFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterCampaignPayload>[]
+          }
+          create: {
+            args: Prisma.NewsletterCampaignCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterCampaignPayload>
+          }
+          createMany: {
+            args: Prisma.NewsletterCampaignCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.NewsletterCampaignCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterCampaignPayload>[]
+          }
+          delete: {
+            args: Prisma.NewsletterCampaignDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterCampaignPayload>
+          }
+          update: {
+            args: Prisma.NewsletterCampaignUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterCampaignPayload>
+          }
+          deleteMany: {
+            args: Prisma.NewsletterCampaignDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.NewsletterCampaignUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.NewsletterCampaignUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterCampaignPayload>[]
+          }
+          upsert: {
+            args: Prisma.NewsletterCampaignUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NewsletterCampaignPayload>
+          }
+          aggregate: {
+            args: Prisma.NewsletterCampaignAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNewsletterCampaign>
+          }
+          groupBy: {
+            args: Prisma.NewsletterCampaignGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NewsletterCampaignGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.NewsletterCampaignCountArgs<ExtArgs>
+            result: $Utils.Optional<NewsletterCampaignCountAggregateOutputType> | number
+          }
+        }
+      }
       Visitor: {
         payload: Prisma.$VisitorPayload<ExtArgs>
         fields: Prisma.VisitorFieldRefs
@@ -5992,6 +6237,270 @@ export namespace Prisma {
           }
         }
       }
+      scraper_providers: {
+        payload: Prisma.$scraper_providersPayload<ExtArgs>
+        fields: Prisma.scraper_providersFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.scraper_providersFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_providersPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.scraper_providersFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_providersPayload>
+          }
+          findFirst: {
+            args: Prisma.scraper_providersFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_providersPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.scraper_providersFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_providersPayload>
+          }
+          findMany: {
+            args: Prisma.scraper_providersFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_providersPayload>[]
+          }
+          create: {
+            args: Prisma.scraper_providersCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_providersPayload>
+          }
+          createMany: {
+            args: Prisma.scraper_providersCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.scraper_providersCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_providersPayload>[]
+          }
+          delete: {
+            args: Prisma.scraper_providersDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_providersPayload>
+          }
+          update: {
+            args: Prisma.scraper_providersUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_providersPayload>
+          }
+          deleteMany: {
+            args: Prisma.scraper_providersDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.scraper_providersUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.scraper_providersUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_providersPayload>[]
+          }
+          upsert: {
+            args: Prisma.scraper_providersUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_providersPayload>
+          }
+          aggregate: {
+            args: Prisma.Scraper_providersAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateScraper_providers>
+          }
+          groupBy: {
+            args: Prisma.scraper_providersGroupByArgs<ExtArgs>
+            result: $Utils.Optional<Scraper_providersGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.scraper_providersCountArgs<ExtArgs>
+            result: $Utils.Optional<Scraper_providersCountAggregateOutputType> | number
+          }
+        }
+      }
+      scraper_logs: {
+        payload: Prisma.$scraper_logsPayload<ExtArgs>
+        fields: Prisma.scraper_logsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.scraper_logsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_logsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.scraper_logsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_logsPayload>
+          }
+          findFirst: {
+            args: Prisma.scraper_logsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_logsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.scraper_logsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_logsPayload>
+          }
+          findMany: {
+            args: Prisma.scraper_logsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_logsPayload>[]
+          }
+          create: {
+            args: Prisma.scraper_logsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_logsPayload>
+          }
+          createMany: {
+            args: Prisma.scraper_logsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.scraper_logsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_logsPayload>[]
+          }
+          delete: {
+            args: Prisma.scraper_logsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_logsPayload>
+          }
+          update: {
+            args: Prisma.scraper_logsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_logsPayload>
+          }
+          deleteMany: {
+            args: Prisma.scraper_logsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.scraper_logsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.scraper_logsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_logsPayload>[]
+          }
+          upsert: {
+            args: Prisma.scraper_logsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scraper_logsPayload>
+          }
+          aggregate: {
+            args: Prisma.Scraper_logsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateScraper_logs>
+          }
+          groupBy: {
+            args: Prisma.scraper_logsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<Scraper_logsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.scraper_logsCountArgs<ExtArgs>
+            result: $Utils.Optional<Scraper_logsCountAggregateOutputType> | number
+          }
+        }
+      }
+      job_embeddings: {
+        payload: Prisma.$job_embeddingsPayload<ExtArgs>
+        fields: Prisma.job_embeddingsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.job_embeddingsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$job_embeddingsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.job_embeddingsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$job_embeddingsPayload>
+          }
+          findFirst: {
+            args: Prisma.job_embeddingsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$job_embeddingsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.job_embeddingsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$job_embeddingsPayload>
+          }
+          findMany: {
+            args: Prisma.job_embeddingsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$job_embeddingsPayload>[]
+          }
+          delete: {
+            args: Prisma.job_embeddingsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$job_embeddingsPayload>
+          }
+          update: {
+            args: Prisma.job_embeddingsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$job_embeddingsPayload>
+          }
+          deleteMany: {
+            args: Prisma.job_embeddingsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.job_embeddingsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.job_embeddingsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$job_embeddingsPayload>[]
+          }
+          aggregate: {
+            args: Prisma.Job_embeddingsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateJob_embeddings>
+          }
+          groupBy: {
+            args: Prisma.job_embeddingsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<Job_embeddingsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.job_embeddingsCountArgs<ExtArgs>
+            result: $Utils.Optional<Job_embeddingsCountAggregateOutputType> | number
+          }
+        }
+      }
+      user_career_embeddings: {
+        payload: Prisma.$user_career_embeddingsPayload<ExtArgs>
+        fields: Prisma.user_career_embeddingsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.user_career_embeddingsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$user_career_embeddingsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.user_career_embeddingsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$user_career_embeddingsPayload>
+          }
+          findFirst: {
+            args: Prisma.user_career_embeddingsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$user_career_embeddingsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.user_career_embeddingsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$user_career_embeddingsPayload>
+          }
+          findMany: {
+            args: Prisma.user_career_embeddingsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$user_career_embeddingsPayload>[]
+          }
+          delete: {
+            args: Prisma.user_career_embeddingsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$user_career_embeddingsPayload>
+          }
+          update: {
+            args: Prisma.user_career_embeddingsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$user_career_embeddingsPayload>
+          }
+          deleteMany: {
+            args: Prisma.user_career_embeddingsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.user_career_embeddingsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.user_career_embeddingsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$user_career_embeddingsPayload>[]
+          }
+          aggregate: {
+            args: Prisma.User_career_embeddingsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUser_career_embeddings>
+          }
+          groupBy: {
+            args: Prisma.user_career_embeddingsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<User_career_embeddingsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.user_career_embeddingsCountArgs<ExtArgs>
+            result: $Utils.Optional<User_career_embeddingsCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -6129,6 +6638,8 @@ export namespace Prisma {
     smtpAccount?: SmtpAccountOmit
     emailBatchJob?: EmailBatchJobOmit
     earlyTester?: EarlyTesterOmit
+    newsletterSubscriber?: NewsletterSubscriberOmit
+    newsletterCampaign?: NewsletterCampaignOmit
     visitor?: VisitorOmit
     visitorSession?: VisitorSessionOmit
     visitorPageView?: VisitorPageViewOmit
@@ -6144,6 +6655,10 @@ export namespace Prisma {
     userBehaviorProfile?: UserBehaviorProfileOmit
     learnedRoleEntry?: LearnedRoleEntryOmit
     learnedRoleBlueprint?: LearnedRoleBlueprintOmit
+    scraper_providers?: scraper_providersOmit
+    scraper_logs?: scraper_logsOmit
+    job_embeddings?: job_embeddingsOmit
+    user_career_embeddings?: user_career_embeddingsOmit
   }
 
   /* Types for Logging */
@@ -6809,6 +7324,37 @@ export namespace Prisma {
    */
   export type Quiz_packagesCountOutputTypeCountAttemptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: quiz_attemptsWhereInput
+  }
+
+
+  /**
+   * Count Type Scraper_providersCountOutputType
+   */
+
+  export type Scraper_providersCountOutputType = {
+    logs: number
+  }
+
+  export type Scraper_providersCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    logs?: boolean | Scraper_providersCountOutputTypeCountLogsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * Scraper_providersCountOutputType without action
+   */
+  export type Scraper_providersCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Scraper_providersCountOutputType
+     */
+    select?: Scraper_providersCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * Scraper_providersCountOutputType without action
+   */
+  export type Scraper_providersCountOutputTypeCountLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: scraper_logsWhereInput
   }
 
 
@@ -24672,7 +25218,6 @@ export namespace Prisma {
     id: string | null
     name: string | null
     slug: string | null
-    logo_url: string | null
     website: string | null
     industry: string | null
     location: string | null
@@ -24682,7 +25227,6 @@ export namespace Prisma {
     id: string | null
     name: string | null
     slug: string | null
-    logo_url: string | null
     website: string | null
     industry: string | null
     location: string | null
@@ -24692,7 +25236,6 @@ export namespace Prisma {
     id: number
     name: number
     slug: number
-    logo_url: number
     website: number
     industry: number
     location: number
@@ -24704,7 +25247,6 @@ export namespace Prisma {
     id?: true
     name?: true
     slug?: true
-    logo_url?: true
     website?: true
     industry?: true
     location?: true
@@ -24714,7 +25256,6 @@ export namespace Prisma {
     id?: true
     name?: true
     slug?: true
-    logo_url?: true
     website?: true
     industry?: true
     location?: true
@@ -24724,7 +25265,6 @@ export namespace Prisma {
     id?: true
     name?: true
     slug?: true
-    logo_url?: true
     website?: true
     industry?: true
     location?: true
@@ -24807,7 +25347,6 @@ export namespace Prisma {
     id: string
     name: string
     slug: string
-    logo_url: string | null
     website: string | null
     industry: string | null
     location: string | null
@@ -24834,7 +25373,6 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
-    logo_url?: boolean
     website?: boolean
     industry?: boolean
     location?: boolean
@@ -24846,7 +25384,6 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
-    logo_url?: boolean
     website?: boolean
     industry?: boolean
     location?: boolean
@@ -24856,7 +25393,6 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
-    logo_url?: boolean
     website?: boolean
     industry?: boolean
     location?: boolean
@@ -24866,13 +25402,12 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
-    logo_url?: boolean
     website?: boolean
     industry?: boolean
     location?: boolean
   }
 
-  export type companiesOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "logo_url" | "website" | "industry" | "location", ExtArgs["result"]["companies"]>
+  export type companiesOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "website" | "industry" | "location", ExtArgs["result"]["companies"]>
   export type companiesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     jobs?: boolean | companies$jobsArgs<ExtArgs>
     _count?: boolean | CompaniesCountOutputTypeDefaultArgs<ExtArgs>
@@ -24889,7 +25424,6 @@ export namespace Prisma {
       id: string
       name: string
       slug: string
-      logo_url: string | null
       website: string | null
       industry: string | null
       location: string | null
@@ -25320,7 +25854,6 @@ export namespace Prisma {
     readonly id: FieldRef<"companies", 'String'>
     readonly name: FieldRef<"companies", 'String'>
     readonly slug: FieldRef<"companies", 'String'>
-    readonly logo_url: FieldRef<"companies", 'String'>
     readonly website: FieldRef<"companies", 'String'>
     readonly industry: FieldRef<"companies", 'String'>
     readonly location: FieldRef<"companies", 'String'>
@@ -54214,6 +54747,2168 @@ export namespace Prisma {
 
 
   /**
+   * Model NewsletterSubscriber
+   */
+
+  export type AggregateNewsletterSubscriber = {
+    _count: NewsletterSubscriberCountAggregateOutputType | null
+    _min: NewsletterSubscriberMinAggregateOutputType | null
+    _max: NewsletterSubscriberMaxAggregateOutputType | null
+  }
+
+  export type NewsletterSubscriberMinAggregateOutputType = {
+    id: string | null
+    email: string | null
+    name: string | null
+    source: string | null
+    is_active: boolean | null
+    token: string | null
+    subscribed_at: Date | null
+    unsubscribed_at: Date | null
+    created_at: Date | null
+    updated_at: Date | null
+  }
+
+  export type NewsletterSubscriberMaxAggregateOutputType = {
+    id: string | null
+    email: string | null
+    name: string | null
+    source: string | null
+    is_active: boolean | null
+    token: string | null
+    subscribed_at: Date | null
+    unsubscribed_at: Date | null
+    created_at: Date | null
+    updated_at: Date | null
+  }
+
+  export type NewsletterSubscriberCountAggregateOutputType = {
+    id: number
+    email: number
+    name: number
+    source: number
+    is_active: number
+    token: number
+    subscribed_at: number
+    unsubscribed_at: number
+    created_at: number
+    updated_at: number
+    _all: number
+  }
+
+
+  export type NewsletterSubscriberMinAggregateInputType = {
+    id?: true
+    email?: true
+    name?: true
+    source?: true
+    is_active?: true
+    token?: true
+    subscribed_at?: true
+    unsubscribed_at?: true
+    created_at?: true
+    updated_at?: true
+  }
+
+  export type NewsletterSubscriberMaxAggregateInputType = {
+    id?: true
+    email?: true
+    name?: true
+    source?: true
+    is_active?: true
+    token?: true
+    subscribed_at?: true
+    unsubscribed_at?: true
+    created_at?: true
+    updated_at?: true
+  }
+
+  export type NewsletterSubscriberCountAggregateInputType = {
+    id?: true
+    email?: true
+    name?: true
+    source?: true
+    is_active?: true
+    token?: true
+    subscribed_at?: true
+    unsubscribed_at?: true
+    created_at?: true
+    updated_at?: true
+    _all?: true
+  }
+
+  export type NewsletterSubscriberAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NewsletterSubscriber to aggregate.
+     */
+    where?: NewsletterSubscriberWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NewsletterSubscribers to fetch.
+     */
+    orderBy?: NewsletterSubscriberOrderByWithRelationInput | NewsletterSubscriberOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: NewsletterSubscriberWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NewsletterSubscribers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NewsletterSubscribers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned NewsletterSubscribers
+    **/
+    _count?: true | NewsletterSubscriberCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: NewsletterSubscriberMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: NewsletterSubscriberMaxAggregateInputType
+  }
+
+  export type GetNewsletterSubscriberAggregateType<T extends NewsletterSubscriberAggregateArgs> = {
+        [P in keyof T & keyof AggregateNewsletterSubscriber]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateNewsletterSubscriber[P]>
+      : GetScalarType<T[P], AggregateNewsletterSubscriber[P]>
+  }
+
+
+
+
+  export type NewsletterSubscriberGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NewsletterSubscriberWhereInput
+    orderBy?: NewsletterSubscriberOrderByWithAggregationInput | NewsletterSubscriberOrderByWithAggregationInput[]
+    by: NewsletterSubscriberScalarFieldEnum[] | NewsletterSubscriberScalarFieldEnum
+    having?: NewsletterSubscriberScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: NewsletterSubscriberCountAggregateInputType | true
+    _min?: NewsletterSubscriberMinAggregateInputType
+    _max?: NewsletterSubscriberMaxAggregateInputType
+  }
+
+  export type NewsletterSubscriberGroupByOutputType = {
+    id: string
+    email: string
+    name: string | null
+    source: string
+    is_active: boolean
+    token: string
+    subscribed_at: Date
+    unsubscribed_at: Date | null
+    created_at: Date
+    updated_at: Date
+    _count: NewsletterSubscriberCountAggregateOutputType | null
+    _min: NewsletterSubscriberMinAggregateOutputType | null
+    _max: NewsletterSubscriberMaxAggregateOutputType | null
+  }
+
+  type GetNewsletterSubscriberGroupByPayload<T extends NewsletterSubscriberGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<NewsletterSubscriberGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof NewsletterSubscriberGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], NewsletterSubscriberGroupByOutputType[P]>
+            : GetScalarType<T[P], NewsletterSubscriberGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type NewsletterSubscriberSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    name?: boolean
+    source?: boolean
+    is_active?: boolean
+    token?: boolean
+    subscribed_at?: boolean
+    unsubscribed_at?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }, ExtArgs["result"]["newsletterSubscriber"]>
+
+  export type NewsletterSubscriberSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    name?: boolean
+    source?: boolean
+    is_active?: boolean
+    token?: boolean
+    subscribed_at?: boolean
+    unsubscribed_at?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }, ExtArgs["result"]["newsletterSubscriber"]>
+
+  export type NewsletterSubscriberSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    name?: boolean
+    source?: boolean
+    is_active?: boolean
+    token?: boolean
+    subscribed_at?: boolean
+    unsubscribed_at?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }, ExtArgs["result"]["newsletterSubscriber"]>
+
+  export type NewsletterSubscriberSelectScalar = {
+    id?: boolean
+    email?: boolean
+    name?: boolean
+    source?: boolean
+    is_active?: boolean
+    token?: boolean
+    subscribed_at?: boolean
+    unsubscribed_at?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }
+
+  export type NewsletterSubscriberOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "source" | "is_active" | "token" | "subscribed_at" | "unsubscribed_at" | "created_at" | "updated_at", ExtArgs["result"]["newsletterSubscriber"]>
+
+  export type $NewsletterSubscriberPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "NewsletterSubscriber"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      email: string
+      name: string | null
+      source: string
+      is_active: boolean
+      token: string
+      subscribed_at: Date
+      unsubscribed_at: Date | null
+      created_at: Date
+      updated_at: Date
+    }, ExtArgs["result"]["newsletterSubscriber"]>
+    composites: {}
+  }
+
+  type NewsletterSubscriberGetPayload<S extends boolean | null | undefined | NewsletterSubscriberDefaultArgs> = $Result.GetResult<Prisma.$NewsletterSubscriberPayload, S>
+
+  type NewsletterSubscriberCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<NewsletterSubscriberFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: NewsletterSubscriberCountAggregateInputType | true
+    }
+
+  export interface NewsletterSubscriberDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NewsletterSubscriber'], meta: { name: 'NewsletterSubscriber' } }
+    /**
+     * Find zero or one NewsletterSubscriber that matches the filter.
+     * @param {NewsletterSubscriberFindUniqueArgs} args - Arguments to find a NewsletterSubscriber
+     * @example
+     * // Get one NewsletterSubscriber
+     * const newsletterSubscriber = await prisma.newsletterSubscriber.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends NewsletterSubscriberFindUniqueArgs>(args: SelectSubset<T, NewsletterSubscriberFindUniqueArgs<ExtArgs>>): Prisma__NewsletterSubscriberClient<$Result.GetResult<Prisma.$NewsletterSubscriberPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one NewsletterSubscriber that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {NewsletterSubscriberFindUniqueOrThrowArgs} args - Arguments to find a NewsletterSubscriber
+     * @example
+     * // Get one NewsletterSubscriber
+     * const newsletterSubscriber = await prisma.newsletterSubscriber.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends NewsletterSubscriberFindUniqueOrThrowArgs>(args: SelectSubset<T, NewsletterSubscriberFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NewsletterSubscriberClient<$Result.GetResult<Prisma.$NewsletterSubscriberPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first NewsletterSubscriber that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NewsletterSubscriberFindFirstArgs} args - Arguments to find a NewsletterSubscriber
+     * @example
+     * // Get one NewsletterSubscriber
+     * const newsletterSubscriber = await prisma.newsletterSubscriber.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends NewsletterSubscriberFindFirstArgs>(args?: SelectSubset<T, NewsletterSubscriberFindFirstArgs<ExtArgs>>): Prisma__NewsletterSubscriberClient<$Result.GetResult<Prisma.$NewsletterSubscriberPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first NewsletterSubscriber that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NewsletterSubscriberFindFirstOrThrowArgs} args - Arguments to find a NewsletterSubscriber
+     * @example
+     * // Get one NewsletterSubscriber
+     * const newsletterSubscriber = await prisma.newsletterSubscriber.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends NewsletterSubscriberFindFirstOrThrowArgs>(args?: SelectSubset<T, NewsletterSubscriberFindFirstOrThrowArgs<ExtArgs>>): Prisma__NewsletterSubscriberClient<$Result.GetResult<Prisma.$NewsletterSubscriberPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more NewsletterSubscribers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NewsletterSubscriberFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all NewsletterSubscribers
+     * const newsletterSubscribers = await prisma.newsletterSubscriber.findMany()
+     * 
+     * // Get first 10 NewsletterSubscribers
+     * const newsletterSubscribers = await prisma.newsletterSubscriber.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const newsletterSubscriberWithIdOnly = await prisma.newsletterSubscriber.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends NewsletterSubscriberFindManyArgs>(args?: SelectSubset<T, NewsletterSubscriberFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NewsletterSubscriberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a NewsletterSubscriber.
+     * @param {NewsletterSubscriberCreateArgs} args - Arguments to create a NewsletterSubscriber.
+     * @example
+     * // Create one NewsletterSubscriber
+     * const NewsletterSubscriber = await prisma.newsletterSubscriber.create({
+     *   data: {
+     *     // ... data to create a NewsletterSubscriber
+     *   }
+     * })
+     * 
+     */
+    create<T extends NewsletterSubscriberCreateArgs>(args: SelectSubset<T, NewsletterSubscriberCreateArgs<ExtArgs>>): Prisma__NewsletterSubscriberClient<$Result.GetResult<Prisma.$NewsletterSubscriberPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many NewsletterSubscribers.
+     * @param {NewsletterSubscriberCreateManyArgs} args - Arguments to create many NewsletterSubscribers.
+     * @example
+     * // Create many NewsletterSubscribers
+     * const newsletterSubscriber = await prisma.newsletterSubscriber.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends NewsletterSubscriberCreateManyArgs>(args?: SelectSubset<T, NewsletterSubscriberCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many NewsletterSubscribers and returns the data saved in the database.
+     * @param {NewsletterSubscriberCreateManyAndReturnArgs} args - Arguments to create many NewsletterSubscribers.
+     * @example
+     * // Create many NewsletterSubscribers
+     * const newsletterSubscriber = await prisma.newsletterSubscriber.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many NewsletterSubscribers and only return the `id`
+     * const newsletterSubscriberWithIdOnly = await prisma.newsletterSubscriber.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends NewsletterSubscriberCreateManyAndReturnArgs>(args?: SelectSubset<T, NewsletterSubscriberCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NewsletterSubscriberPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a NewsletterSubscriber.
+     * @param {NewsletterSubscriberDeleteArgs} args - Arguments to delete one NewsletterSubscriber.
+     * @example
+     * // Delete one NewsletterSubscriber
+     * const NewsletterSubscriber = await prisma.newsletterSubscriber.delete({
+     *   where: {
+     *     // ... filter to delete one NewsletterSubscriber
+     *   }
+     * })
+     * 
+     */
+    delete<T extends NewsletterSubscriberDeleteArgs>(args: SelectSubset<T, NewsletterSubscriberDeleteArgs<ExtArgs>>): Prisma__NewsletterSubscriberClient<$Result.GetResult<Prisma.$NewsletterSubscriberPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one NewsletterSubscriber.
+     * @param {NewsletterSubscriberUpdateArgs} args - Arguments to update one NewsletterSubscriber.
+     * @example
+     * // Update one NewsletterSubscriber
+     * const newsletterSubscriber = await prisma.newsletterSubscriber.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends NewsletterSubscriberUpdateArgs>(args: SelectSubset<T, NewsletterSubscriberUpdateArgs<ExtArgs>>): Prisma__NewsletterSubscriberClient<$Result.GetResult<Prisma.$NewsletterSubscriberPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more NewsletterSubscribers.
+     * @param {NewsletterSubscriberDeleteManyArgs} args - Arguments to filter NewsletterSubscribers to delete.
+     * @example
+     * // Delete a few NewsletterSubscribers
+     * const { count } = await prisma.newsletterSubscriber.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends NewsletterSubscriberDeleteManyArgs>(args?: SelectSubset<T, NewsletterSubscriberDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more NewsletterSubscribers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NewsletterSubscriberUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many NewsletterSubscribers
+     * const newsletterSubscriber = await prisma.newsletterSubscriber.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends NewsletterSubscriberUpdateManyArgs>(args: SelectSubset<T, NewsletterSubscriberUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more NewsletterSubscribers and returns the data updated in the database.
+     * @param {NewsletterSubscriberUpdateManyAndReturnArgs} args - Arguments to update many NewsletterSubscribers.
+     * @example
+     * // Update many NewsletterSubscribers
+     * const newsletterSubscriber = await prisma.newsletterSubscriber.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more NewsletterSubscribers and only return the `id`
+     * const newsletterSubscriberWithIdOnly = await prisma.newsletterSubscriber.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends NewsletterSubscriberUpdateManyAndReturnArgs>(args: SelectSubset<T, NewsletterSubscriberUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NewsletterSubscriberPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one NewsletterSubscriber.
+     * @param {NewsletterSubscriberUpsertArgs} args - Arguments to update or create a NewsletterSubscriber.
+     * @example
+     * // Update or create a NewsletterSubscriber
+     * const newsletterSubscriber = await prisma.newsletterSubscriber.upsert({
+     *   create: {
+     *     // ... data to create a NewsletterSubscriber
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the NewsletterSubscriber we want to update
+     *   }
+     * })
+     */
+    upsert<T extends NewsletterSubscriberUpsertArgs>(args: SelectSubset<T, NewsletterSubscriberUpsertArgs<ExtArgs>>): Prisma__NewsletterSubscriberClient<$Result.GetResult<Prisma.$NewsletterSubscriberPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of NewsletterSubscribers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NewsletterSubscriberCountArgs} args - Arguments to filter NewsletterSubscribers to count.
+     * @example
+     * // Count the number of NewsletterSubscribers
+     * const count = await prisma.newsletterSubscriber.count({
+     *   where: {
+     *     // ... the filter for the NewsletterSubscribers we want to count
+     *   }
+     * })
+    **/
+    count<T extends NewsletterSubscriberCountArgs>(
+      args?: Subset<T, NewsletterSubscriberCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], NewsletterSubscriberCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a NewsletterSubscriber.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NewsletterSubscriberAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends NewsletterSubscriberAggregateArgs>(args: Subset<T, NewsletterSubscriberAggregateArgs>): Prisma.PrismaPromise<GetNewsletterSubscriberAggregateType<T>>
+
+    /**
+     * Group by NewsletterSubscriber.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NewsletterSubscriberGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends NewsletterSubscriberGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: NewsletterSubscriberGroupByArgs['orderBy'] }
+        : { orderBy?: NewsletterSubscriberGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, NewsletterSubscriberGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNewsletterSubscriberGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the NewsletterSubscriber model
+   */
+  readonly fields: NewsletterSubscriberFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for NewsletterSubscriber.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__NewsletterSubscriberClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the NewsletterSubscriber model
+   */
+  interface NewsletterSubscriberFieldRefs {
+    readonly id: FieldRef<"NewsletterSubscriber", 'String'>
+    readonly email: FieldRef<"NewsletterSubscriber", 'String'>
+    readonly name: FieldRef<"NewsletterSubscriber", 'String'>
+    readonly source: FieldRef<"NewsletterSubscriber", 'String'>
+    readonly is_active: FieldRef<"NewsletterSubscriber", 'Boolean'>
+    readonly token: FieldRef<"NewsletterSubscriber", 'String'>
+    readonly subscribed_at: FieldRef<"NewsletterSubscriber", 'DateTime'>
+    readonly unsubscribed_at: FieldRef<"NewsletterSubscriber", 'DateTime'>
+    readonly created_at: FieldRef<"NewsletterSubscriber", 'DateTime'>
+    readonly updated_at: FieldRef<"NewsletterSubscriber", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * NewsletterSubscriber findUnique
+   */
+  export type NewsletterSubscriberFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterSubscriber
+     */
+    select?: NewsletterSubscriberSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterSubscriber
+     */
+    omit?: NewsletterSubscriberOmit<ExtArgs> | null
+    /**
+     * Filter, which NewsletterSubscriber to fetch.
+     */
+    where: NewsletterSubscriberWhereUniqueInput
+  }
+
+  /**
+   * NewsletterSubscriber findUniqueOrThrow
+   */
+  export type NewsletterSubscriberFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterSubscriber
+     */
+    select?: NewsletterSubscriberSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterSubscriber
+     */
+    omit?: NewsletterSubscriberOmit<ExtArgs> | null
+    /**
+     * Filter, which NewsletterSubscriber to fetch.
+     */
+    where: NewsletterSubscriberWhereUniqueInput
+  }
+
+  /**
+   * NewsletterSubscriber findFirst
+   */
+  export type NewsletterSubscriberFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterSubscriber
+     */
+    select?: NewsletterSubscriberSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterSubscriber
+     */
+    omit?: NewsletterSubscriberOmit<ExtArgs> | null
+    /**
+     * Filter, which NewsletterSubscriber to fetch.
+     */
+    where?: NewsletterSubscriberWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NewsletterSubscribers to fetch.
+     */
+    orderBy?: NewsletterSubscriberOrderByWithRelationInput | NewsletterSubscriberOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NewsletterSubscribers.
+     */
+    cursor?: NewsletterSubscriberWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NewsletterSubscribers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NewsletterSubscribers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NewsletterSubscribers.
+     */
+    distinct?: NewsletterSubscriberScalarFieldEnum | NewsletterSubscriberScalarFieldEnum[]
+  }
+
+  /**
+   * NewsletterSubscriber findFirstOrThrow
+   */
+  export type NewsletterSubscriberFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterSubscriber
+     */
+    select?: NewsletterSubscriberSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterSubscriber
+     */
+    omit?: NewsletterSubscriberOmit<ExtArgs> | null
+    /**
+     * Filter, which NewsletterSubscriber to fetch.
+     */
+    where?: NewsletterSubscriberWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NewsletterSubscribers to fetch.
+     */
+    orderBy?: NewsletterSubscriberOrderByWithRelationInput | NewsletterSubscriberOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NewsletterSubscribers.
+     */
+    cursor?: NewsletterSubscriberWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NewsletterSubscribers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NewsletterSubscribers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NewsletterSubscribers.
+     */
+    distinct?: NewsletterSubscriberScalarFieldEnum | NewsletterSubscriberScalarFieldEnum[]
+  }
+
+  /**
+   * NewsletterSubscriber findMany
+   */
+  export type NewsletterSubscriberFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterSubscriber
+     */
+    select?: NewsletterSubscriberSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterSubscriber
+     */
+    omit?: NewsletterSubscriberOmit<ExtArgs> | null
+    /**
+     * Filter, which NewsletterSubscribers to fetch.
+     */
+    where?: NewsletterSubscriberWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NewsletterSubscribers to fetch.
+     */
+    orderBy?: NewsletterSubscriberOrderByWithRelationInput | NewsletterSubscriberOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing NewsletterSubscribers.
+     */
+    cursor?: NewsletterSubscriberWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NewsletterSubscribers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NewsletterSubscribers.
+     */
+    skip?: number
+    distinct?: NewsletterSubscriberScalarFieldEnum | NewsletterSubscriberScalarFieldEnum[]
+  }
+
+  /**
+   * NewsletterSubscriber create
+   */
+  export type NewsletterSubscriberCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterSubscriber
+     */
+    select?: NewsletterSubscriberSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterSubscriber
+     */
+    omit?: NewsletterSubscriberOmit<ExtArgs> | null
+    /**
+     * The data needed to create a NewsletterSubscriber.
+     */
+    data: XOR<NewsletterSubscriberCreateInput, NewsletterSubscriberUncheckedCreateInput>
+  }
+
+  /**
+   * NewsletterSubscriber createMany
+   */
+  export type NewsletterSubscriberCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many NewsletterSubscribers.
+     */
+    data: NewsletterSubscriberCreateManyInput | NewsletterSubscriberCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * NewsletterSubscriber createManyAndReturn
+   */
+  export type NewsletterSubscriberCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterSubscriber
+     */
+    select?: NewsletterSubscriberSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterSubscriber
+     */
+    omit?: NewsletterSubscriberOmit<ExtArgs> | null
+    /**
+     * The data used to create many NewsletterSubscribers.
+     */
+    data: NewsletterSubscriberCreateManyInput | NewsletterSubscriberCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * NewsletterSubscriber update
+   */
+  export type NewsletterSubscriberUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterSubscriber
+     */
+    select?: NewsletterSubscriberSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterSubscriber
+     */
+    omit?: NewsletterSubscriberOmit<ExtArgs> | null
+    /**
+     * The data needed to update a NewsletterSubscriber.
+     */
+    data: XOR<NewsletterSubscriberUpdateInput, NewsletterSubscriberUncheckedUpdateInput>
+    /**
+     * Choose, which NewsletterSubscriber to update.
+     */
+    where: NewsletterSubscriberWhereUniqueInput
+  }
+
+  /**
+   * NewsletterSubscriber updateMany
+   */
+  export type NewsletterSubscriberUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update NewsletterSubscribers.
+     */
+    data: XOR<NewsletterSubscriberUpdateManyMutationInput, NewsletterSubscriberUncheckedUpdateManyInput>
+    /**
+     * Filter which NewsletterSubscribers to update
+     */
+    where?: NewsletterSubscriberWhereInput
+    /**
+     * Limit how many NewsletterSubscribers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * NewsletterSubscriber updateManyAndReturn
+   */
+  export type NewsletterSubscriberUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterSubscriber
+     */
+    select?: NewsletterSubscriberSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterSubscriber
+     */
+    omit?: NewsletterSubscriberOmit<ExtArgs> | null
+    /**
+     * The data used to update NewsletterSubscribers.
+     */
+    data: XOR<NewsletterSubscriberUpdateManyMutationInput, NewsletterSubscriberUncheckedUpdateManyInput>
+    /**
+     * Filter which NewsletterSubscribers to update
+     */
+    where?: NewsletterSubscriberWhereInput
+    /**
+     * Limit how many NewsletterSubscribers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * NewsletterSubscriber upsert
+   */
+  export type NewsletterSubscriberUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterSubscriber
+     */
+    select?: NewsletterSubscriberSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterSubscriber
+     */
+    omit?: NewsletterSubscriberOmit<ExtArgs> | null
+    /**
+     * The filter to search for the NewsletterSubscriber to update in case it exists.
+     */
+    where: NewsletterSubscriberWhereUniqueInput
+    /**
+     * In case the NewsletterSubscriber found by the `where` argument doesn't exist, create a new NewsletterSubscriber with this data.
+     */
+    create: XOR<NewsletterSubscriberCreateInput, NewsletterSubscriberUncheckedCreateInput>
+    /**
+     * In case the NewsletterSubscriber was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<NewsletterSubscriberUpdateInput, NewsletterSubscriberUncheckedUpdateInput>
+  }
+
+  /**
+   * NewsletterSubscriber delete
+   */
+  export type NewsletterSubscriberDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterSubscriber
+     */
+    select?: NewsletterSubscriberSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterSubscriber
+     */
+    omit?: NewsletterSubscriberOmit<ExtArgs> | null
+    /**
+     * Filter which NewsletterSubscriber to delete.
+     */
+    where: NewsletterSubscriberWhereUniqueInput
+  }
+
+  /**
+   * NewsletterSubscriber deleteMany
+   */
+  export type NewsletterSubscriberDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NewsletterSubscribers to delete
+     */
+    where?: NewsletterSubscriberWhereInput
+    /**
+     * Limit how many NewsletterSubscribers to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * NewsletterSubscriber without action
+   */
+  export type NewsletterSubscriberDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterSubscriber
+     */
+    select?: NewsletterSubscriberSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterSubscriber
+     */
+    omit?: NewsletterSubscriberOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model NewsletterCampaign
+   */
+
+  export type AggregateNewsletterCampaign = {
+    _count: NewsletterCampaignCountAggregateOutputType | null
+    _avg: NewsletterCampaignAvgAggregateOutputType | null
+    _sum: NewsletterCampaignSumAggregateOutputType | null
+    _min: NewsletterCampaignMinAggregateOutputType | null
+    _max: NewsletterCampaignMaxAggregateOutputType | null
+  }
+
+  export type NewsletterCampaignAvgAggregateOutputType = {
+    total_recipients: number | null
+    sent_count: number | null
+    failed_count: number | null
+  }
+
+  export type NewsletterCampaignSumAggregateOutputType = {
+    total_recipients: number | null
+    sent_count: number | null
+    failed_count: number | null
+  }
+
+  export type NewsletterCampaignMinAggregateOutputType = {
+    id: string | null
+    title: string | null
+    subject: string | null
+    content_type: string | null
+    reference_id: string | null
+    total_recipients: number | null
+    sent_count: number | null
+    failed_count: number | null
+    status: string | null
+    created_at: Date | null
+  }
+
+  export type NewsletterCampaignMaxAggregateOutputType = {
+    id: string | null
+    title: string | null
+    subject: string | null
+    content_type: string | null
+    reference_id: string | null
+    total_recipients: number | null
+    sent_count: number | null
+    failed_count: number | null
+    status: string | null
+    created_at: Date | null
+  }
+
+  export type NewsletterCampaignCountAggregateOutputType = {
+    id: number
+    title: number
+    subject: number
+    content_type: number
+    reference_id: number
+    total_recipients: number
+    sent_count: number
+    failed_count: number
+    status: number
+    created_at: number
+    _all: number
+  }
+
+
+  export type NewsletterCampaignAvgAggregateInputType = {
+    total_recipients?: true
+    sent_count?: true
+    failed_count?: true
+  }
+
+  export type NewsletterCampaignSumAggregateInputType = {
+    total_recipients?: true
+    sent_count?: true
+    failed_count?: true
+  }
+
+  export type NewsletterCampaignMinAggregateInputType = {
+    id?: true
+    title?: true
+    subject?: true
+    content_type?: true
+    reference_id?: true
+    total_recipients?: true
+    sent_count?: true
+    failed_count?: true
+    status?: true
+    created_at?: true
+  }
+
+  export type NewsletterCampaignMaxAggregateInputType = {
+    id?: true
+    title?: true
+    subject?: true
+    content_type?: true
+    reference_id?: true
+    total_recipients?: true
+    sent_count?: true
+    failed_count?: true
+    status?: true
+    created_at?: true
+  }
+
+  export type NewsletterCampaignCountAggregateInputType = {
+    id?: true
+    title?: true
+    subject?: true
+    content_type?: true
+    reference_id?: true
+    total_recipients?: true
+    sent_count?: true
+    failed_count?: true
+    status?: true
+    created_at?: true
+    _all?: true
+  }
+
+  export type NewsletterCampaignAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NewsletterCampaign to aggregate.
+     */
+    where?: NewsletterCampaignWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NewsletterCampaigns to fetch.
+     */
+    orderBy?: NewsletterCampaignOrderByWithRelationInput | NewsletterCampaignOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: NewsletterCampaignWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NewsletterCampaigns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NewsletterCampaigns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned NewsletterCampaigns
+    **/
+    _count?: true | NewsletterCampaignCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: NewsletterCampaignAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: NewsletterCampaignSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: NewsletterCampaignMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: NewsletterCampaignMaxAggregateInputType
+  }
+
+  export type GetNewsletterCampaignAggregateType<T extends NewsletterCampaignAggregateArgs> = {
+        [P in keyof T & keyof AggregateNewsletterCampaign]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateNewsletterCampaign[P]>
+      : GetScalarType<T[P], AggregateNewsletterCampaign[P]>
+  }
+
+
+
+
+  export type NewsletterCampaignGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NewsletterCampaignWhereInput
+    orderBy?: NewsletterCampaignOrderByWithAggregationInput | NewsletterCampaignOrderByWithAggregationInput[]
+    by: NewsletterCampaignScalarFieldEnum[] | NewsletterCampaignScalarFieldEnum
+    having?: NewsletterCampaignScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: NewsletterCampaignCountAggregateInputType | true
+    _avg?: NewsletterCampaignAvgAggregateInputType
+    _sum?: NewsletterCampaignSumAggregateInputType
+    _min?: NewsletterCampaignMinAggregateInputType
+    _max?: NewsletterCampaignMaxAggregateInputType
+  }
+
+  export type NewsletterCampaignGroupByOutputType = {
+    id: string
+    title: string
+    subject: string
+    content_type: string
+    reference_id: string | null
+    total_recipients: number
+    sent_count: number
+    failed_count: number
+    status: string
+    created_at: Date
+    _count: NewsletterCampaignCountAggregateOutputType | null
+    _avg: NewsletterCampaignAvgAggregateOutputType | null
+    _sum: NewsletterCampaignSumAggregateOutputType | null
+    _min: NewsletterCampaignMinAggregateOutputType | null
+    _max: NewsletterCampaignMaxAggregateOutputType | null
+  }
+
+  type GetNewsletterCampaignGroupByPayload<T extends NewsletterCampaignGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<NewsletterCampaignGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof NewsletterCampaignGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], NewsletterCampaignGroupByOutputType[P]>
+            : GetScalarType<T[P], NewsletterCampaignGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type NewsletterCampaignSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    title?: boolean
+    subject?: boolean
+    content_type?: boolean
+    reference_id?: boolean
+    total_recipients?: boolean
+    sent_count?: boolean
+    failed_count?: boolean
+    status?: boolean
+    created_at?: boolean
+  }, ExtArgs["result"]["newsletterCampaign"]>
+
+  export type NewsletterCampaignSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    title?: boolean
+    subject?: boolean
+    content_type?: boolean
+    reference_id?: boolean
+    total_recipients?: boolean
+    sent_count?: boolean
+    failed_count?: boolean
+    status?: boolean
+    created_at?: boolean
+  }, ExtArgs["result"]["newsletterCampaign"]>
+
+  export type NewsletterCampaignSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    title?: boolean
+    subject?: boolean
+    content_type?: boolean
+    reference_id?: boolean
+    total_recipients?: boolean
+    sent_count?: boolean
+    failed_count?: boolean
+    status?: boolean
+    created_at?: boolean
+  }, ExtArgs["result"]["newsletterCampaign"]>
+
+  export type NewsletterCampaignSelectScalar = {
+    id?: boolean
+    title?: boolean
+    subject?: boolean
+    content_type?: boolean
+    reference_id?: boolean
+    total_recipients?: boolean
+    sent_count?: boolean
+    failed_count?: boolean
+    status?: boolean
+    created_at?: boolean
+  }
+
+  export type NewsletterCampaignOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "subject" | "content_type" | "reference_id" | "total_recipients" | "sent_count" | "failed_count" | "status" | "created_at", ExtArgs["result"]["newsletterCampaign"]>
+
+  export type $NewsletterCampaignPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "NewsletterCampaign"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      title: string
+      subject: string
+      content_type: string
+      reference_id: string | null
+      total_recipients: number
+      sent_count: number
+      failed_count: number
+      status: string
+      created_at: Date
+    }, ExtArgs["result"]["newsletterCampaign"]>
+    composites: {}
+  }
+
+  type NewsletterCampaignGetPayload<S extends boolean | null | undefined | NewsletterCampaignDefaultArgs> = $Result.GetResult<Prisma.$NewsletterCampaignPayload, S>
+
+  type NewsletterCampaignCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<NewsletterCampaignFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: NewsletterCampaignCountAggregateInputType | true
+    }
+
+  export interface NewsletterCampaignDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NewsletterCampaign'], meta: { name: 'NewsletterCampaign' } }
+    /**
+     * Find zero or one NewsletterCampaign that matches the filter.
+     * @param {NewsletterCampaignFindUniqueArgs} args - Arguments to find a NewsletterCampaign
+     * @example
+     * // Get one NewsletterCampaign
+     * const newsletterCampaign = await prisma.newsletterCampaign.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends NewsletterCampaignFindUniqueArgs>(args: SelectSubset<T, NewsletterCampaignFindUniqueArgs<ExtArgs>>): Prisma__NewsletterCampaignClient<$Result.GetResult<Prisma.$NewsletterCampaignPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one NewsletterCampaign that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {NewsletterCampaignFindUniqueOrThrowArgs} args - Arguments to find a NewsletterCampaign
+     * @example
+     * // Get one NewsletterCampaign
+     * const newsletterCampaign = await prisma.newsletterCampaign.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends NewsletterCampaignFindUniqueOrThrowArgs>(args: SelectSubset<T, NewsletterCampaignFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NewsletterCampaignClient<$Result.GetResult<Prisma.$NewsletterCampaignPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first NewsletterCampaign that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NewsletterCampaignFindFirstArgs} args - Arguments to find a NewsletterCampaign
+     * @example
+     * // Get one NewsletterCampaign
+     * const newsletterCampaign = await prisma.newsletterCampaign.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends NewsletterCampaignFindFirstArgs>(args?: SelectSubset<T, NewsletterCampaignFindFirstArgs<ExtArgs>>): Prisma__NewsletterCampaignClient<$Result.GetResult<Prisma.$NewsletterCampaignPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first NewsletterCampaign that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NewsletterCampaignFindFirstOrThrowArgs} args - Arguments to find a NewsletterCampaign
+     * @example
+     * // Get one NewsletterCampaign
+     * const newsletterCampaign = await prisma.newsletterCampaign.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends NewsletterCampaignFindFirstOrThrowArgs>(args?: SelectSubset<T, NewsletterCampaignFindFirstOrThrowArgs<ExtArgs>>): Prisma__NewsletterCampaignClient<$Result.GetResult<Prisma.$NewsletterCampaignPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more NewsletterCampaigns that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NewsletterCampaignFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all NewsletterCampaigns
+     * const newsletterCampaigns = await prisma.newsletterCampaign.findMany()
+     * 
+     * // Get first 10 NewsletterCampaigns
+     * const newsletterCampaigns = await prisma.newsletterCampaign.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const newsletterCampaignWithIdOnly = await prisma.newsletterCampaign.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends NewsletterCampaignFindManyArgs>(args?: SelectSubset<T, NewsletterCampaignFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NewsletterCampaignPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a NewsletterCampaign.
+     * @param {NewsletterCampaignCreateArgs} args - Arguments to create a NewsletterCampaign.
+     * @example
+     * // Create one NewsletterCampaign
+     * const NewsletterCampaign = await prisma.newsletterCampaign.create({
+     *   data: {
+     *     // ... data to create a NewsletterCampaign
+     *   }
+     * })
+     * 
+     */
+    create<T extends NewsletterCampaignCreateArgs>(args: SelectSubset<T, NewsletterCampaignCreateArgs<ExtArgs>>): Prisma__NewsletterCampaignClient<$Result.GetResult<Prisma.$NewsletterCampaignPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many NewsletterCampaigns.
+     * @param {NewsletterCampaignCreateManyArgs} args - Arguments to create many NewsletterCampaigns.
+     * @example
+     * // Create many NewsletterCampaigns
+     * const newsletterCampaign = await prisma.newsletterCampaign.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends NewsletterCampaignCreateManyArgs>(args?: SelectSubset<T, NewsletterCampaignCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many NewsletterCampaigns and returns the data saved in the database.
+     * @param {NewsletterCampaignCreateManyAndReturnArgs} args - Arguments to create many NewsletterCampaigns.
+     * @example
+     * // Create many NewsletterCampaigns
+     * const newsletterCampaign = await prisma.newsletterCampaign.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many NewsletterCampaigns and only return the `id`
+     * const newsletterCampaignWithIdOnly = await prisma.newsletterCampaign.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends NewsletterCampaignCreateManyAndReturnArgs>(args?: SelectSubset<T, NewsletterCampaignCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NewsletterCampaignPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a NewsletterCampaign.
+     * @param {NewsletterCampaignDeleteArgs} args - Arguments to delete one NewsletterCampaign.
+     * @example
+     * // Delete one NewsletterCampaign
+     * const NewsletterCampaign = await prisma.newsletterCampaign.delete({
+     *   where: {
+     *     // ... filter to delete one NewsletterCampaign
+     *   }
+     * })
+     * 
+     */
+    delete<T extends NewsletterCampaignDeleteArgs>(args: SelectSubset<T, NewsletterCampaignDeleteArgs<ExtArgs>>): Prisma__NewsletterCampaignClient<$Result.GetResult<Prisma.$NewsletterCampaignPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one NewsletterCampaign.
+     * @param {NewsletterCampaignUpdateArgs} args - Arguments to update one NewsletterCampaign.
+     * @example
+     * // Update one NewsletterCampaign
+     * const newsletterCampaign = await prisma.newsletterCampaign.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends NewsletterCampaignUpdateArgs>(args: SelectSubset<T, NewsletterCampaignUpdateArgs<ExtArgs>>): Prisma__NewsletterCampaignClient<$Result.GetResult<Prisma.$NewsletterCampaignPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more NewsletterCampaigns.
+     * @param {NewsletterCampaignDeleteManyArgs} args - Arguments to filter NewsletterCampaigns to delete.
+     * @example
+     * // Delete a few NewsletterCampaigns
+     * const { count } = await prisma.newsletterCampaign.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends NewsletterCampaignDeleteManyArgs>(args?: SelectSubset<T, NewsletterCampaignDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more NewsletterCampaigns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NewsletterCampaignUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many NewsletterCampaigns
+     * const newsletterCampaign = await prisma.newsletterCampaign.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends NewsletterCampaignUpdateManyArgs>(args: SelectSubset<T, NewsletterCampaignUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more NewsletterCampaigns and returns the data updated in the database.
+     * @param {NewsletterCampaignUpdateManyAndReturnArgs} args - Arguments to update many NewsletterCampaigns.
+     * @example
+     * // Update many NewsletterCampaigns
+     * const newsletterCampaign = await prisma.newsletterCampaign.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more NewsletterCampaigns and only return the `id`
+     * const newsletterCampaignWithIdOnly = await prisma.newsletterCampaign.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends NewsletterCampaignUpdateManyAndReturnArgs>(args: SelectSubset<T, NewsletterCampaignUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NewsletterCampaignPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one NewsletterCampaign.
+     * @param {NewsletterCampaignUpsertArgs} args - Arguments to update or create a NewsletterCampaign.
+     * @example
+     * // Update or create a NewsletterCampaign
+     * const newsletterCampaign = await prisma.newsletterCampaign.upsert({
+     *   create: {
+     *     // ... data to create a NewsletterCampaign
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the NewsletterCampaign we want to update
+     *   }
+     * })
+     */
+    upsert<T extends NewsletterCampaignUpsertArgs>(args: SelectSubset<T, NewsletterCampaignUpsertArgs<ExtArgs>>): Prisma__NewsletterCampaignClient<$Result.GetResult<Prisma.$NewsletterCampaignPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of NewsletterCampaigns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NewsletterCampaignCountArgs} args - Arguments to filter NewsletterCampaigns to count.
+     * @example
+     * // Count the number of NewsletterCampaigns
+     * const count = await prisma.newsletterCampaign.count({
+     *   where: {
+     *     // ... the filter for the NewsletterCampaigns we want to count
+     *   }
+     * })
+    **/
+    count<T extends NewsletterCampaignCountArgs>(
+      args?: Subset<T, NewsletterCampaignCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], NewsletterCampaignCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a NewsletterCampaign.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NewsletterCampaignAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends NewsletterCampaignAggregateArgs>(args: Subset<T, NewsletterCampaignAggregateArgs>): Prisma.PrismaPromise<GetNewsletterCampaignAggregateType<T>>
+
+    /**
+     * Group by NewsletterCampaign.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NewsletterCampaignGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends NewsletterCampaignGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: NewsletterCampaignGroupByArgs['orderBy'] }
+        : { orderBy?: NewsletterCampaignGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, NewsletterCampaignGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNewsletterCampaignGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the NewsletterCampaign model
+   */
+  readonly fields: NewsletterCampaignFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for NewsletterCampaign.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__NewsletterCampaignClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the NewsletterCampaign model
+   */
+  interface NewsletterCampaignFieldRefs {
+    readonly id: FieldRef<"NewsletterCampaign", 'String'>
+    readonly title: FieldRef<"NewsletterCampaign", 'String'>
+    readonly subject: FieldRef<"NewsletterCampaign", 'String'>
+    readonly content_type: FieldRef<"NewsletterCampaign", 'String'>
+    readonly reference_id: FieldRef<"NewsletterCampaign", 'String'>
+    readonly total_recipients: FieldRef<"NewsletterCampaign", 'Int'>
+    readonly sent_count: FieldRef<"NewsletterCampaign", 'Int'>
+    readonly failed_count: FieldRef<"NewsletterCampaign", 'Int'>
+    readonly status: FieldRef<"NewsletterCampaign", 'String'>
+    readonly created_at: FieldRef<"NewsletterCampaign", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * NewsletterCampaign findUnique
+   */
+  export type NewsletterCampaignFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterCampaign
+     */
+    select?: NewsletterCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterCampaign
+     */
+    omit?: NewsletterCampaignOmit<ExtArgs> | null
+    /**
+     * Filter, which NewsletterCampaign to fetch.
+     */
+    where: NewsletterCampaignWhereUniqueInput
+  }
+
+  /**
+   * NewsletterCampaign findUniqueOrThrow
+   */
+  export type NewsletterCampaignFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterCampaign
+     */
+    select?: NewsletterCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterCampaign
+     */
+    omit?: NewsletterCampaignOmit<ExtArgs> | null
+    /**
+     * Filter, which NewsletterCampaign to fetch.
+     */
+    where: NewsletterCampaignWhereUniqueInput
+  }
+
+  /**
+   * NewsletterCampaign findFirst
+   */
+  export type NewsletterCampaignFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterCampaign
+     */
+    select?: NewsletterCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterCampaign
+     */
+    omit?: NewsletterCampaignOmit<ExtArgs> | null
+    /**
+     * Filter, which NewsletterCampaign to fetch.
+     */
+    where?: NewsletterCampaignWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NewsletterCampaigns to fetch.
+     */
+    orderBy?: NewsletterCampaignOrderByWithRelationInput | NewsletterCampaignOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NewsletterCampaigns.
+     */
+    cursor?: NewsletterCampaignWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NewsletterCampaigns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NewsletterCampaigns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NewsletterCampaigns.
+     */
+    distinct?: NewsletterCampaignScalarFieldEnum | NewsletterCampaignScalarFieldEnum[]
+  }
+
+  /**
+   * NewsletterCampaign findFirstOrThrow
+   */
+  export type NewsletterCampaignFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterCampaign
+     */
+    select?: NewsletterCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterCampaign
+     */
+    omit?: NewsletterCampaignOmit<ExtArgs> | null
+    /**
+     * Filter, which NewsletterCampaign to fetch.
+     */
+    where?: NewsletterCampaignWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NewsletterCampaigns to fetch.
+     */
+    orderBy?: NewsletterCampaignOrderByWithRelationInput | NewsletterCampaignOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NewsletterCampaigns.
+     */
+    cursor?: NewsletterCampaignWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NewsletterCampaigns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NewsletterCampaigns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NewsletterCampaigns.
+     */
+    distinct?: NewsletterCampaignScalarFieldEnum | NewsletterCampaignScalarFieldEnum[]
+  }
+
+  /**
+   * NewsletterCampaign findMany
+   */
+  export type NewsletterCampaignFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterCampaign
+     */
+    select?: NewsletterCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterCampaign
+     */
+    omit?: NewsletterCampaignOmit<ExtArgs> | null
+    /**
+     * Filter, which NewsletterCampaigns to fetch.
+     */
+    where?: NewsletterCampaignWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NewsletterCampaigns to fetch.
+     */
+    orderBy?: NewsletterCampaignOrderByWithRelationInput | NewsletterCampaignOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing NewsletterCampaigns.
+     */
+    cursor?: NewsletterCampaignWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NewsletterCampaigns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NewsletterCampaigns.
+     */
+    skip?: number
+    distinct?: NewsletterCampaignScalarFieldEnum | NewsletterCampaignScalarFieldEnum[]
+  }
+
+  /**
+   * NewsletterCampaign create
+   */
+  export type NewsletterCampaignCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterCampaign
+     */
+    select?: NewsletterCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterCampaign
+     */
+    omit?: NewsletterCampaignOmit<ExtArgs> | null
+    /**
+     * The data needed to create a NewsletterCampaign.
+     */
+    data: XOR<NewsletterCampaignCreateInput, NewsletterCampaignUncheckedCreateInput>
+  }
+
+  /**
+   * NewsletterCampaign createMany
+   */
+  export type NewsletterCampaignCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many NewsletterCampaigns.
+     */
+    data: NewsletterCampaignCreateManyInput | NewsletterCampaignCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * NewsletterCampaign createManyAndReturn
+   */
+  export type NewsletterCampaignCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterCampaign
+     */
+    select?: NewsletterCampaignSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterCampaign
+     */
+    omit?: NewsletterCampaignOmit<ExtArgs> | null
+    /**
+     * The data used to create many NewsletterCampaigns.
+     */
+    data: NewsletterCampaignCreateManyInput | NewsletterCampaignCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * NewsletterCampaign update
+   */
+  export type NewsletterCampaignUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterCampaign
+     */
+    select?: NewsletterCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterCampaign
+     */
+    omit?: NewsletterCampaignOmit<ExtArgs> | null
+    /**
+     * The data needed to update a NewsletterCampaign.
+     */
+    data: XOR<NewsletterCampaignUpdateInput, NewsletterCampaignUncheckedUpdateInput>
+    /**
+     * Choose, which NewsletterCampaign to update.
+     */
+    where: NewsletterCampaignWhereUniqueInput
+  }
+
+  /**
+   * NewsletterCampaign updateMany
+   */
+  export type NewsletterCampaignUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update NewsletterCampaigns.
+     */
+    data: XOR<NewsletterCampaignUpdateManyMutationInput, NewsletterCampaignUncheckedUpdateManyInput>
+    /**
+     * Filter which NewsletterCampaigns to update
+     */
+    where?: NewsletterCampaignWhereInput
+    /**
+     * Limit how many NewsletterCampaigns to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * NewsletterCampaign updateManyAndReturn
+   */
+  export type NewsletterCampaignUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterCampaign
+     */
+    select?: NewsletterCampaignSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterCampaign
+     */
+    omit?: NewsletterCampaignOmit<ExtArgs> | null
+    /**
+     * The data used to update NewsletterCampaigns.
+     */
+    data: XOR<NewsletterCampaignUpdateManyMutationInput, NewsletterCampaignUncheckedUpdateManyInput>
+    /**
+     * Filter which NewsletterCampaigns to update
+     */
+    where?: NewsletterCampaignWhereInput
+    /**
+     * Limit how many NewsletterCampaigns to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * NewsletterCampaign upsert
+   */
+  export type NewsletterCampaignUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterCampaign
+     */
+    select?: NewsletterCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterCampaign
+     */
+    omit?: NewsletterCampaignOmit<ExtArgs> | null
+    /**
+     * The filter to search for the NewsletterCampaign to update in case it exists.
+     */
+    where: NewsletterCampaignWhereUniqueInput
+    /**
+     * In case the NewsletterCampaign found by the `where` argument doesn't exist, create a new NewsletterCampaign with this data.
+     */
+    create: XOR<NewsletterCampaignCreateInput, NewsletterCampaignUncheckedCreateInput>
+    /**
+     * In case the NewsletterCampaign was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<NewsletterCampaignUpdateInput, NewsletterCampaignUncheckedUpdateInput>
+  }
+
+  /**
+   * NewsletterCampaign delete
+   */
+  export type NewsletterCampaignDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterCampaign
+     */
+    select?: NewsletterCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterCampaign
+     */
+    omit?: NewsletterCampaignOmit<ExtArgs> | null
+    /**
+     * Filter which NewsletterCampaign to delete.
+     */
+    where: NewsletterCampaignWhereUniqueInput
+  }
+
+  /**
+   * NewsletterCampaign deleteMany
+   */
+  export type NewsletterCampaignDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NewsletterCampaigns to delete
+     */
+    where?: NewsletterCampaignWhereInput
+    /**
+     * Limit how many NewsletterCampaigns to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * NewsletterCampaign without action
+   */
+  export type NewsletterCampaignDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NewsletterCampaign
+     */
+    select?: NewsletterCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NewsletterCampaign
+     */
+    omit?: NewsletterCampaignOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model Visitor
    */
 
@@ -70832,6 +73527,7 @@ export namespace Prisma {
     top_nicetohave_skills: number
     category: number
     is_promoted: number
+    details: number
     created_at: number
     updated_at: number
     _all: number
@@ -70874,6 +73570,7 @@ export namespace Prisma {
     top_nicetohave_skills?: true
     category?: true
     is_promoted?: true
+    details?: true
     created_at?: true
     updated_at?: true
     _all?: true
@@ -70973,6 +73670,7 @@ export namespace Prisma {
     top_nicetohave_skills: string[]
     category: string
     is_promoted: boolean
+    details: JsonValue | null
     created_at: Date
     updated_at: Date
     _count: LearnedRoleBlueprintCountAggregateOutputType | null
@@ -71004,6 +73702,7 @@ export namespace Prisma {
     top_nicetohave_skills?: boolean
     category?: boolean
     is_promoted?: boolean
+    details?: boolean
     created_at?: boolean
     updated_at?: boolean
   }, ExtArgs["result"]["learnedRoleBlueprint"]>
@@ -71016,6 +73715,7 @@ export namespace Prisma {
     top_nicetohave_skills?: boolean
     category?: boolean
     is_promoted?: boolean
+    details?: boolean
     created_at?: boolean
     updated_at?: boolean
   }, ExtArgs["result"]["learnedRoleBlueprint"]>
@@ -71028,6 +73728,7 @@ export namespace Prisma {
     top_nicetohave_skills?: boolean
     category?: boolean
     is_promoted?: boolean
+    details?: boolean
     created_at?: boolean
     updated_at?: boolean
   }, ExtArgs["result"]["learnedRoleBlueprint"]>
@@ -71040,11 +73741,12 @@ export namespace Prisma {
     top_nicetohave_skills?: boolean
     category?: boolean
     is_promoted?: boolean
+    details?: boolean
     created_at?: boolean
     updated_at?: boolean
   }
 
-  export type LearnedRoleBlueprintOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "role_name" | "entry_count" | "top_essential_skills" | "top_nicetohave_skills" | "category" | "is_promoted" | "created_at" | "updated_at", ExtArgs["result"]["learnedRoleBlueprint"]>
+  export type LearnedRoleBlueprintOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "role_name" | "entry_count" | "top_essential_skills" | "top_nicetohave_skills" | "category" | "is_promoted" | "details" | "created_at" | "updated_at", ExtArgs["result"]["learnedRoleBlueprint"]>
 
   export type $LearnedRoleBlueprintPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "LearnedRoleBlueprint"
@@ -71057,6 +73759,7 @@ export namespace Prisma {
       top_nicetohave_skills: string[]
       category: string
       is_promoted: boolean
+      details: Prisma.JsonValue | null
       created_at: Date
       updated_at: Date
     }, ExtArgs["result"]["learnedRoleBlueprint"]>
@@ -71489,6 +74192,7 @@ export namespace Prisma {
     readonly top_nicetohave_skills: FieldRef<"LearnedRoleBlueprint", 'String[]'>
     readonly category: FieldRef<"LearnedRoleBlueprint", 'String'>
     readonly is_promoted: FieldRef<"LearnedRoleBlueprint", 'Boolean'>
+    readonly details: FieldRef<"LearnedRoleBlueprint", 'Json'>
     readonly created_at: FieldRef<"LearnedRoleBlueprint", 'DateTime'>
     readonly updated_at: FieldRef<"LearnedRoleBlueprint", 'DateTime'>
   }
@@ -71858,6 +74562,4164 @@ export namespace Prisma {
 
 
   /**
+   * Model scraper_providers
+   */
+
+  export type AggregateScraper_providers = {
+    _count: Scraper_providersCountAggregateOutputType | null
+    _avg: Scraper_providersAvgAggregateOutputType | null
+    _sum: Scraper_providersSumAggregateOutputType | null
+    _min: Scraper_providersMinAggregateOutputType | null
+    _max: Scraper_providersMaxAggregateOutputType | null
+  }
+
+  export type Scraper_providersAvgAggregateOutputType = {
+    priority: number | null
+    requests_total: number | null
+    requests_month: number | null
+    success_count: number | null
+    fail_count: number | null
+  }
+
+  export type Scraper_providersSumAggregateOutputType = {
+    priority: number | null
+    requests_total: number | null
+    requests_month: number | null
+    success_count: number | null
+    fail_count: number | null
+  }
+
+  export type Scraper_providersMinAggregateOutputType = {
+    id: string | null
+    provider: string | null
+    label: string | null
+    api_key: string | null
+    priority: number | null
+    is_active: boolean | null
+    status: string | null
+    requests_total: number | null
+    requests_month: number | null
+    success_count: number | null
+    fail_count: number | null
+    last_used_at: Date | null
+    last_error: string | null
+    created_at: Date | null
+    updated_at: Date | null
+  }
+
+  export type Scraper_providersMaxAggregateOutputType = {
+    id: string | null
+    provider: string | null
+    label: string | null
+    api_key: string | null
+    priority: number | null
+    is_active: boolean | null
+    status: string | null
+    requests_total: number | null
+    requests_month: number | null
+    success_count: number | null
+    fail_count: number | null
+    last_used_at: Date | null
+    last_error: string | null
+    created_at: Date | null
+    updated_at: Date | null
+  }
+
+  export type Scraper_providersCountAggregateOutputType = {
+    id: number
+    provider: number
+    label: number
+    api_key: number
+    extra_config: number
+    priority: number
+    is_active: number
+    status: number
+    requests_total: number
+    requests_month: number
+    success_count: number
+    fail_count: number
+    last_used_at: number
+    last_error: number
+    created_at: number
+    updated_at: number
+    _all: number
+  }
+
+
+  export type Scraper_providersAvgAggregateInputType = {
+    priority?: true
+    requests_total?: true
+    requests_month?: true
+    success_count?: true
+    fail_count?: true
+  }
+
+  export type Scraper_providersSumAggregateInputType = {
+    priority?: true
+    requests_total?: true
+    requests_month?: true
+    success_count?: true
+    fail_count?: true
+  }
+
+  export type Scraper_providersMinAggregateInputType = {
+    id?: true
+    provider?: true
+    label?: true
+    api_key?: true
+    priority?: true
+    is_active?: true
+    status?: true
+    requests_total?: true
+    requests_month?: true
+    success_count?: true
+    fail_count?: true
+    last_used_at?: true
+    last_error?: true
+    created_at?: true
+    updated_at?: true
+  }
+
+  export type Scraper_providersMaxAggregateInputType = {
+    id?: true
+    provider?: true
+    label?: true
+    api_key?: true
+    priority?: true
+    is_active?: true
+    status?: true
+    requests_total?: true
+    requests_month?: true
+    success_count?: true
+    fail_count?: true
+    last_used_at?: true
+    last_error?: true
+    created_at?: true
+    updated_at?: true
+  }
+
+  export type Scraper_providersCountAggregateInputType = {
+    id?: true
+    provider?: true
+    label?: true
+    api_key?: true
+    extra_config?: true
+    priority?: true
+    is_active?: true
+    status?: true
+    requests_total?: true
+    requests_month?: true
+    success_count?: true
+    fail_count?: true
+    last_used_at?: true
+    last_error?: true
+    created_at?: true
+    updated_at?: true
+    _all?: true
+  }
+
+  export type Scraper_providersAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which scraper_providers to aggregate.
+     */
+    where?: scraper_providersWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of scraper_providers to fetch.
+     */
+    orderBy?: scraper_providersOrderByWithRelationInput | scraper_providersOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: scraper_providersWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` scraper_providers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` scraper_providers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned scraper_providers
+    **/
+    _count?: true | Scraper_providersCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: Scraper_providersAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: Scraper_providersSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: Scraper_providersMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: Scraper_providersMaxAggregateInputType
+  }
+
+  export type GetScraper_providersAggregateType<T extends Scraper_providersAggregateArgs> = {
+        [P in keyof T & keyof AggregateScraper_providers]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateScraper_providers[P]>
+      : GetScalarType<T[P], AggregateScraper_providers[P]>
+  }
+
+
+
+
+  export type scraper_providersGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: scraper_providersWhereInput
+    orderBy?: scraper_providersOrderByWithAggregationInput | scraper_providersOrderByWithAggregationInput[]
+    by: Scraper_providersScalarFieldEnum[] | Scraper_providersScalarFieldEnum
+    having?: scraper_providersScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: Scraper_providersCountAggregateInputType | true
+    _avg?: Scraper_providersAvgAggregateInputType
+    _sum?: Scraper_providersSumAggregateInputType
+    _min?: Scraper_providersMinAggregateInputType
+    _max?: Scraper_providersMaxAggregateInputType
+  }
+
+  export type Scraper_providersGroupByOutputType = {
+    id: string
+    provider: string
+    label: string
+    api_key: string
+    extra_config: JsonValue | null
+    priority: number
+    is_active: boolean
+    status: string
+    requests_total: number
+    requests_month: number
+    success_count: number
+    fail_count: number
+    last_used_at: Date | null
+    last_error: string | null
+    created_at: Date
+    updated_at: Date
+    _count: Scraper_providersCountAggregateOutputType | null
+    _avg: Scraper_providersAvgAggregateOutputType | null
+    _sum: Scraper_providersSumAggregateOutputType | null
+    _min: Scraper_providersMinAggregateOutputType | null
+    _max: Scraper_providersMaxAggregateOutputType | null
+  }
+
+  type GetScraper_providersGroupByPayload<T extends scraper_providersGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<Scraper_providersGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof Scraper_providersGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], Scraper_providersGroupByOutputType[P]>
+            : GetScalarType<T[P], Scraper_providersGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type scraper_providersSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider?: boolean
+    label?: boolean
+    api_key?: boolean
+    extra_config?: boolean
+    priority?: boolean
+    is_active?: boolean
+    status?: boolean
+    requests_total?: boolean
+    requests_month?: boolean
+    success_count?: boolean
+    fail_count?: boolean
+    last_used_at?: boolean
+    last_error?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    logs?: boolean | scraper_providers$logsArgs<ExtArgs>
+    _count?: boolean | Scraper_providersCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["scraper_providers"]>
+
+  export type scraper_providersSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider?: boolean
+    label?: boolean
+    api_key?: boolean
+    extra_config?: boolean
+    priority?: boolean
+    is_active?: boolean
+    status?: boolean
+    requests_total?: boolean
+    requests_month?: boolean
+    success_count?: boolean
+    fail_count?: boolean
+    last_used_at?: boolean
+    last_error?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }, ExtArgs["result"]["scraper_providers"]>
+
+  export type scraper_providersSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider?: boolean
+    label?: boolean
+    api_key?: boolean
+    extra_config?: boolean
+    priority?: boolean
+    is_active?: boolean
+    status?: boolean
+    requests_total?: boolean
+    requests_month?: boolean
+    success_count?: boolean
+    fail_count?: boolean
+    last_used_at?: boolean
+    last_error?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }, ExtArgs["result"]["scraper_providers"]>
+
+  export type scraper_providersSelectScalar = {
+    id?: boolean
+    provider?: boolean
+    label?: boolean
+    api_key?: boolean
+    extra_config?: boolean
+    priority?: boolean
+    is_active?: boolean
+    status?: boolean
+    requests_total?: boolean
+    requests_month?: boolean
+    success_count?: boolean
+    fail_count?: boolean
+    last_used_at?: boolean
+    last_error?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }
+
+  export type scraper_providersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "provider" | "label" | "api_key" | "extra_config" | "priority" | "is_active" | "status" | "requests_total" | "requests_month" | "success_count" | "fail_count" | "last_used_at" | "last_error" | "created_at" | "updated_at", ExtArgs["result"]["scraper_providers"]>
+  export type scraper_providersInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    logs?: boolean | scraper_providers$logsArgs<ExtArgs>
+    _count?: boolean | Scraper_providersCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type scraper_providersIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type scraper_providersIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $scraper_providersPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "scraper_providers"
+    objects: {
+      logs: Prisma.$scraper_logsPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      provider: string
+      label: string
+      api_key: string
+      extra_config: Prisma.JsonValue | null
+      priority: number
+      is_active: boolean
+      status: string
+      requests_total: number
+      requests_month: number
+      success_count: number
+      fail_count: number
+      last_used_at: Date | null
+      last_error: string | null
+      created_at: Date
+      updated_at: Date
+    }, ExtArgs["result"]["scraper_providers"]>
+    composites: {}
+  }
+
+  type scraper_providersGetPayload<S extends boolean | null | undefined | scraper_providersDefaultArgs> = $Result.GetResult<Prisma.$scraper_providersPayload, S>
+
+  type scraper_providersCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<scraper_providersFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: Scraper_providersCountAggregateInputType | true
+    }
+
+  export interface scraper_providersDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['scraper_providers'], meta: { name: 'scraper_providers' } }
+    /**
+     * Find zero or one Scraper_providers that matches the filter.
+     * @param {scraper_providersFindUniqueArgs} args - Arguments to find a Scraper_providers
+     * @example
+     * // Get one Scraper_providers
+     * const scraper_providers = await prisma.scraper_providers.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends scraper_providersFindUniqueArgs>(args: SelectSubset<T, scraper_providersFindUniqueArgs<ExtArgs>>): Prisma__scraper_providersClient<$Result.GetResult<Prisma.$scraper_providersPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Scraper_providers that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {scraper_providersFindUniqueOrThrowArgs} args - Arguments to find a Scraper_providers
+     * @example
+     * // Get one Scraper_providers
+     * const scraper_providers = await prisma.scraper_providers.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends scraper_providersFindUniqueOrThrowArgs>(args: SelectSubset<T, scraper_providersFindUniqueOrThrowArgs<ExtArgs>>): Prisma__scraper_providersClient<$Result.GetResult<Prisma.$scraper_providersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Scraper_providers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scraper_providersFindFirstArgs} args - Arguments to find a Scraper_providers
+     * @example
+     * // Get one Scraper_providers
+     * const scraper_providers = await prisma.scraper_providers.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends scraper_providersFindFirstArgs>(args?: SelectSubset<T, scraper_providersFindFirstArgs<ExtArgs>>): Prisma__scraper_providersClient<$Result.GetResult<Prisma.$scraper_providersPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Scraper_providers that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scraper_providersFindFirstOrThrowArgs} args - Arguments to find a Scraper_providers
+     * @example
+     * // Get one Scraper_providers
+     * const scraper_providers = await prisma.scraper_providers.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends scraper_providersFindFirstOrThrowArgs>(args?: SelectSubset<T, scraper_providersFindFirstOrThrowArgs<ExtArgs>>): Prisma__scraper_providersClient<$Result.GetResult<Prisma.$scraper_providersPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Scraper_providers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scraper_providersFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Scraper_providers
+     * const scraper_providers = await prisma.scraper_providers.findMany()
+     * 
+     * // Get first 10 Scraper_providers
+     * const scraper_providers = await prisma.scraper_providers.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const scraper_providersWithIdOnly = await prisma.scraper_providers.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends scraper_providersFindManyArgs>(args?: SelectSubset<T, scraper_providersFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$scraper_providersPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Scraper_providers.
+     * @param {scraper_providersCreateArgs} args - Arguments to create a Scraper_providers.
+     * @example
+     * // Create one Scraper_providers
+     * const Scraper_providers = await prisma.scraper_providers.create({
+     *   data: {
+     *     // ... data to create a Scraper_providers
+     *   }
+     * })
+     * 
+     */
+    create<T extends scraper_providersCreateArgs>(args: SelectSubset<T, scraper_providersCreateArgs<ExtArgs>>): Prisma__scraper_providersClient<$Result.GetResult<Prisma.$scraper_providersPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Scraper_providers.
+     * @param {scraper_providersCreateManyArgs} args - Arguments to create many Scraper_providers.
+     * @example
+     * // Create many Scraper_providers
+     * const scraper_providers = await prisma.scraper_providers.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends scraper_providersCreateManyArgs>(args?: SelectSubset<T, scraper_providersCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Scraper_providers and returns the data saved in the database.
+     * @param {scraper_providersCreateManyAndReturnArgs} args - Arguments to create many Scraper_providers.
+     * @example
+     * // Create many Scraper_providers
+     * const scraper_providers = await prisma.scraper_providers.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Scraper_providers and only return the `id`
+     * const scraper_providersWithIdOnly = await prisma.scraper_providers.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends scraper_providersCreateManyAndReturnArgs>(args?: SelectSubset<T, scraper_providersCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$scraper_providersPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Scraper_providers.
+     * @param {scraper_providersDeleteArgs} args - Arguments to delete one Scraper_providers.
+     * @example
+     * // Delete one Scraper_providers
+     * const Scraper_providers = await prisma.scraper_providers.delete({
+     *   where: {
+     *     // ... filter to delete one Scraper_providers
+     *   }
+     * })
+     * 
+     */
+    delete<T extends scraper_providersDeleteArgs>(args: SelectSubset<T, scraper_providersDeleteArgs<ExtArgs>>): Prisma__scraper_providersClient<$Result.GetResult<Prisma.$scraper_providersPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Scraper_providers.
+     * @param {scraper_providersUpdateArgs} args - Arguments to update one Scraper_providers.
+     * @example
+     * // Update one Scraper_providers
+     * const scraper_providers = await prisma.scraper_providers.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends scraper_providersUpdateArgs>(args: SelectSubset<T, scraper_providersUpdateArgs<ExtArgs>>): Prisma__scraper_providersClient<$Result.GetResult<Prisma.$scraper_providersPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Scraper_providers.
+     * @param {scraper_providersDeleteManyArgs} args - Arguments to filter Scraper_providers to delete.
+     * @example
+     * // Delete a few Scraper_providers
+     * const { count } = await prisma.scraper_providers.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends scraper_providersDeleteManyArgs>(args?: SelectSubset<T, scraper_providersDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Scraper_providers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scraper_providersUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Scraper_providers
+     * const scraper_providers = await prisma.scraper_providers.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends scraper_providersUpdateManyArgs>(args: SelectSubset<T, scraper_providersUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Scraper_providers and returns the data updated in the database.
+     * @param {scraper_providersUpdateManyAndReturnArgs} args - Arguments to update many Scraper_providers.
+     * @example
+     * // Update many Scraper_providers
+     * const scraper_providers = await prisma.scraper_providers.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Scraper_providers and only return the `id`
+     * const scraper_providersWithIdOnly = await prisma.scraper_providers.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends scraper_providersUpdateManyAndReturnArgs>(args: SelectSubset<T, scraper_providersUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$scraper_providersPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Scraper_providers.
+     * @param {scraper_providersUpsertArgs} args - Arguments to update or create a Scraper_providers.
+     * @example
+     * // Update or create a Scraper_providers
+     * const scraper_providers = await prisma.scraper_providers.upsert({
+     *   create: {
+     *     // ... data to create a Scraper_providers
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Scraper_providers we want to update
+     *   }
+     * })
+     */
+    upsert<T extends scraper_providersUpsertArgs>(args: SelectSubset<T, scraper_providersUpsertArgs<ExtArgs>>): Prisma__scraper_providersClient<$Result.GetResult<Prisma.$scraper_providersPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Scraper_providers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scraper_providersCountArgs} args - Arguments to filter Scraper_providers to count.
+     * @example
+     * // Count the number of Scraper_providers
+     * const count = await prisma.scraper_providers.count({
+     *   where: {
+     *     // ... the filter for the Scraper_providers we want to count
+     *   }
+     * })
+    **/
+    count<T extends scraper_providersCountArgs>(
+      args?: Subset<T, scraper_providersCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], Scraper_providersCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Scraper_providers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {Scraper_providersAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends Scraper_providersAggregateArgs>(args: Subset<T, Scraper_providersAggregateArgs>): Prisma.PrismaPromise<GetScraper_providersAggregateType<T>>
+
+    /**
+     * Group by Scraper_providers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scraper_providersGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends scraper_providersGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: scraper_providersGroupByArgs['orderBy'] }
+        : { orderBy?: scraper_providersGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, scraper_providersGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetScraper_providersGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the scraper_providers model
+   */
+  readonly fields: scraper_providersFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for scraper_providers.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__scraper_providersClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    logs<T extends scraper_providers$logsArgs<ExtArgs> = {}>(args?: Subset<T, scraper_providers$logsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$scraper_logsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the scraper_providers model
+   */
+  interface scraper_providersFieldRefs {
+    readonly id: FieldRef<"scraper_providers", 'String'>
+    readonly provider: FieldRef<"scraper_providers", 'String'>
+    readonly label: FieldRef<"scraper_providers", 'String'>
+    readonly api_key: FieldRef<"scraper_providers", 'String'>
+    readonly extra_config: FieldRef<"scraper_providers", 'Json'>
+    readonly priority: FieldRef<"scraper_providers", 'Int'>
+    readonly is_active: FieldRef<"scraper_providers", 'Boolean'>
+    readonly status: FieldRef<"scraper_providers", 'String'>
+    readonly requests_total: FieldRef<"scraper_providers", 'Int'>
+    readonly requests_month: FieldRef<"scraper_providers", 'Int'>
+    readonly success_count: FieldRef<"scraper_providers", 'Int'>
+    readonly fail_count: FieldRef<"scraper_providers", 'Int'>
+    readonly last_used_at: FieldRef<"scraper_providers", 'DateTime'>
+    readonly last_error: FieldRef<"scraper_providers", 'String'>
+    readonly created_at: FieldRef<"scraper_providers", 'DateTime'>
+    readonly updated_at: FieldRef<"scraper_providers", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * scraper_providers findUnique
+   */
+  export type scraper_providersFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_providers
+     */
+    select?: scraper_providersSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_providers
+     */
+    omit?: scraper_providersOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_providersInclude<ExtArgs> | null
+    /**
+     * Filter, which scraper_providers to fetch.
+     */
+    where: scraper_providersWhereUniqueInput
+  }
+
+  /**
+   * scraper_providers findUniqueOrThrow
+   */
+  export type scraper_providersFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_providers
+     */
+    select?: scraper_providersSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_providers
+     */
+    omit?: scraper_providersOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_providersInclude<ExtArgs> | null
+    /**
+     * Filter, which scraper_providers to fetch.
+     */
+    where: scraper_providersWhereUniqueInput
+  }
+
+  /**
+   * scraper_providers findFirst
+   */
+  export type scraper_providersFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_providers
+     */
+    select?: scraper_providersSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_providers
+     */
+    omit?: scraper_providersOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_providersInclude<ExtArgs> | null
+    /**
+     * Filter, which scraper_providers to fetch.
+     */
+    where?: scraper_providersWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of scraper_providers to fetch.
+     */
+    orderBy?: scraper_providersOrderByWithRelationInput | scraper_providersOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for scraper_providers.
+     */
+    cursor?: scraper_providersWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` scraper_providers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` scraper_providers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of scraper_providers.
+     */
+    distinct?: Scraper_providersScalarFieldEnum | Scraper_providersScalarFieldEnum[]
+  }
+
+  /**
+   * scraper_providers findFirstOrThrow
+   */
+  export type scraper_providersFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_providers
+     */
+    select?: scraper_providersSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_providers
+     */
+    omit?: scraper_providersOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_providersInclude<ExtArgs> | null
+    /**
+     * Filter, which scraper_providers to fetch.
+     */
+    where?: scraper_providersWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of scraper_providers to fetch.
+     */
+    orderBy?: scraper_providersOrderByWithRelationInput | scraper_providersOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for scraper_providers.
+     */
+    cursor?: scraper_providersWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` scraper_providers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` scraper_providers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of scraper_providers.
+     */
+    distinct?: Scraper_providersScalarFieldEnum | Scraper_providersScalarFieldEnum[]
+  }
+
+  /**
+   * scraper_providers findMany
+   */
+  export type scraper_providersFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_providers
+     */
+    select?: scraper_providersSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_providers
+     */
+    omit?: scraper_providersOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_providersInclude<ExtArgs> | null
+    /**
+     * Filter, which scraper_providers to fetch.
+     */
+    where?: scraper_providersWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of scraper_providers to fetch.
+     */
+    orderBy?: scraper_providersOrderByWithRelationInput | scraper_providersOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing scraper_providers.
+     */
+    cursor?: scraper_providersWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` scraper_providers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` scraper_providers.
+     */
+    skip?: number
+    distinct?: Scraper_providersScalarFieldEnum | Scraper_providersScalarFieldEnum[]
+  }
+
+  /**
+   * scraper_providers create
+   */
+  export type scraper_providersCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_providers
+     */
+    select?: scraper_providersSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_providers
+     */
+    omit?: scraper_providersOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_providersInclude<ExtArgs> | null
+    /**
+     * The data needed to create a scraper_providers.
+     */
+    data: XOR<scraper_providersCreateInput, scraper_providersUncheckedCreateInput>
+  }
+
+  /**
+   * scraper_providers createMany
+   */
+  export type scraper_providersCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many scraper_providers.
+     */
+    data: scraper_providersCreateManyInput | scraper_providersCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * scraper_providers createManyAndReturn
+   */
+  export type scraper_providersCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_providers
+     */
+    select?: scraper_providersSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_providers
+     */
+    omit?: scraper_providersOmit<ExtArgs> | null
+    /**
+     * The data used to create many scraper_providers.
+     */
+    data: scraper_providersCreateManyInput | scraper_providersCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * scraper_providers update
+   */
+  export type scraper_providersUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_providers
+     */
+    select?: scraper_providersSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_providers
+     */
+    omit?: scraper_providersOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_providersInclude<ExtArgs> | null
+    /**
+     * The data needed to update a scraper_providers.
+     */
+    data: XOR<scraper_providersUpdateInput, scraper_providersUncheckedUpdateInput>
+    /**
+     * Choose, which scraper_providers to update.
+     */
+    where: scraper_providersWhereUniqueInput
+  }
+
+  /**
+   * scraper_providers updateMany
+   */
+  export type scraper_providersUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update scraper_providers.
+     */
+    data: XOR<scraper_providersUpdateManyMutationInput, scraper_providersUncheckedUpdateManyInput>
+    /**
+     * Filter which scraper_providers to update
+     */
+    where?: scraper_providersWhereInput
+    /**
+     * Limit how many scraper_providers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * scraper_providers updateManyAndReturn
+   */
+  export type scraper_providersUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_providers
+     */
+    select?: scraper_providersSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_providers
+     */
+    omit?: scraper_providersOmit<ExtArgs> | null
+    /**
+     * The data used to update scraper_providers.
+     */
+    data: XOR<scraper_providersUpdateManyMutationInput, scraper_providersUncheckedUpdateManyInput>
+    /**
+     * Filter which scraper_providers to update
+     */
+    where?: scraper_providersWhereInput
+    /**
+     * Limit how many scraper_providers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * scraper_providers upsert
+   */
+  export type scraper_providersUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_providers
+     */
+    select?: scraper_providersSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_providers
+     */
+    omit?: scraper_providersOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_providersInclude<ExtArgs> | null
+    /**
+     * The filter to search for the scraper_providers to update in case it exists.
+     */
+    where: scraper_providersWhereUniqueInput
+    /**
+     * In case the scraper_providers found by the `where` argument doesn't exist, create a new scraper_providers with this data.
+     */
+    create: XOR<scraper_providersCreateInput, scraper_providersUncheckedCreateInput>
+    /**
+     * In case the scraper_providers was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<scraper_providersUpdateInput, scraper_providersUncheckedUpdateInput>
+  }
+
+  /**
+   * scraper_providers delete
+   */
+  export type scraper_providersDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_providers
+     */
+    select?: scraper_providersSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_providers
+     */
+    omit?: scraper_providersOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_providersInclude<ExtArgs> | null
+    /**
+     * Filter which scraper_providers to delete.
+     */
+    where: scraper_providersWhereUniqueInput
+  }
+
+  /**
+   * scraper_providers deleteMany
+   */
+  export type scraper_providersDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which scraper_providers to delete
+     */
+    where?: scraper_providersWhereInput
+    /**
+     * Limit how many scraper_providers to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * scraper_providers.logs
+   */
+  export type scraper_providers$logsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_logs
+     */
+    select?: scraper_logsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_logs
+     */
+    omit?: scraper_logsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_logsInclude<ExtArgs> | null
+    where?: scraper_logsWhereInput
+    orderBy?: scraper_logsOrderByWithRelationInput | scraper_logsOrderByWithRelationInput[]
+    cursor?: scraper_logsWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Scraper_logsScalarFieldEnum | Scraper_logsScalarFieldEnum[]
+  }
+
+  /**
+   * scraper_providers without action
+   */
+  export type scraper_providersDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_providers
+     */
+    select?: scraper_providersSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_providers
+     */
+    omit?: scraper_providersOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_providersInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model scraper_logs
+   */
+
+  export type AggregateScraper_logs = {
+    _count: Scraper_logsCountAggregateOutputType | null
+    _avg: Scraper_logsAvgAggregateOutputType | null
+    _sum: Scraper_logsSumAggregateOutputType | null
+    _min: Scraper_logsMinAggregateOutputType | null
+    _max: Scraper_logsMaxAggregateOutputType | null
+  }
+
+  export type Scraper_logsAvgAggregateOutputType = {
+    http_status: number | null
+    latency_ms: number | null
+  }
+
+  export type Scraper_logsSumAggregateOutputType = {
+    http_status: number | null
+    latency_ms: number | null
+  }
+
+  export type Scraper_logsMinAggregateOutputType = {
+    id: string | null
+    provider_id: string | null
+    provider_name: string | null
+    provider_label: string | null
+    user_id: string | null
+    user_name: string | null
+    user_email: string | null
+    target_url: string | null
+    target_name: string | null
+    status: string | null
+    http_status: number | null
+    latency_ms: number | null
+    error_message: string | null
+    created_at: Date | null
+  }
+
+  export type Scraper_logsMaxAggregateOutputType = {
+    id: string | null
+    provider_id: string | null
+    provider_name: string | null
+    provider_label: string | null
+    user_id: string | null
+    user_name: string | null
+    user_email: string | null
+    target_url: string | null
+    target_name: string | null
+    status: string | null
+    http_status: number | null
+    latency_ms: number | null
+    error_message: string | null
+    created_at: Date | null
+  }
+
+  export type Scraper_logsCountAggregateOutputType = {
+    id: number
+    provider_id: number
+    provider_name: number
+    provider_label: number
+    user_id: number
+    user_name: number
+    user_email: number
+    target_url: number
+    target_name: number
+    status: number
+    http_status: number
+    latency_ms: number
+    error_message: number
+    created_at: number
+    _all: number
+  }
+
+
+  export type Scraper_logsAvgAggregateInputType = {
+    http_status?: true
+    latency_ms?: true
+  }
+
+  export type Scraper_logsSumAggregateInputType = {
+    http_status?: true
+    latency_ms?: true
+  }
+
+  export type Scraper_logsMinAggregateInputType = {
+    id?: true
+    provider_id?: true
+    provider_name?: true
+    provider_label?: true
+    user_id?: true
+    user_name?: true
+    user_email?: true
+    target_url?: true
+    target_name?: true
+    status?: true
+    http_status?: true
+    latency_ms?: true
+    error_message?: true
+    created_at?: true
+  }
+
+  export type Scraper_logsMaxAggregateInputType = {
+    id?: true
+    provider_id?: true
+    provider_name?: true
+    provider_label?: true
+    user_id?: true
+    user_name?: true
+    user_email?: true
+    target_url?: true
+    target_name?: true
+    status?: true
+    http_status?: true
+    latency_ms?: true
+    error_message?: true
+    created_at?: true
+  }
+
+  export type Scraper_logsCountAggregateInputType = {
+    id?: true
+    provider_id?: true
+    provider_name?: true
+    provider_label?: true
+    user_id?: true
+    user_name?: true
+    user_email?: true
+    target_url?: true
+    target_name?: true
+    status?: true
+    http_status?: true
+    latency_ms?: true
+    error_message?: true
+    created_at?: true
+    _all?: true
+  }
+
+  export type Scraper_logsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which scraper_logs to aggregate.
+     */
+    where?: scraper_logsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of scraper_logs to fetch.
+     */
+    orderBy?: scraper_logsOrderByWithRelationInput | scraper_logsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: scraper_logsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` scraper_logs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` scraper_logs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned scraper_logs
+    **/
+    _count?: true | Scraper_logsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: Scraper_logsAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: Scraper_logsSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: Scraper_logsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: Scraper_logsMaxAggregateInputType
+  }
+
+  export type GetScraper_logsAggregateType<T extends Scraper_logsAggregateArgs> = {
+        [P in keyof T & keyof AggregateScraper_logs]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateScraper_logs[P]>
+      : GetScalarType<T[P], AggregateScraper_logs[P]>
+  }
+
+
+
+
+  export type scraper_logsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: scraper_logsWhereInput
+    orderBy?: scraper_logsOrderByWithAggregationInput | scraper_logsOrderByWithAggregationInput[]
+    by: Scraper_logsScalarFieldEnum[] | Scraper_logsScalarFieldEnum
+    having?: scraper_logsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: Scraper_logsCountAggregateInputType | true
+    _avg?: Scraper_logsAvgAggregateInputType
+    _sum?: Scraper_logsSumAggregateInputType
+    _min?: Scraper_logsMinAggregateInputType
+    _max?: Scraper_logsMaxAggregateInputType
+  }
+
+  export type Scraper_logsGroupByOutputType = {
+    id: string
+    provider_id: string
+    provider_name: string
+    provider_label: string
+    user_id: string | null
+    user_name: string | null
+    user_email: string | null
+    target_url: string
+    target_name: string | null
+    status: string
+    http_status: number | null
+    latency_ms: number | null
+    error_message: string | null
+    created_at: Date
+    _count: Scraper_logsCountAggregateOutputType | null
+    _avg: Scraper_logsAvgAggregateOutputType | null
+    _sum: Scraper_logsSumAggregateOutputType | null
+    _min: Scraper_logsMinAggregateOutputType | null
+    _max: Scraper_logsMaxAggregateOutputType | null
+  }
+
+  type GetScraper_logsGroupByPayload<T extends scraper_logsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<Scraper_logsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof Scraper_logsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], Scraper_logsGroupByOutputType[P]>
+            : GetScalarType<T[P], Scraper_logsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type scraper_logsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider_id?: boolean
+    provider_name?: boolean
+    provider_label?: boolean
+    user_id?: boolean
+    user_name?: boolean
+    user_email?: boolean
+    target_url?: boolean
+    target_name?: boolean
+    status?: boolean
+    http_status?: boolean
+    latency_ms?: boolean
+    error_message?: boolean
+    created_at?: boolean
+    provider?: boolean | scraper_providersDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["scraper_logs"]>
+
+  export type scraper_logsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider_id?: boolean
+    provider_name?: boolean
+    provider_label?: boolean
+    user_id?: boolean
+    user_name?: boolean
+    user_email?: boolean
+    target_url?: boolean
+    target_name?: boolean
+    status?: boolean
+    http_status?: boolean
+    latency_ms?: boolean
+    error_message?: boolean
+    created_at?: boolean
+    provider?: boolean | scraper_providersDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["scraper_logs"]>
+
+  export type scraper_logsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider_id?: boolean
+    provider_name?: boolean
+    provider_label?: boolean
+    user_id?: boolean
+    user_name?: boolean
+    user_email?: boolean
+    target_url?: boolean
+    target_name?: boolean
+    status?: boolean
+    http_status?: boolean
+    latency_ms?: boolean
+    error_message?: boolean
+    created_at?: boolean
+    provider?: boolean | scraper_providersDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["scraper_logs"]>
+
+  export type scraper_logsSelectScalar = {
+    id?: boolean
+    provider_id?: boolean
+    provider_name?: boolean
+    provider_label?: boolean
+    user_id?: boolean
+    user_name?: boolean
+    user_email?: boolean
+    target_url?: boolean
+    target_name?: boolean
+    status?: boolean
+    http_status?: boolean
+    latency_ms?: boolean
+    error_message?: boolean
+    created_at?: boolean
+  }
+
+  export type scraper_logsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "provider_id" | "provider_name" | "provider_label" | "user_id" | "user_name" | "user_email" | "target_url" | "target_name" | "status" | "http_status" | "latency_ms" | "error_message" | "created_at", ExtArgs["result"]["scraper_logs"]>
+  export type scraper_logsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    provider?: boolean | scraper_providersDefaultArgs<ExtArgs>
+  }
+  export type scraper_logsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    provider?: boolean | scraper_providersDefaultArgs<ExtArgs>
+  }
+  export type scraper_logsIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    provider?: boolean | scraper_providersDefaultArgs<ExtArgs>
+  }
+
+  export type $scraper_logsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "scraper_logs"
+    objects: {
+      provider: Prisma.$scraper_providersPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      provider_id: string
+      provider_name: string
+      provider_label: string
+      user_id: string | null
+      user_name: string | null
+      user_email: string | null
+      target_url: string
+      target_name: string | null
+      status: string
+      http_status: number | null
+      latency_ms: number | null
+      error_message: string | null
+      created_at: Date
+    }, ExtArgs["result"]["scraper_logs"]>
+    composites: {}
+  }
+
+  type scraper_logsGetPayload<S extends boolean | null | undefined | scraper_logsDefaultArgs> = $Result.GetResult<Prisma.$scraper_logsPayload, S>
+
+  type scraper_logsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<scraper_logsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: Scraper_logsCountAggregateInputType | true
+    }
+
+  export interface scraper_logsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['scraper_logs'], meta: { name: 'scraper_logs' } }
+    /**
+     * Find zero or one Scraper_logs that matches the filter.
+     * @param {scraper_logsFindUniqueArgs} args - Arguments to find a Scraper_logs
+     * @example
+     * // Get one Scraper_logs
+     * const scraper_logs = await prisma.scraper_logs.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends scraper_logsFindUniqueArgs>(args: SelectSubset<T, scraper_logsFindUniqueArgs<ExtArgs>>): Prisma__scraper_logsClient<$Result.GetResult<Prisma.$scraper_logsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Scraper_logs that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {scraper_logsFindUniqueOrThrowArgs} args - Arguments to find a Scraper_logs
+     * @example
+     * // Get one Scraper_logs
+     * const scraper_logs = await prisma.scraper_logs.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends scraper_logsFindUniqueOrThrowArgs>(args: SelectSubset<T, scraper_logsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__scraper_logsClient<$Result.GetResult<Prisma.$scraper_logsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Scraper_logs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scraper_logsFindFirstArgs} args - Arguments to find a Scraper_logs
+     * @example
+     * // Get one Scraper_logs
+     * const scraper_logs = await prisma.scraper_logs.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends scraper_logsFindFirstArgs>(args?: SelectSubset<T, scraper_logsFindFirstArgs<ExtArgs>>): Prisma__scraper_logsClient<$Result.GetResult<Prisma.$scraper_logsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Scraper_logs that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scraper_logsFindFirstOrThrowArgs} args - Arguments to find a Scraper_logs
+     * @example
+     * // Get one Scraper_logs
+     * const scraper_logs = await prisma.scraper_logs.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends scraper_logsFindFirstOrThrowArgs>(args?: SelectSubset<T, scraper_logsFindFirstOrThrowArgs<ExtArgs>>): Prisma__scraper_logsClient<$Result.GetResult<Prisma.$scraper_logsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Scraper_logs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scraper_logsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Scraper_logs
+     * const scraper_logs = await prisma.scraper_logs.findMany()
+     * 
+     * // Get first 10 Scraper_logs
+     * const scraper_logs = await prisma.scraper_logs.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const scraper_logsWithIdOnly = await prisma.scraper_logs.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends scraper_logsFindManyArgs>(args?: SelectSubset<T, scraper_logsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$scraper_logsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Scraper_logs.
+     * @param {scraper_logsCreateArgs} args - Arguments to create a Scraper_logs.
+     * @example
+     * // Create one Scraper_logs
+     * const Scraper_logs = await prisma.scraper_logs.create({
+     *   data: {
+     *     // ... data to create a Scraper_logs
+     *   }
+     * })
+     * 
+     */
+    create<T extends scraper_logsCreateArgs>(args: SelectSubset<T, scraper_logsCreateArgs<ExtArgs>>): Prisma__scraper_logsClient<$Result.GetResult<Prisma.$scraper_logsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Scraper_logs.
+     * @param {scraper_logsCreateManyArgs} args - Arguments to create many Scraper_logs.
+     * @example
+     * // Create many Scraper_logs
+     * const scraper_logs = await prisma.scraper_logs.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends scraper_logsCreateManyArgs>(args?: SelectSubset<T, scraper_logsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Scraper_logs and returns the data saved in the database.
+     * @param {scraper_logsCreateManyAndReturnArgs} args - Arguments to create many Scraper_logs.
+     * @example
+     * // Create many Scraper_logs
+     * const scraper_logs = await prisma.scraper_logs.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Scraper_logs and only return the `id`
+     * const scraper_logsWithIdOnly = await prisma.scraper_logs.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends scraper_logsCreateManyAndReturnArgs>(args?: SelectSubset<T, scraper_logsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$scraper_logsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Scraper_logs.
+     * @param {scraper_logsDeleteArgs} args - Arguments to delete one Scraper_logs.
+     * @example
+     * // Delete one Scraper_logs
+     * const Scraper_logs = await prisma.scraper_logs.delete({
+     *   where: {
+     *     // ... filter to delete one Scraper_logs
+     *   }
+     * })
+     * 
+     */
+    delete<T extends scraper_logsDeleteArgs>(args: SelectSubset<T, scraper_logsDeleteArgs<ExtArgs>>): Prisma__scraper_logsClient<$Result.GetResult<Prisma.$scraper_logsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Scraper_logs.
+     * @param {scraper_logsUpdateArgs} args - Arguments to update one Scraper_logs.
+     * @example
+     * // Update one Scraper_logs
+     * const scraper_logs = await prisma.scraper_logs.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends scraper_logsUpdateArgs>(args: SelectSubset<T, scraper_logsUpdateArgs<ExtArgs>>): Prisma__scraper_logsClient<$Result.GetResult<Prisma.$scraper_logsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Scraper_logs.
+     * @param {scraper_logsDeleteManyArgs} args - Arguments to filter Scraper_logs to delete.
+     * @example
+     * // Delete a few Scraper_logs
+     * const { count } = await prisma.scraper_logs.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends scraper_logsDeleteManyArgs>(args?: SelectSubset<T, scraper_logsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Scraper_logs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scraper_logsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Scraper_logs
+     * const scraper_logs = await prisma.scraper_logs.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends scraper_logsUpdateManyArgs>(args: SelectSubset<T, scraper_logsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Scraper_logs and returns the data updated in the database.
+     * @param {scraper_logsUpdateManyAndReturnArgs} args - Arguments to update many Scraper_logs.
+     * @example
+     * // Update many Scraper_logs
+     * const scraper_logs = await prisma.scraper_logs.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Scraper_logs and only return the `id`
+     * const scraper_logsWithIdOnly = await prisma.scraper_logs.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends scraper_logsUpdateManyAndReturnArgs>(args: SelectSubset<T, scraper_logsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$scraper_logsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Scraper_logs.
+     * @param {scraper_logsUpsertArgs} args - Arguments to update or create a Scraper_logs.
+     * @example
+     * // Update or create a Scraper_logs
+     * const scraper_logs = await prisma.scraper_logs.upsert({
+     *   create: {
+     *     // ... data to create a Scraper_logs
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Scraper_logs we want to update
+     *   }
+     * })
+     */
+    upsert<T extends scraper_logsUpsertArgs>(args: SelectSubset<T, scraper_logsUpsertArgs<ExtArgs>>): Prisma__scraper_logsClient<$Result.GetResult<Prisma.$scraper_logsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Scraper_logs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scraper_logsCountArgs} args - Arguments to filter Scraper_logs to count.
+     * @example
+     * // Count the number of Scraper_logs
+     * const count = await prisma.scraper_logs.count({
+     *   where: {
+     *     // ... the filter for the Scraper_logs we want to count
+     *   }
+     * })
+    **/
+    count<T extends scraper_logsCountArgs>(
+      args?: Subset<T, scraper_logsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], Scraper_logsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Scraper_logs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {Scraper_logsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends Scraper_logsAggregateArgs>(args: Subset<T, Scraper_logsAggregateArgs>): Prisma.PrismaPromise<GetScraper_logsAggregateType<T>>
+
+    /**
+     * Group by Scraper_logs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scraper_logsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends scraper_logsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: scraper_logsGroupByArgs['orderBy'] }
+        : { orderBy?: scraper_logsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, scraper_logsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetScraper_logsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the scraper_logs model
+   */
+  readonly fields: scraper_logsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for scraper_logs.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__scraper_logsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    provider<T extends scraper_providersDefaultArgs<ExtArgs> = {}>(args?: Subset<T, scraper_providersDefaultArgs<ExtArgs>>): Prisma__scraper_providersClient<$Result.GetResult<Prisma.$scraper_providersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the scraper_logs model
+   */
+  interface scraper_logsFieldRefs {
+    readonly id: FieldRef<"scraper_logs", 'String'>
+    readonly provider_id: FieldRef<"scraper_logs", 'String'>
+    readonly provider_name: FieldRef<"scraper_logs", 'String'>
+    readonly provider_label: FieldRef<"scraper_logs", 'String'>
+    readonly user_id: FieldRef<"scraper_logs", 'String'>
+    readonly user_name: FieldRef<"scraper_logs", 'String'>
+    readonly user_email: FieldRef<"scraper_logs", 'String'>
+    readonly target_url: FieldRef<"scraper_logs", 'String'>
+    readonly target_name: FieldRef<"scraper_logs", 'String'>
+    readonly status: FieldRef<"scraper_logs", 'String'>
+    readonly http_status: FieldRef<"scraper_logs", 'Int'>
+    readonly latency_ms: FieldRef<"scraper_logs", 'Int'>
+    readonly error_message: FieldRef<"scraper_logs", 'String'>
+    readonly created_at: FieldRef<"scraper_logs", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * scraper_logs findUnique
+   */
+  export type scraper_logsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_logs
+     */
+    select?: scraper_logsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_logs
+     */
+    omit?: scraper_logsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_logsInclude<ExtArgs> | null
+    /**
+     * Filter, which scraper_logs to fetch.
+     */
+    where: scraper_logsWhereUniqueInput
+  }
+
+  /**
+   * scraper_logs findUniqueOrThrow
+   */
+  export type scraper_logsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_logs
+     */
+    select?: scraper_logsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_logs
+     */
+    omit?: scraper_logsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_logsInclude<ExtArgs> | null
+    /**
+     * Filter, which scraper_logs to fetch.
+     */
+    where: scraper_logsWhereUniqueInput
+  }
+
+  /**
+   * scraper_logs findFirst
+   */
+  export type scraper_logsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_logs
+     */
+    select?: scraper_logsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_logs
+     */
+    omit?: scraper_logsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_logsInclude<ExtArgs> | null
+    /**
+     * Filter, which scraper_logs to fetch.
+     */
+    where?: scraper_logsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of scraper_logs to fetch.
+     */
+    orderBy?: scraper_logsOrderByWithRelationInput | scraper_logsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for scraper_logs.
+     */
+    cursor?: scraper_logsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` scraper_logs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` scraper_logs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of scraper_logs.
+     */
+    distinct?: Scraper_logsScalarFieldEnum | Scraper_logsScalarFieldEnum[]
+  }
+
+  /**
+   * scraper_logs findFirstOrThrow
+   */
+  export type scraper_logsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_logs
+     */
+    select?: scraper_logsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_logs
+     */
+    omit?: scraper_logsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_logsInclude<ExtArgs> | null
+    /**
+     * Filter, which scraper_logs to fetch.
+     */
+    where?: scraper_logsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of scraper_logs to fetch.
+     */
+    orderBy?: scraper_logsOrderByWithRelationInput | scraper_logsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for scraper_logs.
+     */
+    cursor?: scraper_logsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` scraper_logs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` scraper_logs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of scraper_logs.
+     */
+    distinct?: Scraper_logsScalarFieldEnum | Scraper_logsScalarFieldEnum[]
+  }
+
+  /**
+   * scraper_logs findMany
+   */
+  export type scraper_logsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_logs
+     */
+    select?: scraper_logsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_logs
+     */
+    omit?: scraper_logsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_logsInclude<ExtArgs> | null
+    /**
+     * Filter, which scraper_logs to fetch.
+     */
+    where?: scraper_logsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of scraper_logs to fetch.
+     */
+    orderBy?: scraper_logsOrderByWithRelationInput | scraper_logsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing scraper_logs.
+     */
+    cursor?: scraper_logsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` scraper_logs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` scraper_logs.
+     */
+    skip?: number
+    distinct?: Scraper_logsScalarFieldEnum | Scraper_logsScalarFieldEnum[]
+  }
+
+  /**
+   * scraper_logs create
+   */
+  export type scraper_logsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_logs
+     */
+    select?: scraper_logsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_logs
+     */
+    omit?: scraper_logsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_logsInclude<ExtArgs> | null
+    /**
+     * The data needed to create a scraper_logs.
+     */
+    data: XOR<scraper_logsCreateInput, scraper_logsUncheckedCreateInput>
+  }
+
+  /**
+   * scraper_logs createMany
+   */
+  export type scraper_logsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many scraper_logs.
+     */
+    data: scraper_logsCreateManyInput | scraper_logsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * scraper_logs createManyAndReturn
+   */
+  export type scraper_logsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_logs
+     */
+    select?: scraper_logsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_logs
+     */
+    omit?: scraper_logsOmit<ExtArgs> | null
+    /**
+     * The data used to create many scraper_logs.
+     */
+    data: scraper_logsCreateManyInput | scraper_logsCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_logsIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * scraper_logs update
+   */
+  export type scraper_logsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_logs
+     */
+    select?: scraper_logsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_logs
+     */
+    omit?: scraper_logsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_logsInclude<ExtArgs> | null
+    /**
+     * The data needed to update a scraper_logs.
+     */
+    data: XOR<scraper_logsUpdateInput, scraper_logsUncheckedUpdateInput>
+    /**
+     * Choose, which scraper_logs to update.
+     */
+    where: scraper_logsWhereUniqueInput
+  }
+
+  /**
+   * scraper_logs updateMany
+   */
+  export type scraper_logsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update scraper_logs.
+     */
+    data: XOR<scraper_logsUpdateManyMutationInput, scraper_logsUncheckedUpdateManyInput>
+    /**
+     * Filter which scraper_logs to update
+     */
+    where?: scraper_logsWhereInput
+    /**
+     * Limit how many scraper_logs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * scraper_logs updateManyAndReturn
+   */
+  export type scraper_logsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_logs
+     */
+    select?: scraper_logsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_logs
+     */
+    omit?: scraper_logsOmit<ExtArgs> | null
+    /**
+     * The data used to update scraper_logs.
+     */
+    data: XOR<scraper_logsUpdateManyMutationInput, scraper_logsUncheckedUpdateManyInput>
+    /**
+     * Filter which scraper_logs to update
+     */
+    where?: scraper_logsWhereInput
+    /**
+     * Limit how many scraper_logs to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_logsIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * scraper_logs upsert
+   */
+  export type scraper_logsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_logs
+     */
+    select?: scraper_logsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_logs
+     */
+    omit?: scraper_logsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_logsInclude<ExtArgs> | null
+    /**
+     * The filter to search for the scraper_logs to update in case it exists.
+     */
+    where: scraper_logsWhereUniqueInput
+    /**
+     * In case the scraper_logs found by the `where` argument doesn't exist, create a new scraper_logs with this data.
+     */
+    create: XOR<scraper_logsCreateInput, scraper_logsUncheckedCreateInput>
+    /**
+     * In case the scraper_logs was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<scraper_logsUpdateInput, scraper_logsUncheckedUpdateInput>
+  }
+
+  /**
+   * scraper_logs delete
+   */
+  export type scraper_logsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_logs
+     */
+    select?: scraper_logsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_logs
+     */
+    omit?: scraper_logsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_logsInclude<ExtArgs> | null
+    /**
+     * Filter which scraper_logs to delete.
+     */
+    where: scraper_logsWhereUniqueInput
+  }
+
+  /**
+   * scraper_logs deleteMany
+   */
+  export type scraper_logsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which scraper_logs to delete
+     */
+    where?: scraper_logsWhereInput
+    /**
+     * Limit how many scraper_logs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * scraper_logs without action
+   */
+  export type scraper_logsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scraper_logs
+     */
+    select?: scraper_logsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scraper_logs
+     */
+    omit?: scraper_logsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scraper_logsInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model job_embeddings
+   */
+
+  export type AggregateJob_embeddings = {
+    _count: Job_embeddingsCountAggregateOutputType | null
+    _min: Job_embeddingsMinAggregateOutputType | null
+    _max: Job_embeddingsMaxAggregateOutputType | null
+  }
+
+  export type Job_embeddingsMinAggregateOutputType = {
+    id: string | null
+    job_id: string | null
+    content_hash: string | null
+    created_at: Date | null
+    updated_at: Date | null
+  }
+
+  export type Job_embeddingsMaxAggregateOutputType = {
+    id: string | null
+    job_id: string | null
+    content_hash: string | null
+    created_at: Date | null
+    updated_at: Date | null
+  }
+
+  export type Job_embeddingsCountAggregateOutputType = {
+    id: number
+    job_id: number
+    content_hash: number
+    created_at: number
+    updated_at: number
+    _all: number
+  }
+
+
+  export type Job_embeddingsMinAggregateInputType = {
+    id?: true
+    job_id?: true
+    content_hash?: true
+    created_at?: true
+    updated_at?: true
+  }
+
+  export type Job_embeddingsMaxAggregateInputType = {
+    id?: true
+    job_id?: true
+    content_hash?: true
+    created_at?: true
+    updated_at?: true
+  }
+
+  export type Job_embeddingsCountAggregateInputType = {
+    id?: true
+    job_id?: true
+    content_hash?: true
+    created_at?: true
+    updated_at?: true
+    _all?: true
+  }
+
+  export type Job_embeddingsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which job_embeddings to aggregate.
+     */
+    where?: job_embeddingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of job_embeddings to fetch.
+     */
+    orderBy?: job_embeddingsOrderByWithRelationInput | job_embeddingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: job_embeddingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` job_embeddings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` job_embeddings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned job_embeddings
+    **/
+    _count?: true | Job_embeddingsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: Job_embeddingsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: Job_embeddingsMaxAggregateInputType
+  }
+
+  export type GetJob_embeddingsAggregateType<T extends Job_embeddingsAggregateArgs> = {
+        [P in keyof T & keyof AggregateJob_embeddings]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateJob_embeddings[P]>
+      : GetScalarType<T[P], AggregateJob_embeddings[P]>
+  }
+
+
+
+
+  export type job_embeddingsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: job_embeddingsWhereInput
+    orderBy?: job_embeddingsOrderByWithAggregationInput | job_embeddingsOrderByWithAggregationInput[]
+    by: Job_embeddingsScalarFieldEnum[] | Job_embeddingsScalarFieldEnum
+    having?: job_embeddingsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: Job_embeddingsCountAggregateInputType | true
+    _min?: Job_embeddingsMinAggregateInputType
+    _max?: Job_embeddingsMaxAggregateInputType
+  }
+
+  export type Job_embeddingsGroupByOutputType = {
+    id: string
+    job_id: string
+    content_hash: string
+    created_at: Date
+    updated_at: Date
+    _count: Job_embeddingsCountAggregateOutputType | null
+    _min: Job_embeddingsMinAggregateOutputType | null
+    _max: Job_embeddingsMaxAggregateOutputType | null
+  }
+
+  type GetJob_embeddingsGroupByPayload<T extends job_embeddingsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<Job_embeddingsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof Job_embeddingsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], Job_embeddingsGroupByOutputType[P]>
+            : GetScalarType<T[P], Job_embeddingsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type job_embeddingsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    job_id?: boolean
+    content_hash?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }, ExtArgs["result"]["job_embeddings"]>
+
+
+  export type job_embeddingsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    job_id?: boolean
+    content_hash?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }, ExtArgs["result"]["job_embeddings"]>
+
+  export type job_embeddingsSelectScalar = {
+    id?: boolean
+    job_id?: boolean
+    content_hash?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }
+
+  export type job_embeddingsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "job_id" | "content_hash" | "created_at" | "updated_at", ExtArgs["result"]["job_embeddings"]>
+
+  export type $job_embeddingsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "job_embeddings"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      job_id: string
+      content_hash: string
+      created_at: Date
+      updated_at: Date
+    }, ExtArgs["result"]["job_embeddings"]>
+    composites: {}
+  }
+
+  type job_embeddingsGetPayload<S extends boolean | null | undefined | job_embeddingsDefaultArgs> = $Result.GetResult<Prisma.$job_embeddingsPayload, S>
+
+  type job_embeddingsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<job_embeddingsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: Job_embeddingsCountAggregateInputType | true
+    }
+
+  export interface job_embeddingsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['job_embeddings'], meta: { name: 'job_embeddings' } }
+    /**
+     * Find zero or one Job_embeddings that matches the filter.
+     * @param {job_embeddingsFindUniqueArgs} args - Arguments to find a Job_embeddings
+     * @example
+     * // Get one Job_embeddings
+     * const job_embeddings = await prisma.job_embeddings.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends job_embeddingsFindUniqueArgs>(args: SelectSubset<T, job_embeddingsFindUniqueArgs<ExtArgs>>): Prisma__job_embeddingsClient<$Result.GetResult<Prisma.$job_embeddingsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Job_embeddings that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {job_embeddingsFindUniqueOrThrowArgs} args - Arguments to find a Job_embeddings
+     * @example
+     * // Get one Job_embeddings
+     * const job_embeddings = await prisma.job_embeddings.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends job_embeddingsFindUniqueOrThrowArgs>(args: SelectSubset<T, job_embeddingsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__job_embeddingsClient<$Result.GetResult<Prisma.$job_embeddingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Job_embeddings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {job_embeddingsFindFirstArgs} args - Arguments to find a Job_embeddings
+     * @example
+     * // Get one Job_embeddings
+     * const job_embeddings = await prisma.job_embeddings.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends job_embeddingsFindFirstArgs>(args?: SelectSubset<T, job_embeddingsFindFirstArgs<ExtArgs>>): Prisma__job_embeddingsClient<$Result.GetResult<Prisma.$job_embeddingsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Job_embeddings that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {job_embeddingsFindFirstOrThrowArgs} args - Arguments to find a Job_embeddings
+     * @example
+     * // Get one Job_embeddings
+     * const job_embeddings = await prisma.job_embeddings.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends job_embeddingsFindFirstOrThrowArgs>(args?: SelectSubset<T, job_embeddingsFindFirstOrThrowArgs<ExtArgs>>): Prisma__job_embeddingsClient<$Result.GetResult<Prisma.$job_embeddingsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Job_embeddings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {job_embeddingsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Job_embeddings
+     * const job_embeddings = await prisma.job_embeddings.findMany()
+     * 
+     * // Get first 10 Job_embeddings
+     * const job_embeddings = await prisma.job_embeddings.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const job_embeddingsWithIdOnly = await prisma.job_embeddings.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends job_embeddingsFindManyArgs>(args?: SelectSubset<T, job_embeddingsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$job_embeddingsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Delete a Job_embeddings.
+     * @param {job_embeddingsDeleteArgs} args - Arguments to delete one Job_embeddings.
+     * @example
+     * // Delete one Job_embeddings
+     * const Job_embeddings = await prisma.job_embeddings.delete({
+     *   where: {
+     *     // ... filter to delete one Job_embeddings
+     *   }
+     * })
+     * 
+     */
+    delete<T extends job_embeddingsDeleteArgs>(args: SelectSubset<T, job_embeddingsDeleteArgs<ExtArgs>>): Prisma__job_embeddingsClient<$Result.GetResult<Prisma.$job_embeddingsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Job_embeddings.
+     * @param {job_embeddingsUpdateArgs} args - Arguments to update one Job_embeddings.
+     * @example
+     * // Update one Job_embeddings
+     * const job_embeddings = await prisma.job_embeddings.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends job_embeddingsUpdateArgs>(args: SelectSubset<T, job_embeddingsUpdateArgs<ExtArgs>>): Prisma__job_embeddingsClient<$Result.GetResult<Prisma.$job_embeddingsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Job_embeddings.
+     * @param {job_embeddingsDeleteManyArgs} args - Arguments to filter Job_embeddings to delete.
+     * @example
+     * // Delete a few Job_embeddings
+     * const { count } = await prisma.job_embeddings.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends job_embeddingsDeleteManyArgs>(args?: SelectSubset<T, job_embeddingsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Job_embeddings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {job_embeddingsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Job_embeddings
+     * const job_embeddings = await prisma.job_embeddings.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends job_embeddingsUpdateManyArgs>(args: SelectSubset<T, job_embeddingsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Job_embeddings and returns the data updated in the database.
+     * @param {job_embeddingsUpdateManyAndReturnArgs} args - Arguments to update many Job_embeddings.
+     * @example
+     * // Update many Job_embeddings
+     * const job_embeddings = await prisma.job_embeddings.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Job_embeddings and only return the `id`
+     * const job_embeddingsWithIdOnly = await prisma.job_embeddings.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends job_embeddingsUpdateManyAndReturnArgs>(args: SelectSubset<T, job_embeddingsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$job_embeddingsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+
+    /**
+     * Count the number of Job_embeddings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {job_embeddingsCountArgs} args - Arguments to filter Job_embeddings to count.
+     * @example
+     * // Count the number of Job_embeddings
+     * const count = await prisma.job_embeddings.count({
+     *   where: {
+     *     // ... the filter for the Job_embeddings we want to count
+     *   }
+     * })
+    **/
+    count<T extends job_embeddingsCountArgs>(
+      args?: Subset<T, job_embeddingsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], Job_embeddingsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Job_embeddings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {Job_embeddingsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends Job_embeddingsAggregateArgs>(args: Subset<T, Job_embeddingsAggregateArgs>): Prisma.PrismaPromise<GetJob_embeddingsAggregateType<T>>
+
+    /**
+     * Group by Job_embeddings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {job_embeddingsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends job_embeddingsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: job_embeddingsGroupByArgs['orderBy'] }
+        : { orderBy?: job_embeddingsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, job_embeddingsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetJob_embeddingsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the job_embeddings model
+   */
+  readonly fields: job_embeddingsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for job_embeddings.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__job_embeddingsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the job_embeddings model
+   */
+  interface job_embeddingsFieldRefs {
+    readonly id: FieldRef<"job_embeddings", 'String'>
+    readonly job_id: FieldRef<"job_embeddings", 'String'>
+    readonly content_hash: FieldRef<"job_embeddings", 'String'>
+    readonly created_at: FieldRef<"job_embeddings", 'DateTime'>
+    readonly updated_at: FieldRef<"job_embeddings", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * job_embeddings findUnique
+   */
+  export type job_embeddingsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the job_embeddings
+     */
+    select?: job_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the job_embeddings
+     */
+    omit?: job_embeddingsOmit<ExtArgs> | null
+    /**
+     * Filter, which job_embeddings to fetch.
+     */
+    where: job_embeddingsWhereUniqueInput
+  }
+
+  /**
+   * job_embeddings findUniqueOrThrow
+   */
+  export type job_embeddingsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the job_embeddings
+     */
+    select?: job_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the job_embeddings
+     */
+    omit?: job_embeddingsOmit<ExtArgs> | null
+    /**
+     * Filter, which job_embeddings to fetch.
+     */
+    where: job_embeddingsWhereUniqueInput
+  }
+
+  /**
+   * job_embeddings findFirst
+   */
+  export type job_embeddingsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the job_embeddings
+     */
+    select?: job_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the job_embeddings
+     */
+    omit?: job_embeddingsOmit<ExtArgs> | null
+    /**
+     * Filter, which job_embeddings to fetch.
+     */
+    where?: job_embeddingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of job_embeddings to fetch.
+     */
+    orderBy?: job_embeddingsOrderByWithRelationInput | job_embeddingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for job_embeddings.
+     */
+    cursor?: job_embeddingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` job_embeddings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` job_embeddings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of job_embeddings.
+     */
+    distinct?: Job_embeddingsScalarFieldEnum | Job_embeddingsScalarFieldEnum[]
+  }
+
+  /**
+   * job_embeddings findFirstOrThrow
+   */
+  export type job_embeddingsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the job_embeddings
+     */
+    select?: job_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the job_embeddings
+     */
+    omit?: job_embeddingsOmit<ExtArgs> | null
+    /**
+     * Filter, which job_embeddings to fetch.
+     */
+    where?: job_embeddingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of job_embeddings to fetch.
+     */
+    orderBy?: job_embeddingsOrderByWithRelationInput | job_embeddingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for job_embeddings.
+     */
+    cursor?: job_embeddingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` job_embeddings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` job_embeddings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of job_embeddings.
+     */
+    distinct?: Job_embeddingsScalarFieldEnum | Job_embeddingsScalarFieldEnum[]
+  }
+
+  /**
+   * job_embeddings findMany
+   */
+  export type job_embeddingsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the job_embeddings
+     */
+    select?: job_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the job_embeddings
+     */
+    omit?: job_embeddingsOmit<ExtArgs> | null
+    /**
+     * Filter, which job_embeddings to fetch.
+     */
+    where?: job_embeddingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of job_embeddings to fetch.
+     */
+    orderBy?: job_embeddingsOrderByWithRelationInput | job_embeddingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing job_embeddings.
+     */
+    cursor?: job_embeddingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` job_embeddings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` job_embeddings.
+     */
+    skip?: number
+    distinct?: Job_embeddingsScalarFieldEnum | Job_embeddingsScalarFieldEnum[]
+  }
+
+  /**
+   * job_embeddings update
+   */
+  export type job_embeddingsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the job_embeddings
+     */
+    select?: job_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the job_embeddings
+     */
+    omit?: job_embeddingsOmit<ExtArgs> | null
+    /**
+     * The data needed to update a job_embeddings.
+     */
+    data: XOR<job_embeddingsUpdateInput, job_embeddingsUncheckedUpdateInput>
+    /**
+     * Choose, which job_embeddings to update.
+     */
+    where: job_embeddingsWhereUniqueInput
+  }
+
+  /**
+   * job_embeddings updateMany
+   */
+  export type job_embeddingsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update job_embeddings.
+     */
+    data: XOR<job_embeddingsUpdateManyMutationInput, job_embeddingsUncheckedUpdateManyInput>
+    /**
+     * Filter which job_embeddings to update
+     */
+    where?: job_embeddingsWhereInput
+    /**
+     * Limit how many job_embeddings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * job_embeddings updateManyAndReturn
+   */
+  export type job_embeddingsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the job_embeddings
+     */
+    select?: job_embeddingsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the job_embeddings
+     */
+    omit?: job_embeddingsOmit<ExtArgs> | null
+    /**
+     * The data used to update job_embeddings.
+     */
+    data: XOR<job_embeddingsUpdateManyMutationInput, job_embeddingsUncheckedUpdateManyInput>
+    /**
+     * Filter which job_embeddings to update
+     */
+    where?: job_embeddingsWhereInput
+    /**
+     * Limit how many job_embeddings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * job_embeddings delete
+   */
+  export type job_embeddingsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the job_embeddings
+     */
+    select?: job_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the job_embeddings
+     */
+    omit?: job_embeddingsOmit<ExtArgs> | null
+    /**
+     * Filter which job_embeddings to delete.
+     */
+    where: job_embeddingsWhereUniqueInput
+  }
+
+  /**
+   * job_embeddings deleteMany
+   */
+  export type job_embeddingsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which job_embeddings to delete
+     */
+    where?: job_embeddingsWhereInput
+    /**
+     * Limit how many job_embeddings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * job_embeddings without action
+   */
+  export type job_embeddingsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the job_embeddings
+     */
+    select?: job_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the job_embeddings
+     */
+    omit?: job_embeddingsOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model user_career_embeddings
+   */
+
+  export type AggregateUser_career_embeddings = {
+    _count: User_career_embeddingsCountAggregateOutputType | null
+    _min: User_career_embeddingsMinAggregateOutputType | null
+    _max: User_career_embeddingsMaxAggregateOutputType | null
+  }
+
+  export type User_career_embeddingsMinAggregateOutputType = {
+    id: string | null
+    user_id: string | null
+    cv_id: string | null
+    content_hash: string | null
+    updated_at: Date | null
+  }
+
+  export type User_career_embeddingsMaxAggregateOutputType = {
+    id: string | null
+    user_id: string | null
+    cv_id: string | null
+    content_hash: string | null
+    updated_at: Date | null
+  }
+
+  export type User_career_embeddingsCountAggregateOutputType = {
+    id: number
+    user_id: number
+    cv_id: number
+    content_hash: number
+    updated_at: number
+    _all: number
+  }
+
+
+  export type User_career_embeddingsMinAggregateInputType = {
+    id?: true
+    user_id?: true
+    cv_id?: true
+    content_hash?: true
+    updated_at?: true
+  }
+
+  export type User_career_embeddingsMaxAggregateInputType = {
+    id?: true
+    user_id?: true
+    cv_id?: true
+    content_hash?: true
+    updated_at?: true
+  }
+
+  export type User_career_embeddingsCountAggregateInputType = {
+    id?: true
+    user_id?: true
+    cv_id?: true
+    content_hash?: true
+    updated_at?: true
+    _all?: true
+  }
+
+  export type User_career_embeddingsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which user_career_embeddings to aggregate.
+     */
+    where?: user_career_embeddingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of user_career_embeddings to fetch.
+     */
+    orderBy?: user_career_embeddingsOrderByWithRelationInput | user_career_embeddingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: user_career_embeddingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` user_career_embeddings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` user_career_embeddings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned user_career_embeddings
+    **/
+    _count?: true | User_career_embeddingsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: User_career_embeddingsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: User_career_embeddingsMaxAggregateInputType
+  }
+
+  export type GetUser_career_embeddingsAggregateType<T extends User_career_embeddingsAggregateArgs> = {
+        [P in keyof T & keyof AggregateUser_career_embeddings]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUser_career_embeddings[P]>
+      : GetScalarType<T[P], AggregateUser_career_embeddings[P]>
+  }
+
+
+
+
+  export type user_career_embeddingsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: user_career_embeddingsWhereInput
+    orderBy?: user_career_embeddingsOrderByWithAggregationInput | user_career_embeddingsOrderByWithAggregationInput[]
+    by: User_career_embeddingsScalarFieldEnum[] | User_career_embeddingsScalarFieldEnum
+    having?: user_career_embeddingsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: User_career_embeddingsCountAggregateInputType | true
+    _min?: User_career_embeddingsMinAggregateInputType
+    _max?: User_career_embeddingsMaxAggregateInputType
+  }
+
+  export type User_career_embeddingsGroupByOutputType = {
+    id: string
+    user_id: string
+    cv_id: string | null
+    content_hash: string
+    updated_at: Date
+    _count: User_career_embeddingsCountAggregateOutputType | null
+    _min: User_career_embeddingsMinAggregateOutputType | null
+    _max: User_career_embeddingsMaxAggregateOutputType | null
+  }
+
+  type GetUser_career_embeddingsGroupByPayload<T extends user_career_embeddingsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<User_career_embeddingsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof User_career_embeddingsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], User_career_embeddingsGroupByOutputType[P]>
+            : GetScalarType<T[P], User_career_embeddingsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type user_career_embeddingsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    cv_id?: boolean
+    content_hash?: boolean
+    updated_at?: boolean
+  }, ExtArgs["result"]["user_career_embeddings"]>
+
+
+  export type user_career_embeddingsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    cv_id?: boolean
+    content_hash?: boolean
+    updated_at?: boolean
+  }, ExtArgs["result"]["user_career_embeddings"]>
+
+  export type user_career_embeddingsSelectScalar = {
+    id?: boolean
+    user_id?: boolean
+    cv_id?: boolean
+    content_hash?: boolean
+    updated_at?: boolean
+  }
+
+  export type user_career_embeddingsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "user_id" | "cv_id" | "content_hash" | "updated_at", ExtArgs["result"]["user_career_embeddings"]>
+
+  export type $user_career_embeddingsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "user_career_embeddings"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      user_id: string
+      cv_id: string | null
+      content_hash: string
+      updated_at: Date
+    }, ExtArgs["result"]["user_career_embeddings"]>
+    composites: {}
+  }
+
+  type user_career_embeddingsGetPayload<S extends boolean | null | undefined | user_career_embeddingsDefaultArgs> = $Result.GetResult<Prisma.$user_career_embeddingsPayload, S>
+
+  type user_career_embeddingsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<user_career_embeddingsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: User_career_embeddingsCountAggregateInputType | true
+    }
+
+  export interface user_career_embeddingsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['user_career_embeddings'], meta: { name: 'user_career_embeddings' } }
+    /**
+     * Find zero or one User_career_embeddings that matches the filter.
+     * @param {user_career_embeddingsFindUniqueArgs} args - Arguments to find a User_career_embeddings
+     * @example
+     * // Get one User_career_embeddings
+     * const user_career_embeddings = await prisma.user_career_embeddings.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends user_career_embeddingsFindUniqueArgs>(args: SelectSubset<T, user_career_embeddingsFindUniqueArgs<ExtArgs>>): Prisma__user_career_embeddingsClient<$Result.GetResult<Prisma.$user_career_embeddingsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one User_career_embeddings that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {user_career_embeddingsFindUniqueOrThrowArgs} args - Arguments to find a User_career_embeddings
+     * @example
+     * // Get one User_career_embeddings
+     * const user_career_embeddings = await prisma.user_career_embeddings.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends user_career_embeddingsFindUniqueOrThrowArgs>(args: SelectSubset<T, user_career_embeddingsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__user_career_embeddingsClient<$Result.GetResult<Prisma.$user_career_embeddingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first User_career_embeddings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {user_career_embeddingsFindFirstArgs} args - Arguments to find a User_career_embeddings
+     * @example
+     * // Get one User_career_embeddings
+     * const user_career_embeddings = await prisma.user_career_embeddings.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends user_career_embeddingsFindFirstArgs>(args?: SelectSubset<T, user_career_embeddingsFindFirstArgs<ExtArgs>>): Prisma__user_career_embeddingsClient<$Result.GetResult<Prisma.$user_career_embeddingsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first User_career_embeddings that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {user_career_embeddingsFindFirstOrThrowArgs} args - Arguments to find a User_career_embeddings
+     * @example
+     * // Get one User_career_embeddings
+     * const user_career_embeddings = await prisma.user_career_embeddings.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends user_career_embeddingsFindFirstOrThrowArgs>(args?: SelectSubset<T, user_career_embeddingsFindFirstOrThrowArgs<ExtArgs>>): Prisma__user_career_embeddingsClient<$Result.GetResult<Prisma.$user_career_embeddingsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more User_career_embeddings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {user_career_embeddingsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all User_career_embeddings
+     * const user_career_embeddings = await prisma.user_career_embeddings.findMany()
+     * 
+     * // Get first 10 User_career_embeddings
+     * const user_career_embeddings = await prisma.user_career_embeddings.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const user_career_embeddingsWithIdOnly = await prisma.user_career_embeddings.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends user_career_embeddingsFindManyArgs>(args?: SelectSubset<T, user_career_embeddingsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_career_embeddingsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Delete a User_career_embeddings.
+     * @param {user_career_embeddingsDeleteArgs} args - Arguments to delete one User_career_embeddings.
+     * @example
+     * // Delete one User_career_embeddings
+     * const User_career_embeddings = await prisma.user_career_embeddings.delete({
+     *   where: {
+     *     // ... filter to delete one User_career_embeddings
+     *   }
+     * })
+     * 
+     */
+    delete<T extends user_career_embeddingsDeleteArgs>(args: SelectSubset<T, user_career_embeddingsDeleteArgs<ExtArgs>>): Prisma__user_career_embeddingsClient<$Result.GetResult<Prisma.$user_career_embeddingsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one User_career_embeddings.
+     * @param {user_career_embeddingsUpdateArgs} args - Arguments to update one User_career_embeddings.
+     * @example
+     * // Update one User_career_embeddings
+     * const user_career_embeddings = await prisma.user_career_embeddings.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends user_career_embeddingsUpdateArgs>(args: SelectSubset<T, user_career_embeddingsUpdateArgs<ExtArgs>>): Prisma__user_career_embeddingsClient<$Result.GetResult<Prisma.$user_career_embeddingsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more User_career_embeddings.
+     * @param {user_career_embeddingsDeleteManyArgs} args - Arguments to filter User_career_embeddings to delete.
+     * @example
+     * // Delete a few User_career_embeddings
+     * const { count } = await prisma.user_career_embeddings.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends user_career_embeddingsDeleteManyArgs>(args?: SelectSubset<T, user_career_embeddingsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more User_career_embeddings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {user_career_embeddingsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many User_career_embeddings
+     * const user_career_embeddings = await prisma.user_career_embeddings.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends user_career_embeddingsUpdateManyArgs>(args: SelectSubset<T, user_career_embeddingsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more User_career_embeddings and returns the data updated in the database.
+     * @param {user_career_embeddingsUpdateManyAndReturnArgs} args - Arguments to update many User_career_embeddings.
+     * @example
+     * // Update many User_career_embeddings
+     * const user_career_embeddings = await prisma.user_career_embeddings.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more User_career_embeddings and only return the `id`
+     * const user_career_embeddingsWithIdOnly = await prisma.user_career_embeddings.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends user_career_embeddingsUpdateManyAndReturnArgs>(args: SelectSubset<T, user_career_embeddingsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_career_embeddingsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+
+    /**
+     * Count the number of User_career_embeddings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {user_career_embeddingsCountArgs} args - Arguments to filter User_career_embeddings to count.
+     * @example
+     * // Count the number of User_career_embeddings
+     * const count = await prisma.user_career_embeddings.count({
+     *   where: {
+     *     // ... the filter for the User_career_embeddings we want to count
+     *   }
+     * })
+    **/
+    count<T extends user_career_embeddingsCountArgs>(
+      args?: Subset<T, user_career_embeddingsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], User_career_embeddingsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a User_career_embeddings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {User_career_embeddingsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends User_career_embeddingsAggregateArgs>(args: Subset<T, User_career_embeddingsAggregateArgs>): Prisma.PrismaPromise<GetUser_career_embeddingsAggregateType<T>>
+
+    /**
+     * Group by User_career_embeddings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {user_career_embeddingsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends user_career_embeddingsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: user_career_embeddingsGroupByArgs['orderBy'] }
+        : { orderBy?: user_career_embeddingsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, user_career_embeddingsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUser_career_embeddingsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the user_career_embeddings model
+   */
+  readonly fields: user_career_embeddingsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for user_career_embeddings.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__user_career_embeddingsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the user_career_embeddings model
+   */
+  interface user_career_embeddingsFieldRefs {
+    readonly id: FieldRef<"user_career_embeddings", 'String'>
+    readonly user_id: FieldRef<"user_career_embeddings", 'String'>
+    readonly cv_id: FieldRef<"user_career_embeddings", 'String'>
+    readonly content_hash: FieldRef<"user_career_embeddings", 'String'>
+    readonly updated_at: FieldRef<"user_career_embeddings", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * user_career_embeddings findUnique
+   */
+  export type user_career_embeddingsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user_career_embeddings
+     */
+    select?: user_career_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user_career_embeddings
+     */
+    omit?: user_career_embeddingsOmit<ExtArgs> | null
+    /**
+     * Filter, which user_career_embeddings to fetch.
+     */
+    where: user_career_embeddingsWhereUniqueInput
+  }
+
+  /**
+   * user_career_embeddings findUniqueOrThrow
+   */
+  export type user_career_embeddingsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user_career_embeddings
+     */
+    select?: user_career_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user_career_embeddings
+     */
+    omit?: user_career_embeddingsOmit<ExtArgs> | null
+    /**
+     * Filter, which user_career_embeddings to fetch.
+     */
+    where: user_career_embeddingsWhereUniqueInput
+  }
+
+  /**
+   * user_career_embeddings findFirst
+   */
+  export type user_career_embeddingsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user_career_embeddings
+     */
+    select?: user_career_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user_career_embeddings
+     */
+    omit?: user_career_embeddingsOmit<ExtArgs> | null
+    /**
+     * Filter, which user_career_embeddings to fetch.
+     */
+    where?: user_career_embeddingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of user_career_embeddings to fetch.
+     */
+    orderBy?: user_career_embeddingsOrderByWithRelationInput | user_career_embeddingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for user_career_embeddings.
+     */
+    cursor?: user_career_embeddingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` user_career_embeddings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` user_career_embeddings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of user_career_embeddings.
+     */
+    distinct?: User_career_embeddingsScalarFieldEnum | User_career_embeddingsScalarFieldEnum[]
+  }
+
+  /**
+   * user_career_embeddings findFirstOrThrow
+   */
+  export type user_career_embeddingsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user_career_embeddings
+     */
+    select?: user_career_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user_career_embeddings
+     */
+    omit?: user_career_embeddingsOmit<ExtArgs> | null
+    /**
+     * Filter, which user_career_embeddings to fetch.
+     */
+    where?: user_career_embeddingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of user_career_embeddings to fetch.
+     */
+    orderBy?: user_career_embeddingsOrderByWithRelationInput | user_career_embeddingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for user_career_embeddings.
+     */
+    cursor?: user_career_embeddingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` user_career_embeddings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` user_career_embeddings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of user_career_embeddings.
+     */
+    distinct?: User_career_embeddingsScalarFieldEnum | User_career_embeddingsScalarFieldEnum[]
+  }
+
+  /**
+   * user_career_embeddings findMany
+   */
+  export type user_career_embeddingsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user_career_embeddings
+     */
+    select?: user_career_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user_career_embeddings
+     */
+    omit?: user_career_embeddingsOmit<ExtArgs> | null
+    /**
+     * Filter, which user_career_embeddings to fetch.
+     */
+    where?: user_career_embeddingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of user_career_embeddings to fetch.
+     */
+    orderBy?: user_career_embeddingsOrderByWithRelationInput | user_career_embeddingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing user_career_embeddings.
+     */
+    cursor?: user_career_embeddingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` user_career_embeddings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` user_career_embeddings.
+     */
+    skip?: number
+    distinct?: User_career_embeddingsScalarFieldEnum | User_career_embeddingsScalarFieldEnum[]
+  }
+
+  /**
+   * user_career_embeddings update
+   */
+  export type user_career_embeddingsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user_career_embeddings
+     */
+    select?: user_career_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user_career_embeddings
+     */
+    omit?: user_career_embeddingsOmit<ExtArgs> | null
+    /**
+     * The data needed to update a user_career_embeddings.
+     */
+    data: XOR<user_career_embeddingsUpdateInput, user_career_embeddingsUncheckedUpdateInput>
+    /**
+     * Choose, which user_career_embeddings to update.
+     */
+    where: user_career_embeddingsWhereUniqueInput
+  }
+
+  /**
+   * user_career_embeddings updateMany
+   */
+  export type user_career_embeddingsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update user_career_embeddings.
+     */
+    data: XOR<user_career_embeddingsUpdateManyMutationInput, user_career_embeddingsUncheckedUpdateManyInput>
+    /**
+     * Filter which user_career_embeddings to update
+     */
+    where?: user_career_embeddingsWhereInput
+    /**
+     * Limit how many user_career_embeddings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * user_career_embeddings updateManyAndReturn
+   */
+  export type user_career_embeddingsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user_career_embeddings
+     */
+    select?: user_career_embeddingsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the user_career_embeddings
+     */
+    omit?: user_career_embeddingsOmit<ExtArgs> | null
+    /**
+     * The data used to update user_career_embeddings.
+     */
+    data: XOR<user_career_embeddingsUpdateManyMutationInput, user_career_embeddingsUncheckedUpdateManyInput>
+    /**
+     * Filter which user_career_embeddings to update
+     */
+    where?: user_career_embeddingsWhereInput
+    /**
+     * Limit how many user_career_embeddings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * user_career_embeddings delete
+   */
+  export type user_career_embeddingsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user_career_embeddings
+     */
+    select?: user_career_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user_career_embeddings
+     */
+    omit?: user_career_embeddingsOmit<ExtArgs> | null
+    /**
+     * Filter which user_career_embeddings to delete.
+     */
+    where: user_career_embeddingsWhereUniqueInput
+  }
+
+  /**
+   * user_career_embeddings deleteMany
+   */
+  export type user_career_embeddingsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which user_career_embeddings to delete
+     */
+    where?: user_career_embeddingsWhereInput
+    /**
+     * Limit how many user_career_embeddings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * user_career_embeddings without action
+   */
+  export type user_career_embeddingsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user_career_embeddings
+     */
+    select?: user_career_embeddingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user_career_embeddings
+     */
+    omit?: user_career_embeddingsOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -72124,7 +78986,6 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     slug: 'slug',
-    logo_url: 'logo_url',
     website: 'website',
     industry: 'industry',
     location: 'location'
@@ -72551,6 +79412,38 @@ export namespace Prisma {
   export type EarlyTesterScalarFieldEnum = (typeof EarlyTesterScalarFieldEnum)[keyof typeof EarlyTesterScalarFieldEnum]
 
 
+  export const NewsletterSubscriberScalarFieldEnum: {
+    id: 'id',
+    email: 'email',
+    name: 'name',
+    source: 'source',
+    is_active: 'is_active',
+    token: 'token',
+    subscribed_at: 'subscribed_at',
+    unsubscribed_at: 'unsubscribed_at',
+    created_at: 'created_at',
+    updated_at: 'updated_at'
+  };
+
+  export type NewsletterSubscriberScalarFieldEnum = (typeof NewsletterSubscriberScalarFieldEnum)[keyof typeof NewsletterSubscriberScalarFieldEnum]
+
+
+  export const NewsletterCampaignScalarFieldEnum: {
+    id: 'id',
+    title: 'title',
+    subject: 'subject',
+    content_type: 'content_type',
+    reference_id: 'reference_id',
+    total_recipients: 'total_recipients',
+    sent_count: 'sent_count',
+    failed_count: 'failed_count',
+    status: 'status',
+    created_at: 'created_at'
+  };
+
+  export type NewsletterCampaignScalarFieldEnum = (typeof NewsletterCampaignScalarFieldEnum)[keyof typeof NewsletterCampaignScalarFieldEnum]
+
+
   export const VisitorScalarFieldEnum: {
     id: 'id',
     visitor_id: 'visitor_id',
@@ -72825,11 +79718,76 @@ export namespace Prisma {
     top_nicetohave_skills: 'top_nicetohave_skills',
     category: 'category',
     is_promoted: 'is_promoted',
+    details: 'details',
     created_at: 'created_at',
     updated_at: 'updated_at'
   };
 
   export type LearnedRoleBlueprintScalarFieldEnum = (typeof LearnedRoleBlueprintScalarFieldEnum)[keyof typeof LearnedRoleBlueprintScalarFieldEnum]
+
+
+  export const Scraper_providersScalarFieldEnum: {
+    id: 'id',
+    provider: 'provider',
+    label: 'label',
+    api_key: 'api_key',
+    extra_config: 'extra_config',
+    priority: 'priority',
+    is_active: 'is_active',
+    status: 'status',
+    requests_total: 'requests_total',
+    requests_month: 'requests_month',
+    success_count: 'success_count',
+    fail_count: 'fail_count',
+    last_used_at: 'last_used_at',
+    last_error: 'last_error',
+    created_at: 'created_at',
+    updated_at: 'updated_at'
+  };
+
+  export type Scraper_providersScalarFieldEnum = (typeof Scraper_providersScalarFieldEnum)[keyof typeof Scraper_providersScalarFieldEnum]
+
+
+  export const Scraper_logsScalarFieldEnum: {
+    id: 'id',
+    provider_id: 'provider_id',
+    provider_name: 'provider_name',
+    provider_label: 'provider_label',
+    user_id: 'user_id',
+    user_name: 'user_name',
+    user_email: 'user_email',
+    target_url: 'target_url',
+    target_name: 'target_name',
+    status: 'status',
+    http_status: 'http_status',
+    latency_ms: 'latency_ms',
+    error_message: 'error_message',
+    created_at: 'created_at'
+  };
+
+  export type Scraper_logsScalarFieldEnum = (typeof Scraper_logsScalarFieldEnum)[keyof typeof Scraper_logsScalarFieldEnum]
+
+
+  export const Job_embeddingsScalarFieldEnum: {
+    id: 'id',
+    job_id: 'job_id',
+    content_hash: 'content_hash',
+    created_at: 'created_at',
+    updated_at: 'updated_at'
+  };
+
+  export type Job_embeddingsScalarFieldEnum = (typeof Job_embeddingsScalarFieldEnum)[keyof typeof Job_embeddingsScalarFieldEnum]
+
+
+  export const User_career_embeddingsScalarFieldEnum: {
+    id: 'id',
+    user_id: 'user_id',
+    cv_id: 'cv_id',
+    content_hash: 'content_hash',
+    updated_at: 'updated_at'
+  };
+
+  export type User_career_embeddingsScalarFieldEnum = (typeof User_career_embeddingsScalarFieldEnum)[keyof typeof User_career_embeddingsScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -74658,7 +81616,6 @@ export namespace Prisma {
     id?: UuidFilter<"companies"> | string
     name?: StringFilter<"companies"> | string
     slug?: StringFilter<"companies"> | string
-    logo_url?: StringNullableFilter<"companies"> | string | null
     website?: StringNullableFilter<"companies"> | string | null
     industry?: StringNullableFilter<"companies"> | string | null
     location?: StringNullableFilter<"companies"> | string | null
@@ -74669,7 +81626,6 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
-    logo_url?: SortOrderInput | SortOrder
     website?: SortOrderInput | SortOrder
     industry?: SortOrderInput | SortOrder
     location?: SortOrderInput | SortOrder
@@ -74683,7 +81639,6 @@ export namespace Prisma {
     OR?: companiesWhereInput[]
     NOT?: companiesWhereInput | companiesWhereInput[]
     name?: StringFilter<"companies"> | string
-    logo_url?: StringNullableFilter<"companies"> | string | null
     website?: StringNullableFilter<"companies"> | string | null
     industry?: StringNullableFilter<"companies"> | string | null
     location?: StringNullableFilter<"companies"> | string | null
@@ -74694,7 +81649,6 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
-    logo_url?: SortOrderInput | SortOrder
     website?: SortOrderInput | SortOrder
     industry?: SortOrderInput | SortOrder
     location?: SortOrderInput | SortOrder
@@ -74710,7 +81664,6 @@ export namespace Prisma {
     id?: UuidWithAggregatesFilter<"companies"> | string
     name?: StringWithAggregatesFilter<"companies"> | string
     slug?: StringWithAggregatesFilter<"companies"> | string
-    logo_url?: StringNullableWithAggregatesFilter<"companies"> | string | null
     website?: StringNullableWithAggregatesFilter<"companies"> | string | null
     industry?: StringNullableWithAggregatesFilter<"companies"> | string | null
     location?: StringNullableWithAggregatesFilter<"companies"> | string | null
@@ -76834,6 +83787,162 @@ export namespace Prisma {
     updated_at?: DateTimeWithAggregatesFilter<"EarlyTester"> | Date | string
   }
 
+  export type NewsletterSubscriberWhereInput = {
+    AND?: NewsletterSubscriberWhereInput | NewsletterSubscriberWhereInput[]
+    OR?: NewsletterSubscriberWhereInput[]
+    NOT?: NewsletterSubscriberWhereInput | NewsletterSubscriberWhereInput[]
+    id?: UuidFilter<"NewsletterSubscriber"> | string
+    email?: StringFilter<"NewsletterSubscriber"> | string
+    name?: StringNullableFilter<"NewsletterSubscriber"> | string | null
+    source?: StringFilter<"NewsletterSubscriber"> | string
+    is_active?: BoolFilter<"NewsletterSubscriber"> | boolean
+    token?: StringFilter<"NewsletterSubscriber"> | string
+    subscribed_at?: DateTimeFilter<"NewsletterSubscriber"> | Date | string
+    unsubscribed_at?: DateTimeNullableFilter<"NewsletterSubscriber"> | Date | string | null
+    created_at?: DateTimeFilter<"NewsletterSubscriber"> | Date | string
+    updated_at?: DateTimeFilter<"NewsletterSubscriber"> | Date | string
+  }
+
+  export type NewsletterSubscriberOrderByWithRelationInput = {
+    id?: SortOrder
+    email?: SortOrder
+    name?: SortOrderInput | SortOrder
+    source?: SortOrder
+    is_active?: SortOrder
+    token?: SortOrder
+    subscribed_at?: SortOrder
+    unsubscribed_at?: SortOrderInput | SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type NewsletterSubscriberWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    email?: string
+    token?: string
+    AND?: NewsletterSubscriberWhereInput | NewsletterSubscriberWhereInput[]
+    OR?: NewsletterSubscriberWhereInput[]
+    NOT?: NewsletterSubscriberWhereInput | NewsletterSubscriberWhereInput[]
+    name?: StringNullableFilter<"NewsletterSubscriber"> | string | null
+    source?: StringFilter<"NewsletterSubscriber"> | string
+    is_active?: BoolFilter<"NewsletterSubscriber"> | boolean
+    subscribed_at?: DateTimeFilter<"NewsletterSubscriber"> | Date | string
+    unsubscribed_at?: DateTimeNullableFilter<"NewsletterSubscriber"> | Date | string | null
+    created_at?: DateTimeFilter<"NewsletterSubscriber"> | Date | string
+    updated_at?: DateTimeFilter<"NewsletterSubscriber"> | Date | string
+  }, "id" | "email" | "token">
+
+  export type NewsletterSubscriberOrderByWithAggregationInput = {
+    id?: SortOrder
+    email?: SortOrder
+    name?: SortOrderInput | SortOrder
+    source?: SortOrder
+    is_active?: SortOrder
+    token?: SortOrder
+    subscribed_at?: SortOrder
+    unsubscribed_at?: SortOrderInput | SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    _count?: NewsletterSubscriberCountOrderByAggregateInput
+    _max?: NewsletterSubscriberMaxOrderByAggregateInput
+    _min?: NewsletterSubscriberMinOrderByAggregateInput
+  }
+
+  export type NewsletterSubscriberScalarWhereWithAggregatesInput = {
+    AND?: NewsletterSubscriberScalarWhereWithAggregatesInput | NewsletterSubscriberScalarWhereWithAggregatesInput[]
+    OR?: NewsletterSubscriberScalarWhereWithAggregatesInput[]
+    NOT?: NewsletterSubscriberScalarWhereWithAggregatesInput | NewsletterSubscriberScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"NewsletterSubscriber"> | string
+    email?: StringWithAggregatesFilter<"NewsletterSubscriber"> | string
+    name?: StringNullableWithAggregatesFilter<"NewsletterSubscriber"> | string | null
+    source?: StringWithAggregatesFilter<"NewsletterSubscriber"> | string
+    is_active?: BoolWithAggregatesFilter<"NewsletterSubscriber"> | boolean
+    token?: StringWithAggregatesFilter<"NewsletterSubscriber"> | string
+    subscribed_at?: DateTimeWithAggregatesFilter<"NewsletterSubscriber"> | Date | string
+    unsubscribed_at?: DateTimeNullableWithAggregatesFilter<"NewsletterSubscriber"> | Date | string | null
+    created_at?: DateTimeWithAggregatesFilter<"NewsletterSubscriber"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"NewsletterSubscriber"> | Date | string
+  }
+
+  export type NewsletterCampaignWhereInput = {
+    AND?: NewsletterCampaignWhereInput | NewsletterCampaignWhereInput[]
+    OR?: NewsletterCampaignWhereInput[]
+    NOT?: NewsletterCampaignWhereInput | NewsletterCampaignWhereInput[]
+    id?: UuidFilter<"NewsletterCampaign"> | string
+    title?: StringFilter<"NewsletterCampaign"> | string
+    subject?: StringFilter<"NewsletterCampaign"> | string
+    content_type?: StringFilter<"NewsletterCampaign"> | string
+    reference_id?: UuidNullableFilter<"NewsletterCampaign"> | string | null
+    total_recipients?: IntFilter<"NewsletterCampaign"> | number
+    sent_count?: IntFilter<"NewsletterCampaign"> | number
+    failed_count?: IntFilter<"NewsletterCampaign"> | number
+    status?: StringFilter<"NewsletterCampaign"> | string
+    created_at?: DateTimeFilter<"NewsletterCampaign"> | Date | string
+  }
+
+  export type NewsletterCampaignOrderByWithRelationInput = {
+    id?: SortOrder
+    title?: SortOrder
+    subject?: SortOrder
+    content_type?: SortOrder
+    reference_id?: SortOrderInput | SortOrder
+    total_recipients?: SortOrder
+    sent_count?: SortOrder
+    failed_count?: SortOrder
+    status?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type NewsletterCampaignWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: NewsletterCampaignWhereInput | NewsletterCampaignWhereInput[]
+    OR?: NewsletterCampaignWhereInput[]
+    NOT?: NewsletterCampaignWhereInput | NewsletterCampaignWhereInput[]
+    title?: StringFilter<"NewsletterCampaign"> | string
+    subject?: StringFilter<"NewsletterCampaign"> | string
+    content_type?: StringFilter<"NewsletterCampaign"> | string
+    reference_id?: UuidNullableFilter<"NewsletterCampaign"> | string | null
+    total_recipients?: IntFilter<"NewsletterCampaign"> | number
+    sent_count?: IntFilter<"NewsletterCampaign"> | number
+    failed_count?: IntFilter<"NewsletterCampaign"> | number
+    status?: StringFilter<"NewsletterCampaign"> | string
+    created_at?: DateTimeFilter<"NewsletterCampaign"> | Date | string
+  }, "id">
+
+  export type NewsletterCampaignOrderByWithAggregationInput = {
+    id?: SortOrder
+    title?: SortOrder
+    subject?: SortOrder
+    content_type?: SortOrder
+    reference_id?: SortOrderInput | SortOrder
+    total_recipients?: SortOrder
+    sent_count?: SortOrder
+    failed_count?: SortOrder
+    status?: SortOrder
+    created_at?: SortOrder
+    _count?: NewsletterCampaignCountOrderByAggregateInput
+    _avg?: NewsletterCampaignAvgOrderByAggregateInput
+    _max?: NewsletterCampaignMaxOrderByAggregateInput
+    _min?: NewsletterCampaignMinOrderByAggregateInput
+    _sum?: NewsletterCampaignSumOrderByAggregateInput
+  }
+
+  export type NewsletterCampaignScalarWhereWithAggregatesInput = {
+    AND?: NewsletterCampaignScalarWhereWithAggregatesInput | NewsletterCampaignScalarWhereWithAggregatesInput[]
+    OR?: NewsletterCampaignScalarWhereWithAggregatesInput[]
+    NOT?: NewsletterCampaignScalarWhereWithAggregatesInput | NewsletterCampaignScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"NewsletterCampaign"> | string
+    title?: StringWithAggregatesFilter<"NewsletterCampaign"> | string
+    subject?: StringWithAggregatesFilter<"NewsletterCampaign"> | string
+    content_type?: StringWithAggregatesFilter<"NewsletterCampaign"> | string
+    reference_id?: UuidNullableWithAggregatesFilter<"NewsletterCampaign"> | string | null
+    total_recipients?: IntWithAggregatesFilter<"NewsletterCampaign"> | number
+    sent_count?: IntWithAggregatesFilter<"NewsletterCampaign"> | number
+    failed_count?: IntWithAggregatesFilter<"NewsletterCampaign"> | number
+    status?: StringWithAggregatesFilter<"NewsletterCampaign"> | string
+    created_at?: DateTimeWithAggregatesFilter<"NewsletterCampaign"> | Date | string
+  }
+
   export type VisitorWhereInput = {
     AND?: VisitorWhereInput | VisitorWhereInput[]
     OR?: VisitorWhereInput[]
@@ -78212,6 +85321,7 @@ export namespace Prisma {
     top_nicetohave_skills?: StringNullableListFilter<"LearnedRoleBlueprint">
     category?: StringFilter<"LearnedRoleBlueprint"> | string
     is_promoted?: BoolFilter<"LearnedRoleBlueprint"> | boolean
+    details?: JsonNullableFilter<"LearnedRoleBlueprint">
     created_at?: DateTimeFilter<"LearnedRoleBlueprint"> | Date | string
     updated_at?: DateTimeFilter<"LearnedRoleBlueprint"> | Date | string
   }
@@ -78224,6 +85334,7 @@ export namespace Prisma {
     top_nicetohave_skills?: SortOrder
     category?: SortOrder
     is_promoted?: SortOrder
+    details?: SortOrderInput | SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
@@ -78239,6 +85350,7 @@ export namespace Prisma {
     top_nicetohave_skills?: StringNullableListFilter<"LearnedRoleBlueprint">
     category?: StringFilter<"LearnedRoleBlueprint"> | string
     is_promoted?: BoolFilter<"LearnedRoleBlueprint"> | boolean
+    details?: JsonNullableFilter<"LearnedRoleBlueprint">
     created_at?: DateTimeFilter<"LearnedRoleBlueprint"> | Date | string
     updated_at?: DateTimeFilter<"LearnedRoleBlueprint"> | Date | string
   }, "id" | "role_name">
@@ -78251,6 +85363,7 @@ export namespace Prisma {
     top_nicetohave_skills?: SortOrder
     category?: SortOrder
     is_promoted?: SortOrder
+    details?: SortOrderInput | SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
     _count?: LearnedRoleBlueprintCountOrderByAggregateInput
@@ -78271,8 +85384,327 @@ export namespace Prisma {
     top_nicetohave_skills?: StringNullableListFilter<"LearnedRoleBlueprint">
     category?: StringWithAggregatesFilter<"LearnedRoleBlueprint"> | string
     is_promoted?: BoolWithAggregatesFilter<"LearnedRoleBlueprint"> | boolean
+    details?: JsonNullableWithAggregatesFilter<"LearnedRoleBlueprint">
     created_at?: DateTimeWithAggregatesFilter<"LearnedRoleBlueprint"> | Date | string
     updated_at?: DateTimeWithAggregatesFilter<"LearnedRoleBlueprint"> | Date | string
+  }
+
+  export type scraper_providersWhereInput = {
+    AND?: scraper_providersWhereInput | scraper_providersWhereInput[]
+    OR?: scraper_providersWhereInput[]
+    NOT?: scraper_providersWhereInput | scraper_providersWhereInput[]
+    id?: UuidFilter<"scraper_providers"> | string
+    provider?: StringFilter<"scraper_providers"> | string
+    label?: StringFilter<"scraper_providers"> | string
+    api_key?: StringFilter<"scraper_providers"> | string
+    extra_config?: JsonNullableFilter<"scraper_providers">
+    priority?: IntFilter<"scraper_providers"> | number
+    is_active?: BoolFilter<"scraper_providers"> | boolean
+    status?: StringFilter<"scraper_providers"> | string
+    requests_total?: IntFilter<"scraper_providers"> | number
+    requests_month?: IntFilter<"scraper_providers"> | number
+    success_count?: IntFilter<"scraper_providers"> | number
+    fail_count?: IntFilter<"scraper_providers"> | number
+    last_used_at?: DateTimeNullableFilter<"scraper_providers"> | Date | string | null
+    last_error?: StringNullableFilter<"scraper_providers"> | string | null
+    created_at?: DateTimeFilter<"scraper_providers"> | Date | string
+    updated_at?: DateTimeFilter<"scraper_providers"> | Date | string
+    logs?: Scraper_logsListRelationFilter
+  }
+
+  export type scraper_providersOrderByWithRelationInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    label?: SortOrder
+    api_key?: SortOrder
+    extra_config?: SortOrderInput | SortOrder
+    priority?: SortOrder
+    is_active?: SortOrder
+    status?: SortOrder
+    requests_total?: SortOrder
+    requests_month?: SortOrder
+    success_count?: SortOrder
+    fail_count?: SortOrder
+    last_used_at?: SortOrderInput | SortOrder
+    last_error?: SortOrderInput | SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    logs?: scraper_logsOrderByRelationAggregateInput
+  }
+
+  export type scraper_providersWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: scraper_providersWhereInput | scraper_providersWhereInput[]
+    OR?: scraper_providersWhereInput[]
+    NOT?: scraper_providersWhereInput | scraper_providersWhereInput[]
+    provider?: StringFilter<"scraper_providers"> | string
+    label?: StringFilter<"scraper_providers"> | string
+    api_key?: StringFilter<"scraper_providers"> | string
+    extra_config?: JsonNullableFilter<"scraper_providers">
+    priority?: IntFilter<"scraper_providers"> | number
+    is_active?: BoolFilter<"scraper_providers"> | boolean
+    status?: StringFilter<"scraper_providers"> | string
+    requests_total?: IntFilter<"scraper_providers"> | number
+    requests_month?: IntFilter<"scraper_providers"> | number
+    success_count?: IntFilter<"scraper_providers"> | number
+    fail_count?: IntFilter<"scraper_providers"> | number
+    last_used_at?: DateTimeNullableFilter<"scraper_providers"> | Date | string | null
+    last_error?: StringNullableFilter<"scraper_providers"> | string | null
+    created_at?: DateTimeFilter<"scraper_providers"> | Date | string
+    updated_at?: DateTimeFilter<"scraper_providers"> | Date | string
+    logs?: Scraper_logsListRelationFilter
+  }, "id">
+
+  export type scraper_providersOrderByWithAggregationInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    label?: SortOrder
+    api_key?: SortOrder
+    extra_config?: SortOrderInput | SortOrder
+    priority?: SortOrder
+    is_active?: SortOrder
+    status?: SortOrder
+    requests_total?: SortOrder
+    requests_month?: SortOrder
+    success_count?: SortOrder
+    fail_count?: SortOrder
+    last_used_at?: SortOrderInput | SortOrder
+    last_error?: SortOrderInput | SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    _count?: scraper_providersCountOrderByAggregateInput
+    _avg?: scraper_providersAvgOrderByAggregateInput
+    _max?: scraper_providersMaxOrderByAggregateInput
+    _min?: scraper_providersMinOrderByAggregateInput
+    _sum?: scraper_providersSumOrderByAggregateInput
+  }
+
+  export type scraper_providersScalarWhereWithAggregatesInput = {
+    AND?: scraper_providersScalarWhereWithAggregatesInput | scraper_providersScalarWhereWithAggregatesInput[]
+    OR?: scraper_providersScalarWhereWithAggregatesInput[]
+    NOT?: scraper_providersScalarWhereWithAggregatesInput | scraper_providersScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"scraper_providers"> | string
+    provider?: StringWithAggregatesFilter<"scraper_providers"> | string
+    label?: StringWithAggregatesFilter<"scraper_providers"> | string
+    api_key?: StringWithAggregatesFilter<"scraper_providers"> | string
+    extra_config?: JsonNullableWithAggregatesFilter<"scraper_providers">
+    priority?: IntWithAggregatesFilter<"scraper_providers"> | number
+    is_active?: BoolWithAggregatesFilter<"scraper_providers"> | boolean
+    status?: StringWithAggregatesFilter<"scraper_providers"> | string
+    requests_total?: IntWithAggregatesFilter<"scraper_providers"> | number
+    requests_month?: IntWithAggregatesFilter<"scraper_providers"> | number
+    success_count?: IntWithAggregatesFilter<"scraper_providers"> | number
+    fail_count?: IntWithAggregatesFilter<"scraper_providers"> | number
+    last_used_at?: DateTimeNullableWithAggregatesFilter<"scraper_providers"> | Date | string | null
+    last_error?: StringNullableWithAggregatesFilter<"scraper_providers"> | string | null
+    created_at?: DateTimeWithAggregatesFilter<"scraper_providers"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"scraper_providers"> | Date | string
+  }
+
+  export type scraper_logsWhereInput = {
+    AND?: scraper_logsWhereInput | scraper_logsWhereInput[]
+    OR?: scraper_logsWhereInput[]
+    NOT?: scraper_logsWhereInput | scraper_logsWhereInput[]
+    id?: UuidFilter<"scraper_logs"> | string
+    provider_id?: UuidFilter<"scraper_logs"> | string
+    provider_name?: StringFilter<"scraper_logs"> | string
+    provider_label?: StringFilter<"scraper_logs"> | string
+    user_id?: UuidNullableFilter<"scraper_logs"> | string | null
+    user_name?: StringNullableFilter<"scraper_logs"> | string | null
+    user_email?: StringNullableFilter<"scraper_logs"> | string | null
+    target_url?: StringFilter<"scraper_logs"> | string
+    target_name?: StringNullableFilter<"scraper_logs"> | string | null
+    status?: StringFilter<"scraper_logs"> | string
+    http_status?: IntNullableFilter<"scraper_logs"> | number | null
+    latency_ms?: IntNullableFilter<"scraper_logs"> | number | null
+    error_message?: StringNullableFilter<"scraper_logs"> | string | null
+    created_at?: DateTimeFilter<"scraper_logs"> | Date | string
+    provider?: XOR<Scraper_providersScalarRelationFilter, scraper_providersWhereInput>
+  }
+
+  export type scraper_logsOrderByWithRelationInput = {
+    id?: SortOrder
+    provider_id?: SortOrder
+    provider_name?: SortOrder
+    provider_label?: SortOrder
+    user_id?: SortOrderInput | SortOrder
+    user_name?: SortOrderInput | SortOrder
+    user_email?: SortOrderInput | SortOrder
+    target_url?: SortOrder
+    target_name?: SortOrderInput | SortOrder
+    status?: SortOrder
+    http_status?: SortOrderInput | SortOrder
+    latency_ms?: SortOrderInput | SortOrder
+    error_message?: SortOrderInput | SortOrder
+    created_at?: SortOrder
+    provider?: scraper_providersOrderByWithRelationInput
+  }
+
+  export type scraper_logsWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: scraper_logsWhereInput | scraper_logsWhereInput[]
+    OR?: scraper_logsWhereInput[]
+    NOT?: scraper_logsWhereInput | scraper_logsWhereInput[]
+    provider_id?: UuidFilter<"scraper_logs"> | string
+    provider_name?: StringFilter<"scraper_logs"> | string
+    provider_label?: StringFilter<"scraper_logs"> | string
+    user_id?: UuidNullableFilter<"scraper_logs"> | string | null
+    user_name?: StringNullableFilter<"scraper_logs"> | string | null
+    user_email?: StringNullableFilter<"scraper_logs"> | string | null
+    target_url?: StringFilter<"scraper_logs"> | string
+    target_name?: StringNullableFilter<"scraper_logs"> | string | null
+    status?: StringFilter<"scraper_logs"> | string
+    http_status?: IntNullableFilter<"scraper_logs"> | number | null
+    latency_ms?: IntNullableFilter<"scraper_logs"> | number | null
+    error_message?: StringNullableFilter<"scraper_logs"> | string | null
+    created_at?: DateTimeFilter<"scraper_logs"> | Date | string
+    provider?: XOR<Scraper_providersScalarRelationFilter, scraper_providersWhereInput>
+  }, "id">
+
+  export type scraper_logsOrderByWithAggregationInput = {
+    id?: SortOrder
+    provider_id?: SortOrder
+    provider_name?: SortOrder
+    provider_label?: SortOrder
+    user_id?: SortOrderInput | SortOrder
+    user_name?: SortOrderInput | SortOrder
+    user_email?: SortOrderInput | SortOrder
+    target_url?: SortOrder
+    target_name?: SortOrderInput | SortOrder
+    status?: SortOrder
+    http_status?: SortOrderInput | SortOrder
+    latency_ms?: SortOrderInput | SortOrder
+    error_message?: SortOrderInput | SortOrder
+    created_at?: SortOrder
+    _count?: scraper_logsCountOrderByAggregateInput
+    _avg?: scraper_logsAvgOrderByAggregateInput
+    _max?: scraper_logsMaxOrderByAggregateInput
+    _min?: scraper_logsMinOrderByAggregateInput
+    _sum?: scraper_logsSumOrderByAggregateInput
+  }
+
+  export type scraper_logsScalarWhereWithAggregatesInput = {
+    AND?: scraper_logsScalarWhereWithAggregatesInput | scraper_logsScalarWhereWithAggregatesInput[]
+    OR?: scraper_logsScalarWhereWithAggregatesInput[]
+    NOT?: scraper_logsScalarWhereWithAggregatesInput | scraper_logsScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"scraper_logs"> | string
+    provider_id?: UuidWithAggregatesFilter<"scraper_logs"> | string
+    provider_name?: StringWithAggregatesFilter<"scraper_logs"> | string
+    provider_label?: StringWithAggregatesFilter<"scraper_logs"> | string
+    user_id?: UuidNullableWithAggregatesFilter<"scraper_logs"> | string | null
+    user_name?: StringNullableWithAggregatesFilter<"scraper_logs"> | string | null
+    user_email?: StringNullableWithAggregatesFilter<"scraper_logs"> | string | null
+    target_url?: StringWithAggregatesFilter<"scraper_logs"> | string
+    target_name?: StringNullableWithAggregatesFilter<"scraper_logs"> | string | null
+    status?: StringWithAggregatesFilter<"scraper_logs"> | string
+    http_status?: IntNullableWithAggregatesFilter<"scraper_logs"> | number | null
+    latency_ms?: IntNullableWithAggregatesFilter<"scraper_logs"> | number | null
+    error_message?: StringNullableWithAggregatesFilter<"scraper_logs"> | string | null
+    created_at?: DateTimeWithAggregatesFilter<"scraper_logs"> | Date | string
+  }
+
+  export type job_embeddingsWhereInput = {
+    AND?: job_embeddingsWhereInput | job_embeddingsWhereInput[]
+    OR?: job_embeddingsWhereInput[]
+    NOT?: job_embeddingsWhereInput | job_embeddingsWhereInput[]
+    id?: UuidFilter<"job_embeddings"> | string
+    job_id?: UuidFilter<"job_embeddings"> | string
+    content_hash?: StringFilter<"job_embeddings"> | string
+    created_at?: DateTimeFilter<"job_embeddings"> | Date | string
+    updated_at?: DateTimeFilter<"job_embeddings"> | Date | string
+  }
+
+  export type job_embeddingsOrderByWithRelationInput = {
+    id?: SortOrder
+    job_id?: SortOrder
+    content_hash?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type job_embeddingsWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    job_id?: string
+    AND?: job_embeddingsWhereInput | job_embeddingsWhereInput[]
+    OR?: job_embeddingsWhereInput[]
+    NOT?: job_embeddingsWhereInput | job_embeddingsWhereInput[]
+    content_hash?: StringFilter<"job_embeddings"> | string
+    created_at?: DateTimeFilter<"job_embeddings"> | Date | string
+    updated_at?: DateTimeFilter<"job_embeddings"> | Date | string
+  }, "id" | "job_id">
+
+  export type job_embeddingsOrderByWithAggregationInput = {
+    id?: SortOrder
+    job_id?: SortOrder
+    content_hash?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    _count?: job_embeddingsCountOrderByAggregateInput
+    _max?: job_embeddingsMaxOrderByAggregateInput
+    _min?: job_embeddingsMinOrderByAggregateInput
+  }
+
+  export type job_embeddingsScalarWhereWithAggregatesInput = {
+    AND?: job_embeddingsScalarWhereWithAggregatesInput | job_embeddingsScalarWhereWithAggregatesInput[]
+    OR?: job_embeddingsScalarWhereWithAggregatesInput[]
+    NOT?: job_embeddingsScalarWhereWithAggregatesInput | job_embeddingsScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"job_embeddings"> | string
+    job_id?: UuidWithAggregatesFilter<"job_embeddings"> | string
+    content_hash?: StringWithAggregatesFilter<"job_embeddings"> | string
+    created_at?: DateTimeWithAggregatesFilter<"job_embeddings"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"job_embeddings"> | Date | string
+  }
+
+  export type user_career_embeddingsWhereInput = {
+    AND?: user_career_embeddingsWhereInput | user_career_embeddingsWhereInput[]
+    OR?: user_career_embeddingsWhereInput[]
+    NOT?: user_career_embeddingsWhereInput | user_career_embeddingsWhereInput[]
+    id?: UuidFilter<"user_career_embeddings"> | string
+    user_id?: UuidFilter<"user_career_embeddings"> | string
+    cv_id?: UuidNullableFilter<"user_career_embeddings"> | string | null
+    content_hash?: StringFilter<"user_career_embeddings"> | string
+    updated_at?: DateTimeFilter<"user_career_embeddings"> | Date | string
+  }
+
+  export type user_career_embeddingsOrderByWithRelationInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    cv_id?: SortOrderInput | SortOrder
+    content_hash?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type user_career_embeddingsWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    user_id?: string
+    AND?: user_career_embeddingsWhereInput | user_career_embeddingsWhereInput[]
+    OR?: user_career_embeddingsWhereInput[]
+    NOT?: user_career_embeddingsWhereInput | user_career_embeddingsWhereInput[]
+    cv_id?: UuidNullableFilter<"user_career_embeddings"> | string | null
+    content_hash?: StringFilter<"user_career_embeddings"> | string
+    updated_at?: DateTimeFilter<"user_career_embeddings"> | Date | string
+  }, "id" | "user_id">
+
+  export type user_career_embeddingsOrderByWithAggregationInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    cv_id?: SortOrderInput | SortOrder
+    content_hash?: SortOrder
+    updated_at?: SortOrder
+    _count?: user_career_embeddingsCountOrderByAggregateInput
+    _max?: user_career_embeddingsMaxOrderByAggregateInput
+    _min?: user_career_embeddingsMinOrderByAggregateInput
+  }
+
+  export type user_career_embeddingsScalarWhereWithAggregatesInput = {
+    AND?: user_career_embeddingsScalarWhereWithAggregatesInput | user_career_embeddingsScalarWhereWithAggregatesInput[]
+    OR?: user_career_embeddingsScalarWhereWithAggregatesInput[]
+    NOT?: user_career_embeddingsScalarWhereWithAggregatesInput | user_career_embeddingsScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"user_career_embeddings"> | string
+    user_id?: UuidWithAggregatesFilter<"user_career_embeddings"> | string
+    cv_id?: UuidNullableWithAggregatesFilter<"user_career_embeddings"> | string | null
+    content_hash?: StringWithAggregatesFilter<"user_career_embeddings"> | string
+    updated_at?: DateTimeWithAggregatesFilter<"user_career_embeddings"> | Date | string
   }
 
   export type UserCreateInput = {
@@ -79817,7 +87249,6 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    logo_url?: string | null
     website?: string | null
     industry?: string | null
     location?: string | null
@@ -79828,7 +87259,6 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    logo_url?: string | null
     website?: string | null
     industry?: string | null
     location?: string | null
@@ -79839,7 +87269,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    logo_url?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     industry?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79850,7 +87279,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    logo_url?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     industry?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79861,7 +87289,6 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    logo_url?: string | null
     website?: string | null
     industry?: string | null
     location?: string | null
@@ -79871,7 +87298,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    logo_url?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     industry?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79881,7 +87307,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    logo_url?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     industry?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82284,6 +89709,188 @@ export namespace Prisma {
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type NewsletterSubscriberCreateInput = {
+    id?: string
+    email: string
+    name?: string | null
+    source?: string
+    is_active?: boolean
+    token?: string
+    subscribed_at?: Date | string
+    unsubscribed_at?: Date | string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type NewsletterSubscriberUncheckedCreateInput = {
+    id?: string
+    email: string
+    name?: string | null
+    source?: string
+    is_active?: boolean
+    token?: string
+    subscribed_at?: Date | string
+    unsubscribed_at?: Date | string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type NewsletterSubscriberUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: StringFieldUpdateOperationsInput | string
+    is_active?: BoolFieldUpdateOperationsInput | boolean
+    token?: StringFieldUpdateOperationsInput | string
+    subscribed_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    unsubscribed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NewsletterSubscriberUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: StringFieldUpdateOperationsInput | string
+    is_active?: BoolFieldUpdateOperationsInput | boolean
+    token?: StringFieldUpdateOperationsInput | string
+    subscribed_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    unsubscribed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NewsletterSubscriberCreateManyInput = {
+    id?: string
+    email: string
+    name?: string | null
+    source?: string
+    is_active?: boolean
+    token?: string
+    subscribed_at?: Date | string
+    unsubscribed_at?: Date | string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type NewsletterSubscriberUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: StringFieldUpdateOperationsInput | string
+    is_active?: BoolFieldUpdateOperationsInput | boolean
+    token?: StringFieldUpdateOperationsInput | string
+    subscribed_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    unsubscribed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NewsletterSubscriberUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: StringFieldUpdateOperationsInput | string
+    is_active?: BoolFieldUpdateOperationsInput | boolean
+    token?: StringFieldUpdateOperationsInput | string
+    subscribed_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    unsubscribed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NewsletterCampaignCreateInput = {
+    id?: string
+    title: string
+    subject: string
+    content_type?: string
+    reference_id?: string | null
+    total_recipients?: number
+    sent_count?: number
+    failed_count?: number
+    status?: string
+    created_at?: Date | string
+  }
+
+  export type NewsletterCampaignUncheckedCreateInput = {
+    id?: string
+    title: string
+    subject: string
+    content_type?: string
+    reference_id?: string | null
+    total_recipients?: number
+    sent_count?: number
+    failed_count?: number
+    status?: string
+    created_at?: Date | string
+  }
+
+  export type NewsletterCampaignUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    subject?: StringFieldUpdateOperationsInput | string
+    content_type?: StringFieldUpdateOperationsInput | string
+    reference_id?: NullableStringFieldUpdateOperationsInput | string | null
+    total_recipients?: IntFieldUpdateOperationsInput | number
+    sent_count?: IntFieldUpdateOperationsInput | number
+    failed_count?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NewsletterCampaignUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    subject?: StringFieldUpdateOperationsInput | string
+    content_type?: StringFieldUpdateOperationsInput | string
+    reference_id?: NullableStringFieldUpdateOperationsInput | string | null
+    total_recipients?: IntFieldUpdateOperationsInput | number
+    sent_count?: IntFieldUpdateOperationsInput | number
+    failed_count?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NewsletterCampaignCreateManyInput = {
+    id?: string
+    title: string
+    subject: string
+    content_type?: string
+    reference_id?: string | null
+    total_recipients?: number
+    sent_count?: number
+    failed_count?: number
+    status?: string
+    created_at?: Date | string
+  }
+
+  export type NewsletterCampaignUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    subject?: StringFieldUpdateOperationsInput | string
+    content_type?: StringFieldUpdateOperationsInput | string
+    reference_id?: NullableStringFieldUpdateOperationsInput | string | null
+    total_recipients?: IntFieldUpdateOperationsInput | number
+    sent_count?: IntFieldUpdateOperationsInput | number
+    failed_count?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NewsletterCampaignUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    subject?: StringFieldUpdateOperationsInput | string
+    content_type?: StringFieldUpdateOperationsInput | string
+    reference_id?: NullableStringFieldUpdateOperationsInput | string | null
+    total_recipients?: IntFieldUpdateOperationsInput | number
+    sent_count?: IntFieldUpdateOperationsInput | number
+    failed_count?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type VisitorCreateInput = {
     id?: string
     visitor_id: string
@@ -83876,6 +91483,7 @@ export namespace Prisma {
     top_nicetohave_skills?: LearnedRoleBlueprintCreatetop_nicetohave_skillsInput | string[]
     category?: string
     is_promoted?: boolean
+    details?: NullableJsonNullValueInput | InputJsonValue
     created_at?: Date | string
     updated_at?: Date | string
   }
@@ -83888,6 +91496,7 @@ export namespace Prisma {
     top_nicetohave_skills?: LearnedRoleBlueprintCreatetop_nicetohave_skillsInput | string[]
     category?: string
     is_promoted?: boolean
+    details?: NullableJsonNullValueInput | InputJsonValue
     created_at?: Date | string
     updated_at?: Date | string
   }
@@ -83900,6 +91509,7 @@ export namespace Prisma {
     top_nicetohave_skills?: LearnedRoleBlueprintUpdatetop_nicetohave_skillsInput | string[]
     category?: StringFieldUpdateOperationsInput | string
     is_promoted?: BoolFieldUpdateOperationsInput | boolean
+    details?: NullableJsonNullValueInput | InputJsonValue
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -83912,6 +91522,7 @@ export namespace Prisma {
     top_nicetohave_skills?: LearnedRoleBlueprintUpdatetop_nicetohave_skillsInput | string[]
     category?: StringFieldUpdateOperationsInput | string
     is_promoted?: BoolFieldUpdateOperationsInput | boolean
+    details?: NullableJsonNullValueInput | InputJsonValue
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -83924,6 +91535,7 @@ export namespace Prisma {
     top_nicetohave_skills?: LearnedRoleBlueprintCreatetop_nicetohave_skillsInput | string[]
     category?: string
     is_promoted?: boolean
+    details?: NullableJsonNullValueInput | InputJsonValue
     created_at?: Date | string
     updated_at?: Date | string
   }
@@ -83936,6 +91548,7 @@ export namespace Prisma {
     top_nicetohave_skills?: LearnedRoleBlueprintUpdatetop_nicetohave_skillsInput | string[]
     category?: StringFieldUpdateOperationsInput | string
     is_promoted?: BoolFieldUpdateOperationsInput | boolean
+    details?: NullableJsonNullValueInput | InputJsonValue
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -83948,7 +91561,327 @@ export namespace Prisma {
     top_nicetohave_skills?: LearnedRoleBlueprintUpdatetop_nicetohave_skillsInput | string[]
     category?: StringFieldUpdateOperationsInput | string
     is_promoted?: BoolFieldUpdateOperationsInput | boolean
+    details?: NullableJsonNullValueInput | InputJsonValue
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type scraper_providersCreateInput = {
+    id?: string
+    provider: string
+    label: string
+    api_key: string
+    extra_config?: NullableJsonNullValueInput | InputJsonValue
+    priority?: number
+    is_active?: boolean
+    status?: string
+    requests_total?: number
+    requests_month?: number
+    success_count?: number
+    fail_count?: number
+    last_used_at?: Date | string | null
+    last_error?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+    logs?: scraper_logsCreateNestedManyWithoutProviderInput
+  }
+
+  export type scraper_providersUncheckedCreateInput = {
+    id?: string
+    provider: string
+    label: string
+    api_key: string
+    extra_config?: NullableJsonNullValueInput | InputJsonValue
+    priority?: number
+    is_active?: boolean
+    status?: string
+    requests_total?: number
+    requests_month?: number
+    success_count?: number
+    fail_count?: number
+    last_used_at?: Date | string | null
+    last_error?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+    logs?: scraper_logsUncheckedCreateNestedManyWithoutProviderInput
+  }
+
+  export type scraper_providersUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    api_key?: StringFieldUpdateOperationsInput | string
+    extra_config?: NullableJsonNullValueInput | InputJsonValue
+    priority?: IntFieldUpdateOperationsInput | number
+    is_active?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    requests_total?: IntFieldUpdateOperationsInput | number
+    requests_month?: IntFieldUpdateOperationsInput | number
+    success_count?: IntFieldUpdateOperationsInput | number
+    fail_count?: IntFieldUpdateOperationsInput | number
+    last_used_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    last_error?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    logs?: scraper_logsUpdateManyWithoutProviderNestedInput
+  }
+
+  export type scraper_providersUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    api_key?: StringFieldUpdateOperationsInput | string
+    extra_config?: NullableJsonNullValueInput | InputJsonValue
+    priority?: IntFieldUpdateOperationsInput | number
+    is_active?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    requests_total?: IntFieldUpdateOperationsInput | number
+    requests_month?: IntFieldUpdateOperationsInput | number
+    success_count?: IntFieldUpdateOperationsInput | number
+    fail_count?: IntFieldUpdateOperationsInput | number
+    last_used_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    last_error?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    logs?: scraper_logsUncheckedUpdateManyWithoutProviderNestedInput
+  }
+
+  export type scraper_providersCreateManyInput = {
+    id?: string
+    provider: string
+    label: string
+    api_key: string
+    extra_config?: NullableJsonNullValueInput | InputJsonValue
+    priority?: number
+    is_active?: boolean
+    status?: string
+    requests_total?: number
+    requests_month?: number
+    success_count?: number
+    fail_count?: number
+    last_used_at?: Date | string | null
+    last_error?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type scraper_providersUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    api_key?: StringFieldUpdateOperationsInput | string
+    extra_config?: NullableJsonNullValueInput | InputJsonValue
+    priority?: IntFieldUpdateOperationsInput | number
+    is_active?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    requests_total?: IntFieldUpdateOperationsInput | number
+    requests_month?: IntFieldUpdateOperationsInput | number
+    success_count?: IntFieldUpdateOperationsInput | number
+    fail_count?: IntFieldUpdateOperationsInput | number
+    last_used_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    last_error?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type scraper_providersUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    api_key?: StringFieldUpdateOperationsInput | string
+    extra_config?: NullableJsonNullValueInput | InputJsonValue
+    priority?: IntFieldUpdateOperationsInput | number
+    is_active?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    requests_total?: IntFieldUpdateOperationsInput | number
+    requests_month?: IntFieldUpdateOperationsInput | number
+    success_count?: IntFieldUpdateOperationsInput | number
+    fail_count?: IntFieldUpdateOperationsInput | number
+    last_used_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    last_error?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type scraper_logsCreateInput = {
+    id?: string
+    provider_name: string
+    provider_label: string
+    user_id?: string | null
+    user_name?: string | null
+    user_email?: string | null
+    target_url: string
+    target_name?: string | null
+    status: string
+    http_status?: number | null
+    latency_ms?: number | null
+    error_message?: string | null
+    created_at?: Date | string
+    provider: scraper_providersCreateNestedOneWithoutLogsInput
+  }
+
+  export type scraper_logsUncheckedCreateInput = {
+    id?: string
+    provider_id: string
+    provider_name: string
+    provider_label: string
+    user_id?: string | null
+    user_name?: string | null
+    user_email?: string | null
+    target_url: string
+    target_name?: string | null
+    status: string
+    http_status?: number | null
+    latency_ms?: number | null
+    error_message?: string | null
+    created_at?: Date | string
+  }
+
+  export type scraper_logsUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider_name?: StringFieldUpdateOperationsInput | string
+    provider_label?: StringFieldUpdateOperationsInput | string
+    user_id?: NullableStringFieldUpdateOperationsInput | string | null
+    user_name?: NullableStringFieldUpdateOperationsInput | string | null
+    user_email?: NullableStringFieldUpdateOperationsInput | string | null
+    target_url?: StringFieldUpdateOperationsInput | string
+    target_name?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    http_status?: NullableIntFieldUpdateOperationsInput | number | null
+    latency_ms?: NullableIntFieldUpdateOperationsInput | number | null
+    error_message?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    provider?: scraper_providersUpdateOneRequiredWithoutLogsNestedInput
+  }
+
+  export type scraper_logsUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider_id?: StringFieldUpdateOperationsInput | string
+    provider_name?: StringFieldUpdateOperationsInput | string
+    provider_label?: StringFieldUpdateOperationsInput | string
+    user_id?: NullableStringFieldUpdateOperationsInput | string | null
+    user_name?: NullableStringFieldUpdateOperationsInput | string | null
+    user_email?: NullableStringFieldUpdateOperationsInput | string | null
+    target_url?: StringFieldUpdateOperationsInput | string
+    target_name?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    http_status?: NullableIntFieldUpdateOperationsInput | number | null
+    latency_ms?: NullableIntFieldUpdateOperationsInput | number | null
+    error_message?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type scraper_logsCreateManyInput = {
+    id?: string
+    provider_id: string
+    provider_name: string
+    provider_label: string
+    user_id?: string | null
+    user_name?: string | null
+    user_email?: string | null
+    target_url: string
+    target_name?: string | null
+    status: string
+    http_status?: number | null
+    latency_ms?: number | null
+    error_message?: string | null
+    created_at?: Date | string
+  }
+
+  export type scraper_logsUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider_name?: StringFieldUpdateOperationsInput | string
+    provider_label?: StringFieldUpdateOperationsInput | string
+    user_id?: NullableStringFieldUpdateOperationsInput | string | null
+    user_name?: NullableStringFieldUpdateOperationsInput | string | null
+    user_email?: NullableStringFieldUpdateOperationsInput | string | null
+    target_url?: StringFieldUpdateOperationsInput | string
+    target_name?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    http_status?: NullableIntFieldUpdateOperationsInput | number | null
+    latency_ms?: NullableIntFieldUpdateOperationsInput | number | null
+    error_message?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type scraper_logsUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider_id?: StringFieldUpdateOperationsInput | string
+    provider_name?: StringFieldUpdateOperationsInput | string
+    provider_label?: StringFieldUpdateOperationsInput | string
+    user_id?: NullableStringFieldUpdateOperationsInput | string | null
+    user_name?: NullableStringFieldUpdateOperationsInput | string | null
+    user_email?: NullableStringFieldUpdateOperationsInput | string | null
+    target_url?: StringFieldUpdateOperationsInput | string
+    target_name?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    http_status?: NullableIntFieldUpdateOperationsInput | number | null
+    latency_ms?: NullableIntFieldUpdateOperationsInput | number | null
+    error_message?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type job_embeddingsUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    job_id?: StringFieldUpdateOperationsInput | string
+    content_hash?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type job_embeddingsUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    job_id?: StringFieldUpdateOperationsInput | string
+    content_hash?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type job_embeddingsUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    job_id?: StringFieldUpdateOperationsInput | string
+    content_hash?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type job_embeddingsUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    job_id?: StringFieldUpdateOperationsInput | string
+    content_hash?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type user_career_embeddingsUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    cv_id?: NullableStringFieldUpdateOperationsInput | string | null
+    content_hash?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type user_career_embeddingsUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    cv_id?: NullableStringFieldUpdateOperationsInput | string | null
+    content_hash?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type user_career_embeddingsUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    cv_id?: NullableStringFieldUpdateOperationsInput | string | null
+    content_hash?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type user_career_embeddingsUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    cv_id?: NullableStringFieldUpdateOperationsInput | string | null
+    content_hash?: StringFieldUpdateOperationsInput | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -85431,7 +93364,6 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
-    logo_url?: SortOrder
     website?: SortOrder
     industry?: SortOrder
     location?: SortOrder
@@ -85441,7 +93373,6 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
-    logo_url?: SortOrder
     website?: SortOrder
     industry?: SortOrder
     location?: SortOrder
@@ -85451,7 +93382,6 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
-    logo_url?: SortOrder
     website?: SortOrder
     industry?: SortOrder
     location?: SortOrder
@@ -86950,6 +94880,96 @@ export namespace Prisma {
     updated_at?: SortOrder
   }
 
+  export type NewsletterSubscriberCountOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    name?: SortOrder
+    source?: SortOrder
+    is_active?: SortOrder
+    token?: SortOrder
+    subscribed_at?: SortOrder
+    unsubscribed_at?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type NewsletterSubscriberMaxOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    name?: SortOrder
+    source?: SortOrder
+    is_active?: SortOrder
+    token?: SortOrder
+    subscribed_at?: SortOrder
+    unsubscribed_at?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type NewsletterSubscriberMinOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    name?: SortOrder
+    source?: SortOrder
+    is_active?: SortOrder
+    token?: SortOrder
+    subscribed_at?: SortOrder
+    unsubscribed_at?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type NewsletterCampaignCountOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    subject?: SortOrder
+    content_type?: SortOrder
+    reference_id?: SortOrder
+    total_recipients?: SortOrder
+    sent_count?: SortOrder
+    failed_count?: SortOrder
+    status?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type NewsletterCampaignAvgOrderByAggregateInput = {
+    total_recipients?: SortOrder
+    sent_count?: SortOrder
+    failed_count?: SortOrder
+  }
+
+  export type NewsletterCampaignMaxOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    subject?: SortOrder
+    content_type?: SortOrder
+    reference_id?: SortOrder
+    total_recipients?: SortOrder
+    sent_count?: SortOrder
+    failed_count?: SortOrder
+    status?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type NewsletterCampaignMinOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    subject?: SortOrder
+    content_type?: SortOrder
+    reference_id?: SortOrder
+    total_recipients?: SortOrder
+    sent_count?: SortOrder
+    failed_count?: SortOrder
+    status?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type NewsletterCampaignSumOrderByAggregateInput = {
+    total_recipients?: SortOrder
+    sent_count?: SortOrder
+    failed_count?: SortOrder
+  }
+
   export type VisitorSessionListRelationFilter = {
     every?: VisitorSessionWhereInput
     some?: VisitorSessionWhereInput
@@ -87812,6 +95832,7 @@ export namespace Prisma {
     top_nicetohave_skills?: SortOrder
     category?: SortOrder
     is_promoted?: SortOrder
+    details?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
@@ -87842,6 +95863,201 @@ export namespace Prisma {
 
   export type LearnedRoleBlueprintSumOrderByAggregateInput = {
     entry_count?: SortOrder
+  }
+
+  export type Scraper_logsListRelationFilter = {
+    every?: scraper_logsWhereInput
+    some?: scraper_logsWhereInput
+    none?: scraper_logsWhereInput
+  }
+
+  export type scraper_logsOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type scraper_providersCountOrderByAggregateInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    label?: SortOrder
+    api_key?: SortOrder
+    extra_config?: SortOrder
+    priority?: SortOrder
+    is_active?: SortOrder
+    status?: SortOrder
+    requests_total?: SortOrder
+    requests_month?: SortOrder
+    success_count?: SortOrder
+    fail_count?: SortOrder
+    last_used_at?: SortOrder
+    last_error?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type scraper_providersAvgOrderByAggregateInput = {
+    priority?: SortOrder
+    requests_total?: SortOrder
+    requests_month?: SortOrder
+    success_count?: SortOrder
+    fail_count?: SortOrder
+  }
+
+  export type scraper_providersMaxOrderByAggregateInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    label?: SortOrder
+    api_key?: SortOrder
+    priority?: SortOrder
+    is_active?: SortOrder
+    status?: SortOrder
+    requests_total?: SortOrder
+    requests_month?: SortOrder
+    success_count?: SortOrder
+    fail_count?: SortOrder
+    last_used_at?: SortOrder
+    last_error?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type scraper_providersMinOrderByAggregateInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    label?: SortOrder
+    api_key?: SortOrder
+    priority?: SortOrder
+    is_active?: SortOrder
+    status?: SortOrder
+    requests_total?: SortOrder
+    requests_month?: SortOrder
+    success_count?: SortOrder
+    fail_count?: SortOrder
+    last_used_at?: SortOrder
+    last_error?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type scraper_providersSumOrderByAggregateInput = {
+    priority?: SortOrder
+    requests_total?: SortOrder
+    requests_month?: SortOrder
+    success_count?: SortOrder
+    fail_count?: SortOrder
+  }
+
+  export type Scraper_providersScalarRelationFilter = {
+    is?: scraper_providersWhereInput
+    isNot?: scraper_providersWhereInput
+  }
+
+  export type scraper_logsCountOrderByAggregateInput = {
+    id?: SortOrder
+    provider_id?: SortOrder
+    provider_name?: SortOrder
+    provider_label?: SortOrder
+    user_id?: SortOrder
+    user_name?: SortOrder
+    user_email?: SortOrder
+    target_url?: SortOrder
+    target_name?: SortOrder
+    status?: SortOrder
+    http_status?: SortOrder
+    latency_ms?: SortOrder
+    error_message?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type scraper_logsAvgOrderByAggregateInput = {
+    http_status?: SortOrder
+    latency_ms?: SortOrder
+  }
+
+  export type scraper_logsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    provider_id?: SortOrder
+    provider_name?: SortOrder
+    provider_label?: SortOrder
+    user_id?: SortOrder
+    user_name?: SortOrder
+    user_email?: SortOrder
+    target_url?: SortOrder
+    target_name?: SortOrder
+    status?: SortOrder
+    http_status?: SortOrder
+    latency_ms?: SortOrder
+    error_message?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type scraper_logsMinOrderByAggregateInput = {
+    id?: SortOrder
+    provider_id?: SortOrder
+    provider_name?: SortOrder
+    provider_label?: SortOrder
+    user_id?: SortOrder
+    user_name?: SortOrder
+    user_email?: SortOrder
+    target_url?: SortOrder
+    target_name?: SortOrder
+    status?: SortOrder
+    http_status?: SortOrder
+    latency_ms?: SortOrder
+    error_message?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type scraper_logsSumOrderByAggregateInput = {
+    http_status?: SortOrder
+    latency_ms?: SortOrder
+  }
+
+  export type job_embeddingsCountOrderByAggregateInput = {
+    id?: SortOrder
+    job_id?: SortOrder
+    content_hash?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type job_embeddingsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    job_id?: SortOrder
+    content_hash?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type job_embeddingsMinOrderByAggregateInput = {
+    id?: SortOrder
+    job_id?: SortOrder
+    content_hash?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type user_career_embeddingsCountOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    cv_id?: SortOrder
+    content_hash?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type user_career_embeddingsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    cv_id?: SortOrder
+    content_hash?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type user_career_embeddingsMinOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    cv_id?: SortOrder
+    content_hash?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type UserCreateskillsInput = {
@@ -90434,6 +98650,62 @@ export namespace Prisma {
   export type LearnedRoleBlueprintUpdatetop_nicetohave_skillsInput = {
     set?: string[]
     push?: string | string[]
+  }
+
+  export type scraper_logsCreateNestedManyWithoutProviderInput = {
+    create?: XOR<scraper_logsCreateWithoutProviderInput, scraper_logsUncheckedCreateWithoutProviderInput> | scraper_logsCreateWithoutProviderInput[] | scraper_logsUncheckedCreateWithoutProviderInput[]
+    connectOrCreate?: scraper_logsCreateOrConnectWithoutProviderInput | scraper_logsCreateOrConnectWithoutProviderInput[]
+    createMany?: scraper_logsCreateManyProviderInputEnvelope
+    connect?: scraper_logsWhereUniqueInput | scraper_logsWhereUniqueInput[]
+  }
+
+  export type scraper_logsUncheckedCreateNestedManyWithoutProviderInput = {
+    create?: XOR<scraper_logsCreateWithoutProviderInput, scraper_logsUncheckedCreateWithoutProviderInput> | scraper_logsCreateWithoutProviderInput[] | scraper_logsUncheckedCreateWithoutProviderInput[]
+    connectOrCreate?: scraper_logsCreateOrConnectWithoutProviderInput | scraper_logsCreateOrConnectWithoutProviderInput[]
+    createMany?: scraper_logsCreateManyProviderInputEnvelope
+    connect?: scraper_logsWhereUniqueInput | scraper_logsWhereUniqueInput[]
+  }
+
+  export type scraper_logsUpdateManyWithoutProviderNestedInput = {
+    create?: XOR<scraper_logsCreateWithoutProviderInput, scraper_logsUncheckedCreateWithoutProviderInput> | scraper_logsCreateWithoutProviderInput[] | scraper_logsUncheckedCreateWithoutProviderInput[]
+    connectOrCreate?: scraper_logsCreateOrConnectWithoutProviderInput | scraper_logsCreateOrConnectWithoutProviderInput[]
+    upsert?: scraper_logsUpsertWithWhereUniqueWithoutProviderInput | scraper_logsUpsertWithWhereUniqueWithoutProviderInput[]
+    createMany?: scraper_logsCreateManyProviderInputEnvelope
+    set?: scraper_logsWhereUniqueInput | scraper_logsWhereUniqueInput[]
+    disconnect?: scraper_logsWhereUniqueInput | scraper_logsWhereUniqueInput[]
+    delete?: scraper_logsWhereUniqueInput | scraper_logsWhereUniqueInput[]
+    connect?: scraper_logsWhereUniqueInput | scraper_logsWhereUniqueInput[]
+    update?: scraper_logsUpdateWithWhereUniqueWithoutProviderInput | scraper_logsUpdateWithWhereUniqueWithoutProviderInput[]
+    updateMany?: scraper_logsUpdateManyWithWhereWithoutProviderInput | scraper_logsUpdateManyWithWhereWithoutProviderInput[]
+    deleteMany?: scraper_logsScalarWhereInput | scraper_logsScalarWhereInput[]
+  }
+
+  export type scraper_logsUncheckedUpdateManyWithoutProviderNestedInput = {
+    create?: XOR<scraper_logsCreateWithoutProviderInput, scraper_logsUncheckedCreateWithoutProviderInput> | scraper_logsCreateWithoutProviderInput[] | scraper_logsUncheckedCreateWithoutProviderInput[]
+    connectOrCreate?: scraper_logsCreateOrConnectWithoutProviderInput | scraper_logsCreateOrConnectWithoutProviderInput[]
+    upsert?: scraper_logsUpsertWithWhereUniqueWithoutProviderInput | scraper_logsUpsertWithWhereUniqueWithoutProviderInput[]
+    createMany?: scraper_logsCreateManyProviderInputEnvelope
+    set?: scraper_logsWhereUniqueInput | scraper_logsWhereUniqueInput[]
+    disconnect?: scraper_logsWhereUniqueInput | scraper_logsWhereUniqueInput[]
+    delete?: scraper_logsWhereUniqueInput | scraper_logsWhereUniqueInput[]
+    connect?: scraper_logsWhereUniqueInput | scraper_logsWhereUniqueInput[]
+    update?: scraper_logsUpdateWithWhereUniqueWithoutProviderInput | scraper_logsUpdateWithWhereUniqueWithoutProviderInput[]
+    updateMany?: scraper_logsUpdateManyWithWhereWithoutProviderInput | scraper_logsUpdateManyWithWhereWithoutProviderInput[]
+    deleteMany?: scraper_logsScalarWhereInput | scraper_logsScalarWhereInput[]
+  }
+
+  export type scraper_providersCreateNestedOneWithoutLogsInput = {
+    create?: XOR<scraper_providersCreateWithoutLogsInput, scraper_providersUncheckedCreateWithoutLogsInput>
+    connectOrCreate?: scraper_providersCreateOrConnectWithoutLogsInput
+    connect?: scraper_providersWhereUniqueInput
+  }
+
+  export type scraper_providersUpdateOneRequiredWithoutLogsNestedInput = {
+    create?: XOR<scraper_providersCreateWithoutLogsInput, scraper_providersUncheckedCreateWithoutLogsInput>
+    connectOrCreate?: scraper_providersCreateOrConnectWithoutLogsInput
+    upsert?: scraper_providersUpsertWithoutLogsInput
+    connect?: scraper_providersWhereUniqueInput
+    update?: XOR<XOR<scraper_providersUpdateToOneWithWhereWithoutLogsInput, scraper_providersUpdateWithoutLogsInput>, scraper_providersUncheckedUpdateWithoutLogsInput>
   }
 
   export type NestedUuidFilter<$PrismaModel = never> = {
@@ -95418,7 +103690,6 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    logo_url?: string | null
     website?: string | null
     industry?: string | null
     location?: string | null
@@ -95428,7 +103699,6 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    logo_url?: string | null
     website?: string | null
     industry?: string | null
     location?: string | null
@@ -95470,7 +103740,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    logo_url?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     industry?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
@@ -95480,7 +103749,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    logo_url?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
     industry?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
@@ -101254,6 +109522,176 @@ export namespace Prisma {
     user_feedback?: UserFeedbackUncheckedUpdateManyWithoutUserNestedInput
   }
 
+  export type scraper_logsCreateWithoutProviderInput = {
+    id?: string
+    provider_name: string
+    provider_label: string
+    user_id?: string | null
+    user_name?: string | null
+    user_email?: string | null
+    target_url: string
+    target_name?: string | null
+    status: string
+    http_status?: number | null
+    latency_ms?: number | null
+    error_message?: string | null
+    created_at?: Date | string
+  }
+
+  export type scraper_logsUncheckedCreateWithoutProviderInput = {
+    id?: string
+    provider_name: string
+    provider_label: string
+    user_id?: string | null
+    user_name?: string | null
+    user_email?: string | null
+    target_url: string
+    target_name?: string | null
+    status: string
+    http_status?: number | null
+    latency_ms?: number | null
+    error_message?: string | null
+    created_at?: Date | string
+  }
+
+  export type scraper_logsCreateOrConnectWithoutProviderInput = {
+    where: scraper_logsWhereUniqueInput
+    create: XOR<scraper_logsCreateWithoutProviderInput, scraper_logsUncheckedCreateWithoutProviderInput>
+  }
+
+  export type scraper_logsCreateManyProviderInputEnvelope = {
+    data: scraper_logsCreateManyProviderInput | scraper_logsCreateManyProviderInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type scraper_logsUpsertWithWhereUniqueWithoutProviderInput = {
+    where: scraper_logsWhereUniqueInput
+    update: XOR<scraper_logsUpdateWithoutProviderInput, scraper_logsUncheckedUpdateWithoutProviderInput>
+    create: XOR<scraper_logsCreateWithoutProviderInput, scraper_logsUncheckedCreateWithoutProviderInput>
+  }
+
+  export type scraper_logsUpdateWithWhereUniqueWithoutProviderInput = {
+    where: scraper_logsWhereUniqueInput
+    data: XOR<scraper_logsUpdateWithoutProviderInput, scraper_logsUncheckedUpdateWithoutProviderInput>
+  }
+
+  export type scraper_logsUpdateManyWithWhereWithoutProviderInput = {
+    where: scraper_logsScalarWhereInput
+    data: XOR<scraper_logsUpdateManyMutationInput, scraper_logsUncheckedUpdateManyWithoutProviderInput>
+  }
+
+  export type scraper_logsScalarWhereInput = {
+    AND?: scraper_logsScalarWhereInput | scraper_logsScalarWhereInput[]
+    OR?: scraper_logsScalarWhereInput[]
+    NOT?: scraper_logsScalarWhereInput | scraper_logsScalarWhereInput[]
+    id?: UuidFilter<"scraper_logs"> | string
+    provider_id?: UuidFilter<"scraper_logs"> | string
+    provider_name?: StringFilter<"scraper_logs"> | string
+    provider_label?: StringFilter<"scraper_logs"> | string
+    user_id?: UuidNullableFilter<"scraper_logs"> | string | null
+    user_name?: StringNullableFilter<"scraper_logs"> | string | null
+    user_email?: StringNullableFilter<"scraper_logs"> | string | null
+    target_url?: StringFilter<"scraper_logs"> | string
+    target_name?: StringNullableFilter<"scraper_logs"> | string | null
+    status?: StringFilter<"scraper_logs"> | string
+    http_status?: IntNullableFilter<"scraper_logs"> | number | null
+    latency_ms?: IntNullableFilter<"scraper_logs"> | number | null
+    error_message?: StringNullableFilter<"scraper_logs"> | string | null
+    created_at?: DateTimeFilter<"scraper_logs"> | Date | string
+  }
+
+  export type scraper_providersCreateWithoutLogsInput = {
+    id?: string
+    provider: string
+    label: string
+    api_key: string
+    extra_config?: NullableJsonNullValueInput | InputJsonValue
+    priority?: number
+    is_active?: boolean
+    status?: string
+    requests_total?: number
+    requests_month?: number
+    success_count?: number
+    fail_count?: number
+    last_used_at?: Date | string | null
+    last_error?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type scraper_providersUncheckedCreateWithoutLogsInput = {
+    id?: string
+    provider: string
+    label: string
+    api_key: string
+    extra_config?: NullableJsonNullValueInput | InputJsonValue
+    priority?: number
+    is_active?: boolean
+    status?: string
+    requests_total?: number
+    requests_month?: number
+    success_count?: number
+    fail_count?: number
+    last_used_at?: Date | string | null
+    last_error?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type scraper_providersCreateOrConnectWithoutLogsInput = {
+    where: scraper_providersWhereUniqueInput
+    create: XOR<scraper_providersCreateWithoutLogsInput, scraper_providersUncheckedCreateWithoutLogsInput>
+  }
+
+  export type scraper_providersUpsertWithoutLogsInput = {
+    update: XOR<scraper_providersUpdateWithoutLogsInput, scraper_providersUncheckedUpdateWithoutLogsInput>
+    create: XOR<scraper_providersCreateWithoutLogsInput, scraper_providersUncheckedCreateWithoutLogsInput>
+    where?: scraper_providersWhereInput
+  }
+
+  export type scraper_providersUpdateToOneWithWhereWithoutLogsInput = {
+    where?: scraper_providersWhereInput
+    data: XOR<scraper_providersUpdateWithoutLogsInput, scraper_providersUncheckedUpdateWithoutLogsInput>
+  }
+
+  export type scraper_providersUpdateWithoutLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    api_key?: StringFieldUpdateOperationsInput | string
+    extra_config?: NullableJsonNullValueInput | InputJsonValue
+    priority?: IntFieldUpdateOperationsInput | number
+    is_active?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    requests_total?: IntFieldUpdateOperationsInput | number
+    requests_month?: IntFieldUpdateOperationsInput | number
+    success_count?: IntFieldUpdateOperationsInput | number
+    fail_count?: IntFieldUpdateOperationsInput | number
+    last_used_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    last_error?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type scraper_providersUncheckedUpdateWithoutLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    api_key?: StringFieldUpdateOperationsInput | string
+    extra_config?: NullableJsonNullValueInput | InputJsonValue
+    priority?: IntFieldUpdateOperationsInput | number
+    is_active?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    requests_total?: IntFieldUpdateOperationsInput | number
+    requests_month?: IntFieldUpdateOperationsInput | number
+    success_count?: IntFieldUpdateOperationsInput | number
+    fail_count?: IntFieldUpdateOperationsInput | number
+    last_used_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    last_error?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type accountsCreateManyUsersInput = {
     id: string
     account_id: string
@@ -103304,6 +111742,70 @@ export namespace Prisma {
     started_at?: DateTimeFieldUpdateOperationsInput | Date | string
     completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     time_spent_seconds?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type scraper_logsCreateManyProviderInput = {
+    id?: string
+    provider_name: string
+    provider_label: string
+    user_id?: string | null
+    user_name?: string | null
+    user_email?: string | null
+    target_url: string
+    target_name?: string | null
+    status: string
+    http_status?: number | null
+    latency_ms?: number | null
+    error_message?: string | null
+    created_at?: Date | string
+  }
+
+  export type scraper_logsUpdateWithoutProviderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider_name?: StringFieldUpdateOperationsInput | string
+    provider_label?: StringFieldUpdateOperationsInput | string
+    user_id?: NullableStringFieldUpdateOperationsInput | string | null
+    user_name?: NullableStringFieldUpdateOperationsInput | string | null
+    user_email?: NullableStringFieldUpdateOperationsInput | string | null
+    target_url?: StringFieldUpdateOperationsInput | string
+    target_name?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    http_status?: NullableIntFieldUpdateOperationsInput | number | null
+    latency_ms?: NullableIntFieldUpdateOperationsInput | number | null
+    error_message?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type scraper_logsUncheckedUpdateWithoutProviderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider_name?: StringFieldUpdateOperationsInput | string
+    provider_label?: StringFieldUpdateOperationsInput | string
+    user_id?: NullableStringFieldUpdateOperationsInput | string | null
+    user_name?: NullableStringFieldUpdateOperationsInput | string | null
+    user_email?: NullableStringFieldUpdateOperationsInput | string | null
+    target_url?: StringFieldUpdateOperationsInput | string
+    target_name?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    http_status?: NullableIntFieldUpdateOperationsInput | number | null
+    latency_ms?: NullableIntFieldUpdateOperationsInput | number | null
+    error_message?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type scraper_logsUncheckedUpdateManyWithoutProviderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider_name?: StringFieldUpdateOperationsInput | string
+    provider_label?: StringFieldUpdateOperationsInput | string
+    user_id?: NullableStringFieldUpdateOperationsInput | string | null
+    user_name?: NullableStringFieldUpdateOperationsInput | string | null
+    user_email?: NullableStringFieldUpdateOperationsInput | string | null
+    target_url?: StringFieldUpdateOperationsInput | string
+    target_name?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    http_status?: NullableIntFieldUpdateOperationsInput | number | null
+    latency_ms?: NullableIntFieldUpdateOperationsInput | number | null
+    error_message?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

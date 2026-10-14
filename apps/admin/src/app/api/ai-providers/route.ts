@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@employr/db";
+import { prisma, encryptSecret, decryptSecret } from "@employr/db";
 import crypto from "crypto";
 
 export async function GET() {
@@ -8,21 +8,24 @@ export async function GET() {
       orderBy: { priority: "desc" },
     });
 
-    const formatted = providers.map((p) => ({
-      id: p.id,
-      name: p.name,
-      label: p.label,
-      provider: p.alias || "openai",
-      endpointUrl: p.base_url,
-      apiKey: p.api_key ? `${p.api_key.slice(0, 3)}••••••••${p.api_key.slice(-4)}` : "••••••••",
-      model: p.model,
-      priority: p.priority,
-      isActive: p.is_active,
-      cooldownUntil: p.cooldown_until?.toISOString() || null,
-      authType: p.auth_type,
-      createdAt: p.created_at.toISOString(),
-      updatedAt: p.updated_at.toISOString(),
-    }));
+    const formatted = providers.map((p) => {
+      const plainKey = p.api_key ? decryptSecret(p.api_key) : "";
+      return {
+        id: p.id,
+        name: p.name,
+        label: p.label,
+        provider: p.alias || "openai",
+        endpointUrl: p.base_url,
+        apiKey: plainKey ? `${plainKey.slice(0, 3)}••••••••${plainKey.slice(-4)}` : "••••••••",
+        model: p.model,
+        priority: p.priority,
+        isActive: p.is_active,
+        cooldownUntil: p.cooldown_until?.toISOString() || null,
+        authType: p.auth_type,
+        createdAt: p.created_at.toISOString(),
+        updatedAt: p.updated_at.toISOString(),
+      };
+    });
 
     return NextResponse.json({ success: true, data: formatted });
   } catch (error: any) {
@@ -46,15 +49,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const rawApiKey = apiKey?.trim() || "ollama";
+    const encryptedKey = encryptSecret(rawApiKey);
+    const parsedPriority = typeof priority === "number" ? priority : parseInt(String(priority || "0"), 10) || 0;
+
     const provider = await prisma.ai_providers.create({
       data: {
         id: crypto.randomUUID(),
         name,
         label: label || name,
         base_url: endpointUrl,
-        api_key: apiKey?.trim() || "ollama",
+        api_key: encryptedKey,
         model,
-        priority: priority ?? 0,
+        priority: parsedPriority,
         is_active: true,
         alias: alias || null,
         auth_type: authType || "apikey",
@@ -66,7 +73,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error("[AI Providers API] POST Error:", error);
     return NextResponse.json(
-      { success: false, message: "Gagal membuat AI provider." },
+      { success: false, message: error.message || "Gagal membuat AI provider." },
       { status: 500 }
     );
   }

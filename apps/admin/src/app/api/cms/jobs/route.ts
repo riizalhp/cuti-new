@@ -2,18 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@employr/db";
 import crypto from "crypto";
 
-function slugify(text: string): string {
-  return (
-    text
-      .toString()
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w\-]+/g, "")
-      .replace(/\-\-+/g, "-")
-      .replace(/^-+/, "")
-      .replace(/-+$/, "") || "loker"
-  );
+function slugify(text: string, maxLen = 100): string {
+  const raw = text
+    .toString()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  if (!raw) return "loker";
+  if (raw.length <= maxLen) return raw;
+  const cut = raw.slice(0, maxLen);
+  const lastDash = cut.lastIndexOf("-");
+  return (lastDash > 20 ? cut.slice(0, lastDash) : cut).replace(/-+$/g, "");
 }
 
 export async function GET(req: NextRequest) {
@@ -31,7 +32,18 @@ export async function GET(req: NextRequest) {
 
     const jobs = await prisma.jobs.findMany({
       where,
-      include: { companies: true },
+      include: {
+        companies: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            website: true,
+            location: true,
+            industry: true,
+          },
+        },
+      },
       orderBy: { created_at: "desc" },
       take: limit,
     });
@@ -170,7 +182,12 @@ export async function POST(req: NextRequest) {
     });
 
     if (!companyRecord) {
-      const companySlug = `${slugify(trimmedCompany)}-${crypto.randomBytes(3).toString("hex")}`;
+      const baseCompSlug = slugify(trimmedCompany);
+      let companySlug = baseCompSlug;
+      let cCount = 2;
+      while (await prisma.companies.findUnique({ where: { slug: companySlug }, select: { id: true } })) {
+        companySlug = `${baseCompSlug}-${cCount++}`;
+      }
       companyRecord = await prisma.companies.create({
         data: {
           id: crypto.randomUUID(),
@@ -181,8 +198,13 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 2. Create job
-    const jobSlug = `${slugify(title.trim())}-${crypto.randomBytes(3).toString("hex")}`;
+    // 2. Create job with clean SEO slug
+    const baseJobSlug = slugify(`${title.trim()}-${trimmedCompany}`);
+    let jobSlug = baseJobSlug;
+    let jCount = 2;
+    while (await prisma.jobs.findUnique({ where: { slug: jobSlug }, select: { id: true } })) {
+      jobSlug = `${baseJobSlug}-${jCount++}`;
+    }
     const validWorkTypes = ["ONSITE", "REMOTE", "HYBRID", "ONLINE"];
     const finalWorkType = validWorkTypes.includes(workType) ? workType : "ONSITE";
 

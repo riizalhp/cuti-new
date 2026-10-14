@@ -77,7 +77,7 @@ export default async function CategoryPage({ params }: PageProps) {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+    <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-8 space-y-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
@@ -109,7 +109,7 @@ export default async function CategoryPage({ params }: PageProps) {
 
       {/* Article list */}
       {articles.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-5">
           {articles.map((article) => (
             <ArticleCard key={article.slug} article={article} showCategory={false} />
           ))}

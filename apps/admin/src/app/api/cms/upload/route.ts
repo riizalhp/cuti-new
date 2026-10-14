@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   try {
     const sessionCookie = req.cookies.get("employr_admin_session")?.value || req.cookies.get("cuti_admin_session")?.value;
-    const session = sessionCookie ? await verifyAdminSession(sessionCookie) : null;
+    const session = sessionCookie ? await verifyAdminSession(sessionCookie, req.headers.get("user-agent") || null) : null;
     if (!session) {
       return NextResponse.json(
         { success: false, message: "Akses ditolak. Silakan login." },

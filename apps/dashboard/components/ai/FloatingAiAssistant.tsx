@@ -1,14 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import {
   CloseIcon,
   SendIcon,
   LoaderIcon,
-  MessageSquareIcon,
 } from '@/components/icons/CustomIcons';
 import { AIConversation } from '@/components/smoothui/ai-conversation';
 import { getFaqUrl } from '@/lib/urls';
+import { cn } from '@/lib/utils';
 
 export interface FloatingAiAssistantProps {
   atsScore?: number;
@@ -47,6 +48,7 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimerRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -69,7 +71,16 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
   // Dynamic Base URL situs FAQ
   const faqBaseUrl = getFaqUrl();
 
-  // Click outside listener to auto-close chat room when clicking outside area
+  // Focus input when opened
+  useEffect(() => {
+    if (isExpanded) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [isExpanded]);
+
+  // Click outside and Escape key listener to close chat
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (
@@ -80,14 +91,22 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
       }
     };
 
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsExpanded(false);
+      }
+    };
+
     if (isExpanded) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('touchstart', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isExpanded]);
 
@@ -190,10 +209,20 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
     messages.length + (isTyping ? 1 : 0) + (messages[messages.length - 1]?.text?.length || 0);
 
   return (
-    <div ref={containerRef} className="fixed z-40 right-3.5 bottom-16 md:right-5 md:bottom-5 pointer-events-auto select-none">
+    <div
+      ref={containerRef}
+      className={cn(
+        'fixed z-40 right-3 bottom-[74px] md:right-5 md:bottom-5 pointer-events-auto select-none transition-all duration-300',
+        isScrolling && !isExpanded ? 'opacity-30 scale-90 pointer-events-none' : 'opacity-100 scale-100'
+      )}
+    >
       {isExpanded ? (
         /* MINI CHAT ROOM POPUP WIDGET */
-        <div className="w-[310px] sm:w-[350px] h-[430px] sm:h-[470px] rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div
+          role="dialog"
+          aria-label="Customer Service Herdi"
+          className="w-[310px] sm:w-[350px] h-[430px] sm:h-[470px] rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        >
           {/* Mini Chat Room Header */}
           <div className="p-3.5 bg-navy-700 text-white flex items-center justify-between border-b border-navy-800 shrink-0">
             <div className="flex items-center gap-2.5">
@@ -208,11 +237,11 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
               <div>
                 <h4 className="font-extrabold text-xs text-white flex items-center gap-1.5 leading-tight">
                   <span>Herdi</span>
-                  <span className="px-1.5 py-0.2 rounded-[10px] bg-emerald-500/20 text-emerald-300 text-[9px] font-bold border border-emerald-500/30">
+                  <span className="px-1.5 py-0.5 rounded-[10px] bg-emerald-500/20 text-emerald-300 text-caption font-bold border border-emerald-500/30">
                     Online
                   </span>
                 </h4>
-                <p className="text-[10px] text-slate-200 font-medium">
+                <p className="text-caption text-slate-200 font-medium">
                   Customer Service Employr
                 </p>
               </div>
@@ -223,7 +252,7 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
                 href={`${faqBaseUrl}/`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[10px] font-bold text-blue-200 hover:text-white underline underline-offset-2 transition"
+                className="text-caption font-bold text-blue-200 hover:text-white underline underline-offset-2 transition"
               >
                 Pusat Bantuan
               </a>
@@ -232,6 +261,7 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
                 onClick={() => setIsExpanded(false)}
                 className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white flex items-center justify-center transition cursor-pointer"
                 title="Tutup Chat Room"
+                aria-label="Tutup Chat Room"
               >
                 <CloseIcon size={14} />
               </button>
@@ -243,7 +273,11 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
             className="flex-1 min-h-0 bg-slate-50/50 dark:bg-slate-950/50"
             contentKey={conversationContentKey}
           >
-            <div className="p-3.5 space-y-3 text-xs">
+            <div
+              aria-live="polite"
+              aria-atomic="false"
+              className="p-3.5 space-y-3 text-xs"
+            >
               {messages.map((msg) => {
                 const isBot = msg.sender === 'bot';
                 return (
@@ -255,7 +289,7 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
                       className={`max-w-[85%] p-2.5 rounded-[10px] space-y-1 shadow-xs ${
                         isBot
                           ? 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none'
-                          : 'bg-[#1738D1] text-white rounded-tr-none font-medium'
+                          : 'bg-cobalt-500 text-white rounded-tr-none font-medium'
                       }`}
                     >
                       {isBot ? (
@@ -267,8 +301,8 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
                         <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                       )}
                       <span
-                        className={`block text-[9px] ${
-                          isBot ? 'text-slate-400 dark:text-slate-500' : 'text-orange-100'
+                        className={`block text-caption ${
+                          isBot ? 'text-slate-500 dark:text-slate-500' : 'text-orange-100'
                         } text-right`}
                       >
                         {msg.timestamp}
@@ -279,7 +313,7 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
               })}
 
               {isTyping && (
-                <div className="flex items-center text-slate-400 justify-start">
+                <div className="flex items-center text-slate-500 justify-start dark:text-slate-400">
                   <div className="px-3 py-2.5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
                     {/* Animasi mengetik: 3 titik memantul bergantian */}
                     <div className="flex items-center gap-1">
@@ -291,7 +325,7 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
                         />
                       ))}
                     </div>
-                    <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                    <span className="text-caption font-semibold text-slate-500 dark:text-slate-400">
                       Herdi sedang mengetik...
                     </span>
                   </div>
@@ -308,7 +342,7 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
                 type="button"
                 onClick={() => handleSendMessage(chip)}
                 disabled={isTyping}
-                className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/40 text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-300 text-[10px] font-bold border border-slate-200 dark:border-slate-700 shrink-0 transition cursor-pointer"
+                className="px-2.5 py-1 rounded-[10px] bg-white dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/40 text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-300 text-caption font-bold border border-slate-200 dark:border-slate-700 shrink-0 transition cursor-pointer"
               >
                 {chip}
               </button>
@@ -318,21 +352,24 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
           {/* Mini Chat Input Footer */}
           <div className="p-2.5 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2 shrink-0">
             <input
+              ref={inputRef}
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               disabled={isTyping}
+              aria-label="Tuliskan pertanyaan atau kendala kamu"
               placeholder="Tuliskan pertanyaan atau kendala kamu..."
-              className="flex-1 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-[10px] px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[#1738D1] transition"
+              className="flex-1 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-[10px] px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-cobalt-500 transition"
             />
 
             <button
               type="button"
               onClick={() => handleSendMessage()}
               disabled={!inputText.trim() || isTyping}
-              className="w-8 h-8 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] disabled:opacity-40 text-white flex items-center justify-center shadow-sm transition cursor-pointer shrink-0 border-0"
+              className="w-8 h-8 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 disabled:opacity-40 text-white flex items-center justify-center shadow-sm transition cursor-pointer shrink-0 border-0"
               title="Kirim Pesan"
+              aria-label="Kirim Pesan"
             >
               {isTyping ? (
                 <LoaderIcon size={14} className="animate-spin" />
@@ -344,18 +381,43 @@ export const FloatingAiAssistant: React.FC<FloatingAiAssistantProps> = () => {
         </div>
       ) : (
         /* FLOATING ACTION BUTTON (FAB) CUSTOMER SERVICE */
-        <button
-          type="button"
-          onClick={() => setIsExpanded(true)}
-          className="group relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-lg shadow-[#1738D1]/30 hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#1738D1]/20 border-2 border-white/20"
-          title="Tanya Customer Service"
-          aria-label="Tanya Customer Service"
-        >
-          <MessageSquareIcon size={20} className="text-white group-hover:scale-110 transition-transform duration-200" />
+        <div className="relative group">
+          <button
+            type="button"
+            onClick={() => setIsExpanded(true)}
+            aria-expanded={isExpanded}
+            aria-haspopup="dialog"
+            className="group relative w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-navy-800 hover:bg-navy-900 border-2 border-orange-400 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer p-0.5 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-orange-400/20"
+            title="Tanya Herdi (Customer Service)"
+            aria-label="Tanya Herdi"
+          >
+            <div className="relative w-full h-full rounded-full overflow-hidden bg-navy-900">
+              <Image
+                src="/images/mascot-1.webp"
+                alt="Herdi"
+                width={52}
+                height={52}
+                className="w-full h-full object-cover scale-[2.1] origin-top translate-y-1 group-hover:scale-[2.2] transition-transform duration-200"
+              />
+            </div>
+            {/* Online Status Indicator */}
+            <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900 shadow-xs" />
+          </button>
 
-          {/* Online Status Indicator */}
-          <span className="absolute top-0.5 right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900 shadow-xs" />
-        </button>
+          {/* Quick Dismiss Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsDismissed(true);
+            }}
+            title="Sembunyikan CS"
+            aria-label="Sembunyikan customer service"
+            className="absolute -top-2 -left-2 w-8 h-8 min-w-[28px] min-h-[28px] rounded-full bg-slate-900/90 hover:bg-slate-950 text-slate-300 hover:text-white border border-slate-700/80 flex items-center justify-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity z-10 cursor-pointer shadow-xs"
+          >
+            <CloseIcon size={14} />
+          </button>
+        </div>
       )}
     </div>
   );

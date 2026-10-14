@@ -28,7 +28,6 @@ export async function GET() {
 
 /**
  * POST /api/content-sync → jalankan sinkronisasi konten manual
- * (juga dipanggil cron 01:00 WIB via instrumentation.ts)
  */
 export async function POST(_req: NextRequest) {
   try {

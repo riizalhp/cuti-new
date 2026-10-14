@@ -1,0 +1,227 @@
+{
+  "errors": [],
+  "domAudit": {
+    "title": "CV Screener & Evaluasi ATS | Employr",
+    "headings": [
+      {
+        "level": "H1",
+        "text": "CV SCREENER",
+        "classes": "font-extrabold text-xs sm:text-sm text-white tracking-tight uppercase"
+      },
+      {
+        "level": "H2",
+        "text": "PROFIL CV & TARGET PEKERJAAN",
+        "classes": "text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider"
+      },
+      {
+        "level": "H2",
+        "text": "PENGATURAN LANJUTAN: KARAKTERISTIK RECRUITER TARGET",
+        "classes": "text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider"
+      }
+    ],
+    "buttons": [
+      {
+        "text": "",
+        "ariaLabel": "Tutup Menu",
+        "role": null,
+        "classes": "md:hidden absolute right-3.5 top-1/2 -translate-y-1/2 p-1.5 rounded-[10px] text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition",
+        "rect": {
+          "width": 31,
+          "height": 31
+        },
+        "hasAccessibleName": true
+      },
+      {
+        "text": "Keluar Akun",
+        "ariaLabel": null,
+        "role": null,
+        "classes": "w-full flex items-center rounded-[10px] text-xs font-bold text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-all duration-200 group cursor-pointer border border-transparent hover:border-rose-200 dark:hover:border-rose-900/40 justify-start px-3 py-2 gap-2",
+        "rect": {
+          "width": 227,
+          "height": 34
+        },
+        "hasAccessibleName": true
+      },
+      {
+        "text": "",
+        "ariaLabel": "Toggle Mode Terang / Gelap",
+        "role": null,
+        "classes": "flex items-center gap-2 p-1.5 px-3 rounded-[10px] text-slate-800 dark:text-slate-200 bg-white/30 dark:bg-slate-900/50 hover:bg-white/50 dark:hover:bg-slate-800/80 border border-white/40 dark:border-white/10 transition-all shadow-xs backdrop-blur-md cursor-pointer",
+        "rect": {
+          "width": 42,
+          "height": 29
+        },
+        "hasAccessibleName": true
+      },
+      {
+        "text": "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+        "ariaLabel": "Notifikasi & Pengingat",
+        "role": null,
+        "classes": "relative grid place-items-center rounded-full outline-none active:scale-90 focus-visible:ring-2 focus-visible:ring-ring motion-reduce:active:scale-100 transition cursor-pointer border bg-white/30 dark:bg-slate-900/50 hover:bg-white/50 dark:hover:bg-slate-800/80 border-white/40 dark:border-white/10 text-slate-700 dark:text-slate-300",
+        "rect": {
+          "width": 36,
+          "height": 36
+        },
+        "hasAccessibleName": true
+      },
+      {
+        "text": "",
+        "ariaLabel": "Menu Profil Pengguna",
+        "role": null,
+        "classes": "flex items-center gap-2.5 pl-1.5 py-1 pr-2.5 rounded-full transition group cursor-pointer text-left border bg-white/30 dark:bg-slate-900/50 hover:bg-white/50 dark:hover:bg-slate-800/80 border-white/40 dark:border-white/10",
+        "rect": {
+          "width": 48,
+          "height": 42
+        },
+        "hasAccessibleName": true
+      },
+      {
+        "text": "Riwayat Screening",
+        "ariaLabel": null,
+        "role": null,
+        "classes": "px-3.5 py-2 rounded-[10px] bg-white/10 hover:bg-white/20 active:scale-[0.98] text-white font-bold text-xs border border-white/20 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0",
+        "rect": {
+          "width": 162,
+          "height": 34
+        },
+        "hasAccessibleName": true
+      },
+      {
+        "text": "2\n\nLANGKAH 2 (OPSIONAL)\n\nRecruiter: Startup",
+        "ariaLabel": null,
+        "role": null,
+        "classes": "flex items-center gap-2.5 p-2 sm:p-2.5 rounded-[8px] border transition cursor-pointer text-left bg-slate-50/80 dark:bg-slate-800/40 border-slate-200/70 dark:border-slate-700/60 hover:bg-slate-100 dark:hover:bg-slate-800",
+        "rect": {
+          "width": 340,
+          "height": 48
+        },
+        "hasAccessibleName": true
+      },
+      {
+        "text": "Posisi Umum",
+        "ariaLabel": null,
+        "role": "tab",
+        "classes": "justify-center whitespace-nowrap font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500 focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:shrink-0 [&_svg]:text-current forced-colors:border rounded-[8px] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 data-[state=active]:bg-cobalt-500 data-[state=active]:text-white data-[state=active]:shadow-sm forced-colors:data-[state=active]:bg-[Highlight] forced-colors:data-[state=active]:text-[HighlightText] h-[40px] px-4 [&_svg]:size-[16px] flex items-center gap-1.5 text-xs",
+        "rect": {
+          "width": 136,
+          "height": 40
+        },
+        "hasAccessibleName": true
+      },
+      {
+        "text": "Target Lowongan",
+        "ariaLabel": null,
+        "role": "tab",
+        "classes": "justify-center whitespace-nowrap font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500 focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:shrink-0 [&_svg]:text-current forced-colors:border rounded-[8px] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 data-[state=active]:bg-cobalt-500 data-[state=active]:text-white data-[state=active]:shadow-sm forced-colors:data-[state=active]:bg-[Highlight] forced-colors:data-[state=active]:text-[HighlightText] h-[40px] px-4 [&_svg]:size-[16px] flex items-center gap-1.5 text-xs",
+        "rect": {
+          "width": 163,
+          "height": 40
+        },
+        "hasAccessibleName": true
+      },
+      {
+        "text": "Buat CV di Builder",
+        "ariaLabel": null,
+        "role": null,
+        "classes": "px-3.5 py-2 min-h-[32px] rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-sm active:scale-[0.98]",
+        "rect": {
+          "width": 298,
+          "height": 32
+        },
+        "hasAccessibleName": true
+      },
+      {
+        "text": "",
+        "ariaLabel": "Buka daftar pilihan posisi",
+        "role": null,
+        "classes": "h-8 w-8 min-h-[32px] min-w-[32px] flex items-center justify-center rounded-[6px] text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition cursor-pointer dark:text-slate-400",
+        "rect": {
+          "width": 32,
+          "height": 32
+        },
+        "hasAccessibleName": true
+      },
+      {
+        "text": "Entry-Level (0 - 1 Tahun)",
+        "ariaLabel": null,
+        "role": null,
+        "classes": "w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium flex items-center justify-between focus:ring-2 focus:ring-cobalt-500 focus:outline-none transition cursor-pointer shadow-2xs",
+        "rect": {
+          "width": 324,
+          "height": 36
+        },
+        "hasAccessibleName": true
+      },
+      {
+        "text": "Ubah Tipe Recruiter (Langkah 2)",
+        "ariaLabel": null,
+        "role": null,
+        "classes": "text-xs font-bold text-cobalt-500 hover:text-cobalt-600 dark:text-blue-400 flex items-center gap-1.5 cursor-pointer self-start sm:self-auto transition py-1",
+        "rect": {
+          "width": 222,
+          "height": 24
+        },
+        "hasAccessibleName": true
+      },
+      {
+        "text": "2\nPENGATURAN LANJUTAN: KARAKTERISTIK RECRUITER TARGET\nOpsional\n\nTipe recruiter aktif: Startup (Fast-Paced & Impact) • Portofolio & Impact\n\nSesuaikan Recruiter",
+        "ariaLabel": null,
+        "role": null,
+        "classes": "w-full p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition cursor-pointer",
+        "rect": {
+          "width": 364,
+          "height": 160
+        },
+        "hasAccessibleName": true
+      },
+      {
+        "text": "Mulai Screening CV Saya",
+        "ariaLabel": null,
+        "role": null,
+        "classes": "w-full sm:w-auto px-6 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white font-semibold text-xs shadow-md shadow-cobalt-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
+        "rect": {
+          "width": 358,
+          "height": 34
+        },
+        "hasAccessibleName": true
+      },
+      {
+        "text": "",
+        "ariaLabel": "Tanya Herdi",
+        "role": null,
+        "classes": "group relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-navy-800 hover:bg-navy-900 border-2 border-orange-400 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer p-0.5 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-orange-400/20",
+        "rect": {
+          "width": 48,
+          "height": 48
+        },
+        "hasAccessibleName": true
+      }
+    ],
+    "inputs": [
+      {
+        "type": "text",
+        "placeholder": "Cari atau ketik posisi target...",
+        "id": "",
+        "ariaLabel": null,
+        "hasLabel": false
+      }
+    ],
+    "images": [
+      {
+        "alt": "Employr",
+        "src": "http://localhost:3000/logo.webp",
+        "hasAlt": true
+      },
+      {
+        "alt": "Employr",
+        "src": "http://localhost:3000/logo-minimize.webp",
+        "hasAlt": true
+      },
+      {
+        "alt": "Herdi",
+        "src": "http://localhost:3000/_next/image?url=%2Fimages%2Fmascot-1.w",
+        "hasAlt": true
+      }
+    ]
+  }
+}

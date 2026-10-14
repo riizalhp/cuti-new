@@ -89,12 +89,13 @@ export function renderEmailHtml(
   const subject =
     payload.customSubject || generateDynamicSubject(company, position);
 
-  const greeting = getRandomItem(GREETING_VARIANTS);
-  const opening = getRandomItem(OPENING_VARIANTS)
+  const hasOwnGreeting = payload.bodyContent && /^(Yth|Kepada|Dengan hormat|Halo|Dear|Hello)/i.test(payload.bodyContent.trim());
+  const greeting = hasOwnGreeting ? '' : getRandomItem(GREETING_VARIANTS);
+  const opening = hasOwnGreeting ? '' : getRandomItem(OPENING_VARIANTS)
     .replace(/\{senderName\}/g, senderName)
     .replace(/\{position\}/g, position)
     .replace(/\{company\}/g, company);
-  const closing = getRandomItem(CLOSING_VARIANTS).replace(/\{company\}/g, company);
+  const closing = hasOwnGreeting ? '' : getRandomItem(CLOSING_VARIANTS).replace(/\{company\}/g, company);
 
   const mainBody = payload.bodyContent
     ? payload.bodyContent.replace(/\n/g, '<br/>')
@@ -131,10 +132,10 @@ export function renderEmailHtml(
           </tr>
           <tr>
             <td style="padding:32px;font-size:14px;line-height:1.7;color:#e2e8f0;">
-              <p style="margin:0 0 16px 0;font-weight:600;color:#ffffff;">${greeting} ${company},</p>
-              <p style="margin:0 0 16px 0;">${opening}</p>
+              ${greeting ? `<p style="margin:0 0 16px 0;font-weight:600;color:#ffffff;">${greeting} ${company},</p>` : ''}
+              ${opening ? `<p style="margin:0 0 16px 0;">${opening}</p>` : ''}
               <div style="margin:0 0 20px 0;color:#cbd5e1;">${mainBody}</div>
-              <p style="margin:0 0 24px 0;">${closing}</p>
+              ${closing ? `<p style="margin:0 0 24px 0;">${closing}</p>` : ''}
               <div style="padding-top:16px;border-top:1px solid #334155;">
                 <p style="margin:0;font-weight:700;color:#ffffff;font-size:15px;">${senderName}</p>
                 <p style="margin:6px 0 0 0;font-size:12px;color:#94a3b8;">${contactList}</p>
@@ -165,10 +166,10 @@ export function renderEmailHtml(
           </tr>
           <tr>
             <td style="padding-top:24px;font-size:15px;line-height:1.8;color:#292524;">
-              <p style="margin:0 0 16px 0;">${greeting} ${company},</p>
-              <p style="margin:0 0 16px 0;">${opening}</p>
+              ${greeting ? `<p style="margin:0 0 16px 0;">${greeting} ${company},</p>` : ''}
+              ${opening ? `<p style="margin:0 0 16px 0;">${opening}</p>` : ''}
               <div style="margin:0 0 20px 0;">${mainBody}</div>
-              <p style="margin:0 0 28px 0;">${closing}</p>
+              ${closing ? `<p style="margin:0 0 28px 0;">${closing}</p>` : ''}
               <div style="margin-top:24px;padding-top:16px;border-top:1px dashed #d6d3d1;">
                 <p style="margin:0;font-size:16px;font-weight:bold;color:#1c1917;">${senderName}</p>
                 <p style="margin:4px 0 0 0;font-size:12px;color:#78716c;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">${contactList}</p>
@@ -199,10 +200,10 @@ export function renderEmailHtml(
           </tr>
           <tr>
             <td style="padding:24px 0;font-size:14px;line-height:1.7;color:#334155;">
-              <p style="margin:0 0 16px 0;font-weight:600;color:#0f172a;">${greeting} ${company},</p>
-              <p style="margin:0 0 16px 0;">${opening}</p>
+              ${greeting ? `<p style="margin:0 0 16px 0;font-weight:600;color:#0f172a;">${greeting} ${company},</p>` : ''}
+              ${opening ? `<p style="margin:0 0 16px 0;">${opening}</p>` : ''}
               <div style="margin:0 0 20px 0;">${mainBody}</div>
-              <p style="margin:0 0 24px 0;">${closing}</p>
+              ${closing ? `<p style="margin:0 0 24px 0;">${closing}</p>` : ''}
               <div style="padding-top:16px;border-top:1px solid #f1f5f9;">
                 <p style="margin:0;font-weight:700;color:#0f172a;">${senderName}</p>
                 <p style="margin:4px 0 0 0;font-size:12px;color:#64748b;">${contactList}</p>
@@ -234,10 +235,10 @@ export function renderEmailHtml(
           </tr>
           <tr>
             <td style="padding:32px;font-size:14px;line-height:1.75;color:#334155;">
-              <p style="margin:0 0 16px 0;font-weight:600;color:#0f172a;">${greeting} ${company},</p>
-              <p style="margin:0 0 16px 0;">${opening}</p>
+              ${greeting ? `<p style="margin:0 0 16px 0;font-weight:600;color:#0f172a;">${greeting} ${company},</p>` : ''}
+              ${opening ? `<p style="margin:0 0 16px 0;">${opening}</p>` : ''}
               <div style="margin:0 0 20px 0;">${mainBody}</div>
-              <p style="margin:0 0 24px 0;">${closing}</p>
+              ${closing ? `<p style="margin:0 0 24px 0;">${closing}</p>` : ''}
               <div style="padding-top:18px;border-top:1px solid #f1f5f9;">
                 <p style="margin:0;font-weight:700;color:#0f172a;font-size:15px;">${senderName}</p>
                 <p style="margin:6px 0 0 0;font-size:12px;color:#64748b;">${contactList}</p>
@@ -258,10 +259,10 @@ export function renderEmailHtml(
 <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/></head>
 <body style="margin:0;padding:20px 16px;background-color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:#1e293b;">
   <div style="max-width:640px;margin:0 auto;">
-    <p style="margin:0 0 16px 0;font-weight:600;color:#0f172a;">${greeting} ${company},</p>
-    <p style="margin:0 0 16px 0;color:#1e293b;">${opening}</p>
+    ${greeting ? `<p style="margin:0 0 16px 0;font-weight:600;color:#0f172a;">${greeting} ${company},</p>` : ''}
+    ${opening ? `<p style="margin:0 0 16px 0;color:#1e293b;">${opening}</p>` : ''}
     <div style="margin:0 0 20px 0;color:#1e293b;">${mainBody}</div>
-    <p style="margin:0 0 24px 0;color:#1e293b;">${closing}</p>
+    ${closing ? `<p style="margin:0 0 24px 0;color:#1e293b;">${closing}</p>` : ''}
     <div style="margin-top:28px;padding-top:16px;border-top:1px solid #e2e8f0;">
       <p style="margin:0;font-weight:600;color:#0f172a;font-size:14px;">Hormat saya,</p>
       <p style="margin:4px 0 0 0;font-weight:700;color:#0f172a;font-size:15px;">${senderName}</p>
@@ -272,13 +273,7 @@ export function renderEmailHtml(
 </html>`;
   }
 
-  const textBody = `${greeting} ${company},
-
-${opening.replace(/<[^>]+>/g, '')}
-
-${payload.bodyContent || 'Bersama email ini saya menyampaikan ketertarikan untuk bergabung di ' + company + ' untuk posisi ' + position + '.'}
-
-${closing.replace(/<[^>]+>/g, '')}
+  const textBody = `${greeting ? `${greeting} ${company},\n\n` : ''}${opening ? `${opening.replace(/<[^>]+>/g, '')}\n\n` : ''}${payload.bodyContent || 'Bersama email ini saya menyampaikan ketertarikan untuk bergabung di ' + company + ' untuk posisi ' + position + '.'}${closing ? `\n\n${closing.replace(/<[^>]+>/g, '')}` : ''}
 
 Hormat saya,
 ${senderName}

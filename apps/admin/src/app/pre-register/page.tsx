@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
+import { AdminPageWrapper } from "@/components/admin/AdminPageWrapper"
 import { SidebarToggle } from "@/components/admin/SidebarToggle"
+import { Skeleton } from "@/components/admin/Skeleton"
 import {
   Users,
   Search,
@@ -185,12 +187,7 @@ export default function AdminPreRegisterPage() {
   }, [testers, searchQuery, selectedRole, selectedStatus])
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-6"
-    >
+    <AdminPageWrapper className="space-y-6">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-5">
         <div className="flex items-center gap-3.5">
@@ -326,12 +323,17 @@ export default function AdminPreRegisterPage() {
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {isLoading ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
-                    <RefreshCw size={20} className="animate-spin mx-auto mb-2 text-orange-500" />
-                    <span>Memuat data pendaftar...</span>
-                  </td>
-                </tr>
+                Array.from({ length: 6 }).map((_, rIdx) => (
+                  <tr key={rIdx} className="hover:bg-slate-50/30 dark:hover:bg-slate-800/20">
+                    <td className="py-3.5 px-4"><Skeleton className="h-4 w-36 rounded" /></td>
+                    <td className="py-3.5 px-4"><Skeleton className="h-4 w-44 rounded" /></td>
+                    <td className="py-3.5 px-4"><Skeleton className="h-4 w-32 rounded" /></td>
+                    <td className="py-3.5 px-4"><Skeleton className="h-5 w-24 rounded-full" /></td>
+                    <td className="py-3.5 px-4"><Skeleton className="h-5 w-20 rounded-full" /></td>
+                    <td className="py-3.5 px-4"><Skeleton className="h-3.5 w-24 rounded" /></td>
+                    <td className="py-3.5 px-4 text-right"><Skeleton className="h-7 w-16 rounded-lg ml-auto" /></td>
+                  </tr>
+                ))
               ) : filteredTesters.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-slate-400">
@@ -426,94 +428,133 @@ export default function AdminPreRegisterPage() {
         </div>
       </div>
 
-      {/* Modal Tambah Tester */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-6 space-y-4"
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100">Tambah Early Tester</h3>
-              <button
-                onClick={() => setIsAddModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 transition"
-              >
-                <X size={18} />
-              </button>
-            </div>
+      {/* Right-Hand Slide-in Drawer: Tambah Tester */}
+      <AnimatePresence>
+        {isAddModalOpen && (
+          <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end transition-opacity">
+            {/* Backdrop click listener */}
+            <div
+              className="absolute inset-0 cursor-pointer"
+              onClick={() => setIsAddModalOpen(false)}
+            />
 
-            <form onSubmit={handleAddSubmit} className="space-y-3.5 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Nama pendaftar..."
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
+            {/* Slide-in Drawer Panel */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 280 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative z-10 w-full max-w-md sm:max-w-xl h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden"
+            >
+              {/* Drawer Header */}
+              <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-slate-800/30 gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-[10px] bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 flex items-center justify-center shrink-0 shadow-xs">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 truncate">
+                      Tambah Early Tester
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                      Input data pendaftar baru pra-rilis Employr
+                    </p>
+                  </div>
+                </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Email Aktif</label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="email@example.com"
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Nomor WhatsApp</label>
-                <input
-                  type="tel"
-                  value={formData.phone_number}
-                  onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                  placeholder="0812xxxxxxxx"
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Profil / Jenjang</label>
-                <select
-                  value={formData.role_status}
-                  onChange={(e) => setFormData({ ...formData, role_status: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
-                >
-                  <option value="SMA_SMK">Siswa SMA / SMK</option>
-                  <option value="MAHASISWA">Mahasiswa Aktif</option>
-                  <option value="FRESH_GRAD">Fresh Graduate</option>
-                  <option value="JOB_SEEKER">Pencari Kerja</option>
-                </select>
-              </div>
-
-              <div className="pt-2 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold rounded-xl text-slate-700 dark:text-slate-300 transition"
+                  className="p-2 rounded-[10px] text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
                 >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-4 py-2 bg-[#F97316] hover:bg-[#ea580c] text-white font-bold rounded-xl shadow-md transition disabled:opacity-50"
-                >
-                  {isSubmitting ? "Menyimpan..." : "Simpan Tester"}
+                  <X size={18} />
                 </button>
               </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
-    </motion.div>
+
+              {/* Drawer Form Body */}
+              <form onSubmit={handleAddSubmit} className="flex-1 flex flex-col justify-between min-h-0">
+                <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Nama Lengkap <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="Nama pendaftar..."
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-[10px] font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Email Aktif <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="email@example.com"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-[10px] font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Nomor WhatsApp
+                    </label>
+                    <input
+                      type="tel"
+                      value={formData.phone_number}
+                      onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                      placeholder="0812xxxxxxxx"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-[10px] font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Profil / Jenjang
+                    </label>
+                    <select
+                      value={formData.role_status}
+                      onChange={(e) => setFormData({ ...formData, role_status: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-[10px] font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                    >
+                      <option value="SMA_SMK">Siswa SMA / SMK</option>
+                      <option value="MAHASISWA">Mahasiswa Aktif</option>
+                      <option value="FRESH_GRAD">Fresh Graduate</option>
+                      <option value="JOB_SEEKER">Pencari Kerja</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Sticky Footer */}
+                <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-end gap-2.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddModalOpen(false)}
+                    className="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold rounded-[10px] text-slate-700 dark:text-slate-300 transition text-xs cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-4 py-2.5 bg-[#F97316] hover:bg-[#ea580c] text-white font-bold rounded-[10px] shadow-sm transition disabled:opacity-50 text-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    {isSubmitting ? "Menyimpan..." : "Simpan Tester"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </AdminPageWrapper>
   )
 }

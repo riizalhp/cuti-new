@@ -7,6 +7,14 @@
   --font-serif: 'Instrument Serif', Georgia, serif;
   --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+
+  /* Root 14px, zoom 0.8 di desktop. Komentar = hasil visual desktop. */
+  --text-caption: 0.8571rem;  /* 12px CSS → 9.6px  (metadata, badge) */
+  --text-xs: 0.9286rem;       /* 13px CSS → 10.4px (label tombol/tab) — sebelumnya 10.5px */
+  --text-xs--line-height: 1.25;
+  --text-sm: 1rem;            /* 14px CSS → 11.2px (isi)              — sebelumnya 12.25px */
+  --text-sm--line-height: 1.45;
+
   --color-navy-50: #EEF2FF;
   --color-navy-100: #E0E7FF;
   --color-navy-200: #C7D2FE;
@@ -39,6 +47,32 @@
   --color-cobalt-800: #0B195C;
   --color-cobalt-900: #070F38;
   --color-cobalt: #1738D1;
+
+  --color-cta: var(--color-cobalt-500);
+  --color-cta-hover: var(--color-cobalt-600);
+  --color-text-muted: #64748B;
+  --color-text-muted-dark: #94A3B8;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-20: 80px;
+  --spacing-24: 96px;
 }
 
 /* Employr Design System Variables */
@@ -89,13 +123,6 @@
   --space-20: 80px;
   --space-24: 96px;
 
-  /* Border Radius */
-  --radius-sm: 10px;
-  --radius-md: 10px;
-  --radius-lg: 10px;
-  --radius-xl: 10px;
-  --radius-2xl: 10px;
-  --radius-full: 9999px;
 
   /* Shadows */
   --shadow-card: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -131,53 +158,106 @@
 }
 
 html {
-  font-size: 80%; /* Base compact font for small laptops */
-  transition: font-size 0.15s ease-out;
-}
-
-/* Fluid responsive root scaling across all PC screen sizes */
-@media (min-width: 1440px) {
-  html {
-    font-size: 87.5%; /* 14px base rem for 14"-15" laptops & 24" FHD */
-  }
-}
-
-@media (min-width: 1680px) {
-  html {
-    font-size: 93.75%; /* 15px base rem for 24"-27" FHD/2K */
-  }
-}
-
-@media (min-width: 1920px) {
-  html {
-    font-size: 100%; /* 16px standard base rem for 27" monitors */
-  }
-}
-
-@media (min-width: 2560px) {
-  html {
-    font-size: 112.5%; /* 18px base rem for 27"-32" 2K/QHD screens */
-  }
-}
-
-@media (min-width: 3440px) {
-  html {
-    font-size: 125%; /* 20px base rem for 32" 4K & Ultra-wide displays */
-  }
+  font-size: 87.5%; /* 14px base rem (seragam dengan Dashboard Admin) */
+  height: 100%;
+  background-color: var(--background);
+  font-family: var(--font-sans);
+  scrollbar-width: thin;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
+  height: 100%;
+  min-height: 100%;
   margin: 0;
   padding: 0;
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  letter-spacing: -0.015em;
-  min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+h1, h2, h3 {
+  letter-spacing: -0.015em;
+}
+
+/* ============================================================
+   Mobile Form Input Anti-Zoom (iOS Safari, Android Chrome, Mozilla Firefox)
+   ============================================================ */
+
+/* 
+ * Aturan Anti-Zoom Input Form Mobile:
+ * Di iOS Safari, Android Chrome, dan Firefox mobile, elemen input dengan font-size < 16px otomatis memicu browser melakukan auto-zoom saat difokuskan.
+ * Menerapkan font-size: 16px minimal pada semua input teks, select, textarea, dan contenteditable di layar mobile/tablet (< 1024px) menjamin tampilan tetap stabil 100% tanpa zoom yang mengganggu.
+ */
+@media screen and (max-width: 1023px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]),
+  select,
+  textarea,
+  [contenteditable="true"] {
+    font-size: 16px !important;
+  }
+}
+
+/* Mencegah double-tap to zoom pada kontrol formulir dan tombol interaktif */
+input,
+select,
+textarea,
+button {
+  touch-action: manipulation;
+}
+
+/* Laptop & Desktop Viewport Adjustment: Zoom out 80% */
+@media screen and (min-width: 1024px) {
+  html {
+    zoom: 0.8;
+  }
+}
+
+/* Dashboard Viewport Lock: Cegah window scrolling agar sidebar & layout selalu full-height ke dasar layar tanpa overscroll void atau white space samping */
+html:has(#dashboard-root-layout) {
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+body:has(#dashboard-root-layout) {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#dashboard-root-layout {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+
+#onboarding-root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Onboarding Canvas Background Fix: Ensure pure white canvas on zoom out and large displays */
+html:has(#onboarding-root),
+body:has(#onboarding-root) {
+  background-color: #ffffff !important;
+}
+
+.dark html:has(#onboarding-root),
+.dark body:has(#onboarding-root) {
+  background-color: #020617 !important;
+}
+
 
 /* Glassmorphism Luxury Utilities */
 .glass-panel {
@@ -226,43 +306,7 @@ body {
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
 }
 
-/* Button Styles (Consistent Employr Standards) */
-.btn-neo-skeuo,
-.btn-neo-skeuo-accent {
-  border-radius: 10px;
-  background: #1738D1;
-  color: #ffffff;
-  box-shadow:
-    0 3px 8px rgba(23, 56, 209, 0.35),
-    0 10px 25px rgba(23, 56, 209, 0.18);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
 
-.btn-neo-skeuo:hover,
-.btn-neo-skeuo-accent:hover {
-  transform: translateY(-1px);
-  background: #132EA8;
-  box-shadow:
-    0 6px 16px rgba(23, 56, 209, 0.45),
-    0 15px 30px rgba(23, 56, 209, 0.25);
-}
-
-.btn-neo-skeuo-light {
-  border-radius: 10px;
-  background: #ffffff;
-  color: #1738D1;
-  box-shadow:
-    0 3px 8px rgba(0, 0, 0, 0.08),
-    0 10px 25px rgba(0, 0, 0, 0.04);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.btn-neo-skeuo-light:hover {
-  transform: translateY(-1px);
-  box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.12),
-    0 15px 30px rgba(0, 0, 0, 0.08);
-}
 
 /* Editorial Typography */
 .editorial-title {
@@ -271,19 +315,221 @@ body {
   line-height: 0.95;
 }
 
+/* ============================================================
+   Employr Design System — Sleek Global & Custom Scrollbars
+   ============================================================ */
+
+/* Global Scrollbars for Entire Dashboard */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+}
+
+html.dark, .dark {
+  scrollbar-color: rgba(51, 65, 85, 0.7) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.75);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #1738D1;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.7);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.95);
+}
+
+.dark ::-webkit-scrollbar-thumb:active {
+  background: #3B82F6;
+}
+
+/* Custom Sleek Scrollbar for General Scroll Containers & Drawers */
+@utility custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.45);
+    border-radius: 9999px;
+    transition: background-color 0.2s ease;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.8);
+  }
+  &::-webkit-scrollbar-thumb:active {
+    background: #1738D1;
+  }
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.8);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #1738D1;
+}
+.dark .custom-scrollbar {
+  scrollbar-color: rgba(51, 65, 85, 0.7) transparent;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.7);
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.95);
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #3B82F6;
+}
+
+/* Floating progress pill surface - Tidak perlu scrollbar */
+[data-slot="scroll-progress-surface"] ul {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+[data-slot="scroll-progress-surface"] ul::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Custom Sleek Scrollbar for Sidebar & Navigation */
+@utility sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(203, 213, 225, 0.7) transparent;
+  &::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(203, 213, 225, 0.7);
+    border-radius: 9999px;
+    transition: background-color 0.2s ease;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.9);
+  }
+  &::-webkit-scrollbar-thumb:active {
+    background: #1738D1;
+  }
+}
+
+.sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(203, 213, 225, 0.7) transparent;
+}
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(203, 213, 225, 0.7);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+.sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.9);
+}
+.sidebar-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #1738D1;
+}
+.dark .sidebar-scrollbar {
+  scrollbar-color: rgba(51, 65, 85, 0.7) transparent;
+}
+.dark .sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.7);
+}
+.dark .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.95);
+}
+.dark .sidebar-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #3B82F6;
+}
+
 /* No Scrollbar Utility */
 @utility no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
   &::-webkit-scrollbar {
     display: none;
+    width: 0;
+    height: 0;
   }
 }
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+  width: 0;
+  height: 0;
 }
 .no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@utility scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+.scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -337,7 +583,7 @@ body {
 
 /* Focus Styles */
 .focusable:focus-visible {
-  outline: 2px solid var(--accent-indigo);
+  outline: 2px solid var(--color-cobalt-500);
   outline-offset: 2px;
   border-radius: inherit;
 }
@@ -354,9 +600,14 @@ textarea {
 }
 
 /* Custom Sleek Scrollbar for Textareas */
+textarea {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.4) transparent;
+}
+
 textarea::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 textarea::-webkit-scrollbar-track {
@@ -364,12 +615,33 @@ textarea::-webkit-scrollbar-track {
 }
 
 textarea::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.35);
+  background: rgba(156, 163, 175, 0.4);
   border-radius: 9999px;
+  transition: background-color 0.2s ease;
 }
 
 textarea::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.6);
+  background: rgba(156, 163, 175, 0.7);
+}
+
+textarea::-webkit-scrollbar-thumb:active {
+  background: #1738D1;
+}
+
+.dark textarea {
+  scrollbar-color: rgba(51, 65, 85, 0.7) transparent;
+}
+
+.dark textarea::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.7);
+}
+
+.dark textarea::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.9);
+}
+
+.dark textarea::-webkit-scrollbar-thumb:active {
+  background: #3B82F6;
 }
 
 textarea::placeholder {
@@ -513,6 +785,7 @@ select option {
   }
 
   html, body {
+    zoom: 1 !important;
     width: 210mm !important;
     height: auto !important;
     min-height: 100% !important;
@@ -561,6 +834,7 @@ select option {
     gap: 0 !important;
     display: block !important;
     width: 210mm !important;
+    height: auto !important;
     overflow: visible !important;
   }
 
@@ -683,7 +957,193 @@ input::-ms-clear {
 
 @media (prefers-reduced-motion: reduce) {
   .t-input { animation: none !important; transform: none !important; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-pulse,
+  .animate-bounce,
+  .animate-ping {
+    animation: none !important;
+  }
 }
+
+/* ==========================================================================
+   Driver.js Product Tour — AmbilCUTI / Employr Theme Styling
+   ========================================================================== */
+.driver-popover.employr-driver-popover {
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: 16px 18px;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+  z-index: 10000000;
+}
+
+@media screen and (max-width: 640px) {
+  .driver-popover.employr-driver-popover {
+    width: calc(100vw - 32px);
+    max-width: 340px;
+    padding: 13px 15px;
+  }
+}
+
+:is(.dark, .dark *) .driver-popover.employr-driver-popover {
+  background-color: #0f172a;
+  color: #f8fafc;
+  border-color: #1e293b;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+}
+
+.driver-popover.employr-driver-popover .driver-popover-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+:is(.dark, .dark *) .driver-popover.employr-driver-popover .driver-popover-title {
+  color: #f8fafc;
+}
+
+.driver-popover.employr-driver-popover .driver-popover-description {
+  font-size: 12px;
+  line-height: 1.55;
+  color: #475569;
+  margin-bottom: 14px;
+}
+
+:is(.dark, .dark *) .driver-popover.employr-driver-popover .driver-popover-description {
+  color: #94a3b8;
+}
+
+.driver-popover.employr-driver-popover .driver-popover-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+}
+
+:is(.dark, .dark *) .driver-popover.employr-driver-popover .driver-popover-footer {
+  border-top-color: #1e293b;
+}
+
+.driver-popover.employr-driver-popover .driver-popover-progress-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.02em;
+}
+
+:is(.dark, .dark *) .driver-popover.employr-driver-popover .driver-popover-progress-text {
+  color: #94a3b8;
+}
+
+.driver-popover.employr-driver-popover .driver-popover-navigation-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.driver-popover.employr-driver-popover button {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  text-shadow: none;
+  line-height: 1.25;
+}
+
+.driver-popover.employr-driver-popover .driver-popover-next-btn {
+  background-color: #1738D1 !important;
+  color: #ffffff !important;
+  border: 1px solid #1738D1 !important;
+}
+
+.driver-popover.employr-driver-popover .driver-popover-next-btn:hover {
+  background-color: #132EA8 !important;
+  border-color: #132EA8 !important;
+}
+
+.driver-popover.employr-driver-popover .driver-popover-prev-btn {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+:is(.dark, .dark *) .driver-popover.employr-driver-popover .driver-popover-prev-btn {
+  background-color: #1e293b !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
+}
+
+.driver-popover.employr-driver-popover .driver-popover-prev-btn:hover {
+  background-color: #e2e8f0 !important;
+}
+
+.driver-popover.employr-driver-popover .driver-popover-close-btn {
+  color: #94a3b8;
+  font-size: 16px;
+  top: 10px;
+  right: 10px;
+}
+
+.driver-popover.employr-driver-popover .driver-popover-close-btn:hover {
+  color: #0f172a;
+}
+
+:is(.dark, .dark *) .driver-popover.employr-driver-popover .driver-popover-close-btn:hover {
+  color: #ffffff;
+}
+
+/* Popover Arrow colors (matches driver.js arrow placement) */
+.driver-popover.employr-driver-popover .driver-popover-arrow-side-left {
+  border-left-color: #ffffff !important;
+}
+:is(.dark, .dark *) .driver-popover.employr-driver-popover .driver-popover-arrow-side-left {
+  border-left-color: #0f172a !important;
+}
+
+.driver-popover.employr-driver-popover .driver-popover-arrow-side-right {
+  border-right-color: #ffffff !important;
+}
+:is(.dark, .dark *) .driver-popover.employr-driver-popover .driver-popover-arrow-side-right {
+  border-right-color: #0f172a !important;
+}
+
+.driver-popover.employr-driver-popover .driver-popover-arrow-side-top {
+  border-top-color: #ffffff !important;
+}
+:is(.dark, .dark *) .driver-popover.employr-driver-popover .driver-popover-arrow-side-top {
+  border-top-color: #0f172a !important;
+}
+
+.driver-popover.employr-driver-popover .driver-popover-arrow-side-bottom {
+  border-bottom-color: #ffffff !important;
+}
+:is(.dark, .dark *) .driver-popover.employr-driver-popover .driver-popover-arrow-side-bottom {
+  border-bottom-color: #0f172a !important;
+}
+
+
+
+
+
 
 
 

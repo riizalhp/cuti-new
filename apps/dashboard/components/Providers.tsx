@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { ThemeProvider } from 'next-themes';
+import { MotionConfig } from 'framer-motion';
 import { ModalProvider } from '@/context/ModalContext';
 import { ToastProvider } from '@/components/ui/Toast';
 import { ConfirmDialogProvider } from '@/components/ui/ConfirmDialog';
@@ -12,22 +13,30 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    // Non-destructive migration of legacy cuti_* localStorage keys to employr_*
+    // Purge legacy cuti_* keys and stale form/CV cache from localStorage
     try {
+      const toRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && k.startsWith('cuti_')) {
-          const newKey = 'employr_' + k.slice(5);
-          if (localStorage.getItem(newKey) === null) {
-            const val = localStorage.getItem(k);
-            if (val !== null) localStorage.setItem(newKey, val);
-          }
+        if (
+          k &&
+          (k.startsWith('cuti_') ||
+            k.includes('imported_cv_data') ||
+            k.includes('onboarding_profile') ||
+            k.includes('saved_cover_letters') ||
+            k.includes('cv_list') ||
+            k.includes('cv_active_draft') ||
+            k.startsWith('cuti_cv_data_'))
+        ) {
+          toRemove.push(k);
         }
       }
+      toRemove.forEach((k) => localStorage.removeItem(k));
     } catch {}
   }, []);
 
   return (
+    <MotionConfig reducedMotion="user">
     <ThemeProvider
       attribute="class"
       defaultTheme="light"
@@ -46,6 +55,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         </ToastProvider>
       </ModalProvider>
     </ThemeProvider>
+    </MotionConfig>
   );
 }
 

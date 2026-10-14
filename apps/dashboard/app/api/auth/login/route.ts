@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, logSecurityEvent, logApp, extractRequestContext, detectBruteForce } from '@employr/db';
+import { prisma } from '@employr/db';
+import { logSecurityEvent, logApp, extractRequestContext, detectBruteForce } from '@employr/db/logger';
 import { checkRateLimit } from '@/lib/rate-limit';
 import crypto from 'crypto';
 
@@ -33,8 +34,16 @@ function verifyPassword(password: string, storedHash: string): boolean {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { email, password } = body;
+    let body: any = null;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json(
+        { success: false, message: 'Format data permintaan tidak valid.' },
+        { status: 400, headers: getCorsHeaders(req) }
+      );
+    }
+    const { email, password } = body || {};
 
     if (!email || !password) {
       return NextResponse.json(

@@ -7,37 +7,37 @@ updatedAt: 2026-09-15
 keywords: customer service, cs, kontak, bantuan, support, hubungi, email, chat cs, herdi, layanan pelanggan, keluhan, threads
 ---
 
-Butuh bantuan? Ada beberapa saluran yang bisa kamu gunakan.
+Saluran resmi untuk menyampaikan pertanyaan, masukan, atau kendala teknis pada platform Employr.
 
-## 1. Chat Customer Service di dashboard
+## 1. Widget bantuan di dashboard
 
-Di **pojok kanan bawah** dashboard pengguna ada karakter **Herdi**, asisten Customer Service Employr:
+Pada sudut kanan bawah dashboard utama terdapat widget bantuan **Herdi**:
 
-- Klik karakter/bubble **"Ada kendala atau pertanyaan?"** untuk membuka chat.
-- Ketik pertanyaanmu atau klik **chip saran cepat** (misalnya *Cara cetak CV ke PDF*, *Evaluasi CV*, atau *Panduan Misi dan Referral*).
-- Herdi menjawab berdasarkan **Pusat Bantuan (FAQ)**, setiap balasan menyertakan tautan ke artikel lengkap di **faq.employr.id** untuk panduan lebih rinci.
-- Jika tidak menemukan jawaban, Herdi akan menyarankan kata kunci lain atau arah untuk menghubungi tim lewat email atau Threads.
+- Klik bubble bantuan untuk membuka jendela percakapan.
+- Masukkan kata kunci kendala atau pilih topik rekomendasi seperti cetak CV PDF, evaluasi berkas, atau panduan misi.
+- Jawaban merujuk langsung ke dokumen resmi Pusat Bantuan (faq.employr.id).
+- Jika topik membutuhkan penanganan khusus, Herdi akan mengarahkanmu ke saluran komunikasi email atau tim teknis.
 
-> Catatan: Chat ini menjawab dengan pencarian kata kunci pada dokumen bantuan resmi, sehingga responsnya cepat, konsisten, dan selalu mengarahkan ke sumber resmi.
+> Catatan: Jawaban diambil langsung dari basis pengetahuan resmi sehingga informasi yang diberikan selalu akurat dan terverifikasi.
 
-## 2. Email
+## 2. Alamat email
 
-Untuk kendala akun atau laporan bug:
+Untuk laporan kendala akun, kesalahan sistem, atau pertanyaan data:
 
 - **help.employr@outlook.com**
 
-Sertakan informasi berikut agar tim bisa membantu lebih cepat:
+Sertakan informasi pendukung agar penanganan lebih cepat:
 
-- Email akun yang terdaftar
-- Nama fitur/halaman yang bermasalah
-- Screenshot pesan error
+- Alamat email akun terdaftar
+- Nama halaman atau modul yang mengalami kendala
+- Tangkapan layar pesan kendala
 
-## 3. Threads
+## 3. Saluran Threads
 
-Kamu juga bisa menghubungi kami lewat Threads:
+Kamu juga dapat berkomunikasi melalui kanal media sosial:
 
-- **Akun resmi:** [@employr.id](https://www.threads.net/@employr.id) — untuk pertanyaan umum, info terbaru, dan diskusi terbuka.
-- **DM langsung:** [@riizalhp](https://www.threads.net/@riizalhp) — untuk bantuan personal atau hal yang bersifat privat.
+- **Akun Publik**: [@employr.id](https://www.threads.net/@employr.id) untuk kabar pembaruan dan diskusi umum.
+- **Pesan Langsung (DM)**: [@riizalhp](https://www.threads.net/@riizalhp) untuk penanganan kendala privat.
 
 ## 4. Pusat Bantuan
 

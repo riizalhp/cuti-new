@@ -65,11 +65,36 @@ export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10) || 50, 500);
+    const offset = Math.max(parseInt(url.searchParams.get('offset') || '0', 10) || 0, 0);
+    const workType = (url.searchParams.get('workType') || url.searchParams.get('type') || '').toUpperCase();
+
+    const whereClause: any = { is_active: true };
+    if (workType && workType !== 'ALL') {
+      if (workType === 'REMOTE') {
+        whereClause.work_type = { in: ['REMOTE', 'ONLINE'] };
+      } else if (workType === 'HYBRID') {
+        whereClause.work_type = 'HYBRID';
+      } else if (workType === 'ONSITE') {
+        whereClause.work_type = 'ONSITE';
+      }
+    }
 
     const jobs = await prisma.jobs.findMany({
-      where: { is_active: true },
-      include: { companies: true },
+      where: whereClause,
+      include: {
+        companies: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            website: true,
+            location: true,
+            industry: true,
+          },
+        },
+      },
       orderBy: { created_at: 'desc' },
+      skip: offset,
       take: limit,
     });
 

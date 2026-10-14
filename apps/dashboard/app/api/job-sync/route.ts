@@ -25,8 +25,7 @@ export async function GET() {
 /**
  * POST /api/job-sync → jalankan scrape + simpan ke DB (dedupe + auto-nonaktif)
  * Body: { keyword, location?, portals? }
- * Dipakai tombol "Sinkronkan Sekarang" di /scrape-jobs dan bisa dipanggil
- * oleh cron eksternal (mis. Vercel Cron / system crontab) jam 01:00 WIB.
+ * Dipakai tombol "Sinkronkan Sekarang" di /scrape-jobs dan panel sinkronisasi data.
  */
 export async function POST(req: NextRequest) {
   try {

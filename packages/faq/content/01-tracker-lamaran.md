@@ -1,59 +1,59 @@
 ---
 title: Panduan Tracker Lamaran Kerja
-description: Kelola semua lamaran pekerjaan di papan Kanban — tambah, drag & drop status, cari, filter, sinkronisasi database, dan lihat statistik pipeline.
+description: Panduan papan Kanban tracker lamaran: pencatatan lowongan, pembaruan status, pencarian, filter, dan sinkronisasi berkala.
 category: lamaran-kerja
 order: 1
-updatedAt: 2026-08-18
+updatedAt: 2026-09-26
 keywords: tracker lamaran, tracker, kanban, tambah lamaran, status lamaran, terkirim, screening, interview, offering, ditolak, pipeline, drag drop, simpan lamaran
 ---
 
-**Tracker Lamaran** (/tracker) adalah pusat kendali semua lamaran kerjamu. Setiap lamaran dicatat di database akunmu dan bisa dipantau dari satu dashboard.
+Fitur **Tracker Lamaran** (/tracker) adalah pusat kendali untuk memantau seluruh proses melamar pekerjaan. Setiap lamaran tersimpan di akunmu sehingga riwayat rekrutmen tetap terdata rapi.
 
-## Tambah lamaran baru
+## Cara menambah lamaran
 
-1. Klik **+ Tambah Lamaran Baru**.
-2. Isi formulir:
-   - **Perusahaan** dan **Posisi** (wajib).
+1. Klik tombol **Tambah Lamaran**.
+2. Lengkapi formulir:
+   - **Perusahaan** dan **Posisi** (wajib diisi).
    - **Lokasi**, **Tanggal Melamar**, dan **Status** awal.
-   - **Gaji** (opsional).
-   - **Catatan** (opsional).
-   - **Portal** — dari mana kamu melamar (LinkedIn, JobStreet, Glints, dsb., atau ketik bebas). Bisa juga diisi **link portal** agar mudah dibuka kembali.
-3. Klik simpan — lamaran langsung muncul di papan.
+   - **Estimasi Gaji** (opsional).
+   - **Catatan Tambahan** (opsional).
+   - **Portal Sumber**: platform tempat kamu melamar (LinkedIn, JobStreet, Glints, atau tautan langsung ke lowongan).
+3. Klik simpan. Kartu baru akan langsung muncul pada papan.
 
-## Papan Kanban
+## Status pada papan Kanban
 
-Lamaran dikelompokkan dalam 5 kolom status:
+Kartu lamaran terbagi dalam 5 tahapan proses:
 
-| Kolom | Warna | Arti |
+| Kolom | Indikator | Tahapan |
 |---|---|---|
-| Terkirim | Biru | Lamaran sudah dikirim |
-| Screening | Oranye | Sedang disaring HRD |
-| Interview | Kuning | Ada proses wawancara |
-| Offering | Hijau | Menerima tawaran kerja |
-| Ditolak | Merah | Lamaran tidak dilanjutkan |
+| Terkirim | Biru | Dokumen berhasil dikirimkan ke perusahaan |
+| Screening | Oranye | Berkas sedang ditinjau oleh tim rekrutmen |
+| Interview | Kuning | Memasuki tahap wawancara pengguna atau HRD |
+| Offering | Hijau | Mendapatkan penawaran kerja resmi |
+| Ditolak | Merah | Proses lamaran tidak dilanjutkan |
 
-- **Pindahkan kartu dengan drag & drop** antar kolom — status otomatis tersimpan ke database.
-- Klik ikon **trash** pada kartu untuk menghapus lamaran.
-- Setiap kartu menampilkan posisi, perusahaan, lokasi, tanggal, portal, dan gaji.
+- Geser kartu (drag and drop) ke kolom baru untuk memperbarui status. Perubahan langsung tersimpan ke server.
+- Klik ikon hapus pada kartu untuk membersihkan lamaran yang sudah tidak relevan.
+- Setiap kartu merangkum posisi, nama perusahaan, tanggal melamar, dan portal asal.
 
-## Tampilan Tabel
+## Tampilan daftar tabel
 
-Klik toggle **Tabel** untuk melihat semua lamaran dalam bentuk daftar yang bisa:
+Pilih opsi **Tabel** untuk melihat data dalam susunan baris yang praktis:
 
-- **Diurutkan** (klik header kolom: Perusahaan & Posisi, Lokasi, Tanggal, Status).
-- **Difilter** per status (pill filter di atas).
-- **Dicari** berdasarkan nama perusahaan/posisi/portal.
+- Urutkan kolom berdasarkan nama perusahaan, posisi, tanggal, atau status.
+- Gunakan tombol filter di bagian atas untuk menyaring kelompok status tertentu.
+- Cari kata kunci tertentu melalui kolom pencarian.
 
-## Sinkronisasi & statistik
+## Sinkronisasi data
 
-- Tombol **Sinkronisasi** memuat ulang data langsung dari database — gunakan jika data di perangkat lain sudah berubah.
-- Di header tampil statistik pipeline: **Total Lamaran, Terkirim/Screening, Interview, dan Offering Letter**.
+- Gunakan tombol **Sinkronisasi** untuk menyegarkan data jika kamu baru saja memperbarui lamaran dari perangkat lain.
+- Ringkasan statistik di bagian atas merangkum total lamaran aktif, proses wawancara yang sedang berjalan, dan penawaran kerja yang diterima.
 
 ## Pertanyaan umum
 
-- **Lamaran tersimpan di mana?** Di database Employr, terhubung ke akunmu. Bisa diakses dari perangkat lain setelah login.
-- **Bagaimana jika gagal menyimpan?** Akan muncul pesan *"Lamaran belum tersimpan. Periksa koneksi internet Anda."* (cek koneksi lalu klik Sinkronisasi).
-- **Bisa lamaran tanpa link portal?** Bisa, kolom portal opsional, cukup isi nama perusahaan & posisi.
-- **Ada batas jumlah lamaran?** Tidak ada batasan. Kamu bebas menambahkan dan memantau riwayat lamaran kerja sebanyak apa pun secara gratis.
+- **Di mana data lamaran disimpan?** Data tersimpan di server cloud terenkripsi pada akun Employr milikmu.
+- **Apa yang harus dilakukan jika muncul notifikasi gagal simpan?** Jika muncul pesan *"Lamaran belum tersimpan. Periksa koneksi internet Anda"*, periksa stabilitas jaringan internetmu lalu klik tombol Sinkronisasi.
+- **Apakah tautan lowongan wajib diisi?** Tidak, kolom tautan bersifat opsional untuk memudahkanmu membuka kembali detail postingan lowongan.
+- **Berapa batas maksimal lamaran yang bisa dicatat?** Tracker tidak memiliki batasan kuota. Kamu dapat mencatat seluruh riwayat lamaran tanpa biaya langganan.
 
 Lanjut baca: [Scraper Lowongan](/artikel/scraper-lowongan) dan [Panduan Interview](/artikel/panduan-interview).

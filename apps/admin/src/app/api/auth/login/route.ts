@@ -93,7 +93,10 @@ export async function POST(req: NextRequest) {
       role: user.role,
     };
 
-    const token = await signAdminSession(adminData);
+    const token = await signAdminSession({
+      ...adminData,
+      userAgent: ctx.userAgent || null,
+    });
 
     const response = NextResponse.json({
       success: true,

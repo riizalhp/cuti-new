@@ -8,17 +8,24 @@ import {
   FileCheck,
   AlignLeft,
   CheckCircle2,
-  X,
   ArrowRight,
   Loader2,
   AlertTriangle,
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { cleanBulletLine } from '@/lib/cv-bullets';
 
 export interface BulletOptimizePopoverProps {
   isOpen: boolean;
   onClose: () => void;
   bulletText: string;
   onApplyRewrite: (newText: string, feedbackMsg: string) => void;
+  returnFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
 export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
@@ -26,12 +33,11 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
   onClose,
   bulletText,
   onApplyRewrite,
+  returnFocusRef,
 }) => {
   const [selectedGoal, setSelectedGoal] = useState<'impact' | 'ats' | 'metrics' | 'concise' | 'grammar'>('impact');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
-  if (!isOpen) return null;
 
   const handleRewrite = async () => {
     setIsLoading(true);
@@ -81,55 +87,41 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
       const data = await res.json();
 
       if (!res.ok || data.error) {
-        throw new Error(data.error || 'Gagal menghubungi server AI.');
+        throw new Error(data.error || 'Gagal menghubungi server.');
       }
 
       let resultText = (data.text || '').trim();
-      // Strip outer quotes if returned by AI
+      // Strip outer quotes if returned
       if (resultText.startsWith('"') && resultText.endsWith('"')) {
         resultText = resultText.slice(1, -1);
       }
+      resultText = cleanBulletLine(resultText);
 
       if (!resultText) {
-        throw new Error('Respon AI kosong.');
+        throw new Error('Respon hasil kosong.');
       }
 
       setIsLoading(false);
       onApplyRewrite(resultText, selected.feedback);
       onClose();
-    } catch (err: any) {
-      console.error('[Bullet Optimize Popover] Error:', err);
-      setErrorMessage(err.message || 'Gagal menghubungkan ke server AI.');
+    } catch (err: unknown) {
+      const error = err as Error;
+      console.error('[Bullet Optimize Popover] Error:', error);
+      setErrorMessage(error.message || 'Gagal menghubungi server.');
       setIsLoading(false);
     }
   };
 
   return (
-    <div
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-      className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150 cursor-pointer"
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] shadow-2xl overflow-hidden cursor-default space-y-4 p-5 animate-in zoom-in-95"
-      >
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent size="sm" returnFocusRef={returnFocusRef} className="space-y-4 p-5">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-          <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 font-extrabold text-xs">
+        <DialogHeader className="border-b border-slate-100 dark:border-slate-800 pb-3 pr-8">
+          <DialogTitle className="flex items-center gap-2 text-orange-700 dark:text-orange-400 font-extrabold text-xs">
             <Sparkles className="w-4 h-4 fill-orange-500" />
-            <span>Optimalkan Poin Kalimat Real AI</span>
-          </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-6 h-6 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center transition cursor-pointer"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
+            <span>Optimalkan Poin Pengalaman</span>
+          </DialogTitle>
+        </DialogHeader>
 
         {/* Selected Bullet Preview */}
         <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 italic truncate">
@@ -138,7 +130,7 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="p-3 rounded-[10px] bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center gap-2">
+          <div className="p-3 rounded-[10px] bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-400 text-xs font-semibold flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>{errorMessage}</span>
           </div>
@@ -146,7 +138,7 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
 
         {/* Option Choices */}
         <div className="space-y-1.5">
-          <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+          <label className="text-caption font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
             Pilih Target Perbaikan
           </label>
 
@@ -156,15 +148,15 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
               onClick={() => setSelectedGoal('impact')}
               className={`p-2.5 rounded-[10px] border flex items-center justify-between transition cursor-pointer ${
                 selectedGoal === 'impact'
-                  ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-700 dark:text-orange-300'
+                  ? 'bg-orange-50 dark:bg-orange-950/60 border-cobalt-500 text-orange-700 dark:text-orange-300'
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
               }`}
             >
               <span className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-orange-500" />
+                <Target className="w-4 h-4 text-orange-700 dark:text-orange-400" />
                 <span>Lebih Berdampak (Impact)</span>
               </span>
-              {selectedGoal === 'impact' && <CheckCircle2 className="w-4 h-4 text-orange-500" />}
+              {selectedGoal === 'impact' && <CheckCircle2 className="w-4 h-4 text-orange-700 dark:text-orange-400" />}
             </button>
 
             <button
@@ -172,15 +164,15 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
               onClick={() => setSelectedGoal('ats')}
               className={`p-2.5 rounded-[10px] border flex items-center justify-between transition cursor-pointer ${
                 selectedGoal === 'ats'
-                  ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-700 dark:text-orange-300'
+                  ? 'bg-orange-50 dark:bg-orange-950/60 border-cobalt-500 text-orange-700 dark:text-orange-300'
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
               }`}
             >
               <span className="flex items-center gap-2">
-                <FileCheck className="w-4 h-4 text-orange-500" />
+                <FileCheck className="w-4 h-4 text-orange-700 dark:text-orange-400" />
                 <span>Lebih ATS-Friendly</span>
               </span>
-              {selectedGoal === 'ats' && <CheckCircle2 className="w-4 h-4 text-orange-500" />}
+              {selectedGoal === 'ats' && <CheckCircle2 className="w-4 h-4 text-orange-700 dark:text-orange-400" />}
             </button>
 
             <button
@@ -188,15 +180,15 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
               onClick={() => setSelectedGoal('metrics')}
               className={`p-2.5 rounded-[10px] border flex items-center justify-between transition cursor-pointer ${
                 selectedGoal === 'metrics'
-                  ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-700 dark:text-orange-300'
+                  ? 'bg-orange-50 dark:bg-orange-950/60 border-cobalt-500 text-orange-700 dark:text-orange-300'
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
               }`}
             >
               <span className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-orange-500" />
+                <Zap className="w-4 h-4 text-orange-700 dark:text-orange-400" />
                 <span>Tambahkan Metrik / Data</span>
               </span>
-              {selectedGoal === 'metrics' && <CheckCircle2 className="w-4 h-4 text-orange-500" />}
+              {selectedGoal === 'metrics' && <CheckCircle2 className="w-4 h-4 text-orange-700 dark:text-orange-400" />}
             </button>
 
             <button
@@ -204,15 +196,15 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
               onClick={() => setSelectedGoal('concise')}
               className={`p-2.5 rounded-[10px] border flex items-center justify-between transition cursor-pointer ${
                 selectedGoal === 'concise'
-                  ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-700 dark:text-orange-300'
+                  ? 'bg-orange-50 dark:bg-orange-950/60 border-cobalt-500 text-orange-700 dark:text-orange-300'
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
               }`}
             >
               <span className="flex items-center gap-2">
-                <AlignLeft className="w-4 h-4 text-orange-500" />
+                <AlignLeft className="w-4 h-4 text-orange-700 dark:text-orange-400" />
                 <span>Ringkas &amp; Padat</span>
               </span>
-              {selectedGoal === 'concise' && <CheckCircle2 className="w-4 h-4 text-orange-500" />}
+              {selectedGoal === 'concise' && <CheckCircle2 className="w-4 h-4 text-orange-700 dark:text-orange-400" />}
             </button>
           </div>
         </div>
@@ -222,12 +214,12 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
           type="button"
           disabled={isLoading || !bulletText.trim()}
           onClick={handleRewrite}
-          className="w-full py-2.5 px-4 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-extrabold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 border-0"
+          className="w-full py-2.5 px-4 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 text-white font-extrabold text-xs shadow-md shadow-cobalt-500/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 border-0"
         >
           {isLoading ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Menyusun Kalimat dengan Real AI...</span>
+              <span>Menyusun Kalimat Otomatis...</span>
             </>
           ) : (
             <>
@@ -237,7 +229,7 @@ export const BulletOptimizePopover: React.FC<BulletOptimizePopoverProps> = ({
             </>
           )}
         </button>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

@@ -247,12 +247,8 @@ export const orderApi = {
  */
 export const trackerApi = {
   async getAll<T = any>(bypassCache: boolean = false): Promise<T[]> {
-    try {
-      const res = await apiGet<T[]>("/api/applications", { bypassCache });
-      return res.data || [];
-    } catch {
-      return [];
-    }
+    const res = await apiGet<T[]>("/api/applications", { bypassCache });
+    return res.data || [];
   },
   async getById<T = any>(id: string): Promise<T | null> {
     try {
@@ -336,24 +332,54 @@ export const userApi = {
       return null;
     }
   },
+  async changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const res = await apiPost<{ success: boolean; message: string }>("/api/auth/change-password", {
+        currentPassword,
+        newPassword,
+      });
+      return res as any;
+    } catch (err: any) {
+      return { success: false, message: err?.message || 'Gagal mengubah kata sandi.' };
+    }
+  },
+  async deleteAccount(): Promise<boolean> {
+    try {
+      const res = await apiDelete("/api/user/profile");
+      return res.success;
+    } catch {
+      return false;
+    }
+  },
 };
 
 /**
  * Jobs API Client - Job scraping and matching
  */
 export const jobsApi = {
-  async getAll<T = any>(bypassCache: boolean = false): Promise<T[]> {
+  async getAll<T = any>(limit: number = 24, offset: number = 0, workType?: string, bypassCache: boolean = false): Promise<T[]> {
     try {
-      const res = await apiGet<T[]>("/api/jobs", { bypassCache });
+      const typeParam = workType && workType !== 'ALL' ? `&workType=${encodeURIComponent(workType)}` : '';
+      const res = await apiGet<T[]>(`/api/jobs?limit=${limit}&offset=${offset}${typeParam}`, { bypassCache });
       return res.data || [];
     } catch {
       return [];
     }
   },
-  async getRecommended<T = any>(limit: number = 10, bypassCache: boolean = false): Promise<T[]> {
+  async getRecommended<T = any>(limit: number = 24, offset: number = 0, workType?: string, bypassCache: boolean = false): Promise<T[]> {
     try {
-      const res = await apiGet<T[]>(`/api/jobs/recommended?limit=${limit}`, { bypassCache });
+      const typeParam = workType && workType !== 'ALL' ? `&workType=${encodeURIComponent(workType)}` : '';
+      const res = await apiGet<T[]>(`/api/jobs/recommended?limit=${limit}&offset=${offset}${typeParam}`, { bypassCache });
       return res.data || [];
+    } catch {
+      return [];
+    }
+  },
+  async search<T = any>(query: string, limit: number = 24, offset: number = 0, workType?: string, bypassCache: boolean = false): Promise<T[]> {
+    try {
+      const typeParam = workType && workType !== 'ALL' ? `&workType=${encodeURIComponent(workType)}` : '';
+      const res = await apiGet<T[]>(`/api/jobs/search?q=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}${typeParam}`, { bypassCache });
+      return (res as any)?.data || [];
     } catch {
       return [];
     }
@@ -383,6 +409,30 @@ export const notificationsApi = {
   async markRead(id: string): Promise<boolean> {
     try {
       await apiFetch("/api/notifications", { method: "PATCH", body: JSON.stringify({ id }) });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  async clearRead(): Promise<boolean> {
+    try {
+      await apiDelete("/api/notifications");
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  async delete(id: string): Promise<boolean> {
+    try {
+      await apiDelete(`/api/notifications?id=${encodeURIComponent(id)}`);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  async clearOlderThan(days: number): Promise<boolean> {
+    try {
+      await apiDelete(`/api/notifications?days=${days}`);
       return true;
     } catch {
       return false;

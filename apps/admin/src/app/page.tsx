@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { StatsCard } from "@/components/admin/StatsCard"
 import { SidebarToggle } from "@/components/admin/SidebarToggle"
+import { SkeletonStatsGrid, SkeletonChart, Skeleton } from "@/components/admin/Skeleton"
 import {
   Users,
   FileText,
@@ -26,6 +27,12 @@ import {
   Clock,
   BarChart3,
   TrendingUp,
+  Cpu,
+  AlertCircle,
+  ArrowUpRight,
+  Zap,
+  CheckCircle2,
+  Mail,
 } from "lucide-react"
 import { motion } from "framer-motion"
 import Link from "next/link"
@@ -117,6 +124,10 @@ interface DashboardStats {
     totalDownloaded: number
     topTemplates: TopTemplate[]
   }
+  newsletter?: {
+    total: number
+    active: number
+  }
   recentOrders: any[]
   recentApplications: Array<{
     id: string
@@ -130,6 +141,20 @@ interface DashboardStats {
     location?: string | null
     portal?: string | null
   }>
+  aiStats?: {
+    callsToday: number
+    costToday: number
+    tokensToday: number
+    recentLogs: Array<{
+      id: string
+      feature: string
+      provider: string
+      model: string
+      cost: number
+      tokens: number
+      createdAt: string
+    }>
+  }
 }
 
 export default function AdminDashboard() {
@@ -240,10 +265,10 @@ export default function AdminDashboard() {
           trend: "up" as const,
         },
         {
-          title: "Total Order",
-          value: stats.orders.total.toLocaleString("id-ID"),
-          change: `${stats.orders.completed} selesai`,
-          icon: ShoppingCart,
+          title: "Order & Omzet",
+          value: `Rp ${(stats.transactions.totalRevenue / 1000).toLocaleString("id-ID")}rb`,
+          change: `${stats.orders.completed} order • ${stats.transactions.successful} lunas`,
+          icon: DollarSign,
           trend: "up" as const,
         },
         {
@@ -254,10 +279,12 @@ export default function AdminDashboard() {
           trend: "up" as const,
         },
         {
-          title: "Pendapatan",
-          value: `Rp ${(stats.transactions.totalRevenue / 1000).toLocaleString("id-ID")}rb`,
-          change: `${stats.transactions.successful} transaksi sukses`,
-          icon: DollarSign,
+          title: "AI Spend & Engine (24h)",
+          value: stats.aiStats?.costToday
+            ? `Rp ${Math.round(stats.aiStats.costToday).toLocaleString("id-ID")}`
+            : "Rp 0",
+          change: `${stats.aiStats?.callsToday || 0} req • ${(stats.aiStats?.tokensToday || 0).toLocaleString("id-ID")} tok`,
+          icon: Cpu,
           trend: "up" as const,
         },
       ]
@@ -302,15 +329,89 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* High-Priority Operational Attention Banner */}
+      {stats && (stats.withdrawals.pending > 0 || stats.misi.pendingSubmissions > 0) ? (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 p-4 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <AlertCircle size={22} />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold text-amber-950 dark:text-amber-200">
+                Tindakan Operasional Menunggu Persetujuan
+              </h3>
+              <p className="text-xs text-amber-800/90 dark:text-amber-300/90 mt-0.5 font-medium">
+                {stats.withdrawals.pending > 0 && `${stats.withdrawals.pending} pencairan saldo pengguna butuh transfer manual`}
+                {stats.withdrawals.pending > 0 && stats.misi.pendingSubmissions > 0 && " • "}
+                {stats.misi.pendingSubmissions > 0 && `${stats.misi.pendingSubmissions} bukti misi cuan butuh review admin`}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5 self-end sm:self-auto flex-wrap">
+            {stats.withdrawals.pending > 0 && (
+              <Link
+                href="/users"
+                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                Tinjau Pencairan ({stats.withdrawals.pending})
+                <ArrowRight size={13} />
+              </Link>
+            )}
+            {stats.misi.pendingSubmissions > 0 && (
+              <Link
+                href="/campaigns"
+                className="px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                Review Misi ({stats.misi.pendingSubmissions})
+                <ArrowRight size={13} />
+              </Link>
+            )}
+          </div>
+        </motion.div>
+      ) : stats ? (
+        <div className="mb-6 px-4 py-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/50 flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-300">
+          <span className="flex items-center gap-2 font-medium">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            Antrean Operasional Bersih: Tidak ada pencairan dana atau misi yang menunggu persetujuan.
+          </span>
+          <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-emerald-100/80 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300">
+            Zero Backlog
+          </span>
+        </div>
+      ) : null}
+
       {/* Stats Grid */}
       {loading && !stats ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm animate-pulse">
-              <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/2 mb-3" />
-              <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-1/3" />
+        <div className="space-y-8">
+          <SkeletonStatsGrid count={4} columns={4} />
+          <SkeletonChart height="h-64" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <SkeletonChart height="h-72" />
             </div>
-          ))}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <Skeleton className="h-5 w-32 rounded-md" />
+                <Skeleton className="h-4 w-16 rounded-md" />
+              </div>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-4 w-28 rounded-md" />
+                    <Skeleton className="h-3.5 w-12 rounded-md" />
+                  </div>
+                  <Skeleton className="h-3 w-40 rounded-md" />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
@@ -327,14 +428,117 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Pipeline & Status Tracker Lamaran Kerja (Terkirim, Screening, Interview, Offering, Ditolak) */}
+      {/* Main Unified Bento Command Center */}
       {stats && (
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.15 }}
-          className="mb-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm"
-        >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+          {/* Main Operational Column (8 cols) */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* 1. AI Engine & Live Telemetry Cockpit */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div>
+                  <h2 className="text-base font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
+                    <Activity size={18} className="text-[#1738D1]" />
+                    Telemetri & Konsumsi Engine AI
+                  </h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Ringkasan performa model, volume token, dan estimasi biaya pemanggilan AI hari ini
+                  </p>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/80 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                    Engine Aktif
+                  </span>
+                  <Link
+                    href="/ai-live"
+                    className="text-xs font-bold text-orange-500 hover:text-orange-600 flex items-center gap-1 transition-colors"
+                  >
+                    Buka AI Live Tracker
+                    <ArrowRight size={13} />
+                  </Link>
+                </div>
+              </div>
+
+              {/* 3 Pill Metrics */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Request Hari Ini</span>
+                  <p className="text-xl font-black text-slate-900 dark:text-slate-100 mt-1">
+                    {(stats.aiStats?.callsToday || 0).toLocaleString("id-ID")} calls
+                  </p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Multi-provider router</p>
+                </div>
+                <div className="p-3 rounded-xl bg-orange-50/50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30">
+                  <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider block">Est. Biaya 24 Jam</span>
+                  <p className="text-xl font-black text-orange-600 dark:text-orange-400 mt-1 font-mono">
+                    Rp {Math.round(stats.aiStats?.costToday || 0).toLocaleString("id-ID")}
+                  </p>
+                  <p className="text-[10px] text-orange-500/80 mt-0.5">Biaya API multi-model</p>
+                </div>
+                <div className="p-3 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30">
+                  <span className="text-[10px] font-bold text-[#1738D1] dark:text-blue-400 uppercase tracking-wider block">Volume Token Hari Ini</span>
+                  <p className="text-xl font-black text-slate-900 dark:text-blue-200 mt-1 font-mono">
+                    {(stats.aiStats?.tokensToday || 0).toLocaleString("id-ID")}
+                  </p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Input & output teragregasi</p>
+                </div>
+              </div>
+
+              {/* Mini Stream Table of Latest AI Calls */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pb-1">
+                  <span className="font-semibold text-[11px] uppercase tracking-wider">Panggilan Terakhir:</span>
+                  <Link href="/ai-live" className="text-[11px] font-bold text-[#1738D1] dark:text-blue-400 hover:underline flex items-center gap-0.5">
+                    Lihat 50 Live Stream <ArrowUpRight size={11} />
+                  </Link>
+                </div>
+
+                {!stats.aiStats?.recentLogs || stats.aiStats.recentLogs.length === 0 ? (
+                  <div className="p-4 rounded-xl bg-slate-50/50 dark:bg-slate-800/30 text-center text-xs text-slate-400">
+                    Belum ada panggilan AI tercatat hari ini. Log akan muncul seketika saat user memanggil AI.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {stats.aiStats.recentLogs.map((log) => (
+                      <div
+                        key={log.id}
+                        className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-800/30 flex items-center justify-between gap-3 text-xs"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                          <div className="min-w-0">
+                            <span className="font-bold text-slate-800 dark:text-slate-200 truncate block text-[11px]">
+                              {log.feature}
+                            </span>
+                            <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                              <span className="font-mono text-[#1738D1] dark:text-blue-400 font-semibold">{log.model}</span> • {log.provider}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 shrink-0 text-right">
+                          <div className="text-[11px]">
+                            <span className="font-mono text-slate-500 dark:text-slate-400">{log.tokens.toLocaleString("id-ID")} tok</span>
+                          </div>
+                          <span className="font-mono font-extrabold text-orange-600 dark:text-orange-400 text-xs">
+                            Rp {Math.round(log.cost).toLocaleString("id-ID")}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 2. Pipeline & Status Tracker Lamaran Kerja */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.15 }}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm"
+            >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
             <div>
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
@@ -681,14 +885,9 @@ export default function AdminDashboard() {
             </div>
           )}
         </motion.div>
-      )}
 
-      {/* Main Grid: Orders, Popular Templates & Quick Actions */}
-      {stats && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            {/* Top Downloaded Templates Widget */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+        {/* 3. Top Downloaded Templates Widget */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
               <div>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 pb-4 border-b border-slate-100 dark:border-slate-800">
                   <div>
@@ -888,6 +1087,90 @@ export default function AdminDashboard() {
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* Right Column: Triage Operations & Feeds (4 cols) */}
+          <div className="lg:col-span-4 space-y-6">
+            {/* Quick Actions & Operational Triage */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div>
+                <h2 className="text-base font-bold text-slate-900 dark:text-slate-50 mb-1 flex items-center gap-2">
+                  <ShieldAlert size={18} className="text-orange-500" />
+                  Pusat Triage & Aksi Admin
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">Pintasan manajemen & antrean persetujuan</p>
+
+                {/* Pending Actions High-Priority Direct Alerts */}
+                {(stats.withdrawals.pending > 0 || stats.misi.pendingSubmissions > 0) && (
+                  <div className="mb-4 space-y-2">
+                    {stats.withdrawals.pending > 0 && (
+                      <Link
+                        href="/users"
+                        className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs font-bold text-amber-800 dark:text-amber-300 flex items-center justify-between hover:bg-amber-100/60 transition group cursor-pointer"
+                      >
+                        <span>⚠ {stats.withdrawals.pending} pencairan menunggu transfer</span>
+                        <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    )}
+                    {stats.misi.pendingSubmissions > 0 && (
+                      <Link
+                        href="/campaigns"
+                        className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-xs font-bold text-blue-800 dark:text-blue-300 flex items-center justify-between hover:bg-blue-100/60 transition group cursor-pointer"
+                      >
+                        <span>📋 {stats.misi.pendingSubmissions} misi butuh audit bukti</span>
+                        <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    )}
+                  </div>
+                )}
+
+                <div className="space-y-2.5">
+                  <Link href="/ai-live" className="w-full py-2.5 px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-between group">
+                    <span className="flex items-center gap-1.5">
+                      <Activity size={14} />
+                      AI Live Tracker Telemetry
+                    </span>
+                    <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <Link href="/cv" className="w-full py-2.5 px-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-between group">
+                    <span>Analitik Template & CV ({stats.cv.total})</span>
+                    <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <Link href="/users" className="w-full py-2.5 px-3.5 bg-[#1F3578] hover:bg-[#182a60] text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-between group">
+                    <span>Kelola Pengguna ({stats.users.total})</span>
+                    <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <Link href="/campaigns" className="w-full py-2.5 px-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition-all flex items-center justify-between group">
+                    <span>Misi Cuan ({stats.misi.active} aktif)</span>
+                    <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <Link href="/visitors" className="w-full py-2.5 px-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition-all flex items-center justify-between group">
+                    <span className="flex items-center gap-1.5">
+                      <Flame size={14} className="text-orange-500" />
+                      Tracker Jam Ramai & Trafik
+                    </span>
+                    <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <Link href="/newsletter" className="w-full py-2.5 px-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition-all flex items-center justify-between group">
+                    <span className="flex items-center gap-1.5">
+                      <Mail size={14} className="text-[#1738D1]" />
+                      Newsletter &amp; Buletin ({stats.newsletter?.total || 0} subscriber)
+                    </span>
+                    <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <Link href="/settings" className="w-full py-2.5 px-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition-all flex items-center justify-between group">
+                    <span>Pengaturan Harga & Sistem</span>
+                    <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+              </div>
+
+              <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <p className="text-[11px] font-medium text-slate-400 text-center">
+                  Employr Admin Panel v1.0 • Turborepo
+                </p>
+              </div>
+            </div>
 
             {/* Recent Applications Feed Widget */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
@@ -895,14 +1178,14 @@ export default function AdminDashboard() {
                 <div>
                   <h2 className="text-base font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
                     <Briefcase size={18} className="text-orange-500" />
-                    Aktivitas Lamaran Terbaru Pengguna
+                    Aktivitas Lamaran Terbaru
                   </h2>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Catatan lamaran kerja yang baru saja dimasukkan atau dipantau pengguna
+                    Lamaran kerja yang baru saja dipantau pengguna
                   </p>
                 </div>
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                  {stats.recentApplications?.length || 0} Data Terkini
+                  {stats.recentApplications?.length || 0} Data
                 </span>
               </div>
 
@@ -952,65 +1235,6 @@ export default function AdminDashboard() {
                   })}
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-            <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-50 mb-2 flex items-center gap-2">
-                <ShieldAlert size={18} className="text-orange-500" />
-                Aksi Cepat Admin
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">Pintasan menu manajemen sistem</p>
-
-              <div className="space-y-3">
-                <Link href="/cv" className="w-full py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-between group">
-                  <span>Analitik Template & CV ({stats.cv.total})</span>
-                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link href="/users" className="w-full py-3 px-4 bg-[#1F3578] hover:bg-[#182a60] text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-between group">
-                  <span>Kelola Pengguna ({stats.users.total})</span>
-                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link href="/campaigns" className="w-full py-3 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition-all flex items-center justify-between group">
-                  <span>Misi Cuan ({stats.misi.active} aktif)</span>
-                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link href="/visitors" className="w-full py-3 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition-all flex items-center justify-between group">
-                  <span className="flex items-center gap-1.5">
-                    <Flame size={14} className="text-orange-500" />
-                    Tracker Jam Ramai & Trafik
-                  </span>
-                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link href="/settings" className="w-full py-3 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition-all flex items-center justify-between group">
-                  <span>Pengaturan Harga & Sistem</span>
-                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
-            </div>
-
-            {/* Pending Actions */}
-            {(stats.withdrawals.pending > 0 || stats.misi.pendingSubmissions > 0) && (
-              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
-                {stats.withdrawals.pending > 0 && (
-                  <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs font-semibold text-amber-800 dark:text-amber-300">
-                    ⚠ {stats.withdrawals.pending} pencairan menunggu approval
-                  </div>
-                )}
-                {stats.misi.pendingSubmissions > 0 && (
-                  <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-xs font-semibold text-blue-800 dark:text-blue-300">
-                    📋 {stats.misi.pendingSubmissions} misi menunggu review
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl">
-              <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 text-center">
-                Employr Admin Panel v1.0 • Turborepo
-              </p>
             </div>
           </div>
         </div>

@@ -1,5 +1,10 @@
 ---
-// SearchModal.astro - Unified multi-category search overlay
+// SearchModal.astro - Unified multi-category search overlay with real database data
+import { getPortalCounts } from '../lib/data';
+import { lowonganList, eventList, artikelList, ensureData } from '../data/mock';
+
+await ensureData();
+const counts = await getPortalCounts();
 ---
 
 <div
@@ -18,7 +23,7 @@
       <input
         type="text"
         id="modal-search-input"
-        placeholder="Cari lowongan, artikel, event, course, atau sertifikasi..."
+        placeholder="Cari loker, tips karier, event, pelatihan, atau sertifikasi..."
         class="w-full text-base sm:text-lg text-[#101010] placeholder-[#a5a5a1] outline-none bg-transparent font-medium"
         autofocus
       />
@@ -35,55 +40,54 @@
     </div>
 
     <!-- Category Filter Tabs inside Modal -->
-    <div class="px-4 py-3 border-b border-[#d7d6cf] flex items-center gap-2 overflow-x-auto text-xs font-bold no-scrollbar bg-[#f4f3ee]">
-      <button data-tab="all" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-[#101010] text-white">Semua</button>
-      <button data-tab="lowongan" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-white text-[#6e6d68] border border-[#d7d6cf] hover:border-[#101010]">Lowongan (4)</button>
-      <button data-tab="artikel" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-white text-[#6e6d68] border border-[#d7d6cf] hover:border-[#101010]">Artikel (8)</button>
-      <button data-tab="sertifikasi" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-white text-[#6e6d68] border border-[#d7d6cf] hover:border-[#101010]">Sertifikasi (4)</button>
-      <button data-tab="course" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-white text-[#6e6d68] border border-[#d7d6cf] hover:border-[#101010]">Course (3)</button>
-      <button data-tab="event" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-white text-[#6e6d68] border border-[#d7d6cf] hover:border-[#101010]">Event (4)</button>
+    <div class="px-4 py-3 border-b border-[#d7d6cf] flex items-center gap-2 overflow-x-auto text-xs font-bold no-scrollbar bg-[#f4f3ee]" id="modal-category-tabs">
+      <button data-tab="all" data-target="/search" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-[#101010] text-white">Semua</button>
+      <button data-tab="lowongan" data-target="/search?type=lowongan" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-white text-[#6e6d68] border border-[#d7d6cf] hover:border-[#101010]">Loker ({counts.jobs > 1000 ? `${Math.floor(counts.jobs / 1000)}k+` : counts.jobs})</button>
+      {counts.events > 0 && <button data-tab="event" data-target="/search?type=event" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-white text-[#6e6d68] border border-[#d7d6cf] hover:border-[#101010]">Event ({counts.events})</button>}
+      {counts.articles > 0 && <button data-tab="artikel" data-target="/search?type=career" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-white text-[#6e6d68] border border-[#d7d6cf] hover:border-[#101010]">Artikel ({counts.articles})</button>}
+      {counts.certs > 0 && <button data-tab="sertifikasi" data-target="/search?type=sertifikasi" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-white text-[#6e6d68] border border-[#d7d6cf] hover:border-[#101010]">Sertifikasi ({counts.certs})</button>}
+      {counts.courses > 0 && <button data-tab="course" data-target="/search?type=course" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-white text-[#6e6d68] border border-[#d7d6cf] hover:border-[#101010]">Pelatihan ({counts.courses})</button>}
     </div>
 
     <!-- Search Results Container -->
     <div id="search-results-box" class="p-4 sm:p-6 max-h-[60vh] overflow-y-auto space-y-3 bg-[#f4f3ee]">
       <!-- Default Quick Suggestions -->
-      <div class="section-label mb-3"><span>REKOMENDASI PENCARIAN</span><i></i></div>
+      <div class="section-label mb-3"><span>Rekomendasi Pencarian Terkini</span><i></i></div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        <a href="/lowongan?exp=fresh" class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#0000ff] flex items-center justify-between group transition shadow-xs">
-          <div class="flex items-center gap-2.5">
-            <span class="w-7 h-7 rounded-full bg-blue-50 text-[#0000ff] flex items-center justify-center text-xs font-bold border border-blue-100">L</span>
-            <span class="text-xs font-bold text-[#101010] group-hover:text-[#0000ff]">Lowongan Fresh Graduate</span>
-          </div>
-          <span class="text-[10px] font-bold text-[#6e6d68] uppercase">4 Loker</span>
-        </a>
-        <a href="/sertifikasi?q=google" class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#0000ff] flex items-center justify-between group transition shadow-xs">
-          <div class="flex items-center gap-2.5">
-            <span class="w-7 h-7 rounded-full bg-amber-50 text-amber-700 flex items-center justify-center text-xs font-bold border border-amber-200">S</span>
-            <span class="text-xs font-bold text-[#101010] group-hover:text-[#0000ff]">Google Data Analytics</span>
-          </div>
-          <span class="text-[10px] font-bold text-[#6e6d68] uppercase">Sertifikasi</span>
-        </a>
-        <a href="/career?cat=cv" class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#0000ff] flex items-center justify-between group transition shadow-xs">
-          <div class="flex items-center gap-2.5">
-            <span class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center text-xs font-bold border border-emerald-200">A</span>
-            <span class="text-xs font-bold text-[#101010] group-hover:text-[#0000ff]">Panduan CV ATS-Friendly</span>
-          </div>
-          <span class="text-[10px] font-bold text-[#6e6d68] uppercase">Artikel</span>
-        </a>
-        <a href="/event" class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#0000ff] flex items-center justify-between group transition shadow-xs">
-          <div class="flex items-center gap-2.5">
-            <span class="w-7 h-7 rounded-full bg-purple-50 text-purple-700 flex items-center justify-center text-xs font-bold border border-purple-200">E</span>
-            <span class="text-xs font-bold text-[#101010] group-hover:text-[#0000ff]">Jakarta Career Expo 2026</span>
-          </div>
-          <span class="text-[10px] font-bold text-[#6e6d68] uppercase">Job Fair</span>
-        </a>
+        {lowonganList.slice(0, 2).map((job) => (
+          <a href={`/lowongan/${job.slug}`} class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#1738D1] flex items-center justify-between group transition shadow-xs">
+            <div class="flex items-center gap-2.5 min-w-0 pr-2">
+              <span class="w-7 h-7 rounded-full bg-blue-50 text-[#1738D1] flex items-center justify-center text-xs font-bold border border-blue-100 shrink-0">L</span>
+              <span class="text-xs font-bold text-[#101010] group-hover:text-[#1738D1] truncate">{job.title}</span>
+            </div>
+            <span class="text-[11px] font-bold text-[#55544f] shrink-0 truncate max-w-[120px]">{job.company}</span>
+          </a>
+        ))}
+        {eventList.slice(0, 1).map((ev) => (
+          <a href={`/event/${ev.slug}`} class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#1738D1] flex items-center justify-between group transition shadow-xs">
+            <div class="flex items-center gap-2.5 min-w-0 pr-2">
+              <span class="w-7 h-7 rounded-full bg-amber-50 text-amber-800 flex items-center justify-center text-xs font-bold border border-amber-200 shrink-0">E</span>
+              <span class="text-xs font-bold text-[#101010] group-hover:text-[#1738D1] truncate">{ev.title}</span>
+            </div>
+            <span class="text-[11px] font-bold text-[#55544f] shrink-0 truncate max-w-[120px]">{ev.date}</span>
+          </a>
+        ))}
+        {artikelList.slice(0, 1).map((art) => (
+          <a href={`/career/${art.slug}`} class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#1738D1] flex items-center justify-between group transition shadow-xs">
+            <div class="flex items-center gap-2.5 min-w-0 pr-2">
+              <span class="w-7 h-7 rounded-full bg-rose-50 text-rose-700 flex items-center justify-center text-xs font-bold border border-rose-200 shrink-0">A</span>
+              <span class="text-xs font-bold text-[#101010] group-hover:text-[#1738D1] truncate">{art.title}</span>
+            </div>
+            <span class="text-[11px] font-bold text-[#55544f] shrink-0 truncate max-w-[120px]">{art.category}</span>
+          </a>
+        ))}
       </div>
     </div>
 
     <!-- Modal Footer -->
     <div class="p-4 bg-white border-t border-[#d7d6cf] flex items-center justify-between text-xs text-[#6e6d68]">
       <span>Tekan <kbd class="px-2 py-0.5 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] font-mono text-[10px] text-[#101010]">ESC</kbd> untuk menutup</span>
-      <a href="/lowongan" class="font-bold text-[#0000ff] hover:underline">Buka Direktori Lengkap →</a>
+      <a href="/search" class="font-bold text-[#1738D1] hover:underline">Buka Pencarian Terpadu</a>
     </div>
   </div>
 </div>
@@ -92,10 +96,22 @@
   (function() {
     const modal = document.getElementById('global-search-modal');
     const openBtn = document.getElementById('open-search-btn');
-    const heroBtn = document.getElementById('hero-search-btn');
-    const heroInput = document.getElementById('hero-search-input');
     const closeBtn = document.getElementById('close-search-modal');
     const modalInput = document.getElementById('modal-search-input');
+    const tabBtns = document.querySelectorAll('.search-tab-btn');
+    let currentTarget = '/search';
+
+    tabBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach((b) => {
+          b.classList.remove('bg-[#101010]', 'text-white');
+          b.classList.add('bg-white', 'text-[#6e6d68]', 'border-[#d7d6cf]');
+        });
+        btn.classList.remove('bg-white', 'text-[#6e6d68]', 'border-[#d7d6cf]');
+        btn.classList.add('bg-[#101010]', 'text-white');
+        currentTarget = btn.getAttribute('data-target') || '/search';
+      });
+    });
 
     function openModal(initialQuery) {
       if (!modal) return;
@@ -113,15 +129,26 @@
       modal.classList.remove('flex');
     }
 
-    openBtn?.addEventListener('click', () => openModal(''));
-    heroBtn?.addEventListener('click', () => openModal(heroInput?.value || ''));
-    heroInput?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') openModal(heroInput.value);
-    });
+    function executeSearch() {
+      const q = modalInput?.value?.trim() || '';
+      let dest = currentTarget || '/search';
+      if (q) {
+        dest += (dest.includes('?') ? '&' : '?') + 'q=' + encodeURIComponent(q);
+      }
+      window.location.href = dest;
+    }
 
+    openBtn?.addEventListener('click', () => openModal(''));
     closeBtn?.addEventListener('click', closeModal);
     modal?.addEventListener('click', (e) => {
       if (e.target === modal) closeModal();
+    });
+
+    modalInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        executeSearch();
+      }
     });
 
     window.addEventListener('keydown', (e) => {

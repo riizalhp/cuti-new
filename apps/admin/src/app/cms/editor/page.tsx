@@ -176,7 +176,7 @@ function CMSEditorContent() {
     isPublished: true,
 
     // Articles
-    author: "Tim Employr",
+    author: "Admin Employr",
     category: "Tips Karier",
     categoryId: null,
 
@@ -411,7 +411,7 @@ function CMSEditorContent() {
 
         const payload = {
           title: form.title.trim(),
-          author: form.author?.trim() || "Tim Employr",
+          author: form.author?.trim() || "Admin Employr",
           content: mainRichText,
           categoryId,
           coverImageUrl: form.coverImageUrl || null,
@@ -430,7 +430,7 @@ function CMSEditorContent() {
         const json = await res.json();
 
         if (json.success) {
-          router.push("/cms?tab=articles");
+          router.push("/cms?tab=articles&toast=saved");
         } else {
           alert(json.message || "Gagal menyimpan artikel.");
         }
@@ -466,7 +466,7 @@ function CMSEditorContent() {
         const json = await res.json();
 
         if (json.success) {
-          router.push("/cms?tab=jobs");
+          router.push("/cms?tab=jobs&toast=saved");
         } else {
           alert(json.message || "Gagal menyimpan lowongan.");
         }
@@ -506,7 +506,7 @@ function CMSEditorContent() {
         const json = await res.json();
 
         if (json.success) {
-          router.push("/cms?tab=courses");
+          router.push("/cms?tab=courses&toast=saved");
         } else {
           alert(json.message || "Gagal menyimpan kursus.");
         }
@@ -545,7 +545,7 @@ function CMSEditorContent() {
         const json = await res.json();
 
         if (json.success) {
-          router.push("/cms?tab=certifications");
+          router.push("/cms?tab=certifications&toast=saved");
         } else {
           alert(json.message || "Gagal menyimpan sertifikasi.");
         }
@@ -579,7 +579,7 @@ function CMSEditorContent() {
         const json = await res.json();
 
         if (json.success) {
-          router.push("/cms?tab=events");
+          router.push("/cms?tab=events&toast=saved");
         } else {
           alert(json.message || "Gagal menyimpan event.");
         }
@@ -717,7 +717,7 @@ function CMSEditorContent() {
 
                 {type === "articles" && (
                   <span className="text-xs text-slate-400 font-medium">
-                    Ditulis oleh <strong className="text-slate-700 dark:text-slate-200">{form.author || "Tim Employr"}</strong>
+                    Ditulis oleh <strong className="text-slate-700 dark:text-slate-200">{form.author || "Admin Employr"}</strong>
                   </span>
                 )}
 
@@ -1518,11 +1518,11 @@ function CMSEditorContent() {
         )}
       </main>
 
-      {/* Floating Toast */}
+      {/* Floating Toast: Presisi di tengah layar pada mobile, kanan bawah pada desktop */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-slate-700 animate-in fade-in duration-200">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 sm:left-auto sm:right-6 sm:translate-x-0 z-50 max-w-[calc(100%-2rem)] sm:max-w-md bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-slate-700 animate-in fade-in duration-200">
           <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-          {toast}
+          <span className="truncate">{toast}</span>
         </div>
       )}
     </div>

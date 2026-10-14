@@ -26,8 +26,27 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: true, data: [] });
     }
 
+    // Auto-cleanup background: bersihkan notifikasi yang sudah dibaca > 14 hari atau basi > 30 hari
+    const cutoffRead = new Date();
+    cutoffRead.setDate(cutoffRead.getDate() - 14);
+    const cutoffStale = new Date();
+    cutoffStale.setDate(cutoffStale.getDate() - 30);
+
+    prisma.notifications.deleteMany({
+      where: {
+        user_id: user.id,
+        OR: [
+          { read_at: { not: null }, created_at: { lt: cutoffRead } },
+          { created_at: { lt: cutoffStale } },
+        ],
+      },
+    }).catch(() => {});
+
     const rows = await prisma.notifications.findMany({
-      where: { user_id: user.id },
+      where: {
+        user_id: user.id,
+        created_at: { gte: cutoffStale },
+      },
       orderBy: { created_at: 'desc' },
       take: 20,
     });
@@ -100,6 +119,36 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    const olderThanDays = searchParams.get('days');
+
+    // Hapus satu notifikasi spesifik jika ID diberikan
+    if (id) {
+      const deleted = await prisma.notifications.deleteMany({
+        where: { id: id.trim(), user_id: user.id },
+      });
+      return NextResponse.json({ success: true, deleted: deleted.count });
+    }
+
+    // Hapus notifikasi yang sudah dibaca dan lebih lama dari X hari
+    if (olderThanDays) {
+      const days = parseInt(olderThanDays, 10);
+      if (!isNaN(days) && days > 0) {
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - days);
+        const deleted = await prisma.notifications.deleteMany({
+          where: {
+            user_id: user.id,
+            read_at: { not: null },
+            created_at: { lt: cutoffDate },
+          },
+        });
+        return NextResponse.json({ success: true, deleted: deleted.count });
+      }
+    }
+
+    // Default: Hapus semua notifikasi yang sudah dibaca
     const deleted = await prisma.notifications.deleteMany({
       where: { user_id: user.id, read_at: { not: null } },
     });

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
+import { buildLinkedInAuditSlug } from '@/lib/linkedin-slug';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -41,16 +42,27 @@ export async function GET(req: NextRequest) {
 
     const mapped = records.map((r: any) => {
       const opts = typeof r.options === 'object' && r.options !== null ? r.options : {};
+      const resolvedRole = r.target_job_title || opts.targetRole || opts.evidenceBank?.targetRole || 'Professional';
+      const resolvedName = opts.profileUrl || opts.scrapedData?.name || opts.evidenceBank?.fullName || r.input_text || '';
+      const { roleSlug, nameSlug, fullSlug, auditPath } = buildLinkedInAuditSlug(
+        resolvedRole,
+        resolvedName
+      );
+
       return {
         id: r.id,
         createdAt: r.created_at,
         title: r.section_title || `Optimasi ${r.target_job_title || 'LinkedIn'}`,
-        targetRole: r.target_job_title || opts.targetRole || opts.evidenceBank?.targetRole || 'Professional',
+        targetRole: resolvedRole,
         targetIndustry: r.goal || opts.evidenceBank?.targetIndustry || '',
         profileUrl: opts.profileUrl || r.input_text || '',
         overallScore: opts.overallScore || opts.analysisResult?.overallScore || 0,
         profileStatus: opts.analysisResult?.profileStatus || 'Audit Selesai',
         candidateName: opts.scrapedData?.name || '',
+        roleSlug,
+        nameSlug,
+        slug: opts.slug || fullSlug,
+        auditPath: opts.auditPath || auditPath,
       };
     });
 

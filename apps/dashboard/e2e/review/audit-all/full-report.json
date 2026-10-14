@@ -1,0 +1,2520 @@
+{
+  "beranda": {
+    "name": "Beranda",
+    "url": "http://localhost:3000/beranda",
+    "title": "Beranda: Pusat Aktivitas Karier | Employr",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\audit-all\\beranda.png",
+    "headings": [
+      {
+        "tag": "h2",
+        "text": "Selamat pagi, Budi"
+      },
+      {
+        "tag": "h4",
+        "text": "Kamu belum punya CV"
+      },
+      {
+        "tag": "h3",
+        "text": "Ringkasan Lamaran Kerja"
+      },
+      {
+        "tag": "h3",
+        "text": "Progress & Funnel Lamaran\n4 Tahapan"
+      },
+      {
+        "tag": "h4",
+        "text": "Lamaran Dikirim"
+      },
+      {
+        "tag": "h4",
+        "text": "Screening HR"
+      },
+      {
+        "tag": "h4",
+        "text": "Sesi Interview"
+      },
+      {
+        "tag": "h4",
+        "text": "Offering Letter"
+      },
+      {
+        "tag": "h3",
+        "text": "Jadwal Terdekat\n0 Agenda"
+      },
+      {
+        "tag": "h3",
+        "text": "Career Readiness"
+      },
+      {
+        "tag": "h3",
+        "text": "CV ATS Score"
+      },
+      {
+        "tag": "h3",
+        "text": "Aktivitas Terbaru"
+      },
+      {
+        "tag": "h3",
+        "text": "Sprint Lamaran Minggu Ini"
+      },
+      {
+        "tag": "h3",
+        "text": "Rekomendasi Loker"
+      },
+      {
+        "tag": "h4",
+        "text": "Social Media Writer"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer Service Associate: 3 Month Contract"
+      },
+      {
+        "tag": "h4",
+        "text": "Supervisor - RnD"
+      },
+      {
+        "tag": "h3",
+        "text": "Pengembangan Karier & Skill"
+      },
+      {
+        "tag": "h4",
+        "text": "CV vs. Résumé: What&#8217;s the Difference?"
+      },
+      {
+        "tag": "h4",
+        "text": "Remote or Office Work? What to Consider When Choosing a Work Setup"
+      },
+      {
+        "tag": "h4",
+        "text": "10 Questions Every Student Should Ask Before Accepting an Internship"
+      },
+      {
+        "tag": "h4",
+        "text": "Panduan Lengkap Cara Melamar Kerja via Email & WA"
+      },
+      {
+        "tag": "h4",
+        "text": "20 Pertanyaan Interview Tersering & Cara Menjawabnya"
+      },
+      {
+        "tag": "h4",
+        "text": "Cara Membuat CV ATS Friendly yang Lolos Screening HR"
+      },
+      {
+        "tag": "h4",
+        "text": "Kalibrr Communites April 2026 &#8211; Brrsilaturahmi: Titik Temu Kepemimpinan, Budaya, dan Teknologi untuk Masa Depan HR"
+      },
+      {
+        "tag": "h4",
+        "text": "Rahasia Produktivitas Kerja Melalui Smart Hiring Talenta"
+      },
+      {
+        "tag": "h4",
+        "text": "Manajemen Talent Acquisition: Cara Meningkatkan Kualitas SDM lebih Efisien"
+      }
+    ],
+    "bannedTerms": [],
+    "terminologyViolations": [
+      {
+        "wrongWord": "job",
+        "expected": "loker",
+        "count": 2,
+        "sample": "Event Job Fair"
+      }
+    ],
+    "devOrJargonLeaks": [],
+    "duplicateSnippets": [
+      {
+        "text": "PROFIL & DOKUMEN",
+        "count": 2
+      },
+      {
+        "text": "Screening & Evaluasi ATS",
+        "count": 2
+      },
+      {
+        "text": "Optimasi LinkedIn",
+        "count": 2
+      },
+      {
+        "text": "CAREER INTELLIGENCE",
+        "count": 2
+      },
+      {
+        "text": "Career Intelligence",
+        "count": 3
+      },
+      {
+        "text": "Email & Cover Letter",
+        "count": 2
+      },
+      {
+        "text": "Career Readiness",
+        "count": 3
+      },
+      {
+        "text": "Tingkatkan Kesiapan",
+        "count": 2
+      },
+      {
+        "text": "Kamu belum punya CV",
+        "count": 2
+      },
+      {
+        "text": "30 Hari Terakhir",
+        "count": 2
+      }
+    ],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Jelajahi Fitur",
+      "Buat CV Gratis",
+      "Tracker Detail",
+      "Detail Tracker",
+      "Analisis Detail Conversion Rate di Tracker",
+      "Semua",
+      "Buka Tracker",
+      "Panduan & Simulator Interview",
+      "Lihat Detail",
+      "Tingkatkan Kesiapan Karier",
+      "Optimalkan CV Sekarang",
+      "Lihat Selengkapnya di Tracker",
+      "Lihat Tracker",
+      "Lamar Loker",
+      "Cari Semua Loker",
+      "+ Tracker",
+      "Artikel Karier\n9",
+      "Kursus & Skills\n3",
+      "Sertifikasi\n7",
+      "Event Job Fair\n3"
+    ],
+    "inputs": []
+  },
+  "cv": {
+    "name": "CV Saya",
+    "url": "http://localhost:3000/cv",
+    "title": "CV ATS Builder | Employr",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\audit-all\\cv.png",
+    "headings": [
+      {
+        "tag": "h3",
+        "text": "Belum Ada CV Tersimpan"
+      }
+    ],
+    "bannedTerms": [],
+    "terminologyViolations": [],
+    "devOrJargonLeaks": [],
+    "duplicateSnippets": [
+      {
+        "text": "PROFIL & DOKUMEN",
+        "count": 2
+      },
+      {
+        "text": "Screening & Evaluasi ATS",
+        "count": 2
+      },
+      {
+        "text": "Optimasi LinkedIn",
+        "count": 2
+      },
+      {
+        "text": "CAREER INTELLIGENCE",
+        "count": 2
+      },
+      {
+        "text": "Career Intelligence",
+        "count": 3
+      },
+      {
+        "text": "Email & Cover Letter",
+        "count": 2
+      },
+      {
+        "text": "Career Readiness",
+        "count": 2
+      },
+      {
+        "text": "Tingkatkan Kesiapan",
+        "count": 2
+      },
+      {
+        "text": "Menampilkan 0 dokumen CV",
+        "count": 2
+      }
+    ],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Buat CV Mandiri"
+    ],
+    "inputs": [
+      {
+        "tag": "input",
+        "placeholder": "Cari CV berdasarkan judul atau kata kunci...",
+        "value": "",
+        "name": "",
+        "label": ""
+      }
+    ]
+  },
+  "cv-screener": {
+    "name": "Screening & Evaluasi ATS",
+    "url": "http://localhost:3000/cv-screener",
+    "title": "CV Screener & Evaluasi ATS | Employr",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\audit-all\\cv-screener.png",
+    "headings": [
+      {
+        "tag": "h3",
+        "text": "PROFIL CV & TARGET PEKERJAAN"
+      },
+      {
+        "tag": "h3",
+        "text": "PENGATURAN LANJUTAN: KARAKTERISTIK RECRUITER TARGET"
+      }
+    ],
+    "bannedTerms": [],
+    "terminologyViolations": [
+      {
+        "wrongWord": "lowongan",
+        "expected": "loker",
+        "count": 1,
+        "sample": "Target Lowongan"
+      }
+    ],
+    "devOrJargonLeaks": [],
+    "duplicateSnippets": [
+      {
+        "text": "PROFIL & DOKUMEN",
+        "count": 2
+      },
+      {
+        "text": "Screening & Evaluasi ATS",
+        "count": 2
+      },
+      {
+        "text": "Optimasi LinkedIn",
+        "count": 2
+      },
+      {
+        "text": "CAREER INTELLIGENCE",
+        "count": 2
+      },
+      {
+        "text": "Career Intelligence",
+        "count": 3
+      },
+      {
+        "text": "Email & Cover Letter",
+        "count": 2
+      },
+      {
+        "text": "Career Readiness",
+        "count": 2
+      },
+      {
+        "text": "Tingkatkan Kesiapan",
+        "count": 2
+      },
+      {
+        "text": "Riwayat Screening",
+        "count": 2
+      },
+      {
+        "text": "Recruiter: Startup",
+        "count": 2
+      }
+    ],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Riwayat Screening",
+      "2\n\nLANGKAH 2 (OPSIONAL)\n\nRecruiter: Startup",
+      "Posisi Umum",
+      "Target Lowongan",
+      "Buat CV di Builder",
+      "Entry-Level (0 - 1 Tahun)",
+      "Mulai Simulasi Screening CV (1-Klik)",
+      "2\nPENGATURAN LANJUTAN: KARAKTERISTIK RECRUITER TARGET\nOpsional\n\nTipe recruiter aktif: Startup (Fast-Paced & Impact) • Portofolio & Impact\n\nSesuaikan Recruiter",
+      "Mulai Screening CV Saya"
+    ],
+    "inputs": [
+      {
+        "tag": "input",
+        "placeholder": "Cari atau ketik posisi target...",
+        "value": "",
+        "name": "",
+        "label": ""
+      }
+    ]
+  },
+  "linkedin": {
+    "name": "Optimasi LinkedIn",
+    "url": "http://localhost:3000/linkedin",
+    "title": "Optimasi Profil LinkedIn | Employr",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\audit-all\\linkedin.png",
+    "headings": [
+      {
+        "tag": "h2",
+        "text": "Link Profil LinkedIn (1-Klik Otomatis)"
+      }
+    ],
+    "bannedTerms": [],
+    "terminologyViolations": [],
+    "devOrJargonLeaks": [],
+    "duplicateSnippets": [
+      {
+        "text": "PROFIL & DOKUMEN",
+        "count": 2
+      },
+      {
+        "text": "Screening & Evaluasi ATS",
+        "count": 2
+      },
+      {
+        "text": "Optimasi LinkedIn",
+        "count": 2
+      },
+      {
+        "text": "CAREER INTELLIGENCE",
+        "count": 2
+      },
+      {
+        "text": "Career Intelligence",
+        "count": 3
+      },
+      {
+        "text": "Email & Cover Letter",
+        "count": 2
+      },
+      {
+        "text": "Career Readiness",
+        "count": 2
+      },
+      {
+        "text": "Tingkatkan Kesiapan",
+        "count": 2
+      },
+      {
+        "text": "ASEAN AHEAD STANDARD",
+        "count": 3
+      }
+    ],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Riwayat",
+      "Link URL\n1-Klik",
+      "Upload PDF",
+      "Ekstensi Chrome",
+      "Bookmarklet",
+      "Manual",
+      "Ekstrak & Audit Profil Sekarang",
+      "Belum punya akun LinkedIn publik atau profil diset privat? Gunakan Input Manual (Evidence Bank) →"
+    ],
+    "inputs": [
+      {
+        "tag": "input",
+        "placeholder": "linkedin.com/in/nama-kamu atau cukup nama-kamu",
+        "value": "",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "input",
+        "placeholder": "Pilih peran dari engine atau ketik posisi baru...",
+        "value": "",
+        "name": "",
+        "label": ""
+      }
+    ]
+  },
+  "career-intelligence": {
+    "name": "Career Intelligence",
+    "url": "http://localhost:3000/career-intelligence",
+    "title": "Career Intelligence | Employr",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\audit-all\\career-intelligence.png",
+    "headings": [
+      {
+        "tag": "h1",
+        "text": "Career Intelligence"
+      },
+      {
+        "tag": "h3",
+        "text": "Susun CV Pertama Anda untuk Posisi Staff Administrasi & Operasional"
+      },
+      {
+        "tag": "h3",
+        "text": "Peta Radar Kompetensi"
+      },
+      {
+        "tag": "h3",
+        "text": "Kekuatan Terbesar Anda"
+      },
+      {
+        "tag": "h3",
+        "text": "Kesenjangan Skill Prioritas"
+      }
+    ],
+    "bannedTerms": [],
+    "terminologyViolations": [
+      {
+        "wrongWord": "lowongan",
+        "expected": "loker",
+        "count": 1,
+        "sample": "Lihat Lowongan Terbuka"
+      }
+    ],
+    "devOrJargonLeaks": [],
+    "duplicateSnippets": [
+      {
+        "text": "PROFIL & DOKUMEN",
+        "count": 2
+      },
+      {
+        "text": "Screening & Evaluasi ATS",
+        "count": 2
+      },
+      {
+        "text": "Optimasi LinkedIn",
+        "count": 2
+      },
+      {
+        "text": "CAREER INTELLIGENCE",
+        "count": 2
+      },
+      {
+        "text": "Career Intelligence",
+        "count": 4
+      },
+      {
+        "text": "Email & Cover Letter",
+        "count": 2
+      },
+      {
+        "text": "Career Readiness",
+        "count": 3
+      },
+      {
+        "text": "Tingkatkan Kesiapan",
+        "count": 2
+      },
+      {
+        "text": "Standar Role Target",
+        "count": 2
+      },
+      {
+        "text": "Aplikasi Perkantoran & Spreadsheet",
+        "count": 2
+      }
+    ],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Ringkasan",
+      "Kecocokan Role",
+      "Kesenjangan Skill",
+      "Arah Karier",
+      "Lihat Detail Perhitungan",
+      "Buka Rincian Nilai & Bukti Lengkap",
+      "Bukti",
+      "Lihat Semua"
+    ],
+    "inputs": [
+      {
+        "tag": "select",
+        "placeholder": "",
+        "value": "staff-admin",
+        "name": "",
+        "label": "Pilih Target Role untuk Dianalisis"
+      }
+    ]
+  },
+  "tracker": {
+    "name": "Tracker Lamaran",
+    "url": "http://localhost:3000/tracker",
+    "title": "Tracker Lamaran Kerja | Employr",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\audit-all\\tracker.png",
+    "headings": [],
+    "bannedTerms": [],
+    "terminologyViolations": [
+      {
+        "wrongWord": "job",
+        "expected": "loker",
+        "count": 1,
+        "sample": "JOB TRACKER"
+      }
+    ],
+    "devOrJargonLeaks": [],
+    "duplicateSnippets": [
+      {
+        "text": "PROFIL & DOKUMEN",
+        "count": 2
+      },
+      {
+        "text": "Screening & Evaluasi ATS",
+        "count": 2
+      },
+      {
+        "text": "Optimasi LinkedIn",
+        "count": 2
+      },
+      {
+        "text": "CAREER INTELLIGENCE",
+        "count": 2
+      },
+      {
+        "text": "Career Intelligence",
+        "count": 3
+      },
+      {
+        "text": "Email & Cover Letter",
+        "count": 2
+      },
+      {
+        "text": "Career Readiness",
+        "count": 2
+      },
+      {
+        "text": "Tingkatkan Kesiapan",
+        "count": 2
+      }
+    ],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Pengingat\n1",
+      "Sinkronisasi",
+      "Tambah Lamaran",
+      "Coba lagi",
+      "Tutup"
+    ],
+    "inputs": []
+  },
+  "mailer": {
+    "name": "Email & Cover Letter",
+    "url": "http://localhost:3000/mailer",
+    "title": "Email Lamaran Kerja & Pengirim Otomatis | Employr | Employr",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\audit-all\\mailer.png",
+    "headings": [
+      {
+        "tag": "h3",
+        "text": "Siapkan Draf Surat Lamaran / Isi Email"
+      },
+      {
+        "tag": "h4",
+        "text": "Pilih Template Siap Pakai (1-Klik Jadi)"
+      },
+      {
+        "tag": "h5",
+        "text": "Fresh Graduate"
+      },
+      {
+        "tag": "h5",
+        "text": "Magang / PKL"
+      },
+      {
+        "tag": "h5",
+        "text": "Berpengalaman"
+      },
+      {
+        "tag": "h5",
+        "text": "Singkat & Padat"
+      },
+      {
+        "tag": "h3",
+        "text": "Kustomisasi Parameter Surat"
+      },
+      {
+        "tag": "h3",
+        "text": "Hasil Susunan Surat"
+      },
+      {
+        "tag": "h3",
+        "text": "Daftar Surat Lamaran Tersimpan (0)"
+      }
+    ],
+    "bannedTerms": [],
+    "terminologyViolations": [
+      {
+        "wrongWord": "lowongan",
+        "expected": "loker",
+        "count": 1,
+        "sample": "Sistem menyelaraskan syarat lowongan ini dengan keahlian di CV-mu"
+      }
+    ],
+    "devOrJargonLeaks": [
+      "Langsung tampil & bisa diedit di editor sebelah kanan",
+      "Hasil Susunan Surat"
+    ],
+    "duplicateSnippets": [
+      {
+        "text": "PROFIL & DOKUMEN",
+        "count": 2
+      },
+      {
+        "text": "Screening & Evaluasi ATS",
+        "count": 2
+      },
+      {
+        "text": "Optimasi LinkedIn",
+        "count": 2
+      },
+      {
+        "text": "CAREER INTELLIGENCE",
+        "count": 2
+      },
+      {
+        "text": "Career Intelligence",
+        "count": 3
+      },
+      {
+        "text": "Email & Cover Letter",
+        "count": 2
+      },
+      {
+        "text": "Career Readiness",
+        "count": 2
+      },
+      {
+        "text": "Tingkatkan Kesiapan",
+        "count": 2
+      },
+      {
+        "text": "Form Pengiriman Email",
+        "count": 2
+      },
+      {
+        "text": "Pilih Template Siap Pakai (1-Klik Jadi)",
+        "count": 2
+      }
+    ],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Form Pengiriman Email",
+      "Surat Lamaran",
+      "Kirim Cepat",
+      "Kirim Massal (CSV)",
+      "Akun Pengirim (0)",
+      "LULUSAN BARU\nFresh Graduate\n\nMenonjolkan motivasi tinggi, kecepatan belajar, dan latar pendidikan relevan.\n\nGunakan Template",
+      "SISWA\nMagang / PKL\n\nCocok untuk mahasiswa atau siswa yang ingin mempraktikkan ilmu dalam proyek nyata.\n\nGunakan Template",
+      "PROFESIONAL TERUJI\nBerpengalaman\n\nMenonjolkan rekam jejak hasil kerja nyata, penyelesaian masalah, dan kompetensi.\n\nGunakan Template",
+      "LANGSUNG INTI (TO-THE-POINT)\nSingkat & Padat\n\nFormat ringkas yang disukai HRD sibuk: pengantar singkat + lampiran CV.\n\nGunakan Template",
+      "Tempel Teks Loker",
+      "Tempel Lengkap",
+      "Formal (Bahasa Indonesia)",
+      "Susun Surat Lamaran Cerdas",
+      "Salin Cepat",
+      "Salin Teks (Manual)",
+      "Simpan Draf",
+      "Lanjut Kirim Otomatis"
+    ],
+    "inputs": [
+      {
+        "tag": "input",
+        "placeholder": "Contoh: PT Shopee Indonesia",
+        "value": "",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "input",
+        "placeholder": "Contoh: Senior Frontend Developer",
+        "value": "",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "textarea",
+        "placeholder": "Tempel syarat/kualifikasi dari poster loker (misal: Minimal S1, menguasai React/TypeScript, komunikatif)...",
+        "value": "",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "input",
+        "placeholder": "Contoh: Ibu Rina Hartati",
+        "value": "",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "textarea",
+        "placeholder": "Sebutkan prestasi utama atau portofolio khusus yang ingin ditekankan...",
+        "value": "",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "textarea",
+        "placeholder": "Pilih template cepat di atas atau isi formulir di samping, lalu teks surat lamaran akan tampil di sini dan siap kamu edit secara bebas...",
+        "value": "Kepada Yth. Bapak/Ibu HRD\n[Nama Perusahaan]\n\nDengan hormat,\n\nPerkenalkan saya [Nama Anda], lulusan baru yang berdedikasi dan memiliki antusiasme tinggi untuk berkontribusi pada posisi [Posisi Pekerjaan] di [Nama Perusahaan].\n\nMelalui masa studi dan kegiatan akademik, saya telah membangun fondasi keterampilan yang relevan. Saya memiliki etos kerja tinggi, kemampuan adaptasi yang cepat, serta siap belajar dan memberikan kontribusi terbaik bagi kemajuan tim.\n\nTerlampir saya sertakan CV dan berkas pendukung sebagai bahan pertimbangan Bapak/Ibu. Besar harapan saya untuk memperoleh kesempatan wawancara agar dapat menjelaskan kualifikasi saya lebih mendalam.\n\nAtas perhatian dan kesempatan yang Bapak/Ibu berikan, saya ucapkan terima kasih.\n\nHormat saya,\n[Nama Anda]",
+        "name": "",
+        "label": ""
+      }
+    ]
+  },
+  "scrape-jobs": {
+    "name": "Pencarian Loker",
+    "url": "http://localhost:3000/scrape-jobs",
+    "title": "Job Scraper & Sinkronisasi Loker | Employr | Employr",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\audit-all\\scrape-jobs.png",
+    "headings": [
+      {
+        "tag": "h3",
+        "text": "1. Mesin Penarik Lowongan (Web Scraper)"
+      },
+      {
+        "tag": "h3",
+        "text": "Konsol Log Scraper (Realtime)"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Aktif per Sumber"
+      },
+      {
+        "tag": "h4",
+        "text": "Konten Tersimpan (DB)"
+      },
+      {
+        "tag": "h3",
+        "text": "2. Database Lowongan Tersimpan"
+      },
+      {
+        "tag": "h4",
+        "text": "ACCOUNT MANAGER B2B"
+      },
+      {
+        "tag": "h4",
+        "text": "Supervisor - RnD"
+      },
+      {
+        "tag": "h4",
+        "text": "Mechanical & Mechatronics Engineer"
+      },
+      {
+        "tag": "h4",
+        "text": "Web Developer"
+      },
+      {
+        "tag": "h4",
+        "text": "Power Planner & Maintenance Officer at PT Kawasan Industri Terpadu Batang member of PT Danareksa Persero"
+      },
+      {
+        "tag": "h4",
+        "text": "Technical Support Bandung"
+      },
+      {
+        "tag": "h4",
+        "text": "Digital Marketing Executive"
+      },
+      {
+        "tag": "h4",
+        "text": "Social Studies Teacher at Multimedia Nusantara School"
+      },
+      {
+        "tag": "h4",
+        "text": "Sr. Ad Ops KG Media"
+      },
+      {
+        "tag": "h4",
+        "text": "Digital Promotion Supervisor"
+      },
+      {
+        "tag": "h4",
+        "text": "Social Media & Digital Analyst"
+      },
+      {
+        "tag": "h4",
+        "text": "Wedding and Social Event Sales Manager"
+      },
+      {
+        "tag": "h4",
+        "text": "SALES PROJECT"
+      },
+      {
+        "tag": "h4",
+        "text": "ASSET & INVENTORY CONTROLLER"
+      },
+      {
+        "tag": "h4",
+        "text": "Staf Gudang Juwana Pati"
+      },
+      {
+        "tag": "h4",
+        "text": "Staff Gudang"
+      },
+      {
+        "tag": "h4",
+        "text": "LOWONGAN KERJA TERBARU UNTUK DI DAERAH KARAWANG | LOKER BULAN OKTOBER 2026 UNTUK DI KARAWANG SEGERA"
+      },
+      {
+        "tag": "h4",
+        "text": "Safety Officer"
+      },
+      {
+        "tag": "h4",
+        "text": "Operator Batching Plant"
+      },
+      {
+        "tag": "h4",
+        "text": "Operator Premix"
+      },
+      {
+        "tag": "h4",
+        "text": "Operator Excavator"
+      },
+      {
+        "tag": "h4",
+        "text": "Operator Forklift"
+      },
+      {
+        "tag": "h4",
+        "text": "Internship FQC Operator"
+      },
+      {
+        "tag": "h4",
+        "text": "Supply Analyst - West"
+      },
+      {
+        "tag": "h4",
+        "text": "License Owner / Operator, Jakarta"
+      },
+      {
+        "tag": "h4",
+        "text": "Electrical Group Leader"
+      },
+      {
+        "tag": "h4",
+        "text": "Manager Billiard"
+      },
+      {
+        "tag": "h4",
+        "text": "Sales & Marketing"
+      },
+      {
+        "tag": "h4",
+        "text": "Product Sales Manager"
+      },
+      {
+        "tag": "h4",
+        "text": "Head of Customer Experience"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer Service Officer"
+      },
+      {
+        "tag": "h4",
+        "text": "Advisor I, Customer Service – English"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer Service Representative"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer Project Manager"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer Service Manager - E-commerce 3PL & Automation (UK Shift)"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer service agent"
+      },
+      {
+        "tag": "h4",
+        "text": "Admin for Travel Agent & Tour Operator"
+      },
+      {
+        "tag": "h4",
+        "text": "Admin Sample Promosi"
+      },
+      {
+        "tag": "h4",
+        "text": "Admin Meta Ads"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Finance Administration Staff Jakarta Utara – Gaji 6,5 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Frontliner"
+      },
+      {
+        "tag": "h4",
+        "text": "E-Commerce Pakaian & Manufaktur"
+      },
+      {
+        "tag": "h4",
+        "text": "General Affairs Admin Intern"
+      },
+      {
+        "tag": "h4",
+        "text": "Warehouse Sparepart Admin"
+      },
+      {
+        "tag": "h4",
+        "text": "Sales Admin"
+      },
+      {
+        "tag": "h4",
+        "text": "Staff Admin Internal"
+      },
+      {
+        "tag": "h4",
+        "text": "Junior Salesforce / CRM Administrator - Semarang"
+      },
+      {
+        "tag": "h4",
+        "text": "Production Admin (MF3PR08)"
+      },
+      {
+        "tag": "h4",
+        "text": "Supervisor Fund Admin"
+      },
+      {
+        "tag": "h4",
+        "text": "Project Admin #PECMS"
+      },
+      {
+        "tag": "h4",
+        "text": "CBS - Immigration Admin"
+      },
+      {
+        "tag": "h4",
+        "text": "LOKER SEGERA UNTUK PENEMPATAN DI DAERAH TANGERANG | LOWONGAN KERJA TERBARU UNTUK PENEMPATAN DI"
+      },
+      {
+        "tag": "h4",
+        "text": "Marketing Intern - Surabaya"
+      },
+      {
+        "tag": "h4",
+        "text": "PT KOMATSU Indonesia"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Astra Otoparts Tbk"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Sinar Terang Mandiri Tbk"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Cipta Kridatama"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Unggul Dinamika Utama"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Nihon Seiki Indonesia"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Indonesia Epson Industry"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Hyun Jin Indonesia (Paper Cup Factory)"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Puninar Logistics (Triputra Group)"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Panasonic Manufacturing Indonesia"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Archi Indonesia Tbk"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Akasha Wira International Tbk"
+      },
+      {
+        "tag": "h4",
+        "text": "housekeeping staff"
+      },
+      {
+        "tag": "h4",
+        "text": "Kasir & Pramuniaga"
+      },
+      {
+        "tag": "h4",
+        "text": "SOPIR / HELPER"
+      },
+      {
+        "tag": "h4",
+        "text": "Operator Produksi"
+      },
+      {
+        "tag": "h4",
+        "text": "Kitchen Crew"
+      },
+      {
+        "tag": "h4",
+        "text": "Penjaga Laundry Self Service"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja 2 Posisi Blueanchor Crew Network Cilegon"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja Secretary Assistant Junior Indo Raya Tenaga Cilegon"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja Operator Sewing Joymax Footwear Cikande"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja Field Assistant System Compliance LAPI Laboratories Cikande"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Tanjung Power Indonesia (TPI)"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Nutrifood Indonesia"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Steel Pipe Industry of Indonesia"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja BUMN PT Taspen"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Reska Multi Usaha (KAI Service)"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Komatsu Indonesia"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Kino Indonesia Tbk"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Pos Properti Indonesia"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Nihon Seiki Indonesia"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Cipta Kridatama"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Staff Admin Kota Depok – Gaji 5,5 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Admin Kota Jakarta Pusat – Gaji 7,5 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Quantity Surveyor Internship Tangerang – Gaji 2.5 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Staff Accounting Kota Jakarta Barat – Gaji 6,5 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Finance Accounting Staff Kota Jakarta Selatan – Gaji 7,5 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Finance Staff Kota Jakarta Utara – Gaji 7 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Admin Analyst Kota Jakarta Selatan – Gaji 6,5 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Finance Accounting Staff Kota Tangerang – Gaji 6,5 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan PPNPN KPP Pratama Palangkaraya"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja Kalbe Nutritionals"
+      },
+      {
+        "tag": "h4",
+        "text": "Rekrutmen Magang Komnas Perempuan"
+      },
+      {
+        "tag": "h4",
+        "text": "GURU KBTK"
+      },
+      {
+        "tag": "h4",
+        "text": "Marketing Supervisor"
+      },
+      {
+        "tag": "h4",
+        "text": "Quality Control"
+      },
+      {
+        "tag": "h4",
+        "text": "Marketing"
+      },
+      {
+        "tag": "h4",
+        "text": "SALES B2B ELEKTRONIK (PONTIANAK)"
+      },
+      {
+        "tag": "h4",
+        "text": "Credit Analyst Jambi"
+      },
+      {
+        "tag": "h4",
+        "text": "Motion Designer"
+      },
+      {
+        "tag": "h4",
+        "text": "Software Engineer"
+      },
+      {
+        "tag": "h4",
+        "text": "Community Officer Cianjur"
+      },
+      {
+        "tag": "h4",
+        "text": "Community Officer Kalimantan Timur"
+      },
+      {
+        "tag": "h4",
+        "text": "Community Officer Ciamis"
+      },
+      {
+        "tag": "h4",
+        "text": "Community Officer Majalengka"
+      },
+      {
+        "tag": "h4",
+        "text": "Community Officer Lampung Tengah"
+      },
+      {
+        "tag": "h4",
+        "text": "Beauty Consultant - Parfums Christian Dior (Bali)"
+      },
+      {
+        "tag": "h4",
+        "text": "Sales Executive Laboratory"
+      },
+      {
+        "tag": "h4",
+        "text": "Wakil Supervisor"
+      },
+      {
+        "tag": "h4",
+        "text": "Head of Human Resources"
+      },
+      {
+        "tag": "h4",
+        "text": "Ads Specialist (Shopee & TikTok Shop) – Kayu Manis"
+      },
+      {
+        "tag": "h4",
+        "text": "Associate Data Engineer"
+      },
+      {
+        "tag": "h4",
+        "text": "[POTENSI PENDAPATAN 30 JUTA++] Personal Trainer - FIT HUB Kota Wisata Cibubur"
+      },
+      {
+        "tag": "h4",
+        "text": "Medical Representative - Manado"
+      },
+      {
+        "tag": "h4",
+        "text": "Maintenance Sipil Staff (Bogor, Depok, Jakarta Selatan)"
+      },
+      {
+        "tag": "h4",
+        "text": "Webstore Implemeter (Trainer)"
+      },
+      {
+        "tag": "h4",
+        "text": "Sr. Account Executive [Sports]"
+      },
+      {
+        "tag": "h4",
+        "text": "SAP Staff - Pekalongan (Factory)"
+      },
+      {
+        "tag": "h4",
+        "text": "Credit Risk Intern"
+      },
+      {
+        "tag": "h4",
+        "text": "Project Inspector"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer Care (Freelance)"
+      },
+      {
+        "tag": "h4",
+        "text": "Brand Senior Manager"
+      },
+      {
+        "tag": "h4",
+        "text": "Engineering Manager"
+      },
+      {
+        "tag": "h4",
+        "text": "Project Manager"
+      },
+      {
+        "tag": "h4",
+        "text": "SITE ENGINEER (PROJECT)"
+      },
+      {
+        "tag": "h4",
+        "text": "Application Engineer"
+      },
+      {
+        "tag": "h4",
+        "text": "Teknisi Pengendali Hama (Banjarmasin - Branch)"
+      },
+      {
+        "tag": "h4",
+        "text": "Teknisi Otomotif (Tangerang Selatan)"
+      },
+      {
+        "tag": "h4",
+        "text": "Sosial Media Spesialist"
+      },
+      {
+        "tag": "h4",
+        "text": "Social Media Specialist"
+      },
+      {
+        "tag": "h4",
+        "text": "Senior Digital Designer (Web, UX & Social Design Focus)"
+      },
+      {
+        "tag": "h4",
+        "text": "Social Media & Graphic Designer (Placement: MANDYS Shoes & EVOL)"
+      },
+      {
+        "tag": "h4",
+        "text": "Livelihoods and Social Safeguards Manager"
+      },
+      {
+        "tag": "h4",
+        "text": "KEPALA GUDANG"
+      },
+      {
+        "tag": "h4",
+        "text": "INFO LOKER UNTUK DI DAERAH BEKASI TANPA IJAZAH | DIBUTUHKAN SEGERA BULAN SEPTEMBER 2026 KARYAWAN/TI"
+      },
+      {
+        "tag": "h4",
+        "text": "LOWONGAN KERJA TERBARU UNTUK DI SERANG DI DAERAH BANTEN | LOKER BULAN OKTOBER 2026 UNTUK DI SERANG"
+      },
+      {
+        "tag": "h4",
+        "text": "INFO LOKER TERBARU OKTOBER 2026 UNTUK DAERAH BEKASI SEGERA | DIBUTUHKAN SEGERA KARYAWAN/TI UNTUK"
+      },
+      {
+        "tag": "h4",
+        "text": "Merchant Acquisition - Yogyakarta (Daily Worker)"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Daikin Industries Indonesia"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Malindo Feedmill Tbk"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Niterra Mobility Indonesia"
+      },
+      {
+        "tag": "h4",
+        "text": "Loker Operator Produksi Bogor (Gaji s/d Rp5.500.000) – PT Arindo Pacific Chemicals"
+      },
+      {
+        "tag": "h4",
+        "text": "Tank Farm Operator"
+      },
+      {
+        "tag": "h4",
+        "text": "LOKER PRODUKSI ( OPERATOR ) MAYORA GROUP"
+      },
+      {
+        "tag": "h4",
+        "text": "Field Operator II - CT_MB30"
+      },
+      {
+        "tag": "h4",
+        "text": "Chemistry Analysis Operator"
+      },
+      {
+        "tag": "h4",
+        "text": "Telephone Operator Staff (Midplaza Building)"
+      },
+      {
+        "tag": "h4",
+        "text": "Filling Operator"
+      },
+      {
+        "tag": "h4",
+        "text": "PT ASI Pujiastuti Aviation (Susi Air)"
+      },
+      {
+        "tag": "h4",
+        "text": "PT TransNusa Aviation Mandiri"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Jasa Angkasa Semesta Tbk"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer Experience Officer"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer Insight Associate"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer Solutions Analyst"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer Service Gianyar"
+      },
+      {
+        "tag": "h4",
+        "text": "Service Engineer"
+      },
+      {
+        "tag": "h4",
+        "text": "Advisor I, Customer Service Telesales- Indo"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer Service Representative"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer Care Staff"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer Support Manager"
+      },
+      {
+        "tag": "h4",
+        "text": "Advisor I, Customer Service – Indo"
+      },
+      {
+        "tag": "h4",
+        "text": "Customer Service Officer"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Kobexindo Tractors Tbk"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Electronic City Indonesia Tbk"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Astemo Indonesia Automotive System"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Denso Manufacturing Indonesia"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Nusantara Sejahtera Raya Tbk"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Bungasari Flour Mills Indonesia"
+      },
+      {
+        "tag": "h4",
+        "text": "Admin Social Media Golden Digital Solution"
+      },
+      {
+        "tag": "h4",
+        "text": "Admin Social Media Ruang Taut"
+      },
+      {
+        "tag": "h4",
+        "text": "Admin Social Media Teman Gabutmu"
+      },
+      {
+        "tag": "h4",
+        "text": "Admin Social Media Kimos & Gers (TCG)"
+      },
+      {
+        "tag": "h4",
+        "text": "Admin Marketplace"
+      },
+      {
+        "tag": "h4",
+        "text": "Marketing Support (Admin)"
+      },
+      {
+        "tag": "h4",
+        "text": "ADMIN OUTLET"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Admin & Sales (Front Office) Kabupaten Tangerang – Gaji 5,5 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Project Finance Admin Kota Jakarta Pusat – Gaji 8 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Admin Sales Kuta – Gaji 4,5 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Junior Admin Corporate Services Kabupaten Badung – Gaji 4,5 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Admin Marketing Kota Bekasi – Gaji 5,9 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Admin Project Kabupaten Tangerang – Gaji 6 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Administrasi Sales Kota Surabaya – Gaji 6 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Project Admin Kota Jakarta Barat – Gaji 6,5 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Admin Counter Kota Semarang – Gaji 6,5 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Kepala Administrasi Kota Bogor – Gaji 9 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Accounting Specialist"
+      },
+      {
+        "tag": "h4",
+        "text": "CRM Admin - Remote"
+      },
+      {
+        "tag": "h4",
+        "text": "Sales Admin"
+      },
+      {
+        "tag": "h4",
+        "text": "Finance Executive cum HR Admin"
+      },
+      {
+        "tag": "h4",
+        "text": "Talent Acquisition & Admin (Mandarin Speaker)"
+      },
+      {
+        "tag": "h4",
+        "text": "Admin Sales Staff (Bengkulu Area)"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Angkasa Pura Solusi"
+      },
+      {
+        "tag": "h4",
+        "text": "Mayapada Hospital Nusantara"
+      },
+      {
+        "tag": "h4",
+        "text": "Kasir-Server"
+      },
+      {
+        "tag": "h4",
+        "text": "LOKER SEGERA UNTUK PENEMPATAN DI DAERAH KARAWANG | LOWONGAN KERJA TERBARU UNTUK PENEMPATAN DIDAERAH"
+      },
+      {
+        "tag": "h4",
+        "text": "INFO LOKER TERBARU OKTOBER 2026 UNTUK DAERAH DEPOK SEGERA | DIBUTUHKAN SEGERA KARYAWAN/TI UNTUK"
+      },
+      {
+        "tag": "h4",
+        "text": "LOWONGAN BULAN SEPTEMBER 2026 SEGERA KARYAWAN/TI UNTUK PENEMPATAN DI CIKARANG | INFO LOKER UNTUK"
+      },
+      {
+        "tag": "h4",
+        "text": "LOWONGAN KERJA TERBARU UNTUK PENEMPTAN DICIKARANG | LOKER BULAN OKTOBER 2026 UNTUK DI CIKARANG"
+      },
+      {
+        "tag": "h4",
+        "text": "Barista Staff"
+      },
+      {
+        "tag": "h4",
+        "text": "Barista Full Time"
+      },
+      {
+        "tag": "h4",
+        "text": "INFO LOKER TERBARU UNTUK DI DAERAH TANGERANG | LOWONGAN KERJA UNTUK BULAN SEPTEMBER 2026 PENEMPATAN"
+      },
+      {
+        "tag": "h4",
+        "text": "INFO LOKER TERBARU OKTOBER 2026 UNTUK DAERAH KARAWANG SEGERA | DIBUTUHKAN SEGERA KARYAWAN/TI UNTUK"
+      },
+      {
+        "tag": "h4",
+        "text": "LOKER SEGERA UNTUK PENEMPATAN DI DAERAH BEKASI | LOWONGAN KERJA TERBARU UNTUK PENEMPATAN DI DAERAH"
+      },
+      {
+        "tag": "h4",
+        "text": "DIBUTUHKAN SEGERA KARYAWAN/TI UNTUK PENEMPATAN DI JAKARTA | INFO LOKER BULAN SEPTEMBER 2026 UNTUK"
+      },
+      {
+        "tag": "h4",
+        "text": "LOWONGAN KERJA TERBARU UNTUK DI DAERAH JABODETABEK | LOKER BULAN OKTOBER 2026 UNTUK DI JABODETABEK"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Steel Pipe Industry of Indonesia Tbk"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Nipsea Paint and Chemical (Nippon Paint)"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Triputra Agro Persada Tbk"
+      },
+      {
+        "tag": "h4",
+        "text": "Lippo Indonesia"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Mitsubishi Motors Krama Yudha Indonesia"
+      },
+      {
+        "tag": "h4",
+        "text": "PT Baja Perkasa Sentosa"
+      },
+      {
+        "tag": "h4",
+        "text": "Admin Gudang"
+      },
+      {
+        "tag": "h4",
+        "text": "Operator CCTV"
+      },
+      {
+        "tag": "h4",
+        "text": "Koordinator Gudang"
+      },
+      {
+        "tag": "h4",
+        "text": "Admin Divisi"
+      },
+      {
+        "tag": "h4",
+        "text": "Marketing Specialist"
+      },
+      {
+        "tag": "h4",
+        "text": "Interior Designer"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Everpro Indonesia Technologies"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja Receiving Staff Holywings Group Tangerang Selatan"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja Import Staff PT Indorama Polypet Indonesia Cilegon"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Ajinomoto Indonesia"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja BUMN Perum LPPNPI"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT PAMA"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Mayora Indah Tbk"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Indolakto"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Summarecon Agung Tbk"
+      },
+      {
+        "tag": "h4",
+        "text": "lowongan Kerja Gembira Loka Zoo"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Saptaindra Sejati"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja Bank BNI 46"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja Bank BPD Sumsel Babel"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Elnusa Petrofin"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Kaltim Prima Coal"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja Bank BTN"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja BUMN PT Bina Karya"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja BUMN PT Perkebunan Nusantara IV"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT. TransNusa Aviation Mandiri (TransNusa)"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja PT Jasa Angkasa Semesta (JAS Airport Services)"
+      },
+      {
+        "tag": "h4",
+        "text": "Lowongan Kerja Balai Besar Wilayah Sungai (PUPR)"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Finance Staff Kota Jakarta Utara – Gaji 6 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Dibutuhkan Billing & Document Control Staff Kabupaten Bekasi – Gaji 5,9 Juta"
+      },
+      {
+        "tag": "h4",
+        "text": "Loker Procurement Officer Jakarta Selatan (Gaji s/d Rp7.500.000) – PT Daaz Bara Lestari"
+      },
+      {
+        "tag": "h4",
+        "text": "Loker Teknisi Line Produksi Karawang (Gaji s/d Rp6.500.000) – PT Tuffindo Nittoku Autoneum"
+      },
+      {
+        "tag": "h4",
+        "text": "Loker Operator Maintenance Tangerang (Gaji s/d Rp6.000.000) – PT Astari Niagara Internasional"
+      },
+      {
+        "tag": "h4",
+        "text": "Loker Electrical Engineer Karawang (Gaji s/d Rp8.000.000) – PT Hasil Raya Industries"
+      },
+      {
+        "tag": "h4",
+        "text": "Loker Operation & Maintenance Staff Jakarta Selatan (Gaji s/d Rp6.500.000) – PT. Bayu Buana Gemilang"
+      },
+      {
+        "tag": "h4",
+        "text": "lowongan kerja project engineer terbaru"
+      },
+      {
+        "tag": "h4",
+        "text": "Loker Project Engineer Jakarta Utara (Gaji s/d Rp7.500.000) – PT Bina Karya Prima"
+      }
+    ],
+    "bannedTerms": [
+      {
+        "term": "ai",
+        "snippet": "YO AI Labs"
+      },
+      {
+        "term": "bot",
+        "snippet": "Konfigurasi kata kunci bot scraper untuk mengambil data langsung d"
+      }
+    ],
+    "terminologyViolations": [
+      {
+        "wrongWord": "lowongan",
+        "expected": "loker",
+        "count": 57,
+        "sample": "LOWONGAN AKTIF:"
+      }
+    ],
+    "devOrJargonLeaks": [
+      "Refresh Status DB: Cek dan perbarui status lowongan yang sudah ada di database tanpa scrape ulang portal (lebih hemat waktu).",
+      "Kalibrr: 119",
+      "2. Database Lowongan Tersimpan",
+      "Power Planner & Maintenance Officer at PT Kawasan Industri Terpadu Batang member of PT Danareksa Persero"
+    ],
+    "duplicateSnippets": [
+      {
+        "text": "PROFIL & DOKUMEN",
+        "count": 2
+      },
+      {
+        "text": "Screening & Evaluasi ATS",
+        "count": 2
+      },
+      {
+        "text": "Optimasi LinkedIn",
+        "count": 2
+      },
+      {
+        "text": "CAREER INTELLIGENCE",
+        "count": 2
+      },
+      {
+        "text": "Career Intelligence",
+        "count": 3
+      },
+      {
+        "text": "Email & Cover Letter",
+        "count": 2
+      },
+      {
+        "text": "Career Readiness",
+        "count": 2
+      },
+      {
+        "text": "Tingkatkan Kesiapan",
+        "count": 2
+      },
+      {
+        "text": "WEB SCRAPER ENGINE",
+        "count": 2
+      },
+      {
+        "text": "1. Mesin Penarik Lowongan (Web Scraper)",
+        "count": 2
+      }
+    ],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Muat Ulang",
+      "Mulai Scrape (Semua Loker)",
+      "Refresh Status DB",
+      "Semua Terbaru (Explore)",
+      "F&B & Resto",
+      "Retail & Toko",
+      "Admin & Kantor",
+      "Gudang & Pabrik",
+      "Kreatif & Media",
+      "Teknik & Jasa",
+      "Barista",
+      "Kasir",
+      "Pramuniaga",
+      "Admin",
+      "Customer Service",
+      "Operator Produksi",
+      "Gudang",
+      "Social Media",
+      "Teknisi",
+      "Unduh JSON"
+    ],
+    "inputs": [
+      {
+        "tag": "input",
+        "placeholder": "Ketik profesi (contoh: Barista, Kasir, Admin, Gudang)...",
+        "value": "",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "input",
+        "placeholder": "Filter data tersimpan...",
+        "value": "",
+        "name": "",
+        "label": "Filter data lowongan tersimpan"
+      }
+    ]
+  },
+  "marketplace": {
+    "name": "Cari Lowongan (Loker Portal)",
+    "url": "http://localhost:3003",
+    "title": "Employr: Portal Informasi Loker, Sertifikasi & Karier Terlengkap",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\audit-all\\marketplace.png",
+    "headings": [
+      {
+        "tag": "h1",
+        "text": "Semua peluang kariermu,\ndi satu tempat terpadu."
+      },
+      {
+        "tag": "h2",
+        "text": "Peluang karier terverifikasi,\nsiap kamu lamar."
+      },
+      {
+        "tag": "h3",
+        "text": "ACCOUNT MANAGER B2B"
+      },
+      {
+        "tag": "h3",
+        "text": "Supervisor - RnD"
+      },
+      {
+        "tag": "h3",
+        "text": "Mechanical & Mechatronics Engineer"
+      },
+      {
+        "tag": "h3",
+        "text": "Web Developer"
+      },
+      {
+        "tag": "h3",
+        "text": "Power Planner & Maintenance Officer at PT Kawasan Industri Terpadu Batang member of PT Danareksa Persero"
+      },
+      {
+        "tag": "h3",
+        "text": "Technical Support Bandung"
+      },
+      {
+        "tag": "h2",
+        "text": "Validasi keahlianmu,\ndengan sertifikasi kredibel."
+      },
+      {
+        "tag": "h3",
+        "text": "Perumusan Pelaksanaan Sertifikasi Kompetensi Bagi Peserta Magang Nasional 18 Mei 2026 - Pukul 11.12"
+      },
+      {
+        "tag": "h3",
+        "text": "Peluncuran Skema Sertifikasi Okupasi Nasional di Bidang Klining Servis 18 Mei 2026 - Pukul 11.12"
+      },
+      {
+        "tag": "h3",
+        "text": "svg]:w-7 [&>svg]:h-7\"> svg]:w-full [&>svg]:h-full\"> Jadwal Sertifikasi Kompetensi"
+      },
+      {
+        "tag": "h3",
+        "text": "Sertifikasi Kompetensi"
+      },
+      {
+        "tag": "h2",
+        "text": "Tingkatkan keahlianmu,\ndengan pelatihan terarah."
+      },
+      {
+        "tag": "h3",
+        "text": "Digital Marketing Essentials & Social Media Campaign"
+      },
+      {
+        "tag": "h4",
+        "text": "Dasar Pemrograman Web Frontend dengan React & Next.js"
+      },
+      {
+        "tag": "h4",
+        "text": "Masterclass Excel & Data Analysis untuk HR/Admin"
+      },
+      {
+        "tag": "h2",
+        "text": "Temukan Event yang Membuka Peluang Baru"
+      },
+      {
+        "tag": "h3",
+        "text": "Event & Bursa Kerja Terdekat"
+      },
+      {
+        "tag": "h4",
+        "text": "Webinar: Rahasia Menembus Management Trainee BUMN"
+      },
+      {
+        "tag": "h4",
+        "text": "National Virtual Job Fair 2026 - 500+ Lowongan"
+      },
+      {
+        "tag": "h4",
+        "text": "Workshop Interactive CV Clinic & Mock Interview Direct Review"
+      },
+      {
+        "tag": "h3",
+        "text": "KALENDER AGENDA"
+      },
+      {
+        "tag": "h4",
+        "text": "Indonesia National Career Expo & Job Fair 2026"
+      },
+      {
+        "tag": "h4",
+        "text": "Ingin Hadir ke Bursa Kerja atau Mempublikasikan Event Kampus?"
+      },
+      {
+        "tag": "h2",
+        "text": "Pusat Wawasan & Tips Karier"
+      },
+      {
+        "tag": "h3",
+        "text": "CV vs. Résumé: What's the Difference?"
+      },
+      {
+        "tag": "h4",
+        "text": "Remote or Office Work? What to Consider When Choosing a Work Setup"
+      },
+      {
+        "tag": "h4",
+        "text": "10 Questions Every Student Should Ask Before Accepting an Internship"
+      },
+      {
+        "tag": "h4",
+        "text": "Panduan Lengkap Cara Melamar Kerja via Email & WA"
+      },
+      {
+        "tag": "h4",
+        "text": "20 Pertanyaan Interview Tersering & Cara Menjawabnya"
+      },
+      {
+        "tag": "h3",
+        "text": "Cek Skor & Kata Kunci CV ATS"
+      },
+      {
+        "tag": "h3",
+        "text": "Kalkulator Gaji & Take-Home Pay"
+      },
+      {
+        "tag": "h2",
+        "text": "Dapatkan Paket Template CV ATS & Buletin Karier 2026"
+      },
+      {
+        "tag": "h4",
+        "text": "Update Lowongan"
+      },
+      {
+        "tag": "h4",
+        "text": "Info Job Fair & Event"
+      },
+      {
+        "tag": "h4",
+        "text": "Tips CV & Interview"
+      },
+      {
+        "tag": "h4",
+        "text": "Beasiswa & Sertifikasi"
+      }
+    ],
+    "bannedTerms": [],
+    "terminologyViolations": [
+      {
+        "wrongWord": "lowongan",
+        "expected": "loker",
+        "count": 17,
+        "sample": "Lowongan"
+      },
+      {
+        "wrongWord": "job",
+        "expected": "loker",
+        "count": 18,
+        "sample": "Job Fair & Webinar"
+      }
+    ],
+    "devOrJargonLeaks": [
+      "Power Planner & Maintenance Officer at PT Kawasan Industri Terpadu Batang member of PT Danareksa Persero"
+    ],
+    "duplicateSnippets": [
+      {
+        "text": "PORTAL INFORMASI KARIER",
+        "count": 2
+      },
+      {
+        "text": "Dibuka 4 hari lalu",
+        "count": 6
+      },
+      {
+        "text": "Kurasi peluang karier terpercaya untuk masa depanmu.",
+        "count": 2
+      },
+      {
+        "text": "Cek detail skema",
+        "count": 4
+      },
+      {
+        "text": "Cek biaya di link resmi",
+        "count": 4
+      },
+      {
+        "text": "Lihat Persyaratan",
+        "count": 4
+      },
+      {
+        "text": "Live Google Meet",
+        "count": 2
+      },
+      {
+        "text": "Lihat Detail & Daftar",
+        "count": 3
+      },
+      {
+        "text": "Online via Zoom & Portal",
+        "count": 2
+      },
+      {
+        "text": "Jakarta Selatan & Online",
+        "count": 2
+      }
+    ],
+    "buttons": [
+      "Lowongan Kerja",
+      "Sertifikasi Resmi",
+      "Pelatihan Skill",
+      "Agenda Event",
+      "Cari Lowongan",
+      "Semua Event",
+      "Job Fair",
+      "Webinar",
+      "Workshop",
+      "Seminar",
+      "Career Talk",
+      "15",
+      "18",
+      "24",
+      "28",
+      "Semua",
+      "Tips Karier",
+      "CV & Interview",
+      "Dunia Kerja",
+      "Gaji & Negosiasi",
+      "Klaim Template Gratis",
+      "Lowongan (4)",
+      "Artikel (8)",
+      "Sertifikasi (4)",
+      "Course (3)",
+      "Event (4)"
+    ],
+    "inputs": [
+      {
+        "tag": "input",
+        "placeholder": "Cari lowongan kerja (Admin, IT, Marketing, BUMN)...",
+        "value": "",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "select",
+        "placeholder": "",
+        "value": "all",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "select",
+        "placeholder": "",
+        "value": "all",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "input",
+        "placeholder": "Masukkan alamat email aktif kamu",
+        "value": "",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "input",
+        "placeholder": "Cari lowongan, artikel, event, course, atau sertifikasi...",
+        "value": "",
+        "name": "",
+        "label": ""
+      }
+    ]
+  },
+  "pengaturan": {
+    "name": "Pengaturan",
+    "url": "http://localhost:3000/pengaturan",
+    "title": "Pengaturan Akun & Profil | Employr",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\audit-all\\pengaturan.png",
+    "headings": [
+      {
+        "tag": "h2",
+        "text": "Budi Santoso"
+      },
+      {
+        "tag": "h3",
+        "text": "Informasi Biodata & Kontak Pribadi"
+      },
+      {
+        "tag": "h4",
+        "text": "BIODATA DIRI"
+      },
+      {
+        "tag": "h4",
+        "text": "KONTAK & DOMISILI"
+      },
+      {
+        "tag": "h4",
+        "text": "TENTANG SAYA"
+      },
+      {
+        "tag": "h4",
+        "text": "PORTOFOLIO & MEDIA SOSIAL"
+      }
+    ],
+    "bannedTerms": [],
+    "terminologyViolations": [],
+    "devOrJargonLeaks": [
+      "Keamanan & Akun"
+    ],
+    "duplicateSnippets": [
+      {
+        "text": "PROFIL & DOKUMEN",
+        "count": 2
+      },
+      {
+        "text": "Screening & Evaluasi ATS",
+        "count": 2
+      },
+      {
+        "text": "Optimasi LinkedIn",
+        "count": 2
+      },
+      {
+        "text": "CAREER INTELLIGENCE",
+        "count": 2
+      },
+      {
+        "text": "Career Intelligence",
+        "count": 3
+      },
+      {
+        "text": "Email & Cover Letter",
+        "count": 2
+      },
+      {
+        "text": "Career Readiness",
+        "count": 2
+      },
+      {
+        "text": "Tingkatkan Kesiapan",
+        "count": 2
+      },
+      {
+        "text": "budi.santoso@gmail.com",
+        "count": 2
+      },
+      {
+        "text": "Belum ditentukan",
+        "count": 4
+      }
+    ],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Profil & Kontak",
+      "Preferensi Karir",
+      "Keamanan & Akun",
+      "Tampilan & Sistem"
+    ],
+    "inputs": [
+      {
+        "tag": "input",
+        "placeholder": "",
+        "value": "",
+        "name": "",
+        "label": ""
+      }
+    ]
+  },
+  "saran-fitur": {
+    "name": "Saran Fitur",
+    "url": "http://localhost:3000/saran-fitur",
+    "title": "Saran & Request Fitur | Employr",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\audit-all\\saran-fitur.png",
+    "headings": [
+      {
+        "tag": "h3",
+        "text": "Formulir Pengajuan Fitur"
+      },
+      {
+        "tag": "h4",
+        "text": "Tips Menyampaikan Saran"
+      },
+      {
+        "tag": "h4",
+        "text": "Tahapan Ide Fitur"
+      }
+    ],
+    "bannedTerms": [],
+    "terminologyViolations": [],
+    "devOrJargonLeaks": [
+      "Referensi Mockup / Gambar Sketsa"
+    ],
+    "duplicateSnippets": [
+      {
+        "text": "PROFIL & DOKUMEN",
+        "count": 2
+      },
+      {
+        "text": "Screening & Evaluasi ATS",
+        "count": 2
+      },
+      {
+        "text": "Optimasi LinkedIn",
+        "count": 2
+      },
+      {
+        "text": "CAREER INTELLIGENCE",
+        "count": 2
+      },
+      {
+        "text": "Career Intelligence",
+        "count": 3
+      },
+      {
+        "text": "Email & Cover Letter",
+        "count": 2
+      },
+      {
+        "text": "Career Readiness",
+        "count": 2
+      },
+      {
+        "text": "Tingkatkan Kesiapan",
+        "count": 2
+      },
+      {
+        "text": "WISHLIST KOMUNITAS",
+        "count": 2
+      },
+      {
+        "text": "CV Builder & Desain CV",
+        "count": 2
+      }
+    ],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Formulir",
+      "Riwayat",
+      "CV Builder & Desain CV",
+      "Kirim Saran Fitur"
+    ],
+    "inputs": [
+      {
+        "tag": "input",
+        "placeholder": "Contoh: Notifikasi Pengingat Interview via WhatsApp",
+        "value": "",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "textarea",
+        "placeholder": "Ceritakan kendala yang kamu rasakan saat ini, atau bagaimana fitur ini dapat mempermudahmu dalam mencari pekerjaan...",
+        "value": "",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "textarea",
+        "placeholder": "Contoh: Saat mengubah status di tracker lamaran menjadi 'Interview', muncul tombol 'Sinkronkan ke Google Calendar' atau pilihan kirim pengingat...",
+        "value": "",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "input",
+        "placeholder": "",
+        "value": "",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "input",
+        "placeholder": "Nama kamu",
+        "value": "Budi Santoso",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "input",
+        "placeholder": "email@kamu.com",
+        "value": "budi.santoso@gmail.com",
+        "name": "",
+        "label": ""
+      }
+    ]
+  },
+  "lapor-bug": {
+    "name": "Lapor Kendala",
+    "url": "http://localhost:3000/lapor-bug",
+    "title": "Lapor Kendala & Bug | Employr",
+    "screenshot": "D:\\cuti\\apps\\dashboard\\e2e\\review\\audit-all\\lapor-bug.png",
+    "headings": [
+      {
+        "tag": "h2",
+        "text": "Tangkapan Layar / Screenshot (Opsional)"
+      },
+      {
+        "tag": "h3",
+        "text": "INFO SISTEM KAMU"
+      },
+      {
+        "tag": "h3",
+        "text": "TIPS PELAPORAN EFEKTIF"
+      }
+    ],
+    "bannedTerms": [],
+    "terminologyViolations": [],
+    "devOrJargonLeaks": [
+      "Lampirkan screenshot: Gambar tampilan rusak sangat mempercepat penanganan."
+    ],
+    "duplicateSnippets": [
+      {
+        "text": "PROFIL & DOKUMEN",
+        "count": 2
+      },
+      {
+        "text": "Screening & Evaluasi ATS",
+        "count": 2
+      },
+      {
+        "text": "Optimasi LinkedIn",
+        "count": 2
+      },
+      {
+        "text": "CAREER INTELLIGENCE",
+        "count": 2
+      },
+      {
+        "text": "Career Intelligence",
+        "count": 3
+      },
+      {
+        "text": "Email & Cover Letter",
+        "count": 2
+      },
+      {
+        "text": "Career Readiness",
+        "count": 2
+      },
+      {
+        "text": "Tingkatkan Kesiapan",
+        "count": 2
+      },
+      {
+        "text": "BANTUAN & KENDALA",
+        "count": 2
+      },
+      {
+        "text": "Beranda (/beranda)",
+        "count": 2
+      }
+    ],
+    "buttons": [
+      "Keluar Akun",
+      "Dark",
+      "Notifikasi, 3 belum dibaca\n0\n1\n2\n3\n4\n5\n6",
+      "Budi Santoso",
+      "Formulir",
+      "Riwayat",
+      "Beranda (/beranda)",
+      "Kirim Laporan Kendala"
+    ],
+    "inputs": [
+      {
+        "tag": "input",
+        "placeholder": "Contoh: Tombol simpan CV tidak merespon saat diklik",
+        "value": "",
+        "name": "",
+        "label": "Apa kendala yang kamu temukan? *"
+      },
+      {
+        "tag": "textarea",
+        "placeholder": "Jelaskan apa yang terjadi, apa yang kamu klik, atau pesan error apa yang muncul...",
+        "value": "",
+        "name": "",
+        "label": "Ceritakan Kendalanya *"
+      },
+      {
+        "tag": "input",
+        "placeholder": "",
+        "value": "",
+        "name": "",
+        "label": ""
+      },
+      {
+        "tag": "input",
+        "placeholder": "",
+        "value": "on",
+        "name": "",
+        "label": ""
+      }
+    ]
+  }
+}

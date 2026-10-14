@@ -1,9 +1,12 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { AdminPageWrapper } from "@/components/admin/AdminPageWrapper"
 import { SidebarToggle } from "@/components/admin/SidebarToggle"
+import { Skeleton } from "@/components/admin/Skeleton"
+import { Toast, type ToastData, type ToastType } from "@/components/admin/Toast"
 import {
   BookOpen,
   GraduationCap,
@@ -16,8 +19,15 @@ import {
   ExternalLink,
   Loader2,
   Briefcase,
+  Download,
+  UploadCloud,
+  FileSpreadsheet,
+  FileText,
+  ChevronDown,
 } from "lucide-react"
 import { AdminJobsView } from "@/components/admin/AdminJobsView"
+import { BulkImportModal } from "@/components/admin/BulkImportModal"
+import { downloadTemplate, exportData, CMSEntityKey } from "@/lib/cms-excel"
 
 type TabKey = "articles" | "jobs" | "courses" | "certifications" | "events"
 type CrudTabKey = Exclude<TabKey, "jobs">
@@ -94,6 +104,60 @@ export default function CMSPage() {
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
+  const [toast, setToast] = useState<ToastData | null>(null)
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false)
+  const [showTemplateMenu, setShowTemplateMenu] = useState(false)
+  const [showExportMenu, setShowExportMenu] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+  const [jobsRefreshKey, setJobsRefreshKey] = useState(0)
+
+  const showToast = useCallback((type: ToastType, message: string) => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current)
+    setToast({ type, message })
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast(null)
+    }, 4000)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current)
+    }
+  }, [])
+
+  const handleExport = async (format: "xlsx" | "csv" | "json") => {
+    setShowExportMenu(false)
+    setIsExporting(true)
+    const currentTabObj = tabs.find((t) => t.key === tab)
+    const tabLabel = currentTabObj?.label || tab
+    try {
+      let items = data[tab] || []
+      if (tab === "jobs") {
+        const res = await fetch("/api/cms/jobs?limit=200")
+        const json = await res.json()
+        if (json.success && json.data) items = json.data
+      }
+      exportData(tab as CMSEntityKey, items, format)
+      showToast("success", `Berhasil mengekspor ${items.length} data ${tabLabel} (.${format}).`)
+    } catch (e: any) {
+      showToast("error", e?.message || `Gagal mengekspor data ${tabLabel}.`)
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const handleDownloadTemplate = (format: "xlsx" | "csv" | "json") => {
+    setShowTemplateMenu(false)
+    const currentTabObj = tabs.find((t) => t.key === tab)
+    const tabLabel = currentTabObj?.label || tab
+    try {
+      downloadTemplate(tab as CMSEntityKey, format)
+      showToast("info", `Format template ${tabLabel} (.${format}) siap diisi.`)
+    } catch {
+      showToast("error", "Gagal mengunduh format template.")
+    }
+  }
 
   const load = useCallback(async (t: TabKey) => {
     if (t === "jobs") {
@@ -125,6 +189,13 @@ export default function CMSPage() {
       if (tabParam && ["articles", "jobs", "courses", "certifications", "events"].includes(tabParam)) {
         setTab(tabParam)
       }
+      const toastParam = urlParams.get("toast")
+      if (toastParam === "saved") {
+        showToast("success", "Konten berhasil disimpan.")
+        const newUrl = new URL(window.location.href)
+        newUrl.searchParams.delete("toast")
+        window.history.replaceState({}, "", newUrl.toString())
+      }
     }
 
     setLoading(true)
@@ -147,23 +218,25 @@ export default function CMSPage() {
         setData(next)
       })
       .finally(() => setLoading(false))
-  }, [])
+  }, [showToast])
 
   const handleDelete = async () => {
     if (!confirmDelete || tab === "jobs") return
     const currentTab = tab as CrudTabKey
+    const deletedTitle = confirmDelete.title || "Konten"
     setSaving(true)
     try {
       const res = await fetch(`${API_PATHS[currentTab]}/${confirmDelete.id}`, { method: "DELETE" })
       const json = await res.json()
       if (!json.success) {
-        setError(json.message ?? "Gagal menghapus")
+        showToast("error", json.message ?? `Gagal menghapus "${deletedTitle}".`)
         return
       }
       setConfirmDelete(null)
       await load(currentTab)
+      showToast("success", `"${deletedTitle}" berhasil dihapus.`)
     } catch (e: any) {
-      setError(e?.message ?? "Terjadi kesalahan")
+      showToast("error", e?.message ?? `Terjadi kesalahan saat menghapus "${deletedTitle}".`)
     } finally {
       setSaving(false)
     }
@@ -178,33 +251,55 @@ export default function CMSPage() {
     if (tab === "jobs") return
     const currentTab = tab as CrudTabKey
     const nextActive = !item.isActive
-    const res = await fetch(`${API_PATHS[currentTab]}/${item.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isActive: nextActive }),
-    })
-    const json = await res.json()
-    if (json.success) await load(currentTab)
+    try {
+      const res = await fetch(`${API_PATHS[currentTab]}/${item.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: nextActive }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        await load(currentTab)
+        showToast("success", `Status "${item.title}" diubah menjadi ${nextActive ? "Aktif" : "Nonaktif"}.`)
+      } else {
+        showToast("error", json.message || "Gagal mengubah status.")
+      }
+    } catch {
+      showToast("error", "Terjadi kesalahan saat mengubah status.")
+    }
+  }
+
+  const toggleArticlePublish = async (item: ArticleItem) => {
+    const nextPublished = !item.isPublished
+    try {
+      const res = await fetch(`${API_PATHS.articles}/${item.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPublished: nextPublished }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        await load("articles")
+        showToast("success", `Artikel "${item.title}" berhasil ${nextPublished ? "diterbitkan" : "dijadikan draft"}.`)
+      } else {
+        showToast("error", json.message || "Gagal mengubah status publikasi artikel.")
+      }
+    } catch {
+      showToast("error", "Terjadi kesalahan saat mengubah status publikasi artikel.")
+    }
   }
 
   const columns: Record<CrudTabKey, { key: string; header: string; render: (item: any) => React.ReactNode }[]> = {
     articles: [
       { key: "title", header: "Judul", render: (item: ArticleItem) => <span className="font-semibold">{item.title}</span> },
-      { key: "author", header: "Penulis", render: (item: ArticleItem) => item.author },
+      { key: "author", header: "Penulis", render: (item: ArticleItem) => (!item.author || item.author.toLowerCase().includes("ambilcuti") ? "Admin Employr" : item.author) },
       { key: "category", header: "Kategori", render: (item: ArticleItem) => item.category ?? <span className="text-slate-400">-</span> },
       {
         key: "isPublished",
         header: "Status",
         render: (item: ArticleItem) => (
           <button
-            onClick={() => {
-              const res = fetch(`${API_PATHS.articles}/${item.id}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ isPublished: !item.isPublished }),
-              }).then((r) => r.json())
-              res.then((json) => json.success && load("articles"))
-            }}
+            onClick={() => toggleArticlePublish(item)}
             className={`px-2.5 py-1 rounded-full text-xs font-bold border cursor-pointer transition-all ${
               item.isPublished
                 ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
@@ -331,7 +426,7 @@ export default function CMSPage() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+    <AdminPageWrapper>
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-5">
         <div className="flex items-center gap-3.5">
           <SidebarToggle />
@@ -345,34 +440,141 @@ export default function CMSPage() {
             </p>
           </div>
         </div>
-        {tab === "jobs" ? (
-          <div className="flex items-center gap-2.5">
+        {/* Action Group */}
+        <div className="flex flex-wrap items-center gap-2">
+          {tab === "jobs" && (
             <a
               href="http://localhost:3003"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl shadow-xs transition-all"
+              className="hidden xl:flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-[10px] transition cursor-pointer"
             >
-              <ExternalLink size={15} />
-              Portal Loker (3003)
+              <ExternalLink size={14} />
+              Portal Loker
             </a>
-            <Link
-              href="/cms/editor?type=jobs"
-              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
+          )}
+
+          {/* Unduh Format Template Dropdown */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                setShowTemplateMenu((v) => !v)
+                setShowExportMenu(false)
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-[10px] shadow-2xs transition cursor-pointer"
             >
-              <Plus size={18} />
-              Tambah Lowongan
-            </Link>
+              <FileSpreadsheet size={14} className="text-emerald-500" />
+              <span>Format Template</span>
+              <ChevronDown size={13} className="text-slate-400" />
+            </button>
+            {showTemplateMenu && (
+              <div
+                className="absolute right-0 mt-1.5 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] shadow-xl py-1.5 z-30 animate-in fade-in zoom-in-95 duration-150"
+                onMouseLeave={() => setShowTemplateMenu(false)}
+              >
+                <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Unduh Contoh {tabs.find((t) => t.key === tab)?.label}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleDownloadTemplate("xlsx")}
+                  className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between"
+                >
+                  <span className="flex items-center gap-2">
+                    <FileSpreadsheet size={13} className="text-emerald-500" /> Excel (.xlsx)
+                  </span>
+                  <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950 px-1.5 py-0.5 rounded">Rekomendasi</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDownloadTemplate("csv")}
+                  className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2"
+                >
+                  <FileText size={13} className="text-blue-500" /> CSV (.csv)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDownloadTemplate("json")}
+                  className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2"
+                >
+                  <Download size={13} className="text-slate-400" /> JSON (.json)
+                </button>
+              </div>
+            )}
           </div>
-        ) : (
-          <Link
-            href={`/cms/editor?type=${tab}`}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
+
+          {/* Export Data Dropdown */}
+          <div className="relative">
+            <button
+              type="button"
+              disabled={isExporting}
+              onClick={() => {
+                setShowExportMenu((v) => !v)
+                setShowTemplateMenu(false)
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-[10px] shadow-2xs transition disabled:opacity-50 cursor-pointer"
+            >
+              {isExporting ? (
+                <Loader2 size={14} className="animate-spin text-orange-500" />
+              ) : (
+                <Download size={14} className="text-blue-500" />
+              )}
+              <span>Export Data</span>
+              <ChevronDown size={13} className="text-slate-400" />
+            </button>
+            {showExportMenu && (
+              <div
+                className="absolute right-0 mt-1.5 w-44 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] shadow-xl py-1.5 z-30 animate-in fade-in zoom-in-95 duration-150"
+                onMouseLeave={() => setShowExportMenu(false)}
+              >
+                <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Ekspor Data {tabs.find((t) => t.key === tab)?.label}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleExport("xlsx")}
+                  className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2"
+                >
+                  <FileSpreadsheet size={13} className="text-emerald-500" /> Excel (.xlsx)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleExport("csv")}
+                  className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2"
+                >
+                  <FileText size={13} className="text-blue-500" /> CSV (.csv)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleExport("json")}
+                  className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2"
+                >
+                  <Download size={13} className="text-slate-400" /> JSON (.json)
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Bulk Insert Button */}
+          <button
+            type="button"
+            onClick={() => setIsBulkModalOpen(true)}
+            className="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs rounded-[10px] shadow-sm shadow-[#1738D1]/20 transition cursor-pointer"
           >
-            <Plus size={18} />
-            Tambah {tabs.find((t) => t.key === tab)?.label}
+            <UploadCloud size={15} />
+            Bulk Insert
+          </button>
+
+          {/* Tambah Manual Button */}
+          <Link
+            href={tab === "jobs" ? "/cms/editor?type=jobs" : `/cms/editor?type=${tab}`}
+            className="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-[10px] shadow-sm transition cursor-pointer"
+          >
+            <Plus size={15} />
+            Tambah {tab === "jobs" ? "Lowongan" : tabs.find((t) => t.key === tab)?.label}
           </Link>
-        )}
+        </div>
       </div>
 
       {/* Tabs */}
@@ -408,7 +610,7 @@ export default function CMSPage() {
       </div>
 
       {tab === "jobs" ? (
-        <AdminJobsView hideTitle />
+        <AdminJobsView key={jobsRefreshKey} hideTitle onToast={showToast} />
       ) : (
         <>
           {/* Toolbar */}
@@ -444,27 +646,44 @@ export default function CMSPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/70">
-                  {filtered.map((item, index) => (
-                    <tr key={item.id ?? index} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/30 transition-colors">
-                      {columns[tab as CrudTabKey].map((col) => (
-                        <td key={col.key} className="px-6 py-4 text-sm font-medium text-slate-800 dark:text-slate-200">
-                          {col.render(item)}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
+                  {loading ? (
+                    Array.from({ length: 5 }).map((_, rIdx) => (
+                      <tr key={rIdx} className="hover:bg-slate-50/30 dark:hover:bg-slate-800/20">
+                        {columns[tab as CrudTabKey].map((col, cIdx) => (
+                          <td key={String(col.key || cIdx)} className="px-6 py-4">
+                            {cIdx === 0 ? (
+                              <Skeleton className="h-4 w-44 rounded-md" />
+                            ) : cIdx === columns[tab as CrudTabKey].length - 1 ? (
+                              <div className="flex items-center gap-1.5">
+                                <Skeleton className="h-8 w-8 rounded-lg" />
+                                <Skeleton className="h-8 w-8 rounded-lg" />
+                              </div>
+                            ) : (
+                              <Skeleton className="h-4 w-24 rounded-md" />
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  ) : filtered.length === 0 ? null : (
+                    filtered.map((item, index) => (
+                      <tr key={item.id ?? index} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/30 transition-colors">
+                        {columns[tab as CrudTabKey].map((col) => (
+                          <td key={col.key} className="px-6 py-4 text-sm font-medium text-slate-800 dark:text-slate-200">
+                            {col.render(item)}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
-            {loading ? (
-              <div className="py-12 flex items-center justify-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
-                <Loader2 size={18} className="animate-spin" /> Memuat data...
-              </div>
-            ) : filtered.length === 0 ? (
+            {!loading && filtered.length === 0 && (
               <div className="py-12 text-center text-sm font-medium text-slate-500 dark:text-slate-400">
                 {search ? "Tidak ada hasil yang cocok" : "Belum ada konten. Klik \"Tambah\" untuk mengisi konten pertama."}
               </div>
-            ) : null}
+            )}
           </div>
         </>
       )}
@@ -502,6 +721,34 @@ export default function CMSPage() {
           </motion.div>
         </div>
       )}
-    </motion.div>
+      {/* Modal Bulk Insert */}
+      <BulkImportModal
+        isOpen={isBulkModalOpen}
+        entityKey={tab as CMSEntityKey}
+        onClose={() => setIsBulkModalOpen(false)}
+        onSuccess={(stats) => {
+          if (tab === "jobs") {
+            setJobsRefreshKey((k) => k + 1)
+            load("jobs")
+          } else {
+            load(tab)
+          }
+          const currentTabObj = tabs.find((t) => t.key === tab)
+          const label = currentTabObj?.label || tab
+          if (stats && stats.insertedCount > 0) {
+            if (stats.failedCount > 0) {
+              showToast("info", `${stats.insertedCount} data ${label} berhasil diimpor (${stats.failedCount} data dilewati karena kendala format).`)
+            } else {
+              showToast("success", `Berhasil mengimpor ${stats.insertedCount} data ${label}!`)
+            }
+          } else {
+            showToast("success", `Data ${label} berhasil diimpor.`)
+          }
+        }}
+      />
+
+      {/* Floating Toast Notification */}
+      <Toast toast={toast} onClose={() => setToast(null)} />
+    </AdminPageWrapper>
   )
 }

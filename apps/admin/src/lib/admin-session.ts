@@ -24,7 +24,34 @@ export interface AdminSessionData {
   name: string;
   email: string;
   role: string;
+  uaFamily?: string;
   exp?: number;
+}
+
+function getUaFamily(ua?: string | null): string {
+  if (!ua) return 'unknown';
+  const isMobile = /mobile|android|iphone|ipad/i.test(ua);
+  const os = /windows/i.test(ua)
+    ? 'win'
+    : /macintosh|mac os/i.test(ua)
+    ? 'mac'
+    : /linux/i.test(ua)
+    ? 'linux'
+    : /android/i.test(ua)
+    ? 'android'
+    : /ios|iphone|ipad/i.test(ua)
+    ? 'ios'
+    : 'other';
+  const browser = /edg/i.test(ua)
+    ? 'edge'
+    : /chrome/i.test(ua)
+    ? 'chrome'
+    : /safari/i.test(ua)
+    ? 'safari'
+    : /firefox/i.test(ua)
+    ? 'firefox'
+    : 'other';
+  return `${isMobile ? 'm' : 'd'}:${os}:${browser}`;
 }
 
 export async function signAdminSession(data: {
@@ -32,10 +59,15 @@ export async function signAdminSession(data: {
   name: string;
   email: string;
   role: string;
+  userAgent?: string | null;
 }): Promise<string> {
   const key = await getCryptoKey();
   const payload: AdminSessionData = {
-    ...data,
+    id: data.id,
+    name: data.name,
+    email: data.email,
+    role: data.role,
+    ...(data.userAgent && { uaFamily: getUaFamily(data.userAgent) }),
     exp: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days expiration
   };
 
@@ -61,7 +93,8 @@ export async function signAdminSession(data: {
 }
 
 export async function verifyAdminSession(
-  token: string
+  token: string,
+  currentUserAgent?: string | null
 ): Promise<AdminSessionData | null> {
   if (!token || !token.includes('.')) return null;
 
@@ -103,6 +136,14 @@ export async function verifyAdminSession(
 
     if (!payload || payload.role !== 'ADMIN') return null;
     if (typeof payload.exp === 'number' && payload.exp < Date.now()) return null;
+
+    // Check device/browser family consistency if encoded in token
+    if (payload.uaFamily && currentUserAgent) {
+      const currentFamily = getUaFamily(currentUserAgent);
+      if (payload.uaFamily !== currentFamily) {
+        return null;
+      }
+    }
 
     return payload;
   } catch {

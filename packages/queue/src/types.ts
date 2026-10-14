@@ -1,6 +1,3 @@
-export type ScrapeJobsPayload = {
-  // Empty payload for cron
-};
 
 export type ContentSyncPayload = {
   // Empty payload for cron
@@ -34,7 +31,6 @@ export type ChurnDetectionPayload = {
 };
 
 export const JOB_NAMES = {
-  SCRAPE_JOBS: 'scrape-jobs',
   CONTENT_SYNC: 'content-sync',
   CV_UNLOCK: 'cv-unlock',
   NOTIFICATION_SEND: 'notification-send',

@@ -1,4 +1,4 @@
-import { prisma } from "@employr/db";
+import { prisma, decryptSecret } from "@employr/db";
 import crypto from "crypto";
 import { generateExactCacheKey, FIXED_MINI_SYSTEM_PROMPT } from "@/lib/nlp-pruner";
 import { semanticCache } from "@/lib/semantic-cache";
@@ -10,6 +10,12 @@ const MODEL_COST_PER_1K: Record<string, number> = {
   "gpt-4o": 120,
   "gpt-4.1": 60,
   "o4-mini": 30,
+  "gemini-2.5-flash": 8,
+  "gemini-2.5-pro": 30,
+  "gemini-2.0-flash": 8,
+  "gemini-2.0-flash-lite": 4,
+  "gemini-1.5-flash": 6,
+  "gemini-1.5-pro": 25,
 };
 
 export interface CallAiGatewayOptions {
@@ -18,6 +24,7 @@ export interface CallAiGatewayOptions {
   promptName?: string;
   systemPrompt?: string;
   temperature?: number;
+  maxTokens?: number;
   role?: string;
   goal?: string;
   userId?: string;
@@ -41,6 +48,7 @@ export async function callAiGateway(options: CallAiGatewayOptions): Promise<Call
     promptName = "Custom AI Task",
     systemPrompt,
     temperature,
+    maxTokens,
     role = "Professional",
     goal = "auto",
     userId,
@@ -53,6 +61,7 @@ export async function callAiGateway(options: CallAiGatewayOptions): Promise<Call
 
   const resolvedFeatureKey = feature || null;
   let resolvedTemperature = typeof temperature === "number" ? Math.min(Math.max(temperature, 0), 1) : 0.3;
+  let resolvedMaxTokens = typeof maxTokens === "number" ? maxTokens : undefined;
   let resolvedSystemPrompt =
     typeof systemPrompt === "string" && systemPrompt.trim().length > 0
       ? systemPrompt.trim()
@@ -155,8 +164,11 @@ export async function callAiGateway(options: CallAiGatewayOptions): Promise<Call
 
         if (mapping?.provider && mapping.provider.is_active) {
           assignedProvider = mapping.provider;
-          if (typeof mapping.temperature === "number") {
+          if (typeof mapping.temperature === "number" && typeof temperature !== "number") {
             resolvedTemperature = mapping.temperature;
+          }
+          if (typeof mapping.max_tokens === "number" && typeof resolvedMaxTokens !== "number") {
+            resolvedMaxTokens = mapping.max_tokens;
           }
         }
       }
@@ -203,15 +215,19 @@ export async function callAiGateway(options: CallAiGatewayOptions): Promise<Call
   let lastErrorMsg = "";
 
   for (const currentProvider of candidateChain) {
-    const apiKey = currentProvider.api_key;
-    if (!apiKey) continue;
+    const rawApiKey = currentProvider.api_key;
+    if (!rawApiKey) continue;
+    const apiKey = decryptSecret(rawApiKey);
 
-    const endpoint = (currentProvider.base_url || "https://api.openai.com/v1").replace(/\/+$/, "");
+    let endpoint = (currentProvider.base_url || "https://api.openai.com/v1").replace(/\/+$/, "");
+    if (endpoint.includes("generativelanguage.googleapis.com") && !endpoint.endsWith("/openai")) {
+      endpoint = `${endpoint.replace(/\/v1beta\/?$/, "")}/v1beta/openai`;
+    }
     const model = currentProvider.model || "gpt-4o-mini";
     const url = `${endpoint}/chat/completions`;
     const providerLabel = currentProvider.alias || currentProvider.name || "custom_proxy";
 
-    const payload = {
+    const payload: any = {
       model,
       temperature: resolvedTemperature,
       messages: [
@@ -220,10 +236,14 @@ export async function callAiGateway(options: CallAiGatewayOptions): Promise<Call
       ],
       stream: false,
     };
+    if (typeof resolvedMaxTokens === "number" && resolvedMaxTokens > 0) {
+      payload.max_tokens = resolvedMaxTokens;
+    }
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 25000);
+      const timeoutMs = resolvedFeatureKey === "cv_parser" ? 75000 : 35000;
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
       const res = await fetch(url, {
         method: "POST",
@@ -231,6 +251,7 @@ export async function callAiGateway(options: CallAiGatewayOptions): Promise<Call
           "Content-Type": "application/json",
           Authorization: `Bearer ${apiKey}`,
           "api-key": apiKey,
+          "x-goog-api-key": apiKey,
         },
         body: JSON.stringify(payload),
         signal: controller.signal,
@@ -256,11 +277,20 @@ export async function callAiGateway(options: CallAiGatewayOptions): Promise<Call
         continue;
       }
 
-      const text =
+      let text =
         data.choices?.[0]?.message?.content ||
         data.choices?.[0]?.text ||
         data.text ||
         "";
+
+      // If text is empty but reasoning_content contains JSON, extract it
+      if (!text && data.choices?.[0]?.message?.reasoning_content) {
+        const reasoning = data.choices[0].message.reasoning_content;
+        const match = reasoning.match(/\{[\s\S]*\}/);
+        if (match) {
+          text = match[0];
+        }
+      }
 
       if (!text || text.trim().length === 0) {
         lastErrorMsg = `[${providerLabel}] Mengembalikan respons kosong.`;

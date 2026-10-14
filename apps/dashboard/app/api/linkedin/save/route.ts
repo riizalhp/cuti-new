@@ -11,6 +11,8 @@ function isValidUUID(str?: string | null): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 }
 
+import { buildLinkedInAuditSlug } from '@/lib/linkedin-slug';
+
 export async function POST(req: NextRequest) {
   try {
     const user = await getAuthUser(req);
@@ -51,6 +53,12 @@ export async function POST(req: NextRequest) {
     const resolvedRole = targetRole || evidenceBank?.targetRole || scrapedData?.headline || 'Professional';
     const resolvedIndustry = evidenceBank?.targetIndustry || scrapedData?.location || 'Indonesia';
     const finalScore = overallScore || analysisResult.overallScore || 0;
+    const candidateName = scrapedData?.name || evidenceBank?.fullName || '';
+
+    const { roleSlug, nameSlug, fullSlug, auditPath } = buildLinkedInAuditSlug(
+      resolvedRole,
+      profileUrl || candidateName
+    );
 
     const payloadOptions = {
       overallScore: finalScore,
@@ -59,6 +67,11 @@ export async function POST(req: NextRequest) {
       evidenceBank: evidenceBank || null,
       checklist: checklist || null,
       profileUrl: profileUrl || '',
+      roleSlug,
+      nameSlug,
+      slug: fullSlug,
+      auditPath,
+      shortId: recordId.slice(0, 8),
     };
 
     const savedRecord = await (prisma as any).ai_generation_history.upsert({
@@ -87,9 +100,17 @@ export async function POST(req: NextRequest) {
     const response = NextResponse.json({
       success: true,
       id: savedRecord.id,
+      slug: fullSlug,
+      roleSlug,
+      nameSlug,
+      auditPath,
       message: 'Hasil analisis profil LinkedIn berhasil disimpan.',
       data: {
         id: savedRecord.id,
+        slug: fullSlug,
+        roleSlug,
+        nameSlug,
+        auditPath,
         createdAt: savedRecord.created_at,
       },
     });

@@ -1,13 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@employr/db';
 
+function stripHtml(html: string | null): string {
+  if (!html) return '';
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&#8217;|&#8216;/g, "'")
+    .replace(/&#8220;|&#8221;/g, '"')
+    .replace(/&#8211;/g, '-')
+    .replace(/&#8212;/g, '—')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&hellip;/g, '...')
+    .replace(/&ndash;/g, '–')
+    .replace(/&mdash;/g, '—')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function estimateReadTime(content: string | null): string {
-  const wordCount = (content || '').trim() ? content!.split(/\s+/).length : 0;
+  const clean = stripHtml(content);
+  const wordCount = clean ? clean.split(/\s+/).length : 0;
   return `${Math.max(1, Math.round(wordCount / 200))} min baca`;
 }
 
 function truncate(text: string | null, max = 130): string {
-  const clean = (text || '').trim();
+  const clean = stripHtml(text);
   if (!clean) return '';
   return clean.length > max ? `${clean.slice(0, max).trim()}…` : clean;
 }
@@ -46,7 +70,18 @@ export async function GET(req: NextRequest) {
 
     const [articles, courses, certifications, events] = await Promise.all([
       prisma.articles.findMany({
-        where: { is_published: true },
+        where: {
+          is_published: true,
+          NOT: [
+            { title: { contains: 'Hire Employees', mode: 'insensitive' } },
+            { title: { contains: 'Pasang Lowongan', mode: 'insensitive' } },
+            { title: { contains: 'Perekrut', mode: 'insensitive' } },
+            { title: { contains: 'Akun Perusahaan', mode: 'insensitive' } },
+            { title: { contains: 'Rekrutmen', mode: 'insensitive' } },
+            { title: { contains: 'Dipahami HR', mode: 'insensitive' } },
+            { title: { contains: 'Employers', mode: 'insensitive' } },
+          ],
+        },
         include: { article_categories: true },
         orderBy: { published_at: 'desc' },
         take: limit,
@@ -73,43 +108,43 @@ export async function GET(req: NextRequest) {
       data: {
         articles: articles.map((a) => ({
           id: a.id,
-          title: a.title,
-          category: a.article_categories?.name || 'Karier',
+          title: stripHtml(a.title),
+          category: stripHtml(a.article_categories?.name || 'Karier'),
           readTime: estimateReadTime(a.content),
           desc: truncate(a.content),
           content: a.content || '',
-          author: a.author || 'Tim Employr',
+          author: stripHtml(a.author || 'Tim Employr'),
           slug: a.slug,
           externalUrl: a.external_url || null,
           publishedAt: a.published_at?.toISOString() || null,
         })),
         courses: courses.map((c) => ({
           id: c.id,
-          title: c.title,
-          provider: c.instructor,
+          title: stripHtml(c.title),
+          provider: stripHtml(c.instructor),
           level: c.level,
           price: formatCurrency(c.price),
           rating: c.duration_hours ? `${c.duration_hours} Jam` : 'Online',
-          desc: c.description,
+          desc: stripHtml(c.description),
           url: c.external_url,
         })),
         certifications: certifications.map((c) => ({
           id: c.id,
-          title: c.title,
-          issuer: c.provider,
+          title: stripHtml(c.title),
+          issuer: stripHtml(c.provider),
           validity: c.duration_hours ? `${c.duration_hours} Jam Pelajaran` : 'Selamanya',
           badge: c.price === 0 ? 'Gratis' : 'Bersertifikat',
-          desc: c.description,
+          desc: stripHtml(c.description),
           url: c.external_url,
         })),
         events: events.map((e) => ({
           id: e.id,
-          title: e.title,
+          title: stripHtml(e.title),
           organizer: 'Employr',
           date: formatEventDate(e.event_date),
-          location: e.location,
+          location: stripHtml(e.location),
           badge: workTypeBadge(e.type),
-          desc: e.description,
+          desc: stripHtml(e.description),
           url: e.external_url,
         })),
       },

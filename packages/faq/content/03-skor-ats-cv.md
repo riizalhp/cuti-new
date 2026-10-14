@@ -1,48 +1,47 @@
 ---
 title: Memahami Skor ATS pada CV
-description: Apa itu skor ATS, bagaimana dihitung, kategori penilaiannya, dan cara menaikkannya agar CV-mu lolos mesin ATS.
+description: Cara sistem menghitung skor ATS, tolok ukur kelulusan saringan mesin perusahaan, dan langkah optimasi kata kunci pada CV.
 category: cv-dokumen
 order: 3
-updatedAt: 2026-08-18
+updatedAt: 2026-09-26
 keywords: ats, skor ats, applicant tracking system, lolos ats, keyword, format ats, skor cv, optimasi ats, kata kunci
 ---
 
-**ATS (Applicant Tracking System)** adalah perangkat lunak yang dipakai HRD/perusahaan untuk menyaring CV secara otomatis. Skor ATS di Employr adalah nilai 0-100 yang menilai seberapa besar kemungkinan CV-mu lolos mesin tersebut.
+**Applicant Tracking System (ATS)** adalah sistem digital yang digunakan tim HRD untuk memindai dan menyeleksi berkas pelamar secara otomatis. Di Employr, skor ATS (0-100) menunjukkan seberapa baik format dan kata kunci dokumenmu terbaca oleh sistem pemindai tersebut.
 
-## Bagaimana skor ATS dihitung?
+## Parameter perhitungan skor ATS
 
-Saat kamu mengedit CV, sistem menghitung skor secara real-time berdasarkan beberapa dimensi:
+Saat kamu menyunting CV, sistem memvalidasi beberapa aspek utama:
 
-- **Kelengkapan kontak** — nama lengkap, email, dan nomor HP terisi.
-- **Ringkasan profesional** — ada ringkasan yang cukup informatif (minimal beberapa kalimat, bukan kosong).
-- **Pendidikan** — riwayat pendidikan terisi (institusi/jurusan).
-- **Pengalaman & proyek** — ada riwayat kerja, magang, atau proyek yang mendukung.
-- **Skill** — minimal beberapa skill relevan (direkomendasikan 4+).
-- **Format & kata kunci** — struktur yang rapi, konsisten, dan kata kunci yang sesuai dengan posisi target.
+- **Kelengkapan Kontak**: nama lengkap, alamat email aktif, dan nomor telepon yang valid.
+- **Ringkasan Profesional**: pengantar karier yang ringkas dan memuat arah keahlianmu.
+- **Riwayat Pendidikan**: nama institusi, jurusan, dan jenjang studi.
+- **Pengalaman Kerja & Proyek**: rincian tanggung jawab, lingkup peran, dan dampak kerja.
+- **Daftar Keahlian**: keahlian teknis dan fungsional yang relevan (minimal 4 keahlian terverifikasi).
+- **Struktur & Tipografi**: hierarki heading yang terstandarisasi serta konsistensi penulisan tanggal.
 
-Skor ini juga dipakai di kartu **Career Readiness** pada sidebar dan halaman Beranda.
+Skor ini juga tersinkronisasi pada ringkasan kesiapan kerja di Beranda dan dashboard utama.
 
 ## Kategori skor
 
-| Skor | Status | Arti |
+| Skor | Status | Keterangan |
 |---|---|---|
-| 80 - 100 | **Excellent** | CV kemungkinan besar lolos saringan ATS |
-| 50 - 79 | **Borderline** | Masih perlu perbaikan di beberapa bagian |
-| 0 - 49 | **Needs Work** | Perlu perombakan agar kompetitif |
+| 80 - 100 | **Optimal** | Format dan kata kunci sangat mudah dipindai oleh ATS |
+| 50 - 79 | **Perlu Penyempurnaan** | Informasi dasar terpenuhi, namun kata kunci teknis masih minim |
+| 0 - 49 | **Belum Memenuhi Syarat** | Masih banyak bagian penting yang kosong atau format belum terstandarisasi |
 
-## Cara menaikkan skor ATS
+## Cara meningkatkan skor ATS
 
-- **Lengkapi semua section** — terutama kontak, ringkasan, pendidikan, dan pengalaman.
-- **Tambahkan skill relevan** — cocokkan dengan posisi target (misalnya melamar *Digital Marketing* → sertakan SEO, Social Media, Google Ads).
-- **Tulis pencapaian terukur** — bukan hanya tugas harian. Contoh: *"Meningkatkan traffic website 40% dalam 6 bulan"*.
-- **Gunakan kata kunci dari lowongan** — baca deskripsi lowongan target lalu selipkan istilah yang sama di CV-mu.
-- **Ringkasan yang kuat** — 2-3 kalimat berorientasi hasil di bagian atas CV.
-- **Struktur rapi** — gunakan template ATS Employr (1 kolom) dan hindari tabel/foto berlebihan.
+- Lengkapi seluruh section utama, terutama kontak, ringkasan, riwayat pendidikan, dan pengalaman.
+- Cantumkan keahlian teknis yang spesifik untuk posisi sasaran. Sebagai contoh, posisi *Digital Marketing* membutuhkan keahlian seperti SEO, Google Analytics, atau Meta Ads.
+- Sertakan dampak dan data terukur pada setiap pengalaman, misalnya *"Menaikkan rasio konversi halaman pendaftaran sebesar 25% dalam 3 bulan"*.
+- Cocokkan kata kunci dari deskripsi lowongan kerja yang ingin dilamar.
+- Gunakan susunan satu kolom terstandarisasi bawaan template Employr.
 
 ## Pertanyaan umum
 
-- **Skor ATS tinggi = pasti diterima?** Belum tentu — skor ATS hanya mengukur peluang lolos saringan mesin. Kualitas isi tetap dinilai recruiter.
-- **Skor saya tidak naik padahal sudah lengkap?** Cek apakah judul CV dan **posisi target** sudah sesuai, dan pastikan skill mengandung kata kunci industri yang umum.
-- **Di mana lihat skor?** Di header editor CV (badge skor real-time) dan di kartu **CV ATS Score** pada halaman Beranda.
+- **Apakah skor ATS tinggi menjamin panggilan wawancara?** Skor ATS memastikan berkasmu dapat terbaca sempurna oleh mesin penyaring. Keputusan tahap berikutnya tetap bergantung pada relevansi kualifikasimu dengan kebutuhan pemberi kerja.
+- **Mengapa skor tidak berubah padahal data sudah lengkap?** Pastikan kamu menekan tombol simpan, lalu periksa apakah nama posisi target sudah sesuai dengan industri yang relevan.
+- **Di mana saya bisa melihat skor ATS?** Skor tampil langsung di bagian atas lembar kerja CV Saya serta di kartu indikator halaman Beranda.
 
-Ingin analisis lebih mendalam? Gunakan fitur [Evaluasi CV](/artikel/evaluasi-cv-screener) untuk penilaian ala recruiter hingga heatmap pandangan HRD.
+Untuk diagnosis mendalam, lanjutkan ke panduan [Evaluasi CV dengan Persona Recruiter](/artikel/evaluasi-cv-screener).

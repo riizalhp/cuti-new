@@ -52,7 +52,7 @@ export function FeedbackWidget({ feature, contextId, userId, className = '' }: F
 
   if (submitted) {
     return (
-      <span className={`text-xs text-emerald-600 font-medium ${className}`}>
+      <span className={`text-xs text-emerald-700 font-medium ${className} dark:text-emerald-400`}>
         Terima kasih!
       </span>
     );
@@ -67,9 +67,9 @@ export function FeedbackWidget({ feature, contextId, userId, className = '' }: F
             disabled={sending}
             className={`p-1.5 rounded-[10px] transition ${
               rating === 1
-                ? 'bg-emerald-100 text-emerald-600'
+                ? 'bg-emerald-100 text-emerald-700'
                 : 'bg-slate-100 hover:bg-slate-200 text-slate-500'
-            }`}
+            } dark:text-emerald-400`}
             title="Ini membantu"
           >
             <ThumbsUp className="w-3.5 h-3.5" />
@@ -79,9 +79,9 @@ export function FeedbackWidget({ feature, contextId, userId, className = '' }: F
             disabled={sending}
             className={`p-1.5 rounded-[10px] transition ${
               rating === -1
-                ? 'bg-rose-100 text-rose-600'
+                ? 'bg-rose-100 text-rose-700'
                 : 'bg-slate-100 hover:bg-slate-200 text-slate-500'
-            }`}
+            } dark:text-rose-400`}
             title="Ini kurang membantu"
           >
             <ThumbsDown className="w-3.5 h-3.5" />

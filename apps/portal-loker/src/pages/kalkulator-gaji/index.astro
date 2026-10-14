@@ -1,0 +1,692 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import StickyAnchorBar from '../../components/StickyAnchorBar.astro';
+import PageHero from '../../components/common/PageHero.astro';
+import SalaryCalculatorSection from '../../components/SalaryCalculatorSection.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import FooterPortal from '../../components/FooterPortal.astro';
+import SearchModal from '../../components/SearchModal.astro';
+import { REGION_WAGE_BENCHMARKS, PROVINCE_LIST } from '../../data/umk-2026';
+
+const kotaParam = (Astro.url.searchParams.get('kota') || '').trim().toLowerCase();
+const matchedRegion = kotaParam
+  ? REGION_WAGE_BENCHMARKS.find(
+      (r) => r.id.toLowerCase() === kotaParam || r.city.toLowerCase().replace(/\s+/g, '-') === kotaParam
+    )
+  : undefined;
+
+const siteOrigin = Astro.url.origin || 'http://localhost:3003';
+const canonical = matchedRegion
+  ? `${siteOrigin}/kalkulator-gaji?kota=${matchedRegion.id}`
+  : `${siteOrigin}/kalkulator-gaji`;
+
+const title = matchedRegion
+  ? `Kalkulator Gaji Bersih & UMK ${matchedRegion.city} 2026 (Rp ${matchedRegion.umk2026.toLocaleString('id-ID')}) | Employr`
+  : 'Standar Upah Riil: Kalkulator Gaji Bersih & 142 UMK 2026 | Employr';
+const description = matchedRegion
+  ? `Hitung gaji bersih (take-home pay), potongan BPJS, dan pajak PPh 21 TER di ${matchedRegion.city} (${matchedRegion.province}). Standar UMK 2026: Rp ${matchedRegion.umk2026.toLocaleString('id-ID')} dan estimasi biaya hidup lajang Rp ${matchedRegion.livingCostSingle.toLocaleString('id-ID')}/bulan.`
+  : 'Hitung estimasi pendapatan bersih bulanan (take-home pay), rincian potongan BPJS Ketenagakerjaan, BPJS Kesehatan, dan pajak PPh 21 TER secara transparan beserta perbandingan 142 UMK Kabupaten/Kota 2026 dan biaya hidup lajang.';
+
+function formatExactRupiah(val: number): string {
+  const hasDecimals = Math.round(val * 100) % 100 !== 0;
+  return (
+    'Rp ' +
+    val.toLocaleString('id-ID', {
+      minimumFractionDigits: hasDecimals ? 2 : 0,
+      maximumFractionDigits: hasDecimals ? 2 : 0,
+    })
+  );
+}
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={canonical}
+>
+  <Navbar />
+  <StickyAnchorBar />
+
+  <main class="bg-[#f4f3ee] min-h-screen pb-16 overflow-x-clip">
+    <PageHero
+      eyebrow="STANDAR UPAH RIIL"
+      title="Kalkulator Gaji &amp; <em>Take-Home Pay</em>"
+      description="Hitung estimasi pendapatan bersih bulanan, rincian potongan BPJS Ketenagakerjaan, BPJS Kesehatan, dan PPh 21 secara transparan."
+      badge={{
+        text: '142 Kabupaten/Kota · UMK 2026',
+      }}
+    >
+      <nav slot="breadcrumb" class="flex items-center gap-2 text-xs text-[#55544f] mb-4" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-[#1738D1] font-medium transition">Beranda</a>
+        <span>/</span>
+        <a href="/career" class="hover:text-[#1738D1] font-medium transition">Tips Karier</a>
+        <span>/</span>
+        <span class="text-[#101010] font-bold">Kalkulator Gaji &amp; Take-Home Pay</span>
+      </nav>
+    </PageHero>
+
+    <!-- Komponen Inti Kalkulator Gaji & Analisis Daya Beli -->
+    <SalaryCalculatorSection showSectionHeader={false} />
+
+    <!-- ADS SPACE 1: LEADERBOARD SPONSORSHIP -->
+    <AdSlot
+      type="leaderboard"
+      note="Tingkatkan daya tawar negosiasi gaji pertamamu dengan sertifikasi kompetensi industri resmi dan persiapan karier terarah."
+    />
+
+    <!-- Bagian 2: Direktori Perbandingan Standar UMK 2026 & Biaya Hidup Lajang (142 Kabupaten/Kota dengan Pagination) -->
+    <section id="direktori-umk-2026" class="py-10 sm:py-14 bg-[#f4f3ee] border-y border-[#d7d6cf]/80 scroll-mt-20">
+      <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5 mb-6 sm:mb-8">
+          <div>
+            <div class="section-label mb-2">
+              <span>PATOKAN WILAYAH RESMI</span>
+              <i></i>
+              <span>142 KABUPATEN / KOTA TAHUN 2026</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#101010] tracking-tight">
+              Daftar standar UMK &amp; <em>biaya hidup lajang.</em>
+            </h2>
+            <p class="text-xs sm:text-sm text-[#55544f] mt-1.5 max-w-2xl font-medium">
+              Bandingkan standar upah minimum kota/kabupaten dengan estimasi pengeluaran bulanan pekerja lajang (kos, makan, dan transportasi lokal).
+            </p>
+          </div>
+
+          <!-- Baris Kontrol Filter: Pencarian, Filter Provinsi, dan Jumlah Baris per Halaman -->
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 w-full lg:w-auto lg:min-w-[580px]">
+            <!-- Input Cari Kota/Kabupaten -->
+            <div class="sm:col-span-5 relative flex items-center">
+              <label for="umk-table-search" class="sr-only">Cari kota atau kabupaten</label>
+              <svg class="w-4 h-4 text-[#55544f] absolute left-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                id="umk-table-search"
+                placeholder="Cari kota / kabupaten..."
+                class="w-full min-h-[44px] pl-10 pr-3.5 py-2 rounded-xl bg-white border border-[#d7d6cf] focus:border-[#1738D1] text-xs sm:text-sm font-medium text-[#101010] placeholder-[#55544f] outline-none transition focus-visible:ring-2 focus-visible:ring-[#1738D1]"
+              />
+            </div>
+
+            <!-- Filter Provinsi -->
+            <div class="sm:col-span-4 relative">
+              <label for="umk-province-filter" class="sr-only">Filter berdasarkan provinsi</label>
+              <select
+                id="umk-province-filter"
+                class="w-full min-h-[44px] pl-3.5 pr-8 py-2 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#101010] focus:border-[#1738D1] text-xs sm:text-sm font-bold text-[#101010] outline-none transition appearance-none cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1738D1]"
+              >
+                <option value="">Semua Provinsi (142)</option>
+                {PROVINCE_LIST.map((prov) => {
+                  const count = REGION_WAGE_BENCHMARKS.filter((r) => r.province === prov).length;
+                  return (
+                    <option value={prov}>
+                      {prov} ({count})
+                    </option>
+                  );
+                })}
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-[#55544f]">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Pilihan Jumlah Data Per Halaman -->
+            <div class="sm:col-span-3 relative">
+              <label for="umk-page-size" class="sr-only">Jumlah kota per halaman</label>
+              <select
+                id="umk-page-size"
+                class="w-full min-h-[44px] pl-3.5 pr-8 py-2 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#101010] focus:border-[#1738D1] text-xs sm:text-sm font-bold text-[#101010] tabular-nums outline-none transition appearance-none cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1738D1]"
+              >
+                <option value="10" selected>10 / hal</option>
+                <option value="20">20 / hal</option>
+                <option value="50">50 / hal</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-[#55544f]">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tampilan Desktop: Tabel Terstruktur Rapi (Rata Kiri Kota/Kab, Rata Kanan Nominal) -->
+        <div id="umk-desktop-container" class="hidden md:block bg-white rounded-[20px] border border-[#d7d6cf] overflow-hidden shadow-[0_4px_20px_-2px_rgba(16,16,16,0.04)]">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-[#f9f8f5] border-b border-[#d7d6cf] text-[11px] font-extrabold uppercase tracking-wider text-[#55544f]">
+                <th class="py-3.5 pl-5 pr-2 w-12 text-center">No</th>
+                <th class="py-3.5 px-4 text-left">Kabupaten / Kota &amp; Dasar SK</th>
+                <th class="py-3.5 px-4 text-right">Standar UMK 2026</th>
+                <th class="py-3.5 px-4 text-right">Estimasi THP (TK/0)</th>
+                <th class="py-3.5 px-4 text-right">Rincian Biaya Hidup Lajang</th>
+                <th class="py-3.5 px-4 text-right">Selisih Upah Riil</th>
+                <th class="py-3.5 pl-4 pr-5 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#d7d6cf]/60 text-xs sm:text-sm" id="umk-desktop-tbody">
+              {REGION_WAGE_BENCHMARKS.map((reg) => {
+                const bpjsCut = Math.round(reg.umk2026 * 0.04);
+                const terRate =
+                  reg.umk2026 > 5950000
+                    ? 0.0075
+                    : reg.umk2026 > 5650000
+                    ? 0.005
+                    : reg.umk2026 > 5400000
+                    ? 0.0025
+                    : 0;
+                const taxCut = Math.round(reg.umk2026 * terRate);
+                const netUmk = reg.umk2026 - bpjsCut - taxCut;
+                const realSurplus = netUmk - reg.livingCostSingle;
+                return (
+                  <tr
+                    class="umk-region-row hover:bg-[#f9f8f5] transition"
+                    data-province={reg.province}
+                    data-search={`${reg.city} ${reg.province} ${reg.zoneLabel} ${reg.skReference}`.toLowerCase()}
+                  >
+                    <td class="py-3.5 pl-5 pr-2 text-center font-bold text-[#55544f] tabular-nums text-xs">
+                      {reg.no}
+                    </td>
+                    <td class="py-3.5 px-4 text-left">
+                      <div class="font-bold text-[#101010]">{reg.city}</div>
+                      <div class="text-[11px] text-[#55544f] font-medium">
+                        {reg.province} · {reg.zoneLabel}
+                      </div>
+                      <div class="text-[10px] text-[#55544f] mt-0.5">
+                        {reg.skReference}
+                      </div>
+                    </td>
+                    <td class="py-3.5 px-4 text-right font-extrabold text-[#101010] tabular-nums whitespace-nowrap">
+                      {formatExactRupiah(reg.umkExact)}
+                    </td>
+                    <td class="py-3.5 px-4 text-right font-bold text-[#1738D1] tabular-nums whitespace-nowrap">
+                      Rp {netUmk.toLocaleString('id-ID')}
+                    </td>
+                    <td class="py-3.5 px-4 text-right tabular-nums">
+                      <div class="font-bold text-[#101010] whitespace-nowrap">
+                        Rp {reg.livingCostSingle.toLocaleString('id-ID')}
+                      </div>
+                      <div class="text-[10px] text-[#55544f] font-medium whitespace-nowrap">
+                        Kos {(reg.rentEstimate / 1000).toLocaleString('id-ID')}rb · Makan {(reg.foodEstimate / 1000).toLocaleString('id-ID')}rb · Trans {(reg.transportUtilityEstimate / 1000).toLocaleString('id-ID')}rb
+                      </div>
+                    </td>
+                    <td class="py-3.5 px-4 text-right tabular-nums whitespace-nowrap">
+                      <span
+                        class={`inline-block px-2.5 py-0.5 rounded-full text-xs font-extrabold ${
+                          realSurplus >= 0
+                            ? 'bg-[#ecfdf5] text-[#065f46] border border-[#a7f3d0]'
+                            : 'bg-[#fef2f2] text-[#991b1b] border border-[#fecaca]'
+                        }`}
+                      >
+                        {realSurplus >= 0
+                          ? `+Rp ${realSurplus.toLocaleString('id-ID')}`
+                          : `-Rp ${Math.abs(realSurplus).toLocaleString('id-ID')}`}
+                      </span>
+                    </td>
+                    <td class="py-3.5 pl-4 pr-5 text-right whitespace-nowrap">
+                      <button
+                        type="button"
+                        data-select-region={reg.id}
+                        class="btn-pick-region min-h-[38px] px-3.5 py-1.5 rounded-full bg-[#f4f3ee] hover:bg-[#1738D1] text-[#101010] hover:text-white border border-[#d7d6cf] hover:border-[#1738D1] text-xs font-bold transition cursor-pointer"
+                      >
+                        Hitung Kota Ini
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tampilan Mobile: Reflow Kartu (Tanpa Horizontal Scroll) -->
+        <div class="md:hidden grid grid-cols-1 gap-3" id="umk-mobile-cards">
+          {REGION_WAGE_BENCHMARKS.map((reg) => {
+            const bpjsCut = Math.round(reg.umk2026 * 0.04);
+            const terRate =
+              reg.umk2026 > 5950000
+                ? 0.0075
+                : reg.umk2026 > 5650000
+                ? 0.005
+                : reg.umk2026 > 5400000
+                ? 0.0025
+                : 0;
+            const taxCut = Math.round(reg.umk2026 * terRate);
+            const netUmk = reg.umk2026 - bpjsCut - taxCut;
+            const realSurplus = netUmk - reg.livingCostSingle;
+            return (
+              <div
+                class="umk-region-card bg-white rounded-2xl border border-[#d7d6cf] p-4 space-y-3 shadow-2xs"
+                data-province={reg.province}
+                data-search={`${reg.city} ${reg.province} ${reg.zoneLabel} ${reg.skReference}`.toLowerCase()}
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0 flex-1 text-left">
+                    <span class="text-[10px] font-bold text-[#55544f] uppercase tracking-wider block">
+                      #{reg.no} · {reg.province}
+                    </span>
+                    <h3 class="text-sm font-bold text-[#101010] truncate">{reg.city}</h3>
+                    <span class="text-[11px] font-medium text-[#55544f] block truncate">{reg.zoneLabel}</span>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <span class="text-[10px] font-bold text-[#55544f] uppercase block">UMK 2026</span>
+                    <span class="text-xs sm:text-sm font-extrabold text-[#1738D1] tabular-nums block">
+                      {formatExactRupiah(reg.umkExact)}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 pt-2.5 border-t border-[#d7d6cf]/60 text-xs">
+                  <div>
+                    <span class="text-[10px] text-[#55544f] block">Estimasi Bersih (TK/0)</span>
+                    <strong class="text-[#101010] font-extrabold tabular-nums">Rp {netUmk.toLocaleString('id-ID')}</strong>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-[10px] text-[#55544f] block">Biaya Hidup Lajang</span>
+                    <strong class="text-[#101010] font-bold tabular-nums">Rp {reg.livingCostSingle.toLocaleString('id-ID')}</strong>
+                  </div>
+                </div>
+
+                <!-- Rincian Kos, Makan, Transport di Mobile -->
+                <div class="p-2.5 rounded-xl bg-[#f9f8f5] border border-[#d7d6cf]/70 flex items-center justify-between text-[11px] text-[#55544f] tabular-nums">
+                  <span>Kos: <strong class="text-[#101010]">Rp {(reg.rentEstimate / 1000).toLocaleString('id-ID')}rb</strong></span>
+                  <span>Makan: <strong class="text-[#101010]">Rp {(reg.foodEstimate / 1000).toLocaleString('id-ID')}rb</strong></span>
+                  <span>Trans: <strong class="text-[#101010]">Rp {(reg.transportUtilityEstimate / 1000).toLocaleString('id-ID')}rb</strong></span>
+                </div>
+
+                <div class="flex items-center justify-between text-[11px] pt-0.5">
+                  <span class="text-[#55544f] font-medium truncate max-w-[60%]">{reg.skReference}</span>
+                  <span
+                    class={`px-2 py-0.5 rounded-full text-[11px] font-bold tabular-nums ${
+                      realSurplus >= 0
+                        ? 'bg-[#ecfdf5] text-[#065f46]'
+                        : 'bg-[#fef2f2] text-[#991b1b]'
+                    }`}
+                  >
+                    {realSurplus >= 0
+                      ? `Surplus +Rp ${realSurplus.toLocaleString('id-ID')}`
+                      : `Defisit -Rp ${Math.abs(realSurplus).toLocaleString('id-ID')}`}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  data-select-region={reg.id}
+                  class="btn-pick-region w-full min-h-[44px] py-2.5 px-4 rounded-full bg-[#f4f3ee] hover:bg-[#1738D1] text-[#101010] hover:text-white border border-[#d7d6cf] text-xs font-bold transition cursor-pointer"
+                >
+                  Simulasikan Gaji di {reg.city}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        <!-- Bar Kontrol Pagination (Desktop & Mobile) -->
+        <div
+          id="umk-pagination-bar"
+          class="mt-5 bg-white rounded-2xl border border-[#d7d6cf] px-4 sm:px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3.5 shadow-2xs"
+        >
+          <div id="umk-pagination-info" class="text-xs font-semibold text-[#55544f] tabular-nums text-center sm:text-left">
+            Menampilkan <strong class="text-[#101010]">1 - 10</strong> dari <strong class="text-[#101010]">142</strong> Kabupaten/Kota
+          </div>
+
+          <div class="flex items-center gap-1.5 flex-wrap justify-center" role="navigation" aria-label="Navigasi halaman tabel UMK">
+            <button
+              type="button"
+              id="umk-prev-page"
+              class="min-h-[40px] px-3.5 py-1.5 rounded-xl border border-[#d7d6cf] bg-[#f9f8f5] hover:border-[#101010] disabled:opacity-40 disabled:pointer-events-none text-xs font-bold text-[#101010] transition cursor-pointer"
+            >
+              Sebelumnya
+            </button>
+
+            <div id="umk-page-numbers" class="flex items-center gap-1"></div>
+
+            <button
+              type="button"
+              id="umk-next-page"
+              class="min-h-[40px] px-3.5 py-1.5 rounded-xl border border-[#d7d6cf] bg-[#f9f8f5] hover:border-[#101010] disabled:opacity-40 disabled:pointer-events-none text-xs font-bold text-[#101010] transition cursor-pointer"
+            >
+              Berikutnya
+            </button>
+          </div>
+        </div>
+
+        <div id="umk-empty-state" class="hidden bg-white rounded-2xl border border-[#d7d6cf] p-8 text-center mt-4">
+          <p class="text-sm font-bold text-[#101010] mb-1">Kabupaten/Kota tidak ditemukan dalam filter ini</p>
+          <p class="text-xs text-[#55544f] mb-4">Coba hapus kata kunci pencarian atau pilih "Semua Provinsi" untuk melihat seluruh 142 daerah.</p>
+          <button
+            type="button"
+            id="btn-reset-umk-search"
+            class="min-h-[44px] px-5 py-2 rounded-full bg-[#1738D1] text-white text-xs font-bold cursor-pointer"
+          >
+            Tampilkan Semua 142 Daerah
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADS SPACE 2: INFEED SPONSORSHIP SEBELUM FAQ -->
+    <AdSlot
+      type="infeed"
+      className="max-w-[1240px] mx-auto px-4 sm:px-6"
+      note="Pelajari keterampilan industri yang paling dicari perusahaan di kota tujuan kerjamu."
+    />
+
+    <!-- Bagian 3: Panduan Transparansi Potongan Slip Gaji (FAQ Native Details) -->
+    <section class="py-10 sm:py-14 bg-[#f4f3ee]">
+      <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div class="lg:col-span-5">
+            <div class="section-label mb-2">
+              <span>PANDUAN SLIP GAJI</span>
+              <i></i>
+              <span>EDUKASI KARIER</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#101010] tracking-tight">
+              Cara membaca potongan <em>slip gaji pertama.</em>
+            </h2>
+            <p class="text-xs sm:text-sm text-[#55544f] mt-2 leading-relaxed font-medium">
+              Memahami komponen gaji kotor, iuran wajib jaminan sosial, dan aturan pajak terbaru membantu kamu bernegosiasi secara matang saat menerima offering letter.
+            </p>
+          </div>
+
+          <div class="lg:col-span-7 space-y-3">
+            <details class="group bg-white rounded-2xl border border-[#d7d6cf] p-5 open:border-[#101010] transition">
+              <summary class="flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-[#101010] cursor-pointer list-none select-none min-h-[36px]">
+                <span>Mengapa gaji yang masuk rekening berbeda dengan angka di Offering Letter?</span>
+                <span class="w-7 h-7 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] flex items-center justify-center text-[#101010] group-open:rotate-45 transition-transform shrink-0">+</span>
+              </summary>
+              <p class="text-xs sm:text-sm text-[#55544f] leading-relaxed mt-3 pt-3 border-t border-[#d7d6cf]/60 font-medium">
+                Sebagian besar perusahaan di Indonesia mencantumkan nominal <strong>Gaji Kotor (Gross)</strong> pada surat penawaran kerja. Sebelum ditransfer ke rekening karyawan, bagian payroll wajib memotong iuran BPJS Ketenagakerjaan bagian pekerja (JHT 2% + JP 1%), BPJS Kesehatan (1%), serta pajak penghasilan PPh 21 jika gaji kotor melewati batas penghasilan tidak kena pajak.
+              </p>
+            </details>
+
+            <details class="group bg-white rounded-2xl border border-[#d7d6cf] p-5 open:border-[#101010] transition">
+              <summary class="flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-[#101010] cursor-pointer list-none select-none min-h-[36px]">
+                <span>Berapa batas gaji minimal yang mulai dikenakan potongan pajak PPh 21?</span>
+                <span class="w-7 h-7 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] flex items-center justify-center text-[#101010] group-open:rotate-45 transition-transform shrink-0">+</span>
+              </summary>
+              <p class="text-xs sm:text-sm text-[#55544f] leading-relaxed mt-3 pt-3 border-t border-[#d7d6cf]/60 font-medium">
+                Berdasarkan aturan PP Nomor 58 Tahun 2023 menggunakan skema Tarif Efektif Rata-rata (TER), pekerja lajang tanpa tanggungan (status <strong>TK/0</strong>) dengan penghasilan bruto sampai dengan <strong>Rp 5.400.000 per bulan</strong> dikenakan tarif PPh 21 sebesar <strong>0% (bebas potongan pajak)</strong>. Untuk status menikah atau memiliki tanggungan, batas bebas pajaknya lebih tinggi hingga Rp 6.600.000 per bulan.
+              </p>
+            </details>
+
+            <details class="group bg-white rounded-2xl border border-[#d7d6cf] p-5 open:border-[#101010] transition">
+              <summary class="flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-[#101010] cursor-pointer list-none select-none min-h-[36px]">
+                <span>Apakah potongan JHT 2% dan JP 1% hilang begitu saja?</span>
+                <span class="w-7 h-7 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] flex items-center justify-center text-[#101010] group-open:rotate-45 transition-transform shrink-0">+</span>
+              </summary>
+              <p class="text-xs sm:text-sm text-[#55544f] leading-relaxed mt-3 pt-3 border-t border-[#d7d6cf]/60 font-medium">
+                Tidak hilang. Potongan Jaminan Hari Tua (JHT) sebesar 2% dari gajimu ditambah 3,7% setoran dari perusahaan masuk ke saldo akun JMO (BPJS Ketenagakerjaan) milikmu. Total tabungan 5,7% per bulan ini berkembang dengan hasil pengembangan tahunan dan dapat dicairkan penuh apabila kamu mengundurkan diri (resign), habis kontrak, atau memasuki usia pensiun.
+              </p>
+            </details>
+
+            <details class="group bg-white rounded-2xl border border-[#d7d6cf] p-5 open:border-[#101010] transition">
+              <summary class="flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-[#101010] cursor-pointer list-none select-none min-h-[36px]">
+                <span>Apa perbedaan kontrak gaji Gross dan Gross-Up (Net) saat negosiasi?</span>
+                <span class="w-7 h-7 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] flex items-center justify-center text-[#101010] group-open:rotate-45 transition-transform shrink-0">+</span>
+              </summary>
+              <p class="text-xs sm:text-sm text-[#55544f] leading-relaxed mt-3 pt-3 border-t border-[#d7d6cf]/60 font-medium">
+                Pada skema <strong>Gross</strong>, pajak dan iuran BPJS bagian karyawan dikurangi dari angka gaji yang disepakati. Pada skema <strong>Gross-Up atau Net</strong>, perusahaan memberikan tunjangan pajak dan iuran senilai potongan tersebut, sehingga uang yang kamu terima di rekening sama persis dengan angka yang tertulis di kontrak. Selalu tanyakan ke rekruter apakah angka penawaran bersifat Gross atau Net.
+              </p>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <FooterPortal />
+  <SearchModal />
+
+  <!-- Structured Data JSON-LD for Salary Calculator & FAQ -->
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "name": title,
+        "description": description,
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "All",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "IDR"
+        },
+        "url": canonical
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Mengapa gaji yang masuk rekening berbeda dengan angka di Offering Letter?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sebagian besar perusahaan di Indonesia mencantumkan nominal Gaji Kotor (Gross) pada surat penawaran kerja. Sebelum ditransfer ke rekening karyawan, bagian payroll wajib memotong iuran BPJS Ketenagakerjaan bagian pekerja (JHT 2% + JP 1%), BPJS Kesehatan (1%), serta pajak penghasilan PPh 21 jika gaji kotor melewati batas penghasilan tidak kena pajak."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Berapa batas gaji minimal yang mulai dikenakan potongan pajak PPh 21?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Berdasarkan aturan PP Nomor 58 Tahun 2023 menggunakan skema Tarif Efektif Rata-rata (TER), pekerja lajang tanpa tanggungan (status TK/0) dengan penghasilan bruto sampai dengan Rp 5.400.000 per bulan dikenakan tarif PPh 21 sebesar 0% (bebas potongan pajak)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Apakah potongan JHT 2% dan JP 1% hilang begitu saja?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Tidak hilang. Potongan Jaminan Hari Tua (JHT) sebesar 2% dari gajimu ditambah 3,7% setoran dari perusahaan masuk ke saldo akun JMO (BPJS Ketenagakerjaan) milikmu dan dapat dicairkan penuh apabila mengundurkan diri, habis kontrak, atau pensiun."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Apa perbedaan kontrak gaji Gross dan Gross-Up (Net) saat negosiasi?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Pada skema Gross, pajak dan iuran BPJS bagian karyawan dikurangi dari angka gaji yang disepakati. Pada skema Gross-Up atau Net, perusahaan memberikan tunjangan pajak dan iuran senilai potongan tersebut sehingga uang yang diterima di rekening sama persis dengan angka di kontrak."
+            }
+          }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Beranda", "item": `${siteOrigin}/` },
+          { "@type": "ListItem", "position": 2, "name": "Kalkulator Gaji & 142 UMK 2026", "item": canonical }
+        ]
+      }
+    ]
+  })} />
+</BaseLayout>
+
+<script is:inline>
+  (function () {
+    const searchInput = document.getElementById('umk-table-search');
+    const provSelect = document.getElementById('umk-province-filter');
+    const pageSizeSelect = document.getElementById('umk-page-size');
+    const desktopRows = Array.from(document.querySelectorAll('.umk-region-row'));
+    const mobileCards = Array.from(document.querySelectorAll('.umk-region-card'));
+    const desktopContainer = document.getElementById('umk-desktop-container');
+    const emptyState = document.getElementById('umk-empty-state');
+    const paginationBar = document.getElementById('umk-pagination-bar');
+    const paginationInfo = document.getElementById('umk-pagination-info');
+    const pageNumbersContainer = document.getElementById('umk-page-numbers');
+    const prevBtn = document.getElementById('umk-prev-page');
+    const nextBtn = document.getElementById('umk-next-page');
+    const resetBtn = document.getElementById('btn-reset-umk-search');
+    const pickBtns = document.querySelectorAll('.btn-pick-region');
+
+    let currentPage = 1;
+    let pageSize = 10;
+    let filteredIndices = [];
+
+    function computeFilteredIndices() {
+      const q = (searchInput ? searchInput.value : '').trim().toLowerCase();
+      const prov = provSelect ? provSelect.value : '';
+      filteredIndices = [];
+
+      desktopRows.forEach((row, idx) => {
+        const hay = row.getAttribute('data-search') || '';
+        const rowProv = row.getAttribute('data-province') || '';
+        const matchQ = !q || hay.includes(q);
+        const matchProv = !prov || rowProv === prov;
+        if (matchQ && matchProv) {
+          filteredIndices.push(idx);
+        }
+      });
+    }
+
+    function buildPageButtons(totalPages) {
+      if (!pageNumbersContainer) return;
+      pageNumbersContainer.innerHTML = '';
+
+      const pages = [];
+      if (totalPages <= 7) {
+        for (let i = 1; i <= totalPages; i++) pages.push(i);
+      } else {
+        pages.push(1);
+        if (currentPage > 3) pages.push('...');
+        const start = Math.max(2, currentPage - 1);
+        const end = Math.min(totalPages - 1, currentPage + 1);
+        for (let i = start; i <= end; i++) pages.push(i);
+        if (currentPage < totalPages - 2) pages.push('...');
+        pages.push(totalPages);
+      }
+
+      pages.forEach((p) => {
+        if (p === '...') {
+          const span = document.createElement('span');
+          span.className = 'px-1.5 text-xs font-bold text-[#55544f] select-none';
+          span.textContent = '...';
+          pageNumbersContainer.appendChild(span);
+          return;
+        }
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        const isActive = p === currentPage;
+        btn.className = isActive
+          ? 'min-w-[38px] min-h-[38px] px-2.5 rounded-xl bg-[#1738D1] text-white text-xs font-extrabold tabular-nums transition cursor-pointer'
+          : 'min-w-[38px] min-h-[38px] px-2.5 rounded-xl bg-white hover:bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf] text-xs font-bold tabular-nums transition cursor-pointer';
+        btn.textContent = String(p);
+        btn.setAttribute('aria-label', 'Halaman ' + p);
+        if (isActive) btn.setAttribute('aria-current', 'page');
+
+        btn.addEventListener('click', () => {
+          currentPage = p;
+          renderPage(true);
+        });
+        pageNumbersContainer.appendChild(btn);
+      });
+    }
+
+    function renderPage(scrollToSection) {
+      const totalItems = filteredIndices.length;
+      const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIdx = (currentPage - 1) * pageSize;
+      const endIdx = Math.min(startIdx + pageSize, totalItems);
+      const visibleSet = new Set(filteredIndices.slice(startIdx, endIdx));
+
+      desktopRows.forEach((row, idx) => {
+        row.style.display = visibleSet.has(idx) ? '' : 'none';
+      });
+
+      mobileCards.forEach((card, idx) => {
+        card.style.display = visibleSet.has(idx) ? '' : 'none';
+      });
+
+      if (totalItems === 0) {
+        emptyState?.classList.remove('hidden');
+        paginationBar?.classList.add('hidden');
+        desktopContainer?.classList.add('md:hidden');
+      } else {
+        emptyState?.classList.add('hidden');
+        paginationBar?.classList.remove('hidden');
+        desktopContainer?.classList.remove('md:hidden');
+
+        if (paginationInfo) {
+          paginationInfo.innerHTML =
+            'Menampilkan <strong class="text-[#101010]">' +
+            (startIdx + 1) +
+            ' - ' +
+            endIdx +
+            '</strong> dari <strong class="text-[#101010]">' +
+            totalItems +
+            '</strong> Kabupaten/Kota';
+        }
+
+        if (prevBtn) prevBtn.disabled = currentPage <= 1;
+        if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+
+        buildPageButtons(totalPages);
+      }
+
+      if (scrollToSection) {
+        const dirEl = document.getElementById('direktori-umk-2026');
+        dirEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function applyFilterAndResetPage() {
+      pageSize = parseInt(pageSizeSelect ? pageSizeSelect.value : '10', 10) || 10;
+      currentPage = 1;
+      computeFilteredIndices();
+      renderPage(false);
+    }
+
+    searchInput?.addEventListener('input', applyFilterAndResetPage);
+    provSelect?.addEventListener('change', applyFilterAndResetPage);
+    pageSizeSelect?.addEventListener('change', applyFilterAndResetPage);
+
+    prevBtn?.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderPage(true);
+      }
+    });
+
+    nextBtn?.addEventListener('click', () => {
+      const totalPages = Math.max(1, Math.ceil(filteredIndices.length / pageSize));
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderPage(true);
+      }
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      if (provSelect) provSelect.value = '';
+      applyFilterAndResetPage();
+    });
+
+    pickBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const regId = btn.getAttribute('data-select-region');
+        if (regId && typeof window.__employrSelectCalcRegion === 'function') {
+          window.__employrSelectCalcRegion(regId);
+          const url = new URL(window.location.href);
+          url.searchParams.set('kota', regId);
+          window.history.replaceState({}, '', url.toString());
+        }
+      });
+    });
+
+    // Initial render & ?kota= parameter auto-select
+    applyFilterAndResetPage();
+    const initialKota = new URLSearchParams(window.location.search).get('kota');
+    if (initialKota && typeof window.__employrSelectCalcRegion === 'function') {
+      window.__employrSelectCalcRegion(initialKota);
+    }
+  })();
+</script>

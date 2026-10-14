@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     const recentBroadcasts = await prisma.audit_logs.findMany({
       where: { action: 'BROADCAST_NOTIFICATION' },
       orderBy: { created_at: 'desc' },
-      take: 20,
+      take: 50,
     });
 
     const totalNotifications = await prisma.notifications.count();

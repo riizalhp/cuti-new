@@ -73,20 +73,19 @@ function timeAgo(dateStr: string): string {
   }
 }
 
-function slugify(text: string): string {
-  return text
+function slugify(text: string, maxLen = 100): string {
+  const raw = text
+    .toString()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 80);
-}
-
-function hashUrl(url: string): string {
-  let h = 5381;
-  for (let i = 0; i < url.length; i++) {
-    h = ((h << 5) + h + url.charCodeAt(i)) | 0;
-  }
-  return Math.abs(h).toString(36).slice(0, 8);
+    .replace(/^-+|-+$/g, '');
+  if (!raw) return 'item';
+  if (raw.length <= maxLen) return raw;
+  const cut = raw.slice(0, maxLen);
+  const lastDash = cut.lastIndexOf('-');
+  return (lastDash > 20 ? cut.slice(0, lastDash) : cut).replace(/-+$/g, '');
 }
 
 // ---------------------------------------------------------------------------
@@ -123,7 +122,9 @@ async function syncArticles(): Promise<{ created: number; updated: number }> {
         const contentEncoded = raw.match(
           /<content:encoded><!\[CDATA\[([\s\S]*?)\]\]><\/content:encoded>/
         );
-        const content = contentEncoded ? stripHtml(contentEncoded[1]) : stripCdata(raw.match(/<description>([\s\S]*?)<\/description>/)?.[1] || '');
+        const content = contentEncoded
+          ? stripHtml(contentEncoded[1])
+          : stripHtml(stripCdata(raw.match(/<description>([\s\S]*?)<\/description>/)?.[1] || ''));
 
         if (!title || !link) continue;
 
@@ -139,11 +140,17 @@ async function syncArticles(): Promise<{ created: number; updated: number }> {
           });
           updated++;
         } else {
+          const baseSlug = slugify(title);
+          let slugCandidate = baseSlug;
+          let idx = 2;
+          while (await prisma.articles.findUnique({ where: { slug: slugCandidate }, select: { id: true } })) {
+            slugCandidate = `${baseSlug}-${idx++}`;
+          }
           await prisma.articles.create({
             data: {
               id: crypto.randomUUID(),
               title,
-              slug: `${slugify(title)}-${hashUrl(link)}`,
+              slug: slugCandidate,
               content: content || title,
               author: feed.author,
               is_published: true,
@@ -198,11 +205,17 @@ async function syncCertifications(): Promise<{ created: number; updated: number 
         });
         updated++;
       } else {
+        const baseSlug = slugify(title);
+        let slugCandidate = baseSlug;
+        let idx = 2;
+        while (await prisma.certifications.findUnique({ where: { slug: slugCandidate }, select: { id: true } })) {
+          slugCandidate = `${baseSlug}-${idx++}`;
+        }
         await prisma.certifications.create({
           data: {
             id: crypto.randomUUID(),
             title,
-            slug: `${slugify(title)}-${hashUrl(href)}`,
+            slug: slugCandidate,
             description: `Skema sertifikasi profesi dari BNSP. ${title}`,
             provider: 'BNSP',
             price: 0,

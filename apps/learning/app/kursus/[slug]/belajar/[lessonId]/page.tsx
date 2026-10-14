@@ -10,12 +10,9 @@ import {
   RotateCw,
   Volume2,
   VolumeX,
-  Maximize,
   CheckCircle2,
-  ChevronLeft,
   ChevronRight,
   Sparkles,
-  BookOpen,
   FileText,
   HelpCircle,
   MessageSquare,
@@ -31,8 +28,10 @@ import {
   Menu,
   X,
 } from 'lucide-react';
-import { COURSES, Lesson, TranscriptCue } from '@/lib/courses-data';
+import { COURSES, Lesson } from '@/lib/courses-data';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { MarkdownContent } from '@/components/MarkdownContent';
 
 export default function ClassroomPage() {
   const params = useParams();
@@ -113,8 +112,13 @@ export default function ClassroomPage() {
 
   const currentLessonIndex = allLessons.findIndex((l) => l.id === lessonId);
   const currentLesson = allLessons[currentLessonIndex] || allLessons[0];
-  const prevLesson = currentLessonIndex > 0 ? allLessons[currentLessonIndex - 1] : null;
   const nextLesson = currentLessonIndex < allLessons.length - 1 ? allLessons[currentLessonIndex + 1] : null;
+
+  useEffect(() => {
+    if (currentLesson?.type !== 'video' && activeTab === 'transcript') {
+      setActiveTab('notes');
+    }
+  }, [lessonId, currentLesson?.type]);
 
   // Video Time Update Listener
   const handleTimeUpdate = () => {
@@ -235,8 +239,8 @@ export default function ClassroomPage() {
 
   if (!course || !currentLesson) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] flex items-center justify-center">
-        <p className="text-sm font-bold text-slate-500">Materi tidak ditemukan.</p>
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center font-sans">
+        <p className="text-xs font-bold text-slate-400">Materi tidak ditemukan.</p>
       </div>
     );
   }
@@ -244,10 +248,10 @@ export default function ClassroomPage() {
   const completionPercentage = Math.round((completedLessons.length / allLessons.length) * 100);
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col">
+    <div className="h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 flex flex-col font-sans">
       {/* Top Classroom Bar */}
-      <header className="h-14 bg-slate-950 border-b border-slate-800 px-4 flex items-center justify-between shrink-0 z-30">
-        <div className="flex items-center gap-3">
+      <header className="h-14 bg-slate-950 border-b border-slate-800 px-3 sm:px-4 flex items-center justify-between shrink-0 z-30">
+        <div className="flex items-center gap-2.5">
           <Link
             href={`/kursus/${slug}`}
             className="p-1.5 rounded-[8px] bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition"
@@ -263,34 +267,35 @@ export default function ClassroomPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           {/* Progress Tracker */}
           <div className="hidden sm:flex items-center gap-2">
-            <div className="w-28 h-2 bg-slate-800 rounded-full overflow-hidden">
+            <div className="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden">
               <div
                 className="h-full bg-emerald-500 rounded-full transition-all duration-300"
                 style={{ width: `${completionPercentage}%` }}
               />
             </div>
-            <span className="text-[11px] font-mono font-bold text-emerald-400">
+            <span className="text-[10px] font-mono font-bold text-emerald-400">
               {completionPercentage}% Selesai
             </span>
           </div>
 
           {/* Mark Complete Button */}
-          <button
+          <Button
+            size="sm"
             onClick={markCompletedAndNext}
-            className="px-3 py-1.5 rounded-[8px] bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+            className="h-8 px-3 text-caption font-bold gap-1"
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Selesai & Lanjut</span>
             <ChevronRight className="w-3.5 h-3.5" />
-          </button>
+          </Button>
 
           {/* Toggle Sidebar Button */}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 rounded-[8px] bg-slate-900 hover:bg-slate-800 text-slate-300 transition"
+            className="p-2 rounded-[8px] bg-slate-900 hover:bg-slate-800 text-slate-300 transition cursor-pointer"
             title="Daftar Modul"
           >
             <Menu className="w-4 h-4" />
@@ -305,7 +310,7 @@ export default function ClassroomPage() {
           {/* 1. Main Media Area */}
           <div className="w-full bg-black flex items-center justify-center relative">
             {currentLesson.type === 'video' ? (
-              <div className="w-full max-w-4xl aspect-video relative group bg-black">
+              <div className="w-full max-h-[72vh] aspect-video relative group bg-black">
                 <video
                   ref={videoRef}
                   src={currentLesson.videoUrl}
@@ -330,11 +335,11 @@ export default function ClassroomPage() {
                     max={duration || 100}
                     value={currentTime}
                     onChange={(e) => seekVideo(Number(e.target.value))}
-                    className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-[#1738D1]"
+                    className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cobalt-500"
                   />
 
                   <div className="flex items-center justify-between text-xs text-white">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       <button
                         onClick={togglePlay}
                         className="p-1 rounded-full hover:bg-white/20 transition cursor-pointer"
@@ -357,17 +362,17 @@ export default function ClassroomPage() {
                         <RotateCw className="w-4 h-4" />
                       </button>
 
-                      <span className="font-mono text-[11px] text-slate-300">
+                      <span className="font-mono text-caption text-slate-300">
                         {formatTime(currentTime)} / {formatTime(duration || currentLesson.durationSeconds || 0)}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       {/* Playback Speed Picker */}
                       <div className="relative">
                         <button
                           onClick={() => setShowSpeedMenu(!showSpeedMenu)}
-                          className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[11px] font-bold cursor-pointer"
+                          className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-caption font-bold cursor-pointer"
                         >
                           {playbackSpeed}x
                         </button>
@@ -379,7 +384,7 @@ export default function ClassroomPage() {
                                 onClick={() => changeSpeed(s)}
                                 className={cn(
                                   'w-full px-4 py-1 text-left text-xs font-bold hover:bg-slate-800 transition',
-                                  playbackSpeed === s ? 'text-[#1738D1]' : 'text-slate-300'
+                                  playbackSpeed === s ? 'text-cobalt-500' : 'text-slate-300'
                                 )}
                               >
                                 {s}x
@@ -405,20 +410,28 @@ export default function ClassroomPage() {
                 </div>
               </div>
             ) : currentLesson.type === 'reading' ? (
-              <div className="w-full max-w-3xl p-6 sm:p-10 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-[400px] shadow-lg rounded-[10px] my-6">
-                <div className="prose dark:prose-invert max-w-none text-xs sm:text-sm leading-relaxed whitespace-pre-line font-sans">
-                  {currentLesson.readingContent}
+              <div className="w-full max-w-4xl mx-auto p-5 sm:p-8 bg-slate-950 text-slate-100 min-h-[400px] border border-slate-800 shadow-md rounded-[10px] my-4 sm:my-6">
+                <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-800">
+                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <FileText className="w-4 h-4 text-cobalt-400" />
+                    <span className="font-semibold text-slate-300">Modul Bacaan &amp; Formula Matematika</span>
+                  </div>
+                  <span className="text-[11px] font-mono font-bold text-slate-400 bg-slate-900 px-2.5 py-1 rounded-[6px] border border-slate-800 flex items-center gap-1.5">
+                    <Clock className="w-3 h-3 text-amber-400" />
+                    {currentLesson.duration}
+                  </span>
                 </div>
+                <MarkdownContent content={currentLesson.readingContent || ''} />
               </div>
             ) : (
               /* Quiz Engine Interface */
-              <div className="w-full max-w-3xl p-6 sm:p-8 bg-slate-950 text-slate-100 min-h-[450px] rounded-[10px] my-6 border border-slate-800 space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="w-full p-5 sm:p-6 bg-slate-950 text-slate-100 min-h-[400px] rounded-[10px] my-4 sm:my-6 border border-slate-800 space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                   <div className="flex items-center gap-2">
-                    <HelpCircle className="w-5 h-5 text-amber-400" />
-                    <h2 className="text-sm font-bold text-white">Kuis Evaluasi Pemahaman</h2>
+                    <HelpCircle className="w-4 h-4 text-amber-400" />
+                    <h2 className="text-xs sm:text-sm font-bold text-white">Kuis Evaluasi Pemahaman</h2>
                   </div>
-                  <span className="text-xs text-amber-400 font-bold px-2 py-0.5 rounded bg-amber-950/80 border border-amber-800">
+                  <span className="text-[10px] text-amber-400 font-bold px-2 py-0.5 rounded bg-amber-950/80 border border-amber-800">
                     Passing Grade: 80%
                   </span>
                 </div>
@@ -426,51 +439,53 @@ export default function ClassroomPage() {
                 {isQuizSubmitted && (
                   <div
                     className={cn(
-                      'p-4 rounded-[10px] border flex items-center justify-between',
+                      'p-3.5 rounded-[10px] border flex items-center justify-between',
                       quizScore >= 80
                         ? 'bg-emerald-950/60 border-emerald-800 text-emerald-300'
                         : 'bg-rose-950/60 border-rose-800 text-rose-300'
                     )}
                   >
-                    <div className="space-y-1">
-                      <p className="text-sm font-extrabold flex items-center gap-2">
+                    <div className="space-y-0.5">
+                      <p className="text-xs sm:text-sm font-extrabold flex items-center gap-1.5">
                         {quizScore >= 80 ? (
                           <>
-                            <Award className="w-5 h-5 text-emerald-400" />
+                            <Award className="w-4 h-4 text-emerald-400" />
                             <span>SELAMAT, KAMU LULUS!</span>
                           </>
                         ) : (
                           <>
-                            <AlertCircle className="w-5 h-5 text-rose-400" />
+                            <AlertCircle className="w-4 h-4 text-rose-400" />
                             <span>BELUM MENCAPAI TARGET (80%)</span>
                           </>
                         )}
                       </p>
-                      <p className="text-xs opacity-90">
+                      <p className="text-caption opacity-90">
                         Skor kamu: <strong>{quizScore}%</strong>. {quizScore >= 80 ? 'Materi ini telah ditandai selesai.' : 'Silakan pelajari kembali materi dan coba lagi.'}
                       </p>
                     </div>
 
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => {
                         setIsQuizSubmitted(false);
                         setSelectedAnswers({});
                       }}
-                      className="px-3 py-1.5 rounded-[8px] bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold cursor-pointer"
+                      className="text-caption"
                     >
                       Ulangi Kuis
-                    </button>
+                    </Button>
                   </div>
                 )}
 
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {currentLesson.quizQuestions?.map((q, qIndex) => (
-                    <div key={q.id} className="space-y-3 p-4 rounded-[10px] bg-slate-900/80 border border-slate-800">
+                    <div key={q.id} className="space-y-2.5 p-3.5 rounded-[10px] bg-slate-900/80 border border-slate-800">
                       <p className="text-xs font-bold text-white leading-relaxed">
                         {qIndex + 1}. {q.question}
                       </p>
 
-                      <div className="space-y-2">
+                      <div className="space-y-1.5">
                         {q.options.map((opt, optIdx) => {
                           const isSelected = selectedAnswers[q.id] === optIdx;
                           const isCorrect = q.correctAnswerIndex === optIdx;
@@ -480,7 +495,7 @@ export default function ClassroomPage() {
                             if (isCorrect) optionClass = 'border-emerald-500 bg-emerald-950/60 text-emerald-200 font-bold';
                             else if (isSelected && !isCorrect) optionClass = 'border-rose-500 bg-rose-950/60 text-rose-200';
                           } else if (isSelected) {
-                            optionClass = 'border-[#1738D1] bg-[#1738D1]/20 text-white font-semibold';
+                            optionClass = 'border-cobalt-500 bg-cobalt-500/20 text-white font-semibold';
                           }
 
                           return (
@@ -489,14 +504,14 @@ export default function ClassroomPage() {
                               disabled={isQuizSubmitted}
                               onClick={() => setSelectedAnswers((prev) => ({ ...prev, [q.id]: optIdx }))}
                               className={cn(
-                                'w-full p-3 rounded-[8px] border text-left text-xs transition flex items-center gap-3 cursor-pointer',
+                                'w-full p-2.5 rounded-[8px] border text-left text-xs transition flex items-center gap-2.5 cursor-pointer',
                                 optionClass
                               )}
                             >
                               <div
                                 className={cn(
                                   'w-4 h-4 rounded-full border flex items-center justify-center shrink-0 text-[10px]',
-                                  isSelected ? 'border-[#1738D1] bg-[#1738D1] text-white' : 'border-slate-600'
+                                  isSelected ? 'border-cobalt-500 bg-cobalt-500 text-white' : 'border-slate-600'
                                 )}
                               >
                                 {isSelected && <Check className="w-2.5 h-2.5" />}
@@ -508,7 +523,7 @@ export default function ClassroomPage() {
                       </div>
 
                       {isQuizSubmitted && (
-                        <div className="p-3 rounded-[6px] bg-slate-950 border border-slate-800 text-[11px] text-slate-300 space-y-1">
+                        <div className="p-2.5 rounded-[6px] bg-slate-950 border border-slate-800 text-caption text-slate-300 space-y-0.5">
                           <span className="font-bold text-blue-400">💡 Pembahasan:</span>
                           <p>{q.explanation}</p>
                         </div>
@@ -518,13 +533,13 @@ export default function ClassroomPage() {
                 </div>
 
                 {!isQuizSubmitted && (
-                  <button
+                  <Button
                     onClick={handleQuizSubmit}
                     disabled={Object.keys(selectedAnswers).length < (currentLesson.quizQuestions?.length || 0)}
-                    className="w-full py-3 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] disabled:opacity-50 text-white text-xs font-bold transition shadow-md shadow-[#1738D1]/25 cursor-pointer"
+                    className="w-full text-xs font-bold"
                   >
                     Kirim & Nilai Jawaban
-                  </button>
+                  </Button>
                 )}
               </div>
             )}
@@ -532,7 +547,7 @@ export default function ClassroomPage() {
 
           {/* 2. Secondary Interactive Tab Nav (Transcript, Notes, Q&A, AI Coach) */}
           <div className="border-t border-slate-800 bg-slate-950">
-            <div className="flex items-center gap-1 px-4 border-b border-slate-800 overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-1 px-3 sm:px-4 border-b border-slate-800 overflow-x-auto no-scrollbar">
               {[
                 { id: 'transcript', label: 'Transkrip Sinkron', icon: FileText },
                 { id: 'notes', label: `Catatan (${notes.length})`, icon: StickyNote },
@@ -547,14 +562,14 @@ export default function ClassroomPage() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
                     className={cn(
-                      'flex items-center gap-2 px-4 py-3 text-xs font-bold border-b-2 transition whitespace-nowrap cursor-pointer',
+                      'flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold border-b-2 transition whitespace-nowrap cursor-pointer',
                       isActive
-                        ? 'border-[#1738D1] text-[#1738D1] dark:text-blue-400'
+                        ? 'border-cobalt-500 text-cobalt-500 dark:text-blue-400'
                         : 'border-transparent text-slate-400 hover:text-slate-200',
                       tab.highlight && !isActive && 'text-amber-400 hover:text-amber-300'
                     )}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-3.5 h-3.5" />
                     <span>{tab.label}</span>
                   </button>
                 );
@@ -562,19 +577,19 @@ export default function ClassroomPage() {
             </div>
 
             {/* Tab Contents */}
-            <div className="p-4 sm:p-6 min-h-[300px] max-w-4xl">
+            <div className="p-3.5 sm:p-5 min-h-[250px] w-full">
               {/* TAB 1: SYNCHRONIZED TRANSCRIPT */}
               {activeTab === 'transcript' && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
-                    <span>Klik pada baris kalimat untuk melompatkan posisi video ke detik tersebut:</span>
-                    <span className="text-emerald-400 font-semibold text-[11px] flex items-center gap-1">
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between text-caption text-slate-400 mb-1.5">
+                    <span>Klik pada baris kalimat untuk melompatkan posisi video:</span>
+                    <span className="text-emerald-400 font-semibold text-[10px] flex items-center gap-1">
                       <Sparkles className="w-3 h-3" /> Auto-Sync Aktif
                     </span>
                   </div>
 
                   {currentLesson.transcript && currentLesson.transcript.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       {currentLesson.transcript.map((cue, idx) => {
                         const isCurrentCue =
                           currentTime >= cue.time &&
@@ -585,13 +600,13 @@ export default function ClassroomPage() {
                             key={idx}
                             onClick={() => seekVideo(cue.time)}
                             className={cn(
-                              'p-3 rounded-[8px] border transition flex items-start gap-3 cursor-pointer',
+                              'p-2.5 rounded-[8px] border transition flex items-start gap-2.5 cursor-pointer',
                               isCurrentCue
-                                ? 'bg-blue-950/80 border-[#1738D1] text-white shadow-sm'
+                                ? 'bg-blue-950/80 border-cobalt-500 text-white shadow-xs'
                                 : 'bg-slate-900/50 border-slate-800/80 text-slate-300 hover:bg-slate-800'
                             )}
                           >
-                            <span className="font-mono text-xs font-bold text-[#1738D1] dark:text-blue-400 bg-blue-900/40 px-2 py-0.5 rounded shrink-0">
+                            <span className="font-mono text-[11px] font-bold text-cobalt-500 dark:text-blue-400 bg-blue-900/40 px-2 py-0.5 rounded shrink-0">
                               {cue.timestamp}
                             </span>
                             <p className="text-xs leading-relaxed">{cue.text}</p>
@@ -600,21 +615,21 @@ export default function ClassroomPage() {
                       })}
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-500 py-6 text-center">Transkrip tidak tersedia untuk tipe materi ini.</p>
+                    <p className="text-caption text-slate-500 py-6 text-center">Transkrip tidak tersedia untuk tipe materi ini.</p>
                   )}
                 </div>
               )}
 
               {/* TAB 2: TIMESTAMPED NOTES */}
               {activeTab === 'notes' && (
-                <div className="space-y-4">
-                  <div className="p-3 bg-slate-900 rounded-[10px] border border-slate-800 space-y-3">
+                <div className="space-y-3">
+                  <div className="p-3 bg-slate-900 rounded-[10px] border border-slate-800 space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <StickyNote className="w-4 h-4 text-amber-400" />
+                        <StickyNote className="w-3.5 h-3.5 text-amber-400" />
                         Tambah Catatan Waktu Nyata
                       </span>
-                      <span className="text-[11px] font-mono font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-900">
+                      <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-900">
                         Waktu Video: {formatTime(currentTime)}
                       </span>
                     </div>
@@ -624,27 +639,24 @@ export default function ClassroomPage() {
                       onChange={(e) => setNewNoteText(e.target.value)}
                       placeholder="Ketik catatan penting dari video ini..."
                       rows={2}
-                      className="w-full p-2.5 text-xs bg-slate-950 border border-slate-800 rounded-[8px] text-white focus:outline-none focus:ring-1 focus:ring-[#1738D1]"
+                      className="w-full p-2 text-xs bg-slate-950 border border-slate-800 rounded-[8px] text-white focus:outline-none focus:ring-1 focus:ring-cobalt-500"
                     />
 
-                    <button
-                      onClick={handleAddNote}
-                      className="px-4 py-1.5 rounded-[8px] bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold transition cursor-pointer"
-                    >
+                    <Button size="sm" onClick={handleAddNote} className="text-caption">
                       Simpan Catatan
-                    </button>
+                    </Button>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {notes.map((note) => (
                       <div
                         key={note.id}
-                        className="p-3 bg-slate-900 rounded-[8px] border border-slate-800 flex items-start justify-between gap-3"
+                        className="p-2.5 bg-slate-900 rounded-[8px] border border-slate-800 flex items-start justify-between gap-2.5"
                       >
-                        <div className="space-y-1">
+                        <div className="space-y-0.5">
                           <button
                             onClick={() => seekVideo(note.timeSec)}
-                            className="font-mono text-[11px] font-bold text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                            className="font-mono text-[10px] font-bold text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
                           >
                             <Clock className="w-3 h-3" />
                             <span>{note.timestamp}</span>
@@ -659,19 +671,20 @@ export default function ClassroomPage() {
 
               {/* TAB 3: DISCUSSION FORUM */}
               {activeTab === 'discussion' && (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xs font-bold text-white">Diskusi Kelas & Tanya Jawab</h3>
-                    <button
+                    <Button
+                      size="sm"
                       onClick={() => setShowQuestionForm(!showQuestionForm)}
-                      className="px-3 py-1.5 rounded-[8px] bg-[#1738D1] text-white text-xs font-bold cursor-pointer"
+                      className="text-caption"
                     >
                       Tanya Pertanyaan
-                    </button>
+                    </Button>
                   </div>
 
                   {showQuestionForm && (
-                    <div className="p-4 bg-slate-900 rounded-[10px] border border-slate-800 space-y-3">
+                    <div className="p-3.5 bg-slate-900 rounded-[10px] border border-slate-800 space-y-2.5">
                       <input
                         type="text"
                         placeholder="Judul pertanyaan..."
@@ -686,7 +699,9 @@ export default function ClassroomPage() {
                         onChange={(e) => setNewQuestion({ ...newQuestion, body: e.target.value })}
                         className="w-full p-2 text-xs bg-slate-950 border border-slate-800 rounded-[6px] text-white"
                       />
-                      <button
+                      <Button
+                        size="sm"
+                        variant="brand"
                         onClick={() => {
                           if (newQuestion.title && newQuestion.body) {
                             setDiscussions([
@@ -705,23 +720,23 @@ export default function ClassroomPage() {
                             setShowQuestionForm(false);
                           }
                         }}
-                        className="px-4 py-1.5 rounded-[6px] bg-emerald-600 text-white text-xs font-bold cursor-pointer"
+                        className="text-caption"
                       >
                         Kirim ke Forum
-                      </button>
+                      </Button>
                     </div>
                   )}
 
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {discussions.map((d) => (
-                      <div key={d.id} className="p-4 bg-slate-900/90 rounded-[10px] border border-slate-800 space-y-2">
-                        <div className="flex items-center justify-between text-[11px] text-slate-400">
+                      <div key={d.id} className="p-3 bg-slate-900/90 rounded-[10px] border border-slate-800 space-y-1.5">
+                        <div className="flex items-center justify-between text-caption text-slate-400">
                           <span className="font-bold text-slate-300">{d.author}</span>
                           <span>{d.time}</span>
                         </div>
                         <h4 className="text-xs font-bold text-white">{d.title}</h4>
                         <p className="text-xs text-slate-300">{d.body}</p>
-                        <div className="flex items-center gap-4 pt-1 text-[11px] text-slate-400">
+                        <div className="flex items-center gap-3 pt-1 text-caption text-slate-400">
                           <button className="flex items-center gap-1 hover:text-white transition cursor-pointer">
                             <ThumbsUp className="w-3.5 h-3.5" />
                             <span>{d.upvotes} Upvotes</span>
@@ -736,9 +751,9 @@ export default function ClassroomPage() {
 
               {/* TAB 4: EMPLOYR COACH (AI TUTOR) */}
               {activeTab === 'coach' && (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {/* Quick Action Pills */}
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {[
                       '📌 Rangkum Video Ini',
                       '💡 Sederhanakan Konsep Rumit',
@@ -747,33 +762,37 @@ export default function ClassroomPage() {
                       <button
                         key={prompt}
                         onClick={() => sendCoachPrompt(prompt)}
-                        className="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-medium transition cursor-pointer flex items-center gap-1.5"
+                        className="px-2.5 py-1 rounded-full bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-caption font-medium transition cursor-pointer flex items-center gap-1"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                        <Sparkles className="w-3 h-3 text-amber-400" />
                         <span>{prompt}</span>
                       </button>
                     ))}
                   </div>
 
                   {/* Message History */}
-                  <div className="space-y-3 max-h-96 overflow-y-auto custom-scrollbar p-3 bg-slate-950 rounded-[10px] border border-slate-800">
+                  <div className="space-y-2.5 max-h-80 overflow-y-auto custom-scrollbar p-3 bg-slate-950 rounded-[10px] border border-slate-800">
                     {coachMessages.map((msg, idx) => (
                       <div
                         key={idx}
                         className={cn(
-                          'p-3 rounded-[8px] text-xs leading-relaxed max-w-xl whitespace-pre-line',
+                          'p-2.5 rounded-[8px] text-xs leading-relaxed max-w-xl',
                           msg.role === 'assistant'
                             ? 'bg-slate-900 border border-slate-800 text-slate-200 mr-auto'
-                            : 'bg-[#1738D1] text-white ml-auto font-medium'
+                            : 'bg-cobalt-500 text-white ml-auto font-medium whitespace-pre-line'
                         )}
                       >
-                        {msg.content}
+                        {msg.role === 'assistant' ? (
+                          <MarkdownContent content={msg.content} />
+                        ) : (
+                          msg.content
+                        )}
                       </div>
                     ))}
 
                     {isCoachThinking && (
-                      <div className="p-3 rounded-[8px] bg-slate-900 border border-slate-800 text-xs text-amber-400 mr-auto flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 animate-spin" />
+                      <div className="p-2.5 rounded-[8px] bg-slate-900 border border-slate-800 text-xs text-amber-400 mr-auto flex items-center gap-2">
+                        <Sparkles className="w-3.5 h-3.5 animate-spin" />
                         <span>Employr Coach sedang menyusun penjelasan...</span>
                       </div>
                     )}
@@ -789,14 +808,15 @@ export default function ClassroomPage() {
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') sendCoachPrompt(coachInput);
                       }}
-                      className="flex-1 p-2.5 text-xs bg-slate-900 border border-slate-800 rounded-[8px] text-white focus:outline-none focus:ring-1 focus:ring-[#1738D1]"
+                      className="flex-1 p-2 text-xs bg-slate-900 border border-slate-800 rounded-[8px] text-white focus:outline-none focus:ring-1 focus:ring-cobalt-500"
                     />
-                    <button
+                    <Button
+                      size="sm"
                       onClick={() => sendCoachPrompt(coachInput)}
-                      className="p-2.5 rounded-[8px] bg-[#1738D1] hover:bg-[#132EA8] text-white transition cursor-pointer"
+                      className="h-8 px-3"
                     >
-                      <Send className="w-4 h-4" />
-                    </button>
+                      <Send className="w-3.5 h-3.5" />
+                    </Button>
                   </div>
                 </div>
               )}
@@ -806,20 +826,20 @@ export default function ClassroomPage() {
 
         {/* Right Syllabus Drawer / Sidebar */}
         {isSidebarOpen && (
-          <aside className="w-80 border-l border-slate-800 bg-slate-950 flex flex-col shrink-0 overflow-y-auto no-scrollbar">
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+          <aside className="w-72 border-l border-slate-800 bg-slate-950 flex flex-col shrink-0 overflow-y-auto no-scrollbar">
+            <div className="p-3.5 border-b border-slate-800 flex items-center justify-between">
               <h2 className="text-xs font-bold text-white">Daftar Modul & Materi</h2>
               <button
                 onClick={() => setIsSidebarOpen(false)}
-                className="p-1 rounded text-slate-400 hover:text-white"
+                className="p-1 rounded text-slate-400 hover:text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-3 space-y-4">
+            <div className="p-2.5 space-y-3">
               {course.syllabus.map((mod) => (
-                <div key={mod.id} className="space-y-1.5">
+                <div key={mod.id} className="space-y-1">
                   <div className="px-2 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">
                     Minggu {mod.weekNumber}: {mod.title}
                   </div>
@@ -834,9 +854,9 @@ export default function ClassroomPage() {
                           key={lesson.id}
                           href={`/kursus/${slug}/belajar/${lesson.id}`}
                           className={cn(
-                            'flex items-center justify-between p-2.5 rounded-[8px] text-xs transition border',
+                            'flex items-center justify-between p-2 rounded-[8px] text-xs transition border',
                             isCurrent
-                              ? 'bg-[#1738D1] text-white border-[#1738D1] font-bold shadow-sm'
+                              ? 'bg-cobalt-500 text-white border-cobalt-500 font-bold shadow-xs'
                               : 'bg-slate-900/60 border-slate-800/80 text-slate-300 hover:bg-slate-800'
                           )}
                         >

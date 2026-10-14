@@ -131,7 +131,7 @@ export const AIConversation = ({
             transition={shouldReduceMotion ? { duration: 0 } : SPRING_DEFAULT}
             type="button"
           >
-            <ArrowDown aria-hidden="true" size={13} className="text-[#1738D1]" />
+            <ArrowDown aria-hidden="true" size={13} className="text-cobalt-500" />
             Ke pesan terbaru
           </motion.button>
         )}

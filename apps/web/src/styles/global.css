@@ -25,6 +25,78 @@
 html {
   scroll-behavior: smooth;
   background: var(--paper);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 16, 16, 0.25) transparent;
+}
+
+/* ============================================================
+   Employr Design System — Sleek Global & Custom Scrollbars
+   Editorial Paper & Ink Aesthetic
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 16, 16, 0.2);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 16, 16, 0.45);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--cobalt, #1738D1);
+}
+
+/* Custom Sleek Scrollbar Utility */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 16, 16, 0.25) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(16, 16, 16, 0.22);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 16, 16, 0.45);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background: var(--cobalt, #1738D1);
+}
+
+/* Hide Scrollbar Utilities */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.no-scrollbar,
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 body {
@@ -34,6 +106,13 @@ body {
   font-family: "Manrope", Arial, sans-serif;
   font-weight: 500;
   overflow-x: hidden;
+}
+
+/* Laptop Viewport Adjustment: Zoom out 80% to match desktop screen scale */
+@media screen and (min-width: 1024px) and (max-width: 1599px) {
+  body {
+    zoom: 0.8;
+  }
 }
 
 a { color: inherit; text-decoration: none; }

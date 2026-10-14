@@ -118,11 +118,15 @@ export function getAtsStateInfo(score: number, isEmpty = false): {
 
 export function calculateDynamicAtsScore(
   cv: any,
-  weights?: { contentQuality: number; atsReadability: number; completeness: number; contentIntegrity: number }
+  weights?: { contentQuality: number; atsReadability: number; completeness: number; contentIntegrity: number },
+  purpose?: string
 ): DynamicATSResult {
   const w = weights ?? { contentQuality: 0.4, atsReadability: 0.25, completeness: 0.2, contentIntegrity: 0.15 };
   const issues: ATSIssue[] = [];
   const penaltiesApplied: { category: string; amount: number; reason: string }[] = [];
+
+  const resolvedPurpose = String(purpose || cv?.purpose || 'job').toLowerCase();
+  const isEntryLevel = ['internship', 'fresh_graduate', 'academic_scholarship'].includes(resolvedPurpose);
 
   const isEmpty = isCVEmptyOrDefault(cv);
 
@@ -179,41 +183,88 @@ export function calculateDynamicAtsScore(
   let cqPoints = 0;
   const maxCq = 40;
 
-  // A. Experience Quality (10 pts)
   const experiences = Array.isArray(cv.experience) ? cv.experience : [];
+  const projects = Array.isArray(cv.projects) ? cv.projects : [];
+  const organizations = Array.isArray(cv.organizations) ? cv.organizations : [];
+
+  // A. Experience Quality (10 pts)
   if (experiences.length >= 2) {
     cqPoints += 10;
   } else if (experiences.length === 1) {
-    cqPoints += 6;
-    issues.push({
-      id: 'exp_single',
-      category: 'contentQuality',
-      severity: 'minor',
-      section: 'experience',
-      message: 'Hanya ada 1 riwayat pengalaman kerja.',
-      recommendation: 'Tambahkan pengalaman kerja atau proyek lain untuk memperkuat rekam jejak.',
-      penalty: 4,
-      potentialGain: 4,
-    });
+    if (isEntryLevel && (projects.length > 0 || organizations.length > 0)) {
+      cqPoints += 10; // Portofolio pemula lengkap
+    } else {
+      cqPoints += 6;
+      issues.push({
+        id: 'exp_single',
+        category: 'contentQuality',
+        severity: 'minor',
+        section: 'experience',
+        message: 'Hanya ada 1 riwayat pengalaman kerja.',
+        recommendation: isEntryLevel
+          ? 'Tambahkan proyek kuliah, tugas akhir, atau kepanitiaan organisasi untuk memperkuat portofolio.'
+          : 'Tambahkan pengalaman kerja atau proyek lain untuk memperkuat rekam jejak.',
+        penalty: 4,
+        potentialGain: 4,
+      });
+    }
   } else {
-    issues.push({
-      id: 'exp_missing',
-      category: 'contentQuality',
-      severity: 'critical',
-      section: 'experience',
-      message: 'Belum ada pengalaman kerja terisi.',
-      recommendation: 'Tambahkan minimal 1-2 riwayat pengalaman kerja atau proyek utama.',
-      penalty: 10,
-      potentialGain: 10,
-    });
+    // 0 riwayat pengalaman kerja
+    if (isEntryLevel) {
+      // Proteksi Pemula: Alihkan penilaian ke Proyek & Organisasi
+      const portfolioCount = projects.length + organizations.length;
+      if (portfolioCount >= 2) {
+        cqPoints += 10; // Bebas penalti: Proyek & organisasi menggantikan pengalaman kerja
+      } else if (portfolioCount === 1) {
+        cqPoints += 6;
+        issues.push({
+          id: 'entry_portfolio_few',
+          category: 'contentQuality',
+          severity: 'minor',
+          section: projects.length > 0 ? 'projects' : 'organizations',
+          message: 'Portofolio proyek atau kegiatan organisasi baru 1.',
+          recommendation: 'Tambahkan minimal 1 proyek atau kegiatan organisasi lainnya untuk melengkapi portofolio pemula.',
+          penalty: 4,
+          potentialGain: 4,
+        });
+      } else {
+        issues.push({
+          id: 'entry_portfolio_missing',
+          category: 'contentQuality',
+          severity: 'major',
+          section: 'projects',
+          message: 'Belum ada proyek kuliah, tugas akhir, atau organisasi terisi.',
+          recommendation: 'Untuk format pemula, cantumkan proyek tugas, portofolio mandiri, atau kegiatan organisasi kampus.',
+          penalty: 10,
+          potentialGain: 10,
+        });
+      }
+    } else {
+      issues.push({
+        id: 'exp_missing',
+        category: 'contentQuality',
+        severity: 'critical',
+        section: 'experience',
+        message: 'Belum ada pengalaman kerja terisi.',
+        recommendation: 'Tambahkan minimal 1-2 riwayat pengalaman kerja atau proyek utama.',
+        penalty: 10,
+        potentialGain: 10,
+      });
+    }
   }
 
   // B. Achievement & Metrics Detection (8 pts)
   let metricMatchCount = 0;
-  const metricRegex = /(\d+%\b|\$\d+|\bRp\s*\d+|\b\d+\s*(users|clients|customers|m|k|rb|juta|persen)\b|\b(increased|reduced|improved|grew|decreased)\s+by\s+\d+)/i;
+  const metricRegex = /(\d+%\b|\$\d+|\bRp\s*\d+|\b\d+\s*(users|clients|customers|m|k|rb|juta|persen|peserta|anggota|transaksi|project|proyek)\b|\b(increased|reduced|improved|grew|decreased|meningkat|menurunkan|efisiensi)\s+(by|sebesar)?\s*\d+)/i;
 
-  experiences.forEach((exp: any) => {
-    const desc = exp.description || exp.bullets?.join(' ') || '';
+  const sourcesToCheck = [
+    ...experiences,
+    ...projects,
+    ...organizations,
+  ];
+
+  sourcesToCheck.forEach((item: any) => {
+    const desc = item.description || (Array.isArray(item.bullets) ? item.bullets.join(' ') : '') || '';
     if (metricRegex.test(desc)) {
       metricMatchCount++;
     }
@@ -227,9 +278,11 @@ export function calculateDynamicAtsScore(
       id: 'metric_few',
       category: 'contentQuality',
       severity: 'major',
-      section: 'experience',
-      message: 'Hasil kerja terukur (metrics) masih minim.',
-      recommendation: 'Sertakan angka terukur (persentase, jumlah pengguna, efisiensi waktu) pada pengalaman lainnya.',
+      section: isEntryLevel && experiences.length === 0 ? 'projects' : 'experience',
+      message: 'Hasil kerja terukur (metrics/angka) masih minim.',
+      recommendation: isEntryLevel
+        ? 'Sertakan angka terukur (persentase %, jumlah peserta event, skala proyek) pada proyek atau organisasi.'
+        : 'Sertakan angka terukur (persentase, jumlah pengguna, efisiensi waktu) pada pengalaman lainnya.',
       penalty: 4,
       potentialGain: 4,
     });
@@ -238,9 +291,11 @@ export function calculateDynamicAtsScore(
       id: 'metric_missing',
       category: 'contentQuality',
       severity: 'major',
-      section: 'experience',
+      section: isEntryLevel && experiences.length === 0 ? 'projects' : 'experience',
       message: 'Tidak ditemukan angka pencapaian terukur.',
-      recommendation: 'Tambahkan persentase %, angka nominal (Rp), atau skala dampak pada bullet deskripsi kerja.',
+      recommendation: isEntryLevel
+        ? 'Tambahkan persentase %, nominal anggaran, atau skala dampak/peserta pada deskripsi proyek atau kegiatan organisasi.'
+        : 'Tambahkan persentase %, angka nominal (Rp), atau skala dampak pada bullet deskripsi kerja.',
       penalty: 8,
       potentialGain: 8,
     });
@@ -248,8 +303,8 @@ export function calculateDynamicAtsScore(
 
   // C. Action Verbs Usage (5 pts)
   let actionVerbCount = 0;
-  experiences.forEach((exp: any) => {
-    const text = (exp.description || exp.bullets?.join(' ') || '').toLowerCase();
+  sourcesToCheck.forEach((item: any) => {
+    const text = (item.description || (Array.isArray(item.bullets) ? item.bullets.join(' ') : '') || '').toLowerCase();
     ATS_ACTION_VERBS.forEach((verb) => {
       if (text.includes(verb)) actionVerbCount++;
     });
@@ -264,9 +319,9 @@ export function calculateDynamicAtsScore(
       id: 'action_verbs_missing',
       category: 'contentQuality',
       severity: 'minor',
-      section: 'experience',
+      section: isEntryLevel && experiences.length === 0 ? 'projects' : 'experience',
       message: 'Kurang menggunakan kata kerja aksi (Action Verbs).',
-      recommendation: 'Awali setiap poin tugas dengan kata kerja kuat (contoh: Developed, Spearheaded, Optimized).',
+      recommendation: 'Awali setiap poin tugas dengan kata kerja kuat (contoh: Mengembangkan, Mengelola, Mengoptimalkan, Merancang).',
       penalty: 2,
       potentialGain: 2,
     });
@@ -274,22 +329,22 @@ export function calculateDynamicAtsScore(
 
   // D. Bullet Quality & Structure (7 pts)
   let detailedBulletsCount = 0;
-  experiences.forEach((exp: any) => {
-    const desc = exp.description || '';
+  sourcesToCheck.forEach((item: any) => {
+    const desc = item.description || (Array.isArray(item.bullets) ? item.bullets.join(' ') : '') || '';
     if (desc.trim().length > 60) detailedBulletsCount++;
   });
   if (detailedBulletsCount >= 2) {
     cqPoints += 7;
   } else if (detailedBulletsCount === 1) {
     cqPoints += 4;
-  } else if (experiences.length > 0) {
+  } else if (sourcesToCheck.length > 0) {
     issues.push({
       id: 'bullet_too_short',
       category: 'contentQuality',
       severity: 'minor',
-      section: 'experience',
-      message: 'Deskripsi pengalaman kerja terlalu singkat.',
-      recommendation: 'Tuliskan deskripsi minimal 2-3 kalimat terstruktur mengenai tugas dan dampak peranmu.',
+      section: isEntryLevel && experiences.length === 0 ? 'projects' : 'experience',
+      message: 'Deskripsi pengalaman atau proyek masih terlalu singkat.',
+      recommendation: 'Tuliskan deskripsi minimal 2-3 kalimat terstruktur mengenai tugas, peran, dan dampak kontribusimu.',
       penalty: 3,
       potentialGain: 3,
     });
@@ -356,7 +411,7 @@ export function calculateDynamicAtsScore(
   // A. Essential Section Presence (10 pts)
   let sectionCount = 0;
   if (summaryText.length > 0) sectionCount++;
-  if (experiences.length > 0) sectionCount++;
+  if (experiences.length > 0 || (isEntryLevel && (projects.length > 0 || organizations.length > 0))) sectionCount++;
   if (Array.isArray(cv.education) && cv.education.length > 0) sectionCount++;
   if (skillsList.length > 0) sectionCount++;
 
@@ -369,9 +424,9 @@ export function calculateDynamicAtsScore(
   // B. Date Format Consistency (8 pts)
   let dateInconsistent = false;
   const datesList: string[] = [];
-  experiences.forEach((exp: any) => {
-    if (exp.startDate) datesList.push(exp.startDate);
-    if (exp.endDate) datesList.push(exp.endDate);
+  sourcesToCheck.forEach((item: any) => {
+    if (item.startDate) datesList.push(item.startDate);
+    if (item.endDate) datesList.push(item.endDate);
   });
 
   const hasSlashDate = datesList.some((d) => /\d{1,2}\/\d{4}/.test(d));
@@ -412,16 +467,17 @@ export function calculateDynamicAtsScore(
 
   // D. Profile Photo Presence ATS Check
   const hasPhoto = Boolean(cv?.photoUrl || cv?.personalInfo?.photoUrl);
-  if (hasPhoto) {
+  const isPhotoVisible = cv?.showPhoto !== false && hasPhoto;
+  if (isPhotoVisible) {
     issues.push({
       id: 'photo_present_ats',
       category: 'atsReadability',
       severity: 'minor',
       section: 'basics',
-      message: 'CV menyertakan foto profil yang berpotensi mengurangi skor keramahan ATS.',
-      recommendation: 'Format ATS internasional menyarankan CV tanpa foto agar sistem pemindai teks tidak mengalami bias atau kendala parsing.',
-      penalty: 2,
-      potentialGain: 2,
+      message: 'Foto profil aktif di lembar CV (Cocok untuk BUMN, Perbankan, atau loker lokal).',
+      recommendation: 'Jika kamu melamar ke portal karir internasional/ATS multinasional, kamu bisa menggunakan tombol toggle "Sembunyikan Foto" agar format menjadi teks murni.',
+      penalty: 0,
+      potentialGain: 0,
     });
   }
 

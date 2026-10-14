@@ -130,14 +130,7 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="p-12 text-center text-slate-400 font-medium text-sm">
-          <RefreshCw size={24} className="animate-spin text-orange-500 mx-auto mb-2" />
-          Memuat data pengguna dari database API...
-        </div>
-      ) : (
-        <DataTable data={filteredUsers} columns={columns} />
-      )}
+      <DataTable data={filteredUsers} columns={columns} isLoading={isLoading} />
     </motion.div>
   )
 }

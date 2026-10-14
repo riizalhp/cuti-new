@@ -1,44 +1,41 @@
 ---
 title: Membuat Surat Lamaran (Cover Letter)
-description: Cara membuat surat lamaran kerja otomatis — atur perusahaan target, posisi, gaya bahasa, simpan ke pustaka dokumen, dan salin hasilnya.
+description: Cara menyusun surat lamaran kerja terstruktur: sesuaikan perusahaan target, posisi, gaya bahasa, simpan ke pustaka dokumen, dan salin drafnya.
 category: cv-dokumen
 order: 5
-updatedAt: 2026-08-18
+updatedAt: 2026-09-26
 keywords: surat lamaran, cover letter, membuat surat, surat lamaran kerja, template surat, lampiran lamaran, dokumen lamaran
 ---
 
-Fitur **Surat Lamaran** (/surat-lamaran) menyusun cover letter yang persuasif dan disesuaikan dengan posisi targetmu.
+Fitur **Surat Lamaran** (/surat-lamaran) membantu menyusun draf cover letter terstruktur yang disesuaikan dengan posisi targetmu.
 
-## Cara membuat surat lamaran
+## Cara menyusun surat lamaran
 
 1. Buka menu **Surat Lamaran**.
-2. Isi **Parameter Surat Lamaran**:
-   - **Perusahaan Target** (wajib) — misalnya *PT Shopee Indonesia*.
-   - **Posisi Pekerjaan** (wajib) — misalnya *Senior Frontend Developer*.
-   - **Nama Recruiter** (opsional) — jika kamu tahu nama pemberi kerja, misalnya *Ibu Rina Hartati*.
-   - **Gaya Bahasa / Tone** — pilih salah satu:
-     - Formal (Bahasa Indonesia)
-     - Professional (English)
-     - Persuasif & Antusias
-   - **Highlight Pengalaman Kunci** — tulis 1-3 pencapaian penting yang ingin ditonjolkan.
-3. Klik **Generate Surat** — surat akan disusun otomatis.
-4. Periksa hasilnya, lalu:
-   - **Salin** ke clipboard untuk ditempel ke email atau portal lamaran.
-   - **Simpan ke Pustaka** agar bisa dipakai lagi nanti.
-   - **Hapus** dari pustaka jika tidak diperlukan.
+2. Isi informasi target lamaran:
+   - **Perusahaan Target** (wajib): nama perusahaan tujuan, misalnya *PT Shopee Indonesia*.
+   - **Posisi Pekerjaan** (wajib): jabatan yang dilamar, misalnya *Senior Frontend Developer*.
+   - **Nama Recruiter** (opsional): nama HRD atau hiring manager jika diketahui.
+   - **Gaya Bahasa**: tentukan gaya penyampaian (Formal Bahasa Indonesia, Professional English, atau Persuasif & Antusias).
+   - **Sorotan Pengalaman**: tulis 1-3 pencapaian relevan yang ingin diutamakan.
+3. Klik tombol **Susun Surat**. Sistem akan merangkai draf dalam beberapa detik.
+4. Tinjau kembali isi surat, kemudian:
+   - Klik **Salin** untuk menempelkan teks langsung ke body email atau formulir portal lowongan.
+   - Klik **Simpan ke Pustaka** untuk menyimpan draf ke akunmu.
+   - Edit atau hapus berkas lama dari pustaka jika sudah tidak terpakai.
 
-## Tips surat lamaran yang baik
+## Tips menyusun surat lamaran efektif
 
-- Sebutkan nama perusahaan dan posisi secara spesifik (jangan generik).
-- Tonjolkan **2-3 pencapaian terukur**, bukan sekadar daftar tugas.
-- Sesuaikan tone dengan budaya perusahaan (formal untuk BUMN/bank, lebih santai untuk startup).
-- Tetap ringkas — 3-4 paragraf cukup.
+- Cantumkan nama perusahaan serta posisi secara spesifik agar tidak terkesan mass-application.
+- Tekankan pencapaian terukur yang relevan dengan kualifikasi lowongan.
+- Sesuaikan gaya bahasa dengan profil perusahaan; gunakan gaya formal untuk instansi atau korporasi, dan gaya lebih dinamis untuk industri teknologi.
+- Pertahankan panjang surat tetap ringkas, umumnya 3 sampai 4 paragraf.
 
 ## Pertanyaan umum
 
-- **Surat tersimpan di mana?** Di pustaka **Surat Tersimpan** pada halaman yang sama (tersimpan per akun).
-- **Bisa dalam bahasa Inggris?** Bisa — pilih tone *Professional (English)*.
-- **Berapa lama prosesnya?** Instan — surat langsung jadi setelah tombol Generate diklik.
-- **Apakah suratnya menyertakan tanda tangan?** Tidak otomatis — kamu tinggal menambahkan nama lengkap di bagian akhir sebelum mengirim.
+- **Di mana surat tersimpan?** Semua draf tersimpan di bagian *Surat Tersimpan* pada akunmu.
+- **Apakah tersedia opsi bahasa Inggris?** Ya, pilih opsi gaya bahasa *Professional (English)* saat mengisi parameter.
+- **Berapa lama waktu penyusunan?** Draf tersusun langsung dalam hitungan detik setelah tombol ditekan.
+- **Apakah surat otomatis menyertakan tanda tangan?** Format diakhiri dengan nama lengkap penutup yang siap kamu salin ke berkas pengantar.
 
 Lanjut baca: [Evaluasi CV](/artikel/evaluasi-cv-screener) atau [Tracker Lamaran](/artikel/tracker-lamaran).

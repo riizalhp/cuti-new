@@ -18,8 +18,8 @@ export function isCVEmptyOrDefault(cv: any): boolean {
   return checkEmpty(cv);
 }
 
-export function calculateAtsScore(cv: any): any {
-  const res = calculateDynamicAtsScore(cv);
+export function calculateAtsScore(cv: any, purpose?: string): any {
+  const res = calculateDynamicAtsScore(cv, undefined, purpose || cv?.purpose);
 
   return {
     totalScore: res.totalScore,

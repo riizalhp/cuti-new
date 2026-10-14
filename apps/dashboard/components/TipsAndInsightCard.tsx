@@ -22,8 +22,8 @@ export const TipsAndInsightCard: React.FC = () => {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-[10px] bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
+        <div className="flex items-start gap-2">
+          <div className="p-2 rounded-[10px] bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5">
             <Lightbulb className="w-5 h-5" />
           </div>
           <div>
@@ -47,10 +47,10 @@ export const TipsAndInsightCard: React.FC = () => {
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                  <span className="px-2 py-0.5 rounded-[10px] text-caption font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                     {t.tag}
                   </span>
-                  <Icon className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <Icon className="w-4 h-4 text-amber-700 dark:text-amber-400" />
                 </div>
                 <h4 className="font-bold text-xs text-slate-900 dark:text-white mb-1">
                   {t.title}

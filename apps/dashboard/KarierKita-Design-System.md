@@ -100,4 +100,4 @@ Anti-Pattern: Corporate, Enterprise kaku
 
 Seluruh formulir interaktif kompleks (Tambah Lamaran, Edit CV, Detail ATS) menggunakan drawer samping kanan:
 - Backdrop: `fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end`
-- Drawer Panel: `w-full max-w-md sm:max-w-lg h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300`
+- Drawer Panel: `w-full max-w-md sm:max-w-xl h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300`

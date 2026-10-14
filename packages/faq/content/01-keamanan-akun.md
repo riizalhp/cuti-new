@@ -1,48 +1,43 @@
 ---
 title: Keamanan Akun & Privasi
-description: Cara menjaga keamanan akun Employr — password kuat, sesi login, metode masuk Google, logout di perangkat umum, dan tips privasi data.
+description: Perlindungan akun Employr: sandi aman, autentikasi Google, pengelolaan sesi peramban, dan kebijakan perlindungan data pribadi.
 category: akun-bantuan
 order: 1
-updatedAt: 2026-08-18
+updatedAt: 2026-09-26
 keywords: keamanan, privasi, password, ganti password, sesi login, logout, google account, data pribadi, akun di-hack, keamanan akun
 ---
 
-Akunmu menyimpan data pribadi (profil, CV, lamaran). Berikut cara menjaganya tetap aman.
+Akunmu memuat informasi sensitif seperti riwayat pekerjaan, berkas CV, dan catatan lamaran. Berikut panduan menjaga keamanannya.
 
-## Tips keamanan dasar
+## Praktik keamanan dasar
 
-- **Gunakan password kuat** — kombinasi huruf besar/kecil, angka, dan simbol; jangan pakai tanggal lahir atau nama.
-- **Jangan bagikan password** ke siapa pun — tim Employr tidak akan pernah meminta password kamu.
-- **Gunakan akun Google** sebagai alternatif login yang lebih aman (tanpa perlu mengingat password).
-- **Selalu logout** saat memakai perangkat bersama/umum.
-- **Waspada phishing** — situs resmi Employr selalu di domain `employr.id` (app.employr.id, faq.employr.id, dll). Jangan masukkan kredensial di situs mencurigakan.
+- Buat kata sandi yang kuat dengan perpaduan huruf, angka, dan simbol. Hindari informasi umum seperti tanggal lahir.
+- Jangan pernah membagikan kata sandi kepada siapa pun. Tim resmi Employr tidak akan pernah meminta kata sandimu.
+- Gunakan opsi Masuk dengan Google sebagai alternatif yang praktis dan terlindungi autentikasi dua faktor.
+- Selalu keluar dari akun (logout) jika mengakses platform melalui komputer bersama atau jaringan publik.
+- Waspadai tautan mencurigakan. Seluruh layanan resmi Employr beroperasi di bawah domain utama `employr.id`.
 
-## Mengganti password
+## Mengganti kata sandi
 
-1. Buka **Pengaturan** → tab **Keamanan & Akun**.
-2. Pilih **Ubah Password** dan ikuti petunjuknya.
-3. Gunakan password baru saat login berikutnya.
+1. Buka menu **Pengaturan**, lalu pilih tab **Keamanan & Akun**.
+2. Masukkan kata sandi saat ini dan buat kata sandi baru.
+3. Simpan perubahan untuk digunakan pada sesi masuk berikutnya.
 
-## Lupa password / tidak bisa masuk
+## Pemulihan akun
 
-Gunakan **Lupa password?** di halaman login — link reset dikirim ke email kamu. Lihat [Cara Daftar & Masuk](/artikel/daftar-dan-masuk).
+Jika lupa kata sandi, klik tautan *Lupa kata sandi?* pada halaman login. Tautan pemulihan akan dikirimkan langsung ke alamat email terdaftar.
 
-## Sesi & perangkat
+## Pengelolaan sesi dan privasi berkas
 
-- Sesi login disimpan di perangkat (localStorage). Logout dari menu akun untuk menghapus sesi di perangkat tersebut.
-- Jika mencurigai akun dipakai orang lain, segera **ganti password** dan hubungi Customer Service.
-
-## Privasi data
-
-- **CV & data profil** hanya dipakai untuk fitur di dalam platform (rekomendasi, evaluasi, match lowongan).
-- **Sesi LinkedIn** untuk fitur optimasi disimpan lokal di perangkatmu (folder `.data`).
-- Jangan mengunggah dokumen berisi data sensitif yang tidak diperlukan (misal nomor KTP asli) ke CV.
+- Sesi login tersimpan secara terenkripsi pada peramban yang kamu gunakan. Lakukan logout untuk membersihkan sesi dari perangkat terkait.
+- Jika mendeteksi aktivitas mencurigakan, segera perbarui kata sandi dan hubungi tim bantuan.
+- Berkas CV dan portofolio hanya digunakan untuk keperluan pemrosesan fitur akunmu sendiri dan tidak diperjualbelikan kepada pihak ketiga.
 
 ## Pertanyaan umum
 
-- **Akun saya diretas, bagaimana?** Segera ganti password. Jika tidak bisa login, hubungi Customer Service dengan email terdaftar.
-- **Apakah data saya dijual ke pihak ketiga?** Tidak — data hanya digunakan untuk layanan Employr.
-- **Bisa hapus akun?** Hubungi Customer Service untuk permintaan penghapusan akun & data.
+- **Apa yang harus dilakukan jika akun terindikasi diakses pihak lain?** Segera perbarui kata sandi melalui tautan pemulihan. Jika akses terputus, hubungi Customer Service dengan menyertakan alamat email akun terdaftar.
+- **Apakah data pengguna dibagikan ke pihak ketiga?** Tidak, data profil dan CV hanya diproses untuk fungsi evaluasi dan pelamaran di dalam platform Employr.
+- **Bagaimana cara mengajukan penghapusan akun?** Hubungi Customer Service jika ingin menghapus akun beserta seluruh data tersimpan secara permanen.
 - **Apakah perlu verifikasi email?** Status verifikasi email tampil di profil; pastikan email aktif agar menerima notifikasi penting (reset password, bukti bayar).
 
 Lanjut baca: [Kendala Umum](/artikel/kendala-umum) dan [Hubungi Customer Service](/artikel/hubungi-customer-service).

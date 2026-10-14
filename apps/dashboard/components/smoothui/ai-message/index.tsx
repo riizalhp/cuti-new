@@ -150,7 +150,7 @@ export const AIMessage = ({
           className={cn(
             'w-fit max-w-prose text-xs leading-relaxed',
             bubble && 'rounded-[10px] p-2.5 shadow-xs',
-            bubble && isUser && 'rounded-tr-none bg-[#1738D1] text-white font-medium',
+            bubble && isUser && 'rounded-tr-none bg-cobalt-500 text-white font-medium',
             bubble && !isUser && 'rounded-tl-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100',
             !bubble && 'text-foreground'
           )}
@@ -165,7 +165,7 @@ export const AIMessage = ({
           )}
         >
           {timestamp ? (
-            <span className="text-slate-400 dark:text-slate-500 text-[9px] tabular-nums">
+            <span className="text-slate-500 dark:text-slate-500 text-caption tabular-nums">
               {timestamp}
             </span>
           ) : null}
@@ -180,8 +180,8 @@ export const AIMessage = ({
                   'ai-message-action cursor-pointer rounded-md p-1',
                   isUser ? 'ai-message-action-user' : 'ai-message-action-agent',
                   action.active
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200'
+                    ? 'text-emerald-700 dark:text-emerald-400'
+                    : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 dark:text-slate-400'
                 )}
                 key={action.key}
                 onClick={action.onClick}

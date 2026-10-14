@@ -329,7 +329,6 @@ exports.Prisma.CompaniesScalarFieldEnum = {
   id: 'id',
   name: 'name',
   slug: 'slug',
-  logo_url: 'logo_url',
   website: 'website',
   industry: 'industry',
   location: 'location'
@@ -678,6 +677,32 @@ exports.Prisma.EarlyTesterScalarFieldEnum = {
   updated_at: 'updated_at'
 };
 
+exports.Prisma.NewsletterSubscriberScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  name: 'name',
+  source: 'source',
+  is_active: 'is_active',
+  token: 'token',
+  subscribed_at: 'subscribed_at',
+  unsubscribed_at: 'unsubscribed_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+};
+
+exports.Prisma.NewsletterCampaignScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  subject: 'subject',
+  content_type: 'content_type',
+  reference_id: 'reference_id',
+  total_recipients: 'total_recipients',
+  sent_count: 'sent_count',
+  failed_count: 'failed_count',
+  status: 'status',
+  created_at: 'created_at'
+};
+
 exports.Prisma.VisitorScalarFieldEnum = {
   id: 'id',
   visitor_id: 'visitor_id',
@@ -910,7 +935,60 @@ exports.Prisma.LearnedRoleBlueprintScalarFieldEnum = {
   top_nicetohave_skills: 'top_nicetohave_skills',
   category: 'category',
   is_promoted: 'is_promoted',
+  details: 'details',
   created_at: 'created_at',
+  updated_at: 'updated_at'
+};
+
+exports.Prisma.Scraper_providersScalarFieldEnum = {
+  id: 'id',
+  provider: 'provider',
+  label: 'label',
+  api_key: 'api_key',
+  extra_config: 'extra_config',
+  priority: 'priority',
+  is_active: 'is_active',
+  status: 'status',
+  requests_total: 'requests_total',
+  requests_month: 'requests_month',
+  success_count: 'success_count',
+  fail_count: 'fail_count',
+  last_used_at: 'last_used_at',
+  last_error: 'last_error',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+};
+
+exports.Prisma.Scraper_logsScalarFieldEnum = {
+  id: 'id',
+  provider_id: 'provider_id',
+  provider_name: 'provider_name',
+  provider_label: 'provider_label',
+  user_id: 'user_id',
+  user_name: 'user_name',
+  user_email: 'user_email',
+  target_url: 'target_url',
+  target_name: 'target_name',
+  status: 'status',
+  http_status: 'http_status',
+  latency_ms: 'latency_ms',
+  error_message: 'error_message',
+  created_at: 'created_at'
+};
+
+exports.Prisma.Job_embeddingsScalarFieldEnum = {
+  id: 'id',
+  job_id: 'job_id',
+  content_hash: 'content_hash',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+};
+
+exports.Prisma.User_career_embeddingsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  cv_id: 'cv_id',
+  content_hash: 'content_hash',
   updated_at: 'updated_at'
 };
 
@@ -1047,7 +1125,8 @@ exports.NotificationCategory = exports.$Enums.NotificationCategory = {
   CAREER: 'CAREER',
   REFERRAL: 'REFERRAL',
   DRAFT: 'DRAFT',
-  OPPORTUNITY: 'OPPORTUNITY'
+  OPPORTUNITY: 'OPPORTUNITY',
+  SYSTEM: 'SYSTEM'
 };
 
 exports.NotificationPriority = exports.$Enums.NotificationPriority = {
@@ -1170,6 +1249,8 @@ exports.Prisma.ModelName = {
   SmtpAccount: 'SmtpAccount',
   EmailBatchJob: 'EmailBatchJob',
   EarlyTester: 'EarlyTester',
+  NewsletterSubscriber: 'NewsletterSubscriber',
+  NewsletterCampaign: 'NewsletterCampaign',
   Visitor: 'Visitor',
   VisitorSession: 'VisitorSession',
   VisitorPageView: 'VisitorPageView',
@@ -1184,7 +1265,11 @@ exports.Prisma.ModelName = {
   AnalyticsDailySummary: 'AnalyticsDailySummary',
   UserBehaviorProfile: 'UserBehaviorProfile',
   LearnedRoleEntry: 'LearnedRoleEntry',
-  LearnedRoleBlueprint: 'LearnedRoleBlueprint'
+  LearnedRoleBlueprint: 'LearnedRoleBlueprint',
+  scraper_providers: 'scraper_providers',
+  scraper_logs: 'scraper_logs',
+  job_embeddings: 'job_embeddings',
+  user_career_embeddings: 'user_career_embeddings'
 };
 
 /**

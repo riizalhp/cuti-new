@@ -21,8 +21,12 @@ import {
   XCircle,
   FileText,
   Sparkles,
+  X,
 } from 'lucide-react';
 import { JOB_CLUSTERS } from '@/lib/job-clusters';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/components/ui/Toast';
 
 interface DbJob {
   id: string;
@@ -54,15 +58,6 @@ interface ContentStats {
   events: number;
 }
 
-interface SyncResult {
-  totalScraped: number;
-  created: number;
-  updated: number;
-  deactivated: number;
-  failed: number;
-  logs: string[];
-}
-
 const presetKeywords = [
   'Barista',
   'Kasir',
@@ -84,21 +79,16 @@ export const JobScraperView: React.FC = () => {
 
   // Filter
   const [searchFilter, setSearchFilter] = useState('');
-  const [sourceFilter, setSourceFilter] = useState('all');
+  const [sourceFilter] = useState('all');
 
   // Sync state — default string kosong = Mode Explore (Semua Lowongan Terbaru)
   const [keyword, setKeyword] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncLogs, setSyncLogs] = useState<string[]>([]);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toast = useToast();
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
-  };
-
-  const loadAuditData = useCallback(async () => {
-    setIsLoading(true);
+  const loadAuditData = useCallback(async (showLoading = false) => {
+    if (showLoading) setIsLoading(true);
     try {
       const [statsRes, jobsRes, contentRes] = await Promise.all([
         fetch('/api/job-sync').then((r) => r.json()),
@@ -109,14 +99,15 @@ export const JobScraperView: React.FC = () => {
       if (jobsRes.success) setJobs(jobsRes.data);
       if (contentRes.success) setContentStats(contentRes.stats);
     } catch {
-      showToast('Gagal memuat data dari database.');
+      toast.error('Gagal Memuat Data', 'Tidak dapat mengambil data dari database.');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
-    loadAuditData();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadAuditData(false);
   }, [loadAuditData]);
 
   const handleSync = async () => {
@@ -130,10 +121,11 @@ export const JobScraperView: React.FC = () => {
         isExplore ? 'mode "Semua Lowongan Terbaru (Explore)"' : `kata kunci "${cleanKw}"`
       } + sinkronisasi DB...`,
     ]);
-    showToast(
+    toast.info(
+      'Sinkronisasi Dimulai',
       isExplore
-        ? 'Sinkronisasi Explore dimulai — scrape semua lowongan terbaru publik lalu simpan ke DB.'
-        : `Sinkronisasi dimulai — scrape lowongan "${cleanKw}" ke DB.`
+        ? 'Scrape semua lowongan terbaru publik lalu simpan ke database.'
+        : `Scrape lowongan "${cleanKw}" ke database.`
     );
 
     try {
@@ -147,14 +139,16 @@ export const JobScraperView: React.FC = () => {
       if (!data.success) throw new Error(data.message || 'Sinkronisasi gagal.');
 
       setSyncLogs((prev) => [...(data.logs || []).reverse(), ...prev]);
-      showToast(
+      toast.success(
+        'Sinkronisasi Selesai',
         `Selesai: ${data.created} baru, ${data.updated} diperbarui, ${data.deactivated} dinonaktifkan.`
       );
       await loadAuditData();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as Error;
       const ts = new Date().toLocaleTimeString();
-      setSyncLogs((prev) => [`[${ts}] 🚨 Gagal: ${error.message || 'Terjadi kesalahan.'}`, ...prev]);
-      showToast('Gagal menjalankan sinkronisasi.');
+      setSyncLogs((prev) => [`[${ts}] 🚨 Gagal: ${err.message || 'Terjadi kesalahan.'}`, ...prev]);
+      toast.error('Gagal Sinkronisasi', 'Terjadi kesalahan saat sinkronisasi lowongan.');
     } finally {
       setIsSyncing(false);
     }
@@ -165,7 +159,7 @@ export const JobScraperView: React.FC = () => {
 
     setIsSyncing(true);
     setSyncLogs([`[${new Date().toLocaleTimeString()}] 🔄 Refresh database — cek status lowongan tersimpan...`]);
-    showToast('Refresh dimulai — cek status lowongan di database tanpa scrape ulang portal.');
+    toast.info('Refresh Database', 'Cek status lowongan di database tanpa scrape ulang portal.');
 
     try {
       const res = await fetch('/api/scrape-jobs/refresh', {
@@ -178,14 +172,16 @@ export const JobScraperView: React.FC = () => {
       if (!data.success) throw new Error(data.message || 'Refresh gagal.');
 
       setSyncLogs((prev) => [...(data.logs || []).reverse(), ...prev]);
-      showToast(
+      toast.success(
+        'Refresh Selesai',
         `Refresh selesai: ${data.checked} dicek, ${data.deactivated} dinonaktifkan, ${data.logosProcessed || 0} logo diproses.`
       );
       await loadAuditData();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as Error;
       const ts = new Date().toLocaleTimeString();
-      setSyncLogs((prev) => [`[${ts}] 🚨 Gagal: ${error.message || 'Terjadi kesalahan.'}`, ...prev]);
-      showToast('Gagal menjalankan refresh database.');
+      setSyncLogs((prev) => [`[${ts}] 🚨 Gagal: ${err.message || 'Terjadi kesalahan.'}`, ...prev]);
+      toast.error('Refresh Gagal', 'Gagal menjalankan refresh database.');
     } finally {
       setIsSyncing(false);
     }
@@ -193,7 +189,7 @@ export const JobScraperView: React.FC = () => {
 
   const handleExport = () => {
     if (!filteredJobs.length) {
-      showToast('Belum ada data untuk diunduh.');
+      toast.warning('Data Kosong', 'Belum ada data untuk diunduh.');
       return;
     }
     const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), jobs: filteredJobs }, null, 2)], {
@@ -205,7 +201,7 @@ export const JobScraperView: React.FC = () => {
     a.download = `audit-lowongan-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast(`Berhasil mengunduh ${filteredJobs.length} lowongan (JSON).`);
+    toast.success('Unduhan Berhasil', `Berhasil mengunduh ${filteredJobs.length} lowongan (JSON).`);
   };
 
   const filteredJobs = jobs.filter((job) => {
@@ -226,32 +222,26 @@ export const JobScraperView: React.FC = () => {
 
   return (
     <div className="space-y-6 md:space-y-8 w-full pb-12">
-      {/* Toast */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-[10px] shadow-2xl border border-slate-700 flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-5 duration-300">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
 
       {/* Header */}
       <PageHeader
-        title="Audit Lowongan Tersimpan"
-        subtitle="Data lowongan aktif di database system — hasil scraping harian otomatis (cron 01.00 WIB) yang tersimpan sampai lowongan tutup."
+        title="Job Scraper & Sinkronisasi Loker"
+        subtitle="Tarik dan sinkronkan lowongan kerja resmi dari berbagai portal mitra secara otomatis atau manual langsung ke database sistem."
         icon={Database}
-        badge="Job Scraper"
+        badge="Web Scraper Engine"
         stats={[
           {
             label: 'Lowongan Aktif',
             value: stats?.totalActive ?? '…',
             icon: Briefcase,
-            colorClass: 'text-emerald-600 dark:text-emerald-400',
+            colorClass: 'text-emerald-300',
+            isPrimary: true,
           },
           {
             label: 'Hasil Scraping',
             value: stats?.scrapedActive ?? '…',
             icon: Globe,
-            colorClass: 'text-indigo-600 dark:text-indigo-400',
+            colorClass: 'text-indigo-300',
           },
           {
             label: 'Sinkron Terakhir',
@@ -260,15 +250,17 @@ export const JobScraperView: React.FC = () => {
           },
         ]}
         actions={
-          <button
+          <Button
             type="button"
-            onClick={loadAuditData}
+            variant="secondary"
+            size="sm"
+            onClick={() => { void loadAuditData(); }}
             disabled={isLoading}
-            className="px-4 py-2 rounded-[10px] font-black text-xs transition flex items-center justify-center gap-2 cursor-pointer shrink-0 border-0 bg-slate-900 hover:bg-slate-700 text-white shadow-md disabled:opacity-60"
+            className="w-full sm:w-auto min-h-[40px] md:min-h-[34px] flex items-center justify-center gap-2"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
             <span>Muat Ulang</span>
-          </button>
+          </Button>
         }
       />
 
@@ -277,141 +269,211 @@ export const JobScraperView: React.FC = () => {
         {/* Left: Sync trigger */}
         <div className="xl:col-span-7">
           <div className="glass-card p-6 md:p-8 space-y-5">
-            <div className="flex items-center gap-2 border-b border-slate-200/60 dark:border-slate-800/80 pb-4">
-              <div className="w-8 h-8 rounded-[10px] bg-orange-500/10 text-orange-600 flex items-center justify-center">
-                <RefreshCw className="w-4 h-4" />
-              </div>
-              <div>
-                <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">
-                  Sinkronisasi Manual
-                </h3>
-                <p className="text-[11px] text-slate-500">
-                  Scrape semua portal publik lalu simpan ke DB — dedupe otomatis, lowongan tutup auto-dinonaktifkan.
-                </p>
+            <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800/80 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                  <Globe className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <span>1. Mesin Penarik Lowongan (Web Scraper)</span>
+                  </h3>
+                  <p className="text-caption text-slate-500">
+                    Konfigurasi kata kunci bot scraper untuk mengambil data langsung dari 24+ portal mitra.
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-3">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  placeholder="Kosongkan untuk SEMUA lowongan terbaru, atau ketik: Barista, Kasir, Admin..."
-                  disabled={isSyncing}
-                  className="w-full pl-9 pr-4 py-2.5 text-xs rounded-[10px] border border-slate-300 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60 transition"
-                />
-                <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+            {/* Mode Banner Indicator */}
+            {!keyword.trim() ? (
+              <div className="flex items-center justify-between px-3.5 py-2.5 rounded-[10px] bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse motion-reduce:animate-none shrink-0" />
+                  <span className="font-extrabold text-blue-900 dark:text-blue-200 text-xs">
+                    Mode Aktif: Semua Lowongan Terbaru (Explore)
+                  </span>
+                </div>
+                <span className="text-caption font-semibold text-blue-700 dark:text-blue-300 hidden sm:inline">
+                  Menyisir seluruh feed 24+ portal publik
+                </span>
               </div>
-              <button
-                type="button"
-                onClick={handleSync}
-                disabled={isSyncing}
-                className="px-4 py-2.5 rounded-[10px] font-extrabold text-xs bg-[#1738D1] hover:bg-[#132EA8] text-white shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
-              >
-                {isSyncing ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Scraping…</span>
-                  </>
-                ) : (
-                  <>
-                    <Globe className="w-4 h-4" />
-                    <span>{!keyword.trim() ? 'Scrape Semua (Explore)' : `Scrape "${keyword}"`}</span>
-                  </>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={handleRefresh}
-                disabled={isSyncing}
-                className="px-4 py-2.5 rounded-[10px] font-extrabold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
-              >
-                {isSyncing ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Refresh…</span>
-                  </>
-                ) : (
-                  <>
-                    <Database className="w-4 h-4" />
-                    <span>Refresh DB</span>
-                  </>
-                )}
-              </button>
+            ) : (
+              <div className="flex items-center justify-between px-3.5 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                  <span className="font-medium text-slate-800 dark:text-slate-200 text-xs">
+                    Target Kata Kunci: <strong className="text-cobalt-500 dark:text-blue-400 font-extrabold">&ldquo;{keyword}&rdquo;</strong>
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setKeyword('')}
+                  className="text-caption font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white underline cursor-pointer"
+                >
+                  Reset ke Mode Explore
+                </button>
+              </div>
+            )}
+
+            {/* Input & Action Buttons */}
+            <div className="space-y-1.5">
+              <label className="block text-caption font-bold text-slate-700 dark:text-slate-300">
+                Kata Kunci Scraper (Portal Luar):
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2.5">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    placeholder="Ketik profesi (contoh: Barista, Kasir, Admin, Gudang)..."
+                    disabled={isSyncing}
+                    className="w-full pl-9 pr-8 py-2.5 text-xs rounded-[10px] border border-slate-300 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60 transition"
+                  />
+                  <Search className="w-4 h-4 absolute left-3 top-3 text-slate-500 dark:text-slate-400" />
+                  {keyword && (
+                    <button
+                      type="button"
+                      onClick={() => setKeyword('')}
+                      disabled={isSyncing}
+                      className="absolute right-2.5 top-2.5 p-0.5 text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 rounded dark:text-slate-400"
+                      title="Hapus kata kunci"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+                {/* Primary CTA Button: Scrape */}
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  onClick={handleSync}
+                  disabled={isSyncing}
+                  className="whitespace-nowrap flex items-center justify-center gap-2"
+                >
+                  {isSyncing ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Sedang Scraping…</span>
+                    </>
+                  ) : (
+                    <>
+                      <Globe className="w-4 h-4" />
+                      <span>{!keyword.trim() ? 'Mulai Scrape (Semua Loker)' : `Mulai Scrape "${keyword}"`}</span>
+                    </>
+                  )}
+                </Button>
+                {/* Secondary Action: Refresh DB */}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="md"
+                  onClick={handleRefresh}
+                  disabled={isSyncing}
+                  title="Cek status aktif/tutup data lowongan di database tanpa re-scrape portal luar"
+                  className="whitespace-nowrap flex items-center justify-center gap-1.5"
+                >
+                  {isSyncing ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-slate-500 dark:text-slate-400" />
+                      <span>Refresh…</span>
+                    </>
+                  ) : (
+                    <>
+                      <Database className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Refresh Status DB</span>
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
 
             {/* Klaster Kategori & Preset keywords */}
-            <div className="space-y-2.5">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mr-1 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-amber-500" />
-                  Klaster:
+            <div className="space-y-3 pt-1">
+              <div>
+                <span className="text-caption font-extrabold text-slate-500 uppercase tracking-wider block mb-1.5 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-amber-700 dark:text-amber-400" />
+                  Klaster Profesi Siap Scrape:
                 </span>
-                {JOB_CLUSTERS.map((cluster) => {
-                  const isActive =
-                    cluster.id === 'explore'
-                      ? keyword === ''
-                      : cluster.keywords.some((k) => k.toLowerCase() === keyword.toLowerCase());
-                  return (
-                    <button
-                      key={cluster.id}
-                      type="button"
-                      disabled={isSyncing}
-                      onClick={() => setKeyword(cluster.keywords[0] || '')}
-                      title={cluster.description}
-                      className={`px-2.5 py-1 rounded-[10px] text-[10px] font-bold transition cursor-pointer ${
-                        isActive
-                          ? 'bg-[#1738D1] text-white shadow-xs'
-                          : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      {cluster.name}
-                    </button>
-                  );
-                })}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <Tabs
+                    value={
+                      keyword === ''
+                        ? 'explore'
+                        : (JOB_CLUSTERS.find((c) =>
+                            c.keywords.some((k) => k.toLowerCase() === keyword.toLowerCase())
+                          )?.id || '')
+                    }
+                    onValueChange={(val) => {
+                      const cluster = JOB_CLUSTERS.find((c) => c.id === val);
+                      if (cluster) {
+                        setKeyword(cluster.keywords[0] || '');
+                      }
+                    }}
+                  >
+                    <TabsList variant="pill" className="flex-wrap bg-slate-100 dark:bg-slate-800/80 p-1">
+                      {JOB_CLUSTERS.map((cluster) => (
+                        <TabsTrigger
+                          key={cluster.id}
+                          size="xs"
+                          value={cluster.id}
+                          disabled={isSyncing}
+                          title={cluster.description}
+                          className="flex items-center gap-1 text-slate-600 dark:text-slate-300"
+                        >
+                          {cluster.id === 'explore' && <Globe className="w-3 h-3" />}
+                          <span>{cluster.name}</span>
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
+                </div>
               </div>
 
               {/* Kata Kunci Spesifik */}
-              <div className="flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-800/60">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mr-1">
-                  Kata Kunci:
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60">
+                <span className="text-caption font-extrabold text-slate-500 uppercase tracking-wider block mb-1.5">
+                  Kata Kunci Populer:
                 </span>
-                {presetKeywords.map((k) => (
-                  <button
-                    key={k}
-                    type="button"
-                    disabled={isSyncing}
-                    onClick={() => setKeyword(k)}
-                    className={`px-2 py-0.5 rounded-[8px] text-[10px] font-semibold transition cursor-pointer ${
-                      keyword.toLowerCase() === k.toLowerCase()
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-slate-100/80 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
-                    }`}
-                  >
-                    {k}
-                  </button>
-                ))}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {presetKeywords.map((k) => (
+                    <button
+                      key={k}
+                      type="button"
+                      disabled={isSyncing}
+                      onClick={() => setKeyword(k)}
+                      className={`h-[30px] px-3 rounded-[8px] text-caption font-semibold transition cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500 ${
+                        keyword.toLowerCase() === k.toLowerCase()
+                          ? 'bg-cobalt-500 text-white font-bold shadow-xs'
+                          : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      {k}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5 text-[11px] text-slate-500 pt-2 border-t border-slate-200/60 dark:border-slate-800/80">
+            <div className="flex flex-col gap-1.5 text-caption text-slate-500 pt-2 border-t border-slate-200/60 dark:border-slate-800/80">
               <div className="flex items-start gap-2">
-                <Globe className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                <Globe className="w-4 h-4 text-blue-600 shrink-0 mt-0.5 dark:text-blue-400" />
                 <span>
-                  <b>Mode Explore (Semua Terbaru):</b> Kosongkan kolom kata kunci untuk meraup seluruh feed lowongan terbaru (lintas semua bidang: Barista, Kasir, Admin, Gudang, dll.) dari 24+ portal publik.
+                  <b>Mode Explore:</b> Tarik feed loker terbaru lintas bidang dari 24+ portal mitra.
                 </span>
               </div>
               <div className="flex items-start gap-2">
-                <Database className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                <Database className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
                 <span>
-                  <b>Refresh DB:</b> Cek status lowongan yang sudah tersimpan tanpa scrape ulang portal (lebih cepat).
+                  <b>Refresh Status DB:</b> Perbarui status aktif loker tanpa menarik ulang portal mitra.
                 </span>
               </div>
               <div className="flex items-start gap-2">
-                <Clock className="w-4 h-4 text-violet-500 shrink-0 mt-0.5" />
+                <Clock className="w-4 h-4 text-violet-700 shrink-0 mt-0.5 dark:text-violet-400" />
                 <span>
-                  <b>Cron Otomatis:</b> Scrape harian jam 01.00 WIB menjalankan <b>Mode Explore</b> diikuti klaster profesi lengkap (Barista, Kasir, Pramuniaga, Admin, Gudang, dll.).
+                  <b>Sinkronisasi Manual:</b> Penarikan dan sinkronisasi data dijalankan secara langsung via tombol di atas.
                 </span>
               </div>
             </div>
@@ -420,22 +482,22 @@ export const JobScraperView: React.FC = () => {
 
         {/* Right: Console log + ringkasan sumber */}
         <div className="xl:col-span-5 space-y-4 flex flex-col">
-          <div className="glass-card bg-slate-950 text-slate-200 border border-slate-800 p-6 rounded-[10px] flex-1">
+          <div className="bg-slate-950 text-slate-200 border border-slate-800 p-6 rounded-[10px] flex-1">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <Code className="w-4 h-4 text-emerald-400" />
-                <h3 className="font-extrabold text-xs text-white">Log Sinkronisasi</h3>
+                <h3 className="font-extrabold text-xs text-white">Konsol Log Scraper (Realtime)</h3>
               </div>
               {syncLogs.length > 0 && (
-                <button onClick={() => setSyncLogs([])} className="text-[9px] text-slate-500 hover:text-slate-300 font-bold underline">
+                <button onClick={() => setSyncLogs([])} className="text-caption text-slate-500 hover:text-slate-300 font-bold underline">
                   Bersihkan
                 </button>
               )}
             </div>
-            <div className="min-h-[160px] max-h-[220px] font-mono text-[10px] leading-relaxed overflow-y-auto my-3 space-y-1.5 p-3 bg-slate-900/80 border border-slate-900 rounded-[10px]">
+            <div className="min-h-[160px] max-h-[220px] font-mono text-caption leading-relaxed overflow-y-auto my-3 space-y-1.5 p-3 bg-slate-900/80 border border-slate-900 rounded-[10px]">
               {syncLogs.length === 0 ? (
-                <div className="text-slate-500 italic py-8 text-center flex flex-col items-center gap-2">
-                  <Info className="w-5 h-5 text-slate-600" />
+                <div className="text-slate-400 italic py-8 text-center flex flex-col items-center gap-2">
+                  <Info className="w-5 h-5 text-slate-400" />
                   <span>Belum ada sinkronisasi manual pada sesi ini.</span>
                 </div>
               ) : (
@@ -447,8 +509,8 @@ export const JobScraperView: React.FC = () => {
                         ? 'border-emerald-500 text-emerald-400 font-bold'
                         : log.includes('🚨')
                         ? 'border-rose-500 text-rose-400'
-                        : 'border-slate-700 text-slate-400'
-                    }`}
+                        : 'border-slate-700 text-slate-500'
+                    } dark:text-slate-400`}
                   >
                     {log}
                   </div>
@@ -468,22 +530,22 @@ export const JobScraperView: React.FC = () => {
                 stats.bySource.map((s) => (
                   <span
                     key={s.source}
-                    className="px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                    className="px-2.5 py-1 rounded-[10px] text-caption font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
                   >
                     {s.source}: {s.count}
                   </span>
                 ))
               ) : (
-                <span className="text-[11px] text-slate-500">Belum ada data sumber.</span>
+                <span className="text-caption text-slate-500">Belum ada data sumber.</span>
               )}
             </div>
-            <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-[10px]">
+            <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-caption">
               <div className="flex items-center gap-1.5 text-slate-500">
                 <XCircle className="w-3.5 h-3.5 text-rose-400" />
                 <span>{stats?.totalInactive ?? 0} lowongan nonaktif (tutup)</span>
               </div>
               <div className="flex items-center gap-1.5 text-slate-500">
-                <Briefcase className="w-3.5 h-3.5 text-emerald-500" />
+                <Briefcase className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
                 <span>{stats?.manualActive ?? 0} lowongan manual admin</span>
               </div>
             </div>
@@ -492,25 +554,25 @@ export const JobScraperView: React.FC = () => {
           {/* Konten: artikel / event / sertifikasi */}
           <div className="glass-card p-5 rounded-[10px] border border-slate-200/60 dark:border-slate-800">
             <div className="flex items-center gap-2 mb-3">
-              <FileText className="w-4 h-4 text-violet-500" />
+              <FileText className="w-4 h-4 text-violet-700 dark:text-violet-400" />
               <h4 className="font-extrabold text-xs text-slate-900 dark:text-white">Konten Tersimpan (DB)</h4>
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="p-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/60">
                 <span className="text-base font-black text-slate-900 dark:text-white block">{contentStats?.articles ?? '…'}</span>
-                <span className="text-[9px] font-bold text-slate-400 uppercase">Artikel</span>
+                <span className="text-caption font-bold text-slate-500 uppercase dark:text-slate-400">Artikel</span>
               </div>
               <div className="p-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/60">
                 <span className="text-base font-black text-slate-900 dark:text-white block">{contentStats?.events ?? '…'}</span>
-                <span className="text-[9px] font-bold text-slate-400 uppercase">Event</span>
+                <span className="text-caption font-bold text-slate-500 uppercase dark:text-slate-400">Event</span>
               </div>
               <div className="p-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/60">
                 <span className="text-base font-black text-slate-900 dark:text-white block">{contentStats?.certifications ?? '…'}</span>
-                <span className="text-[9px] font-bold text-slate-400 uppercase">Sertifikasi</span>
+                <span className="text-caption font-bold text-slate-500 uppercase dark:text-slate-400">Sertifikasi</span>
               </div>
             </div>
-            <p className="text-[9px] text-slate-400 mt-2.5 leading-relaxed">
-              Artikel & sertifikasi ikut disinkronkan cron harian 01.00 WIB. Scraper event menyusul (sumber SPA).
+            <p className="text-caption text-slate-500 mt-2.5 leading-relaxed dark:text-slate-400">
+              Artikel & sertifikasi disinkronkan langsung via tombol sinkronisasi. Scraper event menyusul (sumber SPA).
             </p>
           </div>
         </div>
@@ -522,10 +584,10 @@ export const JobScraperView: React.FC = () => {
           <div className="flex items-center gap-2">
             <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
               <Database className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <span>Lowongan Tersimpan di Database</span>
+              <span>2. Database Lowongan Tersimpan</span>
             </h3>
             <span className="px-2.5 py-0.5 rounded-[10px] text-xs font-bold bg-blue-100 dark:bg-blue-950 text-navy-700 dark:text-blue-300">
-              {filteredJobs.length}
+              {filteredJobs.length} Lowongan
             </span>
           </div>
 
@@ -533,29 +595,43 @@ export const JobScraperView: React.FC = () => {
             <div className="relative">
               <input
                 type="text"
+                aria-label="Filter data lowongan tersimpan"
                 value={searchFilter}
                 onChange={(e) => setSearchFilter(e.target.value)}
-                placeholder="Cari lowongan / perusahaan / lokasi..."
-                className="pl-8 pr-3 py-1.5 text-xs rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Filter data tersimpan..."
+                className="pl-8 pr-8 py-2 h-9 text-xs rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt-500 w-56 sm:w-64"
               />
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-3 text-slate-500 dark:text-slate-400" />
+              {searchFilter && (
+                <button
+                  type="button"
+                  onClick={() => setSearchFilter('')}
+                  className="absolute right-2 top-2 h-7 w-7 min-h-[28px] min-w-[28px] rounded-[6px] text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 dark:text-slate-400 flex items-center justify-center cursor-pointer"
+                  title="Hapus filter"
+                  aria-label="Hapus filter lowongan"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={handleExport}
               disabled={filteredJobs.length === 0}
-              className="px-3.5 py-1.5 rounded-[10px] border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center gap-1.5 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 flex items-center gap-1.5"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Unduh JSON</span>
-            </button>
+            </Button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {isLoading ? (
             Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="glass-card p-5 rounded-[10px] animate-pulse space-y-3">
+              <div key={i} className="glass-card p-5 rounded-[10px] animate-pulse motion-reduce:animate-none space-y-3">
                 <div className="h-3 w-1/3 bg-slate-200 dark:bg-slate-800 rounded" />
                 <div className="h-4 w-3/4 bg-slate-200 dark:bg-slate-800 rounded" />
                 <div className="h-3 w-1/2 bg-slate-200 dark:bg-slate-800 rounded" />
@@ -563,11 +639,11 @@ export const JobScraperView: React.FC = () => {
             ))
           ) : filteredJobs.length === 0 ? (
             <div className="col-span-full glass-card p-12 text-center text-slate-500 space-y-3">
-              <Briefcase className="w-12 h-12 text-slate-400 mx-auto" />
+              <Briefcase className="w-12 h-12 text-slate-500 mx-auto dark:text-slate-400" />
               <p className="font-bold text-sm text-slate-700 dark:text-slate-300">
                 Belum ada lowongan tersimpan di database.
               </p>
-              <p className="text-xs">Jalankan sinkronisasi manual, atau tunggu cron harian jam 01.00 WIB.</p>
+              <p className="text-xs">Jalankan sinkronisasi manual untuk memperbarui database lowongan.</p>
             </div>
           ) : (
             filteredJobs.map((job) => (
@@ -577,10 +653,10 @@ export const JobScraperView: React.FC = () => {
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="px-2.5 py-0.5 rounded-[10px] text-[10px] font-extrabold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                      DB
+                    <span className="px-2 py-0.5 rounded-[10px] text-caption font-extrabold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                      DB Tersimpan
                     </span>
-                    <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                    <span className="px-2 py-0.5 rounded-[10px] text-caption font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Aktif
                     </span>
                   </div>
@@ -597,30 +673,30 @@ export const JobScraperView: React.FC = () => {
 
                   <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300 pt-1">
                     <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0 dark:text-slate-400" />
                       <span className="truncate">{job.location}</span>
                     </div>
                     <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
-                      <Tag className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      <Tag className="w-3.5 h-3.5 text-emerald-700 shrink-0 dark:text-emerald-400" />
                       <span className="truncate">{job.salary}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 mt-4 flex items-center justify-between text-xs">
-                  <span className="text-[10px] text-slate-400 font-medium">{job.postedDate}</span>
+                  <span className="text-caption text-slate-500 font-medium dark:text-slate-400">{job.postedDate}</span>
                   {job.externalUrl ? (
                     <a
                       href={job.externalUrl}
                       target="_blank"
                       rel="noopener noreferrer nofollow"
-                      className="font-bold text-blue-600 dark:text-blue-400 hover:text-orange-600 flex items-center gap-1 text-[11px]"
+                      className="font-bold text-blue-600 dark:text-blue-400 hover:text-orange-700 dark:hover:text-orange-300 inline-flex items-center gap-1 text-caption min-h-[32px] px-3 py-1.5 rounded-[6px] hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
                     >
                       <span>Sumber Asli</span>
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   ) : (
-                    <span className="text-[10px] text-slate-400">Tanpa link</span>
+                    <span className="text-caption text-slate-500 dark:text-slate-400">Tanpa link</span>
                   )}
                 </div>
               </div>

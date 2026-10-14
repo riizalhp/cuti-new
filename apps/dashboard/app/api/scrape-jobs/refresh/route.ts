@@ -70,7 +70,18 @@ export async function POST(req: NextRequest) {
         ...(jobIds ? { id: { in: jobIds } } : {}),
         ...(companyIds ? { company_id: { in: companyIds } } : {}),
       },
-      include: { companies: true },
+      include: {
+        companies: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            website: true,
+            location: true,
+            industry: true,
+          },
+        },
+      },
       take: limit,
       orderBy: { last_synced_at: 'asc' }, // Prioritize oldest first
     });
@@ -112,29 +123,8 @@ export async function POST(req: NextRequest) {
           });
         }
 
-        // 2. Process company logo if not yet processed (still external URL)
-        if (
-          job.companies.logo_url &&
-          job.companies.logo_url.startsWith('http') &&
-          !job.companies.logo_url.includes('/uploads/logos/')
-        ) {
-          const processedUrl = await downloadAndProcessLogo(
-            job.companies.logo_url,
-            job.companies.slug
-          );
-
-          if (processedUrl) {
-            await prisma.companies.update({
-              where: { id: job.companies.id },
-              data: { logo_url: processedUrl },
-            });
-            logosProcessed++;
-            logs.push(`[${ts()}] 🖼️  Logo diproses: ${job.companies.name}`);
-          }
-        }
-
         // Small delay to avoid overwhelming external servers
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (error: any) {
         console.error(`[refresh] Error processing job ${job.id}:`, error.message);
         logs.push(`[${ts()}] ⚠️  Error: ${job.title} — ${error.message}`);

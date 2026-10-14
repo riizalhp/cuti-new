@@ -71,7 +71,7 @@ export function calculatePurposeAwareAtsScore(
   purpose: CvPurpose = 'job',
   aiKeywordSignals?: AiKeywordSignals
 ): PurposeAwareAtsResult {
-  const base = calculateDynamicAtsScore(cv);
+  const base = calculateDynamicAtsScore(cv, undefined, purpose);
 
   const order = getSectionOrderForPurpose(purpose);
   const requiredKeys = getRequiredSectionKeys(purpose);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@employr/db";
+import { prisma, decryptSecret } from "@employr/db";
  
 function isSafeEndpointUrl(urlStr: string): boolean {
   try {
@@ -51,7 +51,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { action, endpointUrl, apiKey: rawApiKey, providerId, model, prompt, temperature, maxTokens } = body
 
-    const cleanEndpoint = (endpointUrl || "https://api.openai.com/v1").replace(/\/+$/, "")
+    let cleanEndpoint = (endpointUrl || "https://api.openai.com/v1").replace(/\/+$/, "")
+    // Normalisasi otomatis endpoint Google AI Studio OpenAI-compatible
+    if (cleanEndpoint.includes("generativelanguage.googleapis.com") && !cleanEndpoint.endsWith("/openai")) {
+      cleanEndpoint = `${cleanEndpoint.replace(/\/v1beta\/?$/, "")}/v1beta/openai`
+    }
 
     if (!isSafeEndpointUrl(cleanEndpoint)) {
       return NextResponse.json(
@@ -74,7 +78,7 @@ export async function POST(req: NextRequest) {
           select: { api_key: true },
         })
         if (storedProvider?.api_key) {
-          effectiveApiKey = storedProvider.api_key.trim()
+          effectiveApiKey = decryptSecret(storedProvider.api_key).trim();
         }
       } catch (err) {
         console.warn("[test-ai] Gagal mengambil saved API key dari DB:", err)
@@ -88,6 +92,7 @@ export async function POST(req: NextRequest) {
     if (effectiveApiKey && effectiveApiKey.length > 0) {
       headers["Authorization"] = `Bearer ${effectiveApiKey}`
       headers["api-key"] = effectiveApiKey // Azure OpenAI compatibility
+      headers["x-goog-api-key"] = effectiveApiKey // Google AI Studio compatibility
     }
 
     const startTime = performance.now()
@@ -143,9 +148,9 @@ export async function POST(req: NextRequest) {
 
       let models: string[] = []
       if (Array.isArray(responseData.data)) {
-        models = responseData.data.map((m: any) => m.id || m.name).filter(Boolean)
+        models = responseData.data.map((m: any) => String(m.id || m.name || "").replace(/^models\//, "")).filter(Boolean)
       } else if (Array.isArray(responseData.models)) {
-        models = responseData.models.map((m: any) => m.name || m.id).filter(Boolean)
+        models = responseData.models.map((m: any) => String(m.name || m.id || "").replace(/^models\//, "")).filter(Boolean)
       }
 
       return NextResponse.json({

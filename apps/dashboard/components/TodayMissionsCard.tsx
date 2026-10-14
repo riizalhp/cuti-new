@@ -141,8 +141,8 @@ export const TodayMissionsCard: React.FC = () => {
       <div>
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-[10px] bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
+          <div className="flex items-start gap-2">
+            <div className="p-2 rounded-[10px] bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5">
               <Target className="w-5 h-5" />
             </div>
             <div>
@@ -155,7 +155,7 @@ export const TodayMissionsCard: React.FC = () => {
             </div>
           </div>
           <span className="px-2 py-0.5 rounded-[10px] text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 flex items-center gap-1">
-            <Coins className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+            <Coins className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
             {completedCount}/{missions.length} Selesai
           </span>
         </div>
@@ -180,7 +180,7 @@ export const TodayMissionsCard: React.FC = () => {
                       {m.title}
                     </span>
                   </div>
-                  <span className="font-bold text-amber-600 dark:text-amber-400 text-[11px]">
+                  <span className="font-bold text-amber-700 dark:text-amber-400 text-caption">
                     {m.points}
                   </span>
                 </div>
@@ -193,14 +193,14 @@ export const TodayMissionsCard: React.FC = () => {
                     ></div>
                   </div>
                   {m.completed ? (
-                    <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                    <span className="flex items-center gap-1 text-caption font-bold text-emerald-700 dark:text-emerald-400">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Klaim
                     </span>
                   ) : (
                     <button
                       onClick={() => handleClaim(m.id)}
-                      className="px-2.5 py-0.5 rounded-[10px] bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold transition"
+                      className="px-2.5 py-0.5 rounded-[10px] bg-amber-700 hover:bg-amber-600 text-white text-caption font-bold transition"
                     >
                       Klaim
                     </button>
@@ -213,7 +213,7 @@ export const TodayMissionsCard: React.FC = () => {
       </div>
 
       <div className="text-center pt-2 border-t border-slate-100 dark:border-slate-800">
-        <span className="text-[11px] text-slate-500 dark:text-slate-400">
+        <span className="text-caption text-slate-500 dark:text-slate-400">
           Reset misi berikutnya dalam <span className="font-semibold text-slate-700 dark:text-slate-300">{resetTimer || '...'}</span>
         </span>
       </div>

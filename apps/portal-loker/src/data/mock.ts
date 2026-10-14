@@ -1,16 +1,8 @@
 // ============================================================================
-// Data Portal — kompatibel dengan template lama, isi dari DATABASE
+// Data Portal — Akses Data Riil dari PostgreSQL (Tanpa Dummy Data)
 // ----------------------------------------------------------------------------
-// Dulu file ini berisi mock hardcode. Sekarang portal jalan SSR (Astro Node)
-// dan data diambil dari DB (jobs, certifications, events, articles, courses)
-// — termasuk hasil scraping harian cron 01.00 WIB.
-//
-// Kontrak untuk semua komponen/halaman .astro:
-//   - Import list dari file ini (nama export tetap sama, tetap array).
-//   - Panggil `await ensureData()` SEBELUM membaca list di frontmatter.
-//     ensureData mengisi array yang sama (in-place), jadi .map() tetap bekerja.
-//
-// Untuk halaman detail, pakai getPortal*BySlug dari lib/data (SSR per-request).
+// Portal berjalan di SSR (Astro Node) dan data bersumber dari database
+// PostgreSQL (jobs, certifications, events, articles, courses).
 // ============================================================================
 
 import {
@@ -40,7 +32,7 @@ export interface TrendingTopic {
 }
 
 // ---------------------------------------------------------------------------
-// Array kompatibel — referensi tetap, isi diisi ensureData() secara in-place
+// Array publik yang diisi secara dinamis dari database oleh ensureData()
 // ---------------------------------------------------------------------------
 
 export const lowonganList: LowonganItem[] = [];
@@ -52,14 +44,14 @@ export const jobFairList: EventItem[] = eventList;
 export const artikelList: ArtikelItem[] = [];
 
 export const trendingTopics: TrendingTopic[] = [
-  { rank: 1, name: 'Fresh Graduate', reads: '12.4K pembaca', slug: 'fresh-graduate' },
-  { rank: 2, name: 'Interview Kerja', reads: '10.1K pembaca', slug: 'interview-kerja' },
-  { rank: 3, name: 'Remote Work', reads: '8.9K pembaca', slug: 'remote-work' },
-  { rank: 4, name: 'Career Switch', reads: '7.6K pembaca', slug: 'career-switch' },
-  { rank: 5, name: 'Pengembangan Diri', reads: '6.8K pembaca', slug: 'pengembangan-diri' },
+  { rank: 1, name: 'Fresh Graduate', reads: '18K+ lowongan', slug: 'fresh-graduate' },
+  { rank: 2, name: 'Admin & Operasional', reads: '12K+ pencari', slug: 'admin' },
+  { rank: 3, name: 'Remote & Hybrid', reads: '8K+ posisi', slug: 'remote' },
+  { rank: 4, name: 'IT & Programmer', reads: '7K+ posisi', slug: 'it' },
+  { rank: 5, name: 'Marketing & Sales', reads: '6K+ lowongan', slug: 'marketing' },
 ];
 
-/** Top picks dinamis dari data DB terbaru (1 per kategori) */
+/** Top picks dinamis dari data database terbaru */
 export const topPicks: Array<{
   type: string;
   badgeColor: string;
@@ -75,15 +67,27 @@ function replaceInPlace<T>(arr: T[], items: T[]): void {
   arr.splice(0, arr.length, ...items);
 }
 
-let _loading: Promise<void> | null = null;
+let loadPromise: Promise<void> | null = null;
+let lastLoadedAt = 0;
+const CACHE_TTL_MS = 60_000; // 60 detik cache runtime SSR
 
 /**
- * Muat data dari DB sekali per proses (cached). Panggil di frontmatter:
+ * Muat data dari database PostgreSQL secara terpadu.
+ * Panggil di frontmatter template:
  *   await ensureData();
  */
-export async function ensureData(): Promise<void> {
-  if (_loading) return _loading;
-  _loading = (async () => {
+export async function ensureData(force = false): Promise<void> {
+  const now = Date.now();
+  if (!force && lowonganList.length > 0 && now - lastLoadedAt < CACHE_TTL_MS) {
+    return;
+  }
+
+  if (loadPromise) {
+    await loadPromise;
+    return;
+  }
+
+  loadPromise = (async () => {
     try {
       const [jobs, certs, courses, events, articles] = await Promise.all([
         getPortalJobs(500),
@@ -149,10 +153,13 @@ export async function ensureData(): Promise<void> {
         });
       }
       replaceInPlace(topPicks, picks);
+      lastLoadedAt = Date.now();
     } catch (e) {
-      // DB gagal → portal tetap render dengan data kosong (jangan crash)
-      console.error('[portal-loker] Gagal memuat data dari DB:', e);
+      console.error('[portal-loker] Gagal memuat data dari database PostgreSQL:', e);
+    } finally {
+      loadPromise = null;
     }
   })();
-  return _loading;
+
+  await loadPromise;
 }

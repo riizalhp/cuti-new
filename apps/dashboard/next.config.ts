@@ -3,9 +3,11 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Izinkan akses dev server dari HP di jaringan lokal dan localhost (tanpa ini halaman tidak hydrate)
+  allowedDevOrigins: ["localhost", "127.0.0.1", "192.168.*.*", "172.16.*.*", "172.25.*.*", "10.*.*.*"],
   outputFileTracingRoot: path.resolve(__dirname, "../../"),
   transpilePackages: ["@employr/ui", "@employr/config", "@employr/db", "@employr/faq"],
-  serverExternalPackages: ["pdf-parse", "mammoth", "playwright-core", "nodemailer", "node-cron"],
+  serverExternalPackages: ["pdf-parse", "mammoth", "playwright-core", "nodemailer"],
 
   // Enable optimizations
   compiler: {
@@ -43,12 +45,35 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "picsum.photos",
       },
+      {
+        protocol: "https",
+        hostname: "*.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+      },
     ],
+  },
+
+  // Redirects
+  async redirects() {
+    return [
+      {
+        source: "/request-fitur",
+        destination: "/saran-fitur",
+        permanent: true,
+      },
+    ];
   },
 
   // Experimental features
   experimental: {
-    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
+    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons", "framer-motion", "recharts"],
   },
 };
 

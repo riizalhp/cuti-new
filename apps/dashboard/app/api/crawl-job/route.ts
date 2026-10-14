@@ -222,7 +222,6 @@ export async function POST(req: NextRequest) {
             id: crypto.randomUUID(),
             name: parsedCompany,
             slug: companySlug,
-            logo_url: parsedLogo || null,
             website: targetUrl ? new URL(targetUrl).origin : null,
             location: parsedLocation,
           },
@@ -235,7 +234,12 @@ export async function POST(req: NextRequest) {
       });
 
       if (!existingJob) {
-        const jobSlug = `${slugify(parsedTitle)}-${companySlug}-${Date.now().toString(36)}`;
+        const baseJobSlug = slugify(`${parsedTitle}-${parsedCompany}`);
+        let jobSlug = baseJobSlug;
+        let jIdx = 2;
+        while (await prisma.jobs.findUnique({ where: { slug: jobSlug }, select: { id: true } })) {
+          jobSlug = `${baseJobSlug}-${jIdx++}`;
+        }
         await prisma.jobs.create({
           data: {
             id: crypto.randomUUID(),

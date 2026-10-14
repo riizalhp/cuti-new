@@ -273,8 +273,11 @@ Gunakan Bahasa Indonesia kasual, ringkas, dan membangun kepercayaan.
    - Seluruh formulir interaktif kompleks (misalnya: *Tambah Lamaran*, *Detail ATS*, *Edit Profil*, *Detail Lowongan*) WAJIB menggunakan slide-in drawer yang meluncur dari kanan layar (`fixed inset-0 z-50 justify-end slide-in-from-right`), BUKAN modal pop-up di tengah.
    - Dilengkapi backdrop blur kustom (`bg-slate-950/60 backdrop-blur-xs`), header bertitel dengan tombol tutup, body dengan scroll independen (`overflow-y-auto`), serta sticky footer action.
 
-5. **Mobile-First Bottom Navigation (5 Tab)**:
-   - Di layar mobile (< 1024px), gunakan fixed **Bottom Navigation (64px + safe area)**: *Beranda, CV, Tracker, Misi, Akun*.
+5. **Mobile-First Bottom Navigation (4 Tab)**:
+   - Di layar mobile (< 1024px), gunakan fixed **Bottom Navigation (64px + safe area)**: *Beranda, CV, Tracker, Profil*.
+   - **Status Fitur Non-Aktif (STRICT HIDE / BLACKLIST)**:
+     - Fitur **Misi Cuan** (`/misi-cuan`) dan **Referral** (`/referral`) **BELUM ADA / BELUM SIAP**. Dilarang memanggil, mengusulkan, atau menampilkan keduanya di antarmuka (Bottom Nav, Quick Actions Grid, atau kartu beranda).
+     - Fitur **Panduan & Simulator Interview** (`/interview`) **TELAH DIHAPUS & DILARANG (STRICT BLACKLIST)**. Dilarang keras memunculkan tombol "Panduan & Simulator Interview", membuat ulang route `/interview`, atau menambahkan link ke halaman interview di kartu jadwal/agenda, Beranda, maupun navigasi. Seluruh aksi terkait jadwal wawancara langsung mengarah ke `/tracker`.
    - Tidak menggunakan menu hamburger yang memblokir layar di mobile dashboard.
 
 ---
@@ -327,6 +330,6 @@ Gunakan Bahasa Indonesia kasual, ringkas, dan membangun kepercayaan.
 #### Right-Hand Slide-in Drawer Spec
 
 - **Overlay Backdrop**: `fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end transition-opacity`
-- **Drawer Panel**: `relative z-10 w-full max-w-md sm:max-w-lg h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300`
+- **Drawer Panel**: `relative z-10 w-full max-w-md sm:max-w-xl h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300`
 - **Header**: `p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30`
 - **Sticky Footer**: `p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-end gap-2.5`

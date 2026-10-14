@@ -20,6 +20,12 @@ import {
   PartyPopper,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface PromoModalProps {
   isOpen: boolean;
@@ -81,8 +87,13 @@ export const PromoModal: React.FC<PromoModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg relative overflow-hidden flex flex-col">
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) handleDismiss();
+      }}
+    >
+      <DialogContent hideCloseButton size="md" className="p-0 overflow-hidden max-h-[90vh] flex flex-col max-w-lg">
         {/* Top Decorative Header Banner */}
         <div className="relative bg-navy-700 p-6 text-white overflow-hidden">
           {/* Background Lighting/Glow Circles */}
@@ -99,20 +110,20 @@ export const PromoModal: React.FC<PromoModalProps> = ({
           </button>
 
           {/* Badge & Title */}
-          <div className="relative z-10 space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-[11px] font-extrabold uppercase tracking-wider bg-amber-400 text-slate-950 shadow-md">
+          <DialogHeader className="relative z-10 space-y-2 text-left">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[10px] text-caption font-extrabold uppercase tracking-wider bg-amber-400 text-slate-950 shadow-md w-fit">
               <Flame className="w-3.5 h-3.5 fill-slate-950" />
               <span>Promo Spesial Karir BUMN & Tech</span>
             </div>
 
-            <h3 className="text-2xl font-black tracking-tight text-white leading-tight">
+            <DialogTitle className="text-2xl font-black tracking-tight text-white leading-tight">
               Diskon 70% Paket Pro AI Career Assistant!
-            </h3>
+            </DialogTitle>
 
             <p className="text-xs text-slate-100 font-medium leading-relaxed">
               Tingkatkan peluang panggilan interview kerja hingga 3x lipat dengan AI Resume & Auto ATS Matcher.
             </p>
-          </div>
+          </DialogHeader>
         </div>
 
         {/* Modal Content Body */}
@@ -120,7 +131,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
           {/* Realtime Countdown Timer */}
           <div className="flex items-center justify-between p-3.5 rounded-[10px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60">
             <div className="flex items-center gap-2 text-amber-900 dark:text-amber-300">
-              <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 animate-pulse shrink-0" />
+              <Clock className="w-4 h-4 text-amber-700 dark:text-amber-400 animate-pulse motion-reduce:animate-none shrink-0" />
               <span className="text-xs font-bold">Berakhir Dalam:</span>
             </div>
             <div className="flex items-center gap-1.5 font-mono text-xs font-black text-amber-950 dark:text-amber-200">
@@ -141,7 +152,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
           {/* Coupon Code Banner */}
           <div className="p-4 rounded-[10px] bg-orange-50/70 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-800/50 flex items-center justify-between gap-3">
             <div className="space-y-0.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 flex items-center gap-1">
+              <span className="text-caption font-bold uppercase tracking-wider text-orange-700 dark:text-orange-400 flex items-center gap-1">
                 <Tag className="w-3 h-3" />
                 <span>Kode Promo Eksklusif</span>
               </span>
@@ -154,8 +165,8 @@ export const PromoModal: React.FC<PromoModalProps> = ({
               onClick={handleCopyCode}
               className={`rounded-[10px] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                 copied
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-[#1738D1] hover:bg-[#132EA8] text-white'
+                  ? 'bg-emerald-700 text-white'
+                  : 'bg-cobalt-500 hover:bg-cobalt-600 text-white'
               }`}
             >
               {copied ? (
@@ -175,18 +186,18 @@ export const PromoModal: React.FC<PromoModalProps> = ({
           {/* Pricing Highlight */}
           <div className="flex items-baseline justify-between p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
             <div>
-              <span className="text-xs text-slate-400 line-through mr-2 font-semibold">
+              <span className="text-xs text-slate-500 line-through mr-2 font-semibold dark:text-slate-400">
                 Rp 199.000
               </span>
               <span className="text-lg font-black text-slate-900 dark:text-white">
                 Rp 49.000
               </span>
-              <span className="text-[11px] text-slate-500 font-medium ml-1">
+              <span className="text-caption text-slate-500 font-medium ml-1">
                 / tahun
               </span>
             </div>
-            <span className="px-2.5 py-1 rounded-[10px] text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
-              <BadgePercent className="w-3 h-3 text-emerald-600" />
+            <span className="px-2.5 py-1 rounded-[10px] text-caption font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+              <BadgePercent className="w-3 h-3 text-emerald-700 dark:text-emerald-400" />
               <span>Hemat 75%</span>
             </span>
           </div>
@@ -196,21 +207,21 @@ export const PromoModal: React.FC<PromoModalProps> = ({
             <p className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
               Keuntungan Akses Premium Pass:
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-600 dark:text-slate-300">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-caption text-slate-600 dark:text-slate-300">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0 dark:text-emerald-400" />
                 <span>AI CV ATS Score Unlimited</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0 dark:text-emerald-400" />
                 <span>Analisis CV & Job Match</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0 dark:text-emerald-400" />
                 <span>Simulasi Interview AI</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0 dark:text-emerald-400" />
                 <span>Akses Kursus & Sertifikat</span>
               </div>
             </div>
@@ -228,26 +239,26 @@ export const PromoModal: React.FC<PromoModalProps> = ({
             </Button>
 
             <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 cursor-pointer select-none">
+              <label className="flex items-center gap-2 text-caption text-slate-500 dark:text-slate-400 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={dontShowToday}
                   onChange={(e) => setDontShowToday(e.target.checked)}
-                  className="rounded-[10px] border-slate-300 dark:border-slate-700 text-orange-600 focus:ring-[#1738D1] w-3.5 h-3.5"
+                  className="rounded-[10px] border-slate-300 dark:border-slate-700 text-orange-700 focus:ring-cobalt-500 w-3.5 h-3.5 dark:text-orange-400"
                 />
                 <span>Jangan tampilkan hari ini lagi</span>
               </label>
 
               <button
                 onClick={handleDismiss}
-                className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer"
+                className="text-caption font-semibold text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer dark:text-slate-400"
               >
                 Nanti Saja
               </button>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

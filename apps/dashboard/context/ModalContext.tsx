@@ -45,7 +45,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } else if (featureKey === 'job-tracker') {
       router.push('/tracker');
     } else if (featureKey === 'interview-sim') {
-      router.push('/interview');
+      router.push('/tracker');
     } else if (featureKey === 'misi-reward') {
       router.push('/misi');
     }

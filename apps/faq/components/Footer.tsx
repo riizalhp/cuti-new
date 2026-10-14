@@ -4,8 +4,8 @@ import { APP_URL } from "@/lib/site";
 
 export function Footer() {
   return (
-    <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 mt-14">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 mt-14 w-full">
+      <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
             <div className="flex items-center justify-center overflow-hidden shrink-0">

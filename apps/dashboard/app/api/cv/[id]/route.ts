@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma, learnedRoleService } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 import { calculateAtsScore } from '@/lib/ats-score';
+import { syncUserCvEmbedding } from '@/lib/user-career-embedding';
 
 function isValidUUID(str: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
@@ -32,14 +33,6 @@ export async function GET(
   try {
     const { id } = await params;
 
-    // Handle non-UUID (local draft timestamp IDs like cv-1787624633277) gracefully
-    if (!isValidUUID(id)) {
-      return NextResponse.json(
-        { success: false, message: 'Draf CV lokal (belum tersinkron ke DB).' },
-        { status: 404 }
-      );
-    }
-
     const user = await getAuthUser(req);
     if (!user) {
       return NextResponse.json(
@@ -48,11 +41,30 @@ export async function GET(
       );
     }
 
-    const cv = await prisma.cv_projects.findFirst({
-      where: { id, user_id: user.id, is_active: true },
-    });
+    let cv = isValidUUID(id)
+      ? await prisma.cv_projects.findFirst({
+          where: { id, user_id: user.id, is_active: true },
+        })
+      : null;
 
     if (!cv) {
+      const userProjects = await prisma.cv_projects.findMany({
+        where: { user_id: user.id, is_active: true },
+      });
+      cv = userProjects.find((p) => {
+        const pData = (typeof p.data === 'object' && p.data !== null ? p.data : {}) as Record<string, any>;
+        const cvSlug = pData.slug || p.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '') || 'cv-ats';
+        return cvSlug === id || p.title.toLowerCase() === id.replace(/-/g, ' ').toLowerCase();
+      }) || null;
+    }
+
+    if (!cv) {
+      if (id.startsWith('cv-')) {
+        return NextResponse.json(
+          { success: false, message: 'Draf CV lokal (belum tersinkron ke DB).' },
+          { status: 404 }
+        );
+      }
       return NextResponse.json(
         { success: false, message: 'CV tidak ditemukan.' },
         { status: 404 }
@@ -72,9 +84,13 @@ export async function GET(
       ? parsedData.atsScore
       : (computedScore > 0 ? computedScore : 0);
 
+    const title = cv.title || parsedData.title || 'CV ATS';
+    const slug = parsedData.slug || title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '') || 'cv-ats';
+
     const mapped = {
       ...fullData,
-      title: cv.title || parsedData.title,
+      title,
+      slug,
       templateId: cv.template_id || parsedData.templateId || 'ats-modern-standard',
       atsScore: finalAtsScore,
       updatedAt: formatIndonesianDate(cv.updated_at),
@@ -98,14 +114,6 @@ export async function PATCH(
     const { id } = await params;
     const body = await req.json();
 
-    // Handle non-UUID gracefully (e.g. cv-1787624633277)
-    if (!isValidUUID(id)) {
-      return NextResponse.json(
-        { success: false, message: 'ID draf lokal. Gunakan POST /api/cv untuk menyimpan ke DB.' },
-        { status: 404 }
-      );
-    }
-
     const user = await getAuthUser(req);
     if (!user) {
       return NextResponse.json(
@@ -114,11 +122,30 @@ export async function PATCH(
       );
     }
 
-    const existing = await prisma.cv_projects.findFirst({
-      where: { id, user_id: user.id },
-    });
+    let existing = isValidUUID(id)
+      ? await prisma.cv_projects.findFirst({
+          where: { id, user_id: user.id },
+        })
+      : null;
 
     if (!existing) {
+      const userProjects = await prisma.cv_projects.findMany({
+        where: { user_id: user.id, is_active: true },
+      });
+      existing = userProjects.find((p) => {
+        const pData = (typeof p.data === 'object' && p.data !== null ? p.data : {}) as Record<string, any>;
+        const cvSlug = pData.slug || p.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '') || 'cv-ats';
+        return cvSlug === id || p.title.toLowerCase() === id.replace(/-/g, ' ').toLowerCase();
+      }) || null;
+    }
+
+    if (!existing) {
+      if (id.startsWith('cv-')) {
+        return NextResponse.json(
+          { success: false, message: 'ID draf lokal. Gunakan POST /api/cv untuk menyimpan ke DB.' },
+          { status: 404 }
+        );
+      }
       return NextResponse.json(
         { success: false, message: 'CV tidak ditemukan.' },
         { status: 404 }
@@ -128,15 +155,17 @@ export async function PATCH(
     const title = body.title || existing.title;
     const templateId = body.templateId || existing.template_id;
     const targetPosition = body.headline || body.target_position || existing.target_position;
+    const slug = body.slug || title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '') || 'cv-ats';
 
     const fullCvData = {
       ...body,
-      id,
+      id: existing.id,
+      slug,
       updatedAt: 'Hari ini',
     };
 
     const updated = await prisma.cv_projects.update({
-      where: { id },
+      where: { id: existing.id },
       data: {
         title,
         template_id: templateId,
@@ -177,6 +206,9 @@ export async function PATCH(
       // Non-blocking, continue CV flow
     }
 
+    // Sinkronisasi vektor embedding profil karier pengguna (non-blocking)
+    syncUserCvEmbedding(user.id, fullCvData, updated.id).catch(() => {});
+
     return NextResponse.json({
       success: true,
       data: {
@@ -200,10 +232,6 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    if (!isValidUUID(id)) {
-      return NextResponse.json({ success: true, message: 'Draf lokal dihapus.' });
-    }
-
     const user = await getAuthUser(req);
     if (!user) {
       return NextResponse.json(
@@ -212,11 +240,27 @@ export async function DELETE(
       );
     }
 
-    const existing = await prisma.cv_projects.findFirst({
-      where: { id, user_id: user.id },
-    });
+    let existing = isValidUUID(id)
+      ? await prisma.cv_projects.findFirst({
+          where: { id, user_id: user.id },
+        })
+      : null;
 
     if (!existing) {
+      const userProjects = await prisma.cv_projects.findMany({
+        where: { user_id: user.id, is_active: true },
+      });
+      existing = userProjects.find((p) => {
+        const pData = (typeof p.data === 'object' && p.data !== null ? p.data : {}) as Record<string, any>;
+        const cvSlug = pData.slug || p.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '') || 'cv-ats';
+        return cvSlug === id || p.title.toLowerCase() === id.replace(/-/g, ' ').toLowerCase();
+      }) || null;
+    }
+
+    if (!existing) {
+      if (id.startsWith('cv-')) {
+        return NextResponse.json({ success: true, message: 'Draf lokal dihapus.' });
+      }
       return NextResponse.json(
         { success: false, message: 'CV tidak ditemukan.' },
         { status: 404 }
@@ -224,7 +268,7 @@ export async function DELETE(
     }
 
     await prisma.cv_projects.delete({
-      where: { id },
+      where: { id: existing.id },
     });
 
     return NextResponse.json({ success: true, message: 'CV berhasil dihapus.' });

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { SidebarToggle } from "@/components/admin/SidebarToggle"
+import { SkeletonForm } from "@/components/admin/Skeleton"
 import { Save, Database, Shield, Globe, Tag, RefreshCw, Check } from "lucide-react"
 
 export default function SettingsPage() {
@@ -138,9 +139,10 @@ export default function SettingsPage() {
       )}
 
       {isLoading ? (
-        <div className="p-12 text-center text-slate-400 font-medium text-sm">
-          <RefreshCw size={24} className="animate-spin text-orange-500 mx-auto mb-2" />
-          Memuat pengaturan dari database...
+        <div className="space-y-6">
+          <SkeletonForm fields={3} />
+          <SkeletonForm fields={2} />
+          <SkeletonForm fields={2} />
         </div>
       ) : (
         <div className="space-y-6">

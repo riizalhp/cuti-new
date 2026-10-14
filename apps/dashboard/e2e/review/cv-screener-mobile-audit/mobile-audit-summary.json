@@ -1,0 +1,1697 @@
+{
+  "viewportsTested": [
+    "iPhone-SE-320",
+    "iPhone-Standard-375",
+    "Modern-Mobile-390"
+  ],
+  "setupViewMobile": {
+    "iPhone-SE-320": {
+      "clientWidth": 320,
+      "scrollWidth": 320,
+      "hasOverflow": false,
+      "overflowCount": 0,
+      "overflowingElements": [],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "Staff Administrasi, Kasir, atau Frontend Developer",
+          "fontSize": "16px",
+          "willTriggerIosAutoZoom": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "BCA, Indomaret, Shopee, atau nama PT",
+          "fontSize": "16px",
+          "willTriggerIosAutoZoom": false
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": "text",
+          "placeholder": "Tempel syarat, kualifikasi, atau deskripsi tugas lowongan dari info loker di sini...",
+          "fontSize": "16px",
+          "willTriggerIosAutoZoom": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "text",
+          "placeholder": "",
+          "fontSize": "16px",
+          "willTriggerIosAutoZoom": false
+        }
+      ],
+      "bottomNavHeight": 59.25,
+      "mainPaddingBottom": 0,
+      "interactives": [
+        {
+          "tag": "A",
+          "text": "",
+          "width": 219,
+          "height": 32,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Tutup Menu",
+          "width": 31,
+          "height": 31,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "5.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Beranda",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "CV Saya",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Screening & Evaluasi ATS",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Optimasi LinkedIn",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Career IntelligencePRO",
+          "width": 227,
+          "height": 36,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Tracker Lamaran",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Eksplorasi Loker",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Email & Cover Letter",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Pengaturan Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Saran Fitur",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Lapor Kendala",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Keluar Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8px 12px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Kembali",
+          "width": 30,
+          "height": 30,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Notifikasi, 3 belum dibaca0123456",
+          "width": 36,
+          "height": 36,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Budi SantosoBudi Santoso",
+          "width": 48,
+          "height": 42,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "4px 8.75px 4px 5.25px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Riwayat Screening",
+          "width": 270,
+          "height": 44,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "8px 12.25px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Target Lowongan (Rekomendasi)Target Lowongan",
+          "width": 124,
+          "height": 44,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "0px 8px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Standar Industri (Tanpa Loker)Standar Profesi",
+          "width": 124,
+          "height": 44,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "0px 8px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Tempel dari Clipboard",
+          "width": 139,
+          "height": 52,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "8px 12px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Mulai Screening CV Saya",
+          "width": 262,
+          "height": 48,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "12px 24px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Tanya Herdi",
+          "width": 39,
+          "height": 39,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "1.75px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Sembunyikan customer service",
+          "width": 32,
+          "height": 32,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        },
+        {
+          "tag": "A",
+          "text": "Beranda",
+          "width": 74,
+          "height": 48,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "4px"
+        },
+        {
+          "tag": "A",
+          "text": "CV",
+          "width": 74,
+          "height": 48,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "4px"
+        },
+        {
+          "tag": "A",
+          "text": "Tracker",
+          "width": 74,
+          "height": 48,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "4px"
+        },
+        {
+          "tag": "A",
+          "text": "Profil",
+          "width": 74,
+          "height": 48,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "4px"
+        }
+      ],
+      "smallCount": 19,
+      "smallElements": [
+        {
+          "tag": "A",
+          "text": "",
+          "width": 219,
+          "height": 32,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Tutup Menu",
+          "width": 31,
+          "height": 31,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "5.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Beranda",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "CV Saya",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Screening & Evaluasi ATS",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Optimasi LinkedIn",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Career IntelligencePRO",
+          "width": 227,
+          "height": 36,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Tracker Lamaran",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Eksplorasi Loker",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Email & Cover Letter",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Pengaturan Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Saran Fitur",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Lapor Kendala",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Keluar Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8px 12px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Kembali",
+          "width": 30,
+          "height": 30,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        }
+      ]
+    },
+    "iPhone-Standard-375": {
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "hasOverflow": false,
+      "overflowCount": 0,
+      "overflowingElements": [],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "Staff Administrasi, Kasir, atau Frontend Developer",
+          "fontSize": "16px",
+          "willTriggerIosAutoZoom": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "BCA, Indomaret, Shopee, atau nama PT",
+          "fontSize": "16px",
+          "willTriggerIosAutoZoom": false
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": "text",
+          "placeholder": "Tempel syarat, kualifikasi, atau deskripsi tugas lowongan dari info loker di sini...",
+          "fontSize": "16px",
+          "willTriggerIosAutoZoom": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "text",
+          "placeholder": "",
+          "fontSize": "16px",
+          "willTriggerIosAutoZoom": false
+        }
+      ],
+      "bottomNavHeight": 59.25,
+      "mainPaddingBottom": 0,
+      "interactives": [
+        {
+          "tag": "A",
+          "text": "",
+          "width": 219,
+          "height": 32,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Tutup Menu",
+          "width": 31,
+          "height": 31,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "5.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Beranda",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "CV Saya",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Screening & Evaluasi ATS",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Optimasi LinkedIn",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Career IntelligencePRO",
+          "width": 227,
+          "height": 36,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Tracker Lamaran",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Eksplorasi Loker",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Email & Cover Letter",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Pengaturan Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Saran Fitur",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Lapor Kendala",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Keluar Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8px 12px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Kembali",
+          "width": 30,
+          "height": 30,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Notifikasi, 3 belum dibaca0123456",
+          "width": 36,
+          "height": 36,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Budi SantosoBudi Santoso",
+          "width": 48,
+          "height": 42,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "4px 8.75px 4px 5.25px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Riwayat Screening",
+          "width": 325,
+          "height": 44,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "8px 12.25px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Target Lowongan (Rekomendasi)Target Lowongan",
+          "width": 152,
+          "height": 44,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "0px 8px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Standar Industri (Tanpa Loker)Standar Profesi",
+          "width": 152,
+          "height": 44,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "0px 8px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Tempel dari Clipboard",
+          "width": 153,
+          "height": 44,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "8px 12px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Mulai Screening CV Saya",
+          "width": 317,
+          "height": 48,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "12px 24px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Tanya Herdi",
+          "width": 39,
+          "height": 39,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "1.75px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Sembunyikan customer service",
+          "width": 32,
+          "height": 32,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        },
+        {
+          "tag": "A",
+          "text": "Beranda",
+          "width": 88,
+          "height": 48,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "4px"
+        },
+        {
+          "tag": "A",
+          "text": "CV",
+          "width": 88,
+          "height": 48,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "4px"
+        },
+        {
+          "tag": "A",
+          "text": "Tracker",
+          "width": 88,
+          "height": 48,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "4px"
+        },
+        {
+          "tag": "A",
+          "text": "Profil",
+          "width": 88,
+          "height": 48,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "4px"
+        }
+      ],
+      "smallCount": 19,
+      "smallElements": [
+        {
+          "tag": "A",
+          "text": "",
+          "width": 219,
+          "height": 32,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Tutup Menu",
+          "width": 31,
+          "height": 31,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "5.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Beranda",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "CV Saya",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Screening & Evaluasi ATS",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Optimasi LinkedIn",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Career IntelligencePRO",
+          "width": 227,
+          "height": 36,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Tracker Lamaran",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Eksplorasi Loker",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Email & Cover Letter",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Pengaturan Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Saran Fitur",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Lapor Kendala",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Keluar Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8px 12px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Kembali",
+          "width": 30,
+          "height": 30,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        }
+      ]
+    },
+    "Modern-Mobile-390": {
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "hasOverflow": false,
+      "overflowCount": 0,
+      "overflowingElements": [],
+      "inputs": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "Staff Administrasi, Kasir, atau Frontend Developer",
+          "fontSize": "16px",
+          "willTriggerIosAutoZoom": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "BCA, Indomaret, Shopee, atau nama PT",
+          "fontSize": "16px",
+          "willTriggerIosAutoZoom": false
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": "text",
+          "placeholder": "Tempel syarat, kualifikasi, atau deskripsi tugas lowongan dari info loker di sini...",
+          "fontSize": "16px",
+          "willTriggerIosAutoZoom": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "text",
+          "placeholder": "",
+          "fontSize": "16px",
+          "willTriggerIosAutoZoom": false
+        }
+      ],
+      "bottomNavHeight": 59.25,
+      "mainPaddingBottom": 0,
+      "interactives": [
+        {
+          "tag": "A",
+          "text": "",
+          "width": 219,
+          "height": 32,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Tutup Menu",
+          "width": 31,
+          "height": 31,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "5.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Beranda",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "CV Saya",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Screening & Evaluasi ATS",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Optimasi LinkedIn",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Career IntelligencePRO",
+          "width": 227,
+          "height": 36,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Tracker Lamaran",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Eksplorasi Loker",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Email & Cover Letter",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Pengaturan Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Saran Fitur",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Lapor Kendala",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Keluar Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8px 12px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Kembali",
+          "width": 30,
+          "height": 30,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Notifikasi, 3 belum dibaca0123456",
+          "width": 36,
+          "height": 36,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Budi SantosoBudi Santoso",
+          "width": 48,
+          "height": 42,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "4px 8.75px 4px 5.25px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Riwayat Screening",
+          "width": 340,
+          "height": 44,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "8px 12.25px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Target Lowongan (Rekomendasi)Target Lowongan",
+          "width": 159,
+          "height": 44,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "0px 8px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Standar Industri (Tanpa Loker)Standar Profesi",
+          "width": 159,
+          "height": 44,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "0px 8px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Tempel dari Clipboard",
+          "width": 153,
+          "height": 44,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "8px 12px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Mulai Screening CV Saya",
+          "width": 332,
+          "height": 48,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "12px 24px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Tanya Herdi",
+          "width": 39,
+          "height": 39,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "1.75px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Sembunyikan customer service",
+          "width": 32,
+          "height": 32,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        },
+        {
+          "tag": "A",
+          "text": "Beranda",
+          "width": 92,
+          "height": 48,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "4px"
+        },
+        {
+          "tag": "A",
+          "text": "CV",
+          "width": 92,
+          "height": 48,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "4px"
+        },
+        {
+          "tag": "A",
+          "text": "Tracker",
+          "width": 92,
+          "height": 48,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "4px"
+        },
+        {
+          "tag": "A",
+          "text": "Profil",
+          "width": 92,
+          "height": 48,
+          "isVisible": true,
+          "isSmall": false,
+          "padding": "4px"
+        }
+      ],
+      "smallCount": 19,
+      "smallElements": [
+        {
+          "tag": "A",
+          "text": "",
+          "width": 219,
+          "height": 32,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Tutup Menu",
+          "width": 31,
+          "height": 31,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "5.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Beranda",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "CV Saya",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Screening & Evaluasi ATS",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Optimasi LinkedIn",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Career IntelligencePRO",
+          "width": 227,
+          "height": 36,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Tracker Lamaran",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Eksplorasi Loker",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Email & Cover Letter",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Pengaturan Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Saran Fitur",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "A",
+          "text": "Lapor Kendala",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8.75px 12.25px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Keluar Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "8px 12px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Kembali",
+          "width": 30,
+          "height": 30,
+          "isVisible": true,
+          "isSmall": true,
+          "padding": "0px"
+        }
+      ]
+    }
+  },
+  "reportViewMobile": {
+    "iPhone-SE-320": {
+      "clientWidth": 320,
+      "scrollWidth": 320,
+      "hasOverflow": false,
+      "overflowCount": 0,
+      "overflowingElements": [],
+      "smallCount": 36,
+      "smallElements": [
+        {
+          "tag": "A",
+          "text": "",
+          "width": 219,
+          "height": 32,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Tutup Menu",
+          "width": 31,
+          "height": 31,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Beranda",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "CV Saya",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Screening & Evaluasi ATS",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Optimasi LinkedIn",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Career IntelligencePRO",
+          "width": 227,
+          "height": 36,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Tracker Lamaran",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Eksplorasi Loker",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Email & Cover Letter",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Pengaturan Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Saran Fitur",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Lapor Kendala",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Keluar Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Kembali",
+          "width": 30,
+          "height": 30,
+          "isVisible": true,
+          "isSmall": true
+        }
+      ]
+    },
+    "iPhone-Standard-375": {
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "hasOverflow": false,
+      "overflowCount": 0,
+      "overflowingElements": [],
+      "smallCount": 38,
+      "smallElements": [
+        {
+          "tag": "A",
+          "text": "",
+          "width": 219,
+          "height": 32,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Tutup Menu",
+          "width": 31,
+          "height": 31,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Beranda",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "CV Saya",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Screening & Evaluasi ATS",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Optimasi LinkedIn",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Career IntelligencePRO",
+          "width": 227,
+          "height": 36,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Tracker Lamaran",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Eksplorasi Loker",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Email & Cover Letter",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Pengaturan Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Saran Fitur",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Lapor Kendala",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Keluar Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Kembali",
+          "width": 30,
+          "height": 30,
+          "isVisible": true,
+          "isSmall": true
+        }
+      ]
+    },
+    "Modern-Mobile-390": {
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "hasOverflow": false,
+      "overflowCount": 0,
+      "overflowingElements": [],
+      "smallCount": 38,
+      "smallElements": [
+        {
+          "tag": "A",
+          "text": "",
+          "width": 219,
+          "height": 32,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Tutup Menu",
+          "width": 31,
+          "height": 31,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Beranda",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "CV Saya",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Screening & Evaluasi ATS",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Optimasi LinkedIn",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Career IntelligencePRO",
+          "width": 227,
+          "height": 36,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Tracker Lamaran",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Eksplorasi Loker",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Email & Cover Letter",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Pengaturan Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Saran Fitur",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "A",
+          "text": "Lapor Kendala",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Keluar Akun",
+          "width": 227,
+          "height": 34,
+          "isVisible": true,
+          "isSmall": true
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Kembali",
+          "width": 30,
+          "height": 30,
+          "isVisible": true,
+          "isSmall": true
+        }
+      ]
+    }
+  },
+  "iosAutoZoomHazards": [],
+  "bottomNavOcclusion": {},
+  "touchTargetAudit": []
+}

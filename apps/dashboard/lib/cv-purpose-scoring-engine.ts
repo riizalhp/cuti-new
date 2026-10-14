@@ -2,6 +2,8 @@ export type CvPurpose =
   | 'job'
   | 'internship'
   | 'fresh_graduate'
+  | 'smk_vokasi'
+  | 'healthcare'
   | 'freelance'
   | 'remote'
   | 'career_switch'
@@ -17,17 +19,18 @@ export type CvPurpose =
 
 /** 8 grup kategori tujuan CV ( dipakai modal pemilihan & filter ). */
 export const CV_PURPOSE_CATEGORIES: Array<{ id: 'career' | 'entry' | 'flexible' | 'academic' | 'social' | 'public' | 'leadership' | 'transition'; title: string; purposes: CvPurpose[] }> = [
-  { id: 'career', title: 'Karier & Profesional', purposes: ['job', 'career_switch', 'promotion', 'overseas'] },
-  { id: 'entry', title: 'Pemula & Mahasiswa', purposes: ['internship', 'fresh_graduate'] },
+  { id: 'career', title: 'Karier & Profesional', purposes: ['job', 'healthcare', 'career_switch', 'overseas', 'promotion'] },
+  { id: 'entry', title: 'Pemula & Sekolah / Kampus', purposes: ['internship', 'fresh_graduate', 'smk_vokasi'] },
+  { id: 'public', title: 'BUMN & Sektor Publik', purposes: ['government'] },
   { id: 'flexible', title: 'Format Fleksibel & Mandiri', purposes: ['freelance', 'remote', 'general'] },
   { id: 'academic', title: 'Akademik & Beasiswa', purposes: ['academic_scholarship'] },
   { id: 'social', title: 'Sosial & Nonprofit', purposes: ['volunteer_ngo'] },
-  { id: 'public', title: 'Sektor Publik', purposes: ['government'] },
   { id: 'leadership', title: 'Kepemimpinan & Wirausaha', purposes: ['executive', 'startup_founder'] },
   { id: 'transition', title: 'Transisi Khusus', purposes: ['career_break'] },
 ];
 
 export interface PurposeWeights {
+  [key: string]: number | undefined;
   experience?: number;
   skills?: number;
   projects?: number;
@@ -150,21 +153,20 @@ export interface ComprehensiveCvScoreResult {
 export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
   job: {
     id: 'job',
-    title: 'Lamar Kerja',
-    badge: 'Full-Time Professional',
+    title: 'Lamar Kerja Swasta',
+    badge: 'Perusahaan Swasta',
     iconName: 'Briefcase',
     category: 'career',
-    objective: 'Mendapatkan panggilan interview untuk posisi pekerjaan profesional tertentu.',
+    objective: 'Mendapatkan panggilan interview untuk posisi pekerjaan di perusahaan swasta atau startup.',
     description: 'Menilai keselarasan kata kunci job description, bukti pencapaian dengan metrik angka konkret, dan pengalaman kerja relevan.',
     weights: {
-      jobTitle: 10,
-      summary: 10,
-      experience: 20,
-      projects: 10,
+      experience: 25,
       skills: 15,
-      achievement: 10,
       keywords: 15,
-      education: 5,
+      achievement: 15,
+      projects: 10,
+      jobTitle: 10,
+      summary: 5,
       atsReadability: 5,
     },
     requiredComponents: ['Kontak Lengkap', 'Ringkasan Profesional', 'Target Posisi', 'Pengalaman Kerja / Relevan', 'Keahlian (Skills)', 'Pendidikan'],
@@ -174,22 +176,20 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
   },
   internship: {
     id: 'internship',
-    title: 'Magang / Internship',
-    badge: 'Student & Early Talent',
+    title: 'Magang & PKL Kampus',
+    badge: 'Mahasiswa & Pelajar',
     iconName: 'GraduationCap',
     category: 'entry',
-    objective: 'Mendapatkan posisi magang untuk mahasiswa atau talenta pemula tanpa penalti minim pengalaman kerja.',
+    objective: 'Mendapatkan posisi magang atau program studi independen tanpa penalti minim pengalaman kerja.',
     description: 'Menilai potensi melalui proyek kuliah/pribadi, organisasi, prestasi, dan keterampilan yang siap diasah di dunia kerja.',
     weights: {
+      projects: 25,
+      skills: 20,
       education: 15,
-      skills: 15,
-      projects: 20,
-      internship: 15,
-      organization: 10,
+      organization: 15,
       achievement: 10,
-      certification: 5,
-      summary: 5,
-      keywords: 5,
+      summary: 10,
+      atsReadability: 5,
     },
     requiredComponents: ['Kontak Lengkap', 'Ringkasan Minat Karier', 'Pendidikan Aktif/Terakhir', 'Proyek / Tugas Besar', 'Keahlian (Skills)'],
     highImpactComponents: ['Proyek Nyata', 'Pengalaman Magang/Kepanitiaan', 'Organisasi Kampus', 'Sertifikat & Pelatihan', 'Prestasi / Lomba'],
@@ -198,32 +198,91 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
   },
   fresh_graduate: {
     id: 'fresh_graduate',
-    title: 'Fresh Graduate',
-    badge: 'First Job Ready',
+    title: 'Fresh Graduate Kuliah',
+    badge: 'Lulusan D3 / S1',
     iconName: 'Sparkles',
     category: 'entry',
-    objective: 'Membuktikan potensi, kapabilitas nyata, dan kesiapan kerja lulusan baru.',
+    objective: 'Membuktikan potensi, kapabilitas nyata, dan kesiapan kerja lulusan baru perguruan tinggi.',
     description: 'Menilai portofolio proyek terapan, magang, keaktifan organisasi, dan sertifikasi keahlian spesifik industri.',
     weights: {
-      education: 15,
+      internship: 20,
       projects: 20,
       skills: 15,
-      internship: 15,
+      education: 15,
+      keywords: 10,
       organization: 10,
-      achievement: 10,
-      certification: 5,
+      achievement: 5,
       summary: 5,
-      keywords: 5,
     },
     requiredComponents: ['Kontak Lengkap', 'Ringkasan Profesional', 'Pendidikan & IPK', 'Proyek Portofolio', 'Keahlian Teknis & Soft Skills'],
     highImpactComponents: ['Proyek Akhir / Capstone', 'Pengalaman Magang', 'Peran Kepemimpinan Organisasi', 'Sertifikat Kompetensi'],
     optionalComponents: ['Prestasi Akademik/Non-akademik', 'Aktivitas Sukarela', 'Pelatihan Industri'],
     evaluationFocusText: 'Skor tidak jatuh jika belum punya pengalaman kerja tetap, asalkan proyek, skill, dan pendidikan terdokumentasi kuat.',
   },
+  smk_vokasi: {
+    id: 'smk_vokasi',
+    title: 'Lulusan SMK & Vokasi',
+    badge: 'Praktik & Sertifikasi',
+    iconName: 'Wrench',
+    category: 'entry',
+    objective: 'Membuktikan kompetensi keahlian terapan, pengalaman PKL industri, dan kesiapan kerja lulusan vokasi.',
+    description: 'Menilai nilai Praktik Kerja Lapangan (PKL), sertifikat kompetensi BNSP/UKK, dan keahlian teknis operasional tanpa penalti ketiadaan gelar sarjana.',
+    weights: {
+      internship: 25,
+      certification: 20,
+      skills: 20,
+      projects: 15,
+      education: 10,
+      summary: 5,
+      atsReadability: 5,
+    },
+    requiredComponents: ['Kontak Lengkap', 'Ringkasan Minat Kejuruan', 'Pendidikan SMK / Vokasi', 'Pengalaman PKL / Praktik Industri', 'Keahlian Teknis & Alat Kerja'],
+    highImpactComponents: ['Sertifikasi BNSP / LSP / UKK', 'Pengalaman PKL di Industri Relevan', 'Proyek Tugas Akhir / Produk Kejuruan', 'Kepatuhan Keselamatan Kerja (K3)'],
+    optionalComponents: ['Prestasi Lomba Keterampilan Siswa (LKS)', 'Ekstrakurikuler Kejuruan', 'Pelatihan Teknis Tambahan'],
+    evaluationFocusText: 'Bobot terbesar bertumpu pada pengalaman PKL, kepemilikan sertifikasi kompetensi resmi (BNSP/UKK), dan penguasaan alat teknis industri.',
+  },
+  healthcare: {
+    id: 'healthcare',
+    title: 'Tenaga Kesehatan & Medis',
+    badge: 'STR & Lisensi Klinis',
+    iconName: 'HeartPulse',
+    category: 'career',
+    objective: 'Mendapatkan posisi klinis di rumah sakit, klinik, atau instansi kesehatan dengan verifikasi kompetensi medis resmi.',
+    description: 'Menilai keabsahan lisensi resmi (STR/SIP), riwayat praktik klinis/stase/RS, sertifikasi kegawatdaruratan (BTCLS/ACLS), dan kepatuhan standar pelayanan medis.',
+    weights: {
+      certification: 25,
+      experience: 25,
+      education: 20,
+      skills: 15,
+      summary: 10,
+      atsReadability: 5,
+    },
+    requiredComponents: [
+      'Kontak Lengkap & Lokasi',
+      'Ringkasan Profil Nakes & Spesialisasi',
+      'Pendidikan Profesi / Vokasi Kesehatan',
+      'Pengalaman Praktik Klinis / Rumah Sakit',
+      'Nomor & Status Keaktifan STR',
+      'Keahlian Klinis & Alat Medis',
+    ],
+    highImpactComponents: [
+      'STR Aktif (Surat Tanda Registrasi)',
+      'Sertifikasi Gawat Darurat (BTCLS / ACLS / ATLS / PPGD)',
+      'Pengalaman Stase / Bangsal / ICU / IGD / Poliklinik',
+      'Kepatuhan SOP Akreditasi RS & K3 Rumah Sakit',
+      'Sertifikat Pelatihan Tambahan (e.g. Manajemen Laktasi, EKG, K3RS)',
+    ],
+    optionalComponents: [
+      'Pengalaman Organisasi Profesi (IDI / PPNI / IBI / IAI)',
+      'Bakti Sosial Medis / Pengabdian Masyarakat',
+      'Keahlian SIMRS / SATUSEHAT / Rekam Medis Elektronik',
+    ],
+    evaluationFocusText: 'Verifikasi legalitas lisensi medis (STR/SIP), kepemilikan sertifikasi kegawatdaruratan hidup (BTCLS/ACLS), serta kejelasan unit kerja/stase klinis.',
+  },
   freelance: {
     id: 'freelance',
-    title: 'Freelance',
-    badge: 'Portfolio & Client Results',
+    title: 'Freelance & Portofolio',
+    badge: 'Portofolio Klien',
     iconName: 'Laptop',
     category: 'flexible',
     objective: 'Meyakinkan klien dan merekrut proyek berbasis hasil nyata dan portofolio.',
@@ -245,8 +304,8 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
   },
   remote: {
     id: 'remote',
-    title: 'Remote Job',
-    badge: 'Async & Autonomy',
+    title: 'Kerja Remote & WFH',
+    badge: 'Kerja Jarak Jauh',
     iconName: 'Globe',
     category: 'flexible',
     objective: 'Membuktikan kemampuan kerja mandiri, komunikasi asinkron, dan kolaborasi jarak jauh.',
@@ -269,8 +328,8 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
   },
   career_switch: {
     id: 'career_switch',
-    title: 'Career Switch',
-    badge: 'Transferable Value',
+    title: 'Lamar di Luar Jurusan',
+    badge: 'Lintas Bidang',
     iconName: 'RefreshCw',
     category: 'career',
     objective: 'Menyoroti keahlian transferable dan proyek baru untuk beralih ke bidang industri yang berbeda.',
@@ -315,8 +374,8 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
   },
   academic_scholarship: {
     id: 'academic_scholarship',
-    title: 'Beasiswa / Akademik',
-    badge: 'Research & Excellence',
+    title: 'Beasiswa & Studi Lanjut',
+    badge: 'Akademik & Riset',
     iconName: 'Award',
     category: 'academic',
     objective: 'Mendapatkan beasiswa studi lanjut, program pertukaran, riset ilmiah, atau posisi akademisi.',
@@ -339,11 +398,11 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
   },
   overseas: {
     id: 'overseas',
-    title: 'Kerja di Luar Negeri',
-    badge: 'Global & International',
+    title: 'Kerja ke Luar Negeri',
+    badge: 'Program Global',
     iconName: 'Plane',
     category: 'career',
-    objective: 'Mendapatkan pekerjaan di perusahaan internasional atau relokasi kerja ke luar negeri.',
+    objective: 'Mendapatkan pekerjaan di perusahaan internasional atau program kerja ke luar negeri.',
     description: 'Menilai kemahiran bahasa asing, pengalaman kolaborasi lintas budaya, dan kepatuhan format ATS internasional.',
     weights: {
       experience: 20,
@@ -364,7 +423,7 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
   general: {
     id: 'general',
     title: 'CV Umum / Master CV',
-    badge: 'Comprehensive Master',
+    badge: 'Master Cadangan',
     iconName: 'FileText',
     category: 'flexible',
     objective: 'Menyimpan profil master yang lengkap, terstruktur, dan siap dikustomisasi ke berbagai target lowongan.',
@@ -411,12 +470,12 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
   },
   government: {
     id: 'government',
-    title: 'Kepemerintahan (CPNS/BUMN)',
-    badge: 'Public Sector',
+    title: 'BUMN & Instansi Resmi',
+    badge: 'Seleksi FHCI & Publik',
     iconName: 'Landmark',
     category: 'public',
-    objective: 'Memenuhi standar administratif seleksi CPNS/BUMN dengan riwayat pendidikan formal dan sertifikasi resmi.',
-    description: 'Menilai kelengkapan data administratif, pendidikan formal, sertifikasi resmi, dan rekam jejak kerja yang terverifikasi.',
+    objective: 'Memenuhi standar administratif seleksi Rekrutmen Bersama BUMN (FHCI), instansi publik, dan kementerian.',
+    description: 'Menilai kelengkapan berkas resmi, kesesuaian jenjang pendidikan, sertifikasi kompetensi/bahasa, dan rekam jejak kerja yang terverifikasi.',
     weights: {
       education: 25,
       experience: 20,
@@ -430,7 +489,7 @@ export const CV_PURPOSE_PROFILES: Record<CvPurpose, PurposeProfileConfig> = {
     requiredComponents: ['Kontak Lengkap', 'Ringkasan Profil Diri', 'Data Pendidikan Formal Lengkap', 'Riwayat Pekerjaan / Organisasi', 'Sertifikasi Resmi (TOEFL, AKP, dll)'],
     highImpactComponents: ['IPK & Tahun Lulus Jelas', 'Sertifikat Kompetensi Resmi', 'NIP / Status Kepegawaian (jika ada)', 'Pengalaman Kepanitiaan Resmi'],
     optionalComponents: ['Kursus/TOEFL Terstruktur', 'Prestasi', 'Referensi'],
-    evaluationFocusText: 'Kelengkapan administratif dan formalitas dokumen jauh lebih menentukan daripada gaya penulisan kreatif.',
+    evaluationFocusText: 'Kelengkapan administratif, kejelasan riwayat pendidikan, dan kepatuhan format formal menjadi penentu utama lolos verifikasi.',
   },
   executive: {
     id: 'executive',
@@ -675,17 +734,21 @@ export function evaluateCvComprehensive(
   else missingItems.push('Riwayat Pendidikan');
 
   if (experiences.length > 0) passedItems.push(`Pengalaman Kerja (${experiences.length} posisi)`);
-  else if (purpose === 'job' || purpose === 'remote' || purpose === 'promotion' || purpose === 'overseas') {
-    missingItems.push('Pengalaman Kerja Relevan');
+  else if (purpose === 'job' || purpose === 'healthcare' || purpose === 'remote' || purpose === 'promotion' || purpose === 'overseas') {
+    missingItems.push('Pengalaman Kerja / Praktik Klinis Relevan');
   }
 
   if (projects.length > 0) passedItems.push(`Proyek & Portofolio (${projects.length} proyek)`);
-  else if (purpose === 'fresh_graduate' || purpose === 'internship' || purpose === 'freelance' || purpose === 'career_switch') {
+  else if (purpose === 'fresh_graduate' || purpose === 'internship' || purpose === 'freelance' || purpose === 'career_switch' || purpose === 'smk_vokasi') {
     missingItems.push('Proyek & Portofolio Nyata');
   }
 
   if (organizations.length > 0) passedItems.push('Pengalaman Organisasi');
-  if (certifications.length > 0) passedItems.push('Sertifikasi Kompetensi');
+  if (certifications.length > 0) {
+    passedItems.push(purpose === 'healthcare' ? 'Nomor STR / Sertifikasi Klinis' : 'Sertifikasi Kompetensi');
+  } else if (purpose === 'healthcare') {
+    missingItems.push('Nomor STR Aktif & Sertifikasi Klinis (BTCLS/ACLS/K3RS)');
+  }
 
   let completenessScore = 60;
   if (hasName && hasEmail && hasPhone) completenessScore += 10;
@@ -862,8 +925,27 @@ export function evaluateCvComprehensive(
 
   // Certification
   if (weights.certification) {
-    const score = certifications.length >= 1 ? 95 : 55;
-    addComponent('certification', 'Sertifikasi & Pelatihan', score, score > 70 ? 'optimal' : 'needs_work', certifications.length > 0 ? `${certifications.length} sertifikat dicantumkan` : 'Tambahkan sertifikasi kompetensi industri');
+    let score = certifications.length >= 1 ? 95 : 55;
+    let feedback = certifications.length > 0 ? `${certifications.length} sertifikat dicantumkan` : 'Tambahkan sertifikasi kompetensi industri';
+    if (purpose === 'healthcare') {
+      const hasStrOrClinical = certifications.some((c) =>
+        /str|surat tanda registrasi|btcls|acls|atls|sip|ppgd|k3rs/i.test((c.name || '') + ' ' + (c.issuer || ''))
+      );
+      if (hasStrOrClinical) {
+        score = 98;
+        feedback = 'STR aktif / sertifikasi kegawatdaruratan medis terverifikasi';
+      } else {
+        score = 45;
+        feedback = 'Wajib mencantumkan nomor STR aktif atau sertifikasi klinis (BTCLS/ACLS)';
+      }
+    }
+    addComponent(
+      'certification',
+      purpose === 'healthcare' ? 'STR & Lisensi Klinis' : 'Sertifikasi & Pelatihan',
+      score,
+      score > 70 ? 'optimal' : 'needs_work',
+      feedback
+    );
   }
 
   // Client Experience (Freelance)
@@ -1033,6 +1115,20 @@ export function evaluateCvComprehensive(
       title: 'Cantumkan Tools Kolaborasi Jarak Jauh',
       suggestion: 'Sebutkan kebiasaan memakai tools modern seperti Slack, Notion, Jira, Figma, atau GitHub untuk membuktikan kesiapan kerja mandiri dan asinkron.',
       impactBonus: 5,
+    });
+  } else if (
+    purpose === 'healthcare' &&
+    !certifications.some((c) => /str|surat tanda registrasi|btcls|acls|atls|sip|ppgd|k3rs/i.test((c.name || '') + ' ' + (c.issuer || '')))
+  ) {
+    actionableImprovements.push({
+      id: 'fix-healthcare-str',
+      priority: 'high',
+      dimension: 'completeness',
+      title: 'Cantumkan Nomor STR & Sertifikasi Gawat Darurat',
+      suggestion: 'Rumah sakit dan klinik mewajibkan Surat Tanda Registrasi (STR) aktif dan sertifikat kegawatdaruratan (BTCLS/ACLS/PPGD). Cantumkan nomor registrasi dan masa berlaku dengan jelas.',
+      exampleBefore: 'Sertifikat Seminar Kesehatan Nasional',
+      exampleAfter: 'Surat Tanda Registrasi (STR) Aktif KTKI (No. Reg: 1234567890) & Sertifikasi BTCLS HIPGABI 2023',
+      impactBonus: 10,
     });
   }
 

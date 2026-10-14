@@ -1,13 +1,15 @@
 ---
-// LowonganTerbaruGrid.astro - Kartu Lowongan Terbaru dari DATABASE
+// LowonganTerbaruGrid.astro - Peluang Karier Terverifikasi (3x4 Grid di Sisi Kiri + Perusahaan Trending di Sisi Kanan)
 import { lowonganList, ensureData } from '../data/mock';
-import CompanyLogo from './CompanyLogo.astro';
+import { getPortalTotalJobsCount } from '../lib/data';
+import { CV_BUILDER_URL, TRACKER_URL } from '../lib/urls';
+import CutoutCorner from './common/CutoutCorner.astro';
 
 await ensureData();
+const realTotalJobsCount = await getPortalTotalJobsCount();
 
 interface JobCard {
   company: string;
-  companyLogo?: string;
   companyWebsite?: string;
   type: string;
   location: string;
@@ -20,41 +22,132 @@ interface JobCard {
   slug: string;
 }
 
-// Ambil 8 lowongan terbaru dari DB (fallback list kosong jika DB gagal)
-const dbJobs: JobCard[] = [...lowonganList].slice(0, 8).map((j) => ({
+// Siapkan data untuk 2 halaman showcase di beranda (Halaman 1 & Halaman 2, masing-masing 11 loker)
+const allRawJobs = [...lowonganList];
+const totalJobsCount = realTotalJobsCount > 0 ? realTotalJobsCount : allRawJobs.length;
+
+const formatJob = (j: any, idx: number, pageOffset: number): JobCard => ({
   company: j.company,
-  companyLogo: j.companyLogo,
   companyWebsite: j.companyWebsite,
   type: j.type,
-  location: j.geo,
+  location: j.geo || j.location || 'Indonesia',
   position: j.title,
   postedTime: j.postedAt,
   salary: j.salary,
   experience: j.experience,
-  badge: j.badge,
+  badge: idx === 1 ? 'Hot' : idx === 5 ? 'Baru' : j.badge,
+  isPromoted: (idx === 2 && pageOffset === 0) || (idx === 1 && pageOffset === 11) ? true : j.isPromoted,
   slug: j.slug,
-}));
+});
 
-const jobs: JobCard[] = dbJobs.length ? dbJobs : [];
+const page1Jobs: JobCard[] = allRawJobs.slice(0, 11).map((j, idx) => formatJob(j, idx, 0));
+
+// Untuk Halaman 2, ambil data berikutnya. Jika data kurang dari 22, rotasikan sisa data agar pas 11 kartu.
+const p2Slice = allRawJobs.slice(11, 22);
+const p2Needed = 11 - p2Slice.length;
+const page2Raw = p2Needed > 0 ? [...p2Slice, ...allRawJobs.slice(0, p2Needed)] : p2Slice;
+const page2Jobs: JobCard[] = page2Raw.map((j, idx) => formatJob(j, idx, 11));
+
+const jobs: JobCard[] = page1Jobs;
+
+// Agregasi perusahaan trending dari lowongan aktif di database (tanpa placeholder 'perusahaan')
+const companyCountMap = new Map<string, { count: number; location: string; category: string }>();
+for (const job of lowonganList) {
+  if (!job.company) continue;
+  const cleanName = job.company.trim();
+  if (cleanName.toLowerCase() === 'perusahaan') continue;
+  const existing = companyCountMap.get(cleanName);
+  if (existing) {
+    existing.count += 1;
+  } else {
+    companyCountMap.set(cleanName, {
+      count: 1,
+      location: job.geo || job.location || 'Indonesia',
+      category: job.category || 'Umum',
+    });
+  }
+}
+
+const calculatedTrending = Array.from(companyCountMap.entries())
+  .map(([name, data]) => ({
+    name,
+    jobsCount: data.count,
+    location: data.location,
+    category: data.category,
+  }))
+  .sort((a, b) => b.jobsCount - a.jobsCount)
+  .slice(0, 5);
+
+const displayCompanies = calculatedTrending;
+
+interface SpotlightItem {
+  id: string;
+  badge1: string;
+  badge2: string;
+  title: string;
+  trackHighlight: string;
+  trackAudience: string;
+  description: string;
+  ctaText: string;
+  ctaLink: string;
+}
+
+const spotlightItems: SpotlightItem[] = [
+  {
+    id: 'bumn-swasta-2026',
+    badge1: 'Mitra Pilihan',
+    badge2: '100% Terverifikasi',
+    title: 'Program Rekrutmen Terbuka BUMN & Swasta 2026',
+    trackHighlight: 'Jalur Bebas Biaya',
+    trackAudience: 'Fresh Graduate & SMK',
+    description: 'Proses seleksi transparan langsung ke rekruter resmi tanpa perantara calo.',
+    ctaText: 'Lihat Lowongan Ramah Pemula',
+    ctaLink: '/lowongan?q=fresh+graduate',
+  },
+  {
+    id: 'magang-bumn-2026',
+    badge1: 'Magang Nasional',
+    badge2: 'Uang Saku Resmi',
+    title: 'Program Magang BUMN & Korporasi Strategis',
+    trackHighlight: 'Sertifikat Industri',
+    trackAudience: 'Mahasiswa & Lulusan Baru',
+    description: 'Praktik kerja nyata di unit bisnis terkemuka dengan uang saku resmi dan bimbingan mentor profesional.',
+    ctaText: 'Eksplor Program Magang',
+    ctaLink: '/lowongan?q=magang',
+  },
+  {
+    id: 'tech-accelerator-2026',
+    badge1: 'Jalur Unggulan',
+    badge2: 'Remote & On-site',
+    title: 'Hiring Khusus Talenta Digital & Tech Starter',
+    trackHighlight: 'Portofolio Diutamakan',
+    trackAudience: 'IT, Desain, & Data',
+    description: 'Akses langsung ke hiring manager tech company tanpa batasan almamater.',
+    ctaText: 'Lihat Lowongan Tech Starter',
+    ctaLink: '/lowongan?q=remote',
+  },
+];
 ---
 
 <section id="lowongan" class="py-12 sm:py-16 bg-[#f4f3ee] border-b border-[#d7d6cf]/80 scroll-mt-24">
   <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-7">
       <div>
-        <div class="section-label mb-2.5">
+        <div class="section-label mb-2">
           <span>01</span>
           <i></i>
           <span>LOWONGAN TERBARU</span>
         </div>
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#101010] tracking-tight">
+        <h2 class="text-2xl sm:text-3xl font-bold text-[#101010] tracking-tight">
           Peluang karier terverifikasi,<br class="hidden sm:inline" />
           <em>siap kamu lamar.</em>
         </h2>
-        <p class="text-xs sm:text-sm text-[#6e6d68] mt-2 leading-relaxed font-medium">
-          Daftar lowongan kerja aktif dari korporasi terpercaya, BUMN, dan tech company terkemuka di Indonesia.
+        <p class="text-xs sm:text-sm text-[#6e6d68] mt-2 leading-relaxed font-medium max-w-xl">
+          Kurasi lowongan kerja aktif dari berbagai korporasi, BUMN, dan tech company terkemuka di Indonesia.
         </p>
       </div>
+
       <a
         href="/lowongan"
         class="inline-flex items-center gap-2 px-4.5 py-2 rounded-full border border-[#d7d6cf] bg-white hover:bg-white hover:border-[#101010] text-xs font-bold text-[#101010] shadow-xs transition-all shrink-0 self-start sm:self-auto group"
@@ -66,71 +159,929 @@ const jobs: JobCard[] = dbJobs.length ? dbJobs : [];
       </a>
     </div>
 
-    <!-- 4 Cards Grid with Rich Consistent Metadata -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4.5">
-      {jobs.length === 0 ? (
-        <div class="col-span-full text-center py-12 text-sm text-[#6e6d68]">
-          Belum ada lowongan tersinkron. Data diperbarui otomatis setiap malam jam 01.00 WIB.
+    <!-- Main Content: Sisi Kiri (3x4 Grid Lowongan & Iklan) & Sisi Kanan (Perusahaan Trending & Ads Unit) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-7">
+
+      <!-- Sisi Kiri (8 cols): 3x4 Grid (3 Kolom x 4 Baris = 12 Slot: 11 Lowongan + 1 Iklan 1:1) -->
+      <div class="lg:col-span-8 flex flex-col justify-between h-auto lg:h-full">
+        <div class="flex items-center justify-between mb-3.5">
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-bold text-[#101010]">Daftar Lowongan Terkurasi</h3>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#1738D1] border border-blue-200">
+              Terverifikasi HRD
+            </span>
+          </div>
+          <span class="text-[11px] font-medium text-[#6e6d68]">
+            Menampilkan 12 dari 18.000+ loker aktif
+          </span>
         </div>
-      ) : (
-        jobs.map((job) => (
-          <a
-            href={`/lowongan/${job.slug}`}
-            class="group bg-white rounded-2xl border border-[#d7d6cf] p-5 flex flex-col justify-between hover:border-[#0000ff]/30 hover:shadow-[0_12px_30px_-4px_rgba(16,16,16,0.08)] hover:-translate-y-1 transition-all duration-200 relative overflow-hidden"
-          >
-            <div>
-              <!-- Top Row: Logo Placeholder + Badge -->
-              <div class="flex items-start justify-between gap-3 mb-3.5">
-                <CompanyLogo name={job.company} logoUrl={job.companyLogo} website={job.companyWebsite} size="md" />
 
-                {job.isPromoted ? (
-                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200/80 flex items-center gap-1 shadow-2xs">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                    Promoted
-                  </span>
-                ) : job.badge ? (
-                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#0000ff] border border-blue-100">
-                    {job.badge}
-                  </span>
-                ) : null}
+        <!-- Panels Container (Halaman 1 & Halaman 2 In-Place Toggle) -->
+        <div id="job-grid-panels" class="relative">
+          {jobs.length === 0 ? (
+            <div class="text-center py-10 text-xs sm:text-sm text-[#6e6d68] bg-white rounded-xl border border-[#d7d6cf]">
+              Belum ada lowongan tersinkron. Data lowongan diperbarui secara berkala.
+            </div>
+          ) : (
+            <>
+              <!-- Panel Halaman 1 (11 Loker + 1 Iklan CV Builder) -->
+              <div id="job-grid-page-1" data-job-page-panel="1" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-3.5">
+                {/* 4 Loker Pertama (Slot 1, 2, 3, 4) */}
+                {page1Jobs.slice(0, 4).map((job) => (
+                  <a
+                    href={`/lowongan/${job.slug}`}
+                    class="group bg-white rounded-xl border border-[#d7d6cf] p-3.5 flex flex-col justify-between hover:border-[#1738D1]/40 hover:shadow-[0_8px_20px_-4px_rgba(16,16,16,0.06)] hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden"
+                  >
+                    <div>
+                      <div class="flex items-center justify-between gap-1.5 mb-1.5">
+                        <span class="text-[11px] font-bold text-[#6e6d68] uppercase tracking-wider truncate">
+                          {job.company}
+                        </span>
+                        {job.badge ? (
+                          <span class={`px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${
+                            job.badge === 'Hot' ? 'bg-amber-50 text-amber-800 border border-amber-200/80' : 'bg-blue-50 text-[#1738D1] border border-blue-100'
+                          }`}>
+                            {job.badge}
+                          </span>
+                        ) : null}
+                      </div>
+                      <h3 class="text-xs sm:text-[13px] font-bold text-[#101010] leading-snug line-clamp-2 group-hover:text-[#1738D1] transition mb-1.5 min-h-[2rem] flex items-center">
+                        {job.position}
+                      </h3>
+                      <div class="flex items-center gap-1.5 text-[10.5px] text-[#6e6d68] font-medium mb-2.5 flex-wrap">
+                        <span class="inline-flex items-center gap-1 text-[#101010] font-semibold">
+                          <svg class="w-3 h-3 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          {job.location}
+                        </span>
+                        <span>·</span>
+                        <span>{job.type}</span>
+                      </div>
+                    </div>
+                    <div class="pt-2.5 border-t border-[#d7d6cf]/60 flex flex-col gap-1.5 mt-auto">
+                      <div class="flex items-center justify-between gap-1.5">
+                        <span class="font-bold text-[#101010] text-xs truncate">{job.salary}</span>
+                        <span class="text-[10px] font-semibold text-[#1738D1] group-hover:translate-x-0.5 transition-transform shrink-0 flex items-center gap-0.5">
+                          Lihat
+                          <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </span>
+                      </div>
+                      <div class="flex items-center gap-1.5 text-[10px] text-[#6e6d68]">
+                        <svg class="w-3 h-3 text-[#6e6d68] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="truncate">{job.postedTime}</span>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+
+                {/* SLOT IKLAN 1:1 DI BARIS 2 KOLOM 2 (Halaman 1: CV Builder ATS) */}
+                <div class="relative bg-white rounded-xl border border-dashed border-[#1738D1]/40 p-3.5 flex flex-col justify-between hover:border-[#1738D1] hover:shadow-[0_8px_20px_-4px_rgba(23,56,209,0.06)] transition-all duration-200 overflow-hidden group">
+                  <div class="absolute inset-0 bg-gradient-to-br from-[#1738D1]/[0.03] via-transparent to-amber-500/[0.04] pointer-events-none"></div>
+                  <div>
+                    <div class="flex items-center justify-between gap-1.5 mb-1.5 relative z-10">
+                      <div class="flex items-center gap-1">
+                        <span class="px-1.5 py-0.5 rounded-full text-[8.5px] font-extrabold uppercase tracking-wider bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf]">
+                          REKOMENDASI
+                        </span>
+                        <span class="text-[9px] font-bold text-[#1738D1]">PILIHAN</span>
+                      </div>
+                    </div>
+                    <h3 class="text-xs sm:text-[13px] font-bold text-[#101010] leading-snug group-hover:text-[#1738D1] transition mb-1.5 min-h-[2rem] flex items-center relative z-10">
+                      Uji Format Resume Standar HRD & Lolos Screening
+                    </h3>
+                    <p class="text-[10px] text-[#6e6d68] leading-relaxed font-medium mb-2 relative z-10 line-clamp-2">
+                      Pastikan susunan CV kamu terbaca jelas oleh rekruter.
+                    </p>
+                  </div>
+                  <div class="pt-2.5 border-t border-[#d7d6cf]/60 flex flex-col gap-1.5 relative z-10 mt-auto">
+                    <div class="flex items-center justify-between gap-1.5">
+                      <span class="text-[10px] font-bold text-[#1738D1]">
+                        Akses Gratis
+                      </span>
+                      <a
+                        href={CV_BUILDER_URL}
+                        class="px-2.5 py-1 rounded-full bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white text-[10px] font-bold transition shadow-xs flex items-center gap-1"
+                      >
+                        <span>Coba</span>
+                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                      </a>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-[10px] text-[#6e6d68]">
+                      <svg class="w-3 h-3 text-[#22c55e] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span class="truncate">Format standar ATS rekruter</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 7 Loker Berikutnya untuk Desktop (Slot 6 sampai 12) */}
+                {page1Jobs.slice(4, 11).map((job) => (
+                  <a
+                    href={`/lowongan/${job.slug}`}
+                    class="hidden sm:flex group bg-white rounded-xl border border-[#d7d6cf] p-3.5 flex-col justify-between hover:border-[#1738D1]/40 hover:shadow-[0_8px_20px_-4px_rgba(16,16,16,0.06)] hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden"
+                  >
+                    <div>
+                      <div class="flex items-center justify-between gap-1.5 mb-1.5">
+                        <span class="text-[11px] font-bold text-[#6e6d68] uppercase tracking-wider truncate">
+                          {job.company}
+                        </span>
+                        {job.badge ? (
+                          <span class={`px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${
+                            job.badge === 'Hot' ? 'bg-amber-50 text-amber-800 border border-amber-200/80' : 'bg-blue-50 text-[#1738D1] border border-blue-100'
+                          }`}>
+                            {job.badge}
+                          </span>
+                        ) : null}
+                      </div>
+                      <h3 class="text-xs sm:text-[13px] font-bold text-[#101010] leading-snug line-clamp-2 group-hover:text-[#1738D1] transition mb-1.5 min-h-[2rem] flex items-center">
+                        {job.position}
+                      </h3>
+                      <div class="flex items-center gap-1.5 text-[10.5px] text-[#6e6d68] font-medium mb-2.5 flex-wrap">
+                        <span class="inline-flex items-center gap-1 text-[#101010] font-semibold">
+                          <svg class="w-3 h-3 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          {job.location}
+                        </span>
+                        <span>·</span>
+                        <span>{job.type}</span>
+                      </div>
+                    </div>
+                    <div class="pt-2.5 border-t border-[#d7d6cf]/60 flex flex-col gap-1.5 mt-auto">
+                      <div class="flex items-center justify-between gap-1.5">
+                        <span class="font-bold text-[#101010] text-xs truncate">{job.salary}</span>
+                        <span class="text-[10px] font-semibold text-[#1738D1] group-hover:translate-x-0.5 transition-transform shrink-0 flex items-center gap-0.5">
+                          Lihat
+                          <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </span>
+                      </div>
+                      <div class="flex items-center gap-1.5 text-[10px] text-[#6e6d68]">
+                        <svg class="w-3 h-3 text-[#6e6d68] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="truncate">{job.postedTime}</span>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+
+                {/* Progressive Disclosure untuk Mobile: Buka sisa loker hanya jika diminta */}
+                <details class="sm:hidden col-span-full group/expand">
+                  <summary class="list-none w-full py-2.5 rounded-full bg-white hover:bg-[#eae8e0] text-[#101010] text-xs font-bold text-center border border-[#d7d6cf] cursor-pointer shadow-xs transition flex items-center justify-center gap-1.5 my-1">
+                    <span>Tampilkan 7 Lowongan Lainnya</span>
+                    <svg class="w-3.5 h-3.5 transition-transform group-open/expand:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div class="flex flex-col gap-3 mt-3">
+                    {page1Jobs.slice(4, 11).map((job) => (
+                      <a
+                        href={`/lowongan/${job.slug}`}
+                        class="group bg-white rounded-xl border border-[#d7d6cf] p-3.5 flex flex-col justify-between hover:border-[#1738D1]/40 hover:shadow-[0_8px_20px_-4px_rgba(16,16,16,0.06)] transition-all duration-200 relative overflow-hidden"
+                      >
+                        <div>
+                          <div class="flex items-center justify-between gap-1.5 mb-1.5">
+                            <span class="text-[11px] font-bold text-[#6e6d68] uppercase tracking-wider truncate">
+                              {job.company}
+                            </span>
+                            {job.badge ? (
+                              <span class={`px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${
+                                job.badge === 'Hot' ? 'bg-amber-50 text-amber-800 border border-amber-200/80' : 'bg-blue-50 text-[#1738D1] border border-blue-100'
+                              }`}>
+                                {job.badge}
+                              </span>
+                            ) : null}
+                          </div>
+                          <h3 class="text-xs font-bold text-[#101010] leading-snug line-clamp-2 group-hover:text-[#1738D1] transition mb-1.5 flex items-center">
+                            {job.position}
+                          </h3>
+                          <div class="flex items-center gap-1.5 text-[10.5px] text-[#6e6d68] font-medium mb-2.5 flex-wrap">
+                            <span class="inline-flex items-center gap-1 text-[#101010] font-semibold">
+                              <svg class="w-3 h-3 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                              {job.location}
+                            </span>
+                            <span>·</span>
+                            <span>{job.type}</span>
+                          </div>
+                        </div>
+                        <div class="pt-2.5 border-t border-[#d7d6cf]/60 flex flex-col gap-1.5 mt-auto">
+                          <div class="flex items-center justify-between gap-1.5">
+                            <span class="font-bold text-[#101010] text-xs truncate">{job.salary}</span>
+                            <span class="text-[10px] font-semibold text-[#1738D1] shrink-0 flex items-center gap-0.5">
+                              Lihat
+                              <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                              </svg>
+                            </span>
+                          </div>
+                          <div class="flex items-center gap-1.5 text-[10px] text-[#6e6d68]">
+                            <svg class="w-3 h-3 text-[#6e6d68] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="truncate">{job.postedTime}</span>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </details>
               </div>
 
-              <!-- Company Name -->
-              <p class="text-xs font-bold text-[#6e6d68] truncate mb-1">
-                {job.company}
-              </p>
+              <!-- Panel Halaman 2 (11 Loker Berikutnya + 1 Edukasi/Tools Tracker) -->
+              <div id="job-grid-page-2" data-job-page-panel="2" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-3.5 hidden">
+                {/* 4 Loker Pertama Halaman 2 (Slot 1, 2, 3, 4) */}
+                {page2Jobs.slice(0, 4).map((job) => (
+                  <a
+                    href={`/lowongan/${job.slug}`}
+                    class="group bg-white rounded-xl border border-[#d7d6cf] p-3.5 flex flex-col justify-between hover:border-[#1738D1]/40 hover:shadow-[0_8px_20px_-4px_rgba(16,16,16,0.06)] hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden"
+                  >
+                    <div>
+                      <div class="flex items-center justify-between gap-1.5 mb-1.5">
+                        <span class="text-[11px] font-bold text-[#6e6d68] uppercase tracking-wider truncate">
+                          {job.company}
+                        </span>
+                        {job.badge ? (
+                          <span class={`px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${
+                            job.badge === 'Hot' ? 'bg-amber-50 text-amber-800 border border-amber-200/80' : 'bg-blue-50 text-[#1738D1] border border-blue-100'
+                          }`}>
+                            {job.badge}
+                          </span>
+                        ) : null}
+                      </div>
+                      <h3 class="text-xs sm:text-[13px] font-bold text-[#101010] leading-snug line-clamp-2 group-hover:text-[#1738D1] transition mb-1.5 min-h-[2rem] flex items-center">
+                        {job.position}
+                      </h3>
+                      <div class="flex items-center gap-1.5 text-[10.5px] text-[#6e6d68] font-medium mb-2.5 flex-wrap">
+                        <span class="inline-flex items-center gap-1 text-[#101010] font-semibold">
+                          <svg class="w-3 h-3 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          {job.location}
+                        </span>
+                        <span>·</span>
+                        <span>{job.type}</span>
+                      </div>
+                    </div>
+                    <div class="pt-2.5 border-t border-[#d7d6cf]/60 flex flex-col gap-1.5 mt-auto">
+                      <div class="flex items-center justify-between gap-1.5">
+                        <span class="font-bold text-[#101010] text-xs truncate">{job.salary}</span>
+                        <span class="text-[10px] font-semibold text-[#1738D1] group-hover:translate-x-0.5 transition-transform shrink-0 flex items-center gap-0.5">
+                          Lihat
+                          <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </span>
+                      </div>
+                      <div class="flex items-center gap-1.5 text-[10px] text-[#6e6d68]">
+                        <svg class="w-3 h-3 text-[#6e6d68] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="truncate">{job.postedTime}</span>
+                      </div>
+                    </div>
+                  </a>
+                ))}
 
-              <!-- Position / Job Title -->
-              <h3 class="text-sm sm:text-base font-bold text-[#101010] leading-snug line-clamp-2 group-hover:text-[#0000ff] transition mb-3">
-                {job.position}
-              </h3>
+                {/* SLOT EDUKASI/TOOLS DI BARIS 2 KOLOM 2 (Halaman 2: Job Tracker Karir) */}
+                <div class="relative bg-white rounded-xl border border-dashed border-[#1738D1]/40 p-3.5 flex flex-col justify-between hover:border-[#1738D1] hover:shadow-[0_8px_20px_-4px_rgba(23,56,209,0.06)] transition-all duration-200 overflow-hidden group">
+                  <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.04] via-transparent to-[#1738D1]/[0.03] pointer-events-none"></div>
+                  <div>
+                    <div class="flex items-center justify-between gap-1.5 mb-1.5 relative z-10">
+                      <div class="flex items-center gap-1">
+                        <span class="px-1.5 py-0.5 rounded-full text-[8.5px] font-extrabold uppercase tracking-wider bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf]">
+                          FITUR GRATIS
+                        </span>
+                        <span class="text-[9px] font-bold text-emerald-600">TOOL KARIER</span>
+                      </div>
+                      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    </div>
+                    <h3 class="text-xs sm:text-[13px] font-bold text-[#101010] leading-snug group-hover:text-[#1738D1] transition mb-1.5 min-h-[2rem] flex items-center relative z-10">
+                      Simpan & Pantau Status Lamaran Kerja Otomatis
+                    </h3>
+                    <p class="text-[10px] text-[#6e6d68] leading-relaxed font-medium mb-2 relative z-10 line-clamp-2">
+                      Kelola jadwal interview dan tahap seleksi di satu dashboard rapi tanpa ribet spreadsheet.
+                    </p>
+                  </div>
+                  <div class="pt-2.5 border-t border-[#d7d6cf]/60 flex flex-col gap-1.5 relative z-10 mt-auto">
+                    <div class="flex items-center justify-between gap-1.5">
+                      <span class="text-[10px] font-bold text-emerald-600">
+                        Bebas Biaya
+                      </span>
+                      <a
+                        href={TRACKER_URL}
+                        class="px-2.5 py-1 rounded-full bg-[#101010] hover:bg-[#1738D1] active:scale-[0.98] text-white text-[10px] font-bold transition shadow-xs flex items-center gap-1"
+                      >
+                        <span>Buka Tracker</span>
+                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                      </a>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-[10px] text-[#6e6d68]">
+                      <svg class="w-3 h-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span class="truncate">Tanpa batasan kuota lamaran</span>
+                    </div>
+                  </div>
+                </div>
 
-              <!-- Location & Type Pills -->
-              <div class="flex items-center gap-1.5 mb-4 flex-wrap">
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf]/60">
-                  {job.type}
+                {/* 7 Loker Berikutnya Halaman 2 untuk Desktop (Slot 6 sampai 12) */}
+                {page2Jobs.slice(4, 11).map((job) => (
+                  <a
+                    href={`/lowongan/${job.slug}`}
+                    class="hidden sm:flex group bg-white rounded-xl border border-[#d7d6cf] p-3.5 flex-col justify-between hover:border-[#1738D1]/40 hover:shadow-[0_8px_20px_-4px_rgba(16,16,16,0.06)] hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden"
+                  >
+                    <div>
+                      <div class="flex items-center justify-between gap-1.5 mb-1.5">
+                        <span class="text-[11px] font-bold text-[#6e6d68] uppercase tracking-wider truncate">
+                          {job.company}
+                        </span>
+                        {job.badge ? (
+                          <span class={`px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${
+                            job.badge === 'Hot' ? 'bg-amber-50 text-amber-800 border border-amber-200/80' : 'bg-blue-50 text-[#1738D1] border border-blue-100'
+                          }`}>
+                            {job.badge}
+                          </span>
+                        ) : null}
+                      </div>
+                      <h3 class="text-xs sm:text-[13px] font-bold text-[#101010] leading-snug line-clamp-2 group-hover:text-[#1738D1] transition mb-1.5 min-h-[2rem] flex items-center">
+                        {job.position}
+                      </h3>
+                      <div class="flex items-center gap-1.5 text-[10.5px] text-[#6e6d68] font-medium mb-2.5 flex-wrap">
+                        <span class="inline-flex items-center gap-1 text-[#101010] font-semibold">
+                          <svg class="w-3 h-3 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          {job.location}
+                        </span>
+                        <span>·</span>
+                        <span>{job.type}</span>
+                      </div>
+                    </div>
+                    <div class="pt-2.5 border-t border-[#d7d6cf]/60 flex flex-col gap-1.5 mt-auto">
+                      <div class="flex items-center justify-between gap-1.5">
+                        <span class="font-bold text-[#101010] text-xs truncate">{job.salary}</span>
+                        <span class="text-[10px] font-semibold text-[#1738D1] group-hover:translate-x-0.5 transition-transform shrink-0 flex items-center gap-0.5">
+                          Lihat
+                          <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </span>
+                      </div>
+                      <div class="flex items-center gap-1.5 text-[10px] text-[#6e6d68]">
+                        <svg class="w-3 h-3 text-[#6e6d68] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="truncate">{job.postedTime}</span>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+
+                {/* Progressive Disclosure untuk Mobile Page 2 */}
+                <details class="sm:hidden col-span-full group/expand">
+                  <summary class="list-none w-full py-2.5 rounded-full bg-white hover:bg-[#eae8e0] text-[#101010] text-xs font-bold text-center border border-[#d7d6cf] cursor-pointer shadow-xs transition flex items-center justify-center gap-1.5 my-1">
+                    <span>Tampilkan 7 Lowongan Lainnya</span>
+                    <svg class="w-3.5 h-3.5 transition-transform group-open/expand:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div class="flex flex-col gap-3 mt-3">
+                    {page2Jobs.slice(4, 11).map((job) => (
+                      <a
+                        href={`/lowongan/${job.slug}`}
+                        class="group bg-white rounded-xl border border-[#d7d6cf] p-3.5 flex flex-col justify-between hover:border-[#1738D1]/40 hover:shadow-[0_8px_20px_-4px_rgba(16,16,16,0.06)] transition-all duration-200 relative overflow-hidden"
+                      >
+                        <div>
+                          <div class="flex items-center justify-between gap-1.5 mb-1.5">
+                            <span class="text-[11px] font-bold text-[#6e6d68] uppercase tracking-wider truncate">
+                              {job.company}
+                            </span>
+                            {job.badge ? (
+                              <span class={`px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${
+                                job.badge === 'Hot' ? 'bg-amber-50 text-amber-800 border border-amber-200/80' : 'bg-blue-50 text-[#1738D1] border border-blue-100'
+                              }`}>
+                                {job.badge}
+                              </span>
+                            ) : null}
+                          </div>
+                          <h3 class="text-xs font-bold text-[#101010] leading-snug line-clamp-2 group-hover:text-[#1738D1] transition mb-1.5 flex items-center">
+                            {job.position}
+                          </h3>
+                          <div class="flex items-center gap-1.5 text-[10.5px] text-[#6e6d68] font-medium mb-2.5 flex-wrap">
+                            <span class="inline-flex items-center gap-1 text-[#101010] font-semibold">
+                              <svg class="w-3 h-3 text-[#6e6d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                              {job.location}
+                            </span>
+                            <span>·</span>
+                            <span>{job.type}</span>
+                          </div>
+                        </div>
+                        <div class="pt-2.5 border-t border-[#d7d6cf]/60 flex flex-col gap-1.5 mt-auto">
+                          <div class="flex items-center justify-between gap-1.5">
+                            <span class="font-bold text-[#101010] text-xs truncate">{job.salary}</span>
+                            <span class="text-[10px] font-semibold text-[#1738D1] shrink-0 flex items-center gap-0.5">
+                              Lihat
+                              <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                              </svg>
+                            </span>
+                          </div>
+                          <div class="flex items-center gap-1.5 text-[10px] text-[#6e6d68]">
+                            <svg class="w-3 h-3 text-[#6e6d68] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="truncate">{job.postedTime}</span>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </details>
+              </div>
+            </>
+          )}
+        </div>
+
+        <!-- Baris Pagination Lowongan In-Place (Showcase Beranda + Akses Penuh Direktori) -->
+        <div class="mt-3.5 sm:mt-4 bg-white rounded-2xl border border-[#d7d6cf]/90 p-3 sm:p-4 shadow-[0px_1px_2px_-1px_rgba(16,16,16,0.06),0px_4px_8px_-2px_rgba(16,16,16,0.04)] flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="flex items-center gap-2 text-xs text-[#6e6d68] font-medium">
+            <span class="w-2 h-2 rounded-full bg-[#1738D1]"></span>
+            <span id="job-page-info" data-total={totalJobsCount}>
+              Showcase Beranda: <strong class="text-[#101010] font-bold">1–11</strong> dari 22 Unggulan (<strong class="text-[#1738D1] font-bold">{totalJobsCount}</strong> Total Loker)
+            </span>
+          </div>
+
+          <div class="flex items-center gap-1.5 flex-wrap justify-center sm:justify-end">
+            <!-- Tombol Sebelumnya -->
+            <button
+              type="button"
+              id="job-page-prev-btn"
+              class="px-3 py-2 min-h-[38px] rounded-lg border border-[#d7d6cf]/60 bg-[#f4f3ee]/50 text-[#a5a5a1] text-xs font-semibold cursor-not-allowed select-none transition"
+              aria-label="Halaman Sebelumnya"
+              disabled
+            >
+              ‹
+            </button>
+
+            <!-- Nomor Halaman 1 (Aktif Default) -->
+            <button
+              type="button"
+              data-job-page-btn="1"
+              class="w-9 h-9 min-w-[38px] min-h-[38px] rounded-lg bg-[#1738D1] text-white text-xs font-bold shadow-xs flex items-center justify-center transition cursor-pointer"
+              aria-current="page"
+              aria-label="Tampilkan Halaman 1"
+            >
+              1
+            </button>
+
+            <!-- Nomor Halaman 2 -->
+            <button
+              type="button"
+              data-job-page-btn="2"
+              class="w-9 h-9 min-w-[38px] min-h-[38px] rounded-lg border border-[#d7d6cf] bg-white hover:bg-[#f4f3ee] text-[#101010] text-xs font-semibold transition flex items-center justify-center cursor-pointer"
+              aria-label="Tampilkan Halaman 2"
+            >
+              2
+            </button>
+
+            <!-- Tombol Berikutnya / Akses Lengkap -->
+            <button
+              type="button"
+              id="job-page-next-btn"
+              class="px-3.5 py-2 min-h-[38px] rounded-lg border border-[#d7d6cf] bg-white hover:bg-[#101010] hover:text-white text-[#101010] text-xs font-semibold transition flex items-center gap-1 shadow-2xs group cursor-pointer"
+              aria-label="Buka Halaman Berikutnya"
+            >
+              <span>Berikutnya</span>
+              <span class="transition-transform group-hover:translate-x-0.5">›</span>
+            </button>
+
+            <span class="text-xs text-[#d7d6cf] px-0.5 hidden sm:inline select-none" aria-hidden="true">|</span>
+
+            <!-- Akses Cepat Semua Lowongan -->
+            <a
+              href="/lowongan"
+              class="px-3.5 py-2 min-h-[38px] rounded-lg border border-[#1738D1]/30 bg-blue-50/60 hover:bg-[#1738D1] text-[#1738D1] hover:text-white text-xs font-bold transition flex items-center gap-1 shadow-2xs group"
+              title="Buka seluruh 18.123+ lowongan kerja aktif"
+            >
+              <span>Semua Loker ({totalJobsCount > 1000 ? `${Math.floor(totalJobsCount / 1000)}k+` : totalJobsCount})</span>
+              <span class="transition-transform group-hover:translate-x-0.5">→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sisi Kanan (4 cols): Perusahaan Trending, Spotlight Rekruter & Job Tracker (Sejajar Rata Bawah) -->
+      <div class="lg:col-span-4 flex flex-col gap-3 sm:gap-3.5 h-auto lg:h-full">
+
+        <!-- 1. Widget Perusahaan Trending -->
+        <div class="bg-white rounded-2xl border border-[#d7d6cf]/90 p-4 sm:p-5 shadow-[0px_1px_2px_-1px_rgba(16,16,16,0.06),0px_4px_8px_-2px_rgba(16,16,16,0.04)] shrink-0">
+          <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-[#d7d6cf]/50">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-[#1738D1]"></span>
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-[#101010]">Perusahaan Trending</h3>
+            </div>
+            <span class="text-[10.5px] font-bold text-[#1738D1]">Minggu Ini</span>
+          </div>
+
+          <div class="space-y-1.5">
+            {displayCompanies.length === 0 ? (
+              <div class="text-[11px] text-[#6e6d68] py-4 text-center">
+                Belum ada data perusahaan aktif.
+              </div>
+            ) : (
+              displayCompanies.map((comp, idx) => (
+                <a
+                  href={`/lowongan?q=${encodeURIComponent(comp.name)}`}
+                  class="flex items-center justify-between p-1.5 px-2 rounded-lg hover:bg-[#f4f3ee] border border-transparent hover:border-[#d7d6cf] transition group"
+                >
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="w-4 text-[11px] font-extrabold text-[#6e6d68] group-hover:text-[#1738D1] shrink-0 text-center">
+                      {idx + 1}
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="text-xs font-bold text-[#101010] group-hover:text-[#1738D1] transition truncate">
+                        {comp.name}
+                      </h4>
+                      <div class="flex items-center gap-1 text-[9.5px] text-[#6e6d68]">
+                        <span>{comp.category}</span>
+                        <span>·</span>
+                        <span>{comp.location}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="text-[9.5px] font-bold text-[#1738D1] bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded-full shrink-0 ml-1.5">
+                    {comp.jobsCount} Loker
+                  </span>
+                </a>
+              ))
+            )}
+          </div>
+
+          <div class="pt-3 mt-2.5 border-t border-[#d7d6cf]/50">
+            <a
+              href="/lowongan"
+              class="text-[11px] font-bold text-[#1738D1] hover:text-[#132EA8] flex items-center justify-between group"
+            >
+              <span>Eksplor Semua Perusahaan Mitra</span>
+              <span class="transition-transform group-hover:translate-x-1">→</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 2. Spotlight Rekruter (Mitra Pilihan dengan Auto-Slide Carousel) -->
+        <div
+          id="spotlight-carousel-card"
+          class="bg-white rounded-2xl border border-[#d7d6cf]/90 p-4 sm:p-5 pb-4 sm:pb-4.5 shadow-[0px_1px_2px_-1px_rgba(16,16,16,0.06),0px_4px_8px_-2px_rgba(16,16,16,0.04)] relative overflow-hidden shrink-0 flex flex-col justify-between group"
+        >
+          <!-- Pin Badge (Top-Right) with Cutout Corners -->
+          <div class="absolute top-0 right-0 bg-[#1738D1] text-white rounded-bl-[14px] px-3.5 h-[26px] flex items-center text-[10px] font-extrabold uppercase tracking-wider shadow-sm ring-1 ring-white/20 z-10" data-slot="cutout-card-pin">
+            <span class="leading-none">SPOTLIGHT</span>
+            <CutoutCorner class="text-[#1738D1] absolute top-0 -left-[13px] -rotate-90 pointer-events-none" size={14} />
+            <CutoutCorner class="text-[#1738D1] absolute right-0 -bottom-[13px] -rotate-90 pointer-events-none" size={14} />
+          </div>
+
+          <!-- Slides Container (CSS Grid 1x1 Stacking for Perfect Alignment & Zero Jitter) -->
+          <div class="grid grid-cols-1 grid-rows-1">
+            {spotlightItems.map((item, idx) => (
+              <div
+                class={`col-start-1 row-start-1 flex flex-col justify-between transition-all duration-500 ease-out ${
+                  idx === 0
+                    ? 'opacity-100 pointer-events-auto scale-100'
+                    : 'opacity-0 pointer-events-none scale-[0.98]'
+                }`}
+                data-spotlight-slide={idx}
+              >
+                <div>
+                  <div class="flex items-center gap-1.5 mb-2.5">
+                    <span class="text-[9.5px] font-bold text-[#1738D1] bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                      {item.badge1}
+                    </span>
+                    <span class="text-[9.5px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      {item.badge2}
+                    </span>
+                  </div>
+
+                  <h4 class="text-xs sm:text-[13px] font-bold text-[#101010] leading-snug">
+                    {item.title}
+                  </h4>
+                  <p class="text-[11px] font-bold text-[#101010] mt-1">
+                    <span class="font-extrabold text-[#101010]">{item.trackHighlight}</span>
+                    <span class="text-[#6e6d68] font-normal"> · {item.trackAudience}</span>
+                  </p>
+                  <p class="text-[10.5px] text-[#6e6d68] font-medium leading-relaxed mt-1">
+                    {item.description}
+                  </p>
+                </div>
+
+                <div class="mt-3 sm:mt-3.5">
+                  <a
+                    href={item.ctaLink}
+                    class="w-full py-2.5 px-4 rounded-full bg-[#101010] hover:bg-black text-white text-xs font-bold text-center transition flex items-center justify-center gap-1.5 shadow-xs"
+                  >
+                    {item.ctaText}
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <!-- Carousel Controls & Indicators (Lega & Proporsional) -->
+          <div class="flex items-center justify-between mt-3.5 pt-3 border-t border-[#d7d6cf]/50">
+            <div class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span data-spotlight-counter class="text-[10px] font-bold text-[#6e6d68]">
+                1 / {spotlightItems.length} Program
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                data-spotlight-prev
+                class="w-8 h-8 rounded-full border border-[#d7d6cf] bg-white hover:bg-[#f4f3ee] hover:border-[#101010] flex items-center justify-center text-[#6e6d68] hover:text-[#101010] transition text-sm cursor-pointer shadow-2xs active:scale-95"
+                aria-label="Spotlight Sebelumnya"
+              >
+                ‹
+              </button>
+              <div class="flex items-center gap-1.5 px-1 py-1">
+                {spotlightItems.map((_, idx) => (
+                  <button
+                    type="button"
+                    data-spotlight-dot={idx}
+                    class={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                      idx === 0 ? 'w-5 bg-[#1738D1]' : 'w-2 bg-[#d7d6cf] hover:bg-[#a5a5a1]'
+                    }`}
+                    aria-label={`Lihat Program ${idx + 1}`}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                data-spotlight-next
+                class="w-8 h-8 rounded-full border border-[#d7d6cf] bg-white hover:bg-[#f4f3ee] hover:border-[#101010] flex items-center justify-center text-[#6e6d68] hover:text-[#101010] transition text-sm cursor-pointer shadow-2xs active:scale-95"
+                aria-label="Spotlight Berikutnya"
+              >
+                ›
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Widget Job Tracker (Ramping & Tanpa Blok Preview Kanban) -->
+        <div class="bg-white rounded-2xl border border-[#d7d6cf]/90 p-4 sm:p-5 shadow-[0px_1px_2px_-1px_rgba(16,16,16,0.06),0px_4px_8px_-2px_rgba(16,16,16,0.04)] relative overflow-hidden flex-1 flex flex-col justify-between group">
+          <!-- Subtle Accent Background -->
+          <div class="absolute -top-12 -right-12 w-28 h-28 rounded-full bg-[#1738D1]/5 blur-xl pointer-events-none"></div>
+
+          <div>
+            <div class="flex items-center justify-between gap-1.5 mb-2.5">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[9.5px] font-bold text-[#1738D1] bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                  Fitur Unggulan
                 </span>
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf]/60">
-                  {job.location}
-                </span>
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#f4f3ee] text-[#101010] border border-[#d7d6cf]/60">
-                  {job.experience}
+                <span class="text-[9.5px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  Gratis
                 </span>
               </div>
+              <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#6e6d68]">
+                Tracker
+              </span>
             </div>
 
-            <!-- Bottom Row: Salary & Posted Time -->
-            <div class="pt-3 border-t border-[#101010]/8 flex items-center justify-between text-xs">
-              <span class="font-bold text-[#101010] bg-[#f4f3ee] px-2.5 py-0.5 rounded-full border border-[#d7d6cf]/60">
-                {job.salary}
-              </span>
-              <span class="text-[11px] font-medium text-[#a5a5a1]">
-                {job.postedTime}
-              </span>
+            <h4 class="text-xs sm:text-[13px] font-bold text-[#101010] leading-snug group-hover:text-[#1738D1] transition">
+              Lamar Banyak Tempat? Pantau Semua di Satu Papan.
+            </h4>
+            <p class="text-[10.5px] text-[#6e6d68] leading-relaxed font-medium mt-1">
+              Pantau tahap seleksi, jadwal wawancara, dan riwayat lamaran kamu secara rapi di satu tempat.
+            </p>
+          </div>
+
+          <div class="mt-3.5">
+            <a
+              href={TRACKER_URL}
+              class="w-full py-2.5 px-4 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white text-xs font-bold text-center transition-all duration-200 flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] group/btn"
+            >
+              <span>Buka Tracker</span>
+              <svg class="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+
+            <div class="text-center text-[9.5px] text-[#6e6d68] font-medium mt-1.5">
+              Gratis selamanya · Tanpa batas kuota
             </div>
-          </a>
-        ))
-      )}
+          </div>
+        </div>
+
+      </div>
+
     </div>
   </div>
 </section>
+
+<script is:inline>
+  (function () {
+    // 1. Spotlight Carousel
+    function initSpotlightCarousel() {
+      const card = document.getElementById('spotlight-carousel-card');
+      if (!card) return;
+
+      const slides = card.querySelectorAll('[data-spotlight-slide]');
+      const dots = card.querySelectorAll('[data-spotlight-dot]');
+      const prevBtn = card.querySelector('[data-spotlight-prev]');
+      const nextBtn = card.querySelector('[data-spotlight-next]');
+      const counter = card.querySelector('[data-spotlight-counter]');
+
+      if (!slides.length) return;
+
+      let currentIndex = 0;
+      const total = slides.length;
+      let timer = null;
+      const INTERVAL = 4500;
+
+      function goToSlide(index) {
+        currentIndex = (index + total) % total;
+
+        slides.forEach((slide, idx) => {
+          if (idx === currentIndex) {
+            slide.classList.remove('opacity-0', 'pointer-events-none', 'scale-[0.98]');
+            slide.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+          } else {
+            slide.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+            slide.classList.add('opacity-0', 'pointer-events-none', 'scale-[0.98]');
+          }
+        });
+
+        dots.forEach((dot, idx) => {
+          if (idx === currentIndex) {
+            dot.classList.remove('w-2', 'bg-[#d7d6cf]');
+            dot.classList.add('w-5', 'bg-[#1738D1]');
+          } else {
+            dot.classList.remove('w-5', 'bg-[#1738D1]');
+            dot.classList.add('w-2', 'bg-[#d7d6cf]');
+          }
+        });
+
+        if (counter) {
+          counter.textContent = `${currentIndex + 1} / ${total} Program`;
+        }
+      }
+
+      function startTimer() {
+        stopTimer();
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        timer = setInterval(() => {
+          goToSlide(currentIndex + 1);
+        }, INTERVAL);
+      }
+
+      function stopTimer() {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+        }
+      }
+
+      prevBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        goToSlide(currentIndex - 1);
+        startTimer();
+      });
+
+      nextBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        goToSlide(currentIndex + 1);
+        startTimer();
+      });
+
+      dots.forEach((dot, idx) => {
+        dot.addEventListener('click', (e) => {
+          e.preventDefault();
+          goToSlide(idx);
+          startTimer();
+        });
+      });
+
+      card.addEventListener('mouseenter', stopTimer);
+      card.addEventListener('mouseleave', startTimer);
+
+      startTimer();
+    }
+
+    // 2. In-Place Job Pagination (0ms Reload)
+    function initJobPagination() {
+      const page1Panel = document.getElementById('job-grid-page-1');
+      const page2Panel = document.getElementById('job-grid-page-2');
+      const prevBtn = document.getElementById('job-page-prev-btn');
+      const nextBtn = document.getElementById('job-page-next-btn');
+      const btn1 = document.querySelector('[data-job-page-btn="1"]');
+      const btn2 = document.querySelector('[data-job-page-btn="2"]');
+      const pageInfo = document.getElementById('job-page-info');
+
+      if (!page1Panel || !page2Panel || !btn1 || !btn2 || !prevBtn || !nextBtn) return;
+
+      let currentPage = 1;
+      const totalJobs = pageInfo ? (pageInfo.getAttribute('data-total') || '22') : '22';
+
+      function setPage(page) {
+        if (page === currentPage) return;
+        currentPage = page;
+
+        if (currentPage === 1) {
+          page1Panel.classList.remove('hidden');
+          page2Panel.classList.add('hidden');
+
+          // Button 1 active
+          btn1.className = 'w-9 h-9 min-w-[38px] min-h-[38px] rounded-lg bg-[#1738D1] text-white text-xs font-bold shadow-xs flex items-center justify-center transition cursor-pointer';
+          btn1.setAttribute('aria-current', 'page');
+
+          // Button 2 inactive
+          btn2.className = 'w-9 h-9 min-w-[38px] min-h-[38px] rounded-lg border border-[#d7d6cf] bg-white hover:bg-[#f4f3ee] text-[#101010] text-xs font-semibold transition flex items-center justify-center cursor-pointer';
+          btn2.removeAttribute('aria-current');
+
+          // Prev btn disabled
+          prevBtn.setAttribute('disabled', 'true');
+          prevBtn.className = 'px-3 py-2 min-h-[38px] rounded-lg border border-[#d7d6cf]/60 bg-[#f4f3ee]/50 text-[#a5a5a1] text-xs font-semibold cursor-not-allowed select-none transition flex items-center justify-center';
+
+          // Next btn active
+          nextBtn.removeAttribute('disabled');
+          nextBtn.className = 'px-3.5 py-2 min-h-[38px] rounded-lg border border-[#d7d6cf] bg-white hover:bg-[#101010] hover:text-white text-[#101010] text-xs font-semibold transition flex items-center gap-1 shadow-2xs group cursor-pointer';
+
+          if (pageInfo) {
+            pageInfo.innerHTML = `Showcase Beranda: <strong class="text-[#101010] font-bold">1–11</strong> dari 22 Unggulan (<strong class="text-[#1738D1] font-bold">${totalJobs}</strong> Total Loker)`;
+          }
+        } else {
+          page1Panel.classList.add('hidden');
+          page2Panel.classList.remove('hidden');
+
+          // Button 1 inactive
+          btn1.className = 'w-9 h-9 min-w-[38px] min-h-[38px] rounded-lg border border-[#d7d6cf] bg-white hover:bg-[#f4f3ee] text-[#101010] text-xs font-semibold transition flex items-center justify-center cursor-pointer';
+          btn1.removeAttribute('aria-current');
+
+          // Button 2 active
+          btn2.className = 'w-9 h-9 min-w-[38px] min-h-[38px] rounded-lg bg-[#1738D1] text-white text-xs font-bold shadow-xs flex items-center justify-center transition cursor-pointer';
+          btn2.setAttribute('aria-current', 'page');
+
+          // Prev btn active
+          prevBtn.removeAttribute('disabled');
+          prevBtn.className = 'px-3 py-2 min-h-[38px] rounded-lg border border-[#d7d6cf] bg-white hover:bg-[#101010] hover:text-white text-[#101010] text-xs font-semibold transition cursor-pointer shadow-2xs flex items-center justify-center';
+
+          // Next btn disabled
+          nextBtn.setAttribute('disabled', 'true');
+          nextBtn.className = 'px-3.5 py-2 min-h-[38px] rounded-lg border border-[#d7d6cf]/60 bg-[#f4f3ee]/50 text-[#a5a5a1] text-xs font-semibold cursor-not-allowed select-none transition flex items-center gap-1';
+
+          if (pageInfo) {
+            const endNum = Math.min(22, parseInt(totalJobs, 10));
+            pageInfo.innerHTML = `Showcase Beranda: <strong class="text-[#101010] font-bold">12–${endNum}</strong> dari 22 Unggulan (<strong class="text-[#1738D1] font-bold">${totalJobs}</strong> Total Loker)`;
+          }
+        }
+
+        // Scroll back to top of lowongan section if needed
+        const lowonganSec = document.getElementById('lowongan');
+        if (lowonganSec && window.scrollY > lowonganSec.offsetTop + 150) {
+          lowonganSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+
+      btn1.addEventListener('click', () => setPage(1));
+      btn2.addEventListener('click', () => setPage(2));
+      prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) setPage(currentPage - 1);
+      });
+      nextBtn.addEventListener('click', () => {
+        if (currentPage < 2) setPage(currentPage + 1);
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        initSpotlightCarousel();
+        initJobPagination();
+      });
+    } else {
+      initSpotlightCarousel();
+      initJobPagination();
+    }
+  })();
+</script>

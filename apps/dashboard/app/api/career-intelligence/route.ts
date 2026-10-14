@@ -2,8 +2,109 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@employr/db';
 import crypto from 'crypto';
 import { getAuthUser } from '@/lib/server-auth';
-import { evaluateCareerIntelligence, ROLE_TAXONOMY, RoleTaxonomyItem } from '@/lib/career-intelligence-engine';
+import { evaluateCareerIntelligence, ROLE_TAXONOMY, RoleTaxonomyItem, CompetencyCluster } from '@/lib/career-intelligence-engine';
 import { callAiGateway } from '@/lib/ai-gateway';
+
+function clusterSkillsIntoPillars(
+  roleTitle: string,
+  slugId: string,
+  rawSkills: string[]
+): CompetencyCluster[] {
+  if (rawSkills.length <= 5) {
+    return rawSkills.map((skill, idx) => ({
+      id: `comp-${slugId}-${idx}`,
+      name: skill,
+      description: `Penguasaan praktis terhadap ${skill} untuk operasional posisi ${roleTitle}.`,
+      aliases: [skill.toLowerCase()],
+      keywords: [skill.toLowerCase(), roleTitle.toLowerCase()],
+      requiredScore: 75,
+      weight: 1.2,
+    }));
+  }
+
+  const lowerRole = roleTitle.toLowerCase();
+
+  // 1. Khusus Domain Coach / Pelatih / Esports / Gaming
+  if (lowerRole.includes('coach') || lowerRole.includes('pelatih') || lowerRole.includes('esport') || lowerRole.includes('gaming')) {
+    const tacticalKeywords = ['draft', 'pick', 'ban', 'meta', 'strategi', 'taktik', 'objektif', 'scouting', 'rekaman', 'rotasi', 'kontrol', 'gameplay', 'analis'];
+    const leadershipKeywords = ['roster', 'tim', 'scrim', 'konflik', 'motivasi', 'pemain', 'perekrutan', 'tryout', 'pemimpin', 'mental', 'kurikulum'];
+    const commsKeywords = ['komunikasi', 'callout', 'latihan', 'evaluasi', 'speaking', 'bahasa', 'inggris', 'indonesia', 'kesehatan'];
+    const toolsKeywords = ['sheets', 'excel', 'notion', 'obs', 'discord', 'canva', 'laporan', 'tools', 'software'];
+
+    const tacticalSkills = rawSkills.filter((s) => tacticalKeywords.some((k) => s.toLowerCase().includes(k)));
+    const leadershipSkills = rawSkills.filter(
+      (s) => leadershipKeywords.some((k) => s.toLowerCase().includes(k)) && !tacticalSkills.includes(s)
+    );
+    const commsSkills = rawSkills.filter(
+      (s) => commsKeywords.some((k) => s.toLowerCase().includes(k)) && !tacticalSkills.includes(s) && !leadershipSkills.includes(s)
+    );
+    const toolsSkills = rawSkills.filter(
+      (s) => !tacticalSkills.includes(s) && !leadershipSkills.includes(s) && !commsSkills.includes(s)
+    );
+
+    return [
+      {
+        id: `comp-${slugId}-tactical`,
+        name: 'Strategi Taktikal & Analisis Meta',
+        description: `Penyusunan strategi permainan, adaptasi meta game, draft pick/ban, dan analisis pertandingan (${tacticalSkills.slice(0, 3).join(', ')}).`,
+        aliases: tacticalSkills.map((s) => s.toLowerCase()),
+        keywords: Array.from(new Set([...tacticalKeywords, ...tacticalSkills.map((s) => s.toLowerCase())])),
+        requiredScore: 85,
+        weight: 1.3,
+      },
+      {
+        id: `comp-${slugId}-leadership`,
+        name: 'Kepemimpinan & Manajemen Roster',
+        description: `Pengelolaan kedisiplinan atlet, jadwal scrim harian, pembinaan mental, dan kekompakan tim (${leadershipSkills.slice(0, 3).join(', ')}).`,
+        aliases: leadershipSkills.map((s) => s.toLowerCase()),
+        keywords: Array.from(new Set([...leadershipKeywords, ...leadershipSkills.map((s) => s.toLowerCase())])),
+        requiredScore: 80,
+        weight: 1.2,
+      },
+      {
+        id: `comp-${slugId}-execution`,
+        name: 'Komunikasi & Eksekusi Pertandingan',
+        description: `Pengembangan komunikasi in-game (callout), evaluasi berkala, dan kesiapan bertanding (${commsSkills.slice(0, 3).join(', ')}).`,
+        aliases: commsSkills.map((s) => s.toLowerCase()),
+        keywords: Array.from(new Set([...commsKeywords, ...commsSkills.map((s) => s.toLowerCase())])),
+        requiredScore: 75,
+        weight: 1.1,
+      },
+      {
+        id: `comp-${slugId}-tools`,
+        name: 'Operasional Data & Alat Pendukung',
+        description: `Pemanfaatan perangkat pencatatan data pertandingan, media koordinasi, dan pelaporan (${toolsSkills.slice(0, 3).join(', ')}).`,
+        aliases: toolsSkills.map((s) => s.toLowerCase()),
+        keywords: Array.from(new Set([...toolsKeywords, ...toolsSkills.map((s) => s.toLowerCase())])),
+        requiredScore: 75,
+        weight: 1.0,
+      },
+    ];
+  }
+
+  // 2. Pemetaan Universal untuk Peran Lain (Klasterkan ke dalam 4 pilar seimbang)
+  const chunkSize = Math.ceil(rawSkills.length / 4);
+  const clusterNames = [
+    'Kompetensi Teknis Utama',
+    'Manajemen Alur Kerja & Eksekusi',
+    'Komunikasi & Koordinasi Tim',
+    'Penguasaan Alat & Administrasi',
+  ];
+
+  return clusterNames.map((name, i) => {
+    const groupSkills = rawSkills.slice(i * chunkSize, (i + 1) * chunkSize);
+    const groupKeywords = groupSkills.map((s) => s.toLowerCase());
+    return {
+      id: `comp-${slugId}-p${i + 1}`,
+      name,
+      description: `Domain keahlian mencakup: ${groupSkills.slice(0, 4).join(', ')}${groupSkills.length > 4 ? ', dll.' : ''}.`,
+      aliases: groupKeywords,
+      keywords: groupKeywords,
+      requiredScore: 75 + (i === 0 ? 5 : 0),
+      weight: 1.2 - i * 0.05,
+    };
+  });
+}
 
 async function resolveDynamicRole(
   requestedRoleId: string | undefined,
@@ -44,15 +145,7 @@ async function resolveDynamicRole(
         categoryLabel: 'Profesi Terapan',
         description: `Analisis kompetensi berbasis data pasar untuk posisi ${existingBlueprint.role_name}.`,
         seniority: 'Entry Level',
-        competencies: existingBlueprint.top_essential_skills.map((skill: string, idx: number) => ({
-          id: `comp-${slugId}-${idx}`,
-          name: skill,
-          description: `Penguasaan praktis terhadap ${skill} untuk operasional harian.`,
-          aliases: [skill.toLowerCase()],
-          keywords: [skill.toLowerCase(), cleanTitle.toLowerCase()],
-          requiredScore: 75,
-          weight: 1.2,
-        })),
+        competencies: clusterSkillsIntoPillars(existingBlueprint.role_name, slugId, existingBlueprint.top_essential_skills),
         commonTransitions: [],
       };
     }
@@ -149,6 +242,115 @@ Kembalikan HANYA format JSON valid tanpa tanda markdown codeblock.`;
 function createFallbackRoleItem(roleQuery: string): RoleTaxonomyItem {
   const cleanTitle = roleQuery.replace(/[-_]/g, ' ').trim();
   const slugId = cleanTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'role-custom';
+  const lower = cleanTitle.toLowerCase();
+
+  // 1. Domain Khusus: Coach / Pelatih / Esports / Gaming
+  if (lower.includes('coach') || lower.includes('pelatih') || lower.includes('esport') || lower.includes('gaming')) {
+    return {
+      id: slugId,
+      title: cleanTitle,
+      category: 'operations',
+      categoryLabel: 'Kepelatihan & Esports',
+      description: `Analisis kompetensi kepelatihan, manajemen tim, dan strategi taktis untuk posisi ${cleanTitle}.`,
+      seniority: 'Junior',
+      competencies: [
+        {
+          id: `comp-${slugId}-1`,
+          name: 'Strategi Taktikal & Analisis Meta',
+          description: 'Penyusunan strategi draft pick & ban, pemahaman meta game terkini, dan analisis objektif berbasis data pertandingan.',
+          aliases: ['drafting', 'taktik', 'analisis lawan', 'meta game', 'analisis data'],
+          keywords: ['draft', 'pick', 'ban', 'strategi', 'taktik', 'meta', 'analisis', 'rekaman', 'data lawan', 'objektif', 'gameplay', 'analis'],
+          requiredScore: 85,
+          weight: 1.3,
+        },
+        {
+          id: `comp-${slugId}-2`,
+          name: 'Kepemimpinan Tim & Manajemen Roster',
+          description: 'Mengelola kedisiplinan pemain, jadwal scrim/latihan, pembinaan mental, dan budaya komunikasi tim yang solid.',
+          aliases: ['leadership', 'manajemen pemain', 'roster management', 'scrim'],
+          keywords: ['roster', 'pemain', 'scrim', 'disiplin', 'memimpin', 'mental', 'latihan', 'jadwal', 'komunikasi in-game', 'budaya tim', 'cadangan'],
+          requiredScore: 80,
+          weight: 1.2,
+        },
+        {
+          id: `comp-${slugId}-3`,
+          name: 'Evaluasi Performa & Prestasi Turnamen',
+          description: 'Meningkatkan win rate tim, penguasaan pool hero pemain, dan pencapaian target di kompetisi atau kualifikasi turnamen.',
+          aliases: ['evaluasi performa', 'win rate', 'turnamen', 'pool hero'],
+          keywords: ['win rate', 'turnamen', 'juara', 'kualifikasi', 'pool hero', 'liga', 'prestasi', 'evaluasi', 'metrik'],
+          requiredScore: 78,
+          weight: 1.1,
+        },
+        {
+          id: `comp-${slugId}-4`,
+          name: 'Koordinasi Tim Pendukung & Organisasi',
+          description: 'Kolaborasi efektif dengan analis, manajer tim, psikolog olahraga, dan manajemen organisasi esports.',
+          aliases: ['koordinasi organisasi', 'manajemen staf', 'stakeholder esports'],
+          keywords: ['analyst', 'manajer', 'psikolog', 'organisasi', 'pendukung', 'koordinasi', 'laporan', 'callout', 'rotasi'],
+          requiredScore: 75,
+          weight: 1.0,
+        },
+      ],
+      commonTransitions: [
+        {
+          targetRoleId: 'social-media-specialist',
+          effort: 'Sedang',
+          bridgeSkills: ['Gaming Community Engagement', 'Content Strategy'],
+          path: [cleanTitle, 'Esports Community Lead', 'Social Media Specialist'],
+        },
+        {
+          targetRoleId: 'staff-admin',
+          effort: 'Rendah',
+          bridgeSkills: ['Jadwal & Koordinasi Tim', 'Pelaporan Kegiatan'],
+          path: [cleanTitle, 'Team Operations Coordinator', 'Staff Administrasi & Operasional'],
+        },
+      ],
+    };
+  }
+
+  // 2. Domain Kreatif / Content Creator / Multimedia
+  if (lower.includes('content') || lower.includes('video') || lower.includes('kreator') || lower.includes('creator') || lower.includes('editor')) {
+    return {
+      id: slugId,
+      title: cleanTitle,
+      category: 'creative',
+      categoryLabel: 'Kreatif & Konten',
+      description: `Analisis kompetensi kreasi konten dan komunikasi visual untuk posisi ${cleanTitle}.`,
+      seniority: 'Junior',
+      competencies: [
+        {
+          id: `comp-${slugId}-1`,
+          name: 'Produksi & Perencanaan Konten',
+          description: 'Menyusun ide, naskah konten, dan visual storytelling yang memikat audiens.',
+          aliases: ['storytelling', 'ide konten', 'scriptwriting'],
+          keywords: ['konten', 'ide', 'naskah', 'script', 'storyboard', 'kreatif'],
+          requiredScore: 82,
+          weight: 1.3,
+        },
+        {
+          id: `comp-${slugId}-2`,
+          name: 'Tools Editing & Perangkat Kreatif',
+          description: 'Penguasaan aplikasi visual (Canva, Premiere, CapCut, Photoshop).',
+          aliases: ['editing', 'tools desain', 'video editing'],
+          keywords: ['canva', 'premiere', 'capcut', 'photoshop', 'editing', 'render', 'audio'],
+          requiredScore: 80,
+          weight: 1.2,
+        },
+        {
+          id: `comp-${slugId}-3`,
+          name: 'Distribusi Media Sosial & Engagement',
+          description: 'Memahami tren algoritma platform (TikTok, Instagram, YouTube) dan interaksi penonton.',
+          aliases: ['sosmed', 'engagement', 'analytics sosmed'],
+          keywords: ['tiktok', 'instagram', 'youtube', 'engagement', 'views', 'tren', 'reels'],
+          requiredScore: 78,
+          weight: 1.0,
+        },
+      ],
+      commonTransitions: [],
+    };
+  }
+
+  // 3. Fallback Konstruktif Umum
   return {
     id: slugId,
     title: cleanTitle,
@@ -271,14 +473,30 @@ export async function GET(req: NextRequest) {
     // Format CV data
     const formattedCvs = cvProjects.map((p) => {
       const parsedData = (typeof p.data === 'object' && p.data !== null ? p.data : {}) as Record<string, any>;
+      const targetPos = (
+        p.target_position ||
+        parsedData.headline ||
+        parsedData.targetPosition ||
+        parsedData.target_position ||
+        parsedData.position ||
+        ''
+      ).trim();
       return {
         id: p.id,
         title: p.title || 'CV Aktif',
-        targetPosition: p.target_position || '',
+        targetPosition: targetPos,
         skills: Array.isArray(parsedData.skills) ? parsedData.skills : [],
-        experience: Array.isArray(parsedData.experience) ? parsedData.experience : [],
+        experience: Array.isArray(parsedData.experience)
+          ? parsedData.experience
+          : Array.isArray(parsedData.experiences)
+          ? parsedData.experiences
+          : [],
         projects: Array.isArray(parsedData.projects) ? parsedData.projects : [],
-        education: Array.isArray(parsedData.education) ? parsedData.education : [],
+        education: Array.isArray(parsedData.education)
+          ? parsedData.education
+          : Array.isArray(parsedData.educations)
+          ? parsedData.educations
+          : [],
       };
     });
 
@@ -287,18 +505,36 @@ export async function GET(req: NextRequest) {
     if (requestedRoleId?.trim()) {
       userRoleQueries.push(requestedRoleId.trim());
     }
-    if (userRecord?.target_job?.trim()) {
-      const tj = userRecord.target_job.trim();
-      if (!userRoleQueries.some((q) => q.toLowerCase() === tj.toLowerCase())) {
-        userRoleQueries.push(tj);
+
+    // Prioritaskan dokumen CV aktif/terpilih (atau CV terbaru) saat user belum menentukan role tertentu
+    const activeCv = requestedCvId !== 'all'
+      ? formattedCvs.find((c) => c.id === requestedCvId)
+      : formattedCvs[0];
+
+    if (activeCv?.targetPosition?.trim()) {
+      const pos = activeCv.targetPosition.trim();
+      if (!userRoleQueries.some((q) => q.toLowerCase() === pos.toLowerCase())) {
+        userRoleQueries.push(pos);
       }
     }
+
+    // Role dari dokumen CV lainnya
     formattedCvs.forEach((cv) => {
       const pos = cv.targetPosition?.trim();
       if (pos && !userRoleQueries.some((q) => q.toLowerCase() === pos.toLowerCase())) {
         userRoleQueries.push(pos);
       }
     });
+
+    // Profil target job (jika ada dan belum masuk)
+    if (userRecord?.target_job?.trim()) {
+      const tj = userRecord.target_job.trim();
+      if (!userRoleQueries.some((q) => q.toLowerCase() === tj.toLowerCase())) {
+        userRoleQueries.push(tj);
+      }
+    }
+
+    // Riwayat lamaran pekerjaan
     applications.forEach((app) => {
       const pos = app.position?.trim();
       if (pos && !userRoleQueries.some((q) => q.toLowerCase() === pos.toLowerCase())) {
@@ -306,10 +542,12 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    // Resolve setiap role menjadi RoleTaxonomyItem
+    // Resolve setiap role secara paralel menjadi RoleTaxonomyItem
+    const resolvedItems = await Promise.all(
+      userRoleQueries.map((q) => resolveSingleRole(q, user.id))
+    );
     const userDefinedRoles: RoleTaxonomyItem[] = [];
-    for (const q of userRoleQueries) {
-      const item = await resolveSingleRole(q, user.id);
+    for (const item of resolvedItems) {
       if (item && !userDefinedRoles.some((r) => r.id === item.id)) {
         userDefinedRoles.push(item);
       }
@@ -402,14 +640,30 @@ export async function POST(req: NextRequest) {
 
     const formattedCvs = cvProjects.map((p) => {
       const parsedData = (typeof p.data === 'object' && p.data !== null ? p.data : {}) as Record<string, any>;
+      const targetPos = (
+        p.target_position ||
+        parsedData.headline ||
+        parsedData.targetPosition ||
+        parsedData.target_position ||
+        parsedData.position ||
+        ''
+      ).trim();
       return {
         id: p.id,
         title: p.title || 'CV Aktif',
-        targetPosition: p.target_position || '',
+        targetPosition: targetPos,
         skills: Array.isArray(parsedData.skills) ? parsedData.skills : [],
-        experience: Array.isArray(parsedData.experience) ? parsedData.experience : [],
+        experience: Array.isArray(parsedData.experience)
+          ? parsedData.experience
+          : Array.isArray(parsedData.experiences)
+          ? parsedData.experiences
+          : [],
         projects: Array.isArray(parsedData.projects) ? parsedData.projects : [],
-        education: Array.isArray(parsedData.education) ? parsedData.education : [],
+        education: Array.isArray(parsedData.education)
+          ? parsedData.education
+          : Array.isArray(parsedData.educations)
+          ? parsedData.educations
+          : [],
       };
     });
 

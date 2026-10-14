@@ -161,7 +161,7 @@ export const PortalSearchDropdown: React.FC<PortalSearchDropdownProps> = ({
   return (
     <div className={`relative ${className}`} ref={containerRef}>
       <div className="relative flex items-center">
-        <Globe className="absolute left-3 w-3.5 h-3.5 text-orange-500 pointer-events-none" />
+        <Globe className="absolute left-3 w-3.5 h-3.5 text-orange-700 pointer-events-none dark:text-orange-400" />
         <input
           type="text"
           placeholder={placeholder}
@@ -174,7 +174,7 @@ export const PortalSearchDropdown: React.FC<PortalSearchDropdownProps> = ({
             setIsOpen(true);
             setSelectedIndex(-1);
           }}
-          className="w-full pl-8 pr-8 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-2 focus:ring-[#1738D1]/20 transition"
+          className="w-full pl-8 pr-8 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50 text-slate-900 dark:text-white text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:border-cobalt-500 focus:ring-2 focus:ring-cobalt-500/20 transition"
         />
         {query ? (
           <button
@@ -185,12 +185,12 @@ export const PortalSearchDropdown: React.FC<PortalSearchDropdownProps> = ({
               setIsOpen(true);
               setSelectedIndex(-1);
             }}
-            className="absolute right-2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full transition cursor-pointer"
+            className="absolute right-2 p-1 text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 rounded-full transition cursor-pointer dark:text-slate-400"
           >
             <X className="w-3.5 h-3.5" />
           </button>
         ) : (
-          <ChevronDown className="absolute right-2.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          <ChevronDown className="absolute right-2.5 w-3.5 h-3.5 text-slate-500 pointer-events-none dark:text-slate-400" />
         )}
       </div>
 
@@ -204,15 +204,15 @@ export const PortalSearchDropdown: React.FC<PortalSearchDropdownProps> = ({
               onClick={() => handleSelectCustom(query)}
               className={`w-full text-left px-3.5 py-2.5 transition cursor-pointer flex items-center justify-between ${
                 selectedIndex === 0
-                  ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 font-bold'
-                  : 'bg-orange-50/50 dark:bg-orange-950/20 text-orange-600 dark:text-orange-400 font-bold hover:bg-orange-50 dark:hover:bg-orange-950/30'
+                  ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 font-bold'
+                  : 'bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-400 font-bold hover:bg-orange-50 dark:hover:bg-orange-950/30'
               }`}
             >
               <span className="flex items-center gap-2 min-w-0">
-                <Plus className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                <Plus className="w-3.5 h-3.5 text-orange-700 shrink-0 dark:text-orange-400" />
                 <span className="truncate">Gunakan &quot;{query.trim()}&quot;</span>
               </span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-100 dark:bg-orange-900/60 text-orange-700 dark:text-orange-300 font-medium">
+              <span className="text-caption px-1.5 py-0.5 rounded bg-orange-100 dark:bg-orange-900/60 text-orange-700 dark:text-orange-300 font-medium">
                 Kustom
               </span>
             </button>
@@ -232,9 +232,9 @@ export const PortalSearchDropdown: React.FC<PortalSearchDropdownProps> = ({
                 onClick={() => handleSelectPortal(portal)}
                 className={`w-full text-left px-3.5 py-2 transition cursor-pointer flex items-center justify-between group ${
                   isHighlighted
-                    ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 font-bold'
+                    ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 font-bold'
                     : isSelected
-                    ? 'bg-slate-100/80 dark:bg-slate-800/80 text-[#1738D1] dark:text-blue-400 font-bold'
+                    ? 'bg-slate-100/80 dark:bg-slate-800/80 text-cobalt-500 dark:text-blue-400 font-bold'
                     : 'text-slate-700 dark:text-slate-200 hover:bg-orange-50 dark:hover:bg-orange-950/30 hover:text-orange-600 dark:hover:text-orange-400 font-medium'
                 }`}
               >
@@ -242,15 +242,15 @@ export const PortalSearchDropdown: React.FC<PortalSearchDropdownProps> = ({
                   <Globe
                     className={`w-3.5 h-3.5 shrink-0 transition-colors ${
                       isHighlighted
-                        ? 'text-orange-500'
+                        ? 'text-orange-700 dark:text-orange-400'
                         : isSelected
-                        ? 'text-[#1738D1] dark:text-blue-400'
-                        : 'text-slate-400 group-hover:text-orange-500'
+                        ? 'text-cobalt-500 dark:text-blue-400'
+                        : 'text-slate-500 group-hover:text-orange-500 dark:text-slate-400'
                     }`}
                   />
                   <span className="truncate">{portal.name}</span>
                   {portal.domain && (
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500 truncate">
+                    <span className="text-caption text-slate-500 dark:text-slate-500 truncate">
                       ({portal.domain})
                     </span>
                   )}
@@ -258,18 +258,18 @@ export const PortalSearchDropdown: React.FC<PortalSearchDropdownProps> = ({
 
                 <div className="flex items-center gap-1.5 shrink-0 ml-2">
                   {portal.badge && (
-                    <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                    <span className="text-caption font-normal px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800-slate-600 dark:text-slate-400">
                       {portal.badge}
                     </span>
                   )}
-                  {isSelected && <Check className="w-4 h-4 text-orange-500 shrink-0" />}
+                  {isSelected && <Check className="w-4 h-4 text-orange-700 shrink-0 dark:text-orange-400" />}
                 </div>
               </button>
             );
           })}
 
           {filteredPortals.length === 0 && !showCustomOption && (
-            <div className="p-4 text-center text-slate-400 text-xs">
+            <div className="p-4 text-center text-slate-500 text-xs dark:text-slate-400">
               Tidak ada portal yang cocok
             </div>
           )}

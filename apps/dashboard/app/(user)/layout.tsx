@@ -7,6 +7,7 @@ import { BottomNav } from '@/components/ui/BottomNav';
 import { useModals } from '@/context/ModalContext';
 import { useRouter, usePathname } from 'next/navigation';
 import { FloatingAiAssistant } from '@/components/ai/FloatingAiAssistant';
+import { ProductTour } from '@/components/tour/ProductTour';
 import { getStoredSession } from '@/lib/auth';
 
 export default function UserLayout({ children }: { children: React.ReactNode }) {
@@ -24,7 +25,8 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     const session = getStoredSession();
     if (!session || !session.email) {
       setIsAuthorized(false);
-      const redirectUrl = pathname ? `/login?redirect=${encodeURIComponent(pathname)}` : '/login';
+      const safePath = (!pathname || pathname.startsWith('/login') || pathname.startsWith('/register')) ? '' : `?redirect=${encodeURIComponent(pathname)}`;
+      const redirectUrl = `/login${safePath}`;
       window.location.replace(redirectUrl);
       return;
     }
@@ -44,9 +46,19 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     }
   }, [pathname, router]);
 
+  useEffect(() => {
+    // Clean up legacy dashboard scale attribute if present
+    if (typeof window !== 'undefined') {
+      document.documentElement.removeAttribute('data-dashboard-scale');
+    }
+  }, []);
+
   if (isAuthorized === false) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 font-sans text-xs text-slate-400">
+      <div
+        id="dashboard-root-layout"
+        className="h-full min-h-full max-h-full w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 font-sans text-xs text-slate-500 dark:text-slate-400"
+      >
         <div className="flex flex-col items-center gap-3">
           <div className="w-6 h-6 border-2 border-slate-300 dark:border-slate-700 border-t-[#1738D1] rounded-full animate-spin" />
           <span>Mengalihkan ke halaman masuk...</span>
@@ -56,6 +68,18 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   }
 
   const isCvPage = pathname === '/cv' || pathname?.startsWith('/cv/');
+  const isFocusMode = pathname === '/cv/create';
+
+  if (isFocusMode) {
+    return (
+      <div
+        id="dashboard-root-layout"
+        className="h-full min-h-full max-h-full w-full overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans"
+      >
+        {children}
+      </div>
+    );
+  }
 
   const toggleSidebarCollapse = () => {
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
@@ -72,7 +96,10 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex transition-colors font-sans print:h-auto print:overflow-visible print:block print:bg-white print:p-0 print:m-0">
+    <div
+      id="dashboard-root-layout"
+      className="h-full min-h-full max-h-full w-full overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex transition-colors font-sans print:h-auto print:overflow-visible print:block print:bg-white print:p-0 print:m-0"
+    >
       <Sidebar
         onOpenUpgradeModal={openUpgrade}
         isCollapsed={isSidebarCollapsed}
@@ -81,7 +108,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden print:h-auto print:overflow-visible print:block print:w-[210mm] print:m-0 print:p-0">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden print:h-auto print:overflow-visible print:block print:w-[210mm] print:m-0 print:p-0">
         <Header
           onToggleSidebar={toggleSidebarCollapse}
           isSidebarCollapsed={isSidebarCollapsed}
@@ -89,15 +116,16 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
 
         <main
           id="main-content-scroll"
-          className="flex-1 overflow-y-auto p-3.5 sm:p-6 lg:p-8 pb-24 md:pb-8 w-full no-scrollbar print:h-auto print:overflow-visible print:p-0 print:m-0 print:block print:w-[210mm]"
+          className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 pb-24 md:pb-5 w-full no-scrollbar print:h-auto print:overflow-visible print:p-0 print:m-0 print:block print:w-[210mm]"
         >
-          <div className="w-full mx-auto space-y-6 lg:space-y-8 print:p-0 print:m-0 print:space-y-0 print:w-[210mm] print:max-w-none">
+          <div className="w-full mx-auto space-y-3 sm:space-y-3.5 print:p-0 print:m-0 print:space-y-0 print:w-[210mm] print:max-w-none">
             {children}
           </div>
         </main>
 
         {!isCvPage && <FloatingAiAssistant />}
         <BottomNav />
+        <ProductTour />
       </div>
     </div>
   );

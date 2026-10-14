@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { JobScraperView } from '@/components/JobScraperView';
 
 export const metadata: Metadata = {
-  title: 'Pencarian & Simpan Loker',
+  title: 'Job Scraper & Sinkronisasi Loker | Employr',
   description:
-    'Temukan dan simpan lowongan kerja terbaru dari berbagai portal rekrutmen terkemuka di Employr.',
+    'Tarik dan sinkronkan lowongan kerja resmi dari berbagai portal publik langsung ke database Employr.',
 };
 
 export default function ScrapeJobsPage() {

@@ -1,0 +1,268 @@
+---
+// OrganicCardSmall.astro - Cutout Media Header Placeholder & Inset Card (100% Identik dengan Gaya Port 3005)
+import CutoutCorner from './CutoutCorner.astro';
+
+interface Props {
+  image?: string;
+  imageAlt?: string;
+  category: string;
+  date?: string;
+  title: string;
+  href?: string;
+  description?: string;
+  price?: string;
+  badge?: string;
+  location?: string;
+  actionText?: string;
+  className?: string;
+  surfaceColor?: string;
+  [key: string]: any;
+}
+
+const {
+  image,
+  imageAlt = 'Card banner',
+  category,
+  date = '',
+  title,
+  href = '#',
+  description,
+  price,
+  badge,
+  location,
+  actionText = 'Lihat Detail',
+  className = '',
+  surfaceColor = '#ffffff',
+  ...rest
+} = Astro.props;
+
+function sanitizeCardText(raw = ''): string {
+  if (!raw) return '';
+  return raw
+    .replace(/[—–]/g, '-')
+    .replace(/\bArtificial Intelligence\b/gi, 'Kecerdasan Terapan')
+    .replace(/\bMachine Learning\b/gi, 'Pembelajaran Data')
+    .replace(/\bAI\b/g, 'Teknologi Cerdas')
+    .replace(/\bPrompting\b/gi, 'Penyusunan Instruksi')
+    .replace(/\bPrompt\b/gi, 'Instruksi')
+    .replace(/\bGenerated\b/gi, 'Disusun')
+    .replace(/\bGenerate\b/gi, 'Susun')
+    .replace(/\bSubscription\b/gi, 'Paket Akses')
+    .replace(/\bLangganan\b/gi, 'Paket Akses');
+}
+
+// Definisi gaya gradient, warna aksen, dan icon watermark persis seperti http://localhost:3005/
+function getCategoryStyle(cat = '', tit = '', targetHref = '') {
+  const combined = `${cat} ${tit} ${targetHref}`.toLowerCase();
+
+  // 1. Sertifikasi Profesi
+  if (targetHref.includes('/sertifikasi') || /(sertifikasi|bnsp|akreditasi|ujian|kompetensi|profesi|certificate|sertifikat)/.test(combined)) {
+    return {
+      gradient: 'bg-[#0b132b] from-[#0b132b] via-[#1c2541] to-[#1738D1]',
+      pinBg: 'bg-[#0b132b]',
+      pinCorner: 'text-[#0b132b]',
+      accent: 'text-[#1738D1]',
+      iconType: 'cert',
+      defaultPin: 'Sertifikasi Resmi',
+    };
+  }
+
+  // 2. Event & Job Fair
+  if (targetHref.includes('/event') || /(event|job fair|webinar|expo|bursa kerja|walk-in|karir fair)/.test(combined)) {
+    return {
+      gradient: 'bg-[#022c22] from-[#022c22] via-[#064e3b] to-[#0f766e]',
+      pinBg: 'bg-[#022c22]',
+      pinCorner: 'text-[#022c22]',
+      accent: 'text-emerald-700',
+      iconType: 'event',
+      defaultPin: 'Agenda Event',
+    };
+  }
+
+  // 3. Pelatihan / Course
+  if (targetHref.includes('/course') || /(course|kursus|pelatihan|kelas|bootcamp|coding|programming|developer|data|design)/.test(combined)) {
+    return {
+      gradient: 'bg-[#0F172A] from-[#0F172A] via-[#1E293B] to-[#2563EB]',
+      pinBg: 'bg-[#0F172A]',
+      pinCorner: 'text-[#0F172A]',
+      accent: 'text-[#1738D1]',
+      iconType: 'course',
+      defaultPin: 'Pelatihan Skill',
+    };
+  }
+
+  // 4. Artikel & Tips Karier
+  return {
+    gradient: 'bg-[#18181B] from-[#18181B] via-[#27272A] to-[#3F3F46]',
+    pinBg: 'bg-[#18181B]',
+    pinCorner: 'text-[#18181B]',
+    accent: 'text-rose-700',
+    iconType: 'article',
+    defaultPin: 'Panduan Karier',
+  };
+}
+
+const cleanTitle = sanitizeCardText(title);
+const cleanDescription = description ? sanitizeCardText(description) : undefined;
+const cleanCategory = sanitizeCardText(category);
+const cleanActionText = sanitizeCardText(actionText);
+
+const style = getCategoryStyle(cleanCategory, cleanTitle, href);
+
+// Pin text di pojok kanan atas (Top-Right Cutout Pin)
+const pinText = sanitizeCardText(price || badge || (date && !location ? date : style.defaultPin));
+
+// Meta info di kiri footer
+const rawMetaText = location
+  ? (date ? `${location} · ${date}` : location)
+  : (date || 'Employr Portal');
+const metaText = sanitizeCardText(rawMetaText);
+---
+
+<a
+  href={href}
+  class:list={[
+    "group/cutout relative flex flex-col h-full overflow-hidden rounded-[20px]",
+    "border border-[#d7d6cf]/90 shadow-xs hover:shadow-xl hover:border-[#1738D1]/70",
+    "transition-all duration-300 cursor-pointer outline-none",
+    "focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:ring-offset-2",
+    className
+  ]}
+  style={`background-color: ${surfaceColor};`}
+  {...rest}
+>
+  <!-- 1. Cutout Media Header with Gradient & Giant Watermark Icon -->
+  <div class:list={[
+    "relative h-28 sm:h-32 w-full overflow-hidden p-4 transition-transform duration-500 group-hover/cutout:brightness-105 shrink-0 bg-gradient-to-br",
+    style.gradient
+  ]}>
+    <!-- Subtle Decorative Backdrop Pattern -->
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_60%)] pointer-events-none"></div>
+
+    <!-- Giant Watermark Icon (Hover Zoom & Rotate) -->
+    <div class="absolute -right-2 -bottom-2 opacity-15 text-white pointer-events-none transition-transform duration-500 group-hover/cutout:scale-110 group-hover/cutout:rotate-6">
+      {style.iconType === 'cert' && (
+        <svg class="w-24 h-24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+      )}
+      {style.iconType === 'event' && (
+        <svg class="w-24 h-24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+          <line x1="16" x2="16" y1="2" y2="6"/>
+          <line x1="8" x2="8" y1="2" y2="6"/>
+          <line x1="3" x2="21" y1="10" y2="10"/>
+          <path d="m9 16 2 2 4-4"/>
+        </svg>
+      )}
+      {style.iconType === 'course' && (
+        <svg class="w-24 h-24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/>
+          <path d="M22 10v6"/>
+          <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
+        </svg>
+      )}
+      {style.iconType === 'article' && (
+        <svg class="w-24 h-24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+      )}
+    </div>
+
+    <!-- Top-Right Cutout Pin (Status / Tipe / Harga) with Solid High-Contrast Scrim -->
+    <div class:list={[
+      "absolute top-0 right-0 text-white rounded-bl-[14px] px-3 py-1 text-[11px] font-bold tracking-wide border-b border-l border-white/20 select-none shadow-xs z-10 flex items-center gap-1",
+      style.pinBg
+    ]}>
+      <span class="truncate max-w-[150px]">{pinText}</span>
+      <CutoutCorner class={`absolute top-0 -left-[19px] -rotate-90 pointer-events-none ${style.pinCorner}`} size={20} />
+      <CutoutCorner class={`absolute right-0 -bottom-[19px] -rotate-90 pointer-events-none ${style.pinCorner}`} size={20} />
+    </div>
+
+    <!-- Bottom-Left Cutout Inset Label (Category Pill dengan Icon Aksen) -->
+    <div
+      class="absolute bottom-0 left-0 bg-white rounded-tr-[16px] px-3.5 py-1.5 flex items-center gap-1.5 shadow-xs select-none z-10"
+      style={`background-color: ${surfaceColor};`}
+    >
+      <div class:list={["w-3.5 h-3.5 shrink-0", style.accent]}>
+        {style.iconType === 'cert' && (
+          <svg class="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        )}
+        {style.iconType === 'event' && (
+          <svg class="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+            <line x1="16" x2="16" y1="2" y2="6"/>
+            <line x1="8" x2="8" y1="2" y2="6"/>
+            <line x1="3" x2="21" y1="10" y2="10"/>
+          </svg>
+        )}
+        {style.iconType === 'course' && (
+          <svg class="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/>
+            <path d="M22 10v6"/>
+          </svg>
+        )}
+        {style.iconType === 'article' && (
+          <svg class="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+        )}
+      </div>
+      <span class="text-[11px] font-bold text-[#101010] truncate max-w-[180px]">
+        {cleanCategory}
+      </span>
+      <CutoutCorner class="absolute -right-[23px] -bottom-px rotate-90 pointer-events-none" style={`color: ${surfaceColor};`} size={24} />
+      <CutoutCorner class="absolute -top-[23px] -left-px rotate-90 pointer-events-none" style={`color: ${surfaceColor};`} size={24} />
+    </div>
+  </div>
+
+  <!-- 2. Cutout Content Area -->
+  <div class="p-5 flex-1 flex flex-col justify-between gap-3">
+    <div>
+      <h3 class="text-sm sm:text-base font-bold text-[#101010] group-hover/cutout:text-[#1738D1] transition leading-snug line-clamp-2">
+        {cleanTitle}
+      </h3>
+      {cleanDescription && (
+        <p class="text-xs text-[#55544f] mt-1.5 leading-relaxed line-clamp-2 font-normal">
+          {cleanDescription}
+        </p>
+      )}
+    </div>
+
+    <!-- 3. Footer Meta with Live Arrow -->
+    <div class="flex items-center justify-between pt-3 border-t border-[#d7d6cf]/70 text-[11px] mt-auto">
+      <span class="font-medium text-[#55544f] flex items-center gap-1 min-w-0 pr-2">
+        {location && (
+          <svg class="w-3.5 h-3.5 text-rose-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        )}
+        <span class="truncate">{metaText}</span>
+      </span>
+
+      <span class="inline-flex items-center gap-1 font-bold text-[#1738D1] group-hover/cutout:translate-x-0.5 transition-transform shrink-0">
+        <span>{cleanActionText}</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7" />
+        </svg>
+      </span>
+    </div>
+  </div>
+
+  <!-- 4. Floating Hover Action Pill -->
+  <div class="absolute right-4 bottom-3 opacity-0 translate-y-2 pointer-events-none group-hover/cutout:opacity-100 group-hover/cutout:translate-y-0 transition-all duration-300 ease-out z-20 hidden sm:block">
+    <span class="inline-flex items-center gap-1 bg-[#1738D1] hover:bg-[#132EA8] text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full shadow-lg shadow-[#1738D1]/25">
+      <span>{cleanActionText}</span>
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7" />
+      </svg>
+    </span>
+  </div>
+</a>

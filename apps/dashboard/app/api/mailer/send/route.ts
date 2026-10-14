@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, ApplicationStatus, ApplicationSource } from '@employr/db';
+import { prisma, ApplicationStatus, ApplicationSource, decryptSecret } from '@employr/db';
 import { getAuthUser } from '@/lib/server-auth';
 import { dispatchEmail, SmtpConfig, EmailPayload } from '@/lib/mailer/email-service';
 import { generateAtsPdfBuffer } from '@/lib/mailer/ats-pdf-generator';
@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
       port: selectedSmtp.port,
       secure: selectedSmtp.secure,
       username: selectedSmtp.username,
-      password: selectedSmtp.password,
+      password: decryptSecret(selectedSmtp.password),
       fromName: selectedSmtp.from_name,
       fromEmail: selectedSmtp.from_email,
     };
@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
           port: backupSmtp.port,
           secure: backupSmtp.secure,
           username: backupSmtp.username,
-          password: backupSmtp.password,
+          password: decryptSecret(backupSmtp.password),
           fromName: backupSmtp.from_name,
           fromEmail: backupSmtp.from_email,
         };

@@ -112,22 +112,22 @@ export const SwipeableReminderBanner: React.FC<SwipeableReminderBannerProps> = (
             y: underneathY,
             opacity: underneathOpacity,
           }}
-          className="absolute inset-0 z-0 bg-white/90 dark:bg-slate-900/90 bg-gradient-to-r from-orange-500/10 via-amber-500/5 to-white/90 dark:to-slate-900/90 border border-orange-200/80 dark:border-orange-800/40 rounded-[10px] p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs pointer-events-none"
+          className="absolute inset-0 z-0 bg-white/90 dark:bg-slate-900/90 bg-gradient-to-r from-orange-500/10 via-amber-500/5 to-white/90 dark:to-slate-900/90 border border-orange-200/80 dark:border-orange-800/40 rounded-[10px] p-3 sm:p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3 shadow-2xs pointer-events-none overflow-hidden"
         >
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="w-8 h-8 rounded-[10px] bg-orange-500/80 text-white flex items-center justify-center shrink-0 shadow-xs">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 w-full flex-1 overflow-hidden">
+            <div className="w-8 h-8 rounded-[10px] bg-orange-700/80 text-white flex items-center justify-center shrink-0 shadow-xs">
               <BellRing className="w-4 h-4" />
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-xs text-slate-700 dark:text-slate-300 truncate max-w-[200px] sm:max-w-[320px]">
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <span className="font-bold text-xs text-slate-700 dark:text-slate-300 truncate flex-1 min-w-0">
                   {nextReminder.title}
                 </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-[10px] bg-orange-100/70 dark:bg-orange-950/70 text-orange-700/80 dark:text-orange-300/80 border border-orange-200/60 dark:border-orange-800/50 shrink-0">
+                <span className="text-caption font-bold px-1.5 py-0.5 rounded-[8px] bg-orange-100/70 dark:bg-orange-950/70 text-orange-700/80 dark:text-orange-300/80 border border-orange-200/60 dark:border-orange-800/50 shrink-0">
                   Berikutnya
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+              <p className="text-caption text-slate-500 dark:text-slate-400 truncate mt-0.5">
                 “{nextReminder.message}”
               </p>
             </div>
@@ -191,11 +191,11 @@ export const SwipeableReminderBanner: React.FC<SwipeableReminderBannerProps> = (
               setIsPastThreshold(false);
             }
           }}
-          className="relative z-10 bg-white/95 dark:bg-slate-900/95 bg-gradient-to-r from-orange-500/10 via-amber-500/5 to-white/95 dark:to-slate-900/95 border border-orange-200 dark:border-orange-800/60 rounded-[10px] p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs backdrop-blur-xs cursor-grab active:cursor-grabbing touch-pan-y"
+          className="relative z-10 bg-white/95 dark:bg-slate-900/95 bg-gradient-to-r from-orange-500/10 via-amber-500/5 to-white/95 dark:to-slate-900/95 border border-orange-200 dark:border-orange-800/60 rounded-[10px] p-3 sm:p-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 shadow-2xs backdrop-blur-xs cursor-grab active:cursor-grabbing touch-pan-y overflow-hidden"
         >
-          {/* Left Content: Bell Icon & Animated Rotating Reminder Content */}
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="w-8 h-8 rounded-[10px] bg-orange-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+          {/* Top/Left Content: Bell Icon & Animated Rotating Reminder Content */}
+          <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0 flex-1 overflow-hidden">
+            <div className="w-8 h-8 rounded-[10px] bg-orange-700 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5 sm:mt-0">
               <BellRing className="w-4 h-4" />
             </div>
 
@@ -210,20 +210,25 @@ export const SwipeableReminderBanner: React.FC<SwipeableReminderBannerProps> = (
                   transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
                   className="min-w-0"
                 >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-bold text-xs text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-[320px]">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                    <span className="font-bold text-xs text-slate-900 dark:text-white truncate flex-1 min-w-0" title={activeReminder.title}>
                       {activeReminder.title}
                     </span>
 
                     {/* Indikator Urutan Tumpukan Notifikasi */}
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-[10px] bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800 shrink-0">
-                      {totalReminders > 1
-                        ? `${safeIndex + 1} dari ${totalReminders} Pengingat`
-                        : '1 Pengingat Aktif'}
+                    <span className="text-caption font-bold px-1.5 py-0.5 rounded-[8px] bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800 shrink-0">
+                      {totalReminders > 1 ? (
+                        <>
+                          <span className="sm:hidden">{safeIndex + 1}/{totalReminders}</span>
+                          <span className="hidden sm:inline">{safeIndex + 1} dari {totalReminders} Pengingat</span>
+                        </>
+                      ) : (
+                        'Pengingat'
+                      )}
                     </span>
                   </div>
 
-                  <p className="text-[11px] text-slate-600 dark:text-slate-400 truncate mt-0.5">
+                  <p className="text-caption text-slate-600 dark:text-slate-400 line-clamp-2 sm:truncate mt-0.5 leading-snug">
                     “{activeReminder.message}”
                   </p>
                 </motion.div>
@@ -231,90 +236,97 @@ export const SwipeableReminderBanner: React.FC<SwipeableReminderBannerProps> = (
             </div>
           </div>
 
-          {/* Center/Controls: Pagination Dots & Arrows (hanya jika ada lebih dari 1 notifikasi) */}
-          {totalReminders > 1 && (
+          {/* Bottom Bar on Mobile, Inline on Desktop */}
+          <div className="flex items-center justify-between sm:justify-end gap-2 pt-2 sm:pt-0 border-t border-orange-200/50 dark:border-orange-800/40 sm:border-0 shrink-0 w-full sm:w-auto">
+            {/* Center/Controls: Pagination Dots & Arrows */}
+            {totalReminders > 1 ? (
+              <div
+                className="flex items-center gap-1 shrink-0"
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePrev();
+                  }}
+                  className="p-1 rounded-[6px] text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer dark:text-slate-400"
+                  title="Pengingat sebelumnya"
+                  aria-label="Pengingat sebelumnya"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+
+                {/* Dots Indicator */}
+                <div className="flex items-center gap-1">
+                  {reminders.map((r, idx) => (
+                    <button
+                      key={r.id}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentIndex(idx);
+                      }}
+                      className="min-h-[24px] min-w-[16px] p-0.5 flex items-center justify-center cursor-pointer"
+                      title={`Lihat pengingat ke-${idx + 1}`}
+                      aria-label={`Pengingat ${idx + 1}`}
+                    >
+                      <span
+                        className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 block ${
+                          idx === safeIndex
+                            ? 'w-4 sm:w-5 bg-cobalt-500'
+                            : 'w-1.5 sm:w-2 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400'
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNext();
+                  }}
+                  className="p-1 rounded-[6px] text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer dark:text-slate-400"
+                  title="Pengingat berikutnya"
+                  aria-label="Pengingat berikutnya"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : <div className="sm:hidden" />}
+
+            {/* Right Controls: Open Hub Button & Explicit Dismiss Button */}
             <div
-              className="flex items-center gap-1.5 self-center shrink-0 order-3 sm:order-2"
+              className="flex items-center gap-1.5 shrink-0 ml-auto sm:ml-0"
               onPointerDown={(e) => e.stopPropagation()}
             >
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handlePrev();
+                  onOpenReminderHub();
                 }}
-                className="p-1 rounded-[6px] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
-                title="Pengingat sebelumnya"
-                aria-label="Pengingat sebelumnya"
+                className="px-3 py-1.5 rounded-[8px] bg-cobalt-500 hover:bg-cobalt-600 text-white font-semibold text-xs shadow-xs transition cursor-pointer flex items-center gap-1"
               >
-                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Buka Pengingat</span>
+                <ChevronRight className="w-3 h-3" />
               </button>
-
-              {/* Dots Indicator */}
-              <div className="flex items-center gap-1">
-                {reminders.map((r, idx) => (
-                  <button
-                    key={r.id}
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentIndex(idx);
-                    }}
-                    className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                      idx === safeIndex
-                        ? 'w-4 bg-orange-500'
-                        : 'w-1.5 bg-orange-200 dark:bg-orange-900/60 hover:bg-orange-400'
-                    }`}
-                    title={`Lihat pengingat ke-${idx + 1}`}
-                    aria-label={`Pengingat ${idx + 1}`}
-                  />
-                ))}
-              </div>
 
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleNext();
+                  handleDismissCurrent(activeReminder.id, 'right');
                 }}
-                className="p-1 rounded-[6px] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
-                title="Pengingat berikutnya"
-                aria-label="Pengingat berikutnya"
+                className="p-1.5 rounded-[8px] text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-transparent hover:border-rose-200 dark:hover:border-rose-800 transition cursor-pointer dark:text-slate-400"
+                title="Hapus notifikasi ini"
+                aria-label="Hapus notifikasi"
               >
-                <ChevronRight className="w-3.5 h-3.5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
-          )}
-
-          {/* Right Controls: Open Hub Button & Explicit Dismiss Button */}
-          <div
-            className="flex items-center gap-2 shrink-0 self-end sm:self-center order-2 sm:order-3"
-            onPointerDown={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenReminderHub();
-              }}
-              className="px-3.5 py-1.5 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-xs transition cursor-pointer flex items-center gap-1.5"
-            >
-              <span>Buka Pengingat</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDismissCurrent(activeReminder.id, 'right');
-              }}
-              className="p-1.5 rounded-[10px] text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-transparent hover:border-rose-200 dark:hover:border-rose-800 transition cursor-pointer"
-              title="Hapus notifikasi ini"
-              aria-label="Hapus notifikasi"
-            >
-              <X className="w-4 h-4" />
-            </button>
           </div>
         </motion.div>
       </div>

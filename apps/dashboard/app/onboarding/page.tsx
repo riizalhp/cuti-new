@@ -14,6 +14,8 @@ import { MajorSearchInput } from '@/components/ui/MajorSearchInput';
 import { SchoolSearchInput } from '@/components/ui/SchoolSearchInput';
 import { PositionSearchInput } from '@/components/ui/PositionSearchInput';
 import { CustomDatePicker } from '@/components/ui/CustomDatePicker';
+import { Avatar } from '@/components/ui/components-primitives-avatar';
+import { getLokerUrl } from '@/lib/urls';
 import {
   computeCareerDiagnosis,
   CareerDiagnosisResult,
@@ -30,7 +32,6 @@ import {
   ArrowLeft,
   Check,
   Lock,
-  DollarSign,
   MapPin,
   Award,
   BookOpen,
@@ -50,7 +51,22 @@ import {
   Plus,
   Trash2,
   AlertTriangle,
+  FileText,
+  Eye,
+  Layout,
+  LayoutGrid,
+  ExternalLink,
+  X,
 } from 'lucide-react';
+import {
+  A4PaperlikeCanvas,
+  CVTemplatePreview,
+  TemplateThumbnailVisual,
+  cvTemplates,
+  TemplateOption,
+  CVData,
+  mergeFragmentCertifications,
+} from '@/components/CVView';
 
 export default function CardlessClaudeStyleOnboardingPage() {
   const router = useRouter();
@@ -73,7 +89,19 @@ export default function CardlessClaudeStyleOnboardingPage() {
   const [scanError, setScanError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const dragCounter = useRef(0);
-  const [scannedActiveTab, setScannedActiveTab] = useState<'experience' | 'projects' | 'certifications' | 'organizations'>('experience');
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const importedRaw = localStorage.getItem('employr_imported_cv_data');
+        if (importedRaw) {
+          const parsed = JSON.parse(importedRaw);
+          if (parsed.templateId) return parsed.templateId;
+        }
+      } catch {}
+    }
+    return 'ats-modern';
+  });
+  const [scannedMobileView, setScannedMobileView] = useState<'templates' | 'preview'>('templates');
 
   // Helper to split period string like "Jan 2022 - Mar 2023" into separate startDate and endDate
   const parsePeriodToDates = (periodStr?: string) => {
@@ -87,171 +115,6 @@ export default function CardlessClaudeStyleOnboardingPage() {
       endDate: isCurrent ? 'Sekarang' : end,
       isCurrent,
     };
-  };
-
-  // Helper functions to update/edit extracted CV records directly
-  const updateExperience = (index: number, field: string, value: string) => {
-    setFormData((prev) => {
-      const list = [...prev.extractedExperiences];
-      list[index] = { ...list[index], [field]: value };
-      return { ...prev, extractedExperiences: list };
-    });
-  };
-
-  const updateExperienceDate = (
-    index: number,
-    field: 'startDate' | 'endDate' | 'isCurrent',
-    value: any
-  ) => {
-    setFormData((prev) => {
-      const list = [...prev.extractedExperiences];
-      const current = list[index] || {};
-      const fallback = parsePeriodToDates(current.period);
-      const item = {
-        ...current,
-        startDate: current.startDate || fallback.startDate,
-        endDate: current.endDate || fallback.endDate,
-        isCurrent: current.isCurrent ?? fallback.isCurrent,
-      };
-
-      if (field === 'startDate') {
-        item.startDate = value;
-      } else if (field === 'endDate') {
-        item.endDate = value;
-        item.isCurrent = value === 'Sekarang' || value === 'Saat Ini';
-      } else if (field === 'isCurrent') {
-        item.isCurrent = value;
-        if (value) {
-          item.endDate = 'Sekarang';
-        } else if (item.endDate === 'Sekarang') {
-          item.endDate = '';
-        }
-      }
-
-      const start = item.startDate || '';
-      const end = item.isCurrent ? 'Sekarang' : item.endDate || '';
-      item.period = start && end ? `${start} - ${end}` : start || end || '';
-      list[index] = item;
-      return { ...prev, extractedExperiences: list };
-    });
-  };
-
-  const deleteExperience = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      extractedExperiences: prev.extractedExperiences.filter((_, i) => i !== index),
-    }));
-  };
-
-  const addExperience = () => {
-    setFormData((prev) => ({
-      ...prev,
-      extractedExperiences: [
-        ...prev.extractedExperiences,
-        {
-          id: `exp-${Date.now()}`,
-          role: '',
-          company: '',
-          startDate: '',
-          endDate: '',
-          isCurrent: false,
-          period: '',
-          description: '',
-        },
-      ],
-    }));
-  };
-
-  const updateProject = (index: number, field: string, value: string) => {
-    setFormData((prev) => {
-      const list = [...prev.extractedProjects];
-      list[index] = { ...list[index], [field]: value };
-      return { ...prev, extractedProjects: list };
-    });
-  };
-
-  const deleteProject = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      extractedProjects: prev.extractedProjects.filter((_, i) => i !== index),
-    }));
-  };
-
-  const addProject = () => {
-    setFormData((prev) => ({
-      ...prev,
-      extractedProjects: [
-        ...prev.extractedProjects,
-        {
-          id: `proj-${Date.now()}`,
-          name: '',
-          role: '',
-          period: '',
-          description: '',
-        },
-      ],
-    }));
-  };
-
-  const updateCertification = (index: number, field: string, value: string) => {
-    setFormData((prev) => {
-      const list = [...prev.extractedCertifications];
-      list[index] = { ...list[index], [field]: value };
-      return { ...prev, extractedCertifications: list };
-    });
-  };
-
-  const deleteCertification = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      extractedCertifications: prev.extractedCertifications.filter((_, i) => i !== index),
-    }));
-  };
-
-  const addCertification = () => {
-    setFormData((prev) => ({
-      ...prev,
-      extractedCertifications: [
-        ...prev.extractedCertifications,
-        {
-          id: `cert-${Date.now()}`,
-          name: '',
-          issuer: '',
-          issueDate: '',
-        },
-      ],
-    }));
-  };
-
-  const updateOrganization = (index: number, field: string, value: string) => {
-    setFormData((prev) => {
-      const list = [...prev.extractedOrganizations];
-      list[index] = { ...list[index], [field]: value };
-      return { ...prev, extractedOrganizations: list };
-    });
-  };
-
-  const deleteOrganization = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      extractedOrganizations: prev.extractedOrganizations.filter((_, i) => i !== index),
-    }));
-  };
-
-  const addOrganization = () => {
-    setFormData((prev) => ({
-      ...prev,
-      extractedOrganizations: [
-        ...prev.extractedOrganizations,
-        {
-          id: `org-${Date.now()}`,
-          name: '',
-          role: '',
-          period: '',
-          description: '',
-        },
-      ],
-    }));
   };
 
   // Form State
@@ -281,20 +144,110 @@ export default function CardlessClaudeStyleOnboardingPage() {
     availabilityToStart: '',
     hasCvAlready: null as boolean | null,
     summary: '',
+    topAchievementSnippet: '',
     extractedExperiences: [] as any[],
     extractedProjects: [] as any[],
     extractedOrganizations: [] as any[],
     extractedCertifications: [] as any[],
+    extractedCourses: [] as any[],
+    extractedEducation: [] as any[],
   });
+
+  // Memoized CV Data for Live A4 Paperlike Preview
+  const cvPreviewData: Partial<CVData> = useMemo(() => {
+    const degreeCombined = [formData.educationLevel, formData.major].filter(Boolean).join(' - ');
+    return {
+      id: 'scanned-cv-preview',
+      title: 'CV Saya',
+      updatedAt: 'Baru saja',
+      atsScore: 85,
+      fullName: formData.fullName || 'Nama Lengkap Anda',
+      headline: formData.targetPositions?.[0] || 'Target Posisi / Profesi',
+      email: formData.contactInfo && formData.contactInfo.includes('@') ? formData.contactInfo : '',
+      phone: formData.phone || (!formData.contactInfo.includes('@') ? formData.contactInfo : ''),
+      location: formData.location || 'Indonesia',
+      summary: formData.summary || '',
+      skills: formData.skills || [],
+      education: (formData.extractedEducation && formData.extractedEducation.length > 0)
+        ? formData.extractedEducation.map((edu: any, idx: number) => ({
+            id: edu.id || `edu-preview-${idx}`,
+            institution: edu.institution || formData.institutionName || 'Institusi Pendidikan',
+            degree: edu.degree || degreeCombined || 'Sarjana / Mahasiswa',
+            major: edu.major || formData.major || '',
+            location: edu.location || formData.location || '',
+            year: edu.year || (formData.graduationYear ? `Lulus ${formData.graduationYear}` : ''),
+            startDate: edu.startDate || '',
+            endDate: edu.endDate || formData.graduationYear || '',
+            description: edu.description || '',
+          }))
+        : (formData.educationLevel || formData.major || formData.institutionName)
+          ? [
+              {
+                id: 'edu-preview-1',
+                institution: formData.institutionName || 'Institusi Pendidikan',
+                degree: degreeCombined || 'Sarjana / Mahasiswa',
+                location: formData.location || '',
+                year: formData.graduationYear ? `Lulus ${formData.graduationYear}` : '',
+                startDate: '',
+                endDate: formData.graduationYear || '',
+                description: '',
+              },
+            ]
+          : [],
+      experience: (formData.extractedExperiences || []).map((exp: any, idx: number) => ({
+        id: exp.id || `exp-preview-${idx}`,
+        role: exp.role || 'Posisi Pekerjaan',
+        company: exp.company || 'Nama Perusahaan',
+        location: '',
+        startDate: exp.startDate || '',
+        endDate: exp.endDate || '',
+        period: exp.period || (exp.startDate && exp.endDate ? `${exp.startDate} - ${exp.endDate}` : exp.startDate || exp.endDate || ''),
+        description: exp.description || '',
+      })),
+      projects: (formData.extractedProjects || []).map((proj: any, idx: number) => ({
+        id: proj.id || `proj-preview-${idx}`,
+        name: proj.name || 'Nama Proyek',
+        role: proj.role || '',
+        period: proj.period || '',
+        description: proj.description || '',
+      })),
+      certifications: mergeFragmentCertifications(formData.extractedCertifications || []).map((cert: any, idx: number) => ({
+        id: cert.id || `cert-preview-${idx}`,
+        name: cert.name || 'Nama Sertifikasi',
+        issuer: cert.issuer || '',
+        issueDate: cert.issueDate || '',
+      })),
+      organizations: (formData.extractedOrganizations || []).map((org: any, idx: number) => ({
+        id: org.id || `org-preview-${idx}`,
+        name: org.name || 'Nama Organisasi',
+        role: org.role || '',
+        period: org.period || '',
+        description: org.description || '',
+      })),
+      courses: (formData.extractedCourses || []).map((crs: any, idx: number) => ({
+        id: crs.id || `crs-preview-${idx}`,
+        courseName: crs.courseName || crs.name || 'Nama Kursus / Pelatihan',
+        institution: crs.institution || crs.provider || '',
+        year: crs.year || crs.period || '',
+        description: crs.description || '',
+      })),
+    };
+  }, [formData]);
 
   // Career Direction State
   const [careerSubStep, setCareerSubStep] = useState<'aiming' | 'loading' | 'suggested_paths'>('aiming');
   const [loadingPhase, setLoadingPhase] = useState<'analyzing' | 'success'>('analyzing');
+  const [analysisStep, setAnalysisStep] = useState<1 | 2 | 3>(1);
+  const [analysisProgress, setAnalysisProgress] = useState(20);
   const diagnosisTimerRef = useRef<NodeJS.Timeout[]>([]);
   const [aimingChoice, setAimingChoice] = useState<'know_role' | 'exploring' | 'open_opportunities'>('know_role');
   const [targetRoleInput, setTargetRoleInput] = useState('Frontend Developer');
   const [selectedCareerPaths, setSelectedCareerPaths] = useState<string[]>([]);
   const [dynamicBlueprints, setDynamicBlueprints] = useState<DynamicRoleBlueprint[]>([]);
+  const [semanticDiagnosis, setSemanticDiagnosis] = useState<CareerDiagnosisResult | null>(null);
+  const [isDiagnosing, setIsDiagnosing] = useState(false);
+  const [activeSkillsModal, setActiveSkillsModal] = useState(false);
+  const [activeStrengthModal, setActiveStrengthModal] = useState(false);
 
   // Cleanup diagnosis timers on unmount
   useEffect(() => {
@@ -303,24 +256,186 @@ export default function CardlessClaudeStyleOnboardingPage() {
     };
   }, []);
 
-  // Trigger loading & diagnosis animation before showing suggested paths
-  const handleStartDiagnosis = () => {
+  const handleScannedSaveAndContinue = () => {
+    if (formData.targetPositions.length > 0) {
+      setTargetRoleInput(formData.targetPositions[0]);
+    }
+    try {
+      const importedRaw = localStorage.getItem('employr_imported_cv_data');
+      const existing = importedRaw ? JSON.parse(importedRaw) : {};
+      const updated = {
+        ...existing,
+        templateId: selectedTemplateId,
+        fullName: formData.fullName || existing.fullName,
+        contactInfo: formData.contactInfo || existing.contactInfo,
+        phone: formData.phone || existing.phone,
+        educationLevel: formData.educationLevel || existing.educationLevel,
+        major: formData.major || existing.major,
+        targetPositions: formData.targetPositions,
+        skills: formData.skills?.length ? formData.skills : existing.skills,
+        summary: formData.summary || existing.summary,
+        experience: formData.extractedExperiences,
+        projects: formData.extractedProjects,
+        certifications: formData.extractedCertifications,
+        organizations: formData.extractedOrganizations,
+        courses: formData.extractedCourses,
+        education: (formData.extractedEducation && formData.extractedEducation.length > 0) ? formData.extractedEducation : existing.education,
+      };
+      localStorage.setItem('employr_imported_cv_data', JSON.stringify(updated));
+      if (formData.summary) {
+        userApi.updateProfile({ bio: formData.summary }).catch(() => {});
+      }
+    } catch {}
+    setCurrentStage('career_direction');
+    setCareerSubStep('aiming');
+  };
+
+  // Trigger semantic embedding diagnosis & animation before showing suggested paths
+  const handleStartDiagnosis = async () => {
     if (aimingChoice === 'know_role' && !targetRoleInput.trim()) return;
 
-    diagnosisTimerRef.current.forEach(clearTimeout);
+    diagnosisTimerRef.current.forEach((t) => {
+      clearTimeout(t);
+      clearInterval(t);
+    });
     diagnosisTimerRef.current = [];
 
     setCareerSubStep('loading');
     setLoadingPhase('analyzing');
+    setAnalysisStep(1);
+    setAnalysisProgress(25);
+    setIsDiagnosing(true);
 
+    // Fast-path check: Is fresh matching semantic diagnosis already available?
+    const hasFreshSemantic = Boolean(
+      semanticDiagnosis &&
+        (aimingChoice === 'know_role'
+          ? (semanticDiagnosis.primaryRole || '').toLowerCase().trim() === targetRoleInput.toLowerCase().trim()
+          : semanticDiagnosis.aimingChoice === aimingChoice)
+    );
+
+    // Step 1 -> Step 2 (900ms, progress to 65%)
     const t1 = setTimeout(() => {
-      setLoadingPhase('success');
-      const t2 = setTimeout(() => {
-        setCareerSubStep('suggested_paths');
-      }, 1500);
-      diagnosisTimerRef.current.push(t2);
-    }, 2000);
+      setAnalysisStep(2);
+      setAnalysisProgress(65);
+    }, 900);
     diagnosisTimerRef.current.push(t1);
+
+    // Step 2 -> Step 3 (1800ms, progress to 92% then micro-crawl 93% -> 96%)
+    let crawlInterval: NodeJS.Timeout | null = null;
+    const t2 = setTimeout(() => {
+      setAnalysisStep(3);
+      setAnalysisProgress(92);
+
+      // Dynamic background micro-crawler: 92% -> 93% -> 94% -> 95% -> 96%
+      crawlInterval = setInterval(() => {
+        setAnalysisProgress((prev) => {
+          if (prev >= 96) {
+            if (crawlInterval) clearInterval(crawlInterval);
+            return 96;
+          }
+          return prev + 1;
+        });
+      }, 350);
+      diagnosisTimerRef.current.push(crawlInterval as any);
+    }, 1800);
+    diagnosisTimerRef.current.push(t2);
+
+    // Minimum animation promise (2.2s) so the user experiences the delight stages smoothly
+    const minAnimationPromise = new Promise((resolve) => {
+      const tMin = setTimeout(() => resolve(true), 2200);
+      diagnosisTimerRef.current.push(tMin);
+    });
+
+    // Semantic diagnosis fetch with strict 4.0s timeout and graceful local fallback
+    const fetchDiagnosis = async () => {
+      if (hasFreshSemantic) return;
+
+      const expRoles = (formData.extractedExperiences || []).map((e: any) => e.role).filter(Boolean);
+      const expTitle = formData.experienceTitle || expRoles.join(', ') || '';
+      const expComp = formData.experienceCompany || (formData.extractedExperiences?.[0]?.company || '');
+      const hasExp = formData.hasWorkExperience !== null ? formData.hasWorkExperience : (Boolean(formData.extractedExperiences?.length));
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+      try {
+        const res = await fetch('/api/career/diagnose', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            aimingChoice,
+            targetRoleInput: aimingChoice === 'know_role' ? targetRoleInput.trim() : '',
+            skills: formData.skills,
+            educationLevel: formData.educationLevel,
+            major: formData.major,
+            hasExperience: hasExp,
+            experienceTitle: expTitle,
+            experienceCompany: expComp,
+            experiences: formData.extractedExperiences || [],
+            projects: formData.extractedProjects || [],
+            topAchievementSnippet: formData.topAchievementSnippet || '',
+            summary: formData.summary,
+            dynamicBlueprints,
+          }),
+        });
+
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            setSemanticDiagnosis(json.data);
+            const paths = json.data.suggestedPaths || [];
+            const primary = paths.find((p: any) => p.isPrimaryTarget) || paths[0];
+            if (primary) {
+              setSelectedCareerPaths([primary.role]);
+            }
+          }
+        }
+      } catch (err: any) {
+        // Fallback gracefully without blocking the user
+        console.warn('[Onboarding] Fallback diagnosis rule-based:', err?.message || err);
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    };
+
+    try {
+      await Promise.all([minAnimationPromise, fetchDiagnosis()]);
+    } catch {
+      // Guaranteed safety net: never allow unhandled rejections to block progress
+    } finally {
+      if (crawlInterval) {
+        clearInterval(crawlInterval);
+      }
+    }
+
+    // Ensure selected career path is filled from fallback if still empty
+    const paths = semanticDiagnosis?.suggestedPaths || currentDiagnosis?.suggestedPaths || [];
+    if (selectedCareerPaths.length === 0 && paths.length > 0) {
+      const primary = paths.find((p: any) => p.isPrimaryTarget) || paths[0];
+      if (primary) {
+        setSelectedCareerPaths([primary.role]);
+      }
+    }
+
+    // Progress reaches 100% strictly when the analysis is truly ready
+    setAnalysisProgress(100);
+
+    // Brief 350ms pause so user sees 100% completion before revealing the success screen
+    const tComplete = setTimeout(() => {
+      setIsDiagnosing(false);
+      setLoadingPhase('success');
+
+      // Jeda 2.0s di layar "Diagnosis Berhasil" sebelum otomatis lanjut ke suggested_paths
+      const tFinal = setTimeout(() => {
+        setCareerSubStep('suggested_paths');
+      }, 2000);
+      diagnosisTimerRef.current.push(tFinal);
+    }, 350);
+    diagnosisTimerRef.current.push(tComplete);
   };
 
   // Access Guard & Profile Hydration
@@ -339,13 +454,35 @@ export default function CardlessClaudeStyleOnboardingPage() {
       return;
     }
 
-    // Pre-populate data awal dari sesi
+    // Check if imported CV data already has a extracted candidate name
+    let initialCvFullName = '';
+    if (typeof window !== 'undefined') {
+      try {
+        const importedRaw = localStorage.getItem('employr_imported_cv_data');
+        if (importedRaw) {
+          const parsed = JSON.parse(importedRaw);
+          if (parsed?.fullName && typeof parsed.fullName === 'string' && parsed.fullName.trim()) {
+            initialCvFullName = parsed.fullName.trim();
+          }
+        }
+      } catch {}
+    }
+
+    // Pre-populate data awal dari sesi / imported CV
     setFormData((prev) => ({
       ...prev,
-      fullName: prev.fullName || session.name || '',
+      fullName: prev.fullName || initialCvFullName || session.name || '',
       contactInfo: prev.contactInfo || session.email || '',
       phone: prev.phone || session.phone || '',
     }));
+
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      const requestedStage = sp.get('stage') as any;
+      const requestedSubstep = sp.get('substep') as any;
+      if (requestedStage) setCurrentStage(requestedStage);
+      if (requestedSubstep) setCareerSubStep(requestedSubstep);
+    }
 
     // 3. Verifikasi profil dari database
     userApi
@@ -369,7 +506,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
 
         setFormData((prev) => ({
           ...prev,
-          fullName: prev.fullName || profile.fullName || profile.name || '',
+          fullName: prev.fullName || initialCvFullName || profile.fullName || profile.name || '',
           contactInfo: prev.contactInfo || profile.email || '',
           phone: prev.phone || profile.phone || '',
           location: prev.location || profile.location || '',
@@ -400,30 +537,127 @@ export default function CardlessClaudeStyleOnboardingPage() {
       .catch(() => {});
   }, []);
 
-  // Memoized Real-Time Career Diagnosis
+  // Memoized Real-Time Career Diagnosis (Rule-based baseline)
   const currentDiagnosis = useMemo(() => {
+    const expRoles = (formData.extractedExperiences || []).map((e: any) => e.role).filter(Boolean);
+    const expTitle = formData.experienceTitle || expRoles.join(', ') || '';
+    const expComp = formData.experienceCompany || (formData.extractedExperiences?.[0]?.company || '');
+    const hasExp = formData.hasWorkExperience !== null ? formData.hasWorkExperience : (Boolean(formData.extractedExperiences?.length));
+
     return computeCareerDiagnosis({
       aimingChoice,
       targetRoleInput,
       userSkills: formData.skills,
       educationLevel: formData.educationLevel,
       major: formData.major,
-      hasExperience: formData.hasWorkExperience,
+      hasExperience: hasExp,
+      experienceTitle: expTitle,
+      experienceCompany: expComp,
+      experiences: formData.extractedExperiences || [],
+      projects: formData.extractedProjects || [],
+      topAchievementSnippet: formData.topAchievementSnippet || '',
       dynamicBlueprints,
     });
-  }, [aimingChoice, targetRoleInput, formData.skills, formData.educationLevel, formData.major, formData.hasWorkExperience, dynamicBlueprints]);
+  }, [
+    aimingChoice,
+    targetRoleInput,
+    formData.skills,
+    formData.educationLevel,
+    formData.major,
+    formData.hasWorkExperience,
+    formData.experienceTitle,
+    formData.experienceCompany,
+    formData.extractedExperiences,
+    formData.extractedProjects,
+    formData.topAchievementSnippet,
+    dynamicBlueprints,
+  ]);
+
+  // Active diagnosis: prioritizes high-fidelity semantic embedding diagnosis matching current target & aimingChoice
+  const displayDiagnosis = useMemo(() => {
+    if (semanticDiagnosis) {
+      if (aimingChoice === 'know_role') {
+        if (targetRoleInput.trim()) {
+          const semNorm = (semanticDiagnosis.primaryRole || '').toLowerCase().trim();
+          const targetNorm = targetRoleInput.toLowerCase().trim();
+          if (semNorm === targetNorm || semNorm.includes(targetNorm) || targetNorm.includes(semNorm)) {
+            return semanticDiagnosis;
+          }
+        }
+      } else {
+        if (semanticDiagnosis.aimingChoice === aimingChoice) {
+          return semanticDiagnosis;
+        }
+      }
+    }
+    return currentDiagnosis;
+  }, [semanticDiagnosis, currentDiagnosis, targetRoleInput, aimingChoice]);
+
+  // Debounced semantic diagnosis update when targetRoleInput or aimingChoice is modified in career_direction stage
+  useEffect(() => {
+    if (currentStage !== 'career_direction') return;
+    if (aimingChoice === 'know_role' && !targetRoleInput.trim()) return;
+
+    if (aimingChoice === 'know_role') {
+      const semNorm = (semanticDiagnosis?.primaryRole || '').toLowerCase().trim();
+      const targetNorm = targetRoleInput.toLowerCase().trim();
+      if (semanticDiagnosis && (semNorm === targetNorm || semNorm.includes(targetNorm) || targetNorm.includes(semNorm))) {
+        return;
+      }
+    } else {
+      if (semanticDiagnosis && semanticDiagnosis.aimingChoice === aimingChoice) {
+        return;
+      }
+    }
+
+    const timer = setTimeout(() => {
+      const expRoles = (formData.extractedExperiences || []).map((e: any) => e.role).filter(Boolean);
+      const expTitle = formData.experienceTitle || expRoles.join(', ') || '';
+      const expComp = formData.experienceCompany || (formData.extractedExperiences?.[0]?.company || '');
+      const hasExp = formData.hasWorkExperience !== null ? formData.hasWorkExperience : (Boolean(formData.extractedExperiences?.length));
+
+      fetch('/api/career/diagnose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          aimingChoice,
+          targetRoleInput: aimingChoice === 'know_role' ? targetRoleInput.trim() : '',
+          skills: formData.skills,
+          educationLevel: formData.educationLevel,
+          major: formData.major,
+          hasExperience: hasExp,
+          experienceTitle: expTitle,
+          experienceCompany: expComp,
+          experiences: formData.extractedExperiences || [],
+          projects: formData.extractedProjects || [],
+          topAchievementSnippet: formData.topAchievementSnippet || '',
+          summary: formData.summary,
+          dynamicBlueprints,
+        }),
+      })
+        .then((res) => res.json())
+        .then((json) => {
+          if (json.success && json.data) {
+            setSemanticDiagnosis(json.data);
+          }
+        })
+        .catch(() => {});
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [currentStage, targetRoleInput, aimingChoice, formData, dynamicBlueprints, semanticDiagnosis?.primaryRole, semanticDiagnosis?.aimingChoice]);
 
   // Sync initial target role & preselect suggested paths when entering career_direction
   useEffect(() => {
     if (currentStage === 'career_direction') {
-      if (selectedCareerPaths.length === 0 && currentDiagnosis.suggestedPaths.length > 0) {
-        const primary = currentDiagnosis.suggestedPaths.find((p) => p.isPrimaryTarget) || currentDiagnosis.suggestedPaths[0];
+      if (selectedCareerPaths.length === 0 && displayDiagnosis.suggestedPaths.length > 0) {
+        const primary = displayDiagnosis.suggestedPaths.find((p) => p.isPrimaryTarget) || displayDiagnosis.suggestedPaths[0];
         if (primary) {
           setSelectedCareerPaths([primary.role]);
         }
       }
     }
-  }, [currentStage, currentDiagnosis, selectedCareerPaths.length]);
+  }, [currentStage, displayDiagnosis, selectedCareerPaths.length]);
 
   // Handle Enter key globally for next step in questions mode
   useEffect(() => {
@@ -447,7 +681,6 @@ export default function CardlessClaudeStyleOnboardingPage() {
 
   // Constants
   const EDUCATION_LEVELS = ['SMA', 'SMK', 'D3', 'D4', 'S1', 'S2', 'S3', 'Lainnya'];
-  const SALARY_OPTIONS = ['Rp 2 Juta - 4 Juta', 'Rp 4 Juta - 7 Juta', 'Rp 7 Juta - 10 Juta', '> Rp 10 Juta'];
   const SKILL_SUGGESTIONS = [
     'Microsoft Office',
     'Excel & Spreadsheet',
@@ -470,7 +703,6 @@ export default function CardlessClaudeStyleOnboardingPage() {
     { id: 'targetPosition', title: 'Kamu ingin bekerja sebagai apa?', desc: 'Posisi atau pekerjaan impian yang ditargetkan.', icon: Target },
     { id: 'experience', title: 'Sudah punya pengalaman kerja?', desc: 'Pengalaman PKL, freelance, atau organisasi juga dihitung.', icon: Briefcase },
     { id: 'skills', title: 'Skill apa saja yang kamu kuasai?', desc: 'Pilih keahlian utama untuk ditonjolkan.', icon: Award },
-    { id: 'preference', title: 'Berapa ekspektasi gajimu?', desc: 'Range gaji impian pekerjaanmu.', icon: DollarSign },
   ];
 
   const totalQuestions = questions.length;
@@ -497,8 +729,6 @@ export default function CardlessClaudeStyleOnboardingPage() {
         return true;
       case 'skills':
         return formData.skills.length > 0;
-      case 'preference':
-        return formData.expectedSalary !== '';
       default:
         return true;
     }
@@ -601,27 +831,30 @@ export default function CardlessClaudeStyleOnboardingPage() {
     setScanStatusText('Membaca berkas dokumen...');
     setScanError(null);
 
-    // Dynamic progress ticker to provide real-time visual progression while awaiting server extraction
+    // Dynamic progress ticker with active micro-progress during server extraction
     let currentProgress = 15;
     const progressInterval = setInterval(() => {
-      currentProgress += Math.floor(Math.random() * 6) + 3;
-      if (currentProgress >= 92) {
-        currentProgress = 92;
+      if (currentProgress < 88) {
+        currentProgress += Math.floor(Math.random() * 5) + 3;
+        if (currentProgress >= 70) {
+          setScanStatusText('Menganalisis keahlian & riwayat pengalaman...');
+        } else if (currentProgress >= 40) {
+          setScanStatusText('Mengekstrak teks & struktur CV...');
+        }
+      } else if (currentProgress < 97) {
+        // Micro-progress dinamis di fase akhir: 89% -> 90% -> 91% -> 92% -> 93% -> 94% -> 95% -> 96% -> 97%
+        currentProgress += 1;
         setScanStatusText('Menyusun data terstruktur profil...');
-      } else if (currentProgress >= 70) {
-        setScanStatusText('Menganalisis keahlian & riwayat pengalaman...');
-      } else if (currentProgress >= 40) {
-        setScanStatusText('Mengekstrak teks & struktur CV...');
       }
       setScanProgress(currentProgress);
-    }, 280);
+    }, 320);
 
     try {
       const bodyData = new FormData();
       bodyData.append('file', file);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const timeoutId = setTimeout(() => controller.abort(), 85000);
 
       const res = await fetch('/api/cv/parse', {
         method: 'POST',
@@ -641,9 +874,17 @@ export default function CardlessClaudeStyleOnboardingPage() {
       }
 
       const data = result.data || {};
+      const extractedFullName =
+        data.fullName && typeof data.fullName === 'string' && data.fullName.trim().length > 0
+          ? data.fullName.trim()
+          : '';
 
       if (typeof window !== 'undefined') {
-        localStorage.setItem('employr_imported_cv_data', JSON.stringify(data));
+        const storedImport = {
+          ...data,
+          fullName: extractedFullName || data.fullName,
+        };
+        localStorage.setItem('employr_imported_cv_data', JSON.stringify(storedImport));
       }
 
       // Normalize extracted educationLevel & major
@@ -677,7 +918,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
       setFormData((prev) => ({
         ...prev,
         hasCvAlready: true,
-        fullName: data.fullName || prev.fullName,
+        fullName: extractedFullName || prev.fullName,
         contactInfo: data.contactInfo || prev.contactInfo,
         phone: data.phone || prev.phone,
         location: data.location || prev.location,
@@ -690,39 +931,31 @@ export default function CardlessClaudeStyleOnboardingPage() {
         experienceCompany: data.experienceCompany || prev.experienceCompany,
         skills: data.skills?.length ? data.skills : [],
         summary: data.summary || prev.summary,
+        topAchievementSnippet: data.topAchievementSnippet || '',
         extractedExperiences: parsedExperiences,
         extractedProjects: data.projects || [],
         extractedOrganizations: data.organizations || [],
-        extractedCertifications: data.certifications || [],
+        extractedCertifications: mergeFragmentCertifications(data.certifications || []),
+        extractedCourses: data.courses || [],
+        extractedEducation: data.education || [],
       }));
 
-      // Segera simpan ringkasan dan data kontak ke profil pengguna secara instan
-      if (data.summary) {
+      // Segera simpan ringkasan, nama CV, dan data kontak ke profil pengguna secara instan
+      if (data.summary || extractedFullName) {
         userApi
           .updateProfile({
-            bio: data.summary,
-            fullName: data.fullName || undefined,
+            bio: data.summary || undefined,
+            fullName: extractedFullName || undefined,
             phone: data.phone || undefined,
             location: data.location || undefined,
           })
           .catch(() => {});
       }
 
-      if ((data.experience?.length || 0) > 0) {
-        setScannedActiveTab('experience');
-      } else if ((data.projects?.length || 0) > 0) {
-        setScannedActiveTab('projects');
-      } else if ((data.certifications?.length || 0) > 0) {
-        setScannedActiveTab('certifications');
-      } else if ((data.organizations?.length || 0) > 0) {
-        setScannedActiveTab('organizations');
-      } else {
-        setScannedActiveTab('experience');
-      }
-
       setScanProgress(100);
       setScanStatusText('Ekstraksi berhasil!');
       await new Promise((resolve) => setTimeout(resolve, 350));
+      setScannedMobileView('templates');
       setScanCompleted(true);
     } catch (err: any) {
       clearInterval(progressInterval);
@@ -806,7 +1039,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
         : formData.targetPositions.length > 0
         ? formData.targetPositions
         : [targetRoleInput || 'Product Manager'];
-    const activeDiagnosis = overrideDiagnosis || currentDiagnosis;
+    const activeDiagnosis = overrideDiagnosis || displayDiagnosis;
 
     // Catat data peran dan keahlian ke sistem pembelajaran hybrid mandiri
     const targetToLearn = resolvedRoles[0] || targetRoleInput || 'Product Manager';
@@ -868,73 +1101,11 @@ export default function CardlessClaudeStyleOnboardingPage() {
         // Update auth session cookie & localStorage
         setSessionCookie(enrichedSession, 30);
 
-        // Store extended onboarding profile data for CV defaults
-        localStorage.setItem(
-          'employr_onboarding_profile',
-          JSON.stringify({
-            fullName: formData.fullName,
-            contactInfo: formData.contactInfo,
-            phone: formData.phone,
-            location: formData.location,
-            educationLevel: formData.educationLevel,
-            institutionName: formData.institutionName,
-            major: formData.major,
-            targetPositions: resolvedRoles,
-            hasWorkExperience: formData.hasWorkExperience,
-            experienceTitle: formData.experienceTitle,
-            experienceCompany: formData.experienceCompany,
-            skills: formData.skills,
-            expectedSalary: formData.expectedSalary,
-            summary: formData.summary,
-            hasCvAlready: formData.hasCvAlready,
-            careerDiagnosis: activeDiagnosis,
-          })
-        );
-
-        // Also sync manual adjustments to employr_imported_cv_data so CV Builder reflects edited values
-        const importedRaw = localStorage.getItem('employr_imported_cv_data');
-        if (importedRaw) {
-          try {
-            const parsedImported = JSON.parse(importedRaw);
-            const degreeStr = `${formData.educationLevel} ${formData.major}`.trim();
-            const updatedImported = {
-              ...parsedImported,
-              fullName: formData.fullName || parsedImported.fullName,
-              contactInfo: formData.contactInfo || parsedImported.contactInfo,
-              phone: formData.phone || parsedImported.phone,
-              location: formData.location || parsedImported.location,
-              educationLevel: formData.educationLevel || parsedImported.educationLevel,
-              institutionName: formData.institutionName || parsedImported.institutionName,
-              major: formData.major || parsedImported.major,
-              targetPositions: resolvedRoles,
-              skills: formData.skills?.length ? formData.skills : parsedImported.skills,
-              careerDiagnosis: activeDiagnosis,
-              experience: formData.extractedExperiences?.length ? formData.extractedExperiences : parsedImported.experience,
-              projects: formData.extractedProjects?.length ? formData.extractedProjects : parsedImported.projects,
-              certifications: formData.extractedCertifications?.length ? formData.extractedCertifications : parsedImported.certifications,
-              organizations: formData.extractedOrganizations?.length ? formData.extractedOrganizations : parsedImported.organizations,
-              education: (parsedImported.education && parsedImported.education.length > 0)
-                ? parsedImported.education.map((edu: any, idx: number) => idx === 0 ? {
-                    ...edu,
-                    degree: degreeStr || edu.degree,
-                    institution: formData.institutionName || edu.institution,
-                  } : edu)
-                : formData.institutionName || degreeStr
-                ? [{
-                    id: `edu-${Date.now()}`,
-                    institution: formData.institutionName || 'Pendidikan Terakhir',
-                    degree: degreeStr || 'Sarjana',
-                    location: formData.location || '',
-                    year: '2021 - 2025',
-                    gpa: '',
-                  }]
-                : [],
-            };
-            localStorage.setItem('employr_imported_cv_data', JSON.stringify(updatedImported));
-          } catch {
-            // Ignore error
-          }
-        }
+        // Bersihkan seluruh cache sementara onboarding agar tidak tertinggal di browser
+        localStorage.removeItem('employr_imported_cv_data');
+        localStorage.removeItem('employr_onboarding_profile');
+        localStorage.removeItem('cuti_imported_cv_data');
+        localStorage.removeItem('cuti_onboarding_profile');
       }
       setIsSubmitting(false);
       router.push(destination);
@@ -958,9 +1129,13 @@ export default function CardlessClaudeStyleOnboardingPage() {
   const stageMaxWidth = useMemo(() => {
     switch (currentStage) {
       case 'upload_scan':
-        return 'max-w-4xl lg:max-w-5xl';
+        return scanCompleted ? 'max-w-[1440px]' : 'max-w-2xl sm:max-w-3xl';
       case 'career_direction':
-        return careerSubStep === 'loading' ? 'max-w-xl' : 'max-w-3xl lg:max-w-4xl';
+        return careerSubStep === 'loading'
+          ? 'max-w-xl'
+          : careerSubStep === 'suggested_paths'
+          ? 'max-w-7xl px-4 sm:px-6 lg:px-8'
+          : 'max-w-3xl lg:max-w-4xl';
       case 'fork':
         return 'max-w-2xl sm:max-w-3xl';
       case 'questions':
@@ -969,11 +1144,11 @@ export default function CardlessClaudeStyleOnboardingPage() {
       default:
         return 'max-w-xl';
     }
-  }, [currentStage, careerSubStep]);
+  }, [currentStage, scanCompleted, careerSubStep]);
 
   if (isCheckingAccess) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-white dark:bg-slate-950 font-sans text-xs text-slate-400">
+      <div className="min-h-[100dvh] w-full flex-1 flex items-center justify-center bg-white dark:bg-slate-950 font-sans text-xs text-slate-500 dark:text-slate-400">
         <div className="flex flex-col items-center gap-3">
           <div className="w-6 h-6 border-2 border-slate-300 dark:border-slate-700 border-t-[#1738D1] rounded-full animate-spin" />
           <span>Memeriksa status orientasi...</span>
@@ -982,8 +1157,823 @@ export default function CardlessClaudeStyleOnboardingPage() {
     );
   }
 
+  // Dedicated Full-Screen Onboarding Review: Template Selection + Auto-Fit A4 Paperlike Preview
+  if (currentStage === 'upload_scan' && scanCompleted) {
+    return (
+      <div className="fixed inset-0 z-50 bg-white dark:bg-slate-950 flex flex-col overflow-hidden animate-in fade-in duration-200">
+        {/* Minimalist Top Progress Bar */}
+        <div className="fixed top-0 left-0 right-0 h-[2px] bg-slate-100 dark:bg-slate-900 z-50 overflow-hidden">
+          <motion.div
+            className="h-full bg-cobalt-500"
+            initial={{ width: '50%' }}
+            animate={{ width: '100%' }}
+            transition={{ duration: 0.35, ease: 'easeInOut' }}
+          />
+        </div>
+
+        {/* Top Header: Employr Brand Bar */}
+        <header className="shrink-0 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xs border-b border-slate-100 dark:border-slate-800/80 px-6 py-3.5 sm:px-8 flex items-center justify-between z-30">
+          <div className="flex items-center gap-2">
+            <Image
+              src="/logo.webp"
+              alt="Employr"
+              width={120}
+              height={28}
+              unoptimized
+              priority
+              className="h-6 w-auto object-contain dark:brightness-0 dark:invert"
+            />
+          </div>
+          <div className="text-caption font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            Langkah 2 dari 2
+          </div>
+        </header>
+
+        {/* Sub-Header: Title, Description, and File Status Pill */}
+        <div className="shrink-0 px-6 py-3 sm:px-8 border-b border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 z-20">
+          <div className="space-y-0.5">
+            <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight leading-tight">
+              Pilih Desain Template ATS
+            </h1>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              Pilih desain yang paling cocok untuk profilmu. Data otomatis diselaraskan pada pratinjau lembar A4.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            {/* Mobile View Toggle (< lg) */}
+            <div className="flex lg:hidden items-center p-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs">
+              <button
+                type="button"
+                onClick={() => setScannedMobileView('templates')}
+                className={`px-2.5 py-1 rounded-md text-caption font-bold transition cursor-pointer ${
+                  scannedMobileView === 'templates'
+                    ? 'bg-white dark:bg-slate-700 text-cobalt-500 dark:text-blue-400 shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800 dark:text-slate-400'
+                }`}
+              >
+                Template ({cvTemplates.filter((t) => !t.hidden).length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setScannedMobileView('preview')}
+                className={`px-2.5 py-1 rounded-md text-caption font-bold transition cursor-pointer ${
+                  scannedMobileView === 'preview'
+                    ? 'bg-white dark:bg-slate-700 text-cobalt-500 dark:text-blue-400 shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800 dark:text-slate-400'
+                }`}
+              >
+                Pratinjau A4
+              </button>
+            </div>
+
+            {/* Extracted File Badge */}
+            <div className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 max-w-xs truncate shadow-2xs">
+              <FileCheck size={14} className="shrink-0 text-emerald-700 dark:text-emerald-400" />
+              <span className="truncate text-caption sm:text-xs">
+                {uploadedFile?.name || 'Berkas CV'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Middle Split: Left Template Grid (3 cols) + Right A4 Paperlike Preview */}
+        <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
+          {/* Left: Template List (3 Grid Columns) */}
+          <div
+            className={`w-full lg:w-[580px] xl:w-[640px] 2xl:w-[700px] shrink-0 border-r border-slate-200 dark:border-slate-800 overflow-y-auto bg-slate-50 dark:bg-slate-950/60 p-3 sm:p-4 ${
+              scannedMobileView === 'templates' ? 'block' : 'hidden lg:block'
+            }`}
+          >
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
+              {cvTemplates
+                .filter((tpl) => !tpl.hidden)
+                .map((tpl) => {
+                  const isSelected = selectedTemplateId === tpl.id;
+                  return (
+                    <button
+                      key={tpl.id}
+                      type="button"
+                      id={`template-card-${tpl.id}`}
+                      onClick={() => setSelectedTemplateId(tpl.id)}
+                      className={`p-2 sm:p-2.5 rounded-[10px] border transition-all cursor-pointer flex flex-col justify-between group text-left ${
+                        isSelected
+                          ? 'bg-blue-50/90 dark:bg-blue-950/70 border-cobalt-500 ring-2 ring-cobalt-500/25 shadow-md'
+                          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-navy-700 hover:shadow-xs'
+                      }`}
+                    >
+                      {/* A4 Mini Thumbnail with Exact Aspect Ratio */}
+                      <div className="w-full aspect-[210/297] rounded-[7px] border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 shadow-2xs bg-white relative mb-2 group-hover:scale-[1.01] transition-transform">
+                        <TemplateThumbnailVisual templateId={tpl.id} customData={cvPreviewData} docSectionSpacing={18} />
+                        {isSelected && (
+                          <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-cobalt-500 text-white flex items-center justify-center shadow-xs">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Badge & Name */}
+                      <div className="space-y-1 min-w-0 w-full">
+                        <span className="px-1.5 py-0.5 rounded-[5px] text-[8px] sm:text-caption font-extrabold uppercase bg-blue-100/90 text-navy-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-navy-800 inline-block truncate max-w-full">
+                          {tpl.badge}
+                        </span>
+                        <h4
+                          className="font-extrabold text-caption sm:text-xs text-slate-900 dark:text-white leading-tight truncate whitespace-nowrap"
+                          title={tpl.name}
+                        >
+                          {tpl.name}
+                        </h4>
+                      </div>
+                    </button>
+                  );
+                })}
+            </div>
+          </div>
+
+          {/* Right: A4 Paperlike Preview (Responsive auto-fit scale so no scroll is needed, multi-page horizontal side-by-side) */}
+          <div
+            className={`flex-1 h-full overflow-hidden bg-slate-100 dark:bg-slate-900/80 relative select-none ${
+              scannedMobileView === 'preview' ? 'flex' : 'hidden lg:flex'
+            }`}
+          >
+            <A4PaperlikeCanvas
+              templateId={selectedTemplateId}
+              customData={cvPreviewData}
+              layoutOrientation="horizontal"
+              docMarginTop={1.27}
+              docMarginBottom={1.27}
+              docMarginLeft={1.27}
+              docMarginRight={1.27}
+              docSectionSpacing={18}
+              showPageNumbers={true}
+            />
+          </div>
+        </div>
+
+        {/* Bottom Sticky Action Bar */}
+        <footer className="shrink-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-30 shadow-lg px-6 py-3 sm:px-8">
+          <div className="relative flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => {
+                setScanCompleted(false);
+                setUploadedFile(null);
+                setFormData((prev) => ({ ...prev, skills: [] }));
+              }}
+              className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98]"
+            >
+              <RotateCcw size={14} />
+              <span>Unggah Berkas Lain</span>
+            </button>
+
+            <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 hidden sm:flex items-center gap-1.5 text-caption font-medium text-slate-500 dark:text-slate-400 select-none">
+              <Lock size={12} className="text-slate-500 dark:text-slate-400 shrink-0" />
+              <span>Data kamu aman bersama Employr</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleScannedSaveAndContinue}
+              className="h-10 px-4 rounded-xl bg-[#F97316] hover:bg-[#ea580c] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#F97316]/20 transition flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span>Gunakan Template Ini & Lanjut</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
+  // Dedicated Full-Screen Career Direction Studio: 1 Frame Fit Edge-to-Edge, No Page Scroll
+  if (currentStage === 'career_direction' && careerSubStep === 'suggested_paths') {
+    return (
+      <div className="fixed inset-0 z-50 bg-slate-50/70 dark:bg-slate-950 flex flex-col overflow-hidden animate-in fade-in duration-200 font-sans">
+        {/* Minimalist Top Progress Bar */}
+        <div className="fixed top-0 left-0 right-0 h-[2px] bg-slate-100 dark:bg-slate-900 z-50 overflow-hidden">
+          <motion.div
+            className="h-full bg-cobalt-500"
+            initial={{ width: '85%' }}
+            animate={{ width: '100%' }}
+            transition={{ duration: 0.35, ease: 'easeInOut' }}
+          />
+        </div>
+
+        {/* Top Header: Employr Brand Bar */}
+        <header className="shrink-0 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xs border-b border-slate-100 dark:border-slate-800/80 px-6 py-3 sm:px-8 flex items-center justify-between z-30">
+          <div className="flex items-center gap-2.5">
+            <Image
+              src="/logo.webp"
+              alt="Employr"
+              width={120}
+              height={28}
+              unoptimized
+              priority
+              className="h-6 w-auto object-contain dark:brightness-0 dark:invert"
+            />
+            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/80 text-cobalt-600 dark:text-blue-300 text-[10px] font-extrabold uppercase tracking-wider border border-blue-200 dark:border-blue-800">
+              Career Studio
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="px-3 py-1 rounded-full text-caption font-extrabold bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5 shadow-2xs">
+              <CheckCircle2 size={12} />
+              <span>Diagnosis Selesai</span>
+            </span>
+            <span className="text-caption font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider hidden sm:inline">
+              {selectedCareerPaths.length} Peran Dipilih
+            </span>
+          </div>
+        </header>
+
+        {/* Middle Studio Workspace: Full Frame Edge-to-Edge Grid (No Page Scroll) */}
+        <div className="flex-1 min-h-0 overflow-hidden px-4 py-3 sm:px-6 sm:py-4 lg:px-8 xl:px-10">
+          <div className="w-full h-full grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 overflow-hidden">
+            
+            {/* LEFT COLUMN: Executive Diagnosis & 4 Bento Telemetry Cards (~42% / col-span-5) */}
+            <div className="lg:col-span-5 flex flex-col justify-between h-full overflow-hidden space-y-3">
+              
+              {/* Diagnosis Overview Banner */}
+              <div className="p-4 sm:p-4.5 rounded-2xl bg-gradient-to-br from-blue-50/90 via-indigo-50/50 to-white dark:from-slate-900 dark:via-blue-950/40 dark:to-slate-900 border border-blue-200/80 dark:border-blue-900/50 space-y-1.5 shadow-xs shrink-0">
+                <div className="flex items-center gap-1.5 text-cobalt-600 dark:text-blue-400 text-caption font-extrabold uppercase tracking-wider">
+                  <CheckCircle2 size={13} className="text-emerald-700 dark:text-emerald-400 shrink-0" />
+                  <span>
+                    Hasil Diagnosis Arah Karier
+                    {displayDiagnosis.isSemantic && (
+                      <span className="ml-1.5 px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/80 text-cobalt-600 dark:text-blue-300 text-[10px] tracking-normal font-bold">
+                        Pemetaan Akurat
+                      </span>
+                    )}
+                  </span>
+                </div>
+                <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-snug">
+                  Rekomendasi Jalur Karier Paling Cocok
+                </h2>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                  Berdasarkan latar belakang, keahlian, dan target peranmu, berikut analisis kecocokan serta rekomendasi langkah karier terbaik:
+                </p>
+              </div>
+
+              {/* Contextual Mentor Narrative Card */}
+              {displayDiagnosis.mentorNarrative && (
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 space-y-1 shadow-xs shrink-0">
+                  <div className="flex items-center gap-1.5 text-cobalt-600 dark:text-blue-400 text-caption font-extrabold uppercase tracking-wider">
+                    <Sparkles size={13} className="text-amber-700 shrink-0" />
+                    <span>{displayDiagnosis.mentorNarrative.headline}</span>
+                  </div>
+                  <p className="text-xs font-medium text-slate-700 dark:text-slate-200 leading-relaxed line-clamp-3">
+                    {displayDiagnosis.mentorNarrative.fullNarrative}
+                  </p>
+                </div>
+              )}
+
+              {/* 4 Instant Diagnostic Bento Cards (2x2 Compact Grid) */}
+              {(() => {
+                const getScoreTier = (score: number, isSwitch = false) => {
+                  if (score >= 70) {
+                    return {
+                      colorClass: 'text-emerald-700 dark:text-emerald-400',
+                      badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-800',
+                      dotClass: 'bg-emerald-500',
+                      label: 'Sangat Cocok',
+                    };
+                  }
+                  if (score >= 50) {
+                    return {
+                      colorClass: 'text-cobalt-700 dark:text-blue-400',
+                      badgeClass: 'bg-blue-50 text-cobalt-700 border-blue-200 dark:bg-blue-950/80 dark:text-blue-300 dark:border-blue-800',
+                      dotClass: 'bg-cobalt-500',
+                      label: isSwitch ? 'Transisi Menjanjikan' : 'Potensial',
+                    };
+                  }
+                  return {
+                    colorClass: 'text-slate-600 dark:text-slate-400',
+                    badgeClass: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800/80 dark:text-slate-300 dark:border-slate-700',
+                    dotClass: 'bg-slate-400',
+                    label: isSwitch ? 'Transisi Karier' : 'Pondasi Awal',
+                  };
+                };
+
+                const targetScore = displayDiagnosis.primaryFitScore;
+                const isTargetSwitch = Boolean(displayDiagnosis.isCareerSwitch);
+                const targetTier = getScoreTier(targetScore, isTargetSwitch);
+
+                const transScore = displayDiagnosis.realisticTransition.fitScore;
+                const transTier = getScoreTier(transScore, false);
+                const activeAiming = displayDiagnosis.aimingChoice || aimingChoice;
+
+                return (
+                  <div className="grid grid-cols-2 gap-2.5 flex-1 min-h-0 overflow-hidden">
+                    {/* 1. Fit Score Insight (Big Number) */}
+                    <div className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-2xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                          <Target size={12} className={targetTier.colorClass} />
+                          <span>
+                            {activeAiming === 'open_opportunities'
+                              ? 'Kesiapan Screening'
+                              : activeAiming === 'exploring'
+                              ? 'Kecocokan Terkuat'
+                              : 'Kecocokan'}
+                          </span>
+                        </div>
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold border ${targetTier.badgeClass}`}>
+                          {targetTier.label}
+                        </span>
+                      </div>
+                      <div className="my-1">
+                        <div className={`text-2xl font-black tracking-tight ${targetTier.colorClass}`}>
+                          {targetScore}%
+                        </div>
+                        <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate" title={displayDiagnosis.primaryRole}>
+                          {displayDiagnosis.primaryRole}
+                        </div>
+                      </div>
+                      <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight">
+                        {activeAiming === 'open_opportunities'
+                          ? 'Modal kualifikasi paling siap untuk screening'
+                          : activeAiming === 'exploring'
+                          ? 'Posisi dengan keselarasan profil paling optimal'
+                          : targetScore >= 75
+                          ? 'Peluang lolos screening tinggi'
+                          : isTargetSwitch
+                          ? 'Potensi transisi dengan melengkapi skill kunci'
+                          : 'Lengkapi skill kunci untuk perbesar peluang'}
+                      </p>
+                    </div>
+
+                    {/* 2. Top Strength */}
+                    <div className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-2xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                          <CheckCircle2 size={12} />
+                          <span>Kekuatan Utama</span>
+                        </div>
+                        {displayDiagnosis.matchedSkillsList && displayDiagnosis.matchedSkillsList.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setActiveStrengthModal(true)}
+                            className="text-[10px] font-bold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 hover:underline cursor-pointer"
+                          >
+                            Detail ({displayDiagnosis.matchedSkillsList.length})
+                          </button>
+                        )}
+                      </div>
+                      <div className="my-1">
+                        <p className="text-xs sm:text-sm font-extrabold text-emerald-800 dark:text-emerald-300 leading-snug break-words" title={displayDiagnosis.topStrength}>
+                          {displayDiagnosis.topStrength}
+                        </p>
+                      </div>
+                      <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight">
+                        Modal kuat yang siap ditonjolkan
+                      </p>
+                    </div>
+
+                    {/* 3. Skill Development Gap */}
+                    <div className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-2xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                          <TrendingUp size={12} />
+                          <span>Skill Prioritas</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setActiveSkillsModal(true)}
+                          className="text-[10px] font-bold text-amber-700 hover:text-amber-800 dark:text-amber-400 hover:underline cursor-pointer"
+                        >
+                          Lihat semua ({displayDiagnosis.gapSkillsList?.length || '4+'})
+                        </button>
+                      </div>
+                      <div className="my-1">
+                        <p className="text-xs sm:text-sm font-extrabold text-amber-800 dark:text-amber-300 leading-snug break-words">
+                          {displayDiagnosis.topGap}
+                        </p>
+                      </div>
+                      <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight">
+                        Fokus untuk menutup gap kompetensi
+                      </p>
+                    </div>
+
+                    {/* 4. Realistic Transition Path (Big Number) */}
+                    <div className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-2xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                          <Compass size={12} className={transTier.colorClass} />
+                          <span>
+                            {activeAiming === 'open_opportunities'
+                              ? 'Pilihan Siap Lamar ke-2'
+                              : activeAiming === 'exploring'
+                              ? 'Opsi Alternatif Terdekat'
+                              : 'Jalur Alternatif Terdekat'}
+                          </span>
+                        </div>
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold border ${transTier.badgeClass}`}>
+                          {transTier.label}
+                        </span>
+                      </div>
+                      <div className="my-1">
+                        <div className={`text-2xl font-black tracking-tight ${transTier.colorClass}`}>
+                          {transScore}%
+                        </div>
+                        <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate" title={displayDiagnosis.realisticTransition.role}>
+                          {displayDiagnosis.realisticTransition.role}
+                        </div>
+                      </div>
+                      <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight">
+                        {activeAiming === 'open_opportunities'
+                          ? 'Peluang posisi siap lamar berikutnya'
+                          : activeAiming === 'exploring'
+                          ? 'Alternatif cabang karier dengan modal terdekat'
+                          : 'Peluang screening & transisi tertinggi'}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* RIGHT COLUMN: Interactive Path Selector (2-Zone: Target Incaran & Peluang Terdekat) (~58% / col-span-7) */}
+            <div className="lg:col-span-7 flex flex-col h-full overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs p-4 sm:p-5">
+              {/* Header Pilihan Peran */}
+              {(() => {
+                const activeAiming = displayDiagnosis.aimingChoice || aimingChoice;
+                return (
+                  <div className="shrink-0 flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 gap-3">
+                    <div>
+                      <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+                        Pilihan Target Peran (Career Paths)
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        {activeAiming === 'know_role'
+                          ? 'Pilih 1 atau beberapa peran untuk disesuaikan pada template CV dan pelacakan lamaran:'
+                          : activeAiming === 'exploring'
+                          ? 'Pilih 1 atau beberapa peran yang ingin kamu jajal untuk template CV dan pelacakan lamaran:'
+                          : 'Pilih posisi dengan peluang lolos screening tercepat untuk fokus lamaranmu:'}
+                      </p>
+                    </div>
+                    <span className="px-3 py-1 rounded-full text-caption font-extrabold bg-blue-50 dark:bg-blue-950/80 text-cobalt-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shrink-0">
+                      {selectedCareerPaths.length} peran dipilih
+                    </span>
+                  </div>
+                );
+              })()}
+
+              {/* Scrollable Card List within 1 Frame */}
+              <div className="flex-1 overflow-y-auto space-y-3.5 pt-3 pr-1.5 custom-scrollbar">
+                {/* Unknown Role Banner */}
+                {displayDiagnosis.isUnknownRole && (
+                  <div className="p-3.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 flex items-start gap-2.5">
+                    <AlertTriangle size={16} className="text-amber-700 shrink-0 mt-0.5 dark:text-amber-400" />
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold text-amber-800 dark:text-amber-300">
+                        Posisi &quot;{displayDiagnosis.primaryRole}&quot; belum tersedia di database analisis kami.
+                      </p>
+                      <p className="text-caption text-amber-700/80 dark:text-amber-400/80 leading-relaxed">
+                        {displayDiagnosis.unknownRoleMessage}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {(() => {
+                  const activeAiming = displayDiagnosis.aimingChoice || aimingChoice;
+                  const getRoleTier = (score: number, isSwitch = false) => {
+                    if (score >= 70) {
+                      return {
+                        badgeClass: 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+                        dotClass: 'bg-emerald-500',
+                        label: 'Sangat Cocok',
+                      };
+                    }
+                    if (score >= 50) {
+                      return {
+                        badgeClass: 'bg-blue-50 dark:bg-blue-950/80 text-cobalt-600 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+                        dotClass: 'bg-cobalt-500',
+                        label: isSwitch ? 'Jalur Transisi' : 'Potensial',
+                      };
+                    }
+                    return {
+                      badgeClass: 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700',
+                      dotClass: 'bg-slate-400',
+                      label: isSwitch ? 'Eksplorasi Baru' : 'Pondasi Awal',
+                    };
+                  };
+
+                  const targetPath = displayDiagnosis.suggestedPaths.find((p) => p.isPrimaryTarget) || displayDiagnosis.suggestedPaths[0];
+                  const alternativePaths = displayDiagnosis.suggestedPaths
+                    .filter((p) => p.role !== targetPath?.role)
+                    .sort((a, b) => b.fitScore - a.fitScore);
+
+                  return (
+                    <>
+                      {/* ZONE 1: Target Incaran / Rekomendasi Utama / Peluang Tercepat */}
+                      {targetPath && (
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between px-0.5">
+                            <span className="text-[11px] font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                              <Target size={12} className="text-cobalt-600 dark:text-blue-400" />
+                              <span>
+                                {activeAiming === 'know_role'
+                                  ? '1. Target Incaranmu'
+                                  : activeAiming === 'exploring'
+                                  ? '1. Rekomendasi Terkuat Profilmu'
+                                  : '1. Peluang Lolos Paling Cepat'}
+                              </span>
+                            </span>
+                            <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
+                              {activeAiming === 'know_role'
+                                ? 'Pilihan Awal'
+                                : activeAiming === 'exploring'
+                                ? 'Kecocokan Tertinggi'
+                                : 'Siap Lamar (Gap Rendah)'}
+                            </span>
+                          </div>
+
+                          {(() => {
+                            const isSelected = selectedCareerPaths.includes(targetPath.role);
+                            const isSwitch = Boolean(targetPath.isCareerSwitch || displayDiagnosis.isCareerSwitch);
+                            const tier = getRoleTier(targetPath.fitScore, isSwitch);
+
+                            return (
+                              <div
+                                key={targetPath.role}
+                                onClick={() => {
+                                  setSelectedCareerPaths((prev) =>
+                                    prev.includes(targetPath.role)
+                                      ? prev.filter((r) => r !== targetPath.role)
+                                      : [...prev, targetPath.role]
+                                  );
+                                }}
+                                className={`p-3.5 sm:p-4 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col gap-2.5 ${
+                                  isSelected
+                                    ? 'bg-blue-50/40 dark:bg-slate-800/90 border-cobalt-500 shadow-xs ring-1 ring-cobalt-500/20'
+                                    : 'bg-white dark:bg-slate-900/70 border-slate-200/90 dark:border-slate-800 hover:border-slate-300 hover:bg-slate-50/50 dark:hover:bg-slate-800/40 shadow-2xs'
+                                }`}
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <div
+                                      className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition ${
+                                        isSelected
+                                          ? 'bg-cobalt-500 border-cobalt-500 text-white'
+                                          : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800'
+                                      }`}
+                                    >
+                                      {isSelected && <Check size={12} strokeWidth={3} />}
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                                          {targetPath.role}
+                                        </span>
+                                        <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/80 text-cobalt-600 dark:text-blue-300 text-[10px] font-bold border border-blue-200 dark:border-blue-800">
+                                          {activeAiming === 'know_role'
+                                            ? 'Target Incaran'
+                                            : activeAiming === 'exploring'
+                                            ? 'Rekomendasi Utama'
+                                            : 'Peluang Tercepat'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="shrink-0 flex items-center gap-1.5">
+                                    <span className={`px-2.5 py-1 rounded-md text-[11px] font-extrabold border flex items-center gap-1.5 ${tier.badgeClass}`}>
+                                      <span className={`w-1.5 h-1.5 rounded-full ${tier.dotClass}`} />
+                                      <span>{targetPath.fitScore}% Fit</span>
+                                      <span className="opacity-75 font-semibold text-[10px]">({tier.label})</span>
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="pl-7 space-y-1 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+                                  {targetPath.tagline && (
+                                    <p className="text-[11px] font-semibold text-cobalt-600 dark:text-blue-400">
+                                      {targetPath.tagline}
+                                    </p>
+                                  )}
+                                  <p className="text-caption text-slate-600 dark:text-slate-300 leading-snug">
+                                    <span className="font-semibold text-slate-500 dark:text-slate-400">Keahlian cocok: </span>
+                                    {targetPath.matchedSkills.length > 0 ? targetPath.matchedSkills.join(', ') : 'Pondasi umum profil'}
+                                  </p>
+                                  {targetPath.gapSkills && targetPath.gapSkills.length > 0 && (
+                                    <p className="text-caption text-slate-500 dark:text-slate-400 leading-snug">
+                                      <span className="font-semibold text-amber-700 dark:text-amber-400">Keahlian pendukung: </span>
+                                      {targetPath.gapSkills.join(', ')}
+                                    </p>
+                                  )}
+
+                                  <div className="pt-1 flex items-center justify-between">
+                                    <a
+                                      href={getLokerUrl(`?q=${encodeURIComponent(targetPath.role)}`)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="inline-flex items-center gap-1 text-[11px] font-bold text-cobalt-600 hover:text-cobalt-700 dark:text-blue-400 dark:hover:text-blue-300 hover:underline transition"
+                                    >
+                                      <span>Cari lowongan {targetPath.role} di portal loker</span>
+                                      <ExternalLink size={10} />
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      )}
+
+                      {/* ZONE 2: Alternatif / Eksplorasi Spektrum / Pilihan Potensial Siap Lamar */}
+                      {alternativePaths.length > 0 && (
+                        <div className="space-y-1.5 pt-1.5">
+                          <div className="flex items-center justify-between px-0.5">
+                            <span className="text-[11px] font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                              <Sparkles size={12} className="text-emerald-600 dark:text-emerald-400" />
+                              <span>
+                                {activeAiming === 'know_role'
+                                  ? '2. Jalur Karier Alternatif dari Profilmu'
+                                  : activeAiming === 'exploring'
+                                  ? '2. Eksplorasi Spektrum Karier Lainnya'
+                                  : '2. Posisi Potensial Siap Lamar Berikutnya'}
+                              </span>
+                            </span>
+                            <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
+                              {activeAiming === 'know_role'
+                                ? 'Transferable Skills'
+                                : activeAiming === 'exploring'
+                                ? 'Lintas Bidang'
+                                : 'Peluang Tambahan'}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 px-0.5">
+                            {activeAiming === 'know_role'
+                              ? 'Rekomendasi profesi yang relevan dengan modal keahlianmu (bukan feed lowongan langsung).'
+                              : activeAiming === 'exploring'
+                              ? 'Bandingkan cabang profesi yang relevan dengan modal keahlianmu lintas sektor.'
+                              : 'Pilihan posisi dengan modal kualifikasi yang sudah kamu kuasai untuk memperluas peluang lolos.'}
+                          </p>
+
+                          {alternativePaths.map((path, idx) => {
+                            const isSelected = selectedCareerPaths.includes(path.role);
+                            const tier = getRoleTier(path.fitScore, Boolean(path.isCareerSwitch));
+
+                            return (
+                              <div
+                                key={path.role}
+                                onClick={() => {
+                                  setSelectedCareerPaths((prev) =>
+                                    prev.includes(path.role)
+                                      ? prev.filter((r) => r !== path.role)
+                                      : [...prev, path.role]
+                                  );
+                                }}
+                                className={`p-3.5 sm:p-4 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col gap-2.5 ${
+                                  isSelected
+                                    ? 'bg-blue-50/40 dark:bg-slate-800/90 border-cobalt-500 shadow-xs ring-1 ring-cobalt-500/20'
+                                    : 'bg-white dark:bg-slate-900/70 border-slate-200/90 dark:border-slate-800 hover:border-slate-300 hover:bg-slate-50/50 dark:hover:bg-slate-800/40 shadow-2xs'
+                                }`}
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <div
+                                      className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition ${
+                                        isSelected
+                                          ? 'bg-cobalt-500 border-cobalt-500 text-white'
+                                          : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800'
+                                      }`}
+                                    >
+                                      {isSelected && <Check size={12} strokeWidth={3} />}
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                                          {path.role}
+                                        </span>
+                                        {idx === 0 ? (
+                                          <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold border border-emerald-200 dark:border-emerald-800">
+                                            {activeAiming === 'open_opportunities'
+                                              ? 'Siap Lamar'
+                                              : activeAiming === 'exploring'
+                                              ? 'Opsi Eksplorasi 1'
+                                              : 'Rekomendasi Terbaik'}
+                                          </span>
+                                        ) : (
+                                          <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/80 text-cobalt-600 dark:text-blue-300 text-[10px] font-bold border border-blue-200 dark:border-blue-800">
+                                            {activeAiming === 'open_opportunities'
+                                              ? 'Peluang Tambahan'
+                                              : activeAiming === 'exploring'
+                                              ? `Opsi Eksplorasi ${idx + 1}`
+                                              : 'Transisi Realistis'}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="shrink-0 flex items-center gap-1.5">
+                                    <span className={`px-2.5 py-1 rounded-md text-[11px] font-extrabold border flex items-center gap-1.5 ${tier.badgeClass}`}>
+                                      <span className={`w-1.5 h-1.5 rounded-full ${tier.dotClass}`} />
+                                      <span>{path.fitScore}% Fit</span>
+                                      <span className="opacity-75 font-semibold text-[10px]">({tier.label})</span>
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="pl-7 space-y-1 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+                                  {path.tagline && (
+                                    <p className="text-[11px] font-semibold text-cobalt-600 dark:text-blue-400">
+                                      {path.tagline}
+                                    </p>
+                                  )}
+                                  <p className="text-caption text-slate-600 dark:text-slate-300 leading-snug">
+                                    <span className="font-semibold text-slate-500 dark:text-slate-400">Keahlian cocok: </span>
+                                    {path.matchedSkills.length > 0 ? path.matchedSkills.join(', ') : 'Pondasi umum profil'}
+                                  </p>
+                                  {path.gapSkills && path.gapSkills.length > 0 && (
+                                    <p className="text-caption text-slate-500 dark:text-slate-400 leading-snug">
+                                      <span className="font-semibold text-amber-700 dark:text-amber-400">Keahlian pendukung: </span>
+                                      {path.gapSkills.join(', ')}
+                                    </p>
+                                  )}
+
+                                  <div className="pt-1 flex items-center justify-between">
+                                    <a
+                                      href={getLokerUrl(`?q=${encodeURIComponent(path.role)}`)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="inline-flex items-center gap-1 text-[11px] font-bold text-cobalt-600 hover:text-cobalt-700 dark:text-blue-400 dark:hover:text-blue-300 hover:underline transition"
+                                    >
+                                      <span>Cari lowongan {path.role} di portal loker</span>
+                                      <ExternalLink size={10} />
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+
+              {/* Helper notice */}
+              <div className="shrink-0 pt-2.5 text-center text-caption text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800">
+                Draf CV pertamamu akan otomatis disesuaikan untuk peran yang kamu centang di atas.
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Bottom Sticky Action Footer */}
+        <footer className="shrink-0 bg-white/95 dark:bg-slate-950/95 border-t border-slate-200 dark:border-slate-800 px-6 py-3 sm:px-8 shadow-lg z-30">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => setCareerSubStep('aiming')}
+              className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              <ArrowLeft size={14} />
+              <span>Ubah Target Peran</span>
+            </button>
+
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  const finalRoles = selectedCareerPaths.length > 0 ? selectedCareerPaths : [displayDiagnosis.primaryRole];
+                  setFormData((prev) => ({ ...prev, targetPositions: finalRoles }));
+                  handleFinishAndNavigateTo('/beranda', finalRoles, displayDiagnosis);
+                }}
+                className="text-caption font-bold text-slate-500 hover:text-cobalt-500 dark:hover:text-blue-400 transition cursor-pointer hidden md:inline"
+              >
+                Langsung ke Beranda →
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const finalRoles = selectedCareerPaths.length > 0 ? selectedCareerPaths : [displayDiagnosis.primaryRole];
+                  setFormData((prev) => ({ ...prev, targetPositions: finalRoles }));
+                  handleFinishAndNavigateTo('/cv', finalRoles, displayDiagnosis);
+                }}
+                disabled={isSubmitting || selectedCareerPaths.length === 0}
+                className="px-6 py-2.5 sm:py-3 rounded-xl bg-[#F97316] hover:bg-[#ea580c] active:scale-[0.98] text-white font-extrabold text-xs sm:text-sm shadow-md shadow-[#F97316]/20 transition flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span>{isSubmitting ? 'Menyiapkan CV...' : 'Lanjut ke CV Builder'}</span>
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans p-6 sm:p-10 flex flex-col justify-between selection:bg-orange-500 selection:text-white">
+    <div className="min-h-[100dvh] flex-1 w-full bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans pt-20 pb-28 px-6 sm:pt-24 sm:pb-28 sm:px-10 flex flex-col justify-between selection:bg-orange-500 selection:text-white">
       {/* Full-Screen Drag & Drop Overlay */}
       <AnimatePresence>
         {isDragging && (
@@ -992,16 +1982,16 @@ export default function CardlessClaudeStyleOnboardingPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-50 bg-[#1738D1]/15 dark:bg-[#1738D1]/30 backdrop-blur-xs flex items-center justify-center p-6 sm:p-10 pointer-events-none"
+            className="fixed inset-0 z-50 bg-cobalt-500/15 dark:bg-cobalt-500/30 backdrop-blur-xs flex items-center justify-center p-6 sm:p-10 pointer-events-none"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="w-full h-full max-w-2xl max-h-[75vh] border-3 border-dashed border-[#1738D1] dark:border-blue-400 bg-white/95 dark:bg-slate-900/95 rounded-3xl shadow-2xl flex flex-col items-center justify-center gap-4 text-center p-8"
+              className="w-full h-full max-w-2xl max-h-[75vh] border-3 border-dashed border-cobalt-500 dark:border-blue-400 bg-white/95 dark:bg-slate-900/95 rounded-3xl shadow-2xl flex flex-col items-center justify-center gap-4 text-center p-8"
             >
-              <div className="w-20 h-20 rounded-2xl bg-blue-100 dark:bg-blue-950 text-[#1738D1] dark:text-blue-400 flex items-center justify-center shadow-lg shadow-[#1738D1]/15 scale-110">
+              <div className="w-20 h-20 rounded-2xl bg-blue-100 dark:bg-blue-950 text-cobalt-500 dark:text-blue-400 flex items-center justify-center shadow-lg shadow-cobalt-500/15 scale-110">
                 <FileUp size={44} className="animate-bounce" />
               </div>
               <div className="space-y-1.5 max-w-md">
@@ -1012,7 +2002,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
                   Tarik dan lepas berkas ke bagian mana saja pada layar untuk memindai otomatis (PDF, DOCX, TXT, atau JSON)
                 </p>
               </div>
-              <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 dark:bg-blue-950/80 text-[#1738D1] dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+              <span className="px-3 py-1 rounded-full text-caption font-bold bg-blue-50 dark:bg-blue-950/80 text-cobalt-500 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
                 Maksimal 10MB
               </span>
             </motion.div>
@@ -1021,51 +2011,59 @@ export default function CardlessClaudeStyleOnboardingPage() {
       </AnimatePresence>
 
       {/* 1. Minimalist Top Progress Bar */}
-      {currentStage === 'questions' && (
+      {(currentStage === 'questions' || currentStage === 'upload_scan') && (
         <div className="fixed top-0 left-0 right-0 h-[2px] bg-slate-100 dark:bg-slate-900 z-50 overflow-hidden">
           <motion.div
-            className="h-full bg-[#1738D1]"
+            className="h-full bg-cobalt-500"
             initial={{ width: 0 }}
-            animate={{ width: `${(currentQuestionIndex / totalQuestions) * 100}%` }}
+            animate={{
+              width:
+                currentStage === 'questions'
+                  ? `${(currentQuestionIndex / totalQuestions) * 100}%`
+                  : scanCompleted
+                  ? '100%'
+                  : isScanning
+                  ? `${Math.max(50, Math.min(95, 50 + scanProgress * 0.45))}%`
+                  : '50%',
+            }}
             transition={{ duration: 0.35, ease: 'easeInOut' }}
           />
         </div>
       )}
 
-      {/* Top Header & Brand Bar */}
-      <header className={`w-full mx-auto transition-all duration-300 ${stageMaxWidth}`}>
-        {currentStage !== 'tos' && (
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800/80 mb-2">
-            <div className="flex items-center gap-2">
-              <Image
-                src="/logo.webp"
-                alt="Employr"
-                width={120}
-                height={28}
-                unoptimized
-                priority
-                className="h-6 w-auto object-contain dark:brightness-0 dark:invert"
-              />
-            </div>
-            <div className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-              {currentStage === 'upload_scan' && (scanCompleted ? 'Tinjau Hasil Ekstraksi' : 'Unggah Berkas')}
-              {currentStage === 'career_direction' && (
-                careerSubStep === 'aiming'
-                  ? 'Target Karier'
-                  : careerSubStep === 'loading'
-                  ? 'Diagnosis Profil'
-                  : 'Rekomendasi Karier'
-              )}
-              {currentStage === 'questions' && `Langkah ${currentQuestionIndex} dari ${totalQuestions}`}
-              {currentStage === 'fork' && 'Pilih Metode'}
-            </div>
+      {/* Top Header & Brand Bar - Statis di pojok kiri atas dan pojok kanan atas */}
+      <header className="fixed top-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xs border-b border-slate-100 dark:border-slate-800/80 px-6 py-4 sm:px-10 sm:py-5">
+        <div className="w-full flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Image
+              src="/logo.webp"
+              alt="Employr"
+              width={120}
+              height={28}
+              unoptimized
+              priority
+              className="h-6 w-auto object-contain dark:brightness-0 dark:invert"
+            />
           </div>
-        )}
+          <div className="text-caption font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            {currentStage === 'tos' && 'Ketentuan Layanan'}
+            {currentStage === 'upload_scan' && (scanCompleted ? 'Langkah 2 dari 2' : 'Langkah 1 dari 2')}
+            {currentStage === 'career_direction' && (
+              careerSubStep === 'aiming'
+                ? 'Target Karier'
+                : careerSubStep === 'loading'
+                ? 'Diagnosis Profil'
+                : 'Rekomendasi Karier'
+            )}
+            {currentStage === 'questions' && `Langkah ${currentQuestionIndex} dari ${totalQuestions}`}
+            {currentStage === 'fork' && 'Pilih Metode'}
+          </div>
+        </div>
       </header>
 
       {/* Center Screen Content */}
       <main className={`w-full mx-auto py-6 sm:py-8 transition-all duration-300 ${stageMaxWidth} ${
-        currentStage === 'tos' || currentStage === 'fork' ? 'my-auto' : ''
+        currentStage === 'tos' || currentStage === 'fork' || currentStage === 'upload_scan' ? 'my-auto' : ''
       }`}>
         {/* ============================================================ */}
         {/* STAGE 1: TOS AGREEMENT */}
@@ -1104,18 +2102,18 @@ export default function CardlessClaudeStyleOnboardingPage() {
                 <span
                   className={`w-5 h-5 shrink-0 mt-0.5 rounded-md border-2 flex items-center justify-center transition ${
                     formData.tosAccepted
-                      ? 'bg-[#1738D1] border-[#1738D1] text-white'
+                      ? 'bg-cobalt-500 border-cobalt-500 text-white'
                       : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-transparent'
                   }`}
                 >
                   <Check size={13} strokeWidth={3} />
                 </span>
                 <span className="text-xs font-medium text-slate-700 dark:text-slate-200 leading-relaxed">
-                  Saya menyetujui seluruh ketentuan layanan dan kebijakan privasi Employr untuk rekomendasi lowongan kerja & layanan pembuatan CV.
+                  Saya menyetujui Syarat &amp; Ketentuan serta Kebijakan Privasi Employr untuk rekomendasi loker dan pembuatan CV.
                 </span>
               </motion.button>
 
-              <div className="flex items-center gap-4 text-[11px] pt-1 border-t border-slate-200 dark:border-slate-800/60 font-semibold text-[#1738D1] pl-8">
+              <div className="flex items-center gap-4 text-caption pt-1 border-t border-slate-200 dark:border-slate-800/60 font-semibold text-cobalt-500 pl-8">
                 <Link href="/syarat-ketentuan" target="_blank" className="hover:underline flex items-center gap-1">
                   Syarat & Ketentuan ↗
                 </Link>
@@ -1125,16 +2123,6 @@ export default function CardlessClaudeStyleOnboardingPage() {
                 </Link>
               </div>
             </div>
-
-            <button
-              type="button"
-              disabled={!formData.tosAccepted}
-              onClick={() => setCurrentStage('fork')}
-              className="w-full py-3.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-white font-bold text-xs shadow-md shadow-[#F97316]/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-98"
-            >
-              <span>Mulai Sekarang</span>
-              <ArrowRight size={16} />
-            </button>
           </motion.div>
         )}
 
@@ -1167,17 +2155,17 @@ export default function CardlessClaudeStyleOnboardingPage() {
                   setFormData({ ...formData, hasCvAlready: true });
                   setCurrentStage('upload_scan');
                 }}
-                className="p-5 rounded-2xl border-2 border-[#1738D1]/40 hover:border-[#1738D1] bg-blue-50/40 dark:bg-blue-950/20 text-left transition flex items-start gap-4 cursor-pointer group shadow-sm"
+                className="p-5 rounded-2xl border-2 border-cobalt-500/40 hover:border-cobalt-500 bg-blue-50/40 dark:bg-blue-950/20 text-left transition flex items-start gap-4 cursor-pointer group shadow-sm"
               >
-                <div className="w-12 h-12 rounded-xl bg-[#1738D1] text-white flex items-center justify-center shrink-0 shadow-md shadow-[#1738D1]/20">
+                <div className="w-12 h-12 rounded-xl bg-cobalt-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-cobalt-500/20">
                   <Upload size={22} />
                 </div>
                 <div className="space-y-1 flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 group-hover:text-[#1738D1] transition">
+                    <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 group-hover:text-cobalt-500 transition">
                       Sudah Punya CV (Upload & Scan)
                     </h3>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200">
+                    <span className="text-caption font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200">
                       Otomatis & Cepat
                     </span>
                   </div>
@@ -1200,7 +2188,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
                 className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-slate-400 bg-slate-50 dark:bg-slate-900 text-left transition flex items-start gap-4 cursor-pointer group"
               >
                 <div className="w-12 h-12 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0">
-                  <Sparkles size={22} className="text-orange-500" />
+                  <Sparkles size={22} className="text-orange-700 dark:text-orange-400" />
                 </div>
                 <div className="space-y-1 flex-1">
                   <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 group-hover:text-orange-600 transition">
@@ -1211,16 +2199,6 @@ export default function CardlessClaudeStyleOnboardingPage() {
                   </p>
                 </div>
               </motion.button>
-            </div>
-
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => setCurrentStage('tos')}
-                className="text-xs font-bold text-slate-400 hover:text-slate-600 flex items-center gap-1 transition cursor-pointer"
-              >
-                <ArrowLeft size={14} /> Kembali
-              </button>
             </div>
           </motion.div>
         )}
@@ -1237,896 +2215,89 @@ export default function CardlessClaudeStyleOnboardingPage() {
           >
             <div className="space-y-2">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight leading-tight">
-                {scanCompleted ? 'Hasil Pemindaian CV' : 'Unggah Berkas CV Kamu'}
+                Unggah Berkas CV Kamu
               </h1>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                {scanCompleted
-                  ? 'Periksa data yang berhasil diekstrak. Kamu bisa langsung menyesuaikannya jika diperlukan.'
-                  : 'Pilih file PDF, DOCX, atau JSON untuk dipindai otomatis oleh sistem.'}
+                Pilih file PDF, DOCX, atau JSON untuk dipindai otomatis oleh sistem.
               </p>
             </div>
 
-            {!scanCompleted ? (
-              <div className="space-y-4">
-                {/* Upload Zone */}
-                <label
-                  onDragOver={handleDragOver}
-                  onDragEnter={handleDragEnter}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  className={`w-full p-8 border-2 border-dashed rounded-2xl transition-all flex flex-col items-center justify-center gap-3 cursor-pointer group ${
+            <div className="space-y-4">
+              {/* Upload Zone */}
+              <label
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`w-full p-8 border-2 border-dashed rounded-2xl transition-all flex flex-col items-center justify-center gap-3 cursor-pointer group ${
+                  isDragging
+                    ? 'border-cobalt-500 bg-blue-100/60 dark:bg-blue-900/40 ring-4 ring-cobalt-500/15 scale-[1.01]'
+                    : 'border-cobalt-500/50 hover:border-cobalt-500 dark:border-blue-800 bg-blue-50/30 hover:bg-blue-50/60 dark:bg-blue-950/10'
+                }`}
+              >
+                <div
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
                     isDragging
-                      ? 'border-[#1738D1] bg-blue-100/60 dark:bg-blue-900/40 ring-4 ring-[#1738D1]/15 scale-[1.01]'
-                      : 'border-[#1738D1]/50 hover:border-[#1738D1] dark:border-blue-800 bg-blue-50/30 hover:bg-blue-50/60 dark:bg-blue-950/10'
+                      ? 'scale-110 bg-cobalt-500 text-white shadow-md shadow-cobalt-500/20'
+                      : 'bg-blue-100 dark:bg-blue-900/60 text-cobalt-500 dark:text-blue-400 group-hover:scale-105'
                   }`}
                 >
-                  <div
-                    className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
-                      isDragging
-                        ? 'scale-110 bg-[#1738D1] text-white shadow-md shadow-[#1738D1]/20'
-                        : 'bg-blue-100 dark:bg-blue-900/60 text-[#1738D1] dark:text-blue-400 group-hover:scale-105'
+                  <FileUp size={28} />
+                </div>
+                <div className="text-center space-y-1">
+                  <p
+                    className={`text-xs font-extrabold transition ${
+                      isDragging ? 'text-cobalt-500 dark:text-blue-400' : 'text-slate-800 dark:text-slate-200'
                     }`}
                   >
-                    <FileUp size={28} />
-                  </div>
-                  <div className="text-center space-y-1">
-                    <p
-                      className={`text-xs font-extrabold transition ${
-                        isDragging ? 'text-[#1738D1] dark:text-blue-400' : 'text-slate-800 dark:text-slate-200'
-                      }`}
-                    >
-                      {isDragging
-                        ? 'Lepaskan berkas di sini untuk mulai memindai'
-                        : 'Klik untuk pilih file atau tarik berkas ke sini'}
-                    </p>
-                    <p className="text-[11px] font-medium text-slate-400">
-                      Mendukung PDF, DOCX, dan JSON (Maksimal 10MB)
-                    </p>
-                  </div>
-                  <input
-                    type="file"
-                    accept=".pdf,.docx,.doc,.txt,.json"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleFileUploadAndScan(file);
-                      e.target.value = '';
-                    }}
-                    className="hidden"
-                  />
-                </label>
-
-                {/* Scanning Progress State */}
-                {isScanning && (
-                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
-                    <div className="flex items-center justify-between text-xs font-bold">
-                      <span className="flex items-center gap-2 text-[#1738D1]">
-                        <span className="w-2 h-2 rounded-full bg-[#1738D1] animate-ping" />
-                        {scanStatusText}
-                      </span>
-                      <span className="text-slate-500 font-mono font-bold">{scanProgress}%</span>
-                    </div>
-                    <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                      <motion.div
-                        className="h-full bg-[#1738D1]"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${scanProgress}%` }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {scanError && (
-                  <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-start gap-2.5 text-xs text-amber-700 dark:text-amber-400">
-                    <AlertCircle size={16} className="shrink-0 mt-0.5" />
-                    <span>{scanError}</span>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStage('fork')}
-                    className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <ArrowLeft size={14} /> Ganti Metode
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCurrentStage('questions');
-                      setCurrentQuestionIndex(1);
-                    }}
-                    className="text-xs font-bold text-[#1738D1] hover:underline cursor-pointer"
-                  >
-                    Atau isi manual langkah-demi-langkah →
-                  </button>
+                    {isDragging
+                      ? 'Lepaskan berkas di sini untuk mulai memindai'
+                      : 'Klik untuk pilih file atau tarik berkas ke sini'}
+                  </p>
+                  <p className="text-caption font-medium text-slate-500 dark:text-slate-400">
+                    Mendukung PDF, DOCX, dan JSON (Maksimal 10MB)
+                  </p>
                 </div>
-              </div>
-            ) : (
-              /* Scanned Review Cards */
-              <div className="space-y-5 text-left">
-                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center gap-2.5 text-xs font-bold text-emerald-700 dark:text-emerald-400">
-                  <FileCheck size={16} className="shrink-0" />
-                  <span>Berkas &quot;{uploadedFile?.name}&quot; berhasil dipindai dan dipetakan!</span>
-                </div>
+                <input
+                  type="file"
+                  accept=".pdf,.docx,.doc,.txt,.json"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileUploadAndScan(file);
+                    e.target.value = '';
+                  }}
+                  className="hidden"
+                />
+              </label>
 
-                <div className="space-y-3 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
-                      Nama Lengkap
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.fullName}
-                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      className="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1]"
+              {/* Scanning Progress State */}
+              {isScanning && (
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span className="flex items-center gap-2 text-cobalt-500">
+                      <span className="w-2 h-2 rounded-full bg-cobalt-500 animate-ping" />
+                      {scanStatusText}
+                    </span>
+                    <span className="text-slate-500 font-mono font-bold">{scanProgress}%</span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                    <motion.div
+                      className="h-full bg-cobalt-500"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${scanProgress}%` }}
+                      transition={{ duration: 0.3 }}
                     />
                   </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
-                        Email Kontak
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="email"
-                          placeholder="email@domain.com"
-                          value={formData.contactInfo}
-                          onChange={(e) => setFormData({ ...formData, contactInfo: e.target.value })}
-                          className="w-full px-3.5 py-2 pl-8 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1]"
-                        />
-                        <Mail size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
-                        Nomor HP / WhatsApp
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          placeholder="08123456789"
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          className="w-full px-3.5 py-2 pl-8 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1]"
-                        />
-                        <Phone size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-                    <div className="sm:col-span-7">
-                      <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
-                        Pendidikan & Jurusan
-                      </label>
-                      <div className="flex gap-2">
-                        <select
-                          value={formData.educationLevel}
-                          onChange={(e) => setFormData({ ...formData, educationLevel: e.target.value })}
-                          className="w-28 sm:w-32 shrink-0 px-2.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1]"
-                        >
-                          <option value="">Jenjang</option>
-                          {EDUCATION_LEVELS.map((lvl) => (
-                            <option key={lvl} value={lvl}>
-                              {lvl}
-                            </option>
-                          ))}
-                        </select>
-                        <input
-                          type="text"
-                          placeholder="Jurusan (contoh: Teknik Informatika)"
-                          value={formData.major}
-                          onChange={(e) => setFormData({ ...formData, major: e.target.value })}
-                          className="flex-1 min-w-0 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1]"
-                        />
-                      </div>
-                    </div>
-                    <div className="sm:col-span-5">
-                      <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
-                        Target Posisi
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Contoh: Staf Operasional, Desainer"
-                        value={formData.targetPositions.join(', ')}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          const parts = val ? val.split(',').map((s) => s.trimStart()) : [];
-                          setFormData({ ...formData, targetPositions: parts });
-                        }}
-                        className="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1]"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
-                      Keahlian Terdeteksi ({formData.skills.length})
-                    </label>
-                    <div className="flex flex-wrap gap-1.5">
-                      {formData.skills.map((s, i) => (
-                        <span
-                          key={i}
-                          className="px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/80 text-[10px] font-bold text-[#1738D1] dark:text-blue-300 border border-blue-200 dark:border-blue-800"
-                        >
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Ringkasan Diri (About Me)
-                      </label>
-                      <span className="text-[10px] font-medium text-[#1738D1] dark:text-blue-400 flex items-center gap-1">
-                        <Pencil size={10} /> Bisa disunting langsung
-                      </span>
-                    </div>
-                    <textarea
-                      rows={3}
-                      placeholder="Tuliskan ringkasan singkat tentang latar belakang, keahlian, dan tujuan karier kamu..."
-                      value={formData.summary}
-                      onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-                      className="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium leading-relaxed text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1] resize-y"
-                    />
-                  </div>
-
-                  {/* Ringkasan Data Lengkap Siap Masuk ke CV */}
-                  {(formData.extractedExperiences?.length > 0 ||
-                    formData.extractedProjects?.length > 0 ||
-                    formData.extractedCertifications?.length > 0 ||
-                    formData.extractedOrganizations?.length > 0) && (
-                    <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-3">
-                      <div className="space-y-0.5">
-                        <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                          Data Lengkap yang Siap Masuk ke CV Builder
-                        </label>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Pastikan data di bawah ini sudah akurat. Kamu bisa mengubahnya langsung jika ada kesalahan.
-                        </p>
-                      </div>
-
-                      {/* Interactive Tab Navigation */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" role="tablist" aria-label="Kategori Data CV">
-                        {/* Tab 1: Pengalaman */}
-                        <button
-                          type="button"
-                          role="tab"
-                          aria-selected={scannedActiveTab === 'experience'}
-                          onClick={() => setScannedActiveTab('experience')}
-                          className={`relative p-2.5 sm:p-3 rounded-xl text-left transition-all cursor-pointer ${
-                            scannedActiveTab === 'experience'
-                              ? 'bg-blue-50/90 dark:bg-blue-950/60 border-2 border-[#1738D1] shadow-xs ring-2 ring-[#1738D1]/15'
-                              : 'bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 hover:border-slate-300'
-                          }`}
-                        >
-                          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase">
-                            <Briefcase size={12} className={scannedActiveTab === 'experience' ? 'text-[#1738D1]' : 'text-slate-400'} />
-                            <span className={scannedActiveTab === 'experience' ? 'text-[#1738D1] dark:text-blue-300' : 'text-slate-500 dark:text-slate-400'}>
-                              Pengalaman
-                            </span>
-                          </div>
-                          <p className="text-xs font-extrabold text-slate-900 dark:text-slate-100 mt-1">
-                            {formData.extractedExperiences?.length || 0} Riwayat Kerja
-                          </p>
-                          {scannedActiveTab === 'experience' && (
-                            <span className="absolute -bottom-[2px] left-3 right-3 h-[3px] bg-[#1738D1] rounded-full" />
-                          )}
-                        </button>
-
-                        {/* Tab 2: Proyek */}
-                        <button
-                          type="button"
-                          role="tab"
-                          aria-selected={scannedActiveTab === 'projects'}
-                          onClick={() => setScannedActiveTab('projects')}
-                          className={`relative p-2.5 sm:p-3 rounded-xl text-left transition-all cursor-pointer ${
-                            scannedActiveTab === 'projects'
-                              ? 'bg-blue-50/90 dark:bg-blue-950/60 border-2 border-[#1738D1] shadow-xs ring-2 ring-[#1738D1]/15'
-                              : 'bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 hover:border-slate-300'
-                          }`}
-                        >
-                          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase">
-                            <Sparkles size={12} className={scannedActiveTab === 'projects' ? 'text-purple-600' : 'text-slate-400'} />
-                            <span className={scannedActiveTab === 'projects' ? 'text-[#1738D1] dark:text-blue-300' : 'text-slate-500 dark:text-slate-400'}>
-                              Proyek
-                            </span>
-                          </div>
-                          <p className="text-xs font-extrabold text-slate-900 dark:text-slate-100 mt-1">
-                            {formData.extractedProjects?.length || 0} Portofolio
-                          </p>
-                          {scannedActiveTab === 'projects' && (
-                            <span className="absolute -bottom-[2px] left-3 right-3 h-[3px] bg-[#1738D1] rounded-full" />
-                          )}
-                        </button>
-
-                        {/* Tab 3: Sertifikasi */}
-                        <button
-                          type="button"
-                          role="tab"
-                          aria-selected={scannedActiveTab === 'certifications'}
-                          onClick={() => setScannedActiveTab('certifications')}
-                          className={`relative p-2.5 sm:p-3 rounded-xl text-left transition-all cursor-pointer ${
-                            scannedActiveTab === 'certifications'
-                              ? 'bg-blue-50/90 dark:bg-blue-950/60 border-2 border-[#1738D1] shadow-xs ring-2 ring-[#1738D1]/15'
-                              : 'bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 hover:border-slate-300'
-                          }`}
-                        >
-                          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase">
-                            <Award size={12} className={scannedActiveTab === 'certifications' ? 'text-amber-600' : 'text-slate-400'} />
-                            <span className={scannedActiveTab === 'certifications' ? 'text-[#1738D1] dark:text-blue-300' : 'text-slate-500 dark:text-slate-400'}>
-                              Sertifikasi
-                            </span>
-                          </div>
-                          <p className="text-xs font-extrabold text-slate-900 dark:text-slate-100 mt-1">
-                            {formData.extractedCertifications?.length || 0} Sertifikat
-                          </p>
-                          {scannedActiveTab === 'certifications' && (
-                            <span className="absolute -bottom-[2px] left-3 right-3 h-[3px] bg-[#1738D1] rounded-full" />
-                          )}
-                        </button>
-
-                        {/* Tab 4: Organisasi */}
-                        <button
-                          type="button"
-                          role="tab"
-                          aria-selected={scannedActiveTab === 'organizations'}
-                          onClick={() => setScannedActiveTab('organizations')}
-                          className={`relative p-2.5 sm:p-3 rounded-xl text-left transition-all cursor-pointer ${
-                            scannedActiveTab === 'organizations'
-                              ? 'bg-blue-50/90 dark:bg-blue-950/60 border-2 border-[#1738D1] shadow-xs ring-2 ring-[#1738D1]/15'
-                              : 'bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 hover:border-slate-300'
-                          }`}
-                        >
-                          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase">
-                            <BookOpen size={12} className={scannedActiveTab === 'organizations' ? 'text-emerald-600' : 'text-slate-400'} />
-                            <span className={scannedActiveTab === 'organizations' ? 'text-[#1738D1] dark:text-blue-300' : 'text-slate-500 dark:text-slate-400'}>
-                              Organisasi
-                            </span>
-                          </div>
-                          <p className="text-xs font-extrabold text-slate-900 dark:text-slate-100 mt-1">
-                            {formData.extractedOrganizations?.length || 0} Organisasi
-                          </p>
-                          {scannedActiveTab === 'organizations' && (
-                            <span className="absolute -bottom-[2px] left-3 right-3 h-[3px] bg-[#1738D1] rounded-full" />
-                          )}
-                        </button>
-                      </div>
-
-                      {/* Active Tab Editable Content */}
-                      <div className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 shadow-xs">
-                        {/* 1. TAB PENGALAMAN */}
-                        {scannedActiveTab === 'experience' && (
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800">
-                              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
-                                <Briefcase size={14} className="text-[#1738D1]" />
-                                <span>Detail Pengalaman Kerja</span>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950 text-[#1738D1] dark:text-blue-400 border border-blue-200 dark:border-blue-800">
-                                  {formData.extractedExperiences.length}
-                                </span>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={addExperience}
-                                className="text-[11px] font-bold text-[#1738D1] hover:underline flex items-center gap-1 cursor-pointer"
-                              >
-                                <Plus size={13} /> Tambah Pengalaman
-                              </button>
-                            </div>
-
-                            {formData.extractedExperiences.length === 0 ? (
-                              <div className="py-6 text-center space-y-2">
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
-                                  Belum ada riwayat pengalaman terdeteksi dari berkas CV ini.
-                                </p>
-                                <button
-                                  type="button"
-                                  onClick={addExperience}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-[#1738D1] bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 cursor-pointer"
-                                >
-                                  <Plus size={13} /> Tambah Pengalaman Manual
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="space-y-3">
-                                {formData.extractedExperiences.map((exp: any, i: number) => (
-                                  <div
-                                    key={exp.id || i}
-                                    className="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 space-y-2.5 transition-all"
-                                  >
-                                    <div className="flex items-start justify-between gap-2">
-                                      <div className="flex-1 space-y-2.5">
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                          <div>
-                                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-                                              Posisi / Jabatan
-                                            </label>
-                                            <input
-                                              type="text"
-                                              placeholder="Contoh: Staff Administrasi"
-                                              value={exp.role || ''}
-                                              onChange={(e) => updateExperience(i, 'role', e.target.value)}
-                                              className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1]"
-                                            />
-                                          </div>
-                                          <div>
-                                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-                                              Perusahaan / Tempat Kerja
-                                            </label>
-                                            <input
-                                              type="text"
-                                              placeholder="Nama Perusahaan"
-                                              value={exp.company || ''}
-                                              onChange={(e) => updateExperience(i, 'company', e.target.value)}
-                                              className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1]"
-                                            />
-                                          </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                          <div>
-                                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-                                              Tanggal Mulai Bekerja
-                                            </label>
-                                            <CustomDatePicker
-                                              value={exp.startDate || parsePeriodToDates(exp.period).startDate}
-                                              onChange={(val) => updateExperienceDate(i, 'startDate', val)}
-                                              placeholder="Pilih Bulan & Tahun Mulai..."
-                                              className="w-full"
-                                            />
-                                          </div>
-                                          <div>
-                                            <div className="flex items-center justify-between mb-0.5">
-                                              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                                Tanggal Selesai Bekerja
-                                              </label>
-                                              <label className="inline-flex items-center gap-1.5 cursor-pointer text-[10px] font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 select-none">
-                                                <input
-                                                  type="checkbox"
-                                                  checked={Boolean(exp.isCurrent ?? parsePeriodToDates(exp.period).isCurrent)}
-                                                  onChange={(e) => updateExperienceDate(i, 'isCurrent', e.target.checked)}
-                                                  className="w-3 h-3 text-[#1738D1] rounded border-slate-300 dark:border-slate-700 focus:ring-[#1738D1]"
-                                                />
-                                                <span>Masih Bekerja Di Sini</span>
-                                              </label>
-                                            </div>
-                                            <CustomDatePicker
-                                              value={(exp.isCurrent ?? parsePeriodToDates(exp.period).isCurrent) ? 'Sekarang' : (exp.endDate || parsePeriodToDates(exp.period).endDate)}
-                                              onChange={(val) => updateExperienceDate(i, 'endDate', val)}
-                                              placeholder="Pilih Bulan & Tahun Selesai..."
-                                              disabled={Boolean(exp.isCurrent ?? parsePeriodToDates(exp.period).isCurrent)}
-                                              allowPresent={true}
-                                              minDate={exp.startDate || parsePeriodToDates(exp.period).startDate}
-                                              className="w-full"
-                                            />
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <button
-                                        type="button"
-                                        onClick={() => deleteExperience(i)}
-                                        title="Hapus riwayat ini"
-                                        className="p-1.5 mt-1 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition shrink-0 cursor-pointer"
-                                      >
-                                        <Trash2 size={14} />
-                                      </button>
-                                    </div>
-
-                                    <div>
-                                      <div className="flex items-center justify-between mb-1">
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                          Deskripsi & Tanggung Jawab (Bisa Langsung Diedit)
-                                        </label>
-                                        <span className="text-[10px] font-medium text-[#1738D1] dark:text-blue-400 flex items-center gap-1">
-                                          <Pencil size={10} /> Edit langsung di kotak
-                                        </span>
-                                      </div>
-                                      <textarea
-                                        rows={3}
-                                        placeholder="Jelaskan tanggung jawab, tugas harian, atau pencapaian utama selama bekerja..."
-                                        value={exp.description || ''}
-                                        onChange={(e) => updateExperience(i, 'description', e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs leading-relaxed text-slate-800 dark:text-slate-200 focus:outline-none focus:border-[#1738D1] resize-y"
-                                      />
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* 2. TAB PROYEK */}
-                        {scannedActiveTab === 'projects' && (
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800">
-                              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
-                                <Sparkles size={14} className="text-purple-600" />
-                                <span>Detail Portofolio & Proyek</span>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800">
-                                  {formData.extractedProjects.length}
-                                </span>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={addProject}
-                                className="text-[11px] font-bold text-[#1738D1] hover:underline flex items-center gap-1 cursor-pointer"
-                              >
-                                <Plus size={13} /> Tambah Proyek
-                              </button>
-                            </div>
-
-                            {formData.extractedProjects.length === 0 ? (
-                              <div className="py-6 text-center space-y-2">
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
-                                  Belum ada portofolio atau proyek terdeteksi dari berkas CV ini.
-                                </p>
-                                <button
-                                  type="button"
-                                  onClick={addProject}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-[#1738D1] bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 cursor-pointer"
-                                >
-                                  <Plus size={13} /> Tambah Proyek Manual
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="space-y-3">
-                                {formData.extractedProjects.map((proj: any, i: number) => (
-                                  <div
-                                    key={proj.id || i}
-                                    className="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 space-y-2.5 transition-all"
-                                  >
-                                    <div className="flex items-start justify-between gap-2">
-                                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
-                                        <div>
-                                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-                                            Nama Proyek
-                                          </label>
-                                          <input
-                                            type="text"
-                                            placeholder="Contoh: Redesign Aplikasi Mobile"
-                                            value={proj.name || ''}
-                                            onChange={(e) => updateProject(i, 'name', e.target.value)}
-                                            className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1]"
-                                          />
-                                        </div>
-                                        <div>
-                                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-                                            Peran (Opsional)
-                                          </label>
-                                          <input
-                                            type="text"
-                                            placeholder="Contoh: Lead Designer"
-                                            value={proj.role || ''}
-                                            onChange={(e) => updateProject(i, 'role', e.target.value)}
-                                            className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1]"
-                                          />
-                                        </div>
-                                        <div>
-                                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-                                            Periode (Opsional)
-                                          </label>
-                                          <input
-                                            type="text"
-                                            placeholder="Contoh: 2023"
-                                            value={proj.period || ''}
-                                            onChange={(e) => updateProject(i, 'period', e.target.value)}
-                                            className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-[#1738D1]"
-                                          />
-                                        </div>
-                                      </div>
-                                      <button
-                                        type="button"
-                                        onClick={() => deleteProject(i)}
-                                        title="Hapus proyek ini"
-                                        className="p-1.5 mt-3.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition shrink-0 cursor-pointer"
-                                      >
-                                        <Trash2 size={14} />
-                                      </button>
-                                    </div>
-
-                                    <div>
-                                      <div className="flex items-center justify-between mb-1">
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                          Deskripsi Proyek (Bisa Langsung Diedit)
-                                        </label>
-                                        <span className="text-[10px] font-medium text-[#1738D1] dark:text-blue-400 flex items-center gap-1">
-                                          <Pencil size={10} /> Edit langsung di kotak
-                                        </span>
-                                      </div>
-                                      <textarea
-                                        rows={3}
-                                        placeholder="Jelaskan ringkasan proyek, teknologi yang digunakan, atau dampak hasilnya..."
-                                        value={proj.description || ''}
-                                        onChange={(e) => updateProject(i, 'description', e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs leading-relaxed text-slate-800 dark:text-slate-200 focus:outline-none focus:border-[#1738D1] resize-y"
-                                      />
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* 3. TAB SERTIFIKASI */}
-                        {scannedActiveTab === 'certifications' && (
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800">
-                              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
-                                <Award size={14} className="text-amber-600" />
-                                <span>Detail Sertifikasi & Lisensi</span>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                                  {formData.extractedCertifications.length}
-                                </span>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={addCertification}
-                                className="text-[11px] font-bold text-[#1738D1] hover:underline flex items-center gap-1 cursor-pointer"
-                              >
-                                <Plus size={13} /> Tambah Sertifikat
-                              </button>
-                            </div>
-
-                            {formData.extractedCertifications.length === 0 ? (
-                              <div className="py-6 text-center space-y-2">
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
-                                  Belum ada sertifikasi terdeteksi dari berkas CV ini.
-                                </p>
-                                <button
-                                  type="button"
-                                  onClick={addCertification}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-[#1738D1] bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 cursor-pointer"
-                                >
-                                  <Plus size={13} /> Tambah Sertifikat Manual
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="space-y-3">
-                                {formData.extractedCertifications.map((cert: any, i: number) => (
-                                  <div
-                                    key={cert.id || i}
-                                    className="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 space-y-2 transition-all"
-                                  >
-                                    <div className="flex items-start justify-between gap-2">
-                                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
-                                        <div>
-                                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-                                            Nama Sertifikat
-                                          </label>
-                                          <input
-                                            type="text"
-                                            placeholder="Contoh: BNSP Digital Marketing"
-                                            value={cert.name || ''}
-                                            onChange={(e) => updateCertification(i, 'name', e.target.value)}
-                                            className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1]"
-                                          />
-                                        </div>
-                                        <div>
-                                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-                                            Penerbit / Penyelenggara
-                                          </label>
-                                          <input
-                                            type="text"
-                                            placeholder="Contoh: Google, BNSP, Microsoft"
-                                            value={cert.issuer || ''}
-                                            onChange={(e) => updateCertification(i, 'issuer', e.target.value)}
-                                            className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1]"
-                                          />
-                                        </div>
-                                        <div>
-                                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-                                            Tahun / Tanggal Terbit
-                                          </label>
-                                          <CustomDatePicker
-                                            value={cert.issueDate || ''}
-                                            onChange={(val) => updateCertification(i, 'issueDate', val)}
-                                            placeholder="Pilih Tanggal Terbit..."
-                                            className="w-full"
-                                          />
-                                        </div>
-                                      </div>
-                                      <button
-                                        type="button"
-                                        onClick={() => deleteCertification(i)}
-                                        title="Hapus sertifikat ini"
-                                        className="p-1.5 mt-3.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition shrink-0 cursor-pointer"
-                                      >
-                                        <Trash2 size={14} />
-                                      </button>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* 4. TAB ORGANISASI */}
-                        {scannedActiveTab === 'organizations' && (
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800">
-                              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
-                                <BookOpen size={14} className="text-emerald-600" />
-                                <span>Detail Riwayat Organisasi</span>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                                  {formData.extractedOrganizations.length}
-                                </span>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={addOrganization}
-                                className="text-[11px] font-bold text-[#1738D1] hover:underline flex items-center gap-1 cursor-pointer"
-                              >
-                                <Plus size={13} /> Tambah Organisasi
-                              </button>
-                            </div>
-
-                            {formData.extractedOrganizations.length === 0 ? (
-                              <div className="py-6 text-center space-y-2">
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
-                                  Belum ada riwayat organisasi terdeteksi dari berkas CV ini.
-                                </p>
-                                <button
-                                  type="button"
-                                  onClick={addOrganization}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-[#1738D1] bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 cursor-pointer"
-                                >
-                                  <Plus size={13} /> Tambah Organisasi Manual
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="space-y-3">
-                                {formData.extractedOrganizations.map((org: any, i: number) => (
-                                  <div
-                                    key={org.id || i}
-                                    className="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 space-y-2.5 transition-all"
-                                  >
-                                    <div className="flex items-start justify-between gap-2">
-                                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
-                                        <div>
-                                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-                                            Nama Organisasi
-                                          </label>
-                                          <input
-                                            type="text"
-                                            placeholder="Contoh: BEM Fakultas Teknik"
-                                            value={org.name || ''}
-                                            onChange={(e) => updateOrganization(i, 'name', e.target.value)}
-                                            className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1]"
-                                          />
-                                        </div>
-                                        <div>
-                                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-                                            Jabatan / Posisi
-                                          </label>
-                                          <input
-                                            type="text"
-                                            placeholder="Contoh: Koordinator Acara"
-                                            value={org.role || ''}
-                                            onChange={(e) => updateOrganization(i, 'role', e.target.value)}
-                                            className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#1738D1]"
-                                          />
-                                        </div>
-                                        <div>
-                                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-                                            Periode
-                                          </label>
-                                          <input
-                                            type="text"
-                                            placeholder="Contoh: 2021 - 2022"
-                                            value={org.period || ''}
-                                            onChange={(e) => updateOrganization(i, 'period', e.target.value)}
-                                            className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-[#1738D1]"
-                                          />
-                                        </div>
-                                      </div>
-                                      <button
-                                        type="button"
-                                        onClick={() => deleteOrganization(i)}
-                                        title="Hapus organisasi ini"
-                                        className="p-1.5 mt-3.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition shrink-0 cursor-pointer"
-                                      >
-                                        <Trash2 size={14} />
-                                      </button>
-                                    </div>
-
-                                    <div>
-                                      <div className="flex items-center justify-between mb-1">
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                          Deskripsi Kegiatan Organisasi (Bisa Langsung Diedit)
-                                        </label>
-                                        <span className="text-[10px] font-medium text-[#1738D1] dark:text-blue-400 flex items-center gap-1">
-                                          <Pencil size={10} /> Edit langsung di kotak
-                                        </span>
-                                      </div>
-                                      <textarea
-                                        rows={3}
-                                        placeholder="Jelaskan kontribusi, program kerja, atau kegiatan yang kamu jalankan..."
-                                        value={org.description || ''}
-                                        onChange={(e) => updateOrganization(i, 'description', e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs leading-relaxed text-slate-800 dark:text-slate-200 focus:outline-none focus:border-[#1738D1] resize-y"
-                                      />
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
+              )}
 
-                <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setScanCompleted(false);
-                      setUploadedFile(null);
-                      setFormData((prev) => ({ ...prev, skills: [] }));
-                    }}
-                    className="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-100 transition flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <RotateCcw size={14} /> Unggah Ulang
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (formData.targetPositions.length > 0) {
-                        setTargetRoleInput(formData.targetPositions[0]);
-                      }
-                      // Also save current scanned & edited state to localStorage immediately
-                      try {
-                        const importedRaw = localStorage.getItem('employr_imported_cv_data');
-                        const existing = importedRaw ? JSON.parse(importedRaw) : {};
-                        const updated = {
-                          ...existing,
-                          fullName: formData.fullName || existing.fullName,
-                          contactInfo: formData.contactInfo || existing.contactInfo,
-                          phone: formData.phone || existing.phone,
-                          educationLevel: formData.educationLevel || existing.educationLevel,
-                          major: formData.major || existing.major,
-                          targetPositions: formData.targetPositions,
-                          skills: formData.skills?.length ? formData.skills : existing.skills,
-                          summary: formData.summary || existing.summary,
-                          experience: formData.extractedExperiences,
-                          projects: formData.extractedProjects,
-                          certifications: formData.extractedCertifications,
-                          organizations: formData.extractedOrganizations,
-                        };
-                        localStorage.setItem('employr_imported_cv_data', JSON.stringify(updated));
-                        if (formData.summary) {
-                          userApi.updateProfile({ bio: formData.summary }).catch(() => {});
-                        }
-                      } catch {}
-                      setCurrentStage('career_direction');
-                      setCareerSubStep('aiming');
-                    }}
-                    className="flex-1 py-3 px-5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-white font-bold shadow-md shadow-[#F97316]/20 transition flex items-center justify-between gap-3 cursor-pointer active:scale-[0.99]"
-                  >
-                    <div className="text-left">
-                      <div className="text-xs sm:text-sm font-extrabold tracking-tight leading-tight">
-                        Simpan & Lanjutkan
-                      </div>
-                      <div className="text-[11px] font-normal text-orange-100 opacity-90 leading-tight mt-0.5">
-                        Langkah selanjutnya: Tentukan arah karier
-                      </div>
-                    </div>
-                    <ArrowRight size={18} className="shrink-0" />
-                  </button>
+              {scanError && (
+                <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-start gap-2.5 text-xs text-amber-700 dark:text-amber-400">
+                  <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                  <span>{scanError}</span>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </motion.div>
         )}
 
@@ -2153,9 +2324,9 @@ export default function CardlessClaudeStyleOnboardingPage() {
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: i * 0.04, duration: 0.2 }}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800/80 text-[10px] font-bold text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700/60"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800/80 text-caption font-bold-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/60"
                     >
-                      <Check size={10} className="text-emerald-500" />
+                      <Check size={10} className="text-emerald-700 dark:text-emerald-400" />
                       {chip}
                     </motion.span>
                   ))}
@@ -2187,14 +2358,14 @@ export default function CardlessClaudeStyleOnboardingPage() {
                         className={`w-full text-lg sm:text-xl font-bold py-3 bg-transparent border-b-2 text-slate-900 dark:text-slate-100 focus:outline-none transition placeholder:text-slate-300 dark:placeholder:text-slate-700 ${
                           formData.fullName.trim()
                             ? 'border-emerald-400 dark:border-emerald-500'
-                            : 'border-slate-200 dark:border-slate-800 focus:border-[#1738D1]'
+                            : 'border-slate-200 dark:border-slate-800 focus:border-cobalt-500 focus-visible:ring-2 focus-visible:ring-cobalt-500/30 rounded-xs'
                         }`}
                       />
                       {formData.fullName.trim() && (
                         <motion.span
                           initial={{ opacity: 0, scale: 0.5 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className="absolute right-0 top-1/2 -translate-y-1/2 text-emerald-500"
+                          className="absolute right-0 top-1/2 -translate-y-1/2 text-emerald-700 dark:text-emerald-400"
                         >
                           <CheckCircle2 size={18} />
                         </motion.span>
@@ -2262,6 +2433,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
                       onAddPosition={(pos) => setFormData((prev) => ({ ...prev, targetPositions: [...prev.targetPositions, pos] }))}
                       onRemovePosition={(pos) => setFormData((prev) => ({ ...prev, targetPositions: prev.targetPositions.filter((p) => p !== pos) }))}
                       placeholder="Cari atau ketik posisi yang ditargetkan..."
+                      blueprints={dynamicBlueprints}
                       autoFocus
                     />
                   </div>
@@ -2278,7 +2450,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
                         onClick={() => setFormData({ ...formData, hasWorkExperience: false })}
                         className={`p-5 rounded-2xl border text-center font-bold text-xs transition cursor-pointer ${
                           formData.hasWorkExperience === false
-                            ? 'bg-orange-50/80 dark:bg-orange-950/60 border-[#F97316] text-orange-600 dark:text-orange-400 ring-2 ring-[#F97316]/20'
+                            ? 'bg-orange-50/80 dark:bg-orange-950/60 border-[#F97316] text-orange-700 dark:text-orange-400 ring-2 ring-[#F97316]/20'
                             : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
                         }`}
                       >
@@ -2291,7 +2463,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
                         onClick={() => setFormData({ ...formData, hasWorkExperience: true })}
                         className={`p-5 rounded-2xl border text-center font-bold text-xs transition cursor-pointer ${
                           formData.hasWorkExperience === true
-                            ? 'bg-orange-50/80 dark:bg-orange-950/60 border-[#F97316] text-orange-600 dark:text-orange-400 ring-2 ring-[#F97316]/20'
+                            ? 'bg-orange-50/80 dark:bg-orange-950/60 border-[#F97316] text-orange-700 dark:text-orange-400 ring-2 ring-[#F97316]/20'
                             : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
                         }`}
                       >
@@ -2306,14 +2478,14 @@ export default function CardlessClaudeStyleOnboardingPage() {
                           placeholder="Posisi terakhirmu..."
                           value={formData.experienceTitle}
                           onChange={(e) => setFormData({ ...formData, experienceTitle: e.target.value })}
-                          className="px-4 py-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#1738D1]"
+                          className="px-4 py-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:border-cobalt-500"
                         />
                         <input
                           type="text"
                           placeholder="Nama Perusahaan..."
                           value={formData.experienceCompany}
                           onChange={(e) => setFormData({ ...formData, experienceCompany: e.target.value })}
-                          className="px-4 py-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#1738D1]"
+                          className="px-4 py-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:border-cobalt-500"
                         />
                       </div>
                     )}
@@ -2339,7 +2511,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
                               }));
                             }}
                             className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                              isSel ? 'bg-[#1738D1] text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
+                              isSel ? 'bg-cobalt-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
                             }`}
                           >
                             {isSel && <Check size={14} />}
@@ -2368,7 +2540,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
                             }
                           }
                         }}
-                        className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#1738D1] transition"
+                        className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:border-cobalt-500 transition"
                       />
                       <button
                         type="button"
@@ -2383,7 +2555,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
                           }
                         }}
                         disabled={!formData.customSkillInput.trim()}
-                        className="px-4 py-2.5 rounded-xl bg-[#1738D1] text-white text-xs font-bold transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="px-4 py-2.5 rounded-xl bg-cobalt-500 text-white text-xs font-bold transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         Tambah
                       </button>
@@ -2405,7 +2577,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
                                   skills: prev.skills.filter((s) => s !== sk),
                                 }))
                               }
-                              className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#1738D1] text-white shadow-sm flex items-center gap-1.5 cursor-pointer"
+                              className="px-4 py-2.5 rounded-xl text-xs font-bold bg-cobalt-500 text-white shadow-sm flex items-center gap-1.5 cursor-pointer"
                             >
                               <Check size={14} />
                               <span>{sk}</span>
@@ -2415,42 +2587,6 @@ export default function CardlessClaudeStyleOnboardingPage() {
                     )}
                   </div>
                 )}
-
-                {/* 8. PREFERENCE */}
-                {currentQuestion.id === 'preference' && (
-                  <div className="text-left space-y-4">
-                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                      Range Gaji Impian
-                    </label>
-                    <CustomSelect
-                      value={formData.expectedSalary}
-                      onChange={(val) => setFormData({ ...formData, expectedSalary: val })}
-                      options={SALARY_OPTIONS}
-                      placeholder="Pilih range gaji..."
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Navigation Button Bar */}
-              <div className="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-slate-800/80">
-                <button
-                  type="button"
-                  onClick={handlePrevQuestion}
-                  className="px-5 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
-                >
-                  <ArrowLeft size={16} /> Kembali
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleNextQuestion}
-                  disabled={!isCurrentQuestionValid()}
-                  className="px-7 py-3 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-white font-bold text-xs shadow-md shadow-[#F97316]/20 transition flex items-center gap-2 cursor-pointer active:scale-98 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  <span>{currentQuestionIndex === totalQuestions ? 'Selesai' : 'Lanjut'}</span>
-                  <ArrowRight size={16} />
-                </button>
               </div>
             </motion.div>
           </AnimatePresence>
@@ -2473,7 +2609,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
               >
                 {/* Top Header */}
                 <div className="space-y-2">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#1738D1] dark:text-blue-400 text-[11px] font-extrabold border border-blue-200 dark:border-blue-900/60">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-cobalt-500 dark:text-blue-400 text-caption font-extrabold border border-blue-200 dark:border-blue-900/60">
                     <Compass size={13} />
                     <span>Tentukan Career Direction</span>
                   </div>
@@ -2489,17 +2625,22 @@ export default function CardlessClaudeStyleOnboardingPage() {
                 <div className="grid grid-cols-1 gap-3">
                   {/* 1. I know my target role */}
                   <div
-                    onClick={() => setAimingChoice('know_role')}
+                    onClick={() => {
+                      setAimingChoice('know_role');
+                      if (!targetRoleInput.trim()) {
+                        setTargetRoleInput(formData.targetPositions?.[0] || 'Frontend Developer');
+                      }
+                    }}
                     className={`p-4 sm:p-5 rounded-2xl border transition-all duration-200 cursor-pointer ${
                       aimingChoice === 'know_role'
-                        ? 'bg-blue-50/50 dark:bg-blue-950/30 border-[#1738D1] ring-2 ring-[#1738D1]/15'
+                        ? 'bg-blue-50/50 dark:bg-blue-950/30 border-cobalt-500 ring-2 ring-cobalt-500/15'
                         : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300'
                     }`}
                   >
                     <div className="flex items-start gap-3.5">
                       <div
                         className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                          aimingChoice === 'know_role' ? 'bg-[#1738D1] text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                          aimingChoice === 'know_role' ? 'bg-cobalt-500 text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
                         }`}
                       >
                         <Target size={18} />
@@ -2511,7 +2652,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
                           </h3>
                           <div
                             className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                              aimingChoice === 'know_role' ? 'border-[#1738D1] bg-[#1738D1] text-white' : 'border-slate-300 dark:border-slate-700'
+                              aimingChoice === 'know_role' ? 'border-cobalt-500 bg-cobalt-500 text-white' : 'border-slate-300 dark:border-slate-700'
                             }`}
                           >
                             {aimingChoice === 'know_role' && <Check size={10} strokeWidth={3} />}
@@ -2524,48 +2665,17 @@ export default function CardlessClaudeStyleOnboardingPage() {
                         {/* Target Role Input & Quick Suggestions */}
                         {aimingChoice === 'know_role' && (
                           <div className="mt-4 pt-3.5 border-t border-blue-100 dark:border-blue-900/40 space-y-2.5" onClick={(e) => e.stopPropagation()}>
-                            <label className="block text-[11px] font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            <label className="block text-caption font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                               Target Role Incaran:
                             </label>
-                            <input
-                              type="text"
-                              value={targetRoleInput}
-                              onChange={(e) => setTargetRoleInput(e.target.value)}
-                              placeholder="Ketik posisi incaran (misal: Frontend Developer)"
-                              className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-2 focus:ring-[#1738D1]/15 transition"
+                            <PositionSearchInput
+                              selectedPositions={targetRoleInput.trim() ? [targetRoleInput.trim()] : []}
+                              onAddPosition={(pos) => setTargetRoleInput(pos)}
+                              onRemovePosition={() => setTargetRoleInput('')}
+                              placeholder="Cari atau ketik posisi incaran (misal: kurir, barista, admin shopee)..."
+                              blueprints={dynamicBlueprints}
+                              autoFocus
                             />
-                            <div className="space-y-1.5 pt-1">
-                              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Saran cepat:</div>
-                              <div className="flex flex-wrap gap-1.5">
-                                {[
-                                  'Project Manager',
-                                  'Frontend Developer',
-                                  'Data Analyst',
-                                  'Digital Marketer',
-                                  'Admin Staff',
-                                  'Content Writer',
-                                  ...formData.targetPositions.filter(
-                                    (p) => !['Project Manager', 'Frontend Developer', 'Data Analyst', 'Digital Marketer', 'Admin Staff', 'Content Writer'].includes(p)
-                                  ),
-                                ].map((role) => {
-                                  const isSelectedRole = targetRoleInput.trim().toLowerCase() === role.toLowerCase();
-                                  return (
-                                    <button
-                                      key={role}
-                                      type="button"
-                                      onClick={() => setTargetRoleInput(role)}
-                                      className={`text-[11px] font-bold px-3 py-1 rounded-lg border transition cursor-pointer active:scale-95 ${
-                                        isSelectedRole
-                                          ? 'bg-[#1738D1] text-white border-[#1738D1] shadow-xs'
-                                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-400 hover:bg-slate-50'
-                                      }`}
-                                    >
-                                      {role}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
                           </div>
                         )}
                       </div>
@@ -2574,17 +2684,20 @@ export default function CardlessClaudeStyleOnboardingPage() {
 
                   {/* 2. I'm exploring */}
                   <div
-                    onClick={() => setAimingChoice('exploring')}
+                    onClick={() => {
+                      setAimingChoice('exploring');
+                      setTargetRoleInput('');
+                    }}
                     className={`p-4 sm:p-5 rounded-2xl border transition-all duration-200 cursor-pointer ${
                       aimingChoice === 'exploring'
-                        ? 'bg-blue-50/50 dark:bg-blue-950/30 border-[#1738D1] ring-2 ring-[#1738D1]/15'
+                        ? 'bg-blue-50/50 dark:bg-blue-950/30 border-cobalt-500 ring-2 ring-cobalt-500/15'
                         : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300'
                     }`}
                   >
                     <div className="flex items-start gap-3.5">
                       <div
                         className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                          aimingChoice === 'exploring' ? 'bg-[#1738D1] text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                          aimingChoice === 'exploring' ? 'bg-cobalt-500 text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
                         }`}
                       >
                         <Compass size={18} />
@@ -2596,7 +2709,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
                           </h3>
                           <div
                             className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                              aimingChoice === 'exploring' ? 'border-[#1738D1] bg-[#1738D1] text-white' : 'border-slate-300 dark:border-slate-700'
+                              aimingChoice === 'exploring' ? 'border-cobalt-500 bg-cobalt-500 text-white' : 'border-slate-300 dark:border-slate-700'
                             }`}
                           >
                             {aimingChoice === 'exploring' && <Check size={10} strokeWidth={3} />}
@@ -2611,17 +2724,20 @@ export default function CardlessClaudeStyleOnboardingPage() {
 
                   {/* 3. I'm open to opportunities */}
                   <div
-                    onClick={() => setAimingChoice('open_opportunities')}
+                    onClick={() => {
+                      setAimingChoice('open_opportunities');
+                      setTargetRoleInput('');
+                    }}
                     className={`p-4 sm:p-5 rounded-2xl border transition-all duration-200 cursor-pointer ${
                       aimingChoice === 'open_opportunities'
-                        ? 'bg-blue-50/50 dark:bg-blue-950/30 border-[#1738D1] ring-2 ring-[#1738D1]/15'
+                        ? 'bg-blue-50/50 dark:bg-blue-950/30 border-cobalt-500 ring-2 ring-cobalt-500/15'
                         : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300'
                     }`}
                   >
                     <div className="flex items-start gap-3.5">
                       <div
                         className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                          aimingChoice === 'open_opportunities' ? 'bg-[#1738D1] text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                          aimingChoice === 'open_opportunities' ? 'bg-cobalt-500 text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
                         }`}
                       >
                         <Sparkles size={18} />
@@ -2633,7 +2749,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
                           </h3>
                           <div
                             className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                              aimingChoice === 'open_opportunities' ? 'border-[#1738D1] bg-[#1738D1] text-white' : 'border-slate-300 dark:border-slate-700'
+                              aimingChoice === 'open_opportunities' ? 'border-cobalt-500 bg-cobalt-500 text-white' : 'border-slate-300 dark:border-slate-700'
                             }`}
                           >
                             {aimingChoice === 'open_opportunities' && <Check size={10} strokeWidth={3} />}
@@ -2645,34 +2761,6 @@ export default function CardlessClaudeStyleOnboardingPage() {
                       </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Action Navigation */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (formData.hasCvAlready) {
-                        setCurrentStage('upload_scan');
-                      } else {
-                        setCurrentStage('questions');
-                        setCurrentQuestionIndex(totalQuestions);
-                      }
-                    }}
-                    className="px-5 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <ArrowLeft size={14} /> Ganti Data
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleStartDiagnosis}
-                    disabled={aimingChoice === 'know_role' && !targetRoleInput.trim()}
-                    className="flex-1 py-3.5 px-6 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-white font-bold text-xs shadow-md shadow-[#F97316]/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-98"
-                  >
-                    <span>Lanjutkan Diagnosis</span>
-                    <ArrowRight size={16} />
-                  </button>
                 </div>
               </motion.div>
             )}
@@ -2690,44 +2778,90 @@ export default function CardlessClaudeStyleOnboardingPage() {
                 {loadingPhase === 'analyzing' ? (
                   <div className="space-y-5">
                     <div className="w-36 h-36 mx-auto flex items-center justify-center">
-                      <DotLottiePlayer
-                        src="/animations/ats-optimize.json"
-                        autoplay={true}
-                        loop={true}
-                        className="w-36 h-36 mx-auto"
-                        fallback={
-                          <div className="w-20 h-20 rounded-2xl bg-blue-50 dark:bg-blue-950 text-[#1738D1] dark:text-blue-400 flex items-center justify-center animate-spin">
-                            <Compass size={36} />
-                          </div>
-                        }
-                      />
+                      <Avatar color="blue" size="xl" blinking={true} />
                     </div>
 
-                    <div className="space-y-2">
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/70 text-[#1738D1] dark:text-blue-400 text-[10px] font-extrabold uppercase tracking-wider border border-blue-200/60">
-                        <span className="w-2 h-2 rounded-full bg-[#1738D1] animate-ping" />
-                        <span>Sedang Menganalisis</span>
+                    <div className="space-y-2.5">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/70 text-cobalt-500 dark:text-blue-400 text-caption font-extrabold uppercase tracking-wider border border-blue-200/60">
+                        <span className="w-2 h-2 rounded-full bg-cobalt-500 animate-ping" />
+                        <span>
+                          {analysisStep === 1
+                            ? 'Membaca Profil...'
+                            : analysisStep === 2
+                            ? 'Menyelaraskan Industri...'
+                            : 'Menghitung Kecocokan...'}
+                        </span>
                       </div>
                       <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
                         Menyusun Diagnosis Karier...
                       </h2>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs mx-auto">
-                        {aimingChoice === 'know_role'
-                          ? `Menyelaraskan profil dan keahlianmu dengan standar peran ${targetRoleInput}...`
-                          : aimingChoice === 'exploring'
-                          ? 'Menganalisis potensi kecocokan keahlianmu ke berbagai pilihan peran industri...'
-                          : 'Menghitung peluang kerja dengan probabilitas lolos seleksi berkas tertinggi...'}
-                      </p>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs mx-auto min-h-[38px] flex items-center justify-center">
+                        <AnimatePresence mode="wait">
+                          <motion.p
+                            key={analysisStep}
+                            initial={{ opacity: 0, y: 4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -4 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {analysisStep === 1 && (
+                              <span>Membaca latar belakang pendidikan dan keahlian yang kamu kuasai...</span>
+                            )}
+                            {analysisStep === 2 && (
+                              <span>
+                                {aimingChoice === 'know_role'
+                                  ? `Menyelaraskan profil dengan standar peran ${targetRoleInput || 'industri'}...`
+                                  : aimingChoice === 'exploring'
+                                  ? 'Menyelaraskan kompetensi ke berbagai sektor industri kerja...'
+                                  : 'Memetakan posisi dengan kualifikasi paling siap lamar dan gap minimal...'}
+                              </span>
+                            )}
+                            {analysisStep === 3 && (
+                              <span>
+                                {aimingChoice === 'open_opportunities'
+                                  ? 'Menghitung rasio kesiapan skill dan posisi dengan peluang lolos tercepat...'
+                                  : 'Menghitung skor kecocokan peran dan peluang jalur transisi...'}
+                              </span>
+                            )}
+                          </motion.p>
+                        </AnimatePresence>
+                      </div>
                     </div>
 
-                    {/* Dynamic Progress Bar */}
-                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                      <motion.div
-                        className="h-full bg-gradient-to-r from-[#1738D1] to-[#F97316]"
-                        initial={{ width: '10%' }}
-                        animate={{ width: '92%' }}
-                        transition={{ duration: 1.9, ease: 'easeInOut' }}
-                      />
+                    {/* Dynamic Progress Bar with Stepped Animation */}
+                    <div className="space-y-1.5 pt-1">
+                      <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+                        <motion.div
+                          className="h-full rounded-full bg-gradient-to-r from-[#1738D1] via-blue-500 to-[#F97316]"
+                          initial={{ width: '15%' }}
+                          animate={{ width: `${analysisProgress}%` }}
+                          transition={{
+                            duration: analysisProgress >= 92 && analysisProgress < 100 ? 0.35 : 0.6,
+                            ease: 'easeOut',
+                          }}
+                        />
+                      </div>
+                      <div className="flex justify-between items-center px-1 text-[11px] font-bold text-slate-400">
+                        <span>Analisis Multi-Vektor</span>
+                        <span className="text-cobalt-600 dark:text-blue-400 font-extrabold">{analysisProgress}%</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          diagnosisTimerRef.current.forEach((t) => {
+                            clearTimeout(t);
+                            clearInterval(t);
+                          });
+                          setIsDiagnosing(false);
+                          setCareerSubStep('suggested_paths');
+                        }}
+                        className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition underline underline-offset-2 cursor-pointer font-medium"
+                      >
+                        Lewati & buka rekomendasi langsung
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -2739,7 +2873,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
                         loop={false}
                         className="w-36 h-36 mx-auto"
                         fallback={
-                          <div className="w-20 h-20 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-200">
+                          <div className="w-20 h-20 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center border border-emerald-200">
                             <CheckCircle2 size={40} />
                           </div>
                         }
@@ -2747,7 +2881,7 @@ export default function CardlessClaudeStyleOnboardingPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider border border-emerald-200 dark:border-emerald-800">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 text-caption font-extrabold uppercase tracking-wider border border-emerald-200 dark:border-emerald-800">
                         <CheckCircle2 size={12} />
                         <span>Diagnosis Berhasil</span>
                       </div>
@@ -2762,8 +2896,11 @@ export default function CardlessClaudeStyleOnboardingPage() {
                     <div className="pt-2">
                       <button
                         type="button"
-                        onClick={() => setCareerSubStep('suggested_paths')}
-                        className="px-5 py-2.5 rounded-xl bg-[#1738D1] hover:bg-[#132ea8] text-white text-xs font-bold shadow-md shadow-[#1738D1]/20 transition inline-flex items-center gap-2 cursor-pointer active:scale-95"
+                        onClick={() => {
+                          diagnosisTimerRef.current.forEach(clearTimeout);
+                          setCareerSubStep('suggested_paths');
+                        }}
+                        className="px-5 py-2.5 rounded-xl bg-cobalt-500 hover:bg-[#132ea8] text-white text-xs font-bold shadow-md shadow-cobalt-500/20 transition inline-flex items-center gap-2 cursor-pointer active:scale-95"
                       >
                         <span>Lihat Suggested Career Paths</span>
                         <ArrowRight size={14} />
@@ -2773,238 +2910,284 @@ export default function CardlessClaudeStyleOnboardingPage() {
                 )}
               </motion.div>
             )}
+          </AnimatePresence>
+        )}
 
-            {/* 4C: SUGGESTED CAREER PATHS & DIAGNOSTIC CARDS */}
-            {careerSubStep === 'suggested_paths' && (
-              <motion.div
-                key="career-suggested"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.25 }}
-                className="space-y-6 text-left"
-              >
-                {/* Banner Title */}
-                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50/60 dark:from-slate-900 dark:to-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 space-y-1.5">
-                  <div className="flex items-center gap-1.5 text-[#1738D1] dark:text-blue-400 text-[10px] font-extrabold uppercase tracking-wider">
-                    <CheckCircle2 size={13} />
-                    <span>Hasil Diagnosis Arah Karier</span>
+        {/* Modal Detail Skill Prioritas */}
+        {activeSkillsModal && (
+          <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
+              <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                    <TrendingUp size={18} />
                   </div>
-                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-                    Sekarang Employr sudah memahami kariermu.
-                  </h2>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                    Berdasarkan latar belakang, keahlian, dan target peranmu, berikut analisis kecocokan dan rekomendasi langkah karier terbaik:
-                  </p>
+                  <div>
+                    <h4 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-slate-100">
+                      Daftar Keahlian Prioritas
+                    </h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Target posisi: <span className="font-bold text-slate-800 dark:text-slate-200">{displayDiagnosis.primaryRole}</span>
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveSkillsModal(false)}
+                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="space-y-3.5 overflow-y-auto flex-1 pr-1 custom-scrollbar">
+                <div className="p-3.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
+                  Keahlian di bawah ini adalah kompetensi inti yang paling dicari perekrut untuk posisi <strong>{displayDiagnosis.primaryRole}</strong>. Melengkapi 1–2 keahlian ini akan meningkatkan persentase kecocokan CV kamu secara instan.
                 </div>
 
-                {/* Unknown Role Banner */}
-                {currentDiagnosis.isUnknownRole && (
-                  <div className="p-3.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 flex items-start gap-2.5">
-                    <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
-                    <div className="space-y-1">
-                      <p className="text-xs font-bold text-amber-800 dark:text-amber-300">
-                        Posisi &quot;{currentDiagnosis.primaryRole}&quot; belum tersedia di database analisis kami.
-                      </p>
-                      <p className="text-[11px] text-amber-700/80 dark:text-amber-400/80 leading-relaxed">
-                        {currentDiagnosis.unknownRoleMessage}
-                      </p>
+                <div className="space-y-2">
+                  <span className="text-[11px] font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                    Keahlian yang Perlu Dilengkapi ({displayDiagnosis.gapSkillsList?.length || 0})
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {(displayDiagnosis.gapSkillsList && displayDiagnosis.gapSkillsList.length > 0
+                      ? displayDiagnosis.gapSkillsList
+                      : ['Keahlian teknis spesifik peran', 'Portofolio / Sertifikasi terkait']
+                    ).map((skill, idx) => (
+                      <div
+                        key={idx}
+                        className="p-2.5 rounded-xl border border-amber-200 dark:border-amber-800/80 bg-white dark:bg-slate-800/60 flex items-center gap-2"
+                      >
+                        <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{skill}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {displayDiagnosis.matchedSkillsList && displayDiagnosis.matchedSkillsList.length > 0 && (
+                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <span className="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
+                      Keahlian yang Sudah Kamu Miliki ({displayDiagnosis.matchedSkillsList.length})
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {displayDiagnosis.matchedSkillsList.map((skill, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1"
+                        >
+                          <Check size={12} strokeWidth={3} />
+                          <span>{skill}</span>
+                        </span>
+                      ))}
                     </div>
                   </div>
                 )}
+              </div>
 
-                {/* Suggested Career Paths List */}
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                      Suggested Career Paths (Pilih 1 atau beberapa):
-                    </label>
-                    <span className="text-[10px] font-semibold text-slate-400">
-                      {selectedCareerPaths.length} peran dipilih
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setActiveSkillsModal(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition cursor-pointer"
+                >
+                  Mengerti & Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Detail Kekuatan Utama */}
+        {activeStrengthModal && (
+          <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
+              <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                    <CheckCircle2 size={18} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-slate-100">
+                      Detail Kekuatan Utama
+                    </h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Modal kompetensi dan bukti nyata profilmu
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveStrengthModal(false)}
+                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="space-y-3.5 overflow-y-auto flex-1 pr-1 custom-scrollbar">
+                <div className="p-3.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 text-xs text-emerald-900 dark:text-emerald-200 leading-relaxed">
+                  <p className="font-extrabold text-sm text-emerald-950 dark:text-emerald-100 mb-1">
+                    {displayDiagnosis.topStrength}
+                  </p>
+                  <p className="text-emerald-800/90 dark:text-emerald-300/90 text-caption">
+                    Poin ini mencatat modal riwayat nyata atau penguasaan keahlian yang langsung memberi nilai tambah saat melamar pekerjaan.
+                  </p>
+                </div>
+
+                {displayDiagnosis.matchedSkillsList && displayDiagnosis.matchedSkillsList.length > 0 && (
+                  <div className="space-y-2 pt-2">
+                    <span className="text-[11px] font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                      Keahlian Terpenuhi ({displayDiagnosis.matchedSkillsList.length})
                     </span>
-                  </div>
-
-                  <div className="space-y-2">
-                    {currentDiagnosis.suggestedPaths.map((path) => {
-                      const isSelected = selectedCareerPaths.includes(path.role);
-                      return (
-                        <div
-                          key={path.role}
-                          onClick={() => {
-                            setSelectedCareerPaths((prev) =>
-                              prev.includes(path.role)
-                                ? prev.filter((r) => r !== path.role)
-                                : [...prev, path.role]
-                            );
-                          }}
-                          className={`p-3.5 rounded-xl border transition cursor-pointer flex items-center justify-between gap-3 ${
-                            isSelected
-                              ? 'bg-white dark:bg-slate-800 border-[#1738D1] shadow-xs ring-1 ring-[#1738D1]/20'
-                              : 'bg-white/60 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-slate-300'
-                          }`}
+                    <div className="flex flex-wrap gap-1.5">
+                      {displayDiagnosis.matchedSkillsList.map((skill, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1"
                         >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div
-                              className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition ${
-                                isSelected
-                                  ? 'bg-[#1738D1] border-[#1738D1] text-white'
-                                  : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800'
-                              }`}
-                            >
-                              {isSelected && <Check size={12} strokeWidth={3} />}
-                            </div>
-                            <div className="truncate">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-extrabold text-slate-900 dark:text-slate-100">
-                                  {path.role}
-                                </span>
-                                {path.isLearned && (
-                                  <span className="px-1.5 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 text-[9px] font-bold border border-purple-200 dark:border-purple-800 flex items-center gap-1">
-                                    <Sparkles size={9} />
-                                    Dipetakan Komunitas ({path.entryCount || 1})
-                                  </span>
-                                )}
-                                {path.isRealisticTransition && (
-                                  <span className="px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-[9px] font-bold border border-emerald-200 dark:border-emerald-800">
-                                    Jalur Transisi Realistis
-                                  </span>
-                                )}
-                                {path.isPrimaryTarget && (
-                                  <span className="px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/80 text-[#1738D1] dark:text-blue-300 text-[9px] font-bold border border-blue-200 dark:border-blue-800">
-                                    Target Incaran
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-[10px] text-slate-400 truncate mt-0.5">
-                                Keahlian cocok: {path.matchedSkills.join(', ')}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="shrink-0 flex items-center gap-1.5">
-                            <span
-                              className={`px-2 py-0.5 rounded-lg text-xs font-black ${
-                                path.fitScore >= 90
-                                  ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200'
-                                  : path.fitScore >= 80
-                                  ? 'bg-blue-100 dark:bg-blue-950 text-[#1738D1] dark:text-blue-300 border border-blue-200'
-                                  : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200'
-                              }`}
-                            >
-                              {path.fitScore}% fit
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* 4 Instant Diagnostic Bento Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                  {/* 1. Fit Score Insight */}
-                  <div className="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 space-y-1">
-                    <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider">
-                      <Target size={12} />
-                      <span>{currentDiagnosis.isUnknownRole ? 'Rekomendasi Peran Terdekat' : 'Kecocokan Peran'}</span>
+                          <Check size={12} strokeWidth={3} />
+                          <span>{skill}</span>
+                        </span>
+                      ))}
                     </div>
-                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-snug">
-                      {currentDiagnosis.isUnknownRole ? (
-                        <>Peran terdekat yang cocok: <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">{currentDiagnosis.realisticTransition.role}</span> ({currentDiagnosis.realisticTransition.fitScore}% fit).</>
-                      ) : (
-                        <>Kamu <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">{currentDiagnosis.primaryFitScore}% fit</span> untuk posisi {currentDiagnosis.primaryRole}.</>
-                      )}
-                    </p>
                   </div>
+                )}
+              </div>
 
-                  {/* 2. Top Strength */}
-                  <div className="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 space-y-1">
-                    <div className="flex items-center gap-1.5 text-[#1738D1] dark:text-blue-400 text-[10px] font-extrabold uppercase tracking-wider">
-                      <Zap size={12} />
-                      <span>Kekuatan Terbesarmu</span>
-                    </div>
-                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-snug">
-                      Paling kuat di: <span className="text-[#1738D1] dark:text-blue-400 font-extrabold">{currentDiagnosis.topStrength}</span>.
-                    </p>
-                  </div>
-
-                  {/* 3. Skill Gap */}
-                  <div className="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 space-y-1">
-                    <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 text-[10px] font-extrabold uppercase tracking-wider">
-                      <TrendingUp size={12} />
-                      <span>Gap Terbesar untuk Ditingkatkan</span>
-                    </div>
-                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-snug">
-                      Fokus peningkatan utama: <span className="text-amber-700 dark:text-amber-400 font-extrabold">{currentDiagnosis.topGap}</span>.
-                    </p>
-                  </div>
-
-                  {/* 4. Realistic Transition Path */}
-                  <div className="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 space-y-1">
-                    <div className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400 text-[10px] font-extrabold uppercase tracking-wider">
-                      <Compass size={12} />
-                      <span>{currentDiagnosis.isUnknownRole ? 'Jalur yang Bisa Dicoba' : 'Jalur Transisi Realistis'}</span>
-                    </div>
-                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-snug">
-                      {currentDiagnosis.isUnknownRole ? (
-                        <>{currentDiagnosis.realisticTransition.reason}</>
-                      ) : (
-                        <><span className="text-purple-700 dark:text-purple-300 font-extrabold">{currentDiagnosis.realisticTransition.role}</span> bisa jadi jalur transisi yang relevan ({currentDiagnosis.realisticTransition.fitScore}% fit) berdasarkan profilmu.</>
-                      )}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-                  <button
-                    type="button"
-                    onClick={() => setCareerSubStep('aiming')}
-                    className="px-5 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <ArrowLeft size={14} /> Ubah Target Peran
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const finalRoles = selectedCareerPaths.length > 0 ? selectedCareerPaths : [currentDiagnosis.primaryRole];
-                      setFormData((prev) => ({ ...prev, targetPositions: finalRoles }));
-                      handleFinishAndNavigateTo('/cv', finalRoles, currentDiagnosis);
-                    }}
-                    disabled={isSubmitting}
-                    className="flex-1 py-3.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-white font-bold text-xs shadow-md shadow-[#F97316]/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-98"
-                  >
-                    <span>{isSubmitting ? 'Menyiapkan CV...' : 'Lanjut ke CV Builder'}</span>
-                    <ArrowRight size={16} />
-                  </button>
-                </div>
-
-                <div className="text-center pt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const finalRoles = selectedCareerPaths.length > 0 ? selectedCareerPaths : [currentDiagnosis.primaryRole];
-                      setFormData((prev) => ({ ...prev, targetPositions: finalRoles }));
-                      handleFinishAndNavigateTo('/beranda', finalRoles, currentDiagnosis);
-                    }}
-                    className="text-[11px] font-bold text-slate-500 hover:text-[#1738D1] dark:hover:text-blue-400 transition cursor-pointer"
-                  >
-                    Atau langsung masuk ke Beranda Dashboard →
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setActiveStrengthModal(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition cursor-pointer"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </main>
 
-      {/* Bottom Footer */}
-      <footer className={`w-full mx-auto text-center py-4 transition-all duration-300 ${stageMaxWidth}`}>
-        <p className="text-xs font-medium text-slate-400 dark:text-slate-600 flex items-center justify-center gap-1.5">
-          <Lock size={12} className="text-slate-400" />
-          <span>Data kamu aman bersama Employr</span>
-        </p>
+      {/* Unified Bottom Action Bar - Statis di Bawah */}
+      <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xs border-t border-slate-200/80 dark:border-slate-800/80 px-6 py-3.5 sm:px-10 shadow-lg">
+        <div className="w-full relative flex items-center justify-between gap-3">
+          {/* Centered Trust Badge - Exactly in the Horizontal Center of the Viewport */}
+          <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 hidden sm:flex items-center gap-1.5 text-caption font-medium text-slate-500 dark:text-slate-400 select-none whitespace-nowrap">
+            <Lock size={12} className="text-slate-500 dark:text-slate-400 shrink-0" />
+            <span>Data kamu aman bersama Employr</span>
+          </div>
+
+          {currentStage === 'tos' ? (
+            <>
+              <div />
+
+              <button
+                type="button"
+                disabled={!formData.tosAccepted}
+                onClick={() => setCurrentStage('fork')}
+                className="h-10 px-6 rounded-xl bg-[#F97316] hover:bg-[#ea580c] active:scale-[0.98] text-white font-extrabold text-xs shadow-md shadow-[#F97316]/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ml-auto"
+              >
+                <span>Mulai Sekarang</span>
+                <ArrowRight size={15} />
+              </button>
+            </>
+          ) : currentStage === 'fork' ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setCurrentStage('tos')}
+                className="h-10 px-4 rounded-xl text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98]"
+              >
+                <ArrowLeft size={15} />
+                <span>Kembali</span>
+              </button>
+
+              <span className="text-caption font-medium text-slate-400 dark:text-slate-500 hidden sm:inline ml-auto">
+                Pilih salah satu metode untuk lanjut
+              </span>
+            </>
+          ) : currentStage === 'upload_scan' ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setCurrentStage('fork')}
+                className="h-10 px-4 rounded-xl text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98]"
+              >
+                <ArrowLeft size={15} />
+                <span>Ganti Metode</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentStage('questions');
+                  setCurrentQuestionIndex(1);
+                }}
+                className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98] ml-auto"
+              >
+                <span>Isi Manual</span>
+                <ArrowRight size={14} />
+              </button>
+            </>
+          ) : currentStage === 'questions' ? (
+            <>
+              <button
+                type="button"
+                onClick={handlePrevQuestion}
+                className="h-10 px-4 rounded-xl text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98]"
+              >
+                <ArrowLeft size={15} />
+                <span>Kembali</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleNextQuestion}
+                disabled={!isCurrentQuestionValid()}
+                className="h-10 px-6 rounded-xl bg-[#F97316] hover:bg-[#ea580c] active:scale-[0.98] text-white font-extrabold text-xs shadow-md shadow-[#F97316]/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ml-auto"
+              >
+                <span>{currentQuestionIndex === totalQuestions ? 'Selesai' : 'Lanjut'}</span>
+                <ArrowRight size={15} />
+              </button>
+            </>
+          ) : currentStage === 'career_direction' && careerSubStep === 'aiming' ? (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  if (formData.hasCvAlready) {
+                    setCurrentStage('upload_scan');
+                  } else {
+                    setCurrentStage('questions');
+                    setCurrentQuestionIndex(totalQuestions);
+                  }
+                }}
+                className="h-10 px-4 rounded-xl text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98]"
+              >
+                <ArrowLeft size={14} />
+                <span>Ganti Data</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleStartDiagnosis}
+                disabled={aimingChoice === 'know_role' && !targetRoleInput.trim()}
+                className="h-10 px-6 rounded-xl bg-[#F97316] hover:bg-[#ea580c] active:scale-[0.98] text-white font-extrabold text-xs shadow-md shadow-[#F97316]/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ml-auto"
+              >
+                <span>Lanjutkan Diagnosis</span>
+                <ArrowRight size={15} />
+              </button>
+            </>
+          ) : (
+            <>
+              <div />
+              <span className="text-[11px] text-slate-400 dark:text-slate-600 hidden sm:inline font-mono ml-auto">
+                Employr
+              </span>
+            </>
+          )}
+        </div>
       </footer>
     </div>
   );

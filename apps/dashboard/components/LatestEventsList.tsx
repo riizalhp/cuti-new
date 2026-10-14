@@ -88,7 +88,7 @@ export const LatestEventsList: React.FC = () => {
     <div className="bg-white dark:bg-slate-900 rounded-[10px] p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-[10px] bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
+          <div className="p-2 rounded-[10px] bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400">
             <Calendar className="w-5 h-5" />
           </div>
           <div>
@@ -112,10 +112,10 @@ export const LatestEventsList: React.FC = () => {
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300">
+                  <span className="px-2 py-0.5 rounded-[10px] text-caption font-bold bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300">
                     {ev.type}
                   </span>
-                  <span className="text-[10px] text-slate-400 font-semibold bg-white dark:bg-slate-900 px-2 py-0.5 rounded-[10px] border border-slate-200 dark:border-slate-800">
+                  <span className="text-caption text-slate-500 font-semibold bg-white dark:bg-slate-900 px-2 py-0.5 rounded-[10px] border border-slate-200 dark:border-slate-800 dark:text-slate-400">
                     {ev.badge}
                   </span>
                 </div>
@@ -123,30 +123,30 @@ export const LatestEventsList: React.FC = () => {
                 <h4 className="font-bold text-xs text-slate-900 dark:text-white mb-1">
                   {ev.title}
                 </h4>
-                <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-3">
+                <p className="text-caption font-semibold text-slate-500 dark:text-slate-400 mb-3">
                   Penyelenggara: {ev.organizer}
                 </p>
 
                 <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300 mb-3">
                   <div className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-orange-500 flex-shrink-0" />
+                    <Calendar className="w-3.5 h-3.5 text-orange-700 flex-shrink-0 dark:text-orange-400" />
                     <span>{ev.date}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                    <Clock className="w-3.5 h-3.5 text-amber-700 flex-shrink-0 dark:text-amber-400" />
                     <span>{ev.time}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-rose-500 flex-shrink-0" />
+                    <MapPin className="w-3.5 h-3.5 text-rose-700 flex-shrink-0 dark:text-rose-400" />
                     <span className="truncate">{ev.location}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-orange-600 dark:text-orange-400">
+                  <div className="flex items-center gap-1.5 text-caption font-bold text-orange-700 dark:text-orange-400">
                     <Users className="w-3.5 h-3.5 flex-shrink-0" />
                     <span>{ev.companiesCount}</span>
                   </div>
                 </div>
 
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                <p className="text-caption text-slate-500 dark:text-slate-400 leading-snug">
                   {ev.desc}
                 </p>
               </div>
@@ -157,7 +157,7 @@ export const LatestEventsList: React.FC = () => {
                 className={`mt-4 w-full flex items-center justify-center gap-1.5 py-2 rounded-[10px] font-bold text-xs transition shadow-sm ${
                   isReg
                     ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                    : 'bg-[#1738D1] hover:bg-[#132EA8] text-white'
+                    : 'bg-cobalt-500 hover:bg-cobalt-600 text-white'
                 }`}
               >
                 {isReg ? (

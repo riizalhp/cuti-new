@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" fill="none">
+  <defs>
+    <linearGradient id="designBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B0764" />
+      <stop offset="50%" stop-color="#581C87" />
+      <stop offset="100%" stop-color="#7E22CE" />
+    </linearGradient>
+    <linearGradient id="pinkAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F472B6" />
+      <stop offset="100%" stop-color="#EC4899" />
+    </linearGradient>
+    <pattern id="designGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.5" fill="rgba(255, 255, 255, 0.08)" />
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#designBg)" />
+  <rect width="800" height="500" fill="url(#designGrid)" />
+  <circle cx="400" cy="210" r="150" fill="#A855F7" opacity="0.3" filter="blur(50px)" />
+  
+  <g transform="translate(350, 140)">
+    <rect x="0" y="0" width="100" height="90" rx="16" fill="rgba(59, 7, 100, 0.85)" stroke="rgba(255, 255, 255, 0.2)" stroke-width="2" />
+    <!-- Megaphone / Campaign Icon -->
+    <path d="M22 52 L22 38 L38 38 L62 26 V64 L38 52 Z" fill="url(#pinkAccent)" opacity="0.9" />
+    <path d="M30 52 V66 C30 68 34 68 34 66 V52" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" />
+    <path d="M68 36 C72 40 72 50 68 54" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" />
+    <path d="M74 30 C80 37 80 53 74 60" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" />
+  </g>
+
+  <g transform="translate(400, 310)">
+    <rect x="-125" y="0" width="250" height="32" rx="16" fill="rgba(255, 255, 255, 0.12)" stroke="rgba(255, 255, 255, 0.25)" stroke-width="1" />
+    <text x="0" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">MARKETING &amp; KREATIF</text>
+  </g>
+  <text x="400" y="370" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="500" fill="rgba(255, 255, 255, 0.75)" text-anchor="middle">Strategi Konten &amp; Pertumbuhan Karir</text>
+</svg>

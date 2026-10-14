@@ -11,6 +11,7 @@
 
 import { prisma } from '@employr/db';
 import type { ExtractedJob } from './job-scraper';
+import { syncJobEmbedding } from './job-embedding';
 
 export interface SyncResult {
   totalScraped: number;
@@ -36,23 +37,38 @@ function mapWorkType(jobType: ExtractedJob['jobType']): string {
   }
 }
 
-/** Slug unik untuk jobs.slug (unique constraint) */
-function buildSlug(job: ExtractedJob): string {
-  const base = [job.portal, job.title, job.company].join('-').toLowerCase();
-  const slug = base
+function slugify(text: string, maxLen = 100): string {
+  const raw = text
+    .toString()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 90);
-  return `${slug}-${hashUrl(job.portalUrl)}`;
+    .replace(/^-+|-+$/g, '');
+  if (!raw) return 'loker';
+  if (raw.length <= maxLen) return raw;
+  const cut = raw.slice(0, maxLen);
+  const lastDash = cut.lastIndexOf('-');
+  return (lastDash > 20 ? cut.slice(0, lastDash) : cut).replace(/-+$/g, '');
 }
 
-/** Hash pendek stabil dari URL (dedupe key tambahan di slug) */
-function hashUrl(url: string): string {
-  let h = 5381;
-  for (let i = 0; i < url.length; i++) {
-    h = ((h << 5) + h + url.charCodeAt(i)) | 0;
+/** Slug bersih SEO untuk jobs.slug (unique constraint) */
+async function buildUniqueJobSlug(job: ExtractedJob): Promise<string> {
+  const baseSlug = slugify(`${job.title}-${job.company || ''}`);
+  if (!(await prisma.jobs.findUnique({ where: { slug: baseSlug }, select: { id: true } }))) {
+    return baseSlug;
   }
-  return Math.abs(h).toString(36).slice(0, 8);
+  if (job.location && job.location.toLowerCase() !== 'indonesia') {
+    const locSlug = slugify(`${job.title}-${job.company || ''}-${job.location.split(',')[0]}`, 110);
+    if (locSlug !== baseSlug && !(await prisma.jobs.findUnique({ where: { slug: locSlug }, select: { id: true } }))) {
+      return locSlug;
+    }
+  }
+  let idx = 2;
+  while (await prisma.jobs.findUnique({ where: { slug: `${baseSlug}-${idx}` }, select: { id: true } })) {
+    idx++;
+  }
+  return `${baseSlug}-${idx}`;
 }
 
 /**
@@ -86,17 +102,15 @@ export async function syncJobsToDb(jobs: ExtractedJob[]): Promise<SyncResult> {
     try {
       // Cari atau buat company stub (lowongan scrape tidak punya company_id)
       const companyName = job.company || 'Perusahaan Eksternal';
-      const companySlug = `${source}-${companyName}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 80);
+      const companySlug = slugify(companyName, 80);
       const company = await prisma.companies.upsert({
         where: { slug: companySlug },
         update: {
-          ...(job.companyLogo ? { logo_url: job.companyLogo } : {}),
           ...(job.companyWebsite ? { website: job.companyWebsite } : {}),
         },
         create: {
           name: companyName,
           slug: companySlug,
-          logo_url: job.companyLogo || null,
           website: job.companyWebsite || null,
         },
       });
@@ -120,13 +134,22 @@ export async function syncJobsToDb(jobs: ExtractedJob[]): Promise<SyncResult> {
           },
         });
         updated++;
+        syncJobEmbedding({
+          id: existing.id,
+          title: job.title,
+          location: job.location,
+          requirements: job.requirements,
+          description: job.description,
+        }).catch(() => {});
       } else {
+        const newJobId = crypto.randomUUID();
+        const uniqueSlug = await buildUniqueJobSlug(job);
         await prisma.jobs.create({
           data: {
-            id: crypto.randomUUID(),
+            id: newJobId,
             company_id: company.id,
             title: job.title,
-            slug: buildSlug(job),
+            slug: uniqueSlug,
             description: job.description || 'Lowongan aktif dari sumber eksternal.',
             location: job.location || 'Indonesia',
             work_type: mapWorkType(job.jobType) as any,
@@ -137,6 +160,13 @@ export async function syncJobsToDb(jobs: ExtractedJob[]): Promise<SyncResult> {
           },
         });
         created++;
+        syncJobEmbedding({
+          id: newJobId,
+          title: job.title,
+          location: job.location,
+          requirements: job.requirements,
+          description: job.description,
+        }).catch(() => {});
       }
     } catch (e: any) {
       failed++;

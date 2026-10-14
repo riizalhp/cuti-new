@@ -124,9 +124,9 @@ export function VisitorDetailDrawer({ visitorId, onClose }: VisitorDetailDrawerP
           className="relative z-10 w-full max-w-2xl h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden"
         >
           {/* Header */}
-          <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-800/40">
+          <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50/80 dark:bg-slate-800/40">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-600 dark:text-orange-400 font-mono font-bold text-sm">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-600 dark:text-orange-400 font-mono font-bold text-sm shrink-0">
                 <Globe size={20} />
               </div>
               <div>
@@ -152,14 +152,15 @@ export function VisitorDetailDrawer({ visitorId, onClose }: VisitorDetailDrawerP
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              aria-label="Tutup panel"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition shrink-0"
             >
               <X size={18} />
             </button>
           </div>
 
           {/* Body content */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
             {loading ? (
               <div className="py-20 flex flex-col items-center justify-center gap-3">
                 <div className="w-8 h-8 border-3 border-orange-500 border-t-transparent rounded-full animate-spin" />
@@ -471,7 +472,7 @@ export function VisitorDetailDrawer({ visitorId, onClose }: VisitorDetailDrawerP
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/40 flex items-center justify-end">
+          <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/40 flex items-center justify-end shrink-0">
             <button
               onClick={onClose}
               className="px-4 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-bold text-xs rounded-xl transition"

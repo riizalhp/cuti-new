@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
+import { AdminPageWrapper } from "@/components/admin/AdminPageWrapper"
 import { SidebarToggle } from "@/components/admin/SidebarToggle"
+import { Skeleton } from "@/components/admin/Skeleton"
 import {
   Shield,
   Activity,
@@ -142,7 +144,7 @@ export default function LogsPage() {
     data.app?.totalPages || 1
 
   return (
-    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+    <AdminPageWrapper>
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-5">
         <div className="flex items-center gap-3.5">
@@ -282,9 +284,26 @@ export default function LogsPage() {
 
       {/* Log List */}
       {loading ? (
-        <div className="p-12 text-center text-slate-400 font-medium text-sm">
-          <RefreshCw size={24} className="animate-spin text-orange-500 mx-auto mb-2" />
-          Memuat logs dari database...
+        <div className="space-y-2">
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <div
+              key={idx}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 flex items-center justify-between gap-3"
+            >
+              <div className="flex items-center gap-3 flex-1">
+                <Skeleton className="w-8 h-8 rounded-lg shrink-0" />
+                <div className="space-y-1.5 flex-1">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-16 rounded-full" />
+                    <Skeleton className="h-4 w-20 rounded-full" />
+                    <Skeleton className="h-4 w-44 rounded-md" />
+                  </div>
+                  <Skeleton className="h-3 w-32 rounded-md" />
+                </div>
+              </div>
+              <Skeleton className="h-3.5 w-24 rounded-md shrink-0" />
+            </div>
+          ))}
         </div>
       ) : allLogs.length === 0 ? (
         <div className="p-12 text-center text-slate-400 font-medium text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
@@ -435,6 +454,6 @@ export default function LogsPage() {
           </div>
         </div>
       )}
-    </motion.div>
+    </AdminPageWrapper>
   )
 }

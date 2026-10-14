@@ -1,10 +1,17 @@
 'use client';
 
 import { PageHeader } from '@/components/ui/PageHeader';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/Toast';
-import { CustomSelect } from '@/components/ui/CustomSelect';
+import { CustomSelect, SelectOption } from '@/components/ui/CustomSelect';
 import { userApi, coverLetterApi, cvApi, trackerApi } from '@/lib/api';
 import {
   Mail,
@@ -30,6 +37,9 @@ import {
   FileCheck2,
   ExternalLink,
   Paperclip,
+  Search,
+  X,
+  ClipboardPaste,
 } from 'lucide-react';
 
 export interface CoverLetterPreset {
@@ -80,7 +90,7 @@ export const COVER_LETTER_PRESETS: CoverLetterPreset[] = [
     name: 'Singkat & Padat',
     badge: 'Langsung Inti (To-The-Point)',
     description: 'Format ringkas yang disukai HRD sibuk: pengantar singkat + lampiran CV.',
-    icon: Zap,
+    icon: CheckCircle2,
     generate: ({ userName, company, position, recruiterName }) =>
       `Yth. ${recruiterName || 'Tim Rekrutmen'}\n${company || '[Nama Perusahaan]'}\n\nPerkenalkan saya ${userName || '[Nama Anda]'}. Bersama email ini saya menyampaikan minat untuk mengisi posisi ${position || '[Posisi Pekerjaan]'} yang sedang dibuka di ${company || '[Nama Perusahaan]'}.\n\nTerlampir berkas CV dan dokumen portofolio terbaru saya sebagai bahan tinjauan. Saya siap hadir untuk sesi interview atau tahapan seleksi selanjutnya sesuai jadwal yang ditentukan.\n\nTerima kasih atas kesempatan dan perhatian Bapak/Ibu.\n\nHormat saya,\n${userName || '[Nama Anda]'}`,
   },
@@ -107,6 +117,101 @@ export interface CoverLetterViewProps {
   }) => void;
 }
 
+export interface ExtractedJobData {
+  company: string;
+  position: string;
+  recruiter: string;
+  qualifications: string;
+  highlights: string;
+}
+
+export function extractJobDescriptionEntities(text: string): ExtractedJobData {
+  if (!text || !text.trim()) {
+    return { company: '', position: '', recruiter: '', qualifications: '', highlights: '' };
+  }
+
+  const cleanText = text.trim();
+  const lines = cleanText.split('\n').map((l) => l.trim()).filter(Boolean);
+  let company = '';
+  let position = '';
+  let recruiter = '';
+  let qualifications = '';
+
+  // 1. Deteksi Nama Perusahaan
+  const companyPrefixMatch = cleanText.match(/(?:Perusahaan|Company|Employer|Kantor|Instansi|Nama Perusahaan)\s*[:\-]\s*([^\n\r,]+)/i);
+  if (companyPrefixMatch && companyPrefixMatch[1]) {
+    company = companyPrefixMatch[1].trim();
+  } else {
+    const ptMatch = cleanText.match(/\b(PT|CV|UD|Yayasan)\s+([A-Za-z0-9\.\s\-&]+?)(?=\s*(?:\n|\r|,|membuka|is hiring|hiring|sedang|\.|$))/i);
+    if (ptMatch && ptMatch[0]) {
+      company = ptMatch[0].trim();
+    } else {
+      const atMatch = cleanText.match(/(?:join us at|we are hiring at|bekerja di|lowongan di|karir di)\s+([A-Z][A-Za-z0-9\s&]{2,35})/i);
+      if (atMatch && atMatch[1]) {
+        company = atMatch[1].trim();
+      } else if (lines.length > 0 && /^(PT|CV|Yayasan)\b/i.test(lines[0])) {
+        company = lines[0];
+      }
+    }
+  }
+
+  // 2. Deteksi Posisi Pekerjaan
+  const posPrefixMatch = cleanText.match(/(?:Posisi|Position|Role|Jabatan|Lowongan|Job Title|Dibutuhkan)\s*[:\-]\s*([^\n\r]+)/i);
+  if (posPrefixMatch && posPrefixMatch[1]) {
+    position = posPrefixMatch[1].replace(/^(sebagai|for|urgently needed)\s*/i, '').trim();
+  } else {
+    const hiringMatch = cleanText.match(/(?:We are hiring|Hiring|Membuka lowongan|Open Position|Recruiting)\s*[:\-]?\s*([^\n\r]+)/i);
+    if (hiringMatch && hiringMatch[1] && !hiringMatch[1].toLowerCase().includes('team')) {
+      position = hiringMatch[1].trim();
+    } else {
+      const titleRegex = /\b((?:Senior\s+|Junior\s+|Lead\s+|Associate\s+|Intern\s+)?(?:Software Engineer|Frontend(?: Developer)?|Back-?end(?: Developer)?|Fullstack(?: Developer)?|Web Developer|Mobile Developer|Android Developer|iOS Developer|UI\/UX Designer|Graphic Designer|Product Manager|Project Manager|Data Analyst|Digital Marketing(?: Specialist)?|Social Media(?: Specialist)?|Content Creator|Copywriter|Admin Operasional|Staff Administrasi|Customer Service|Accountant|Accounting Staff|Sales Executive|Business Development|Finance Officer|HR Officer|HRD))\b/i;
+      const titleMatch = cleanText.match(titleRegex);
+      if (titleMatch && titleMatch[0]) {
+        position = titleMatch[0].trim();
+      }
+    }
+  }
+
+  // Fallback nama perusahaan/posisi jika baris awal ringkas
+  if (!company && lines.length > 0 && lines[0].length < 40 && !lines[0].includes(':')) {
+    if (!position || position.toLowerCase() !== lines[0].toLowerCase()) {
+      company = lines[0];
+    }
+  }
+
+  // 3. Deteksi Recruiter / Kontak
+  const recruiterSalutationMatch = cleanText.match(/(?:Yth\.|Bpk\.|Bapak|Ibu|Pak|Mr\.|Ms\.|Mrs\.)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
+  if (recruiterSalutationMatch && recruiterSalutationMatch[0]) {
+    recruiter = recruiterSalutationMatch[0].trim();
+  } else {
+    const picMatch = cleanText.match(/(?:HRD|Hiring Manager|Recruiter|PIC|Contact Person|Kirim CV ke)\s*[:\-]\s*([A-Za-z\s]+?)(?=\s*(?:\(|<|\n|$))/i);
+    if (picMatch && picMatch[1] && !picMatch[1].includes('@') && picMatch[1].length < 40) {
+      recruiter = picMatch[1].trim();
+    }
+  }
+
+  // 4. Deteksi Kualifikasi / Syarat
+  const qualSectionMatch = cleanText.match(/(?:Kualifikasi|Persyaratan|Requirements|Qualifications|Kriteria|Syarat Lowongan|Kualifikasi Pelamar|Syarat)\s*[:\-]?([\s\S]*?)(?=(?:Deskripsi Pekerjaan|Job Description|Tanggung Jawab|Responsibilities|Benefit|Cara Melamar|Kirim CV|Contact|$))/i);
+  if (qualSectionMatch && qualSectionMatch[1] && qualSectionMatch[1].trim().length > 15) {
+    qualifications = qualSectionMatch[1].trim();
+  } else {
+    const bulletLines = lines.filter((l) => /^[•\-\*\d\.]+\s+/.test(l));
+    if (bulletLines.length > 0) {
+      qualifications = bulletLines.join('\n');
+    } else {
+      qualifications = lines.length > 2 ? lines.slice(2).join('\n') : cleanText;
+    }
+  }
+
+  return {
+    company: company.replace(/[,\.;]+$/, '').trim(),
+    position: position.replace(/[,\.;]+$/, '').trim(),
+    recruiter: recruiter.replace(/[,\.;]+$/, '').trim(),
+    qualifications: qualifications.trim(),
+    highlights: '',
+  };
+}
+
 const initialSavedLetters: SavedCoverLetter[] = [];
 
 export const CoverLetterView: React.FC<CoverLetterViewProps> = ({
@@ -130,7 +235,17 @@ export const CoverLetterView: React.FC<CoverLetterViewProps> = ({
   const [selectedCv, setSelectedCv] = useState<any | null>(null);
   const [jobDescription, setJobDescription] = useState('');
   const [trackedJobs, setTrackedJobs] = useState<any[]>([]);
-  const [showTrackerSelector, setShowTrackerSelector] = useState(false);
+  const [isTrackerSearchOpen, setIsTrackerSearchOpen] = useState(false);
+  const [trackerSearchQuery, setTrackerSearchQuery] = useState('');
+  const trackerDropdownRef = useRef<HTMLDivElement>(null);
+  const trackerSearchInputRef = useRef<HTMLInputElement>(null);
+
+  // Full Job Description Extraction Drawer States
+  const [isJobDescDrawerOpen, setIsJobDescDrawerOpen] = useState(false);
+  const [rawJobDescText, setRawJobDescText] = useState('');
+  const [extractedData, setExtractedData] = useState<ExtractedJobData | null>(null);
+  const jobDescTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const jobDescDrawerRef = useRef<HTMLDivElement>(null);
 
   const [isManualEdited, setIsManualEdited] = useState(false);
   const isManualEditedRef = useRef(false);
@@ -309,9 +424,108 @@ export const CoverLetterView: React.FC<CoverLetterViewProps> = ({
     if (app.notes || app.job_description) {
       setJobDescription(app.notes || app.job_description);
     }
-    setShowTrackerSelector(false);
-    toast.success('Lowongan Dimuat dari Tracker', `Data lowongan ${app.company_name} berhasil dimuat.`);
+    setIsTrackerSearchOpen(false);
+    toast.success('Loker Dimuat dari Tracker', `Data ${app.company_name} berhasil dimuat.`);
   };
+
+  const handlePasteFromClipboard = async () => {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.readText) {
+        const text = await navigator.clipboard.readText();
+        if (text && text.trim()) {
+          setRawJobDescText(text);
+          const parsed = extractJobDescriptionEntities(text);
+          setExtractedData(parsed);
+          toast.success('Teks Loker Ditempel', 'Teks berhasil disalin dari clipboard dan parameter berhasil dideteksi.');
+          return;
+        }
+      }
+      toast.info('Clipboard Kosong', 'Silakan tempel teks secara manual dengan tombol Ctrl+V.');
+    } catch {
+      toast.info('Izin Clipboard Ditolak', 'Silakan tempel teks langsung di kotak teks menggunakan Ctrl+V.');
+    }
+  };
+
+  const handleRawJobDescChange = (text: string) => {
+    setRawJobDescText(text);
+    if (text.trim()) {
+      const parsed = extractJobDescriptionEntities(text);
+      setExtractedData(parsed);
+    } else {
+      setExtractedData(null);
+    }
+  };
+
+  const handleApplyExtractedJobDesc = () => {
+    if (!extractedData && !rawJobDescText.trim()) return;
+
+    const data = extractedData || extractJobDescriptionEntities(rawJobDescText);
+    const newCompany = data.company.trim() || targetCompany;
+    const newPosition = data.position.trim() || targetPosition;
+    const newRecruiter = data.recruiter.trim() || recruiterName;
+    const newQualifications = data.qualifications.trim() || rawJobDescText.trim();
+
+    if (newCompany) handleCompanyChange(newCompany);
+    if (newPosition) handlePositionChange(newPosition);
+    if (newRecruiter) handleRecruiterChange(newRecruiter);
+    if (newQualifications) setJobDescription(newQualifications);
+
+    setIsJobDescDrawerOpen(false);
+    toast.success(
+      'Job Description Diterapkan',
+      'Parameter target loker berhasil diselaraskan dan draf diperbarui secara live.'
+    );
+  };
+
+  const filteredTrackedJobs = useMemo(() => {
+    if (!trackerSearchQuery.trim()) return trackedJobs;
+    const q = trackerSearchQuery.toLowerCase().trim();
+    return trackedJobs.filter((job) =>
+      (job.company_name && job.company_name.toLowerCase().includes(q)) ||
+      (job.position && job.position.toLowerCase().includes(q)) ||
+      (job.status && job.status.toLowerCase().includes(q))
+    );
+  }, [trackedJobs, trackerSearchQuery]);
+
+  const cvOptions: SelectOption[] = useMemo(() => {
+    return userCvs.map((cv) => ({
+      value: cv.id,
+      label: `${cv.title || 'CV Siap Kerja'} (${cv.target_position || 'Umum'})`,
+    }));
+  }, [userCvs]);
+
+  // Click outside & Escape key listeners for tracker search dropdown and drawer
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (trackerDropdownRef.current && !trackerDropdownRef.current.contains(e.target as Node)) {
+        setIsTrackerSearchOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsTrackerSearchOpen(false);
+        setIsJobDescDrawerOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isTrackerSearchOpen) {
+      setTimeout(() => trackerSearchInputRef.current?.focus(), 50);
+    }
+  }, [isTrackerSearchOpen]);
+
+  useEffect(() => {
+    if (isJobDescDrawerOpen) {
+      setTimeout(() => jobDescTextareaRef.current?.focus(), 80);
+    }
+  }, [isJobDescDrawerOpen]);
 
   const rawCvData = selectedCv && typeof selectedCv.data === 'object' && selectedCv.data !== null ? selectedCv.data : {};
   const selectedCvSkills: string[] = Array.isArray(rawCvData.skills)
@@ -371,59 +585,11 @@ export const CoverLetterView: React.FC<CoverLetterViewProps> = ({
     // Muat dari database, lalu migrasikan data lama di localStorage (sekali saja)
     const loadLetters = async () => {
       const remote = await coverLetterApi.getAll();
-      if (Array.isArray(remote) && remote.length > 0) {
+      if (Array.isArray(remote)) {
         setSavedLetters(remote as SavedCoverLetter[]);
-        // Migrasi: push sisa data localStorage ke DB, lalu bersihkan
-        try {
-          const stored = localStorage.getItem('employr_saved_cover_letters');
-          if (stored) {
-            const localList: SavedCoverLetter[] = JSON.parse(stored);
-            if (Array.isArray(localList) && localList.length > 0) {
-              const remoteKeys = new Set(remote.map((r: any) => `${r.company}|${r.position}|${r.content}`));
-              for (const l of localList) {
-                const key = `${l.company}|${l.position}|${l.content}`;
-                if (!remoteKeys.has(key)) {
-                  await coverLetterApi.create({
-                    company: l.company,
-                    position: l.position,
-                    content: l.content,
-                  });
-                }
-              }
-              localStorage.removeItem('employr_saved_cover_letters');
-              const refreshed = await coverLetterApi.getAll();
-              if (Array.isArray(refreshed)) setSavedLetters(refreshed as SavedCoverLetter[]);
-            }
-          }
-        } catch (e) {
-          // Abaikan kegagalan migrasi localStorage
-        }
-        return;
+      } else {
+        setSavedLetters([]);
       }
-
-      // DB kosong: coba migrasi penuh dari localStorage
-      try {
-        const stored = localStorage.getItem('employr_saved_cover_letters');
-        if (stored) {
-          const localList: SavedCoverLetter[] = JSON.parse(stored);
-          if (Array.isArray(localList) && localList.length > 0) {
-            for (const l of localList) {
-              await coverLetterApi.create({
-                company: l.company,
-                position: l.position,
-                content: l.content,
-              });
-            }
-            localStorage.removeItem('employr_saved_cover_letters');
-            const refreshed = await coverLetterApi.getAll();
-            if (Array.isArray(refreshed)) setSavedLetters(refreshed as SavedCoverLetter[]);
-            return;
-          }
-        }
-      } catch (e) {
-        // Abaikan kegagalan migrasi localStorage
-      }
-      setSavedLetters([]);
     };
 
     loadLetters();
@@ -479,7 +645,7 @@ PANDUAN PENULISAN:
         body: JSON.stringify({
           feature: 'cover_letter',
           task: 'cover_letter',
-          promptName: 'Cover Letter AI Generator',
+          promptName: 'Cover Letter Generator',
           prompt,
         }),
       });
@@ -560,9 +726,17 @@ ${userEmail || 'email@email.com'}`);
   };
 
   const handleDeleteSaved = async (id: string) => {
-    const ok = await coverLetterApi.delete(id);
-    if (ok) {
-      setSavedLetters((prev) => prev.filter((l) => l.id !== id));
+    try {
+      const ok = await coverLetterApi.delete(id);
+      if (ok) {
+        setSavedLetters((prev) => prev.filter((l) => l.id !== id));
+        toast.success('Surat Lamaran Dihapus', 'Draf surat lamaran berhasil dihapus.');
+      } else {
+        toast.error('Gagal Menghapus', 'Surat lamaran tidak berhasil dihapus. Silakan coba lagi.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Gagal Menghapus', 'Terjadi kesalahan sistem saat menghapus surat lamaran.');
     }
   };
 
@@ -572,20 +746,20 @@ ${userEmail || 'email@email.com'}`);
       {!hideHeader && (
         <PageHeader
           title="Pembuat Surat Lamaran"
-          subtitle="Susun surat lamaran kerja persuasif secara instan dengan template profesional atau bantuan AI. Kamu bisa menyalin teks secara manual atau langsung kirim via bot pengirim."
+          subtitle="Susun surat lamaran kerja persuasif secara instan dengan template profesional. Kamu bisa menyalin teks secara manual atau langsung kirim via pengirim otomatis."
           icon={Mail}
-          badge="Cover Letter AI"
+          badge="Penyelaras Lamaran"
           stats={[
-            { label: 'Tersimpan', value: `${savedLetters.length} Draf`, icon: FileText },
+            { label: 'Tersimpan', value: `${savedLetters.length} Draf`, icon: FileText, isPrimary: true },
           ]}
         />
       )}
 
-      {/* Alur Kerja Cerdas: Siapkan Email -> Manual / Bot */}
+      {/* Alur Kerja Cerdas: Siapkan Email -> Manual / Kirim Otomatis */}
       <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-[10px] text-[10px] font-extrabold bg-[#1738D1] text-white">
+            <span className="px-2 py-0.5 rounded-[10px] text-caption font-extrabold bg-cobalt-500 text-white">
               Langkah 1
             </span>
             <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">
@@ -593,17 +767,17 @@ ${userEmail || 'email@email.com'}`);
             </h3>
           </div>
           <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-            Pilih template cepat di bawah atau susun otomatis. Jika tidak ingin pakai bot, kamu cukup klik <strong>Salin Teks</strong> untuk kirim manual. Atau klik <strong>Lanjut Kirim via Bot</strong> untuk kirim instan ke HRD.
+            Pilih template cepat di bawah atau susun secara cerdas. Kamu cukup klik <strong>Salin Teks</strong> untuk kirim manual, atau klik <strong>Lanjut Kirim Otomatis</strong> untuk kirim instan ke HRD.
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[11px] text-slate-500 hidden sm:inline">Pilihan kamu:</span>
-          <span className="px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+          <span className="text-caption text-slate-500 hidden sm:inline">Pilihan kamu:</span>
+          <span className="px-2.5 py-1 rounded-[10px] text-caption font-bold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
             Salin Bebas (Manual)
           </span>
-          <span className="text-slate-400 text-xs">/</span>
-          <span className="px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-blue-50 dark:bg-blue-950/60 text-[#1738D1] dark:text-blue-400 border border-blue-200 dark:border-blue-800">
-            Kirim Otomatis (Bot)
+          <span className="text-slate-500 text-xs dark:text-slate-400">/</span>
+          <span className="px-2.5 py-1 rounded-[10px] text-caption font-bold bg-blue-50 dark:bg-blue-950/60 text-cobalt-500 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+            Kirim Otomatis
           </span>
         </div>
       </div>
@@ -612,10 +786,10 @@ ${userEmail || 'email@email.com'}`);
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+            <FileText className="w-3.5 h-3.5 text-orange-700 dark:text-orange-400" />
             <span>Pilih Template Siap Pakai (1-Klik Jadi)</span>
           </h4>
-          <span className="text-[11px] text-slate-500 hidden sm:inline">
+          <span className="text-caption text-slate-500 hidden sm:inline">
             Langsung tampil & bisa diedit di editor sebelah kanan
           </span>
         </div>
@@ -647,29 +821,28 @@ ${userEmail || 'email@email.com'}`);
                 }}
                 className={`p-3.5 rounded-[10px] text-left transition border cursor-pointer flex flex-col justify-between ${
                   isSelected
-                    ? 'bg-blue-50 dark:bg-blue-950/40 border-[#1738D1] shadow-xs ring-1 ring-[#1738D1]'
+                    ? 'bg-blue-50 dark:bg-blue-950/40 border-cobalt-500 shadow-xs ring-1 ring-cobalt-500'
                     : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                 }`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="w-7 h-7 rounded-[8px] bg-slate-100 dark:bg-slate-800 text-[#1738D1] dark:text-blue-400 flex items-center justify-center">
+                    <span className="w-7 h-7 rounded-[8px] bg-slate-100 dark:bg-slate-800 text-cobalt-500 dark:text-blue-400 flex items-center justify-center">
                       <Icon className="w-3.5 h-3.5" />
                     </span>
-                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    <span className="text-caption font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                       {preset.badge.split('/')[0].trim()}
                     </span>
                   </div>
                   <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100">
                     {preset.name}
                   </h5>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                  <p className="text-caption text-slate-600 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
                     {preset.description}
                   </p>
                 </div>
-                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-[#1738D1] dark:text-blue-400">
+                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-caption font-bold text-cobalt-500 dark:text-blue-400">
                   <span>Gunakan Template</span>
-                  <ArrowRight className="w-3 h-3" />
                 </div>
               </button>
             );
@@ -680,16 +853,28 @@ ${userEmail || 'email@email.com'}`);
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Form Generator Left */}
         <div className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-xs space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-            <Sparkles className="w-4 h-4 text-orange-500" />
-            <div>
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white">
-                Kustomisasi Parameter Surat
-              </h3>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                Ketik nama perusahaan & posisi di bawah untuk merubah draf di sebelah kanan secara live, atau susun otomatis via AI.
-              </p>
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <FileText className="w-4 h-4 text-orange-700 shrink-0 dark:text-orange-400" />
+              <div className="min-w-0">
+                <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                  Kustomisasi Parameter Surat
+                </h3>
+                <p className="text-caption text-slate-500 dark:text-slate-400 mt-0.5">
+                  Sesuaikan manual, atau tempel seluruh teks loker untuk pengisian otomatis.
+                </p>
+              </div>
             </div>
+
+            <button
+              type="button"
+              onClick={() => setIsJobDescDrawerOpen(true)}
+              className="px-3.5 py-2.5 min-h-[44px] rounded-[10px] bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 text-cobalt-500 dark:text-blue-400 font-bold text-sm sm:text-xs border border-blue-200/80 dark:border-blue-800/80 transition flex items-center gap-1.5 shrink-0 cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 active:scale-[0.98]"
+              title="Tempel seluruh isi postingan loker untuk mengisi form otomatis"
+            >
+              <ClipboardPaste className="w-3.5 h-3.5" />
+              <span>Tempel Teks Loker</span>
+            </button>
           </div>
 
           <form onSubmit={handleGenerate} className="space-y-3">
@@ -697,32 +882,27 @@ ${userEmail || 'email@email.com'}`);
             <div className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                  <FileCheck2 className="w-3.5 h-3.5 text-[#1738D1] dark:text-blue-400" />
+                  <FileCheck2 className="w-3.5 h-3.5 text-cobalt-500 dark:text-blue-400" />
                   <span>Pilih CV Saya (Basis Kualifikasi)</span>
                 </label>
                 {userCvs.length > 0 && (
-                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                    Auto-Attach PDF
+                  <span className="text-caption text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                    PDF Disiapkan Otomatis
                   </span>
                 )}
               </div>
 
               {userCvs.length > 0 ? (
-                <select
+                <CustomSelect
                   value={selectedCvId}
-                  onChange={(e) => handleSelectCv(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-[8px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
-                >
-                  {userCvs.map((cv) => (
-                    <option key={cv.id} value={cv.id}>
-                      {cv.title || 'CV Siap Kerja'} ({cv.target_position || 'Umum'})
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => handleSelectCv(val)}
+                  options={cvOptions}
+                  placeholder="Pilih CV Saya..."
+                />
               ) : (
-                <div className="text-[11px] text-slate-500 flex items-center justify-between py-1">
+                <div className="text-caption text-slate-500 flex items-center justify-between py-1">
                   <span>Belum ada CV di akunmu.</span>
-                  <Link href="/cv" className="text-[#1738D1] dark:text-blue-400 font-bold hover:underline flex items-center gap-1">
+                  <Link href="/cv" className="px-3 py-2 min-h-[44px] rounded-[8px] hover:bg-blue-50 dark:hover:bg-blue-950/40 text-cobalt-500 dark:text-blue-400 font-bold inline-flex items-center gap-1 transition">
                     Buat CV <ExternalLink className="w-3 h-3" />
                   </Link>
                 </div>
@@ -731,20 +911,20 @@ ${userEmail || 'email@email.com'}`);
               {/* Tampilkan Skills dari CV Terpilih */}
               {selectedCvSkills.length > 0 && (
                 <div className="pt-1.5 border-t border-slate-200/60 dark:border-slate-700/60">
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
+                  <span className="text-caption font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                     Keahlian di CV yang akan dijodohkan:
                   </span>
                   <div className="flex flex-wrap gap-1">
                     {selectedCvSkills.slice(0, 6).map((skill, idx) => (
                       <span
                         key={idx}
-                        className="px-2 py-0.5 rounded-[6px] text-[10px] font-medium bg-blue-50 dark:bg-blue-950/80 text-[#1738D1] dark:text-blue-300 border border-blue-200/80 dark:border-blue-800"
+                        className="px-2 py-0.5 rounded-[6px] text-caption font-medium bg-blue-50 dark:bg-blue-950/80 text-cobalt-500 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800"
                       >
                         {skill}
                       </span>
                     ))}
                     {selectedCvSkills.length > 6 && (
-                      <span className="text-[10px] text-slate-400 px-1 py-0.5">
+                      <span className="text-caption text-slate-500 px-1 py-0.5 dark:text-slate-400">
                         +{selectedCvSkills.length - 6} lainnya
                       </span>
                     )}
@@ -754,109 +934,201 @@ ${userEmail || 'email@email.com'}`);
             </div>
 
             {/* 2. Perusahaan Target & Tombol Ambil dari Tracker */}
-            <div>
+            <div ref={trackerDropdownRef} className="relative">
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                <label htmlFor="cover-letter-company-input" className="text-xs font-bold text-slate-700 dark:text-slate-300">
                   Perusahaan Target *
                 </label>
                 {trackedJobs.length > 0 && (
                   <button
                     type="button"
-                    onClick={() => setShowTrackerSelector(!showTrackerSelector)}
-                    className="text-[11px] font-bold text-[#1738D1] dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                    onClick={() => {
+                      setIsTrackerSearchOpen(!isTrackerSearchOpen);
+                      setTrackerSearchQuery('');
+                    }}
+                    className={`text-xs font-bold px-3 py-2 min-h-[44px] sm:min-h-[36px] rounded-[10px] transition flex items-center gap-1.5 cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
+                      isTrackerSearchOpen
+                        ? 'bg-cobalt-500 text-white border-cobalt-500 shadow-xs'
+                        : 'bg-blue-50 dark:bg-blue-950/60 text-cobalt-500 dark:text-blue-400 border-blue-200/80 dark:border-blue-800/80 hover:bg-blue-100 dark:hover:bg-blue-900/60'
+                    }`}
+                    aria-expanded={isTrackerSearchOpen}
+                    aria-haspopup="dialog"
                   >
-                    <Briefcase className="w-3 h-3" />
+                    <Briefcase className="w-3.5 h-3.5" />
                     <span>Ambil dari Tracker ({trackedJobs.length})</span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isTrackerSearchOpen ? 'rotate-180' : ''}`} />
                   </button>
                 )}
               </div>
 
-              {/* Tracker Selector Dropdown */}
-              {showTrackerSelector && (
-                <div className="mb-2 p-2.5 rounded-[8px] bg-blue-50/70 dark:bg-slate-800 border border-blue-200 dark:border-blue-800 space-y-1.5">
-                  <div className="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-200">
-                    <span>Pilih lowongan dari Job Tracker:</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowTrackerSelector(false)}
-                      className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs cursor-pointer"
-                    >
-                      Tutup
-                    </button>
-                  </div>
-                  <div className="max-h-36 overflow-y-auto space-y-1 pr-1">
-                    {trackedJobs.map((job) => (
-                      <button
-                        key={job.id}
-                        type="button"
-                        onClick={() => handleSelectTrackedJob(job)}
-                        className="w-full text-left p-1.5 rounded-[6px] text-[11px] bg-white dark:bg-slate-900 hover:bg-blue-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center justify-between transition cursor-pointer"
-                      >
-                        <span className="font-bold truncate">{job.company_name}</span>
-                        <span className="text-slate-500 truncate ml-2 text-[10px]">{job.position}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               <input
+                id="cover-letter-company-input"
                 type="text"
                 required
                 placeholder="Contoh: PT Shopee Indonesia"
                 value={targetCompany}
                 onChange={(e) => handleCompanyChange(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
+                className="w-full px-3.5 py-2.5 min-h-[44px] text-sm sm:text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cobalt-500"
               />
+
+              {/* Search Dropdown Popover */}
+              {isTrackerSearchOpen && (
+                <div className="absolute z-50 left-0 right-0 mt-1.5 p-3 rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl space-y-2.5 animate-in fade-in-80 zoom-in-95 duration-150">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-800">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <Briefcase className="w-3.5 h-3.5 text-orange-700 dark:text-orange-400" />
+                      Pilih dari Tracker
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsTrackerSearchOpen(false)}
+                      className="text-caption font-medium text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer dark:text-slate-400"
+                    >
+                      Tutup
+                    </button>
+                  </div>
+
+                  {/* Search Input Box */}
+                  <div className="relative">
+                    <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2 dark:text-slate-400" />
+                    <input
+                      ref={trackerSearchInputRef}
+                      type="text"
+                      placeholder="Cari perusahaan atau posisi di Tracker..."
+                      value={trackerSearchQuery}
+                      onChange={(e) => setTrackerSearchQuery(e.target.value)}
+                      className="w-full pl-8 pr-9 py-2.5 min-h-[44px] text-sm sm:text-xs rounded-[8px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt-500 focus:bg-white dark:focus:bg-slate-900 transition"
+                    />
+                    {trackerSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setTrackerSearchQuery('')}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center p-1 text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer dark:text-slate-400"
+                        aria-label="Bersihkan pencarian"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Filtered Tracked Jobs List */}
+                  <div className="max-h-52 overflow-y-auto space-y-1 pr-0.5">
+                    {filteredTrackedJobs.length > 0 ? (
+                      filteredTrackedJobs.map((job) => (
+                        <button
+                          key={job.id}
+                          type="button"
+                          onClick={() => handleSelectTrackedJob(job)}
+                          className="w-full text-left p-2.5 min-h-[48px] rounded-[8px] bg-slate-50/60 dark:bg-slate-800/40 hover:bg-blue-50 dark:hover:bg-blue-950/50 border border-slate-100 dark:border-slate-800 hover:border-blue-200 dark:hover:border-blue-800/80 transition flex items-center justify-between group cursor-pointer"
+                        >
+                          <div className="min-w-0 flex-1 mr-2">
+                            <span className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-cobalt-500 dark:group-hover:text-blue-400 block truncate">
+                              {job.company_name}
+                            </span>
+                            <span className="text-caption text-slate-500 dark:text-slate-400 block truncate">
+                              {job.position || 'Posisi tidak disebutkan'}
+                            </span>
+                          </div>
+                          {job.status && (
+                            <span className="text-caption font-bold px-2 py-0.5 rounded-[6px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 shrink-0">
+                              {job.status}
+                            </span>
+                          )}
+                        </button>
+                      ))
+                    ) : (
+                      <div className="py-4 text-center text-xs text-slate-500 dark:text-slate-400">
+                        Tidak ada loker di Tracker yang cocok dengan "{trackerSearchQuery}"
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 3. Posisi Pekerjaan */}
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label htmlFor="cover-letter-position-input" className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                 Posisi Pekerjaan *
               </label>
               <input
+                id="cover-letter-position-input"
                 type="text"
                 required
                 placeholder="Contoh: Senior Frontend Developer"
                 value={targetPosition}
                 onChange={(e) => handlePositionChange(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
+                className="w-full px-3.5 py-2.5 min-h-[44px] text-sm sm:text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cobalt-500"
               />
             </div>
 
             {/* 4. Deskripsi / Kualifikasi Lowongan (Job Description) */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                  <Briefcase className="w-3.5 h-3.5 text-orange-500" />
-                  <span>Kualifikasi Lowongan (Job Description)</span>
+                <label htmlFor="cover-letter-job-desc-textarea" className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 cursor-pointer">
+                  <Briefcase className="w-3.5 h-3.5 text-orange-700 dark:text-orange-400" />
+                  <span>Kualifikasi Loker (Deskripsi Posisi)</span>
                 </label>
-                <span className="text-[10px] text-slate-400">Direkomendasikan</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (jobDescription && !rawJobDescText) {
+                        setRawJobDescText(jobDescription);
+                        setExtractedData(extractJobDescriptionEntities(jobDescription));
+                      }
+                      setIsJobDescDrawerOpen(true);
+                    }}
+                    className="px-2.5 py-1.5 min-h-[44px] rounded-[8px] hover:bg-blue-50 dark:hover:bg-blue-950/40 text-caption font-bold text-cobalt-500 dark:text-blue-400 flex items-center gap-1 cursor-pointer transition"
+                  >
+                    <ClipboardPaste className="w-3.5 h-3.5" />
+                    <span>Tempel Lengkap</span>
+                  </button>
+                  <span className="text-caption text-slate-500 dark:text-slate-400">Direkomendasikan</span>
+                </div>
               </div>
               <textarea
+                id="cover-letter-job-desc-textarea"
                 rows={3}
                 placeholder="Tempel syarat/kualifikasi dari poster loker (misal: Minimal S1, menguasai React/TypeScript, komunikatif)..."
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
+                className="w-full p-3 min-h-[80px] text-sm sm:text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-cobalt-500"
               />
-              <p className="text-[10px] text-slate-500 mt-1">
-                AI akan secara spesifik menjodohkan syarat lowongan ini dengan bukti keahlian & pengalaman di CV-mu.
-              </p>
+              <div className="flex items-center justify-between mt-1">
+                <p className="text-caption text-slate-500">
+                  Sistem menyelaraskan syarat lowongan ini dengan keahlian di CV-mu.
+                </p>
+                {jobDescription.length > 40 && (!targetCompany || !targetPosition) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const parsed = extractJobDescriptionEntities(jobDescription);
+                      if (parsed.company && !targetCompany) handleCompanyChange(parsed.company);
+                      if (parsed.position && !targetPosition) handlePositionChange(parsed.position);
+                      if (parsed.recruiter && !recruiterName) handleRecruiterChange(parsed.recruiter);
+                      toast.success('Parameter Terdeteksi', 'Nama perusahaan dan posisi berhasil diekstrak dari teks loker.');
+                    }}
+                    className="text-caption font-bold text-cobalt-500 dark:text-blue-400 hover:underline shrink-0 cursor-pointer min-h-[44px] sm:min-h-0 inline-flex items-center"
+                  >
+                    Deteksi & Isi Form
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* 5. Nama Recruiter */}
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label htmlFor="cover-letter-recruiter-input" className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                 Nama Recruiter (Opsional)
               </label>
               <input
+                id="cover-letter-recruiter-input"
                 type="text"
                 placeholder="Contoh: Ibu Rina Hartati"
                 value={recruiterName}
                 onChange={(e) => handleRecruiterChange(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
+                className="w-full px-3.5 py-2.5 min-h-[44px] text-sm sm:text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cobalt-500"
               />
             </div>
 
@@ -878,32 +1150,33 @@ ${userEmail || 'email@email.com'}`);
 
             {/* 7. Highlight Pengalaman Kunci */}
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label htmlFor="cover-letter-highlights-textarea" className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                 Highlight Pengalaman Kunci (Opsional)
               </label>
               <textarea
+                id="cover-letter-highlights-textarea"
                 rows={2}
                 placeholder="Sebutkan prestasi utama atau portofolio khusus yang ingin ditekankan..."
                 value={experienceHighlights}
                 onChange={(e) => handleHighlightsChange(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
+                className="w-full p-3 min-h-[64px] text-sm sm:text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-cobalt-500"
               />
             </div>
 
             <button
               type="submit"
               disabled={isGenerating}
-              className="w-full py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition flex items-center justify-center gap-2 cursor-pointer border-0 disabled:opacity-50"
+              className="w-full min-h-[44px] py-2.5 px-4 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white font-bold text-sm sm:text-xs shadow-md shadow-cobalt-500/20 transition flex items-center justify-center gap-2 cursor-pointer border-0 disabled:opacity-50"
             >
               {isGenerating ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Sedang Menyelaraskan CV ⟷ Lowongan...</span>
+                  <span>Sedang Menyelaraskan CV ⟷ Loker...</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 text-orange-400" />
-                  <span>Susun Surat Lamaran Cerdas (Match CV ⟷ JD)</span>
+                  <FileText className="w-4 h-4 text-orange-400" />
+                  <span>Susun Surat Lamaran Cerdas</span>
                 </>
               )}
             </button>
@@ -913,62 +1186,127 @@ ${userEmail || 'email@email.com'}`);
         {/* Generated Result Right */}
         <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-xs flex flex-col space-y-4 h-fit">
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 gap-3">
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-orange-500" />
-                <div>
+            {/* Header Hasil Susunan Surat */}
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <FileText className="w-4 h-4 text-orange-700 shrink-0 dark:text-orange-400" />
+                <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-white whitespace-nowrap">
                       Hasil Susunan Surat
                     </h3>
                     {!isManualEdited ? (
-                      <span className="px-2 py-0.5 rounded-[6px] text-[10px] font-bold bg-blue-50 dark:bg-blue-950/60 text-[#1738D1] dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                      <span className="px-2 py-0.5 rounded-[6px] text-caption font-bold bg-blue-50 dark:bg-blue-950/60 text-cobalt-500 dark:text-blue-400 border border-blue-200 dark:border-blue-800 whitespace-nowrap shrink-0">
                         Live Sinkron
                       </span>
                     ) : (
-                      <div className="flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 rounded-[6px] text-[10px] font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="px-2 py-0.5 rounded-[6px] text-caption font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 whitespace-nowrap">
                           Diedit Manual
                         </span>
                         <button
                           type="button"
                           onClick={handleResetToTemplate}
-                          className="text-[10px] font-bold text-[#1738D1] dark:text-blue-400 hover:underline cursor-pointer"
+                          className="text-caption font-bold text-cobalt-500 dark:text-blue-400 hover:underline cursor-pointer min-h-[44px] sm:min-h-0 inline-flex items-center"
                         >
                           Sinkronkan Ulang
                         </button>
                       </div>
                     )}
                   </div>
-                  <span className="text-[11px] text-slate-500">
-                    Bisa langsung kamu edit atau salin (otomatis menyesuaikan parameter)
-                  </span>
+                  <p className="text-caption text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
+                    Draf surat siap disalin atau diedit langsung.
+                  </p>
                 </div>
               </div>
+
+              {/* Quick Copy Shortcut in Header */}
               {generatedLetter && (
-                <div className="flex items-center gap-2 flex-wrap">
-                  {/* Pilihan 1: Stop / Manual */}
-                  <button
-                    type="button"
-                    onClick={handleCopy}
-                    className="px-3 py-1.5 rounded-[10px] text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition flex items-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-700"
-                    title="Salin ke clipboard untuk kirim manual via Gmail atau aplikasi lain tanpa bot"
-                  >
-                    {isCopied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{isCopied ? 'Tersalin!' : 'Salin Teks (Manual)'}</span>
-                  </button>
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="shrink-0 px-3.5 py-2 min-h-[44px] sm:min-h-[36px] rounded-[8px] text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition flex items-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                  title="Salin teks ke clipboard"
+                >
+                  {isCopied ? (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
+                      <span className="text-emerald-700 dark:text-emerald-400">Tersalin!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Salin Cepat</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
 
-                  {/* Pilihan 2: Simpan Draf */}
-                  <button
-                    type="button"
-                    onClick={handleSaveToLibrary}
-                    className="px-3 py-1.5 rounded-[10px] text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition flex items-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-700"
-                  >
-                    <Bookmark className="w-3.5 h-3.5 text-slate-500" />
-                    <span>Simpan Draf</span>
-                  </button>
+            <div className="mt-3">
+              <textarea
+                id="cover-letter-editor-content"
+                aria-label="Editor Isi Surat Lamaran"
+                ref={textareaRef}
+                value={generatedLetter}
+                onChange={(e) => {
+                  isManualEditedRef.current = true;
+                  setIsManualEdited(true);
+                  setGeneratedLetter(e.target.value);
+                  e.target.style.height = 'auto';
+                  e.target.style.height = `${Math.max(e.target.scrollHeight, 280)}px`;
+                }}
+                placeholder="Pilih template cepat di atas atau isi formulir di samping, lalu teks surat lamaran akan tampil di sini dan siap kamu edit secara bebas..."
+                className="w-full p-4 rounded-[10px] bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm sm:text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-sans focus:outline-none focus:border-cobalt-500 resize-none overflow-hidden"
+              />
+            </div>
 
-                  {/* Pilihan 3: Lanjut Kirim via Bot */}
+            {generatedLetter && (
+              <div className="mt-2.5 space-y-3">
+                <div className="flex items-center justify-between text-caption text-slate-500 dark:text-slate-400">
+                  <span>Teks di atas dapat langsung kamu ketik/edit sesuai kebutuhan.</span>
+                  <span className="font-mono">{generatedLetter.length} karakter</span>
+                </div>
+
+                {selectedCv && (
+                  <div className="p-2.5 rounded-[8px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-caption flex-wrap gap-2">
+                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                      <FileCheck2 className="w-4 h-4 text-cobalt-500 dark:text-blue-400 shrink-0" />
+                      <span>
+                        CV Terhubung: <strong className="font-bold text-slate-900 dark:text-white">{selectedCv.title || 'CV Utama'}</strong>
+                        {selectedCv.target_position ? ` (${selectedCv.target_position})` : ''}
+                      </span>
+                    </div>
+                    <span className="text-caption text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                      <Paperclip className="w-3 h-3" />
+                      Auto-Attach PDF ATS Aktif
+                    </span>
+                  </div>
+                )}
+
+                {/* Toolbar Aksi Terpadu (Action Toolbar di Bawah Surat) */}
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      className="flex-1 sm:flex-none px-3.5 py-2.5 min-h-[44px] rounded-[10px] text-sm sm:text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                      title="Salin ke clipboard untuk kirim manual via Gmail atau aplikasi lain"
+                    >
+                      {isCopied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
+                      <span>{isCopied ? 'Tersalin!' : 'Salin Teks (Manual)'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleSaveToLibrary}
+                      className="flex-1 sm:flex-none px-3.5 py-2.5 min-h-[44px] rounded-[10px] text-sm sm:text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                    >
+                      <Bookmark className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Simpan Draf</span>
+                    </button>
+                  </div>
+
                   {onUseInMailer ? (
                     <button
                       type="button"
@@ -981,64 +1319,21 @@ ${userEmail || 'email@email.com'}`);
                           cvId: selectedCvId || undefined,
                         })
                       }
-                      className="px-3.5 py-1.5 rounded-[10px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white transition flex items-center gap-1.5 cursor-pointer shadow-md shadow-[#1738D1]/20"
+                      className="px-4 py-2.5 min-h-[44px] rounded-[10px] text-sm sm:text-xs font-bold bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-cobalt-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                     >
                       <Send className="w-3.5 h-3.5" />
-                      <span>Lanjut Kirim via Bot</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <span>Lanjut Kirim Otomatis</span>
                     </button>
                   ) : (
                     <Link
                       href={`/mailer?cvId=${selectedCvId || ''}`}
-                      className="px-3.5 py-1.5 rounded-[10px] text-xs font-bold bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white transition flex items-center gap-1.5 cursor-pointer shadow-md shadow-[#1738D1]/20"
+                      className="px-4 py-2.5 min-h-[44px] rounded-[10px] text-sm sm:text-xs font-bold bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-cobalt-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 no-underline"
                     >
                       <Send className="w-3.5 h-3.5" />
-                      <span>Lanjut Kirim via Bot</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <span>Lanjut Kirim Otomatis</span>
                     </Link>
                   )}
                 </div>
-              )}
-            </div>
-
-            <div className="mt-3">
-              <textarea
-                ref={textareaRef}
-                value={generatedLetter}
-                onChange={(e) => {
-                  isManualEditedRef.current = true;
-                  setIsManualEdited(true);
-                  setGeneratedLetter(e.target.value);
-                  e.target.style.height = 'auto';
-                  e.target.style.height = `${Math.max(e.target.scrollHeight, 280)}px`;
-                }}
-                placeholder="Pilih template cepat di atas atau isi formulir di samping, lalu teks surat lamaran akan tampil di sini dan siap kamu edit secara bebas..."
-                className="w-full p-4 rounded-[10px] bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-sans focus:outline-none focus:border-[#1738D1] resize-none overflow-hidden"
-              />
-            </div>
-
-            {generatedLetter && (
-              <div className="mt-2.5 space-y-2">
-                <div className="flex items-center justify-between text-[11px] text-slate-500">
-                  <span>Teks di atas dapat langsung kamu ketik/edit sesuai kebutuhan.</span>
-                  <span className="font-mono">{generatedLetter.length} karakter</span>
-                </div>
-
-                {selectedCv && (
-                  <div className="p-2.5 rounded-[8px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-[11px] flex-wrap gap-2">
-                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                      <FileCheck2 className="w-4 h-4 text-[#1738D1] dark:text-blue-400 shrink-0" />
-                      <span>
-                        CV Terhubung: <strong className="font-bold text-slate-900 dark:text-white">{selectedCv.title || 'CV Utama'}</strong>
-                        {selectedCv.target_position ? ` (${selectedCv.target_position})` : ''}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
-                      <Paperclip className="w-3 h-3" />
-                      Auto-Attach PDF ATS Aktif
-                    </span>
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -1049,16 +1344,16 @@ ${userEmail || 'email@email.com'}`);
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-            <FileText className="w-4 h-4 text-orange-500" />
+            <FileText className="w-4 h-4 text-orange-700 dark:text-orange-400" />
             Daftar Surat Lamaran Tersimpan ({savedLetters.length})
           </h3>
-          <span className="text-[11px] text-slate-500">
+          <span className="text-caption text-slate-500">
             Dapat disalin langsung atau dimuat ke editor kapan saja
           </span>
         </div>
 
         {savedLetters.length === 0 ? (
-          <div className="p-8 text-center rounded-[10px] border border-dashed border-slate-200 dark:border-slate-800 text-slate-400 text-xs">
+          <div className="p-8 text-center rounded-[10px] border border-dashed border-slate-200 dark:border-slate-800 text-slate-500 text-xs dark:text-slate-400">
             Belum ada surat lamaran yang disimpan. Buat surat baru dan klik &quot;Simpan Draf&quot; untuk menyimpannya di sini.
           </div>
         ) : (
@@ -1073,25 +1368,26 @@ ${userEmail || 'email@email.com'}`);
                     <h4 className="font-bold text-xs text-slate-900 dark:text-white">
                       {letter.position}
                     </h4>
-                    <p className="text-xs font-semibold text-orange-600 dark:text-orange-400">
+                    <p className="text-xs font-semibold text-orange-700 dark:text-orange-400">
                       {letter.company}
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleDeleteSaved(letter.id)}
-                    className="p-1 text-slate-400 hover:text-rose-600 cursor-pointer transition"
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[8px] text-slate-500 hover:text-rose-600 cursor-pointer transition dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/40"
                     title="Hapus"
+                    aria-label="Hapus surat lamaran tersimpan"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
-                <p className="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-3 bg-white dark:bg-slate-900 p-2.5 rounded-[10px] border border-slate-100 dark:border-slate-800 font-sans leading-relaxed">
+                <p className="text-caption text-slate-600 dark:text-slate-400 line-clamp-3 bg-white dark:bg-slate-900 p-2.5 rounded-[10px] border border-slate-100 dark:border-slate-800 font-sans leading-relaxed">
                   {letter.content}
                 </p>
 
-                <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
+                <div className="flex items-center justify-between text-caption text-slate-500 pt-1 dark:text-slate-400">
                   <span>Diperbarui: {letter.date}</span>
                   <div className="flex items-center gap-2">
                     <button
@@ -1107,7 +1403,7 @@ ${userEmail || 'email@email.com'}`);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         toast.success('Draf Dimuat', 'Surat lamaran dimuat ke editor.');
                       }}
-                      className="px-2 py-1 rounded-[8px] text-[10px] font-bold bg-slate-200/70 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition flex items-center gap-1 cursor-pointer"
+                      className="px-3 py-2 min-h-[44px] sm:min-h-[34px] rounded-[8px] text-xs font-bold bg-slate-200/70 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition flex items-center gap-1 cursor-pointer"
                     >
                       <Edit3 className="w-3 h-3" />
                       <span>Edit</span>
@@ -1118,7 +1414,7 @@ ${userEmail || 'email@email.com'}`);
                         navigator.clipboard.writeText(letter.content);
                         toast.success('Teks Tersalin', 'Surat lamaran berhasil disalin ke clipboard!');
                       }}
-                      className="px-2 py-1 rounded-[8px] text-[10px] font-bold bg-slate-200/70 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition flex items-center gap-1 cursor-pointer"
+                      className="px-3 py-2 min-h-[44px] sm:min-h-[34px] rounded-[8px] text-xs font-bold bg-slate-200/70 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition flex items-center gap-1 cursor-pointer"
                     >
                       <Copy className="w-3 h-3" />
                       <span>Salin</span>
@@ -1133,10 +1429,10 @@ ${userEmail || 'email@email.com'}`);
                             content: letter.content,
                           })
                         }
-                        className="px-2 py-1 rounded-[8px] text-[10px] font-bold bg-[#1738D1] hover:bg-[#132EA8] text-white transition flex items-center gap-1 cursor-pointer shadow-xs"
+                        className="px-3 py-2 min-h-[44px] sm:min-h-[34px] rounded-[8px] text-xs font-bold bg-cobalt-500 hover:bg-cobalt-600 text-white transition flex items-center gap-1 cursor-pointer shadow-xs"
                       >
                         <Send className="w-3 h-3" />
-                        <span>Kirim via Bot</span>
+                        <span>Kirim Otomatis</span>
                       </button>
                     )}
                   </div>
@@ -1146,6 +1442,188 @@ ${userEmail || 'email@email.com'}`);
           </div>
         )}
       </div>
+
+      {/* Right-Hand Slide-in Drawer: Tempel Seluruh Job Description */}
+      <Sheet
+        open={isJobDescDrawerOpen}
+        onOpenChange={setIsJobDescDrawerOpen}
+      >
+        <SheetContent
+          side="right"
+          hideCloseButton
+          className="w-full max-w-md sm:max-w-xl p-0 flex flex-col justify-between overflow-hidden"
+        >
+          {/* Drawer Header */}
+          <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
+            <SheetHeader className="flex flex-row items-center gap-2.5 space-y-0 text-left">
+              <span className="w-8 h-8 rounded-[8px] bg-cobalt-500 text-white flex items-center justify-center shadow-xs">
+                <ClipboardPaste className="w-4 h-4 text-orange-400" />
+              </span>
+              <div>
+                <SheetTitle className="font-bold text-sm text-slate-900 dark:text-white">
+                  Tempel Teks Loker Lengkap
+                </SheetTitle>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Deteksi nama perusahaan, posisi, dan syarat lowongan secara otomatis.
+                </p>
+              </div>
+            </SheetHeader>
+            <button
+              type="button"
+              onClick={() => setIsJobDescDrawerOpen(false)}
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[8px] text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer dark:text-slate-400"
+              aria-label="Tutup Drawer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+            {/* Drawer Body (Scrollable) */}
+            <div className="p-5 space-y-4 overflow-y-auto flex-1">
+              {/* Helper info & Clipboard button */}
+              <div className="flex items-center justify-between gap-2">
+                <label htmlFor="job-desc-full-textarea" className="text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer">
+                  Teks Lengkap Lowongan Kerja
+                </label>
+                <button
+                  type="button"
+                  onClick={handlePasteFromClipboard}
+                  className="text-xs font-bold text-cobalt-500 dark:text-blue-400 hover:underline min-h-[44px] sm:min-h-0 inline-flex items-center gap-1 cursor-pointer"
+                >
+                  <ClipboardPaste className="w-3.5 h-3.5" />
+                  <span>Tempel dari Clipboard</span>
+                </button>
+              </div>
+
+              {/* Big Textarea */}
+              <div className="relative">
+                <textarea
+                  id="job-desc-full-textarea"
+                  ref={jobDescTextareaRef}
+                  rows={8}
+                  value={rawJobDescText}
+                  onChange={(e) => handleRawJobDescChange(e.target.value)}
+                  placeholder="Salin dan tempel seluruh teks postingan loker di sini (dari LinkedIn, Jobstreet, Glints, poster WA, dll)...&#10;&#10;Contoh:&#10;PT Bintang Teknologi Solusindo&#10;Posisi: Front-End Web Developer&#10;Kualifikasi:&#10;- Minimal 1 tahun pengalaman React / Next.js&#10;- Paham TypeScript dan Tailwind CSS&#10;Kirim lamaran ke: Ibu Maya (hrd@bintangtekno.com)"
+                  className="w-full p-3.5 text-sm sm:text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt-500 focus:bg-white dark:focus:bg-slate-900 transition leading-relaxed resize-y"
+                />
+                {rawJobDescText && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRawJobDescText('');
+                      setExtractedData(null);
+                    }}
+                    className="absolute right-2.5 top-2.5 px-3 py-1.5 min-h-[36px] rounded-[6px] text-caption font-bold text-slate-500 hover:text-rose-500 bg-white/80 dark:bg-slate-800/80 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-slate-200 dark:border-slate-700 transition cursor-pointer"
+                  >
+                    Bersihkan
+                  </button>
+                )}
+              </div>
+
+              {/* Live Extraction Preview Panel */}
+              {extractedData && (
+                <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-3 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-700/60">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <FileCheck2 className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
+                      Hasil Deteksi Loker
+                    </span>
+                    <span className="text-caption font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-[6px] border border-emerald-200 dark:border-emerald-800">
+                      Terdeteksi
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                    <div>
+                      <span className="text-caption font-bold text-slate-500 block mb-0.5 uppercase tracking-wider dark:text-slate-400">
+                        Perusahaan:
+                      </span>
+                      <input
+                        type="text"
+                        value={extractedData.company}
+                        onChange={(e) => setExtractedData({ ...extractedData, company: e.target.value })}
+                        placeholder="Tidak terdeteksi (isi manual)"
+                        className="w-full px-3 py-2 min-h-[44px] rounded-[8px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm sm:text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-cobalt-500"
+                      />
+                    </div>
+
+                    <div>
+                      <span className="text-caption font-bold text-slate-500 block mb-0.5 uppercase tracking-wider dark:text-slate-400">
+                        Posisi:
+                      </span>
+                      <input
+                        type="text"
+                        value={extractedData.position}
+                        onChange={(e) => setExtractedData({ ...extractedData, position: e.target.value })}
+                        placeholder="Tidak terdeteksi (isi manual)"
+                        className="w-full px-3 py-2 min-h-[44px] rounded-[8px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm sm:text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-cobalt-500"
+                      />
+                    </div>
+
+                    <div>
+                      <span className="text-caption font-bold text-slate-500 block mb-0.5 uppercase tracking-wider dark:text-slate-400">
+                        Recruiter / HR:
+                      </span>
+                      <input
+                        type="text"
+                        value={extractedData.recruiter}
+                        onChange={(e) => setExtractedData({ ...extractedData, recruiter: e.target.value })}
+                        placeholder="Opsional (misal: Ibu Maya)"
+                        className="w-full px-3 py-2 min-h-[44px] rounded-[8px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm sm:text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-cobalt-500"
+                      />
+                    </div>
+
+                    <div>
+                      <span className="text-caption font-bold text-slate-500 block mb-0.5 uppercase tracking-wider dark:text-slate-400">
+                        Status Ekstraksi:
+                      </span>
+                      <div className="py-2 text-xs text-slate-600 dark:text-slate-300 font-medium truncate">
+                        {extractedData.qualifications ? `${extractedData.qualifications.length} karakter kualifikasi` : 'Hanya info perusahaan/posisi'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-caption font-bold text-slate-500 block mb-1 uppercase tracking-wider dark:text-slate-400">
+                      Ringkasan Syarat / Kualifikasi:
+                    </span>
+                    <textarea
+                      rows={3}
+                      value={extractedData.qualifications}
+                      onChange={(e) => setExtractedData({ ...extractedData, qualifications: e.target.value })}
+                      placeholder="Poin-poin kualifikasi loker..."
+                      className="w-full p-2.5 rounded-[8px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm sm:text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-cobalt-500 resize-none"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Drawer Sticky Footer */}
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-end gap-2.5">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsJobDescDrawerOpen(false)}
+                className="min-h-[44px] px-4 text-sm sm:text-xs"
+              >
+                Batal
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                disabled={!rawJobDescText.trim()}
+                onClick={handleApplyExtractedJobDesc}
+                className="min-h-[44px] px-4 text-sm sm:text-xs"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Terapkan ke Parameter Surat</span>
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
     </div>
   );
 };

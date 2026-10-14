@@ -1,23 +1,24 @@
 ---
 // HeroPortal.astro - Hero Section Career Information Portal (Pixel-Matched to Reference 1)
+import { getPortalCounts } from '../lib/data';
+const counts = await getPortalCounts();
 ---
 
 <section class="relative bg-[#f4f3ee] pt-8 sm:pt-12 lg:pt-14 pb-14 sm:pb-20 overflow-hidden border-b border-[#d7d6cf]/80">
-  <!-- Background Image & Washes -->
-  <div class="absolute inset-0 z-0 pointer-events-none select-none">
+  <!-- Background Image & Washes (Hanya tampil di tablet/desktop agar mobile 100% bersih dan kontras) -->
+  <div class="absolute inset-0 z-0 pointer-events-none select-none hidden sm:block">
     <img
       src="/images/hero-job.webp"
       alt="Portal Lowongan Kerja dan Karier"
-      class="w-full h-full object-cover object-[80%_center] lg:object-right"
+      class="w-full h-full object-cover object-[80%_center] lg:object-right opacity-90"
       loading="eager"
     />
     <!-- Gradient Overlays: Blends smoothly into warm paper #f4f3ee -->
     <div class="absolute inset-0 bg-gradient-to-r from-[#f4f3ee] via-[#f4f3ee]/95 to-transparent w-full lg:w-3/5"></div>
-    <div class="absolute inset-0 bg-[#f4f3ee]/80 sm:bg-transparent"></div>
   </div>
 
   <div class="max-w-[1240px] mx-auto px-4 sm:px-6 relative z-10">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start min-h-[400px] lg:min-h-[460px]">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start min-h-[360px] lg:min-h-[460px]">
       
       <!-- Left Column: Copy & Search -->
       <div class="lg:col-span-7 flex flex-col items-start pt-2 sm:pt-4">
@@ -30,107 +31,132 @@
         <!-- H1 Headline with Instrument Serif Italic Accent -->
         <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold text-[#101010] tracking-tight leading-[1.08] mb-4">
           Semua peluang kariermu,<br class="hidden sm:inline" />
-          <em>di satu tempat terpadu.</em>
+          <em>di satu tempat.</em>
         </h1>
 
         <!-- Subtitle -->
-        <p class="text-xs sm:text-sm md:text-base text-[#6e6d68] leading-relaxed max-w-xl mb-6 font-medium">
-          Kurasi lowongan kerja resmi, beasiswa sertifikasi, pelatihan keterampilan digital, dan agenda event karier terpercaya di seluruh Indonesia.
+        <p class="text-xs sm:text-sm md:text-base text-[#6e6d68] leading-relaxed max-w-xl mb-5 font-medium">
+          Kurasi lowongan kerja resmi, beasiswa sertifikasi, pelatihan keterampilan digital, dan agenda event karier di seluruh Indonesia.
         </p>
 
-        <!-- Category Selector Pills (Menyelesaikan Ambigu Omnisearch) -->
-        <div class="flex items-center gap-1.5 sm:gap-2 mb-3 flex-wrap text-xs" id="hero-category-tabs">
+        <!-- Category Selector Pills (Scrollable Horizontal Chips di Mobile, Wrap di Desktop) -->
+        <div class="flex items-center gap-1.5 sm:gap-2 mb-4 overflow-x-auto no-scrollbar whitespace-nowrap pb-1.5 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap text-xs max-w-full" id="hero-category-tabs">
           <button
             type="button"
-            class="hero-tab-pill px-3.5 py-1.5 rounded-full font-bold text-xs bg-[#101010] text-white shadow-xs transition-all cursor-pointer"
+            class="hero-tab-pill shrink-0 px-3.5 py-1.5 rounded-full font-bold text-xs bg-[#101010] text-white shadow-xs transition-all cursor-pointer"
             data-cat="all"
-            data-placeholder="Cari lowongan, artikel, sertifikasi, course, atau event..."
+            data-target="/search"
+            data-placeholder="Cari apa saja (lowongan, event, tips karier, kursus)..."
+            data-btn="Cari Semua"
           >
-            Semua Peluang
+            Semua
           </button>
           <button
             type="button"
-            class="hero-tab-pill px-3.5 py-1.5 rounded-full font-bold text-xs bg-white hover:border-[#101010] border border-[#d7d6cf] text-[#6e6d68] hover:text-[#101010] transition-all cursor-pointer shadow-xs"
+            class="hero-tab-pill shrink-0 px-3.5 py-1.5 rounded-full font-bold text-xs bg-white hover:border-[#101010] border border-[#d7d6cf] text-[#6e6d68] hover:text-[#101010] transition-all cursor-pointer shadow-xs"
             data-cat="lowongan"
-            data-target="/lowongan"
-            data-placeholder="Cari posisi kerja (Admin, IT, Marketing, BUMN)..."
+            data-target="/search?type=lowongan"
+            data-placeholder="Cari lowongan kerja (Admin, IT, Marketing, BUMN)..."
+            data-btn="Cari Lowongan"
           >
             Lowongan Kerja
           </button>
           <button
             type="button"
-            class="hero-tab-pill px-3.5 py-1.5 rounded-full font-bold text-xs bg-white hover:border-[#101010] border border-[#d7d6cf] text-[#6e6d68] hover:text-[#101010] transition-all cursor-pointer shadow-xs"
-            data-cat="sertifikasi"
-            data-target="/sertifikasi"
-            data-placeholder="Cari skema sertifikasi resmi (BNSP, Google, AWS)..."
-          >
-            Sertifikasi Resmi
-          </button>
-          <button
-            type="button"
-            class="hero-tab-pill px-3.5 py-1.5 rounded-full font-bold text-xs bg-white hover:border-[#101010] border border-[#d7d6cf] text-[#6e6d68] hover:text-[#101010] transition-all cursor-pointer shadow-xs"
-            data-cat="course"
-            data-target="/course"
-            data-placeholder="Cari kursus skill digital (UI/UX, Data, Python)..."
-          >
-            Pelatihan Skill
-          </button>
-          <button
-            type="button"
-            class="hero-tab-pill px-3.5 py-1.5 rounded-full font-bold text-xs bg-white hover:border-[#101010] border border-[#d7d6cf] text-[#6e6d68] hover:text-[#101010] transition-all cursor-pointer shadow-xs"
+            class="hero-tab-pill shrink-0 px-3.5 py-1.5 rounded-full font-bold text-xs bg-white hover:border-[#101010] border border-[#d7d6cf] text-[#6e6d68] hover:text-[#101010] transition-all cursor-pointer shadow-xs"
             data-cat="event"
-            data-target="/event"
+            data-target="/search?type=event"
             data-placeholder="Cari job fair, webinar karier, walk-in interview..."
+            data-btn="Cari Event"
           >
             Agenda Event
           </button>
+          <button
+            type="button"
+            class="hero-tab-pill shrink-0 px-3.5 py-1.5 rounded-full font-bold text-xs bg-white hover:border-[#101010] border border-[#d7d6cf] text-[#6e6d68] hover:text-[#101010] transition-all cursor-pointer shadow-xs"
+            data-cat="career"
+            data-target="/search?type=career"
+            data-placeholder="Cari tips wawancara, standar gaji, panduan CV ATS..."
+            data-btn="Cari Artikel"
+          >
+            Tips Karier
+          </button>
+          {counts.certs > 0 && (
+            <button
+              type="button"
+              class="hero-tab-pill shrink-0 px-3.5 py-1.5 rounded-full font-bold text-xs bg-white hover:border-[#101010] border border-[#d7d6cf] text-[#6e6d68] hover:text-[#101010] transition-all cursor-pointer shadow-xs"
+              data-cat="sertifikasi"
+              data-target="/search?type=sertifikasi"
+              data-placeholder="Cari skema sertifikasi resmi (BNSP, Google, AWS)..."
+              data-btn="Cari Sertifikasi"
+            >
+              Sertifikasi
+            </button>
+          )}
+          {counts.courses > 0 && (
+            <button
+              type="button"
+              class="hero-tab-pill shrink-0 px-3.5 py-1.5 rounded-full font-bold text-xs bg-white hover:border-[#101010] border border-[#d7d6cf] text-[#6e6d68] hover:text-[#101010] transition-all cursor-pointer shadow-xs"
+              data-cat="course"
+              data-target="/search?type=course"
+              data-placeholder="Cari kursus skill digital (UI/UX, Data, Python)..."
+              data-btn="Cari Pelatihan"
+            >
+              Pelatihan Skill
+            </button>
+          )}
         </div>
 
         <!-- Big Search Bar (Pill Shape) -->
-        <div class="w-full max-w-xl bg-white border border-[#d7d6cf] focus-within:border-[#0000ff] focus-within:ring-4 focus-within:ring-blue-500/10 rounded-full shadow-[0_4px_20px_-2px_rgba(16,16,16,0.06)] p-1.5 pl-4 flex items-center gap-2 transition-all mb-5">
+        <form
+          action="/search"
+          method="GET"
+          id="hero-search-form"
+          class="w-full max-w-xl bg-white border border-[#d7d6cf] focus-within:border-[#1738D1] focus-within:ring-4 focus-within:ring-blue-500/10 rounded-full shadow-[0_4px_20px_-2px_rgba(16,16,16,0.06)] p-1.5 pl-3 sm:pl-4 flex items-center gap-2 transition-all mb-4"
+        >
           <div class="text-[#6e6d68] shrink-0">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 sm:w-5 h-4 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
           </div>
           <input
             type="text"
+            name="q"
             id="hero-search-input"
-            placeholder="Cari lowongan, artikel, sertifikasi, course, atau event..."
-            class="flex-1 text-xs sm:text-sm text-[#101010] placeholder-[#a5a5a1] outline-none bg-transparent font-medium"
+            placeholder="Cari apa saja (lowongan, event, tips karier, kursus)..."
+            class="min-w-0 flex-1 text-xs sm:text-sm text-[#101010] placeholder-[#6e6d68] outline-none bg-transparent font-medium"
           />
+          <input type="hidden" name="type" id="hero-search-type" value="all" />
           <button
-            type="button"
+            type="submit"
             id="hero-search-btn"
-            class="px-5 sm:px-6 py-2.5 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs sm:text-sm shadow-[0_4px_14px_rgba(23,56,209,0.25)] transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer shrink-0"
+            class="px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs sm:text-sm shadow-[0_4px_14px_rgba(23,56,209,0.25)] transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer shrink-0 whitespace-nowrap"
           >
-            Temukan Peluang →
+            <span class="hidden sm:inline">Cari Semua</span>
+            <span class="sm:hidden">Cari</span>
           </button>
-        </div>
+        </form>
 
-        <!-- Popular Tags Row with Uniform Capsule Chips -->
-        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs">
-          <span class="font-bold text-[#101010] mr-1 text-xs">Populer:</span>
-          <a href="/lowongan?loc=jakarta" class="px-3.5 py-1 bg-white hover:border-[#101010] border border-[#d7d6cf] rounded-full font-bold text-xs text-[#6e6d68] hover:text-[#101010] transition shadow-xs">
+        <!-- Popular Tags Row with Essential Focus (Scrollable di Mobile) -->
+        <div class="flex items-center gap-1.5 sm:gap-2 text-xs overflow-x-auto no-scrollbar whitespace-nowrap pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap max-w-full">
+          <span class="font-bold text-[#101010] mr-1 text-xs shrink-0">Populer:</span>
+          <a href="/search?q=jakarta" class="shrink-0 px-3 py-1 bg-white hover:border-[#101010] border border-[#d7d6cf] rounded-full font-bold text-xs text-[#6e6d68] hover:text-[#101010] transition shadow-xs">
             Jakarta
           </a>
-          <a href="/lowongan?type=remote" class="px-3.5 py-1 bg-white hover:border-[#101010] border border-[#d7d6cf] rounded-full font-bold text-xs text-[#6e6d68] hover:text-[#101010] transition shadow-xs">
+          <a href="/search?q=bumn" class="shrink-0 px-3 py-1 bg-white hover:border-[#101010] border border-[#d7d6cf] rounded-full font-bold text-xs text-[#6e6d68] hover:text-[#101010] transition shadow-xs">
+            BUMN
+          </a>
+          <a href="/search?q=remote" class="shrink-0 px-3 py-1 bg-white hover:border-[#101010] border border-[#d7d6cf] rounded-full font-bold text-xs text-[#6e6d68] hover:text-[#101010] transition shadow-xs">
             Remote
           </a>
-          <a href="/lowongan?exp=fresh" class="px-3.5 py-1 bg-white hover:border-[#101010] border border-[#d7d6cf] rounded-full font-bold text-xs text-[#6e6d68] hover:text-[#101010] transition shadow-xs">
+          <a href="/search?q=fresh+graduate" class="shrink-0 px-3 py-1 bg-white hover:border-[#101010] border border-[#d7d6cf] rounded-full font-bold text-xs text-[#6e6d68] hover:text-[#101010] transition shadow-xs">
             Fresh Graduate
           </a>
-          <a href="/lowongan?type=magang" class="px-3.5 py-1 bg-white hover:border-[#101010] border border-[#d7d6cf] rounded-full font-bold text-xs text-[#6e6d68] hover:text-[#101010] transition shadow-xs">
-            Magang
+          <a href="/search?q=webinar" class="shrink-0 px-3 py-1 bg-white hover:border-[#101010] border border-[#d7d6cf] rounded-full font-bold text-xs text-[#6e6d68] hover:text-[#101010] transition shadow-xs">
+            Webinar
           </a>
-          <a href="/job-fair" class="px-3.5 py-1 bg-white hover:border-[#101010] border border-[#d7d6cf] rounded-full font-bold text-xs text-[#6e6d68] hover:text-[#101010] transition shadow-xs">
-            Job Fair
-          </a>
-          <a href="/sertifikat?q=google" class="px-3.5 py-1 bg-white hover:border-[#101010] border border-[#d7d6cf] rounded-full font-bold text-xs text-[#6e6d68] hover:text-[#101010] transition shadow-xs">
-            Sertifikasi Google
-          </a>
-          <a href="/kursus?price=gratis" class="px-3.5 py-1 bg-white hover:border-[#101010] border border-[#d7d6cf] rounded-full font-bold text-xs text-[#6e6d68] hover:text-[#101010] transition shadow-xs">
-            Course Gratis
+          <a href="/search?q=cv" class="shrink-0 px-3 py-1 bg-white hover:border-[#101010] border border-[#d7d6cf] rounded-full font-bold text-xs text-[#6e6d68] hover:text-[#101010] transition shadow-xs">
+            Panduan CV
           </a>
         </div>
       </div>
@@ -147,8 +173,9 @@
   (function() {
     const tabs = document.querySelectorAll('.hero-tab-pill');
     const input = document.getElementById('hero-search-input');
+    const typeInput = document.getElementById('hero-search-type');
     const searchBtn = document.getElementById('hero-search-btn');
-    let currentTarget = null;
+    let currentTarget = '/search';
 
     tabs.forEach((tab) => {
       tab.addEventListener('click', () => {
@@ -161,40 +188,28 @@
 
         const placeholder = tab.getAttribute('data-placeholder');
         if (input && placeholder) input.placeholder = placeholder;
-        currentTarget = tab.getAttribute('data-target');
+        
+        currentTarget = tab.getAttribute('data-target') || '/search';
+        const cat = tab.getAttribute('data-cat') || 'all';
+        if (typeInput) typeInput.value = cat;
+
+        const btnText = tab.getAttribute('data-btn') || 'Cari';
+        if (searchBtn) {
+          const deskText = searchBtn.querySelector('.hidden.sm\\:inline') || searchBtn.querySelector('span');
+          if (deskText) deskText.textContent = btnText;
+        }
       });
     });
 
-    function executeSearch() {
+    const form = document.getElementById('hero-search-form');
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
       const q = input?.value?.trim() || '';
-      if (currentTarget) {
-        window.location.href = `${currentTarget}${q ? '?q=' + encodeURIComponent(q) : ''}`;
-      } else {
-        const modal = document.getElementById('global-search-modal');
-        const modalInput = document.getElementById('modal-search-input');
-        if (modal) {
-          modal.classList.remove('hidden');
-          modal.classList.add('flex');
-          if (modalInput) {
-            modalInput.value = q;
-            modalInput.focus();
-          }
-        }
+      let url = currentTarget || '/search';
+      if (q) {
+        url += (url.includes('?') ? '&' : '?') + 'q=' + encodeURIComponent(q);
       }
-    }
-
-    searchBtn?.addEventListener('click', (e) => {
-      if (currentTarget) {
-        e.stopImmediatePropagation();
-        executeSearch();
-      }
-    });
-
-    input?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && currentTarget) {
-        e.stopImmediatePropagation();
-        executeSearch();
-      }
+      window.location.href = url;
     });
   })();
 </script>

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@employr/db";
+import { prisma, encryptSecret, decryptSecret } from "@employr/db";
 
 // PUT: Update provider by ID
 export async function PUT(
@@ -29,7 +29,7 @@ export async function PUT(
       data: {
         ...(name && { name, label: label || name }),
         ...(endpointUrl && { base_url: endpointUrl }),
-        ...(shouldUpdateApiKey && { api_key: apiKey.trim() }),
+        ...(shouldUpdateApiKey && { api_key: encryptSecret(apiKey.trim()) }),
         ...(model && { model }),
         ...(priority !== undefined && { priority }),
         ...(isActive !== undefined && { is_active: isActive }),
@@ -39,9 +39,10 @@ export async function PUT(
       },
     });
 
+    const plainKey = updated.api_key ? decryptSecret(updated.api_key) : "";
     const sanitized = {
       ...updated,
-      api_key: updated.api_key ? `${updated.api_key.slice(0, 3)}••••••••${updated.api_key.slice(-4)}` : "••••••••",
+      api_key: plainKey ? `${plainKey.slice(0, 3)}••••••••${plainKey.slice(-4)}` : "••••••••",
     };
 
     return NextResponse.json({ success: true, data: sanitized });
@@ -62,6 +63,7 @@ export async function DELETE(
   try {
     const { id } = await params;
     await prisma.ai_providers.delete({ where: { id } });
+
     return NextResponse.json({ success: true, message: "Provider berhasil dihapus." });
   } catch (error: any) {
     console.error("[AI Providers API] DELETE Error:", error);

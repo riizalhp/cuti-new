@@ -21,6 +21,7 @@ import { CustomSelect } from '@/components/ui/CustomSelect';
 import { CustomDatePicker, isEndDateBeforeStartDate } from '@/components/ui/CustomDatePicker';
 import { AutoResizeTextarea } from '@/components/ui/AutoResizeTextarea';
 import { BulletPointListInput } from '@/components/ui/BulletPointListInput';
+import { JobTitleSearchSelect } from '@/components/ui/JobTitleSearchSelect';
 import { INDONESIAN_CITIES } from '@/lib/indonesianCities';
 import {
   FileText,
@@ -32,6 +33,7 @@ import {
   Award,
   CheckCircle2,
   Eye,
+  EyeOff,
   ArrowLeft,
   Save,
   Briefcase,
@@ -59,6 +61,7 @@ import {
   Zap,
   RefreshCw,
   FileDown,
+  ChevronLeft,
   ChevronRight,
   Info,
   Lock,
@@ -87,13 +90,16 @@ import {
   Youtube,
   Facebook,
   AlignLeft,
+  AlignCenter,
   AlignRight,
   Image as ImageIcon,
   FileCheck,
   Target,
 } from 'lucide-react';
 import { CvPurpose, CV_PURPOSE_PROFILES } from '@/lib/cv-purpose-scoring-engine';
-import { generateStarterCvPreset } from '@/lib/cv-starter-presets';
+import { generateStarterCvPreset, generateEmptyCvPreset } from '@/lib/cv-starter-presets';
+import { slugify, isUUID } from '@/lib/slug';
+import { parseCleanBulletLines, cleanBulletText } from '@/lib/cv-bullets';
 
 export const renderSocialIcon = (platform?: string, className = 'w-3.5 h-3.5 text-slate-700 shrink-0') => {
   const p = (platform || 'github').toLowerCase();
@@ -183,10 +189,7 @@ const RenderBulletDescription: React.FC<{ text?: string; className?: string }> =
   className = 'text-xs leading-relaxed text-slate-700 text-justify break-words [word-break:break-word]',
 }) => {
   if (!text || !text.trim()) return null;
-  const lines = text
-    .split('\n')
-    .map((l) => l.replace(/^[\s•\-\*\d\.\)]+/, '').trim())
-    .filter(Boolean);
+  const lines = parseCleanBulletLines(text);
 
   if (lines.length === 0) return null;
 
@@ -345,7 +348,7 @@ const CitySearchInput = ({
             onChange(e.target.value);
             setIsOpen(true);
           }}
-          className="w-full pl-9 pr-8 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+          className="w-full pl-9 pr-8 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 transition shadow-2xs"
         />
         {query ? (
           <button
@@ -375,14 +378,14 @@ const CitySearchInput = ({
                 onChange(city);
                 setIsOpen(false);
               }}
-              className="w-full text-left px-3.5 py-2 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:text-teal-700 dark:hover:text-teal-300 text-slate-700 dark:text-slate-200 font-medium transition cursor-pointer flex items-center justify-between group"
+              className="w-full text-left px-3.5 py-2 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-[#1738D1] dark:hover:text-blue-300 text-slate-700 dark:text-slate-200 font-medium transition cursor-pointer flex items-center justify-between group"
             >
               <span className="flex items-center gap-2">
-                <MapPin className="w-3 h-3 text-slate-400 group-hover:text-teal-500 transition-colors shrink-0" />
+                <MapPin className="w-3 h-3 text-slate-400 group-hover:text-[#1738D1] transition-colors shrink-0" />
                 <span>{city}</span>
               </span>
               {query.trim() && city.toLowerCase() === query.toLowerCase().trim() && (
-                <Check className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                <Check className="w-3.5 h-3.5 text-[#1738D1] shrink-0" />
               )}
             </button>
           ))}
@@ -435,7 +438,7 @@ const CVSectionCard = ({
         zIndex: isPointerDragging ? 50 : undefined,
         transition: isPointerDragging ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
       }}
-      className={`border rounded-[10px] bg-white dark:bg-slate-900 transition-all duration-200 relative touch-none ${
+      className={`border rounded-[10px] bg-white dark:bg-slate-900 transition-all duration-200 relative ${
         isPointerDragging
           ? 'shadow-2xl border-2 border-[#1738D1] ring-4 ring-[#1738D1]/25 opacity-100 bg-white dark:bg-slate-900 cursor-grabbing'
           : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs'
@@ -443,7 +446,9 @@ const CVSectionCard = ({
     >
       <div
         onClick={onToggle}
-        className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition border-b border-slate-100 dark:border-slate-800 rounded-t-[10px] cursor-pointer select-none group"
+        className={`w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition ${
+          isOpen ? 'border-b border-slate-100 dark:border-slate-800 rounded-t-[10px]' : 'rounded-[10px]'
+        } cursor-pointer select-none group`}
       >
         <div className="flex items-center gap-2.5 min-w-0">
           <div
@@ -451,19 +456,20 @@ const CVSectionCard = ({
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             onClick={(e) => e.stopPropagation()}
-            className="cursor-grab active:cursor-grabbing p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 touch-none select-none"
+            className="cursor-grab active:cursor-grabbing p-2 min-h-[36px] min-w-[36px] text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 touch-none select-none"
             title="Tarik untuk mengatur posisi section di CV"
+            aria-label={`Ubah urutan section ${title}`}
           >
             <GripVertical className="w-4 h-4" />
           </div>
-          <span className="font-bold text-sm text-slate-800 dark:text-white truncate group-hover:text-orange-500 transition">
+          <span className="font-bold text-sm text-slate-800 dark:text-white truncate group-hover:text-[#1738D1] transition">
             {title}
           </span>
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
-          <div className="p-1 text-slate-500 dark:text-slate-400 group-hover:text-orange-500 rounded-[10px] transition">
-            {isOpen ? <ChevronUp className="w-4 h-4 text-orange-500" /> : <ChevronDown className="w-4 h-4" />}
+          <div className="p-1 min-h-[36px] min-w-[36px] flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:text-[#1738D1] rounded-[10px] transition">
+            {isOpen ? <ChevronUp className="w-4 h-4 text-[#1738D1]" /> : <ChevronDown className="w-4 h-4" />}
           </div>
         </div>
       </div>
@@ -523,7 +529,7 @@ const SkillsEditorSection: React.FC<{
         <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">
           Tambah Skill Utama (1 per 1)
         </label>
-        <div className="relative flex items-center gap-2">
+        <div className="relative flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <div className="relative flex-1">
             <input
               type="text"
@@ -540,7 +546,7 @@ const SkillsEditorSection: React.FC<{
                   handleAddSkill();
                 }
               }}
-              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
             />
 
             {/* Dropdown Suggestions */}
@@ -551,7 +557,7 @@ const SkillsEditorSection: React.FC<{
                     key={i}
                     type="button"
                     onClick={() => handleAddSkill(sug)}
-                    className="w-full text-left px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/50 hover:text-teal-600 dark:hover:text-teal-400 rounded-[10px] transition cursor-pointer flex items-center justify-between"
+                    className="w-full text-left px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:text-[#1738D1] dark:hover:text-blue-300 rounded-[8px] transition cursor-pointer flex items-center justify-between"
                   >
                     <span>{sug}</span>
                     <Plus className="w-3.5 h-3.5 opacity-60" />
@@ -561,7 +567,7 @@ const SkillsEditorSection: React.FC<{
                   <button
                     type="button"
                     onClick={() => handleAddSkill(inputValue.trim())}
-                    className="w-full text-left px-3 py-2 text-xs font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition cursor-pointer flex items-center justify-between border-t border-slate-100 dark:border-slate-800 mt-1 pt-2"
+                    className="w-full text-left px-3 py-2 text-xs font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[8px] transition cursor-pointer flex items-center justify-between border-t border-slate-100 dark:border-slate-800 mt-1 pt-2"
                   >
                     <span>Tambah &quot;{inputValue.trim()}&quot; sebagai keahlian baru</span>
                     <Plus className="w-3.5 h-3.5" />
@@ -574,7 +580,7 @@ const SkillsEditorSection: React.FC<{
           <button
             type="button"
             onClick={() => handleAddSkill()}
-            className="px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition flex items-center gap-1 shrink-0 cursor-pointer shadow-2xs"
+            className="px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs transition flex items-center justify-center gap-1 shrink-0 cursor-pointer shadow-2xs"
           >
             <Plus className="w-4 h-4" />
             <span>Tambah</span>
@@ -587,13 +593,15 @@ const SkillsEditorSection: React.FC<{
         {skills.filter(Boolean).map((sk, skIdx) => (
           <span
             key={skIdx}
-            className="px-3 py-1.5 rounded-[10px] bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 text-xs font-bold flex items-center gap-2 shadow-2xs"
+            className="px-3 py-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold flex items-center gap-2 shadow-2xs"
           >
-            {sk}
+            <span>{sk}</span>
             <button
               type="button"
               onClick={() => handleRemoveSkill(skIdx)}
-              className="w-4 h-4 rounded-full bg-teal-200/60 dark:bg-teal-800/60 hover:bg-rose-500 hover:text-white text-teal-700 dark:text-teal-300 flex items-center justify-center transition cursor-pointer text-[10px]"
+              className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 hover:bg-rose-500 hover:text-white text-slate-600 dark:text-slate-300 flex items-center justify-center transition cursor-pointer text-[11px]"
+              title={`Hapus ${sk}`}
+              aria-label={`Hapus ${sk}`}
             >
               ✕
             </button>
@@ -782,8 +790,9 @@ export interface CVData {
   fullName: string;
   headline: string;
   photoUrl?: string;
+  showPhoto?: boolean;
   photoShape?: 'circle' | 'square';
-  photoPosition?: 'left' | 'right';
+  photoPosition?: 'left' | 'center' | 'right';
 
   // 2. Informasi Kontak & Social Media
   email: string;
@@ -1004,7 +1013,7 @@ const packages: PackageOption[] = [
   },
 ];
 
-interface TemplateOption {
+export interface TemplateOption {
   id: string;
   name: string;
   badge: string;
@@ -1014,11 +1023,16 @@ interface TemplateOption {
   hidden?: boolean;
 }
 
-const cvTemplates: TemplateOption[] = [
+export const mergeFragmentCertifications = (certs: any[]): any[] => {
+  if (!Array.isArray(certs)) return [];
+  return certs.filter(Boolean);
+};
+
+export const cvTemplates: TemplateOption[] = [
   {
     id: 'ats-modern',
     name: 'ATS Modern Standard',
-    badge: '1 Column ATS',
+    badge: '1 Kolom ATS',
     description: 'Format tunggal paling optimal untuk sistem ATS HRD BUMN & Multinasional. Memaksimalkan pembacaan kata kunci.',
     iconColor: 'bg-blue-600 text-white',
     features: ['100% Parsing ATS Friendly', 'Font Standar Internasional', 'Hierarki Pengalaman Jelas'],
@@ -1026,7 +1040,7 @@ const cvTemplates: TemplateOption[] = [
   {
     id: 'ketat-serif',
     name: 'Ketat Ruled Serif',
-    badge: 'Classic Serif',
+    badge: 'Serif Klasik',
     description: 'Format serif ringkas dengan garis pemisah (ruled heading). Sangat disukai industri Perbankan, Hukum, & BUMN.',
     iconColor: 'bg-slate-800 text-white',
     features: ['Garis Pemisah Ruled Heading', 'Font Serif Formal', 'Tata Letak Padat & Rapi'],
@@ -1034,23 +1048,15 @@ const cvTemplates: TemplateOption[] = [
   {
     id: 'luasa-minimal',
     name: 'Luasa Airy Minimalist',
-    badge: 'Minimalist',
+    badge: 'Minimalis',
     description: 'Tampilan bersih dengan spasi antar elemen yang lega dan letterspaced heading. Cocok untuk Profesional & Manager.',
     iconColor: 'bg-sky-600 text-white',
     features: ['Spasi Elemen Lega', 'Letterspaced Headings', 'Desain Modern & Clean'],
   },
   {
-    id: 'tebal-bold',
-    name: 'Tebal Bold Statement',
-    badge: 'Bold ATS',
-    description: 'Template tegas dengan nama besar & blok judul uppercase hitam. Sangat eyecatching tanpa mengorbankan parser ATS.',
-    iconColor: 'bg-slate-900 text-white',
-    features: ['Header Nama Ekstra Besar', 'Blok Judul Uppercase', 'Visual Strong & Clear'],
-  },
-  {
     id: 'harvard-modern',
     name: 'Harvard Modern Grid',
-    badge: '2 Column Grid',
+    badge: 'Grid 2 Kolom',
     description: 'Layout 2 kolom dengan grid date-content yang rapi. Inspired by Harvard Business School resume format.',
     iconColor: 'bg-slate-900 text-white',
     features: ['Grid Layout Professional', 'Date di Kolom Kiri', 'Minimal & Clean'],
@@ -1058,7 +1064,7 @@ const cvTemplates: TemplateOption[] = [
   {
     id: 'rezi-classic',
     name: 'Rezi Classic Serif',
-    badge: 'Academic',
+    badge: 'Akademis',
     description: 'Font serif klasik dengan layout tradisional. Sangat cocok untuk posisi akademis, legal, dan consulting.',
     iconColor: 'bg-blue-800 text-white',
     features: ['Font Serif Klasik', 'Traditional Layout', 'Formal & Authoritative'],
@@ -1066,80 +1072,107 @@ const cvTemplates: TemplateOption[] = [
   {
     id: 'minimalist-executive',
     name: 'Minimalist Executive',
-    badge: 'Executive',
+    badge: 'Eksekutif',
     description: 'Desain bersih dengan tata letak ringkas & elegan. Sangat cocok untuk posisi Manajerial, Finansial, & Konsultan.',
     iconColor: 'bg-slate-800 text-white',
     features: ['Ringkasan Eksekutif Dominan', 'Garis Pemisah Minimalis', 'Tampilan Rapi & Formal'],
   },
-  {
-    id: 'creative-tech',
-    name: 'Creative Tech & Digital',
-    badge: 'Tech & Product',
-    description: 'Menonjolkan daftar Tech Stack, sertifikasi profesional, dan portofolio. Sangat ideal untuk Developer & Designer.',
-    iconColor: 'bg-emerald-600 text-white',
-    features: ['Sorotan Skill Pill Badges', 'Kategori Proyek & Portofolio', 'Tata Letak Modern'],
-  },
-  {
-    id: 'resumify-tech-sidebar',
-    name: 'Split Dark Sidebar',
-    badge: 'Split Sidebar',
-    description: 'Layout 2 kolom dengan sidebar kiri berwarna gelap khusus Kontak, Pendidikan, & Keahlian.',
-    iconColor: 'bg-slate-900 text-white',
-    features: ['Dark Left Sidebar', 'Pemisahan Area Jelas', 'Ideal untuk IT & Designer'],
-  },
-  {
-    id: 'studio-timeline',
-    name: 'Chronological Timeline',
-    badge: 'Timeline Visual',
-    description: 'Menampilkan riwayat karir dalam alur timeline vertikal dengan garis pembatas ber-node.',
-    iconColor: 'bg-indigo-600 text-white',
-    features: ['Visual Vertical Line', 'Node Point Chronology', 'Khas Resume Studio'],
-  },
-  {
-    id: 'studio-accent-tabs',
-    name: 'Accent Tab Headings',
-    badge: 'Tab Headings',
-    description: 'Judul seksi berbentuk tab persegi berwarna yang sangat mudah dinavigasi oleh pembaca.',
-    iconColor: 'bg-indigo-500 text-white',
-    features: ['Header Berbentuk Tab', 'Struktur Blok Terpisah', 'Mudah Dibaca'],
-  },
-  {
-    id: 'builder-creative-box',
-    name: 'Boxed Section Container',
-    badge: 'Box Container',
-    description: 'Setiap bagian pengalaman dan pendidikan terbungkus rapi dalam kontainer bingkai terstruktur.',
-    iconColor: 'bg-emerald-700 text-white',
-    features: ['Kartu Seksi Bergaris', 'Pemisahan Visual Tegas', 'Rapi & Teratur'],
-  },
-  {
-    id: 'builder-two-column',
-    name: 'Equal 50:50 Split Grid',
-    badge: '50:50 Split',
-    description: 'Layout 2 kolom seimbang (50% kiri, 50% kanan) untuk memaksimalkan kepadatan 1 halaman A4.',
-    iconColor: 'bg-indigo-800 text-white',
-    features: ['Split 50:50 Canvas', 'Padat & Ringkas', 'Memaksimalkan Ruang'],
-  },
-  {
-    id: 'impact-professional',
-    name: 'Left Border Accent Highlight',
-    badge: 'Left Border Accent',
-    description: 'Header seksi bergaris bawah tebal dengan aksen border kiri pada setiap poin riwayat kerja.',
-    iconColor: 'bg-blue-600 text-white',
-    features: ['Border Kiri Konten', 'Header Section Ber-Badge', 'Visual Hierarchy Strong'],
-  },
 ];
+
+export function extractFormDataFromCv(cv: CVData | null | undefined): Omit<CVData, 'id' | 'updatedAt' | 'atsScore' | 'title'> {
+  if (!cv) {
+    return {
+      sectionOrder: DEFAULT_SECTION_ORDER,
+      firstName: '',
+      lastName: '',
+      fullName: '',
+      headline: '',
+      photoUrl: '',
+      showPhoto: true,
+      email: '',
+      phone: '',
+      website: '',
+      linkedin: '',
+      github: '',
+      instagram: '',
+      city: '',
+      province: '',
+      country: '',
+      location: '',
+      summary: '',
+      experience: [],
+      internships: [],
+      projects: [],
+      organizations: [],
+      education: [],
+      certifications: [],
+      skillsList: [],
+      skills: [],
+      languages: [],
+      courses: [],
+      scholarships: [],
+      volunteers: [],
+      references: [],
+    };
+  }
+  const resolvedFullName = cv.fullName || '';
+  const resolvedFirst = cv.firstName || (resolvedFullName ? resolvedFullName.split(' ')[0] : '');
+  const resolvedLast = cv.lastName || (resolvedFullName ? resolvedFullName.split(' ').slice(1).join(' ') : '');
+
+  return {
+    sectionOrder: cv.sectionOrder || DEFAULT_SECTION_ORDER,
+    firstName: resolvedFirst,
+    lastName: resolvedLast,
+    fullName: resolvedFullName,
+    headline: cv.headline || '',
+    photoUrl: cv.photoUrl || '',
+    showPhoto: cv.showPhoto !== undefined ? cv.showPhoto : true,
+    email: cv.email || '',
+    phone: cv.phone || '',
+    website: cv.website || '',
+    linkedin: cv.linkedin || '',
+    github: cv.github || '',
+    instagram: (cv as any).instagram || '',
+    city: cv.city || '',
+    province: cv.province || '',
+    country: cv.country || '',
+    location: cv.location || '',
+    summary: cv.summary || '',
+    skills: Array.isArray(cv.skills) ? [...cv.skills] : [],
+    skillsList: Array.isArray(cv.skillsList) ? [...cv.skillsList] : [],
+    experience: Array.isArray(cv.experience) ? [...cv.experience] : [],
+    education: Array.isArray(cv.education) ? [...cv.education] : [],
+    courses: Array.isArray(cv.courses) ? [...cv.courses] : [],
+    scholarships: Array.isArray(cv.scholarships) ? [...cv.scholarships] : [],
+    volunteers: Array.isArray(cv.volunteers) ? [...cv.volunteers] : [],
+    references: Array.isArray(cv.references) ? [...cv.references] : [],
+    internships: Array.isArray(cv.internships) ? [...cv.internships] : [],
+    projects: Array.isArray(cv.projects) ? [...cv.projects] : [],
+    organizations: Array.isArray(cv.organizations) ? [...cv.organizations] : [],
+    certifications: Array.isArray(cv.certifications) ? [...cv.certifications] : [],
+    languages: Array.isArray(cv.languages) ? [...cv.languages] : [],
+  };
+}
 
 export interface CVViewProps {
   cvId?: string;
+  initialCV?: CVData | null;
 }
 
-export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
+export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
   const router = useRouter();
   const toast = useToast();
   const [isMounted, setIsMounted] = useState(false);
 
   const [isLoadingCvList, setIsLoadingCvList] = useState<boolean>(true);
-  const [cvList, setCvList] = useState<CVData[]>(initialCVs);
+  const [isLoadingDetail, setIsLoadingDetail] = useState<boolean>(() => {
+    if (initialCV) return false;
+    return Boolean(cvId && cvId !== 'create' && !initialCVs.some((c) => c.id === cvId || (c as any).slug === cvId || slugify(c.title || '') === cvId));
+  });
+  const [cvList, setCvList] = useState<CVData[]>(() => {
+    if (initialCV) return [initialCV, ...initialCVs];
+    return initialCVs;
+  });
   const [viewMode, setViewMode] = useState<'list' | 'create' | 'preview' | 'ai-wizard' | 'ai-progress' | 'template-wizard'>(() => {
     if (!cvId) return 'list';
     if (cvId === 'create') return 'template-wizard';
@@ -1147,8 +1180,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   });
 
   const [selectedCV, setSelectedCV] = useState<CVData | null>(() => {
+    if (initialCV) return initialCV;
     if (!cvId || cvId === 'create') return null;
-    const found = initialCVs.find((c) => c.id === cvId);
+    const found = initialCVs.find((c) => c.id === cvId || (c as any).slug === cvId || slugify(c.title || '') === cvId);
     return found || null;
   });
 
@@ -1168,7 +1202,6 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const [targetBulletText, setTargetBulletText] = useState('');
   const [bulletApplyHandler, setBulletApplyHandler] = useState<((newVal: string, feedback: string) => void) | null>(null);
 
-  const [aiToastMessage, setAiToastMessage] = useState<string | null>(null);
   const [isImportingResume, setIsImportingResume] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
   const [isDragOverImport, setIsDragOverImport] = useState(false);
@@ -1196,10 +1229,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   };
 
   const handleAiSuccessFeedback = (feedbackMsg: string) => {
-    setAiToastMessage(feedbackMsg);
-    setTimeout(() => {
-      setAiToastMessage(null);
-    }, 4000);
+    toast.success('Bullet Berhasil Diperbarui', feedbackMsg);
 
     if (selectedCV) {
       const metrics = calculateAtsScore(selectedCV);
@@ -1211,6 +1241,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const [deletingCvTarget, setDeletingCvTarget] = useState<CVData | null>(null);
   const lastSavedSnapshotRef = useRef<string>('');
   const prevCvIdRef = useRef<string | undefined | null>(undefined);
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
+  const latestUpdatedCvRef = useRef<CVData | null>(null);
+  const pendingCloudSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Set isMounted on mount and warm cache from localStorage
   useEffect(() => {
@@ -1250,6 +1283,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               localStorage.setItem('cuti_cv_list', JSON.stringify(enriched));
             } catch {}
           }
+          if (cvId && cvId !== 'create' && !selectedCV) {
+            const matching = enriched.find((c) => c.id === cvId || (c as any).slug === cvId || slugify(c.title || '') === cvId);
+            if (matching) {
+              handleOpenCvDetail(matching);
+              setIsLoadingDetail(false);
+            }
+          }
         }
       })
       .catch((err) => {
@@ -1288,9 +1328,15 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     }
 
     if (cvId === 'create') {
-      setViewMode('create');
+      setViewMode('template-wizard');
+      setTemplateModalStep(1);
       resetForm();
-      setIsFormDrawerOpen(true);
+      return;
+    }
+
+    if (initialCV && ((initialCV as any).slug === cvId || initialCV.id === cvId || slugify(initialCV.title || '') === cvId)) {
+      handleOpenCvDetail(initialCV);
+      setIsLoadingDetail(false);
       return;
     }
 
@@ -1311,9 +1357,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     }
 
     // Try finding in list or individual key or fetch from API
-    let cv = activeCvList.find((c) => c.id === cvId);
+    let cv = activeCvList.find((c) => c.id === cvId || (c as any).slug === cvId || slugify(c.title || '') === cvId);
     if (!cv && typeof window !== 'undefined') {
-      const storedSingle = localStorage.getItem(`cuti_cv_data_${cvId}`);
+      const storedSingle = localStorage.getItem('cuti_cv_data_' + cvId);
       if (storedSingle) {
         try {
           cv = JSON.parse(storedSingle);
@@ -1323,313 +1369,49 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       }
     }
 
-    if (!cv) {
-      cvApi.getById<CVData>(cvId).then((fetched) => {
+    if (cv) {
+      handleOpenCvDetail(cv);
+      setIsLoadingDetail(false);
+      return;
+    }
+
+    setIsLoadingDetail(true);
+    const targetCvId = cvId;
+
+    cvApi
+      .getById<CVData>(cvId)
+      .then((fetched) => {
+        if (prevCvIdRef.current !== targetCvId) return;
         if (fetched) {
           handleOpenCvDetail(fetched);
-        }
-      });
-    }
-
-    if (cv) {
-      const importedStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_imported_cv_data') : null;
-      const importedData = importedStr ? JSON.parse(importedStr) : null;
-      const onboardingStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_onboarding_profile') : null;
-      const onboardingProfile = onboardingStr ? JSON.parse(onboardingStr) : null;
-      const profileSource = importedData || onboardingProfile;
-
-      const resolvedFullName = cv.fullName || profileSource?.fullName || '';
-      const resolvedFirst = cv.firstName || (resolvedFullName ? resolvedFullName.split(' ')[0] : '');
-      const resolvedLast = cv.lastName || (resolvedFullName ? resolvedFullName.split(' ').slice(1).join(' ') : '');
-      const resolvedEmail = cv.email || profileSource?.contactInfo || '';
-      const resolvedPhone = cv.phone || profileSource?.phone || '';
-      const resolvedLocation = cv.location || profileSource?.location || '';
-
-      const isSentenceFragmentTitle = (title: string): boolean => {
-        if (!title) return false;
-        const t = title.trim();
-        if (/^[a-z]/.test(t)) return true;
-        if (/^(development|timelines|successfully|leading|achieving|ensuring|reducing|increasing|enhancing|providing|maintaining|improving|mitigation|completion|deliverables)\b/i.test(t)) return true;
-        if (t.split(/\s+/).length > 8 && /[\.\!\?]$/.test(t)) return true;
-        return false;
-      };
-
-      const mergeFragmentItems = <T extends Record<string, any>>(items: T[]): T[] => {
-        const result: T[] = [];
-        for (const item of items) {
-          const title = item.name || item.role || item.company || '';
-          if (isSentenceFragmentTitle(title) && result.length > 0) {
-            const prev = result[result.length - 1];
-            const extra = [title, (item as any).description].filter(Boolean).join('\n');
-            (prev as any).description = (prev as any).description ? `${(prev as any).description}\n${extra}` : extra;
-          } else if (!isSentenceFragmentTitle(title)) {
-            result.push({ ...item });
+          const cleanSlug = (fetched as any).slug || slugify(fetched.title || 'cv-ats');
+          if (cleanSlug && typeof window !== 'undefined' && window.location.pathname !== '/cv/' + cleanSlug) {
+            window.history.replaceState(null, '', '/cv/' + cleanSlug);
           }
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('employr_active_cv_title', fetched.title);
+            window.dispatchEvent(new CustomEvent('employr:cv-title-change', { detail: { title: fetched.title } }));
+          }
+        } else {
+          toast.error('CV tidak ditemukan.');
+          router.push('/cv');
         }
-        return result;
-      };
-
-      const resolvedSkills = Array.isArray(cv.skills)
-        ? cv.skills
-        : (profileSource?.skills || []);
-      const resolvedSummary = cv.summary !== undefined && cv.summary !== null
-        ? cv.summary
-        : (profileSource?.summary || '');
-      const rawExp: ExperienceItem[] = Array.isArray(cv.experience)
-        ? cv.experience
-        : (profileSource?.experience || []);
-      const resolvedExp: ExperienceItem[] = mergeFragmentItems<ExperienceItem>(rawExp);
-
-      const resolvedEdu: EducationItem[] = Array.isArray(cv.education)
-        ? cv.education
-        : (profileSource?.education || []);
-
-      const rawProjects: ProjectItem[] = Array.isArray(cv.projects)
-        ? cv.projects
-        : (profileSource?.projects || []);
-      const resolvedProjects: ProjectItem[] = mergeFragmentItems<ProjectItem>(rawProjects);
-
-      const rawOrgs: OrganizationItem[] = Array.isArray(cv.organizations)
-        ? cv.organizations
-        : (profileSource?.organizations || []);
-      const resolvedOrgs: OrganizationItem[] = mergeFragmentItems<OrganizationItem>(rawOrgs);
-
-      const rawCerts: CertificationItem[] = Array.isArray(cv.certifications)
-        ? cv.certifications
-        : (profileSource?.certifications || []);
-      const resolvedCerts: CertificationItem[] = rawCerts.map((cert) => {
-        let name = cert.name || '';
-        let issuer = cert.issuer || '';
-        let issueDate = cert.issueDate || (cert as any).date || '';
-
-        const certDateMatch = (issuer || name).match(/(Jan(?:uari)?|Feb(?:ruari)?|Mar(?:et)?|Apr(?:il)?|May|Mei|Jun(?:i|e)?|Jul(?:i|y)?|Aug(?:ustus)?|Agu(?:stus)?|Sep(?:tember)?|Oct(?:ober)?|Okt(?:ober)?|Nov(?:ember)?|Dec(?:ember)?|Des(?:ember)?)\s+\d{4}|\b(19|20)\d{2}\b/i);
-        if (certDateMatch && !issueDate) {
-          issueDate = certDateMatch[0].trim();
-          issuer = issuer.replace(certDateMatch[0], '').trim().replace(/^[-–—,]\s*/, '').replace(/[-–—,]\s*$/, '').trim();
+      })
+      .catch((err) => {
+        if (prevCvIdRef.current !== targetCvId) return;
+        console.error('[CVView] Failed to fetch CV detail:', err);
+        toast.error('Gagal memuat data CV.');
+        router.push('/cv');
+      })
+      .finally(() => {
+        if (prevCvIdRef.current === targetCvId) {
+          setIsLoadingDetail(false);
         }
-
-        return {
-          ...cert,
-          name,
-          issuer: issuer || 'Penerbit Sertifikat',
-          issueDate,
-        };
       });
-      const resolvedReferences = Array.isArray(cv.references)
-        ? cv.references
-        : (profileSource?.references || []);
-
-      const enrichedCv: CVData = {
-        ...cv,
-        fullName: resolvedFullName,
-        firstName: resolvedFirst,
-        lastName: resolvedLast,
-        email: resolvedEmail,
-        phone: resolvedPhone,
-        location: resolvedLocation,
-        summary: resolvedSummary,
-        skills: resolvedSkills,
-        experience: resolvedExp,
-        education: resolvedEdu,
-        projects: resolvedProjects,
-        organizations: resolvedOrgs,
-        certifications: resolvedCerts,
-        references: resolvedReferences,
-      };
-
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(`cuti_cv_data_${cvId}`, JSON.stringify(enrichedCv));
-        const currentListStr = localStorage.getItem('cuti_cv_list');
-        if (currentListStr) {
-          try {
-            const listArr = JSON.parse(currentListStr);
-            if (Array.isArray(listArr)) {
-              const updatedList = listArr.map((item: any) => (item.id === cvId ? enrichedCv : item));
-              localStorage.setItem('cuti_cv_list', JSON.stringify(updatedList));
-              setCvList(updatedList);
-            }
-          } catch {}
-        }
-      }
-
-      setSelectedCV(enrichedCv);
-      setTitleInput(enrichedCv.title);
-      setFormData({
-        firstName: resolvedFirst,
-        lastName: resolvedLast,
-        fullName: resolvedFullName,
-        headline: enrichedCv.headline || profileSource?.targetPositions?.[0] || 'Project Manager',
-        photoUrl: enrichedCv.photoUrl || '',
-        email: resolvedEmail,
-        phone: resolvedPhone,
-        website: enrichedCv.website || '',
-        linkedin: enrichedCv.linkedin || '',
-        github: enrichedCv.github || '',
-        city: enrichedCv.city || '',
-        province: enrichedCv.province || '',
-        country: enrichedCv.country || '',
-        location: resolvedLocation,
-        summary: resolvedSummary,
-        skills: resolvedSkills ? [...resolvedSkills] : [],
-        skillsList: enrichedCv.skillsList ? [...enrichedCv.skillsList] : [],
-        experience: resolvedExp ? [...resolvedExp] : [],
-        education: resolvedEdu ? [...resolvedEdu] : [],
-        courses: enrichedCv.courses ? [...enrichedCv.courses] : [],
-        scholarships: enrichedCv.scholarships ? [...enrichedCv.scholarships] : [],
-        volunteers: enrichedCv.volunteers ? [...enrichedCv.volunteers] : [],
-        references: resolvedReferences ? [...resolvedReferences] : [],
-        internships: enrichedCv.internships ? [...enrichedCv.internships] : [],
-        projects: resolvedProjects ? [...resolvedProjects] : [],
-        organizations: resolvedOrgs ? [...resolvedOrgs] : [],
-        certifications: resolvedCerts ? [...resolvedCerts] : [],
-        languages: enrichedCv.languages ? [...enrichedCv.languages] : [],
-      });
-      if (cv.templateId) {
-        setSelectedTemplateId(cv.templateId);
-      }
-      if (cv.docFontFamily) setDocFontFamily(cv.docFontFamily);
-      if (cv.docFontSize) setDocFontSize(cv.docFontSize);
-      if (cv.docSpacing) setDocSpacing(cv.docSpacing);
-      if (cv.docShowIcons !== undefined) setDocShowIcons(cv.docShowIcons);
-      if (cv.docNameSize !== undefined) setDocNameSize(cv.docNameSize);
-      if (cv.docHeaderSize !== undefined) setDocHeaderSize(cv.docHeaderSize);
-      if (cv.docBodySize !== undefined) setDocBodySize(cv.docBodySize);
-      if (cv.docSectionSpacing !== undefined) setDocSectionSpacing(cv.docSectionSpacing);
-      if (cv.docLineHeight !== undefined) setDocLineHeight(cv.docLineHeight);
-      if (cv.docLetterSpacing !== undefined) setDocLetterSpacing(cv.docLetterSpacing);
-      if (cv.docLinkStyle) setDocLinkStyle(cv.docLinkStyle);
-      if (cv.docMarginTop !== undefined) setDocMarginTop(cv.docMarginTop);
-      if (cv.docMarginBottom !== undefined) setDocMarginBottom(cv.docMarginBottom);
-      if (cv.docMarginLeft !== undefined) setDocMarginLeft(cv.docMarginLeft);
-      if (cv.docMarginRight !== undefined) setDocMarginRight(cv.docMarginRight);
-    } else {
-      const storedSession = typeof window !== 'undefined' ? getStoredSession() : null;
-      const importedStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_imported_cv_data') : null;
-      const importedData = importedStr ? JSON.parse(importedStr) : null;
-      const onboardingStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_onboarding_profile') : null;
-      const onboardingProfile = onboardingStr ? JSON.parse(onboardingStr) : null;
-
-      const profileSource = importedData || onboardingProfile;
-
-      const fallbackName = profileSource?.fullName || storedSession?.name || '';
-      const fallbackLocation = profileSource?.location || '';
-      const fallbackHeadline = profileSource?.targetPositions?.[0] || profileSource?.experienceTitle || '';
-      const fallbackEmail = profileSource?.contactInfo || storedSession?.email || '';
-      const fallbackPhone = profileSource?.phone || '';
-      const fallbackSkills = profileSource?.skills || [];
-      const fallbackExp: ExperienceItem[] = profileSource?.experience && profileSource.experience.length > 0
-        ? profileSource.experience
-        : (profileSource?.hasWorkExperience && profileSource?.experienceCompany)
-        ? [{
-            id: `exp-${Date.now()}`,
-            company: profileSource.experienceCompany,
-            role: profileSource.experienceTitle || fallbackHeadline || '',
-            period: 'Sekarang',
-            location: fallbackLocation,
-            isCurrent: true,
-            description: '',
-          }]
-        : [];
-      const fallbackEdu: EducationItem[] = profileSource?.education && profileSource.education.length > 0
-        ? profileSource.education
-        : profileSource?.institutionName
-        ? [{
-            id: `edu-${Date.now()}`,
-            institution: profileSource.institutionName,
-            degree: `${profileSource.educationLevel || ''} ${profileSource.major || ''}`.trim(),
-            year: '',
-            location: fallbackLocation,
-            gpa: '',
-            description: '',
-          }]
-        : [];
-      const fallbackProjects: ProjectItem[] = profileSource?.projects || [];
-      const fallbackOrgs: OrganizationItem[] = profileSource?.organizations || [];
-      const fallbackCerts: CertificationItem[] = profileSource?.certifications || [];
-      const fallbackSummary = profileSource?.summary || '';
-
-      const fallbackCv: CVData = {
-        id: cvId,
-        templateId: 'ats-modern',
-        title: fallbackName ? `CV ATS - ${fallbackName}` : 'CV ATS',
-        updatedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-        atsScore: 0,
-        firstName: '',
-        lastName: '',
-        fullName: fallbackName,
-        headline: fallbackHeadline,
-        photoUrl: '',
-        email: fallbackEmail,
-        phone: fallbackPhone,
-        website: '',
-        linkedin: '',
-        github: '',
-        city: '',
-        province: '',
-        country: '',
-        location: fallbackLocation,
-        summary: fallbackSummary,
-        skills: fallbackSkills,
-        skillsList: [],
-        experience: fallbackExp,
-        internships: [],
-        projects: fallbackProjects,
-        organizations: fallbackOrgs,
-        education: fallbackEdu,
-        certifications: fallbackCerts,
-        languages: [],
-        courses: [],
-        scholarships: [],
-        volunteers: [],
-        references: [],
-      };
-
-      setSelectedTemplateId('ats-modern');
-      setSelectedCV(fallbackCv);
-      setTitleInput(fallbackCv.title);
-      setFormData({
-        firstName: fallbackCv.firstName,
-        lastName: fallbackCv.lastName,
-        fullName: fallbackCv.fullName,
-        headline: fallbackCv.headline,
-        photoUrl: fallbackCv.photoUrl,
-        email: fallbackCv.email,
-        phone: fallbackCv.phone,
-        website: fallbackCv.website,
-        linkedin: fallbackCv.linkedin,
-        github: fallbackCv.github,
-        city: fallbackCv.city,
-        province: fallbackCv.province,
-        country: fallbackCv.country,
-        location: fallbackCv.location,
-        summary: fallbackCv.summary,
-        skills: fallbackCv.skills ? [...fallbackCv.skills] : [],
-        skillsList: fallbackCv.skillsList ? [...fallbackCv.skillsList] : [],
-        experience: fallbackCv.experience ? [...fallbackCv.experience] : [],
-        education: fallbackCv.education ? [...fallbackCv.education] : [],
-        internships: fallbackCv.internships ? [...fallbackCv.internships] : [],
-        projects: fallbackCv.projects ? [...fallbackCv.projects] : [],
-        organizations: fallbackCv.organizations ? [...fallbackCv.organizations] : [],
-        certifications: fallbackCv.certifications ? [...fallbackCv.certifications] : [],
-        languages: fallbackCv.languages ? [...fallbackCv.languages] : [],
-        courses: fallbackCv.courses ? [...fallbackCv.courses] : [],
-        scholarships: fallbackCv.scholarships ? [...fallbackCv.scholarships] : [],
-        volunteers: fallbackCv.volunteers ? [...fallbackCv.volunteers] : [],
-        references: fallbackCv.references ? [...fallbackCv.references] : [],
-      });
-
-      // Simpan agar dapat diakses permanen
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(`cuti_cv_data_${cvId}`, JSON.stringify(fallbackCv));
-        setCvList([fallbackCv, ...activeCvList.filter((c) => c.id !== cvId)]);
-      }
-    }
-    setViewMode('preview');
-    setIsFormDrawerOpen(true);
-  }, [cvId, cvList]);
+  }, [cvId, initialCV]);
 
   // Template Wizard State
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('ats-modern');
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(() => initialCV?.templateId || 'ats-modern');
   const [templateModalStep, setTemplateModalStep] = useState<number>(1);
   const [newCvPurpose, setNewCvPurpose] = useState<CvPurpose>('job');
   const [purposeCategoryFilterInModal, setPurposeCategoryFilterInModal] = useState<'all' | 'career' | 'entry' | 'flexible' | 'academic'>('all');
@@ -1648,23 +1430,23 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   const [rightPanelTab, setRightPanelTab] = useState<'editor' | 'templates' | 'pengaturan'>('editor');
   const [showLayoutSelector, setShowLayoutSelector] = useState<boolean>(false);
   const [showDocSettings, setShowDocSettings] = useState<boolean>(false);
-  const [docFontFamily, setDocFontFamily] = useState<'sans' | 'serif' | 'mono' | 'standard'>('sans');
-  const [docFontSize, setDocFontSize] = useState<'sm' | 'base' | 'md' | 'lg'>('base');
-  const [docSpacing, setDocSpacing] = useState<'compact' | 'normal' | 'spacious'>('normal');
-  const [docShowIcons, setDocShowIcons] = useState<boolean>(true);
-  const [docPhotoPosition, setDocPhotoPosition] = useState<'left' | 'right'>('right');
-  const [docNameSize, setDocNameSize] = useState<number>(30);
-  const [docHeaderSize, setDocHeaderSize] = useState<number>(14);
-  const [docBodySize, setDocBodySize] = useState<number>(12);
-  const [docSectionSpacing, setDocSectionSpacing] = useState<number>(20);
-  const [docLineHeight, setDocLineHeight] = useState<number>(1.4);
-  const [docLetterSpacing, setDocLetterSpacing] = useState<number>(0);
-  const [docLinkStyle, setDocLinkStyle] = useState<'blue' | 'underline' | 'plain'>('blue');
-  const [docMarginPreset, setDocMarginPreset] = useState<MarginPresetType>('narrow');
-  const [docMarginTop, setDocMarginTop] = useState<number>(1.27);
-  const [docMarginBottom, setDocMarginBottom] = useState<number>(1.27);
-  const [docMarginLeft, setDocMarginLeft] = useState<number>(1.27);
-  const [docMarginRight, setDocMarginRight] = useState<number>(1.27);
+  const [docFontFamily, setDocFontFamily] = useState<'sans' | 'serif' | 'mono' | 'standard'>(() => (initialCV?.docFontFamily as any) || 'sans');
+  const [docFontSize, setDocFontSize] = useState<'sm' | 'base' | 'md' | 'lg'>(() => (initialCV?.docFontSize as any) || 'base');
+  const [docSpacing, setDocSpacing] = useState<'compact' | 'normal' | 'spacious'>(() => (initialCV?.docSpacing as any) || 'normal');
+  const [docShowIcons, setDocShowIcons] = useState<boolean>(() => initialCV?.docShowIcons !== undefined ? initialCV.docShowIcons : true);
+  const [docPhotoPosition, setDocPhotoPosition] = useState<'left' | 'center' | 'right'>(() => ((initialCV as any)?.docPhotoPosition as any) || 'right');
+  const [docNameSize, setDocNameSize] = useState<number>(() => initialCV?.docNameSize !== undefined ? initialCV.docNameSize : 30);
+  const [docHeaderSize, setDocHeaderSize] = useState<number>(() => initialCV?.docHeaderSize !== undefined ? initialCV.docHeaderSize : 14);
+  const [docBodySize, setDocBodySize] = useState<number>(() => initialCV?.docBodySize !== undefined ? initialCV.docBodySize : 12);
+  const [docSectionSpacing, setDocSectionSpacing] = useState<number>(() => initialCV?.docSectionSpacing !== undefined ? initialCV.docSectionSpacing : 20);
+  const [docLineHeight, setDocLineHeight] = useState<number>(() => initialCV?.docLineHeight !== undefined ? initialCV.docLineHeight : 1.4);
+  const [docLetterSpacing, setDocLetterSpacing] = useState<number>(() => initialCV?.docLetterSpacing !== undefined ? initialCV.docLetterSpacing : 0);
+  const [docLinkStyle, setDocLinkStyle] = useState<'blue' | 'underline' | 'plain'>(() => (initialCV?.docLinkStyle as any) || 'blue');
+  const [docMarginPreset, setDocMarginPreset] = useState<MarginPresetType>(() => (initialCV?.docMarginPreset as any) || 'narrow');
+  const [docMarginTop, setDocMarginTop] = useState<number>(() => initialCV?.docMarginTop !== undefined ? initialCV.docMarginTop : 1.27);
+  const [docMarginBottom, setDocMarginBottom] = useState<number>(() => initialCV?.docMarginBottom !== undefined ? initialCV.docMarginBottom : 1.27);
+  const [docMarginLeft, setDocMarginLeft] = useState<number>(() => initialCV?.docMarginLeft !== undefined ? initialCV.docMarginLeft : 1.27);
+  const [docMarginRight, setDocMarginRight] = useState<number>(() => initialCV?.docMarginRight !== undefined ? initialCV.docMarginRight : 1.27);
   const [docRefEmailHyperlink, setDocRefEmailHyperlink] = useState<boolean>(true);
   const [docRefPhoneHyperlink, setDocRefPhoneHyperlink] = useState<boolean>(true);
   const [docProjectLinkStyle, setDocProjectLinkStyle] = useState<'name' | 'text' | 'none'>('text');
@@ -1745,20 +1527,29 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       return;
     }
 
-    // Untuk berkas PDF, DOCX, DOC, TXT menggunakan API parser CV
+    // Untuk berkas PDF, DOCX, DOC, TXT menggunakan API parser CV dengan micro-progress dinamis
+    let currentProg = 20;
+    const progInterval = setInterval(() => {
+      if (currentProg < 85) {
+        currentProg += Math.floor(Math.random() * 6) + 4;
+      } else if (currentProg < 96) {
+        currentProg += 1;
+      }
+      setImportProgress(currentProg);
+    }, 280);
+
     try {
-      setImportProgress(40);
+      setImportProgress(20);
       const bodyData = new FormData();
       bodyData.append('file', file);
 
-      setImportProgress(65);
       const res = await fetch('/api/cv/parse', {
         method: 'POST',
         body: bodyData,
       });
 
-      setImportProgress(85);
       const result = await res.json();
+      clearInterval(progInterval);
 
       if (!res.ok || !result.success) {
         toast.error(
@@ -1851,18 +1642,27 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     setImportScanProgress(20);
     setImportScanError(null);
 
+    let currentScanProg = 20;
+    const scanProgInterval = setInterval(() => {
+      if (currentScanProg < 85) {
+        currentScanProg += Math.floor(Math.random() * 6) + 4;
+      } else if (currentScanProg < 96) {
+        currentScanProg += 1;
+      }
+      setImportScanProgress(currentScanProg);
+    }, 280);
+
     try {
       const bodyData = new FormData();
       bodyData.append('file', file);
 
-      setImportScanProgress(45);
       const res = await fetch('/api/cv/parse', {
         method: 'POST',
         body: bodyData,
       });
 
-      setImportScanProgress(80);
       const result = await res.json();
+      clearInterval(scanProgInterval);
 
       if (!res.ok || !result.success) {
         setImportScanError(result.error || 'Berkas yang kamu unggah tampaknya bukan dokumen CV atau Resume. Pastikan berkas memuat informasi pendidikan, pengalaman, atau keahlian kamu.');
@@ -1996,27 +1796,17 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         localStorage.removeItem('cuti_imported_cv_data');
       }
     } else {
-      // newCvStartMode === 'empty' (Lembar Kerja Kosong Bersih)
-      initialData = {
-        fullName: currentSession?.name || '',
-        headline: newCvJobTitle || '',
-        email: currentSession?.email || '',
-        phone: (currentSession as any)?.phone || '',
-        location: '',
-        summary: '',
-        skills: [],
-        skillsList: [],
-        experience: [],
-        education: [],
-        projects: [],
-        organizations: [],
-        certifications: [],
-        languages: [],
-        courses: [],
-        scholarships: [],
-        volunteers: [],
-        references: [],
-      };
+      // newCvStartMode === 'empty' (Lembar Kerja Kosong Bersih sesuai Tujuan CV)
+      const emptyPreset = generateEmptyCvPreset({
+        purpose: newCvPurpose,
+        targetRole: newCvJobTitle || 'Professional',
+        templateId: selectedTemplateId || 'ats-modern',
+        userName: currentSession?.name || onboardingProfile?.fullName || '',
+        userEmail: currentSession?.email || onboardingProfile?.contactInfo || '',
+        userPhone: (currentSession as any)?.phone || onboardingProfile?.phone || '',
+        userLocation: onboardingProfile?.location || 'Indonesia',
+      });
+      initialData = { ...emptyPreset };
     }
 
     const defaultName = initialData.fullName || currentSession?.name || '';
@@ -2095,7 +1885,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     }
     setViewMode('preview');
     setTemplateModalStep(1);
-    router.push(`/cv/${newId}`);
+    router.replace(`/cv/${newId}`);
   };
 
   const handleSelectPurposeAndNext = () => {
@@ -2435,45 +2225,15 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
   };
 
   // Form State for Manual CV & Wizard
-  // Form State for Manual CV & Wizard
-  const [formData, setFormData] = useState<Omit<CVData, 'id' | 'updatedAt' | 'atsScore' | 'title'>>({
-    sectionOrder: DEFAULT_SECTION_ORDER,
-    firstName: '',
-    lastName: '',
-    fullName: '',
-    headline: '',
-    photoUrl: '',
-    email: '',
-    phone: '',
-    website: '',
-    linkedin: '',
-    github: '',
-    instagram: '',
-    city: '',
-    province: '',
-    country: '',
-    location: '',
-    summary: '',
-    experience: [],
-    internships: [],
-    projects: [],
-    organizations: [],
-    education: [],
-    certifications: [],
-    skillsList: [],
-    skills: [],
-    languages: [],
-    courses: [],
-    scholarships: [],
-    volunteers: [],
-    references: [],
+  const [formData, setFormData] = useState<Omit<CVData, 'id' | 'updatedAt' | 'atsScore' | 'title'>>(() => {
+    return extractFormDataFromCv(initialCV);
   });
 
   // Real-time Dynamic ATS Score hook
   const { atsResult, getSectionIssues } = useDynamicATSScore(formData, 300);
 
   const [aiNote, setAiNote] = useState<string>('');
-  const [titleInput, setTitleInput] = useState('');
+  const [titleInput, setTitleInput] = useState(() => initialCV?.title || '');
   const [skillInput, setSkillInput] = useState('');
   const [expCompany, setExpCompany] = useState('');
   const [expRole, setExpRole] = useState('');
@@ -3040,48 +2800,67 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
     // Skip auto-save if no data changed
     if (currentSnapshot === lastSavedSnapshotRef.current) return;
 
-    // Debounce timer: 400ms idle before saving to local storage
-    const timer = setTimeout(() => {
-      const targetId = cvId && cvId !== 'create' ? cvId : 'cv-draft-local';
+    // Safety guard: Jangan auto-save jika tidak sedang aktif di preview/editor
+    if (viewMode !== 'preview') return;
 
-      const liveAtsScore = calculateAtsScore({
-        ...(selectedCV || {}),
-        ...formData,
-      }).totalScore;
+    // Tentukan ID definitif dokumen (utamakan UUID asli dari selectedCV)
+    const definitiveId = selectedCV?.id || (isUUID(cvId || '') ? cvId : null);
+    const targetId = definitiveId || (cvId && cvId !== 'create' ? cvId : 'cv-draft-local');
 
-      const finalAtsScore = liveAtsScore > 0 ? liveAtsScore : (selectedCV?.atsScore && selectedCV.atsScore > 0 ? selectedCV.atsScore : 0);
+    const liveAtsScore = calculateAtsScore({
+      ...(selectedCV || {}),
+      ...formData,
+    }).totalScore;
 
-      const updatedCV: CVData = {
-        ...(selectedCV || {}),
-        ...formData,
-        id: targetId,
-        title: titleInput || 'CV Saya',
-        updatedAt: 'Hari ini',
-        atsScore: finalAtsScore,
-        templateId: selectedTemplateId,
-        docFontFamily,
-        docFontSize,
-        docSpacing,
-        docShowIcons,
-        docNameSize,
-        docHeaderSize,
-        docBodySize,
-        docSectionSpacing,
-        docLineHeight,
-        docLetterSpacing,
-        docLinkStyle,
-        docMarginPreset,
-        docMarginTop,
-        docMarginBottom,
-        docMarginLeft,
-        docMarginRight,
-      } as CVData;
+    const finalAtsScore = liveAtsScore > 0 ? liveAtsScore : (selectedCV?.atsScore && selectedCV.atsScore > 0 ? selectedCV.atsScore : 0);
 
+    const updatedCV: CVData = {
+      ...(selectedCV || {}),
+      ...formData,
+      id: targetId,
+      title: titleInput || 'CV Saya',
+      updatedAt: 'Hari ini',
+      atsScore: finalAtsScore,
+      templateId: selectedTemplateId,
+      docFontFamily,
+      docFontSize,
+      docSpacing,
+      docShowIcons,
+      docNameSize,
+      docHeaderSize,
+      docBodySize,
+      docSectionSpacing,
+      docLineHeight,
+      docLetterSpacing,
+      docLinkStyle,
+      docMarginPreset,
+      docMarginTop,
+      docMarginBottom,
+      docMarginLeft,
+      docMarginRight,
+    } as CVData;
+
+    latestUpdatedCvRef.current = updatedCV;
+    setSaveStatus('saving');
+
+    const isMatchingCv = (cv: CVData) => {
+      if (definitiveId && cv.id === definitiveId) return true;
+      if (cv.id === targetId) return true;
+      if ((cv as any).slug && (targetId === (cv as any).slug || (selectedCV as any)?.slug === (cv as any).slug)) return true;
+      if (selectedCV?.title && slugify(cv.title || '') === slugify(selectedCV.title)) return true;
+      if (titleInput && slugify(cv.title || '') === slugify(titleInput)) return true;
+      return false;
+    };
+
+    // Tier 1: Local-First Update (Debounce 250ms untuk UI state & localStorage)
+    const localTimer = setTimeout(() => {
       setCvList((prevList) => {
         let updatedList = [...prevList];
-        const existingIdx = prevList.findIndex((cv) => cv.id === targetId);
+        const existingIdx = prevList.findIndex(isMatchingCv);
         if (existingIdx >= 0) {
           updatedList[existingIdx] = updatedCV;
+          // Bersihkan entri duplikat lama jika sempat tercipta akibat bug slug
+          updatedList = updatedList.filter((cv, idx) => idx === existingIdx || !isMatchingCv(cv));
         } else {
           updatedList = [updatedCV, ...prevList];
         }
@@ -3089,18 +2868,43 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           localStorage.setItem('cuti_cv_list', JSON.stringify(updatedList));
           localStorage.setItem('cuti_cv_active_draft', JSON.stringify(updatedCV));
           localStorage.setItem(`cuti_cv_data_${targetId}`, JSON.stringify(updatedCV));
+          if (definitiveId && definitiveId !== targetId) {
+            localStorage.setItem(`cuti_cv_data_${definitiveId}`, JSON.stringify(updatedCV));
+          }
         }
         return updatedList;
       });
 
-      if (targetId && targetId !== 'create') {
-        cvApi.update(targetId, updatedCV).catch(console.error);
-      }
-
       lastSavedSnapshotRef.current = currentSnapshot;
-    }, 400);
+    }, 250);
 
-    return () => clearTimeout(timer);
+    // Tier 2: Debounced Cloud Sync (1500ms agar hemat I/O ke Postgres)
+    if (pendingCloudSaveTimerRef.current) {
+      clearTimeout(pendingCloudSaveTimerRef.current);
+    }
+
+    pendingCloudSaveTimerRef.current = setTimeout(() => {
+      if (targetId && targetId !== 'create') {
+        cvApi
+          .update(targetId, updatedCV)
+          .then(() => {
+            setSaveStatus('saved');
+          })
+          .catch((err) => {
+            console.warn('[CVView AutoSave] Gagal sinkronisasi ke cloud:', err);
+            setSaveStatus('error');
+          });
+      } else {
+        setSaveStatus('saved');
+      }
+    }, 1500);
+
+    return () => {
+      clearTimeout(localTimer);
+      if (pendingCloudSaveTimerRef.current) {
+        clearTimeout(pendingCloudSaveTimerRef.current);
+      }
+    };
   }, [
     formData,
     titleInput,
@@ -3217,8 +3021,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
   const handleSaveCV = (e: React.FormEvent) => {
     e.preventDefault();
-    let updatedList = [...cvList];
-    const targetId = cvId && cvId !== 'create' ? cvId : `cv-${Date.now()}`;
+    if (pendingCloudSaveTimerRef.current) {
+      clearTimeout(pendingCloudSaveTimerRef.current);
+      pendingCloudSaveTimerRef.current = null;
+    }
+
+    const definitiveId = selectedCV?.id || (isUUID(cvId || '') ? cvId : null);
+    const targetId = definitiveId || (cvId && cvId !== 'create' ? cvId : `cv-${Date.now()}`);
     const calculatedScore = calculateAtsScore({
       ...(selectedCV || {}),
       ...formData,
@@ -3250,22 +3059,91 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       docMarginRight,
     } as CVData;
 
-    const existingIdx = cvList.findIndex((cv) => cv.id === targetId);
+    latestUpdatedCvRef.current = updatedCV;
+    setSaveStatus('saving');
+
+    const isMatchingCv = (cv: CVData) => {
+      if (definitiveId && cv.id === definitiveId) return true;
+      if (cv.id === targetId) return true;
+      if ((cv as any).slug && (targetId === (cv as any).slug || (selectedCV as any)?.slug === (cv as any).slug)) return true;
+      if (selectedCV?.title && slugify(cv.title || '') === slugify(selectedCV.title)) return true;
+      if (titleInput && slugify(cv.title || '') === slugify(titleInput)) return true;
+      return false;
+    };
+
+    let updatedList = [...cvList];
+    const existingIdx = cvList.findIndex(isMatchingCv);
     if (existingIdx >= 0) {
       updatedList[existingIdx] = updatedCV;
+      updatedList = updatedList.filter((cv, idx) => idx === existingIdx || !isMatchingCv(cv));
     } else {
       updatedList = [updatedCV, ...cvList];
     }
 
     setCvList(updatedList);
-    cvApi.update(targetId, updatedCV).catch(console.error);
+    cvApi
+      .update(targetId, updatedCV)
+      .then(() => setSaveStatus('saved'))
+      .catch((err) => {
+        console.warn('[CVView handleSaveCV] Error updating CV:', err);
+        setSaveStatus('error');
+      });
+
     if (typeof window !== 'undefined') {
       localStorage.setItem('cuti_cv_list', JSON.stringify(updatedList));
       localStorage.setItem('cuti_cv_active_draft', JSON.stringify(updatedCV));
       localStorage.setItem(`cuti_cv_data_${targetId}`, JSON.stringify(updatedCV));
+      if (definitiveId && definitiveId !== targetId) {
+        localStorage.setItem(`cuti_cv_data_${definitiveId}`, JSON.stringify(updatedCV));
+      }
     }
+
+    // Sinkronkan snapshot agar auto-save tidak terpicu ulang
+    const finalSnapshot = JSON.stringify({
+      ...formData,
+      title: titleInput,
+      templateId: selectedTemplateId,
+      docFontFamily,
+      docFontSize,
+      docSpacing,
+      docShowIcons,
+      docNameSize,
+      docHeaderSize,
+      docBodySize,
+      docSectionSpacing,
+      docLineHeight,
+      docLetterSpacing,
+      docLinkStyle,
+      docMarginPreset,
+      docMarginTop,
+      docMarginBottom,
+      docMarginLeft,
+      docMarginRight,
+    });
+    lastSavedSnapshotRef.current = finalSnapshot;
+
+    toast.success('CV Berhasil Disimpan', 'Semua perubahan telah tersinkronisasi ke akun kamu.');
     router.push('/cv');
-    resetForm();
+  };
+
+  const handleBackToCvList = async () => {
+    if (pendingCloudSaveTimerRef.current) {
+      clearTimeout(pendingCloudSaveTimerRef.current);
+      pendingCloudSaveTimerRef.current = null;
+    }
+    const cvToFlush = latestUpdatedCvRef.current;
+    const definitiveId = selectedCV?.id || (isUUID(cvId || '') ? cvId : null);
+    const targetId = definitiveId || (cvId && cvId !== 'create' ? cvId : null);
+
+    if (cvToFlush && targetId && targetId !== 'create') {
+      cvApi.update(targetId, cvToFlush).catch(console.error);
+    }
+
+    if (cvId) {
+      router.push('/cv');
+    } else {
+      setViewMode('list');
+    }
   };
 
   const resetForm = () => {
@@ -3474,7 +3352,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
     setViewMode('preview');
     setIsFormDrawerOpen(true);
-    router.push(`/cv/${cv.id}`);
+    const targetSlug = (cv as any).slug || slugify(cv.title || 'cv-ats') || cv.id;
+    if (typeof window !== 'undefined' && window.location.pathname !== `/cv/${targetSlug}`) {
+      router.push(`/cv/${targetSlug}`);
+    }
   };
 
   const handleDeleteCV = (cv: CVData) => {
@@ -3638,30 +3519,20 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               }/100`,
               icon: Sparkles,
               colorClass: 'text-emerald-600 dark:text-emerald-400',
+              isPrimary: true,
             },
           ]}
           actions={
-            <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full sm:w-auto">
-              <button
-                type="button"
-                onClick={() => setShowCvPromoModal(true)}
-                className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs border border-slate-200 dark:border-slate-700 transition cursor-pointer w-full sm:w-auto"
-              >
-                <Sparkles className="w-4 h-4 text-amber-500" />
-                <span>Konsultasi Jasa HR</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setViewMode('template-wizard');
-                  setTemplateModalStep(1);
-                }}
-                className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 active:scale-[0.98] transition cursor-pointer w-full sm:w-auto"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Buat CV Mandiri</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                router.push('/cv/create');
+              }}
+              className="flex items-center justify-center gap-1.5 px-4 py-2.5 min-h-[40px] md:min-h-[34px] rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 active:scale-[0.98] transition cursor-pointer w-full sm:w-auto"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Buat CV Mandiri</span>
+            </button>
           }
         />
       )}
@@ -3670,18 +3541,36 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       {viewMode === 'list' && (
         <div className="space-y-6">
           {/* Search & Actions Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-[10px] border border-slate-200 dark:border-slate-800">
-            <div className="relative w-full sm:w-80">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="relative w-full sm:max-w-md">
+              <label htmlFor="search-cv-input" className="sr-only">
+                Cari CV berdasarkan judul atau kata kunci
+              </label>
+              <Search
+                className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 pointer-events-none"
+                aria-hidden="true"
+              />
               <input
-                type="text"
-                placeholder="Cari CV berdasarkan judul atau kata kunci..."
+                id="search-cv-input"
+                type="search"
+                placeholder="Cari CV berdasarkan judul atau posisi..."
+                aria-label="Cari CV berdasarkan judul atau posisi"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1738D1]"
+                className="w-full h-10 sm:h-11 pl-10 pr-9 text-xs sm:text-sm rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1738D1] dark:focus:ring-blue-500 transition-shadow"
               />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  aria-label="Hapus kata kunci pencarian"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1738D1]"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            <div className="text-xs text-slate-600 dark:text-slate-400 font-medium whitespace-nowrap self-start sm:self-center">
               Menampilkan <span className="font-bold text-slate-900 dark:text-white">{filteredCVs.length}</span> dokumen CV
             </div>
           </div>
@@ -3690,7 +3579,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Card Order Active (Sedang Ditinjau) */}
             {activeOrder && (
-              <div className="bg-gradient-to-br from-amber-50/40 via-white to-orange-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-amber-950/30 border-2 border-amber-400/80 dark:border-amber-500/60 rounded-[10px] p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden">
+              <div
+                onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  if (target.closest('button, a')) return;
+                  setViewMode('ai-progress');
+                }}
+                className="bg-gradient-to-br from-amber-50/40 via-white to-orange-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-amber-950/30 border-2 border-amber-400/80 dark:border-amber-500/60 rounded-[10px] p-5 shadow-sm hover:shadow-md active:scale-[0.99] transition-all flex flex-col justify-between relative overflow-hidden cursor-pointer group"
+              >
                 <div className="absolute -top-12 -right-12 w-28 h-28 bg-amber-400/10 rounded-full blur-xl pointer-events-none" />
 
                 <div>
@@ -3738,8 +3634,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   </div>
 
                   <button
-                    onClick={() => setViewMode('ai-progress')}
-                    className="px-3.5 py-2 rounded-[10px] text-xs font-bold text-white bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] shadow-md shadow-[#1738D1]/20 transition flex items-center gap-1.5 cursor-pointer border-0"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setViewMode('ai-progress');
+                    }}
+                    className="px-3.5 py-2 rounded-[10px] text-xs font-bold text-white bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] shadow-md shadow-[#1738D1]/20 transition flex items-center gap-1.5 cursor-pointer border-0 relative z-10"
                   >
                     <Clock className="w-3.5 h-3.5" />
                     <span>Lihat Progress</span>
@@ -3751,22 +3651,25 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             {filteredCVs.map((cv) => (
               <div
                 key={cv.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-4 sm:p-5 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group"
+                onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  if (target.closest('button, a')) return;
+                  handleOpenCvDetail(cv);
+                }}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-4 sm:p-5 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 active:scale-[0.99] transition-all flex flex-col justify-between group cursor-pointer text-left select-none sm:select-auto"
               >
                 <div>
                   {/* Card Header: Icon, Title & Date, ATS Badge, and Safe Top-Right Trash Button */}
                   <div className="flex items-start justify-between gap-2.5 mb-3">
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <div
-                        onClick={() => handleOpenCvDetail(cv)}
-                        className="p-2.5 rounded-[10px] bg-orange-50 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/50 cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-900/60 transition shrink-0"
+                        className="p-2.5 rounded-[10px] bg-orange-50 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/50 group-hover:bg-orange-100 dark:group-hover:bg-orange-900/60 transition-colors shrink-0"
                       >
                         <FileText className="w-5 h-5" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <h3
-                          onClick={() => handleOpenCvDetail(cv)}
-                          className="font-bold text-sm text-slate-900 dark:text-white truncate cursor-pointer hover:text-orange-500 dark:hover:text-orange-400 transition"
+                          className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors"
                           title={cv.title}
                         >
                           {cv.title}
@@ -3784,9 +3687,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       </span>
                       <button
                         type="button"
-                        onClick={() => handleDeleteCV(cv)}
-                        className="p-1.5 rounded-[8px] text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/60 dark:hover:text-rose-400 transition cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteCV(cv);
+                        }}
+                        className="p-1.5 rounded-[8px] text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/60 dark:hover:text-rose-400 transition cursor-pointer relative z-10"
                         title="Hapus CV"
+                        aria-label={`Hapus CV ${cv.title}`}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -3794,7 +3701,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   </div>
 
                   {/* Card Metadata Chunk (Clean, High-Signal, Minimalist) */}
-                  <div className="py-2.5 px-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-1.5 mb-4">
+                  <div className="py-2.5 px-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-1.5 mb-4 group-hover:border-slate-200 dark:group-hover:border-slate-700/80 transition-colors">
                     <div className="flex items-center gap-2 text-xs">
                       <Briefcase className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                       <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
@@ -3812,8 +3719,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                 <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
                   <button
                     type="button"
-                    onClick={() => handleOpenCvDetail(cv)}
-                    className="px-3.5 py-2 rounded-[10px] text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200/60 dark:border-slate-700/60 transition flex items-center gap-1.5 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenCvDetail(cv);
+                    }}
+                    className="px-3.5 py-2 rounded-[10px] text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-[#1738D1] hover:text-white hover:border-[#1738D1] dark:bg-slate-800 dark:hover:bg-[#1738D1] dark:hover:text-white border border-slate-200/60 dark:border-slate-700/60 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer relative z-10"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     <span>Lihat / Edit</span>
@@ -3821,10 +3731,28 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                   <button
                     type="button"
-                    onClick={() => {
-                      toast.info('Menyiapkan Berkas PDF', `Mengunduh versi PDF dari ${cv.title}...`);
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toast.success('Mempersiapkan PDF', `Membuka pratinjau cetak untuk ${cv.title}...`);
+                      handleOpenCvDetail(cv);
+                      setTimeout(() => {
+                        try {
+                          fetch('/api/cv/track-download', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              cvId: cv.id,
+                              templateId: cv.templateId || 'ats-modern',
+                              format: 'pdf',
+                              title: cv.title || 'CV Lamaran',
+                            }),
+                          }).catch(() => {});
+                        } catch {}
+                        window.print();
+                      }, 500);
                     }}
-                    className="px-3.5 py-2 rounded-[10px] text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                    className="px-3.5 py-2 rounded-[10px] text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-900 hover:text-white hover:border-slate-900 dark:hover:bg-slate-100 dark:hover:text-slate-900 dark:hover:border-slate-100 border border-slate-200 dark:border-slate-700 shadow-2xs hover:shadow-md active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer relative z-10"
+                    aria-label={`Download PDF CV ${cv.title}`}
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Download PDF</span>
@@ -3895,19 +3823,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full max-w-sm justify-center">
                 <button
                   type="button"
-                  onClick={() => { setViewMode('template-wizard'); setTemplateModalStep(1); }}
+                  onClick={() => router.push('/cv/create')}
                   className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 active:scale-[0.98] transition flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Buat CV Mandiri</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowCvPromoModal(true)}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs border border-slate-200 dark:border-slate-700 transition flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <Sparkles className="w-4 h-4 text-amber-500" />
-                  <span>Konsultasi Jasa HR</span>
                 </button>
               </div>
             </div>
@@ -3942,9 +3862,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       
       {/* VIEW MODE: CV CREATION WIZARD (DEDICATED FULL-PAGE FLOW) */}
       {viewMode === 'template-wizard' && (
-        <div className="space-y-6 max-w-6xl mx-auto animate-in fade-in duration-200">
+        <div className="space-y-4 md:space-y-6 max-w-7xl mx-auto animate-in fade-in duration-200 w-full">
           {/* Top Editorial Header & Stepper */}
-          <div className="relative overflow-hidden bg-[#162758] border border-[#20367A] rounded-[10px] p-5 md:p-6 text-white shadow-xs">
+          <div className="relative overflow-hidden bg-[#162758] border border-[#20367A] rounded-[10px] p-4 sm:p-5 md:p-6 text-white shadow-xs">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 text-blue-200 text-xs font-bold">
@@ -3966,7 +3886,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
               <button
                 type="button"
                 onClick={() => {
-                  setViewMode('list');
+                  if (cvId === 'create') {
+                    router.push('/cv');
+                  } else {
+                    setViewMode('list');
+                  }
                   setTemplateModalStep(1);
                 }}
                 className="self-start md:self-center px-4 py-2 rounded-[10px] bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-1.5 cursor-pointer shrink-0 shadow-2xs"
@@ -4122,7 +4046,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     <button
                       type="button"
                       onClick={() => {
-                        setViewMode('list'); setTemplateModalStep(1);
+                        if (cvId === 'create') {
+                          router.push('/cv');
+                        } else {
+                          setViewMode('list');
+                        }
+                        setTemplateModalStep(1);
                       }}
                       className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
                     >
@@ -4144,9 +4073,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             {/* STEP 2: PILIH TEMPLATE CV MANDIRI (Dedicated Section Page) */}
             {templateModalStep === 2 && (
               <>
-                <div className="flex flex-1 overflow-hidden">
+                <div className="flex flex-col lg:flex-row flex-1 overflow-hidden min-h-[520px] lg:h-[calc(100vh-230px)]">
                   {/* Left: Template List */}
-                  <div className="w-80 border-r border-slate-200 dark:border-slate-800 overflow-y-auto bg-slate-50 dark:bg-slate-950/60 p-4 space-y-3">
+                  <div className="w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 overflow-y-auto bg-slate-50 dark:bg-slate-950/60 p-4 space-y-3 shrink-0 max-h-56 lg:max-h-none">
                     {cvTemplates
                       .filter((tpl) => !tpl.hidden)
                       .map((tpl) => {
@@ -4164,7 +4093,17 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           >
                             <div className="flex items-center gap-3">
                               <div className="w-12 h-16 rounded-[10px] border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 shadow-2xs bg-white">
-                                <TemplateThumbnailVisual templateId={tpl.id} customData={formData} />
+                                <TemplateThumbnailVisual
+                                  templateId={tpl.id}
+                                  customData={formData}
+                                  docMarginTop={docMarginTop}
+                                  docMarginBottom={docMarginBottom}
+                                  docMarginLeft={docMarginLeft}
+                                  docMarginRight={docMarginRight}
+                                  docFontFamily={docFontFamily}
+                                  docFontSize={docFontSize}
+                                  docSpacing={docSpacing}
+                                />
                               </div>
                               <div className="space-y-1 min-w-0">
                                 <span className="px-2 py-0.5 rounded-[10px] text-[9px] font-extrabold uppercase bg-blue-100 text-navy-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-navy-800 inline-block truncate">
@@ -4183,12 +4122,17 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   {/* Right: A4 Preview with Dummy Data */}
                   <div className="flex-1 overflow-y-auto bg-slate-200/80 dark:bg-slate-950 p-4 md:p-6 flex justify-center items-start">
                     <div className="relative w-[105mm] h-[148.5mm] shadow-2xl rounded-[10px] border border-slate-300 dark:border-slate-800 bg-white overflow-hidden shrink-0 my-auto">
-                      <div
-                        className="w-[210mm] min-h-[297mm] bg-white origin-top-left scale-50 pointer-events-none"
-                        style={{ fontFamily: "'Satoshi', sans-serif" }}
-                      >
-                        <CVTemplatePreview templateId={selectedTemplateId} customData={formData} />
-                      </div>
+                      <TemplateThumbnailVisual
+                        templateId={selectedTemplateId}
+                        customData={formData}
+                        docMarginTop={docMarginTop}
+                        docMarginBottom={docMarginBottom}
+                        docMarginLeft={docMarginLeft}
+                        docMarginRight={docMarginRight}
+                        docFontFamily={docFontFamily}
+                        docFontSize={docFontSize}
+                        docSpacing={docSpacing}
+                      />
                     </div>
                   </div>
                 </div>
@@ -4208,7 +4152,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     <button
                       type="button"
                       onClick={() => {
-                        setViewMode('list'); setTemplateModalStep(1);
+                        if (cvId === 'create') {
+                          router.push('/cv');
+                        } else {
+                          setViewMode('list');
+                        }
+                        setTemplateModalStep(1);
                       }}
                       className="px-4 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
                     >
@@ -4310,22 +4259,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           <label className="block text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider mb-1.5">
                             Lowongan / Target Posisi <span className="text-rose-500">*</span>
                           </label>
-                          <input
-                            type="text"
+                          <JobTitleSearchSelect
                             value={newCvJobTitle}
-                            onChange={(e) => setNewCvJobTitle(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                handleCreateCvFromTemplate();
-                              }
-                            }}
-                            placeholder="Contoh: Senior Frontend Developer / Staff Administrasi"
-                            className={`w-full px-4 py-2.5 rounded-[10px] border text-xs font-medium focus:ring-2 transition ${
-                              templateFormSubmitted && !isNewCvJobTitleValid
-                                ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100 focus:ring-rose-500 focus:border-rose-500'
-                                : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-blue-500 focus:border-blue-500'
-                            }`}
+                            onChange={(val) => setNewCvJobTitle(val)}
+                            hasError={templateFormSubmitted && !isNewCvJobTitleValid}
                           />
                           {templateFormSubmitted && !isNewCvJobTitleValid ? (
                             <p className="text-[11px] font-bold text-rose-500 mt-1 flex items-center gap-1">
@@ -4536,13 +4473,27 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     <span>Kembali ke Pilih Template</span>
                   </button>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     {templateFormSubmitted && !isTemplateFormValid && (
                       <span className="text-xs font-extrabold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 bg-rose-50 dark:bg-rose-950/60 px-3 py-1.5 rounded-[10px] border border-rose-200 dark:border-rose-800">
                         <AlertCircle className="w-4 h-4 shrink-0 animate-bounce text-rose-500" />
                         <span>Harap isi semua kolom wajib (*)</span>
                       </span>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (cvId === 'create') {
+                          router.push('/cv');
+                        } else {
+                          setViewMode('list');
+                        }
+                        setTemplateModalStep(1);
+                      }}
+                      className="px-4 py-2.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
+                    >
+                      Batal
+                    </button>
                     <button
                       type="button"
                       onClick={handleCreateCvFromTemplate}
@@ -5183,7 +5134,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           onChange={(e) => setExpCompany(e.target.value)}
                           className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
                         />
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <input
                             type="text"
                             placeholder="Posisi / Jabatan"
@@ -5494,14 +5445,71 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
       {/* VIEW MODE 4: MANUAL CREATION & EDIT VIEW */}
       {(viewMode === 'create' || viewMode === 'preview') && (
-        <div className="cv-print-area-wrapper flex flex-col space-y-4 w-full print:space-y-0 print:max-w-none print:w-[210mm] print:m-0 print:p-0">
+        isLoadingDetail ? (
+          <div className="cv-print-area-wrapper flex flex-col space-y-4 w-full no-print">
+            {/* Control Toolbar Skeleton */}
+            <div className="w-full bg-white dark:bg-slate-900 p-3.5 rounded-[10px] border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-2xs animate-pulse">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-24 bg-slate-200 dark:bg-slate-800 rounded-[10px]" />
+                <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block" />
+                <div className="h-4 w-36 bg-slate-200 dark:bg-slate-800 rounded" />
+              </div>
+              <div className="h-7 w-20 bg-slate-200 dark:bg-slate-800 rounded-[10px]" />
+            </div>
+
+            {/* Main Split Content Skeleton */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Column: Canvas Preview Skeleton */}
+              <div className="lg:col-span-7 xl:col-span-7 w-full overflow-hidden flex flex-col items-center bg-slate-200/60 dark:bg-slate-950/80 p-4 md:p-6 rounded-[10px] border border-slate-300/60 dark:border-slate-800 h-fit min-h-fit">
+                <div className="w-[210mm] max-w-full aspect-[210/297] min-h-[750px] bg-white dark:bg-slate-900 rounded-[10px] shadow-sm p-8 space-y-5 animate-pulse">
+                  <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-5">
+                    <div className="space-y-2">
+                      <div className="h-7 w-56 bg-slate-200 dark:bg-slate-800 rounded" />
+                      <div className="h-4 w-36 bg-slate-100 dark:bg-slate-800/60 rounded" />
+                    </div>
+                    <div className="w-16 h-20 bg-slate-100 dark:bg-slate-800/60 rounded-[6px]" />
+                  </div>
+                  <div className="space-y-2 pt-2">
+                    <div className="h-3.5 w-full bg-slate-100 dark:bg-slate-800/60 rounded" />
+                    <div className="h-3.5 w-4/5 bg-slate-100 dark:bg-slate-800/60 rounded" />
+                  </div>
+                  <div className="space-y-3 pt-4">
+                    <div className="h-4 w-28 bg-slate-200 dark:bg-slate-800 rounded" />
+                    <div className="h-16 w-full bg-slate-50 dark:bg-slate-800/40 rounded-[8px] p-3 space-y-2">
+                      <div className="h-3 w-3/4 bg-slate-200 dark:bg-slate-800 rounded" />
+                      <div className="h-3 w-1/2 bg-slate-100 dark:bg-slate-800/60 rounded" />
+                    </div>
+                    <div className="h-16 w-full bg-slate-50 dark:bg-slate-800/40 rounded-[8px] p-3 space-y-2">
+                      <div className="h-3 w-2/3 bg-slate-200 dark:bg-slate-800 rounded" />
+                      <div className="h-3 w-1/3 bg-slate-100 dark:bg-slate-800/60 rounded" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Editor Form Skeleton */}
+              <div className="lg:col-span-5 xl:col-span-5 w-full flex flex-col space-y-3">
+                <div className="p-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 h-10 animate-pulse" />
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 space-y-4 shadow-2xs animate-pulse">
+                  <div className="h-5 w-32 bg-slate-200 dark:bg-slate-800 rounded" />
+                  <div className="space-y-3">
+                    <div className="h-9 w-full bg-slate-100 dark:bg-slate-800/60 rounded-[8px]" />
+                    <div className="h-9 w-full bg-slate-100 dark:bg-slate-800/60 rounded-[8px]" />
+                    <div className="h-20 w-full bg-slate-100 dark:bg-slate-800/60 rounded-[8px]" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="cv-print-area-wrapper flex flex-col space-y-4 w-full print:space-y-0 print:max-w-none print:w-[210mm] print:m-0 print:p-0">
           {/* CONTROL TOOLBAR FOR LAYOUT & DOCUMENT SETTINGS */}
           <div className="w-full bg-white dark:bg-slate-900 p-3.5 rounded-[10px] border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-2xs no-print">
-            {/* Left: Back to List & Active Layout Indicator */}
-            <div className="flex items-center gap-3">
+            {/* Left: Back to List & Active Layout Indicator & Save Status */}
+            <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
               <button
                 type="button"
-                onClick={() => setViewMode('list')}
+                onClick={handleBackToCvList}
                 className="px-3.5 py-2 rounded-[10px] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 transition cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -5517,21 +5525,67 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                   <span>{cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS Standard'}</span>
                 </span>
               </div>
+
+              {/* Status Save Indicator (Desktop) */}
+              <div className="hidden sm:flex items-center">
+                {saveStatus === 'saving' && (
+                  <span className="px-2.5 py-1 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-bold border border-slate-200 dark:border-slate-700 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                    <span>Menyimpan...</span>
+                  </span>
+                )}
+                {saveStatus === 'saved' && (
+                  <span className="px-2.5 py-1 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-1.5">
+                    <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400 stroke-[3]" />
+                    <span>Tersimpan</span>
+                  </span>
+                )}
+                {saveStatus === 'error' && (
+                  <span className="px-2.5 py-1 rounded-[10px] bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[11px] font-bold border border-amber-200 dark:border-amber-800/60 flex items-center gap-1.5" title="Tersimpan lokal, koneksi cloud tertunda">
+                    <AlertCircle className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                    <span>Tersimpan di perangkat</span>
+                  </span>
+                )}
+              </div>
             </div>
 
-            {/* Right: ATS Score Indicator Badge */}
+            {/* Right: Save Status Mobile + ATS Score Indicator Badge */}
             <div className="flex items-center gap-2">
+              <div className="flex sm:hidden items-center">
+                {saveStatus === 'saving' && (
+                  <span className="px-2 py-1 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold border border-slate-200 dark:border-slate-700 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                    <span>Menyimpan...</span>
+                  </span>
+                )}
+                {saveStatus === 'saved' && (
+                  <span className="px-2 py-1 rounded-[10px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-1" title="Tersimpan">
+                    <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400 stroke-[3]" />
+                  </span>
+                )}
+              </div>
               <ATSScoreBadge
                 atsResult={atsResult}
                 onClick={() => setIsAtsAnalysisOpen(true)}
               />
+
+              <button
+                type="button"
+                onClick={handleSaveCV}
+                className="px-3.5 py-2 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 active:scale-[0.98] transition flex items-center gap-1.5 cursor-pointer shrink-0"
+                title="Simpan & Selesai"
+              >
+                <Save className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Simpan &amp; Selesai</span>
+                <span className="sm:hidden">Simpan</span>
+              </button>
             </div>
           </div>
 
           {/* MAIN CONTENT: SPLIT SCREEN ON DESKTOP (LEFT: A4 CANVAS, RIGHT: INLINE FORM EDITOR) */}
           <div className="cv-print-area-wrapper grid grid-cols-1 lg:grid-cols-12 gap-6 items-start print:block print:w-[210mm] print:m-0 print:p-0">
             {/* LEFT COLUMN: CENTERED A4 CANVAS PREVIEW */}
-            <div className="cv-print-area-wrapper lg:col-span-7 xl:col-span-7 w-full overflow-x-auto no-scrollbar pb-4 flex justify-center bg-slate-200/60 dark:bg-slate-950/80 p-4 md:p-6 rounded-[10px] border border-slate-300/60 dark:border-slate-800 lg:sticky lg:top-4 max-h-[calc(100vh-2rem)] overflow-y-auto print:p-0 print:bg-transparent print:border-none print:max-h-none print:overflow-visible print:static print:block print:w-[210mm] print:m-0">
+            <div className="cv-print-area-wrapper lg:col-span-7 xl:col-span-7 w-full overflow-x-hidden no-scrollbar pb-6 flex flex-col items-center bg-slate-200/60 dark:bg-slate-950/80 p-4 md:p-6 rounded-[10px] border border-slate-300/60 dark:border-slate-800 h-fit min-h-fit print:p-0 print:bg-transparent print:border-none print:max-h-none print:overflow-visible print:static print:block print:w-[210mm] print:m-0">
               <A4PaperlikeCanvas
                 templateId={selectedTemplateId}
                 customData={formData}
@@ -5610,22 +5664,24 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                     <button
                       type="button"
                       onClick={() => toggleAccordion('sec1')}
-                      className="w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition cursor-pointer border-b border-slate-100 dark:border-slate-800"
+                      className={`w-full px-4 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition cursor-pointer ${
+                        openAccordion['sec1'] ? 'border-b border-slate-100 dark:border-slate-800 rounded-t-[10px]' : 'rounded-[10px]'
+                      }`}
                     >
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm text-slate-800 dark:text-white">Informasi Pribadi &amp; Kontak</span>
                       </div>
                       <div className="flex items-center gap-2.5">
                         {openAccordion['sec1'] ? (
-                          <ChevronUp className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                          <ChevronUp className="w-4 h-4 text-[#1738D1] dark:text-blue-400 shrink-0" />
                         ) : (
-                          <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                          <ChevronDown className="w-4 h-4 text-[#1738D1] dark:text-blue-400 shrink-0" />
                         )}
                       </div>
                     </button>
                     {openAccordion['sec1'] && (
                       <div className="p-4 space-y-3.5 bg-white dark:bg-slate-900">
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
                             <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Nama Depan</label>
                             <input
@@ -5640,7 +5696,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   fullName: `${newFirst} ${prev.lastName || ''}`.trim(),
                                 }));
                               }}
-                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 transition shadow-2xs"
                             />
                           </div>
                           <div>
@@ -5657,7 +5713,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   fullName: `${prev.firstName || ''} ${newLast}`.trim(),
                                 }));
                               }}
-                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 transition shadow-2xs"
                             />
                           </div>
                         </div>
@@ -5669,7 +5725,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             placeholder="e.g., Senior Frontend Engineer"
                             value={formData.headline}
                             onChange={(e) => setFormData((prev) => ({ ...prev, headline: e.target.value }))}
-                            className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                            className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 transition shadow-2xs"
                           />
                         </div>
 
@@ -5687,7 +5743,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
                             <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Email *</label>
                             <input
@@ -5696,7 +5752,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               placeholder="e.g., john.doe@example.com"
                               value={formData.email}
                               onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 transition shadow-2xs"
                             />
                           </div>
                           <div>
@@ -5713,12 +5769,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 }
                                 setFormData((prev) => ({ ...prev, phone: val }));
                               }}
-                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 transition shadow-2xs"
                             />
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
                             <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Website / Portofolio</label>
                             <input
@@ -5726,7 +5782,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               placeholder="e.g., johndoe.dev"
                               value={formData.website || ''}
                               onChange={(e) => setFormData((prev) => ({ ...prev, website: e.target.value }))}
-                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 transition shadow-2xs"
                             />
                           </div>
                           <div>
@@ -5736,7 +5792,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                               placeholder="e.g., linkedin.com/in/johndoe"
                               value={formData.linkedin || ''}
                               onChange={(e) => setFormData((prev) => ({ ...prev, linkedin: e.target.value }))}
-                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                              className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 transition shadow-2xs"
                             />
                           </div>
                         </div>
@@ -5801,7 +5857,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                     socialHandle: e.target.value,
                                   }))
                                 }
-                                className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                                className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 transition shadow-2xs"
                               />
                             </div>
                           </div>
@@ -5818,20 +5874,20 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 <button
                                   type="button"
                                   onClick={() => setShowPhotoAtsInfo((prev) => !prev)}
-                                  className="text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 p-0.5 rounded-full hover:bg-amber-50 dark:hover:bg-amber-950/40 transition cursor-pointer"
-                                  aria-label="Info ATS Score untuk Foto Profil"
-                                  title="Info Dampak Skor ATS"
+                                  className="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 p-0.5 rounded-full hover:bg-blue-50 dark:hover:bg-blue-950/40 transition cursor-pointer"
+                                  aria-label="Info Pasang Foto untuk Loker"
+                                  title="Panduan Pasang Foto"
                                 >
-                                  <Info className="w-3.5 h-3.5" />
+                                  <Info className="w-3.5 h-3.5 text-blue-500" />
                                 </button>
 
                                 {/* Hover Tooltip */}
                                 <div className="absolute left-0 bottom-full mb-1.5 hidden group-hover:block z-30 w-72 p-2.5 bg-slate-900 text-white text-[11px] rounded-[10px] shadow-xl border border-slate-700 pointer-events-none leading-relaxed animate-in fade-in zoom-in-95 duration-150">
-                                  <p className="font-bold text-amber-300 flex items-center gap-1.5 mb-1 text-xs">
-                                    <AlertCircle className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                                    Info Dampak Skor ATS
+                                  <p className="font-bold text-blue-300 flex items-center gap-1.5 mb-1 text-xs">
+                                    <Info className="w-3.5 h-3.5 shrink-0 text-blue-400" />
+                                    Panduan Foto &amp; Format ATS
                                   </p>
-                                  Standar CV ATS internasional menyarankan tanpa foto profil agar pemindaian teks berjalan maksimal dan menghindari bias sistem seleksi otomatis.
+                                  Gunakan foto untuk loker lokal/BUMN/perbankan. Untuk portal ATS multinasional, kamu bisa mematikan foto dengan tombol toggle tanpa menghapus filenya.
                                 </div>
                               </div>
                             </div>
@@ -5842,18 +5898,18 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                           {/* Expandable Info Alert on Click */}
                           {showPhotoAtsInfo && (
-                            <div className="p-2.5 rounded-[10px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 text-[11px] leading-relaxed flex items-start justify-between gap-2 animate-in fade-in duration-200">
+                            <div className="p-2.5 rounded-[10px] bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/60 text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed flex items-start justify-between gap-2 animate-in fade-in duration-200">
                               <div className="flex items-start gap-2">
-                                <AlertCircle className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
+                                <Info className="w-4 h-4 shrink-0 text-[#1738D1] dark:text-blue-400 mt-0.5" />
                                 <div>
-                                  <span className="font-bold">Dampak pada ATS: </span>
-                                  Menyertakan foto profil dapat mengurangi skor keramahan ATS pada sebagian sistem seleksi otomatis internasional yang mensyaratkan format teks murni.
+                                  <span className="font-bold text-slate-900 dark:text-white">Panduan Penggunaan Foto: </span>
+                                  Aktifkan foto jika melamar ke BUMN, Perbankan, atau perusahaan yang mensyaratkan pas foto resmi. Gunakan tombol cepat <strong>Sembunyi</strong> jika kamu melamar ke portal karir internasional/ATS multinasional agar format otomatis menjadi teks murni.
                                 </div>
                               </div>
                               <button
                                 type="button"
                                 onClick={() => setShowPhotoAtsInfo(false)}
-                                className="text-amber-500 hover:text-amber-700 p-0.5 rounded transition cursor-pointer shrink-0"
+                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded transition cursor-pointer shrink-0"
                               >
                                 <X className="w-3.5 h-3.5" />
                               </button>
@@ -5869,67 +5925,131 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           />
 
                           {formData.photoUrl ? (
-                            <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-[10px] border border-slate-200 dark:border-slate-700 flex flex-col gap-3">
-                              {/* Top Row: Avatar + Status + Action Buttons */}
+                            <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-[10px] border border-slate-200 dark:border-slate-700 flex flex-col gap-3.5">
+                              {/* Top Row: Interactive Avatar + Info + Action Bar */}
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                {/* Left: Clickable Avatar + Details */}
                                 <div className="flex items-center gap-3 min-w-0">
-                                  <img
-                                    src={formData.photoUrl}
-                                    alt="Foto Profil"
-                                    className={`w-12 h-12 ${
+                                  <button
+                                    type="button"
+                                    onClick={handleEditExistingPhoto}
+                                    className={`relative group shrink-0 rounded-full focus-visible:ring-2 focus-visible:ring-[#1738D1] outline-none cursor-pointer ${
                                       formData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'
-                                    } object-cover border-2 border-[#1738D1] shadow-2xs shrink-0 bg-white`}
-                                  />
+                                    }`}
+                                    title="Klik untuk atur ukuran & posisi crop foto"
+                                    aria-label="Atur ukuran dan posisi crop foto"
+                                  >
+                                    <img
+                                      src={formData.photoUrl}
+                                      alt="Foto Profil"
+                                      className={`w-12 h-12 ${
+                                        formData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'
+                                      } object-cover border-2 border-[#1738D1] shadow-2xs bg-white transition duration-200 group-hover:brightness-90 ${
+                                        formData.showPhoto === false ? 'opacity-40 grayscale' : ''
+                                      }`}
+                                    />
+                                    {/* Hover / Focus Overlay Icon */}
+                                    <div
+                                      className={`absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity flex items-center justify-center text-white ${
+                                        formData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'
+                                      }`}
+                                    >
+                                      <Maximize2 className="w-4 h-4 stroke-[2.5]" />
+                                    </div>
+                                  </button>
+
                                   <div className="min-w-0">
-                                    <p className="text-xs font-bold text-slate-800 dark:text-white truncate">
-                                      Foto Profil Terpasang
-                                    </p>
-                                    <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1 mt-0.5">
-                                      <Info className="w-3 h-3 shrink-0" />
-                                      <span>Berpotensi mengurangi skor ATS</span>
+                                    <div className="flex items-center gap-2">
+                                      <p className="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                                        Foto Profil
+                                      </p>
+                                      <span
+                                        className={`px-2 py-0.5 rounded-[6px] text-[10px] font-bold ${
+                                          formData.showPhoto !== false
+                                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800'
+                                            : 'bg-slate-200/80 text-slate-600 border border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                                        }`}
+                                      >
+                                        {formData.showPhoto !== false ? 'Aktif' : 'Disembunyikan'}
+                                      </span>
+                                    </div>
+                                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                      Klik gambar untuk crop / atur zoom
                                     </p>
                                   </div>
                                 </div>
 
-                                {/* Action Buttons: Atur Ukuran, Ganti, Hapus */}
-                                <div className="flex items-center gap-1.5 shrink-0 flex-wrap sm:flex-nowrap">
+                                {/* Right: Compact Action Buttons */}
+                                <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+                                  {/* Toggle Visibilitas */}
                                   <button
                                     type="button"
-                                    onClick={handleEditExistingPhoto}
-                                    className="px-2.5 py-1.5 rounded-[10px] bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200/60 dark:bg-orange-950/40 dark:hover:bg-orange-900/60 dark:text-orange-400 dark:border-orange-800/50 text-xs font-semibold transition cursor-pointer flex items-center gap-1 shadow-2xs"
-                                    title="Atur Ukuran & Posisi Crop Foto"
+                                    onClick={() =>
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        showPhoto: prev.showPhoto === false ? true : false,
+                                      }))
+                                    }
+                                    className={`px-3 py-1.5 rounded-[10px] text-xs font-bold transition cursor-pointer flex items-center gap-1.5 border shadow-2xs ${
+                                      formData.showPhoto !== false
+                                        ? 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
+                                        : 'bg-blue-50 hover:bg-blue-100 text-[#1738D1] border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800'
+                                    }`}
+                                    title={
+                                      formData.showPhoto !== false
+                                        ? 'Klik untuk sembunyikan foto dari CV tanpa menghapus file'
+                                        : 'Klik untuk menampilkan kembali foto di CV'
+                                    }
                                   >
-                                    <Maximize2 className="w-3.5 h-3.5" />
-                                    <span>Atur Ukuran</span>
+                                    {formData.showPhoto !== false ? (
+                                      <>
+                                        <EyeOff className="w-3.5 h-3.5" />
+                                        <span>Sembunyikan</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Eye className="w-3.5 h-3.5" />
+                                        <span>Tampilkan</span>
+                                      </>
+                                    )}
                                   </button>
+
+                                  {/* Ganti Foto */}
                                   <button
                                     type="button"
                                     onClick={() => photoFileInputRef.current?.click()}
-                                    className="px-2.5 py-1.5 rounded-[10px] bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white text-xs font-semibold transition cursor-pointer"
+                                    className="px-3 py-1.5 rounded-[10px] bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-slate-200 dark:border-slate-700 text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                                    title="Ganti foto dengan file baru"
                                   >
-                                    Ganti
+                                    <RefreshCw className="w-3.5 h-3.5" />
+                                    <span>Ganti</span>
                                   </button>
+
+                                  {/* Hapus Foto (Compact Icon Button) */}
                                   <button
                                     type="button"
-                                    onClick={() => setFormData((prev) => ({ ...prev, photoUrl: '' }))}
-                                    className="px-2.5 py-1.5 rounded-[10px] bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/60 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-400 dark:border-rose-800/50 text-xs font-semibold transition cursor-pointer flex items-center gap-1"
+                                    onClick={() => setFormData((prev) => ({ ...prev, photoUrl: '', showPhoto: true }))}
+                                    className="p-1.5 px-2 rounded-[10px] bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-300 hover:border-rose-300 dark:bg-slate-900 dark:hover:bg-rose-950/40 dark:text-slate-400 dark:hover:text-rose-400 dark:border-slate-700 transition cursor-pointer flex items-center justify-center shadow-2xs"
+                                    title="Hapus foto profil permanen"
+                                    aria-label="Hapus foto profil"
                                   >
-                                    <Trash2 className="w-3 h-3" />
-                                    <span>Hapus</span>
+                                    <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
                               </div>
 
-                              {/* Bottom Row: Shape & Position Selectors */}
-                              <div className="pt-2.5 border-t border-slate-200/80 dark:border-slate-700/80 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {/* Bottom Row: Shape & Position Controls (Proximity & Clean Grouping) */}
+                              <div className="pt-2.5 border-t border-slate-200/80 dark:border-slate-700/80 flex flex-wrap items-center gap-x-6 gap-y-2">
                                 {/* Bentuk Selector */}
-                                <div className="flex items-center justify-between gap-2 p-1.5 px-2 bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200/70 dark:border-slate-700/70">
-                                  <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Bentuk:</span>
-                                  <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-[8px]">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                                    Bentuk:
+                                  </span>
+                                  <div className="flex items-center gap-1 bg-slate-200/70 dark:bg-slate-800 p-0.5 rounded-[8px]">
                                     <button
                                       type="button"
                                       onClick={() => setFormData((prev) => ({ ...prev, photoShape: 'circle' }))}
-                                      className={`px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition cursor-pointer ${
+                                      className={`px-2.5 py-1 rounded-[7px] text-[11px] font-bold transition cursor-pointer ${
                                         (formData.photoShape || 'circle') === 'circle'
                                           ? 'bg-[#1738D1] text-white shadow-2xs'
                                           : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -5940,7 +6060,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                     <button
                                       type="button"
                                       onClick={() => setFormData((prev) => ({ ...prev, photoShape: 'square' }))}
-                                      className={`px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition cursor-pointer ${
+                                      className={`px-2.5 py-1 rounded-[7px] text-[11px] font-bold transition cursor-pointer ${
                                         formData.photoShape === 'square'
                                           ? 'bg-[#1738D1] text-white shadow-2xs'
                                           : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -5952,38 +6072,51 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 </div>
 
                                 {/* Posisi Selector */}
-                                <div className="flex items-center justify-between gap-2 p-1.5 px-2 bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200/70 dark:border-slate-700/70">
-                                  <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Posisi:</span>
-                                  <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-[8px]">
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setFormData((prev) => ({ ...prev, photoPosition: 'left' }));
-                                        setDocPhotoPosition('left');
-                                      }}
-                                      className={`px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition cursor-pointer ${
-                                        (formData.photoPosition || docPhotoPosition || 'right') === 'left'
-                                          ? 'bg-[#1738D1] text-white shadow-2xs'
-                                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                                      }`}
-                                    >
-                                      Kiri
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setFormData((prev) => ({ ...prev, photoPosition: 'right' }));
-                                        setDocPhotoPosition('right');
-                                      }}
-                                      className={`px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition cursor-pointer ${
-                                        (formData.photoPosition || docPhotoPosition || 'right') === 'right'
-                                          ? 'bg-[#1738D1] text-white shadow-2xs'
-                                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                                      }`}
-                                    >
-                                      Kanan
-                                    </button>
-                                  </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                                    Posisi:
+                                  </span>
+                                  {selectedTemplateId === 'tech-sidebar' ? (
+                                    <span className="text-[10px] font-bold text-slate-500 bg-slate-200/70 dark:bg-slate-800 px-2.5 py-1 rounded-[6px]">
+                                      Tetap (Sidebar)
+                                    </span>
+                                  ) : (selectedTemplateId === 'minimalist-executive' || selectedTemplateId === 'charcoal-white') ? (
+                                    <span className="text-[10px] font-bold text-[#1738D1] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2.5 py-1 rounded-[6px] flex items-center gap-1">
+                                      <AlignCenter className="w-3 h-3" />
+                                      Tengah (Simetris)
+                                    </span>
+                                  ) : (
+                                    <div className="flex items-center gap-1 bg-slate-200/70 dark:bg-slate-800 p-0.5 rounded-[8px]">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setFormData((prev) => ({ ...prev, photoPosition: 'left' }));
+                                          setDocPhotoPosition('left');
+                                        }}
+                                        className={`px-2.5 py-1 rounded-[7px] text-[11px] font-bold transition cursor-pointer ${
+                                          (formData.photoPosition || docPhotoPosition || 'right') === 'left'
+                                            ? 'bg-[#1738D1] text-white shadow-2xs'
+                                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                        }`}
+                                      >
+                                        Kiri
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setFormData((prev) => ({ ...prev, photoPosition: 'right' }));
+                                          setDocPhotoPosition('right');
+                                        }}
+                                        className={`px-2.5 py-1 rounded-[7px] text-[11px] font-bold transition cursor-pointer ${
+                                          (formData.photoPosition || docPhotoPosition || 'right') === 'right' || (formData.photoPosition || docPhotoPosition) === 'center'
+                                            ? 'bg-[#1738D1] text-white shadow-2xs'
+                                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                        }`}
+                                      >
+                                        Kanan
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -6001,8 +6134,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 <span className="text-[11px] text-slate-400">PNG, JPG, WebP</span>
                               </div>
                               <p className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                                <Info className="w-3 h-3 shrink-0 text-slate-400" />
-                                <span>Format ATS disarankan tanpa foto</span>
+                                <Info className="w-3 h-3 shrink-0 text-blue-500" />
+                                <span>Opsional: Pasang foto untuk BUMN/lokal, atau kosongkan untuk ATS</span>
                               </p>
                             </div>
                           )}
@@ -6023,7 +6156,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       accordionKey = 'sec2';
                       content = (
                         <div className="space-y-2">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 items-start">
                             <label className="font-semibold text-slate-700 dark:text-slate-300 block text-xs">
                               Ringkasan Profil / Summary
                             </label>
@@ -6033,10 +6166,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 setFormData((prev) => ({ ...prev, summary: newVal }));
                                 handleAiSuccessFeedback(feedback);
                               })}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 font-extrabold text-[11px] border border-orange-200 dark:border-orange-800 transition cursor-pointer shadow-2xs"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] sm:min-h-[40px] rounded-[10px] bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 font-extrabold text-xs border border-orange-200 dark:border-orange-800 transition cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                             >
-                              <Sparkles className="w-3.5 h-3.5 fill-orange-500 text-orange-600" />
-                              <span>Bantu tulis dengan AI</span>
+                              <Target className="w-3.5 h-3.5 text-orange-600" />
+                              <span>Bantu Tulis Ringkasan</span>
                             </button>
                           </div>
                           <AutoResizeTextarea
@@ -6075,17 +6208,18 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 }`}
                               >
                                 <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-2 min-w-0">
                                     <div
                                       onPointerDown={(e) => handleSubItemPointerDown(e, 'experience', expIdx)}
                                       onPointerMove={(e) => handleSubItemPointerMove(e, 'experience', expIdx)}
                                       onPointerUp={handleSubItemPointerUp}
-                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      className="p-2 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none min-h-[36px] min-w-[36px]"
                                       title="Tarik untuk mengatur posisi"
+                                      aria-label={`Ubah urutan pengalaman kerja ke-${expIdx + 1}`}
                                     >
                                       <GripVertical className="w-3.5 h-3.5" />
                                     </div>
-                                    <span className="font-bold text-xs text-slate-800 dark:text-white">
+                                    <span className="font-bold text-xs text-slate-800 dark:text-white truncate">
                                       Pengalaman Kerja #{expIdx + 1}
                                     </span>
 
@@ -6098,13 +6232,15 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         experience: prev.experience.filter((_, i) => i !== expIdx),
                                       }))
                                     }
-                                    className="w-7 h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                    className="w-8 h-8 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer shrink-0"
+                                    title="Hapus pengalaman kerja"
+                                    aria-label="Hapus pengalaman kerja"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                   <div>
                                     <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Perusahaan *</label>
                                     <input
@@ -6119,7 +6255,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, experience: arr };
                                         });
                                       }}
-                                      className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                                      className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 transition shadow-2xs"
                                     />
                                   </div>
                                   <div>
@@ -6136,7 +6272,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, experience: arr };
                                         });
                                       }}
-                                      className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition shadow-2xs"
+                                      className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 transition shadow-2xs"
                                     />
                                   </div>
                                 </div>
@@ -6155,43 +6291,43 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                   />
                                 </div>
 
-                                 <div className="grid grid-cols-2 gap-3">
-                                   <div>
-                                     <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Mulai Bekerja</label>
-                                     <CustomDatePicker
-                                       value={exp.startDate || ''}
-                                       onChange={(val) => {
-                                         setFormData((prev) => {
-                                           const arr = [...prev.experience];
-                                           arr[expIdx] = { ...arr[expIdx], startDate: val };
-                                           return { ...prev, experience: arr };
-                                         });
-                                       }}
-                                       placeholder="Mulai..."
-                                     />
-                                   </div>
-                                   <div>
-                                     <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Selesai Bekerja</label>
-                                     <CustomDatePicker
-                                       disabled={exp.isCurrent}
-                                       value={exp.isCurrent ? 'Sekarang' : (exp.endDate || '')}
-                                       minDate={exp.startDate || ''}
-                                       onChange={(val) => {
-                                         setFormData((prev) => {
-                                           const arr = [...prev.experience];
-                                           arr[expIdx] = {
-                                             ...arr[expIdx],
-                                             endDate: val,
-                                             isCurrent: val === 'Sekarang' || val === 'Saat Ini',
-                                           };
-                                           return { ...prev, experience: arr };
-                                         });
-                                       }}
-                                       placeholder="Selesai..."
-                                       allowPresent={true}
-                                     />
-                                   </div>
-                                 </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                  <div>
+                                    <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Mulai Bekerja</label>
+                                    <CustomDatePicker
+                                      value={exp.startDate || ''}
+                                      onChange={(val) => {
+                                        setFormData((prev) => {
+                                          const arr = [...prev.experience];
+                                          arr[expIdx] = { ...arr[expIdx], startDate: val };
+                                          return { ...prev, experience: arr };
+                                        });
+                                      }}
+                                      placeholder="Mulai..."
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Selesai Bekerja</label>
+                                    <CustomDatePicker
+                                      disabled={exp.isCurrent}
+                                      value={exp.isCurrent ? 'Sekarang' : (exp.endDate || '')}
+                                      minDate={exp.startDate || ''}
+                                      onChange={(val) => {
+                                        setFormData((prev) => {
+                                          const arr = [...prev.experience];
+                                          arr[expIdx] = {
+                                            ...arr[expIdx],
+                                            endDate: val,
+                                            isCurrent: val === 'Sekarang' || val === 'Saat Ini',
+                                          };
+                                          return { ...prev, experience: arr };
+                                        });
+                                      }}
+                                      placeholder="Selesai..."
+                                      allowPresent={true}
+                                    />
+                                  </div>
+                                </div>
 
                                 <div className="flex items-center gap-2 pt-1">
                                   <input
@@ -6210,7 +6346,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, experience: arr };
                                       });
                                     }}
-                                    className="rounded-[10px] border-slate-300 text-teal-600 focus:ring-teal-500 cursor-pointer"
+                                    className="rounded-[6px] border-slate-300 text-[#1738D1] focus:ring-[#1738D1] cursor-pointer"
                                   />
                                   <label htmlFor={`exp-current-${expIdx}`} className="text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none">
                                     Saya masih bekerja di sini saat ini
@@ -6218,7 +6354,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 </div>
 
                                 <div>
-                                  <div className="flex items-center justify-between mb-1.5">
+                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 items-start mb-1.5">
                                     <span className="font-semibold text-slate-700 dark:text-slate-300 block text-xs">
                                       Deskripsi Tugas &amp; Pencapaian
                                     </span>
@@ -6232,10 +6368,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         });
                                         handleAiSuccessFeedback(feedback);
                                       })}
-                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[10px] bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 font-extrabold text-[11px] border border-orange-200 dark:border-orange-800 transition cursor-pointer shadow-2xs"
+                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] sm:min-h-[40px] rounded-[10px] bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 font-extrabold text-xs border border-orange-200 dark:border-orange-800 transition cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                                     >
-                                      <Sparkles className="w-3.5 h-3.5 fill-orange-500 text-orange-600" />
-                                      <span>Bantu tulis dengan AI</span>
+                                      <Target className="w-3.5 h-3.5 text-orange-600" />
+                                      <span>Bantu Tulis Poin</span>
                                     </button>
                                   </div>
 
@@ -6329,15 +6465,15 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       onPointerDown={(e) => handleSubItemPointerDown(e, 'internships', itemIdx)}
                                       onPointerMove={(e) => handleSubItemPointerMove(e, 'internships', itemIdx)}
                                       onPointerUp={handleSubItemPointerUp}
-                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none min-h-[32px] min-w-[32px]"
                                       title="Tarik untuk mengatur posisi"
+                                      aria-label="Tarik untuk mengatur posisi magang"
                                     >
                                       <GripVertical className="w-3.5 h-3.5" />
                                     </div>
                                     <span className="font-bold text-xs text-slate-800 dark:text-white">
                                       Magang #{itemIdx + 1}
                                     </span>
-
                                   </div>
                                   <button
                                     type="button"
@@ -6347,13 +6483,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         internships: (prev.internships || []).filter((_, i) => i !== itemIdx),
                                       }))
                                     }
-                                    className="w-7 h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                    className="w-8 h-8 sm:w-7 sm:h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                    aria-label={`Hapus magang #${itemIdx + 1}`}
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
 
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Perusahaan *</label>
                                   <input
@@ -6368,7 +6505,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, internships: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                                 <div>
@@ -6385,7 +6522,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, internships: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                               </div>
@@ -6404,7 +6541,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 />
                               </div>
 
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Mulai</label>
                                   <CustomDatePicker
@@ -6472,7 +6609,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Pengalaman Magang</span>
@@ -6507,15 +6644,15 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       onPointerDown={(e) => handleSubItemPointerDown(e, 'projects', projIdx)}
                                       onPointerMove={(e) => handleSubItemPointerMove(e, 'projects', projIdx)}
                                       onPointerUp={handleSubItemPointerUp}
-                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none min-h-[32px] min-w-[32px]"
                                       title="Tarik untuk mengatur posisi"
+                                      aria-label="Tarik untuk mengatur posisi proyek"
                                     >
                                       <GripVertical className="w-3.5 h-3.5" />
                                     </div>
                                     <span className="font-bold text-xs text-slate-800 dark:text-white">
                                       Proyek #{projIdx + 1}
                                     </span>
-
                                   </div>
                                   <button
                                     type="button"
@@ -6525,13 +6662,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         projects: (prev.projects || []).filter((_, i) => i !== projIdx),
                                       }))
                                     }
-                                    className="w-7 h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                    className="w-8 h-8 sm:w-7 sm:h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                    aria-label={`Hapus proyek #${projIdx + 1}`}
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
 
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Nama Proyek *</label>
                                   <input
@@ -6546,7 +6684,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, projects: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                                 <div>
@@ -6563,12 +6701,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, projects: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                               </div>
 
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Teknologi yang Digunakan</label>
                                   <input
@@ -6583,7 +6721,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, projects: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                                 <div>
@@ -6600,12 +6738,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, projects: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                               </div>
 
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Mulai Proyek</label>
                                   <CustomDatePicker
@@ -6675,7 +6813,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Proyek</span>
@@ -6710,15 +6848,15 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       onPointerDown={(e) => handleSubItemPointerDown(e, 'organizations', orgIdx)}
                                       onPointerMove={(e) => handleSubItemPointerMove(e, 'organizations', orgIdx)}
                                       onPointerUp={handleSubItemPointerUp}
-                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none min-h-[32px] min-w-[32px]"
                                       title="Tarik untuk mengatur posisi"
+                                      aria-label="Tarik untuk mengatur posisi organisasi"
                                     >
                                       <GripVertical className="w-3.5 h-3.5" />
                                     </div>
                                     <span className="font-bold text-xs text-slate-800 dark:text-white">
                                       Organisasi #{orgIdx + 1}
                                     </span>
-
                                   </div>
                                   <button
                                     type="button"
@@ -6728,13 +6866,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         organizations: (prev.organizations || []).filter((_, i) => i !== orgIdx),
                                       }))
                                     }
-                                    className="w-7 h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                    className="w-8 h-8 sm:w-7 sm:h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                    aria-label={`Hapus organisasi #${orgIdx + 1}`}
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
 
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Nama Organisasi *</label>
                                   <input
@@ -6749,7 +6888,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, organizations: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                                 <div>
@@ -6766,12 +6905,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, organizations: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                               </div>
 
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Mulai</label>
                                   <CustomDatePicker
@@ -6838,7 +6977,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Pengalaman Organisasi</span>
@@ -6873,15 +7012,15 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       onPointerDown={(e) => handleSubItemPointerDown(e, 'education', eduIdx)}
                                       onPointerMove={(e) => handleSubItemPointerMove(e, 'education', eduIdx)}
                                       onPointerUp={handleSubItemPointerUp}
-                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none min-h-[32px] min-w-[32px]"
                                       title="Tarik untuk mengatur posisi"
+                                      aria-label="Tarik untuk mengatur posisi pendidikan"
                                     >
                                       <GripVertical className="w-3.5 h-3.5" />
                                     </div>
                                     <span className="font-bold text-xs text-slate-800 dark:text-white">
                                       Pendidikan #{eduIdx + 1}
                                     </span>
-
                                   </div>
                                   <button
                                     type="button"
@@ -6891,13 +7030,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         education: prev.education.filter((_, i) => i !== eduIdx),
                                       }))
                                     }
-                                    className="w-7 h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                    className="w-8 h-8 sm:w-7 sm:h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                    aria-label={`Hapus pendidikan #${eduIdx + 1}`}
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
 
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Institusi / Sekolah *</label>
                                   <input
@@ -6912,7 +7052,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, education: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                                 <div>
@@ -6929,12 +7069,12 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, education: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                               </div>
 
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Masuk</label>
                                   <CustomDatePicker
@@ -6980,7 +7120,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, education: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
 
@@ -7020,7 +7160,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Pendidikan</span>
@@ -7049,13 +7189,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       certifications: (prev.certifications || []).filter((_, i) => i !== certIdx),
                                     }))
                                   }
-                                  className="w-7 h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                  className="w-8 h-8 sm:w-7 sm:h-7 rounded-[10px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-2xs cursor-pointer"
+                                  aria-label={`Hapus sertifikat #${certIdx + 1}`}
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                               </div>
 
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Nama Sertifikat *</label>
                                   <input
@@ -7070,7 +7211,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, certifications: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                                 <div>
@@ -7087,7 +7228,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, certifications: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                               </div>
@@ -7106,11 +7247,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       return { ...prev, certifications: arr };
                                     });
                                   }}
-                                  className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                  className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                 />
                               </div>
 
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                   <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1 text-xs">Tanggal Terbit</label>
                                   <CustomDatePicker
@@ -7139,7 +7280,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, certifications: arr };
                                       });
                                     }}
-                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                               </div>
@@ -7162,7 +7303,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Sertifikat</span>
@@ -7184,7 +7325,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       content = (
                         <div className="space-y-3.5">
                           {(formData.languages || []).map((lang, langIdx) => (
-                            <div key={lang.id || langIdx} className="grid grid-cols-2 gap-3 items-center">
+                            <div
+                              key={lang.id || langIdx}
+                              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 p-3 sm:p-0 rounded-[10px] bg-slate-50 sm:bg-transparent dark:bg-slate-800/40 sm:dark:bg-transparent border sm:border-0 border-slate-200 dark:border-slate-800"
+                            >
                               <input
                                 type="text"
                                 placeholder="e.g., Bahasa Indonesia"
@@ -7197,25 +7341,27 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                     return { ...prev, languages: arr };
                                   });
                                 }}
-                                className="w-full px-3.5 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-teal-500 shadow-2xs"
+                                className="w-full sm:flex-1 px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                               />
-                              <div className="flex items-center gap-2">
-                                <CustomSelect
-                                  value={lang.level}
-                                  onChange={(val) => {
-                                    setFormData((prev) => {
-                                      const arr = [...(prev.languages || [])];
-                                      arr[langIdx] = { ...arr[langIdx], level: val as any };
-                                      return { ...prev, languages: arr };
-                                    });
-                                  }}
-                                  options={[
-                                    { value: 'Native', label: 'Native (Penutur Asli)' },
-                                    { value: 'Professional', label: 'Professional (Lancar)' },
-                                    { value: 'Conversational', label: 'Conversational (Menengah)' },
-                                    { value: 'Basic', label: 'Basic (Dasar)' },
-                                  ]}
-                                />
+                              <div className="flex items-center gap-2 w-full sm:w-auto">
+                                <div className="flex-1 sm:w-48">
+                                  <CustomSelect
+                                    value={lang.level}
+                                    onChange={(val) => {
+                                      setFormData((prev) => {
+                                        const arr = [...(prev.languages || [])];
+                                        arr[langIdx] = { ...arr[langIdx], level: val as any };
+                                        return { ...prev, languages: arr };
+                                      });
+                                    }}
+                                    options={[
+                                      { value: 'Native', label: 'Native (Penutur Asli)' },
+                                      { value: 'Professional', label: 'Professional (Lancar)' },
+                                      { value: 'Conversational', label: 'Conversational (Menengah)' },
+                                      { value: 'Basic', label: 'Basic (Dasar)' },
+                                    ]}
+                                  />
+                                </div>
                                 <button
                                   type="button"
                                   onClick={() =>
@@ -7224,7 +7370,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       languages: (prev.languages || []).filter((_, i) => i !== langIdx),
                                     }))
                                   }
-                                  className="p-2 rounded-[10px] bg-rose-500 text-white hover:bg-rose-600 transition cursor-pointer"
+                                  className="w-8 h-8 sm:w-7 sm:h-7 rounded-[10px] bg-rose-500 text-white hover:bg-rose-600 transition flex items-center justify-center shrink-0 cursor-pointer"
+                                  aria-label={`Hapus bahasa ${lang.language || `#${langIdx + 1}`}`}
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -7243,7 +7390,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Bahasa</span>
@@ -7267,12 +7414,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       courses: (prev.courses || []).filter((_, i) => i !== crsIdx),
                                     }))
                                   }
-                                  className="text-rose-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                                  className="text-rose-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1 cursor-pointer py-1.5 px-2 rounded-[8px] hover:bg-rose-50 dark:hover:bg-rose-950/40 min-h-[32px] transition"
+                                  aria-label={`Hapus kursus #${crsIdx + 1}`}
                                 >
                                   <Trash2 className="w-3.5 h-3.5" /> Hapus
                                 </button>
                               </div>
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="space-y-1">
                                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Kursus / Pelatihan</label>
                                   <input
@@ -7287,7 +7435,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, courses: arr };
                                       });
                                     }}
-                                    className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -7304,11 +7452,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, courses: arr };
                                       });
                                     }}
-                                    className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                               </div>
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tanggal Mulai</label>
                                   <CustomDatePicker
@@ -7365,7 +7513,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Pelatihan</span>
@@ -7389,12 +7537,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       scholarships: (prev.scholarships || []).filter((_, i) => i !== schIdx),
                                     }))
                                   }
-                                  className="text-rose-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                                  className="text-rose-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1 cursor-pointer py-1.5 px-2 rounded-[8px] hover:bg-rose-50 dark:hover:bg-rose-950/40 min-h-[32px] transition"
+                                  aria-label={`Hapus beasiswa #${schIdx + 1}`}
                                 >
                                   <Trash2 className="w-3.5 h-3.5" /> Hapus
                                 </button>
                               </div>
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="space-y-1">
                                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Beasiswa</label>
                                   <input
@@ -7409,7 +7558,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, scholarships: arr };
                                       });
                                     }}
-                                    className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -7426,11 +7575,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, scholarships: arr };
                                       });
                                     }}
-                                    className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                               </div>
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tanggal Mulai</label>
                                   <CustomDatePicker
@@ -7487,7 +7636,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Beasiswa</span>
@@ -7511,12 +7660,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       volunteers: (prev.volunteers || []).filter((_, i) => i !== volIdx),
                                     }))
                                   }
-                                  className="text-rose-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                                  className="text-rose-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1 cursor-pointer py-1.5 px-2 rounded-[8px] hover:bg-rose-50 dark:hover:bg-rose-950/40 min-h-[32px] transition"
+                                  aria-label={`Hapus volunteer #${volIdx + 1}`}
                                 >
                                   <Trash2 className="w-3.5 h-3.5" /> Hapus
                                 </button>
                               </div>
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="space-y-1">
                                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Organisasi / Komunitas</label>
                                   <input
@@ -7531,7 +7681,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, volunteers: arr };
                                       });
                                     }}
-                                    className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -7548,11 +7698,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         return { ...prev, volunteers: arr };
                                       });
                                     }}
-                                    className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-teal-500"
+                                    className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                   />
                                 </div>
                               </div>
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tanggal Mulai</label>
                                   <CustomDatePicker
@@ -7610,7 +7760,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Volunteer</span>
@@ -7649,13 +7799,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                       onPointerDown={(e) => handleSubItemPointerDown(e, 'references', refIdx)}
                                       onPointerMove={(e) => handleSubItemPointerMove(e, 'references', refIdx)}
                                       onPointerUp={handleSubItemPointerUp}
-                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none"
+                                      className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-[10px] transition shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing touch-none select-none min-h-[32px] min-w-[32px]"
                                       title="Tarik untuk mengatur posisi"
+                                      aria-label="Tarik untuk mengatur posisi referensi"
                                     >
                                       <GripVertical className="w-3.5 h-3.5" />
                                     </div>
                                     <span className="font-bold text-xs text-slate-700 dark:text-slate-300">Referensi #{refIdx + 1}</span>
-
                                   </div>
                                   <button
                                     type="button"
@@ -7665,12 +7815,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                         references: (prev.references || []).filter((_, i) => i !== refIdx),
                                       }))
                                     }
-                                    className="text-rose-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                                    className="text-rose-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1 cursor-pointer py-1.5 px-2 rounded-[8px] hover:bg-rose-50 dark:hover:bg-rose-950/40 min-h-[32px] transition"
+                                    aria-label={`Hapus referensi #${refIdx + 1}`}
                                   >
                                     <Trash2 className="w-3.5 h-3.5" /> Hapus
                                   </button>
                                 </div>
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                   <div className="space-y-1">
                                     <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
                                     <input
@@ -7685,7 +7836,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, references: arr };
                                         });
                                       }}
-                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1]"
+                                      className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                     />
                                   </div>
                                   <div className="space-y-1">
@@ -7702,11 +7853,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, references: arr };
                                         });
                                       }}
-                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1]"
+                                      className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                     />
                                   </div>
                                 </div>
-                                <div className="grid grid-cols-3 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                   <div className="space-y-1">
                                     <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Perusahaan / Institusi</label>
                                     <input
@@ -7721,7 +7872,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, references: arr };
                                         });
                                       }}
-                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1]"
+                                      className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                     />
                                   </div>
                                   <div className="space-y-1">
@@ -7738,7 +7889,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, references: arr };
                                         });
                                       }}
-                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1]"
+                                      className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                     />
                                   </div>
                                   <div className="space-y-1">
@@ -7755,7 +7906,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                           return { ...prev, references: arr };
                                         });
                                       }}
-                                      className="w-full px-3 py-2 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1]"
+                                      className="w-full px-3.5 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#1738D1] focus:ring-1 focus:ring-[#1738D1]/20 shadow-2xs"
                                     />
                                   </div>
                                 </div>
@@ -7774,7 +7925,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                                 ],
                               }))
                             }
-                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="w-full py-2.5 rounded-[10px] border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1738D1] hover:text-orange-500 text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-[0.99]"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Tambah Referensi</span>
@@ -7807,6 +7958,24 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                       </CVSectionCard>
                     );
                   })}
+
+                  {/* Form Footer Action Buttons */}
+                  <div className="pt-3 pb-6 flex items-center justify-end gap-2.5">
+                    <button
+                      type="button"
+                      onClick={handleBackToCvList}
+                      className="px-4 py-2.5 rounded-[10px] border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-5 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 active:scale-[0.98] transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>Simpan &amp; Selesai</span>
+                    </button>
+                  </div>
                 </form>
               </div>
               )}
@@ -7839,7 +8008,17 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                             }`}
                           >
                             <div className="w-full aspect-[210/297] rounded-[10px] bg-white border border-slate-200 dark:border-slate-700 p-1 overflow-hidden shadow-2xs relative flex flex-col justify-between mb-2 group-hover:shadow-md transition">
-                              <TemplateThumbnailVisual templateId={tpl.id} customData={formData} />
+                              <TemplateThumbnailVisual
+                                templateId={tpl.id}
+                                customData={formData}
+                                docMarginTop={docMarginTop}
+                                docMarginBottom={docMarginBottom}
+                                docMarginLeft={docMarginLeft}
+                                docMarginRight={docMarginRight}
+                                docFontFamily={docFontFamily}
+                                docFontSize={docFontSize}
+                                docSpacing={docSpacing}
+                              />
                               {isSelected && (
                                 <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-[#1738D1] text-white flex items-center justify-center shadow-xs">
                                   <Check className="w-3 h-3 stroke-[3]" />
@@ -8080,43 +8259,65 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
                       {/* Selection Posisi Foto Profil Header */}
                       <div className="space-y-1.5 sm:col-span-2">
-                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                          <ImageIcon className="w-3.5 h-3.5 text-orange-500" />
-                          <span>Posisi Foto Profil Header</span>
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                          <span className="flex items-center gap-1.5">
+                            <ImageIcon className="w-3.5 h-3.5 text-orange-500" />
+                            <span>Posisi Foto Profil Header</span>
+                          </span>
+                          {selectedTemplateId === 'tech-sidebar' ? (
+                            <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-[6px]">
+                              Terkunci di Sidebar
+                            </span>
+                          ) : (selectedTemplateId === 'minimalist-executive' || selectedTemplateId === 'charcoal-white') ? (
+                            <span className="text-[10px] font-semibold text-[#1738D1] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded-[6px]">
+                              Terkunci di Tengah
+                            </span>
+                          ) : null}
                         </label>
-                        <div className="grid grid-cols-2 gap-3">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setDocPhotoPosition('left');
-                              setFormData((prev) => ({ ...prev, photoPosition: 'left' }));
-                            }}
-                            className={`px-3.5 py-2.5 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-2 ${
-                              docPhotoPosition === 'left'
-                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
-                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
-                            }`}
-                          >
-                            <AlignLeft className="w-3.5 h-3.5" />
-                            <span>Di Kiri (Left)</span>
-                          </button>
+                        {selectedTemplateId === 'tech-sidebar' ? (
+                          <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-[10px] border border-slate-200 dark:border-slate-700 text-xs text-slate-500 text-center">
+                            Template ini menempatkan foto secara otomatis pada bilah samping (sidebar).
+                          </div>
+                        ) : (selectedTemplateId === 'minimalist-executive' || selectedTemplateId === 'charcoal-white') ? (
+                          <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-[10px] border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 text-center flex items-center justify-center gap-2">
+                            <AlignCenter className="w-4 h-4 text-[#1738D1] shrink-0" />
+                            <span>Template simetris ini mengunci foto secara otomatis di tengah atas nama.</span>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setDocPhotoPosition('left');
+                                setFormData((prev) => ({ ...prev, photoPosition: 'left' }));
+                              }}
+                              className={`px-3.5 py-2.5 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-2 ${
+                                docPhotoPosition === 'left'
+                                  ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
+                                  : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
+                              }`}
+                            >
+                              <AlignLeft className="w-3.5 h-3.5" />
+                              <span>Di Kiri (Left)</span>
+                            </button>
 
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setDocPhotoPosition('right');
-                              setFormData((prev) => ({ ...prev, photoPosition: 'right' }));
-                            }}
-                            className={`px-3.5 py-2.5 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-2 ${
-                              docPhotoPosition === 'right'
-                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
-                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
-                            }`}
-                          >
-                            <AlignRight className="w-3.5 h-3.5" />
-                            <span>Di Kanan (Right)</span>
-                          </button>
-                        </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setDocPhotoPosition('right');
+                                setFormData((prev) => ({ ...prev, photoPosition: 'right' }));
+                              }}
+                              className={`px-3.5 py-2.5 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-2 ${
+                                docPhotoPosition === 'right' || docPhotoPosition === 'center'
+                                  ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
+                                  : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
+                              }`}
+                            >
+                              <AlignRight className="w-3.5 h-3.5" />
+                              <span>Di Kanan (Right)</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       {/* Selection Gaya Hyperlink */}
@@ -8170,7 +8371,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
                           <Mail className="w-3.5 h-3.5 text-orange-500" />
                           <span>Hyperlink Referensi Kontak</span>
                         </label>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                           <button
                             type="button"
                             onClick={() => setDocRefEmailHyperlink(!docRefEmailHyperlink)}
@@ -8618,7 +8819,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
             </div>
           </div>
         </div>
-      )}
+      )
+    )}
 
       {/* MODAL 1: PRATINJAU DRAF CV AI (DRAFT MODAL) */}
       {showDraftModal && (
@@ -9026,18 +9228,6 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
       {/* Hidden for now: Floating CTA & Modal layanan CV by HRD */}
       {/* <CvHrdFloatingCta /> */}
 
-      {/* Toast Feedback Success AI */}
-      {aiToastMessage && (
-        <div className="fixed top-20 right-6 z-50 p-4 rounded-[10px] bg-slate-900 text-white border border-emerald-500/50 shadow-2xl flex items-center gap-3 animate-in slide-in-from-top duration-300">
-          <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="font-extrabold text-xs text-white">Bullet berhasil diperbarui</div>
-            <div className="text-[11px] text-slate-300">{aiToastMessage}</div>
-          </div>
-        </div>
-      )}
 
       {/* Contextual AI Assistant Drawer */}
       <AiAssistantDrawer
@@ -9049,7 +9239,15 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
         onApplyContent={(newVal, feedback) => {
           if (aiApplyHandler) aiApplyHandler(newVal, feedback);
         }}
-        targetJobTitle={selectedCV?.headline || 'Professional'}
+        targetJobTitle={selectedCV?.headline || selectedCV?.targetRole || 'Professional'}
+        cvContext={{
+          headline: selectedCV?.headline || selectedCV?.targetRole,
+          targetRole: selectedCV?.targetRole,
+          education: selectedCV?.education?.[0]
+            ? `${selectedCV.education[0].degree ? selectedCV.education[0].degree + ' ' : ''}${selectedCV.education[0].institution || ''}`.trim()
+            : undefined,
+          skills: selectedCV?.skillsList?.map((s) => s.name) || selectedCV?.skills || [],
+        }}
       />
 
       {/* Dynamic ATS Score Analysis Drawer */}
@@ -9098,15 +9296,16 @@ export const CVView: React.FC<CVViewProps> = ({ cvId }) => {
 
 
 // A4 Paperlike Canvas Component: Maintains exact A4 proportions per sheet, handles multi-page (Page 2+) flow with responsive auto-scaling & zoom controls
-const A4PaperlikeCanvas: React.FC<{
+export const A4PaperlikeCanvas: React.FC<{
   templateId: string;
   customData?: Partial<CVData>;
   showPageNumbers?: boolean;
+  layoutOrientation?: string;
   docFontFamily?: string;
   docFontSize?: string;
   docSpacing?: string;
   docShowIcons?: boolean;
-  docPhotoPosition?: 'left' | 'right';
+  docPhotoPosition?: 'left' | 'center' | 'right';
   docNameSize?: number;
   docHeaderSize?: number;
   docBodySize?: number;
@@ -9151,6 +9350,7 @@ const A4PaperlikeCanvas: React.FC<{
   const [pageBreaksPx, setPageBreaksPx] = useState<number[]>([0]);
   const [zoomScale, setZoomScale] = useState<number | null>(null);
   const [autoScale, setAutoScale] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   // Dynamic A4 margin & printable slice calculations
   const marginTopMM = (docMarginTop ?? 1.27) * 10;
@@ -9159,7 +9359,10 @@ const A4PaperlikeCanvas: React.FC<{
   const PRINTABLE_HEIGHT_MM = Math.max(100, 297 - verticalMarginsMM);
 
   useEffect(() => {
+    let isMounted = true;
+
     const updateDimensions = () => {
+      if (!isMounted) return;
       const printableHeightPx = PRINTABLE_HEIGHT_MM * 3.779527559;
 
       if (hiddenMeasureRef.current) {
@@ -9168,57 +9371,209 @@ const A4PaperlikeCanvas: React.FC<{
           setContentHeightPx(measuredH);
 
           const parentRect = hiddenMeasureRef.current.getBoundingClientRect();
-          
-          // Collect all granular leaf-level candidate elements (headings, bullets, paragraphs, item headers)
+
+          // Collect leaf-level text and visual elements
           const candidateNodes = Array.from(
             hiddenMeasureRef.current.querySelectorAll<HTMLElement>(
-              'h1, h2, h3, li, p, .space-y-4 > div > div.flex, .space-y-3 > div > div.flex, .mb-3 > div.flex, .grid > div'
+              'li, p, h1, h2, h3, h4, h5, h6, tr, img, svg'
             )
           );
 
-          const blockRects = candidateNodes
-            .map((node) => {
-              const r = node.getBoundingClientRect();
-              const top = r.top - parentRect.top;
-              const bottom = r.bottom - parentRect.top;
-              const isH2 = node.tagName.toLowerCase() === 'h2';
-              return { top, bottom, height: bottom - top, isH2, node };
-            })
-            .filter((b) => b.height > 0)
-            .sort((a, b) => a.top - b.top);
+          type MeasureBlock = {
+            top: number;
+            bottom: number;
+            height: number;
+            node: HTMLElement;
+            isHeading: boolean;
+            isItemTitle: boolean;
+          };
+
+          const rawBlocks: MeasureBlock[] = [];
+          const range = typeof document !== 'undefined' ? document.createRange() : null;
+
+          for (const node of candidateNodes) {
+            const r = node.getBoundingClientRect();
+            const top = r.top - parentRect.top;
+            const bottom = r.bottom - parentRect.top;
+            const height = bottom - top;
+            if (height <= 0) continue;
+
+            const tag = node.tagName.toLowerCase();
+            const isHeading = /^h[1-6]$/.test(tag);
+            const cls = typeof node.className === 'string' ? node.className : '';
+            const isItemTitle =
+              !isHeading &&
+              tag === 'p' &&
+              (cls.includes('font-bold') || cls.includes('font-extrabold') || cls.includes('font-black')) &&
+              height <= 44;
+
+            // For multi-line <p> or <li> blocks (e.g. skills paragraph, summary, or long bullet description),
+            // extract individual rendered line boxes via Range.getClientRects() so a tall paragraph
+            // at the bottom of Page 2 splits cleanly between lines instead of jumping entirely to Page 3
+            if (range && (tag === 'p' || tag === 'li') && height > 38) {
+              try {
+                range.selectNodeContents(node);
+                const clientRects = Array.from(range.getClientRects()).filter(
+                  (cr) => cr.height > 0 && cr.width > 0
+                );
+                if (clientRects.length > 1) {
+                  const lineGroups: { top: number; bottom: number }[] = [];
+                  for (const cr of clientRects) {
+                    const cTop = cr.top - parentRect.top;
+                    const cBottom = cr.bottom - parentRect.top;
+                    const lastGroup = lineGroups[lineGroups.length - 1];
+                    if (lastGroup && Math.abs(cTop - lastGroup.top) <= 4) {
+                      lastGroup.top = Math.min(lastGroup.top, cTop);
+                      lastGroup.bottom = Math.max(lastGroup.bottom, cBottom);
+                    } else {
+                      lineGroups.push({ top: cTop, bottom: cBottom });
+                    }
+                  }
+                  if (lineGroups.length > 1) {
+                    for (const lg of lineGroups) {
+                      rawBlocks.push({
+                        top: lg.top,
+                        bottom: lg.bottom,
+                        height: lg.bottom - lg.top,
+                        node,
+                        isHeading: false,
+                        isItemTitle: false,
+                      });
+                    }
+                    continue;
+                  }
+                }
+              } catch {
+                // Fallback to whole node rect if Range measurement fails
+              }
+            }
+
+            rawBlocks.push({
+              top,
+              bottom,
+              height,
+              node,
+              isHeading,
+              isItemTitle,
+            });
+          }
+
+          rawBlocks.sort((a, b) => a.top - b.top || b.bottom - a.bottom);
+
+          // Merge side-by-side blocks on the same horizontal row (e.g. flex justify-between role + period)
+          // so a shorter date on the right never overrides the true bottom of a 2-line title on the left
+          const blockRects: MeasureBlock[] = [];
+          for (const blk of rawBlocks) {
+            const prev = blockRects[blockRects.length - 1];
+            if (prev && Math.abs(blk.top - prev.top) <= 4) {
+              prev.top = Math.min(prev.top, blk.top);
+              prev.bottom = Math.max(prev.bottom, blk.bottom);
+              prev.height = prev.bottom - prev.top;
+              prev.isHeading = prev.isHeading || blk.isHeading;
+              prev.isItemTitle = prev.isItemTitle || blk.isItemTitle;
+            } else {
+              blockRects.push({ ...blk });
+            }
+          }
+
+          // Calculate true content boundary from actual visual elements (avoid min-height inflation)
+          const maxBlockBottom = blockRects.length > 0
+            ? Math.max(...blockRects.map((b) => b.bottom))
+            : 0;
+          const contentBoundary = maxBlockBottom > 0 ? maxBlockBottom : measuredH;
+
+          // 4px safety buffer to prevent subpixel float clipping while maximizing printable A4 height
+          const SAFETY_BUFFER_PX = 4;
+          const usablePageHeightPx = Math.max(600, printableHeightPx - SAFETY_BUFFER_PX);
+          const MAX_BACKTRACK_PX = 72;
 
           const computedBreaks: number[] = [0];
           let currentStart = 0;
 
-          while (currentStart + printableHeightPx < measuredH - 5) {
-            const maxTarget = currentStart + printableHeightPx;
+          // Only paginate if remaining content genuinely exceeds printable page height
+          while (currentStart + printableHeightPx - 2 < contentBoundary) {
+            const maxTarget = currentStart + usablePageHeightPx;
 
-            // Find the exact line/bullet/heading that crosses the margin boundary
-            const crossingBlock = blockRects.find(
-              (b) => b.top < maxTarget && b.bottom > maxTarget && b.top > currentStart + 15
+            // Find the exact line/item that straddles the page boundary
+            const crossingIdx = blockRects.findIndex(
+              (b) => b.top < maxTarget && b.bottom > maxTarget && b.top > currentStart + 20
             );
 
-            let nextBreak = maxTarget;
+            let breakPoint = maxTarget;
 
-            if (crossingBlock && crossingBlock.top > currentStart + 15) {
-              nextBreak = crossingBlock.top;
+            if (crossingIdx !== -1) {
+              let targetIdx = crossingIdx;
+
+              // Step back to the last fitting block before the straddling line
+              let prevIdx = targetIdx - 1;
+              while (prevIdx >= 0 && blockRects[prevIdx].bottom > blockRects[targetIdx].top + 2) {
+                prevIdx--;
+              }
+
+              // Orphan heading / item-title protection:
+              // If the block right before the break is a section heading (h1..h6) or a standalone bold item title,
+              // pull the break above it so it isn't stranded alone at the bottom of the page
+              while (
+                prevIdx >= 0 &&
+                blockRects[prevIdx].top > currentStart + 40 &&
+                (blockRects[prevIdx].isHeading || blockRects[prevIdx].isItemTitle) &&
+                maxTarget - blockRects[prevIdx].top <= MAX_BACKTRACK_PX
+              ) {
+                targetIdx = prevIdx;
+                prevIdx = targetIdx - 1;
+                while (prevIdx >= 0 && blockRects[prevIdx].bottom > blockRects[targetIdx].top + 2) {
+                  prevIdx--;
+                }
+              }
+
+              if (prevIdx >= 0 && blockRects[prevIdx].bottom > currentStart + 20) {
+                const candidateBp = blockRects[prevIdx].bottom;
+                // Guard against excessive backtracking that would leave a huge bottom margin
+                if (maxTarget - candidateBp <= MAX_BACKTRACK_PX) {
+                  breakPoint = candidateBp;
+                } else {
+                  breakPoint = Math.max(currentStart + 20, blockRects[crossingIdx].top - 2);
+                }
+              } else {
+                breakPoint = Math.max(currentStart + 20, blockRects[targetIdx].top - 4);
+              }
             } else {
-              const fitting = blockRects.filter((b) => b.bottom <= maxTarget && b.top >= currentStart);
-              if (fitting.length > 0) {
-                const lastFit = fitting[fitting.length - 1];
-                const nextOne = blockRects.find((b) => b.top >= lastFit.bottom && b.top > currentStart + 15);
-                if (nextOne && nextOne.top <= maxTarget + 20) {
-                  nextBreak = nextOne.top;
+              // No block straddles maxTarget; break cleanly at the bottom of the last fitting block
+              let lastFitIdx = -1;
+              for (let i = 0; i < blockRects.length; i++) {
+                if (blockRects[i].top >= currentStart && blockRects[i].bottom <= maxTarget) {
+                  lastFitIdx = i;
+                }
+              }
+
+              if (lastFitIdx !== -1) {
+                // Pull back if the last fitting block on the page is an orphan heading or standalone item title
+                while (
+                  lastFitIdx >= 0 &&
+                  blockRects[lastFitIdx].top > currentStart + 40 &&
+                  (blockRects[lastFitIdx].isHeading || blockRects[lastFitIdx].isItemTitle) &&
+                  maxTarget - blockRects[lastFitIdx].top <= MAX_BACKTRACK_PX
+                ) {
+                  lastFitIdx--;
+                }
+
+                if (lastFitIdx >= 0 && blockRects[lastFitIdx].bottom > currentStart + 20) {
+                  const candidateBp = blockRects[lastFitIdx].bottom;
+                  if (maxTarget - candidateBp <= MAX_BACKTRACK_PX) {
+                    breakPoint = candidateBp;
+                  }
                 }
               }
             }
 
-            if (nextBreak <= currentStart + 20) {
-              nextBreak = maxTarget;
+            // Fallback progress guarantee to avoid infinite loop
+            if (breakPoint <= currentStart + 20) {
+              breakPoint = maxTarget;
             }
 
-            computedBreaks.push(nextBreak);
-            currentStart = nextBreak;
+            const finalBreak = Math.max(currentStart + 20, Math.floor(breakPoint));
+            computedBreaks.push(finalBreak);
+            currentStart = finalBreak;
           }
 
           setPageBreaksPx(computedBreaks);
@@ -9229,14 +9584,24 @@ const A4PaperlikeCanvas: React.FC<{
         const a4W = 794; // approx px width of 210mm (210 * 3.7795)
         if (availW > 0) {
           const computedScale = Number((availW / a4W).toFixed(3));
-          // Clamped scale from 0.35x up to 2.0x for large 27"-32" screens
-          const clampedScale = Math.min(Math.max(computedScale, 0.35), 2.0);
+          // Clamped scale from 0.35x up to 1.0x (1.0 = true 100% real A4 size)
+          const clampedScale = Math.min(Math.max(computedScale, 0.35), 1.0);
           setAutoScale(clampedScale);
         }
       }
     };
 
     updateDimensions();
+
+    // Await web font loading to guarantee true text bounding box dimensions
+    if (typeof document !== 'undefined' && document.fonts) {
+      document.fonts.ready.then(() => {
+        if (isMounted) updateDimensions();
+      }).catch(() => {});
+    }
+
+    const t1 = setTimeout(updateDimensions, 150);
+    const t2 = setTimeout(updateDimensions, 500);
 
     const ro = new ResizeObserver(updateDimensions);
     if (hiddenMeasureRef.current) ro.observe(hiddenMeasureRef.current);
@@ -9245,6 +9610,9 @@ const A4PaperlikeCanvas: React.FC<{
     window.addEventListener('resize', updateDimensions);
 
     return () => {
+      isMounted = false;
+      clearTimeout(t1);
+      clearTimeout(t2);
       ro.disconnect();
       window.removeEventListener('resize', updateDimensions);
     };
@@ -9252,12 +9620,31 @@ const A4PaperlikeCanvas: React.FC<{
 
   const effectiveScale = zoomScale !== null ? zoomScale : autoScale;
   const totalPages = Math.max(1, pageBreaksPx.length);
+  const activePage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const A4_WIDTH_PX = 794;
+  const A4_HEIGHT_PX = 1123;
+  const scaledWidth = Math.round(A4_WIDTH_PX * effectiveScale);
+  const scaledHeight = Math.round(A4_HEIGHT_PX * effectiveScale);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
 
   return (
-    <div ref={containerRef} className="cv-print-area w-full max-w-full overflow-x-auto flex flex-col items-center gap-4 py-2 print:p-0 print:m-0 print:w-[210mm]">
+    <div ref={containerRef} className="cv-print-area w-full max-w-full overflow-x-hidden flex flex-col items-center gap-4 py-2 print:p-0 print:m-0 print:w-[210mm]">
       {/* Hidden DOM measurement container */}
       <div className="fixed top-[-9999px] left-[-9999px] opacity-0 pointer-events-none print:hidden" aria-hidden="true">
-        <div ref={hiddenMeasureRef} style={{ width: '210mm', background: '#ffffff' }}>
+        <style>{`
+          .cv-hidden-measure-root,
+          .cv-hidden-measure-root *,
+          .cv-hidden-measure-root .cv-template-root > div {
+            min-height: 0 !important;
+          }
+        `}</style>
+        <div ref={hiddenMeasureRef} style={{ width: '210mm', background: '#ffffff' }} className="cv-hidden-measure-root">
           <CVTemplatePreview
             templateId={templateId}
             customData={customData}
@@ -9265,6 +9652,7 @@ const A4PaperlikeCanvas: React.FC<{
             docFontSize={docFontSize}
             docSpacing={docSpacing}
             docShowIcons={docShowIcons}
+            docPhotoPosition={docPhotoPosition}
             docNameSize={docNameSize}
             docHeaderSize={docHeaderSize}
             docBodySize={docBodySize}
@@ -9283,16 +9671,77 @@ const A4PaperlikeCanvas: React.FC<{
         </div>
       </div>
 
+      {/* Pagination Toolbar (Hanya muncul jika CV lebih dari 1 halaman) */}
+      {totalPages > 1 && (
+        <div
+          className="no-print flex items-center justify-between gap-3 px-4 py-2 bg-white dark:bg-slate-900 rounded-[10px] border border-slate-300/80 dark:border-slate-800 shadow-2xs z-10 transition-all"
+          style={{
+            width: `${scaledWidth}px`,
+            maxWidth: '100%',
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-[#1738D1]" />
+              Halaman {activePage} dari {totalPages}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={activePage <= 1}
+              className="px-2.5 py-1 text-xs font-semibold rounded-[8px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1 cursor-pointer"
+              title="Halaman Sebelumnya"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Sebelumnya</span>
+            </button>
+
+            <div className="flex items-center gap-1 mx-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => setCurrentPage(num)}
+                  className={`w-6 h-6 rounded-[6px] text-xs font-bold transition cursor-pointer flex items-center justify-center ${
+                    activePage === num
+                      ? 'bg-[#1738D1] text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                  title={`Buka Halaman ${num}`}
+                >
+                  {num}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={activePage >= totalPages}
+              className="px-2.5 py-1 text-xs font-semibold rounded-[8px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1 cursor-pointer"
+              title="Halaman Selanjutnya"
+            >
+              <span className="hidden sm:inline">Selanjutnya</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Render Paginated A4 Paper Sheets with Responsive Scale Wrapper */}
       <div
-        className="a4-paper-sheet-container flex flex-col items-center gap-6 transition-transform duration-200 origin-top print:gap-0 print:transform-none print:m-0"
+        className="a4-paper-sheet-container flex flex-col items-center gap-6 print:gap-0 print:transform-none print:m-0 print:!w-[210mm] print:!h-auto"
         style={{
-          transform: effectiveScale !== 1 ? `scale(${effectiveScale})` : undefined,
-          marginBottom: effectiveScale !== 1 ? `${(effectiveScale - 1) * 297 * 3.7795 * totalPages}px` : undefined,
+          width: `${scaledWidth}px`,
+          height: `${scaledHeight}px`,
         }}
       >
         {Array.from({ length: totalPages }, (_, index) => {
           const pageNum = index + 1;
+          const isCurrentPage = pageNum === activePage;
           const PRINTABLE_HEIGHT_PX = PRINTABLE_HEIGHT_MM * 3.779527559;
           const startPx = pageBreaksPx[index] || 0;
           const nextBreakPx = pageBreaksPx[index + 1];
@@ -9301,16 +9750,29 @@ const A4PaperlikeCanvas: React.FC<{
             : PRINTABLE_HEIGHT_PX;
 
           return (
-            <div key={pageNum} className="flex flex-col items-center w-full max-w-[210mm] print:w-[210mm] print:m-0 print:block print:p-0">
-              {/* A4 Paperlike Sheet Card */}
+            <div
+              key={pageNum}
+              className={`a4-page-frame w-full h-full rounded-[10px] shadow-2xl shadow-slate-900/15 border border-slate-300/80 dark:border-slate-700/80 overflow-hidden bg-white print:overflow-visible print:shadow-none print:border-none print:rounded-none print:w-[210mm] print:h-[297mm] print:m-0 print:block print:p-0 ${
+                isCurrentPage ? 'block animate-in fade-in duration-150' : 'hidden print:block'
+              }`}
+            >
+              {/* Scaled viewport container */}
               <div
-                className="a4-paper-sheet relative bg-white text-slate-900 shadow-2xl shadow-slate-900/15 border border-slate-300/80 dark:border-slate-700/80 rounded-[10px] overflow-hidden transition-all duration-300 hover:shadow-slate-900/25 shrink-0 print:shadow-none print:border-none print:rounded-none print:m-0"
+                className="w-[210mm] h-[297mm] origin-top-left transition-transform duration-200 print:!transform-none print:!w-[210mm] print:!h-[297mm]"
                 style={{
-                  width: '210mm',
-                  height: '297mm',
-                  boxSizing: 'border-box',
+                  transform: effectiveScale !== 1 ? `scale(${effectiveScale})` : undefined,
+                  transformOrigin: 'top left',
                 }}
               >
+                {/* A4 Paperlike Sheet Card */}
+                <div
+                  className="a4-paper-sheet relative bg-white text-slate-900 overflow-hidden shrink-0 print:m-0"
+                  style={{
+                    width: '210mm',
+                    height: '297mm',
+                    boxSizing: 'border-box',
+                  }}
+                >
                 {/* Paper Texture Micro-Grain Overlay */}
                 <div
                   className="absolute inset-0 pointer-events-none opacity-[0.025] mix-blend-multiply no-print"
@@ -9353,6 +9815,7 @@ const A4PaperlikeCanvas: React.FC<{
                         docFontSize={docFontSize}
                         docSpacing={docSpacing}
                         docShowIcons={docShowIcons}
+                        docPhotoPosition={docPhotoPosition}
                         docNameSize={docNameSize}
                         docHeaderSize={docHeaderSize}
                         docBodySize={docBodySize}
@@ -9372,12 +9835,20 @@ const A4PaperlikeCanvas: React.FC<{
                   </div>
                 </div>
 
-                  {/* Page Bottom Margin Spacer */}
-                  <div style={{ height: `${docMarginBottom ?? 1.27}cm`, width: '100%', flexShrink: 0 }} />
+                  {/* Page Bottom Margin Spacer & Page Number Indicator */}
+                  <div
+                    style={{ height: `${docMarginBottom ?? 1.27}cm`, width: '100%', flexShrink: 0 }}
+                    className="flex items-center justify-center text-[10px] text-slate-400 font-medium select-none"
+                  >
+                    {totalPages > 1 && showPageNumbers && (
+                      <span>Halaman {pageNum} dari {totalPages}</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          );
+          </div>
+        );
         })}
       </div>
     </div>
@@ -9392,14 +9863,15 @@ const hasAnyValue = (arr?: any[]) => {
 };
 
 // CV Template Preview Component with Full Data Support
-const CVTemplatePreview: React.FC<{
+export const CVTemplatePreview: React.FC<{
   templateId: string;
   customData?: Partial<CVData>;
+  isThumbnail?: boolean;
   docFontFamily?: string;
   docFontSize?: string;
   docSpacing?: string;
   docShowIcons?: boolean;
-  docPhotoPosition?: 'left' | 'right';
+  docPhotoPosition?: 'left' | 'center' | 'right';
   docNameSize?: number;
   docHeaderSize?: number;
   docBodySize?: number;
@@ -9417,6 +9889,7 @@ const CVTemplatePreview: React.FC<{
 }> = ({
   templateId,
   customData,
+  isThumbnail,
   docFontFamily = 'sans',
   docFontSize = 'base',
   docSpacing = 'normal',
@@ -9441,10 +9914,10 @@ const CVTemplatePreview: React.FC<{
   const storedSession = typeof window !== 'undefined' ? getStoredSession() : null;
   const storedProfileStr = typeof window !== 'undefined' ? localStorage.getItem('cuti_onboarding_profile') : null;
   const storedProfile = storedProfileStr ? JSON.parse(storedProfileStr) : null;
-  const defaultUserName = customData?.fullName?.trim() || storedProfile?.fullName || storedSession?.name || 'Nama Lengkap Anda';
-  const defaultUserLocation = customData?.location?.trim() || storedProfile?.location || 'Kota, Indonesia';
-  const defaultUserJobTitle = customData?.headline?.trim() || (storedProfile?.targetPositions?.[0]) || 'Posisi / Jabatan Anda';
-  const isTemplateGalleryThumbnail = !customData || (!customData.id && !customData.fullName && !customData.title && !customData.summary);
+  const isTemplateGalleryThumbnail = isThumbnail !== undefined ? isThumbnail : !customData;
+  const defaultUserName = customData?.fullName?.trim() || (isTemplateGalleryThumbnail ? 'Alexander Pratama, S.Kom.' : 'Nama Lengkap Anda');
+  const defaultUserLocation = customData?.location?.trim() || (isTemplateGalleryThumbnail ? 'Jakarta, Indonesia' : 'Kota, Indonesia');
+  const defaultUserJobTitle = customData?.headline?.trim() || (isTemplateGalleryThumbnail ? 'Senior Software Engineer' : 'Posisi / Jabatan Anda');
 
   // Data (merges customData with fallback dummy data for gallery thumbnails)
   const dummyData = {
@@ -9458,7 +9931,8 @@ const CVTemplatePreview: React.FC<{
     linkedin: customData?.linkedin?.trim() || '',
     github: customData?.github?.trim() || customData?.socialHandle?.trim() || '',
     socialPlatform: customData?.socialPlatform || 'github',
-    photoUrl: customData?.photoUrl !== undefined ? customData.photoUrl : '',
+    photoUrl: (customData?.showPhoto !== false && customData?.photoUrl) ? customData.photoUrl : '',
+    showPhoto: customData?.showPhoto !== false,
     summary:
       (customData?.summary && !customData.summary.toLowerCase().includes('hasil impor') && !customData.summary.toLowerCase().includes('.pdf'))
         ? customData.summary
@@ -9485,7 +9959,7 @@ const CVTemplatePreview: React.FC<{
           period: (exp.startDate || exp.endDate)
             ? `${exp.startDate || ''}${exp.endDate ? ` - ${exp.endDate}` : ''}`.trim()
             : (exp.period || ''),
-          description: exp.description || '',
+          description: cleanBulletText(exp.description || ''),
         }))
       : isTemplateGalleryThumbnail
       ? [
@@ -9515,7 +9989,7 @@ const CVTemplatePreview: React.FC<{
           period: (item.startDate || item.endDate)
             ? `${item.startDate || ''}${item.endDate ? ` - ${item.endDate}` : ''}`.trim()
             : (item.period || ''),
-          description: item.description || '',
+          description: cleanBulletText(item.description || ''),
         }))
       : isTemplateGalleryThumbnail
       ? [
@@ -9548,7 +10022,7 @@ const CVTemplatePreview: React.FC<{
             period: ((proj as any).startDate || (proj as any).endDate)
               ? `${(proj as any).startDate || ''}${(proj as any).endDate ? ` - ${(proj as any).endDate}` : ''}`.trim()
               : ((proj as any).period || ''),
-            description: proj.description || '',
+            description: cleanBulletText(proj.description || ''),
           }));
 
           const merged: typeof list = [];
@@ -9603,7 +10077,7 @@ const CVTemplatePreview: React.FC<{
               period: (org.startDate || org.endDate)
                 ? `${org.startDate || ''}${org.endDate ? ` - ${org.endDate}` : ''}`.trim()
                 : (org.period || ''),
-              description: org.description || '',
+              description: cleanBulletText(org.description || ''),
             };
           });
 
@@ -9653,7 +10127,9 @@ const CVTemplatePreview: React.FC<{
         ]
       : [],
     photoShape: customData?.photoShape || 'circle',
-    photoPosition: customData?.photoPosition || docPhotoPosition || 'right',
+    photoPosition: (templateId === 'minimalist-executive' || templateId === 'charcoal-white')
+      ? 'center'
+      : ((customData?.photoPosition === 'left' || docPhotoPosition === 'left') ? 'left' : 'right'),
     linkStyle: (customData as any)?.linkStyle || docLinkStyle || 'blue',
     certifications: (!isTemplateGalleryThumbnail && customData?.certifications)
       ? customData.certifications.map((cert) => {
@@ -9783,85 +10259,89 @@ const CVTemplatePreview: React.FC<{
 
   // Template Renderers
   const renderATSModern = () => {
-    const activeOrderKeys = DEFAULT_SECTION_ORDER;
+    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
 
     const sectionBlocks: Record<string, React.ReactNode> = {
       summary: (
-        <div key="summary" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
+        <div key="summary" data-cv-section="summary" className="mb-6">
+          <h2 data-cv-node="heading" className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
             RINGKASAN PROFESIONAL
           </h2>
-          <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
+          <p data-cv-node="summary-text" className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
         </div>
       ),
       skills: dummyData.skills.length > 0 ? (
-        <div key="skills" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
+        <div key="skills" data-cv-section="skills" className="mb-6">
+          <h2 data-cv-node="heading" className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
             KEAHLIAN TEKNIS
           </h2>
-          <p className="text-xs leading-relaxed text-slate-700">{dummyData.skills.join('  •  ')}</p>
+          <p data-cv-node="skills-text" className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.skills.join('  •  ')}</p>
         </div>
       ) : null,
-      experience: (
-        <div key="experience" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
+      experience: dummyData.experience.length > 0 ? (
+        <div key="experience" data-cv-section="experience" className="mb-6">
+          <h2 data-cv-node="heading" className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
             PENGALAMAN KERJA
           </h2>
           <div className="space-y-4">
             {dummyData.experience.map((exp, idx) => (
-              <div key={idx}>
+              <div key={idx} data-cv-item={`exp-${idx}`}>
                 <div className="flex items-baseline justify-between mb-1">
-                  <p className="text-sm font-bold text-slate-900">{exp.role}</p>
-                  <p className="text-xs text-slate-600">{exp.period}</p>
+                  <p data-cv-node="job-title" className="text-sm font-bold text-slate-900">{exp.role}</p>
+                  <p data-cv-node="job-period" className="text-xs text-slate-600">{exp.period}</p>
                 </div>
-                <p className="text-xs italic text-slate-700 mb-0.5">
+                <p data-cv-node="job-company" className="text-xs italic text-slate-700 mb-0.5">
                   {exp.company}{exp.location ? ` · ${exp.location}` : ''}
                 </p>
-                <RenderBulletDescription text={exp.description} />
-              </div>
-            ))}
-          </div>
-        </div>
-      ),
-      internships: dummyData.internships.length > 0 ? (
-        <div key="internships" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
-            PENGALAMAN MAGANG
-          </h2>
-          <div className="space-y-3">
-            {dummyData.internships.map((item, idx) => (
-              <div key={idx}>
-                <div className="flex items-baseline justify-between mb-1">
-                  <p className="text-sm font-bold text-slate-900">{item.role}</p>
-                  <p className="text-xs text-slate-600">{item.period}</p>
+                <div data-cv-node="job-bullets">
+                  <RenderBulletDescription text={exp.description} />
                 </div>
-                <p className="text-xs italic text-slate-700 mb-0.5">
-                  {item.company}{(item as any).location ? ` · ${(item as any).location}` : ''}
-                </p>
-                <RenderBulletDescription text={item.description} />
               </div>
             ))}
           </div>
         </div>
       ) : null,
-      education: (
-        <div key="education" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
+      internships: dummyData.internships.length > 0 ? (
+        <div key="internships" data-cv-section="internships" className="mb-6">
+          <h2 data-cv-node="heading" className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
+            PENGALAMAN MAGANG
+          </h2>
+          <div className="space-y-3">
+            {dummyData.internships.map((item, idx) => (
+              <div key={idx} data-cv-item={`intern-${idx}`}>
+                <div className="flex items-baseline justify-between mb-1">
+                  <p data-cv-node="job-title" className="text-sm font-bold text-slate-900">{item.role}</p>
+                  <p data-cv-node="job-period" className="text-xs text-slate-600">{item.period}</p>
+                </div>
+                <p data-cv-node="job-company" className="text-xs italic text-slate-700 mb-0.5">
+                  {item.company}{(item as any).location ? ` · ${(item as any).location}` : ''}
+                </p>
+                <div data-cv-node="job-bullets">
+                  <RenderBulletDescription text={item.description} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+      education: dummyData.education.length > 0 ? (
+        <div key="education" data-cv-section="education" className="mb-6">
+          <h2 data-cv-node="heading" className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
             PENDIDIKAN
           </h2>
           {dummyData.education.map((edu, idx) => (
-            <div key={idx}>
+            <div key={idx} data-cv-item={`edu-${idx}`}>
               <div className="flex items-baseline justify-between mb-1">
-                <p className="text-sm font-bold text-slate-900">{edu.institution}</p>
-                <p className="text-xs text-slate-600">{edu.year}</p>
+                <p data-cv-node="edu-institution" className="text-sm font-bold text-slate-900">{edu.institution}</p>
+                <p data-cv-node="edu-year" className="text-xs text-slate-600">{edu.year}</p>
               </div>
-              <p className="text-xs text-slate-700">{edu.degree}</p>
-              {edu.gpa && <p className="text-xs text-slate-600">{edu.gpa}</p>}
+              <p data-cv-node="edu-degree" className="text-xs text-slate-700">{edu.degree}</p>
+              {edu.gpa && <p data-cv-node="edu-gpa" className="text-xs text-slate-600">{edu.gpa}</p>}
               {(edu as any).description && <RenderBulletDescription text={(edu as any).description} />}
             </div>
           ))}
         </div>
-      ),
+      ) : null,
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-6">
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">
@@ -10049,12 +10529,12 @@ const CVTemplatePreview: React.FC<{
     return (
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
         {/* Header */}
-        <div className={`border-b-4 border-slate-900 pb-4 mb-6 flex items-start justify-between gap-4 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+        <div data-cv-section="header" className={`border-b-4 border-slate-900 pb-4 mb-6 flex items-start justify-between gap-4 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
           <div className="flex-1">
-            <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
+            <h1 data-cv-node="name" className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
               {dummyData.fullName}
             </h1>
-            <p className="text-base font-semibold text-slate-700 mb-3">{dummyData.jobTitle}</p>
+            <p data-cv-node="role" className="text-base font-semibold text-slate-700 mb-3">{dummyData.jobTitle}</p>
             <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
           </div>
           {dummyData.photoUrl ? (
@@ -10082,20 +10562,20 @@ const CVTemplatePreview: React.FC<{
             <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Ringkasan Eksekutif</span>
             <div className="flex-grow border-t border-slate-300"></div>
           </div>
-          <p className="text-xs leading-relaxed text-slate-700 px-4 text-left">{dummyData.summary}</p>
+          <p className="text-xs leading-relaxed text-slate-700 px-4 text-justify">{dummyData.summary}</p>
         </div>
       ),
-      skills: (
+      skills: dummyData.skills.length > 0 ? (
         <div key="skills" className="mb-6">
           <div className="flex items-center justify-center mb-3">
             <div className="flex-grow border-t border-slate-300"></div>
             <span className="px-4 text-xs font-black uppercase tracking-widest text-slate-800">Keahlian</span>
             <div className="flex-grow border-t border-slate-300"></div>
           </div>
-          <p className="text-xs leading-relaxed text-slate-700 px-4 text-left">{dummyData.skills.join(' • ')}</p>
+          <p className="text-xs leading-relaxed text-slate-700 px-4 text-justify">{dummyData.skills.join(' • ')}</p>
         </div>
-      ),
-      experience: (
+      ) : null,
+      experience: dummyData.experience.length > 0 ? (
         <div key="experience" className="mb-6">
           <div className="flex items-center justify-center mb-3">
             <div className="flex-grow border-t border-slate-300"></div>
@@ -10115,7 +10595,7 @@ const CVTemplatePreview: React.FC<{
             ))}
           </div>
         </div>
-      ),
+      ) : null,
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-6">
           <div className="flex items-center justify-center mb-3">
@@ -10176,7 +10656,7 @@ const CVTemplatePreview: React.FC<{
           </div>
         </div>
       ) : null,
-      education: (
+      education: dummyData.education.length > 0 ? (
         <div key="education" className="mb-6">
           <div className="flex items-center justify-center mb-3">
             <div className="flex-grow border-t border-slate-300"></div>
@@ -10195,7 +10675,7 @@ const CVTemplatePreview: React.FC<{
             ))}
           </div>
         </div>
-      ),
+      ) : null,
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-6">
           <div className="flex items-center justify-center mb-3">
@@ -10232,7 +10712,12 @@ const CVTemplatePreview: React.FC<{
           <div className="space-y-2 px-4 text-left text-xs">
             {dummyData.courses.map((crs, idx) => (
               <div key={idx}>
-                <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+                <div className="flex items-baseline justify-between mb-0.5">
+                  <p className="font-bold text-slate-900">{crs.courseName}</p>
+                  <p className="text-[11px] text-slate-500 italic shrink-0 text-right">{crs.year}</p>
+                </div>
+                <p className="text-xs italic text-slate-600">{crs.institution}</p>
+                <RenderBulletDescription text={crs.description} />
               </div>
             ))}
           </div>
@@ -10290,236 +10775,39 @@ const CVTemplatePreview: React.FC<{
 
     return (
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
-        {/* Header - Centered */}
-        <div className={`flex flex-col items-center text-center border-b-2 border-slate-300 pb-4 mb-6 ${dummyData.photoPosition === 'left' ? 'sm:flex-row-reverse sm:justify-between sm:text-left' : ''}`}>
-          {dummyData.photoUrl ? (
-            <img
-              src={dummyData.photoUrl}
-              alt={dummyData.fullName}
-              className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border-2 border-slate-300 mb-3 shadow-2xs`}
-            />
-          ) : null}
-          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
-            {dummyData.fullName}
-          </h1>
-          <p className="text-base font-semibold text-slate-600 mb-3">{dummyData.jobTitle}</p>
-          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center" />
-        </div>
-
-        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
-      </div>
-    );
-  };
-
-  const renderCreativeTech = () => {
-    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
-    const sectionBlocks: Record<string, React.ReactNode> = {
-      summary: (
-        <div key="summary" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-2 flex items-center gap-2">
-            <span className="w-1 h-4 bg-emerald-500"></span>
-            ABOUT ME
-          </h2>
-          <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
-        </div>
-      ),
-      skills: (
-        <div key="skills" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-1 h-4 bg-emerald-500"></span>
-            TECH STACK &amp; SKILLS
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {dummyData.skills.map((skill, idx) => (
-              <span key={idx} className="px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-[10px] text-xs font-bold">
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
-      ),
-      experience: (
-        <div key="experience" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-1 h-4 bg-emerald-500"></span>
-            WORK EXPERIENCE
-          </h2>
-          <div className="space-y-4">
-            {dummyData.experience.map((exp, idx) => (
-              <div key={idx}>
-                <div className="flex items-baseline justify-between mb-1">
-                  <p className="text-sm font-bold text-slate-900">{exp.role}</p>
-                  <p className="text-xs text-slate-600">{exp.period}</p>
-                </div>
-                <p className="text-xs font-semibold text-emerald-600 mb-1">{exp.company}</p>
-                <RenderBulletDescription text={exp.description} />
-              </div>
-            ))}
-          </div>
-        </div>
-      ),
-      internships: dummyData.internships.length > 0 ? (
-        <div key="internships" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-1 h-4 bg-emerald-500"></span>
-            INTERNSHIPS
-          </h2>
-          <div className="space-y-3">
-            {dummyData.internships.map((item, idx) => (
-              <div key={idx}>
-                <div className="flex items-baseline justify-between mb-1">
-                  <p className="text-sm font-bold text-slate-900">{item.role}</p>
-                  <p className="text-xs text-slate-600">{item.period}</p>
-                </div>
-                <p className="text-xs font-semibold text-emerald-600 mb-1">{item.company}</p>
-                <RenderBulletDescription text={item.description} />
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null,
-      projects: dummyData.projects.length > 0 ? (
-        <div key="projects" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-1 h-4 bg-emerald-500"></span>
-            FEATURED PROJECTS
-          </h2>
-          <div className="space-y-3">
-            {dummyData.projects.map((proj, idx) => (
-              <div key={idx}>
-                <p className="text-sm font-bold text-slate-900 mb-1">{proj.name}</p>
-                <p className="text-xs text-emerald-600 mb-1">{proj.tech}</p>
-                <RenderBulletDescription text={proj.description} />
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null,
-      organizations: dummyData.organizations.length > 0 ? (
-        <div key="organizations" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-1 h-4 bg-emerald-500"></span>
-            ORGANIZATIONS
-          </h2>
-          <div className="space-y-3">
-            {dummyData.organizations.map((org, idx) => (
-              <div key={idx}>
-                <div className="flex items-baseline justify-between mb-1">
-                  <p className="text-sm font-bold text-slate-900">{org.name}</p>
-                  <p className="text-xs text-slate-600">{org.period}</p>
-                </div>
-                <p className="text-xs font-semibold text-emerald-600 mb-1">{org.role}</p>
-                <RenderBulletDescription text={org.description} />
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null,
-      education: (
-        <div key="education" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-1 h-4 bg-emerald-500"></span>
-            EDUCATION
-          </h2>
-          {dummyData.education.map((edu, idx) => (
-            <div key={idx} className="mb-2">
-              <div className="flex items-baseline justify-between mb-1">
-                <p className="text-sm font-bold text-slate-900">{edu.institution}</p>
-                <p className="text-xs text-slate-600">{edu.year}</p>
-              </div>
-              <p className="text-xs text-slate-700">{edu.degree} • {edu.gpa}</p>
+        {/* Header - Minimalist Executive */}
+        <div className="border-b-2 border-slate-300 pb-4 mb-6">
+          {dummyData.photoPosition === 'center' || !dummyData.photoUrl ? (
+            <div className="flex flex-col items-center text-center">
+              {dummyData.photoUrl ? (
+                <img
+                  src={dummyData.photoUrl}
+                  alt={dummyData.fullName}
+                  className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border-2 border-slate-300 mb-3 shadow-2xs`}
+                />
+              ) : null}
+              <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
+                {dummyData.fullName}
+              </h1>
+              <p className="text-base font-semibold text-slate-600 mb-3">{dummyData.jobTitle}</p>
+              <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center" />
             </div>
-          ))}
-        </div>
-      ),
-      certifications: dummyData.certifications.length > 0 ? (
-        <div key="certifications" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-1 h-4 bg-emerald-500"></span>
-            CERTIFICATIONS
-          </h2>
-          <div className="space-y-2">
-            {dummyData.certifications.map((cert, idx) => (
-              <div key={idx} className="flex justify-between text-xs">
-                <span className="font-bold text-slate-900">{cert.name} — <em className="text-emerald-600 font-normal">{cert.issuer}</em></span>
-                <span className="text-slate-600">{cert.issueDate}</span>
+          ) : (
+            <div className={`flex items-start justify-between gap-6 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+              <div className="flex-1">
+                <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
+                  {dummyData.fullName}
+                </h1>
+                <p className="text-base font-semibold text-slate-600 mb-3">{dummyData.jobTitle}</p>
+                <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap gap-x-3 gap-y-1 items-center" />
               </div>
-            ))}
-          </div>
-        </div>
-      ) : null,
-      languages: dummyData.languages.length > 0 ? (
-        <div key="languages" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-1 h-4 bg-emerald-500"></span>
-            LANGUAGES
-          </h2>
-          <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
-        </div>
-      ) : null,
-      courses: dummyData.courses.length > 0 ? (
-        <div key="courses" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-1 h-4 bg-emerald-500"></span>
-            COURSES &amp; TRAINING
-          </h2>
-          {dummyData.courses.map((crs, idx) => (
-            <div key={idx} className="mb-2 text-xs">
-              <p className="font-bold text-slate-900">{crs.courseName} — <span className="text-emerald-600">{crs.institution}</span> ({crs.year})</p>
+              <img
+                src={dummyData.photoUrl}
+                alt={dummyData.fullName}
+                className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border-2 border-slate-300 shrink-0 shadow-2xs`}
+              />
             </div>
-          ))}
-        </div>
-      ) : null,
-      scholarships: dummyData.scholarships.length > 0 ? (
-        <div key="scholarships" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-1 h-4 bg-emerald-500"></span>
-            SCHOLARSHIPS
-          </h2>
-          {dummyData.scholarships.map((sch, idx) => (
-            <div key={idx} className="mb-2 text-xs">
-              <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
-            </div>
-          ))}
-        </div>
-      ) : null,
-      volunteers: dummyData.volunteers.length > 0 ? (
-        <div key="volunteers" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-1 h-4 bg-emerald-500"></span>
-            VOLUNTEER EXPERIENCE
-          </h2>
-          {dummyData.volunteers.map((vol, idx) => (
-            <div key={idx} className="mb-2 text-xs">
-              <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
-            </div>
-          ))}
-        </div>
-      ) : null,
-      references: dummyData.references.length > 0 ? (
-        <div key="references" className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-3 flex items-center gap-2">
-            <span className="w-1 h-4 bg-emerald-500"></span>
-            REFERENCES
-          </h2>
-          {dummyData.references.map((ref, idx) => (
-            <div key={idx} className="text-xs text-slate-700">
-              <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
-            </div>
-          ))}
-        </div>
-      ) : null,
-    };
-
-    return (
-      <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
-        {/* Header with accent */}
-        <div className="border-l-8 border-emerald-500 pl-4 mb-6">
-          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-1">
-            {dummyData.fullName}
-          </h1>
-          <p className="text-base font-bold text-emerald-600 mb-2">{dummyData.jobTitle}</p>
-          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
+          )}
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -10533,7 +10821,7 @@ const CVTemplatePreview: React.FC<{
       summary: (
         <div key="summary" className="mb-6 bg-amber-50 border-l-4 border-amber-500 p-4">
           <h2 className="text-sm font-black uppercase tracking-wide text-amber-800 mb-2">
-            OBJECTIVE
+            RINGKASAN PROFESIONAL
           </h2>
           <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
         </div>
@@ -10541,7 +10829,7 @@ const CVTemplatePreview: React.FC<{
       education: (
         <div key="education" className="mb-6">
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
-            PENDIDIKAN
+            RIWAYAT PENDIDIKAN
           </h2>
           {dummyData.education.map((edu, idx) => (
             <div key={idx} className="bg-slate-50 p-4 rounded-[10px]">
@@ -10645,7 +10933,7 @@ const CVTemplatePreview: React.FC<{
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-6">
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
-            SERTIFIKAT
+            SERTIFIKASI &amp; PELATIHAN
           </h2>
           <div className="space-y-2 text-xs">
             {dummyData.certifications.map((cert, idx) => (
@@ -10660,7 +10948,7 @@ const CVTemplatePreview: React.FC<{
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-6">
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
-            BAHASA
+            PENGUASAAN BAHASA
           </h2>
           <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
@@ -10672,7 +10960,12 @@ const CVTemplatePreview: React.FC<{
           </h2>
           {dummyData.courses.map((crs, idx) => (
             <div key={idx} className="mb-2 text-xs">
-              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+              <div className="flex items-baseline justify-between mb-0.5">
+                <p className="font-bold text-slate-900">{crs.courseName}</p>
+                <p className="text-[11px] text-slate-600 italic shrink-0 text-right">{crs.year}</p>
+              </div>
+              <p className="text-xs italic text-slate-700">{crs.institution}</p>
+              <RenderBulletDescription text={crs.description} />
             </div>
           ))}
         </div>
@@ -10680,7 +10973,7 @@ const CVTemplatePreview: React.FC<{
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-6">
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
-            BEASISWA
+            BEASISWA &amp; PRESTASI
           </h2>
           {dummyData.scholarships.map((sch, idx) => (
             <div key={idx} className="mb-2 text-xs">
@@ -10692,7 +10985,7 @@ const CVTemplatePreview: React.FC<{
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-6">
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
-            RELAWAN
+            PENGALAMAN RELAWAN
           </h2>
           {dummyData.volunteers.map((vol, idx) => (
             <div key={idx} className="mb-2 text-xs">
@@ -10704,7 +10997,7 @@ const CVTemplatePreview: React.FC<{
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-6">
           <h2 className="text-sm font-black uppercase tracking-wide text-slate-900 border-b-2 border-amber-500 pb-1 mb-3">
-            REFERENSI
+            REFERENSI PROFESIONAL
           </h2>
           {dummyData.references.map((ref, idx) => (
             <div key={idx} className="text-xs text-slate-700">
@@ -10718,12 +11011,21 @@ const CVTemplatePreview: React.FC<{
     return (
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
         {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
-            {dummyData.fullName}
-          </h1>
-          <p className="text-base font-semibold text-amber-600 mb-3">{dummyData.jobTitle}</p>
-          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center" />
+        <div className={`mb-6 flex items-start justify-between gap-4 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex-1 ${dummyData.photoUrl ? '' : 'text-center'}`}>
+            <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
+              {dummyData.fullName}
+            </h1>
+            <p className="text-base font-semibold text-amber-600 mb-3">{dummyData.jobTitle}</p>
+            <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className={`text-xs flex flex-wrap gap-x-3 gap-y-1 items-center ${dummyData.photoUrl ? '' : 'justify-center'}`} />
+          </div>
+          {dummyData.photoUrl ? (
+            <img
+              src={dummyData.photoUrl}
+              alt={dummyData.fullName}
+              className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border border-slate-300 shrink-0 shadow-2xs`}
+            />
+          ) : null}
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -10736,13 +11038,13 @@ const CVTemplatePreview: React.FC<{
     const sectionBlocks: Record<string, React.ReactNode> = {
       summary: (
         <div key="summary" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">SUMMARY</h2>
-          <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">RINGKASAN PROFESIONAL</h2>
+          <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
         </div>
       ),
-      experience: (
+      experience: dummyData.experience.length > 0 ? (
         <div key="experience" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">EXPERIENCE</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">PENGALAMAN KERJA</h2>
           {dummyData.experience.map((exp, idx) => (
             <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-3">
               <div className="text-xs font-bold text-slate-600 uppercase">{exp.period}</div>
@@ -10754,10 +11056,10 @@ const CVTemplatePreview: React.FC<{
             </div>
           ))}
         </div>
-      ),
+      ) : null,
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">INTERNSHIPS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">PENGALAMAN MAGANG</h2>
           {dummyData.internships.map((item, idx) => (
             <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-3">
               <div className="text-xs font-bold text-slate-600 uppercase">{item.period}</div>
@@ -10772,7 +11074,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">PROJECTS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">PROYEK &amp; PORTOFOLIO</h2>
           {dummyData.projects.map((proj, idx) => (
             <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-3">
               <div className="text-xs font-bold text-slate-600 uppercase">{proj.name}</div>
@@ -10786,7 +11088,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">ORGANIZATIONS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">PENGALAMAN ORGANISASI</h2>
           {dummyData.organizations.map((org, idx) => (
             <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-3">
               <div className="text-xs font-bold text-slate-600 uppercase">{org.period}</div>
@@ -10799,32 +11101,32 @@ const CVTemplatePreview: React.FC<{
           ))}
         </div>
       ) : null,
-      education: (
+      education: dummyData.education.length > 0 ? (
         <div key="education" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">EDUCATION</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">RIWAYAT PENDIDIKAN</h2>
           {dummyData.education.map((edu, idx) => (
             <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-2">
               <div className="text-xs font-bold text-slate-600 uppercase">{edu.year}</div>
               <div>
                 <p className="text-sm font-bold text-slate-900">{edu.institution}</p>
-                <p className="text-xs text-slate-700">{edu.degree} • {edu.gpa}</p>
+                <p className="text-xs text-slate-700">{edu.degree}{edu.gpa ? ` • ${edu.gpa}` : ''}</p>
               </div>
             </div>
           ))}
         </div>
-      ),
-      skills: (
+      ) : null,
+      skills: dummyData.skills.length > 0 ? (
         <div key="skills" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">SKILLS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">KEAHLIAN</h2>
           <div className="grid grid-cols-[140px_1fr] gap-4">
-            <div className="text-xs font-bold text-slate-600 uppercase">Core Skills</div>
+            <div className="text-xs font-bold text-slate-600 uppercase">Keahlian Utama</div>
             <p className="text-xs text-slate-700">{dummyData.skills.join(' • ')}</p>
           </div>
         </div>
-      ),
+      ) : null,
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">CERTIFICATIONS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">SERTIFIKASI &amp; PELATIHAN</h2>
           {dummyData.certifications.map((cert, idx) => (
             <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-2 text-xs">
               <div className="font-bold text-slate-600 uppercase">{cert.issueDate}</div>
@@ -10837,21 +11139,23 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">LANGUAGES</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">PENGUASAAN BAHASA</h2>
           <div className="grid grid-cols-[140px_1fr] gap-4 text-xs">
-            <div className="font-bold text-slate-600 uppercase">Languages</div>
+            <div className="font-bold text-slate-600 uppercase">Bahasa</div>
             <p className="text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
           </div>
         </div>
       ) : null,
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">COURSES</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">KURSUS &amp; PELATIHAN</h2>
           {dummyData.courses.map((crs, idx) => (
             <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-2 text-xs">
               <div className="font-bold text-slate-600 uppercase">{crs.year}</div>
               <div>
-                <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution}</p>
+                <p className="font-bold text-slate-900">{crs.courseName}</p>
+                <p className="text-xs italic text-slate-700">{crs.institution}</p>
+                <RenderBulletDescription text={crs.description} />
               </div>
             </div>
           ))}
@@ -10859,7 +11163,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">SCHOLARSHIPS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">BEASISWA &amp; PRESTASI</h2>
           {dummyData.scholarships.map((sch, idx) => (
             <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-2 text-xs">
               <div className="font-bold text-slate-600 uppercase">{sch.year}</div>
@@ -10872,7 +11176,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">VOLUNTEER</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">PENGALAMAN RELAWAN</h2>
           {dummyData.volunteers.map((vol, idx) => (
             <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-2 text-xs">
               <div className="font-bold text-slate-600 uppercase">{vol.organization}</div>
@@ -10885,7 +11189,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">REFERENCES</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">REFERENSI PROFESIONAL</h2>
           {dummyData.references.map((ref, idx) => (
             <div key={idx} className="grid grid-cols-[140px_1fr] gap-4 mb-2 text-xs">
               <div className="font-bold text-slate-600 uppercase">{ref.company}</div>
@@ -10901,11 +11205,31 @@ const CVTemplatePreview: React.FC<{
     return (
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
         {/* Header */}
-        <div className="border-b-4 border-slate-900 pb-3 mb-6">
-          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900">
-            {dummyData.fullName}
-          </h1>
-          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center mt-2" />
+        <div className={`border-b-4 border-slate-900 pb-4 mb-6 flex items-start justify-between gap-4 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+          <div className="flex-1">
+            <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900">
+              {dummyData.fullName}
+            </h1>
+            {dummyData.jobTitle && (
+              <p className="text-sm font-bold uppercase tracking-wider text-slate-700 mt-1">
+                {dummyData.jobTitle}
+              </p>
+            )}
+            <RenderContactHeaderLinks
+              dummyData={dummyData}
+              docLinkStyle={docLinkStyle}
+              docShowIcons={docShowIcons}
+              separator="|"
+              className="text-xs flex flex-wrap gap-x-3 gap-y-1 items-center mt-2"
+            />
+          </div>
+          {dummyData.photoUrl ? (
+            <img
+              src={dummyData.photoUrl}
+              alt={dummyData.fullName}
+              className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border border-slate-300 shrink-0 shadow-2xs`}
+            />
+          ) : null}
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -10918,19 +11242,19 @@ const CVTemplatePreview: React.FC<{
     const sectionBlocks: Record<string, React.ReactNode> = {
       summary: (
         <div key="summary" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">PROFESSIONAL SUMMARY</h2>
-          <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">RINGKASAN PROFESIONAL</h2>
+          <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
         </div>
       ),
       skills: (
         <div key="skills" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">SKILLS</h2>
-          <p className="text-xs text-slate-700">{dummyData.skills.join(' • ')}</p>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">KEAHLIAN</h2>
+          <p className="text-xs text-slate-700 text-justify">{dummyData.skills.join(' • ')}</p>
         </div>
       ),
       experience: (
         <div key="experience" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">WORK EXPERIENCE</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">PENGALAMAN KERJA</h2>
           {dummyData.experience.map((exp, idx) => (
             <div key={idx} className="mb-4">
               <div className="flex justify-between items-baseline mb-1">
@@ -10945,7 +11269,7 @@ const CVTemplatePreview: React.FC<{
       ),
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">INTERNSHIPS</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">PENGALAMAN MAGANG</h2>
           {dummyData.internships.map((item, idx) => (
             <div key={idx} className="mb-3">
               <div className="flex justify-between items-baseline mb-1">
@@ -10960,7 +11284,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">PROJECTS</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">PROYEK &amp; PORTOFOLIO</h2>
           {dummyData.projects.map((proj, idx) => (
             <div key={idx} className="mb-3">
               <p className="text-sm font-bold text-slate-900">{proj.name}</p>
@@ -10972,7 +11296,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">ORGANIZATIONS</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">PENGALAMAN ORGANISASI</h2>
           {dummyData.organizations.map((org, idx) => (
             <div key={idx} className="mb-3">
               <div className="flex justify-between items-baseline mb-1">
@@ -10987,7 +11311,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       education: (
         <div key="education" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">EDUCATION</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">RIWAYAT PENDIDIKAN</h2>
           {dummyData.education.map((edu, idx) => (
             <div key={idx} className="mb-2">
               <div className="flex justify-between items-baseline mb-1">
@@ -11001,7 +11325,7 @@ const CVTemplatePreview: React.FC<{
       ),
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">CERTIFICATIONS</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">SERTIFIKASI &amp; PELATIHAN</h2>
           {dummyData.certifications.map((cert, idx) => (
             <div key={idx} className="flex justify-between text-xs mb-1">
               <span className="font-bold text-slate-900">{cert.name} — <em className="text-navy-700">{cert.issuer}</em></span>
@@ -11012,23 +11336,28 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">LANGUAGES</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">PENGUASAAN BAHASA</h2>
           <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
       ) : null,
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">COURSES</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">KURSUS &amp; PELATIHAN</h2>
           {dummyData.courses.map((crs, idx) => (
             <div key={idx} className="mb-2 text-xs">
-              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+              <div className="flex items-baseline justify-between mb-0.5">
+                <p className="font-bold text-slate-900">{crs.courseName}</p>
+                <p className="text-[11px] text-slate-600 italic shrink-0 text-right">{crs.year}</p>
+              </div>
+              <p className="text-xs italic text-navy-700">{crs.institution}</p>
+              <RenderBulletDescription text={crs.description} />
             </div>
           ))}
         </div>
       ) : null,
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">SCHOLARSHIPS</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">BEASISWA &amp; PRESTASI</h2>
           {dummyData.scholarships.map((sch, idx) => (
             <div key={idx} className="mb-2 text-xs">
               <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
@@ -11038,7 +11367,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">VOLUNTEER</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">PENGALAMAN RELAWAN</h2>
           {dummyData.volunteers.map((vol, idx) => (
             <div key={idx} className="mb-2 text-xs">
               <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
@@ -11048,7 +11377,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">REFERENCES</h2>
+          <h2 className="text-sm font-black uppercase text-navy-900 border-b-2 border-navy-700 pb-1 mb-3">REFERENSI PROFESIONAL</h2>
           {dummyData.references.map((ref, idx) => (
             <div key={idx} className="text-xs text-slate-700">
               <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
@@ -11060,10 +11389,19 @@ const CVTemplatePreview: React.FC<{
 
     return (
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
-        <div className="border-b-3 border-navy-600 pb-4 mb-6">
-          <h1 className="text-3xl font-black uppercase text-navy-900">{dummyData.fullName}</h1>
-          <p className="text-base font-semibold text-blue-600 mt-1">{dummyData.jobTitle}</p>
-          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap gap-x-3 gap-y-1 items-center mt-2" />
+        <div className={`border-b-3 border-navy-600 pb-4 mb-6 flex items-start justify-between gap-4 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+          <div className="flex-1">
+            <h1 className="text-3xl font-black uppercase text-navy-900">{dummyData.fullName}</h1>
+            <p className="text-base font-semibold text-blue-600 mt-1">{dummyData.jobTitle}</p>
+            <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap gap-x-3 gap-y-1 items-center mt-2" />
+          </div>
+          {dummyData.photoUrl ? (
+            <img
+              src={dummyData.photoUrl}
+              alt={dummyData.fullName}
+              className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border border-slate-300 shrink-0 shadow-2xs`}
+            />
+          ) : null}
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -11076,19 +11414,19 @@ const CVTemplatePreview: React.FC<{
     const sectionBlocks: Record<string, React.ReactNode> = {
       summary: (
         <div key="summary" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">SUMMARY</h2>
-          <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">RINGKASAN PROFESIONAL</h2>
+          <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
         </div>
       ),
       skills: (
         <div key="skills" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">SKILLS</h2>
-          <p className="text-xs text-slate-700 leading-relaxed">{dummyData.skills.join(' • ')}</p>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">KEAHLIAN</h2>
+          <p className="text-xs text-slate-700 leading-relaxed text-justify">{dummyData.skills.join(' • ')}</p>
         </div>
       ),
       experience: (
         <div key="experience" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">EXPERIENCE</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">PENGALAMAN KERJA</h2>
           {dummyData.experience.map((exp, idx) => (
             <div key={idx} className="mb-4">
               <div className="flex justify-between items-baseline">
@@ -11103,7 +11441,7 @@ const CVTemplatePreview: React.FC<{
       ),
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">INTERNSHIPS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">PENGALAMAN MAGANG</h2>
           {dummyData.internships.map((item, idx) => (
             <div key={idx} className="mb-3">
               <div className="flex justify-between items-baseline">
@@ -11118,7 +11456,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">PROJECTS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">PROYEK &amp; PORTOFOLIO</h2>
           {dummyData.projects.map((proj, idx) => (
             <div key={idx} className="mb-3">
               <p className="text-sm font-bold text-slate-900">{proj.name}</p>
@@ -11130,7 +11468,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">ORGANIZATIONS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">PENGALAMAN ORGANISASI</h2>
           {dummyData.organizations.map((org, idx) => (
             <div key={idx} className="mb-3">
               <div className="flex justify-between items-baseline">
@@ -11145,7 +11483,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       education: (
         <div key="education" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">EDUCATION</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">RIWAYAT PENDIDIKAN</h2>
           {dummyData.education.map((edu, idx) => (
             <div key={idx} className="mb-2">
               <div className="flex justify-between items-baseline">
@@ -11159,7 +11497,7 @@ const CVTemplatePreview: React.FC<{
       ),
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">CERTIFICATIONS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">SERTIFIKASI &amp; PELATIHAN</h2>
           {dummyData.certifications.map((cert, idx) => (
             <div key={idx} className="flex justify-between text-xs mb-1">
               <span className="font-bold text-slate-900">{cert.name} — <em className="text-orange-600">{cert.issuer}</em></span>
@@ -11170,23 +11508,28 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">LANGUAGES</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">PENGUASAAN BAHASA</h2>
           <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
       ) : null,
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">COURSES</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">KURSUS &amp; PELATIHAN</h2>
           {dummyData.courses.map((crs, idx) => (
             <div key={idx} className="mb-2 text-xs">
-              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+              <div className="flex items-baseline justify-between mb-0.5">
+                <p className="font-bold text-slate-900">{crs.courseName}</p>
+                <p className="text-[11px] text-slate-600 italic shrink-0 text-right">{crs.year}</p>
+              </div>
+              <p className="text-xs italic text-slate-700">{crs.institution}</p>
+              <RenderBulletDescription text={crs.description} />
             </div>
           ))}
         </div>
       ) : null,
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">SCHOLARSHIPS</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">BEASISWA &amp; PRESTASI</h2>
           {dummyData.scholarships.map((sch, idx) => (
             <div key={idx} className="mb-2 text-xs">
               <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
@@ -11196,7 +11539,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">VOLUNTEER</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">PENGALAMAN RELAWAN</h2>
           {dummyData.volunteers.map((vol, idx) => (
             <div key={idx} className="mb-2 text-xs">
               <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
@@ -11206,7 +11549,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-6">
-          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">REFERENCES</h2>
+          <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-navy-400 pb-1 mb-3">REFERENSI PROFESIONAL</h2>
           {dummyData.references.map((ref, idx) => (
             <div key={idx} className="text-xs text-slate-700">
               <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
@@ -11232,7 +11575,7 @@ const CVTemplatePreview: React.FC<{
             />
           ) : (
             <div className={`w-24 h-24 border-2 border-[#1738D1] ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} bg-slate-100 flex items-center justify-center text-xs text-slate-400 shrink-0`}>
-              Photo
+              Foto
             </div>
           )}
         </div>
@@ -11247,19 +11590,19 @@ const CVTemplatePreview: React.FC<{
     const sectionBlocks: Record<string, React.ReactNode> = {
       summary: (
         <div key="summary" className="mb-6">
-          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Professional Summary</h2>
-          <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Ringkasan Profesional</h2>
+          <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
         </div>
       ),
-      skills: (
+      skills: dummyData.skills.length > 0 ? (
         <div key="skills" className="mb-6">
-          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Skills</h2>
-          <p className="text-xs text-slate-700">{dummyData.skills.join(', ')}</p>
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Keahlian</h2>
+          <p className="text-xs text-slate-700 text-justify">{dummyData.skills.join(' • ')}</p>
         </div>
-      ),
-      experience: (
+      ) : null,
+      experience: dummyData.experience.length > 0 ? (
         <div key="experience" className="mb-6">
-          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Experience</h2>
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Pengalaman Kerja</h2>
           {dummyData.experience.map((exp, idx) => (
             <div key={idx} className="mb-4">
               <div className="flex justify-between items-baseline">
@@ -11267,14 +11610,14 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600 italic">{exp.period}</p>
               </div>
               <p className="text-xs italic text-slate-700 mb-2">{exp.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+              <RenderBulletDescription text={exp.description} />
             </div>
           ))}
         </div>
-      ),
+      ) : null,
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-6">
-          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Internships</h2>
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Pengalaman Magang</h2>
           {dummyData.internships.map((item, idx) => (
             <div key={idx} className="mb-3">
               <div className="flex justify-between items-baseline">
@@ -11282,26 +11625,35 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600 italic">{item.period}</p>
               </div>
               <p className="text-xs italic text-slate-700 mb-1">{item.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+              <RenderBulletDescription text={item.description} />
             </div>
           ))}
         </div>
       ) : null,
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-6">
-          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Projects</h2>
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Proyek &amp; Portofolio</h2>
           {dummyData.projects.map((proj, idx) => (
             <div key={idx} className="mb-3">
-              <p className="text-sm font-bold text-slate-900">{proj.name}</p>
-              <p className="text-xs italic text-slate-700 mb-1">{proj.tech}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
+              <div className="flex justify-between items-baseline">
+                <p className="text-sm font-bold text-slate-900">{proj.name}</p>
+                {proj.period ? <p className="text-xs text-slate-600 italic">{proj.period}</p> : null}
+              </div>
+              {proj.tech ? <p className="text-xs italic text-slate-700 mb-1">{proj.tech}</p> : null}
+              {proj.description ? (
+                proj.description.includes('\n') || proj.description.includes('•') || proj.description.includes('- ') ? (
+                  <RenderBulletDescription text={proj.description} />
+                ) : (
+                  <p className="text-xs leading-relaxed text-slate-700 text-justify">{proj.description}</p>
+                )
+              ) : null}
             </div>
           ))}
         </div>
       ) : null,
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-6">
-          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Organizations</h2>
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Pengalaman Organisasi</h2>
           {dummyData.organizations.map((org, idx) => (
             <div key={idx} className="mb-3">
               <div className="flex justify-between items-baseline">
@@ -11309,55 +11661,60 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600 italic">{org.period}</p>
               </div>
               <p className="text-xs italic text-slate-700 mb-1">{org.role}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+              <RenderBulletDescription text={org.description} />
             </div>
           ))}
         </div>
       ) : null,
-      education: (
+      education: dummyData.education.length > 0 ? (
         <div key="education" className="mb-6">
-          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Education</h2>
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Riwayat Pendidikan</h2>
           {dummyData.education.map((edu, idx) => (
             <div key={idx} className="mb-2">
               <div className="flex justify-between items-baseline">
                 <p className="text-sm font-bold text-slate-900">{edu.institution}</p>
                 <p className="text-xs text-slate-600 italic">{edu.year}</p>
               </div>
-              <p className="text-xs text-slate-700">{edu.degree} • {edu.gpa}</p>
+              <p className="text-xs text-slate-700">{edu.degree}{edu.gpa ? ` • ${edu.gpa}` : ''}</p>
             </div>
           ))}
         </div>
-      ),
+      ) : null,
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-6">
-          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Certifications</h2>
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Sertifikasi &amp; Pelatihan</h2>
           {dummyData.certifications.map((cert, idx) => (
             <div key={idx} className="flex justify-between text-xs mb-1">
-              <span className="font-bold text-slate-900">{cert.name} — <em>{cert.issuer}</em></span>
-              <span className="text-slate-600">{cert.issueDate}</span>
+              <p className="font-bold text-slate-900">{cert.name} — <em>{cert.issuer}</em></p>
+              <p className="text-slate-600">{cert.issueDate}</p>
             </div>
           ))}
         </div>
       ) : null,
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-6">
-          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Languages</h2>
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Penguasaan Bahasa</h2>
           <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
       ) : null,
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-6">
-          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Courses</h2>
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Kursus &amp; Pelatihan</h2>
           {dummyData.courses.map((crs, idx) => (
             <div key={idx} className="mb-2 text-xs">
-              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+              <div className="flex items-baseline justify-between mb-0.5">
+                <p className="font-bold text-slate-900">{crs.courseName}</p>
+                <p className="text-[11px] text-slate-600 italic shrink-0 text-right">{crs.year}</p>
+              </div>
+              <p className="text-xs italic text-slate-700">{crs.institution}</p>
+              <RenderBulletDescription text={crs.description} />
             </div>
           ))}
         </div>
       ) : null,
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-6">
-          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Scholarships</h2>
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Beasiswa &amp; Prestasi</h2>
           {dummyData.scholarships.map((sch, idx) => (
             <div key={idx} className="mb-2 text-xs">
               <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
@@ -11367,7 +11724,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-6">
-          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Volunteer</h2>
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Pengalaman Relawan</h2>
           {dummyData.volunteers.map((vol, idx) => (
             <div key={idx} className="mb-2 text-xs">
               <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
@@ -11377,7 +11734,7 @@ const CVTemplatePreview: React.FC<{
       ) : null,
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-6">
-          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">References</h2>
+          <h2 className="text-sm font-bold uppercase text-slate-900 border-b border-slate-900 pb-1 mb-3">Referensi Profesional</h2>
           {dummyData.references.map((ref, idx) => (
             <div key={idx} className="text-xs text-slate-700">
               <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
@@ -11389,10 +11746,19 @@ const CVTemplatePreview: React.FC<{
 
     return (
       <div className="p-12 min-h-[297mm] bg-white font-serif" style={{ fontFamily: selectedFontFamily }}>
-        <div className="text-center border-b border-slate-400 pb-4 mb-6">
-          <h1 className="text-3xl font-bold text-slate-900">{dummyData.fullName}</h1>
-          <p className="text-base text-slate-700 mt-2">{dummyData.jobTitle}</p>
-          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center mt-2" />
+        <div className={`border-b border-slate-400 pb-4 mb-6 flex items-start justify-between gap-4 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex-1 ${dummyData.photoUrl ? '' : 'text-center'}`}>
+            <h1 className="text-3xl font-bold text-slate-900">{dummyData.fullName}</h1>
+            <p className="text-base text-slate-700 mt-2">{dummyData.jobTitle}</p>
+            <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" className={`text-xs flex flex-wrap gap-x-3 gap-y-1 items-center mt-2 ${dummyData.photoUrl ? '' : 'justify-center'}`} />
+          </div>
+          {dummyData.photoUrl ? (
+            <img
+              src={dummyData.photoUrl}
+              alt={dummyData.fullName}
+              className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border border-slate-300 shrink-0 shadow-2xs`}
+            />
+          ) : null}
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -11405,15 +11771,15 @@ const CVTemplatePreview: React.FC<{
     const sectionBlocks: Record<string, React.ReactNode> = {
       summary: (
         <div key="summary" className="mb-6 bg-orange-50 border-l-4 border-[#1738D1] p-4 rounded-r-[10px]">
-          <h2 className="text-sm font-black uppercase text-orange-800 mb-2">ABOUT ME</h2>
-          <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+          <h2 className="text-sm font-black uppercase text-orange-800 mb-2">RINGKASAN PROFESIONAL</h2>
+          <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
         </div>
       ),
       skills: (
         <div key="skills" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
-            CORE COMPETENCIES
+            KEAHLIAN UTAMA
           </h2>
           <div className="flex flex-wrap gap-2">
             {dummyData.skills.map((skill, idx) => (
@@ -11428,7 +11794,7 @@ const CVTemplatePreview: React.FC<{
         <div key="experience" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
-            PROFESSIONAL EXPERIENCE
+            PENGALAMAN KERJA
           </h2>
           {dummyData.experience.map((exp, idx) => (
             <div key={idx} className="mb-4 pl-4 border-l-2 border-orange-300">
@@ -11437,7 +11803,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-orange-600 font-semibold">{exp.period}</p>
               </div>
               <p className="text-xs font-bold text-orange-600 mb-2">{exp.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+              <RenderBulletDescription text={exp.description} />
             </div>
           ))}
         </div>
@@ -11446,7 +11812,7 @@ const CVTemplatePreview: React.FC<{
         <div key="internships" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
-            INTERNSHIPS
+            PENGALAMAN MAGANG
           </h2>
           {dummyData.internships.map((item, idx) => (
             <div key={idx} className="mb-3 pl-4 border-l-2 border-orange-300">
@@ -11455,7 +11821,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-orange-600 font-semibold">{item.period}</p>
               </div>
               <p className="text-xs font-bold text-orange-600 mb-1">{item.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+              <RenderBulletDescription text={item.description} />
             </div>
           ))}
         </div>
@@ -11464,7 +11830,7 @@ const CVTemplatePreview: React.FC<{
         <div key="projects" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
-            PROJECTS
+            PROYEK &amp; PORTOFOLIO
           </h2>
           {dummyData.projects.map((proj, idx) => (
             <div key={idx} className="mb-3 pl-4 border-l-2 border-orange-300">
@@ -11479,7 +11845,7 @@ const CVTemplatePreview: React.FC<{
         <div key="organizations" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
-            ORGANIZATIONS
+            PENGALAMAN ORGANISASI
           </h2>
           {dummyData.organizations.map((org, idx) => (
             <div key={idx} className="mb-3 pl-4 border-l-2 border-orange-300">
@@ -11488,7 +11854,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-orange-600 font-semibold">{org.period}</p>
               </div>
               <p className="text-xs font-bold text-orange-600 mb-1">{org.role}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+              <RenderBulletDescription text={org.description} />
             </div>
           ))}
         </div>
@@ -11497,7 +11863,7 @@ const CVTemplatePreview: React.FC<{
         <div key="education" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
-            EDUCATION
+            RIWAYAT PENDIDIKAN
           </h2>
           {dummyData.education.map((edu, idx) => (
             <div key={idx} className="pl-4 border-l-2 border-orange-300 mb-2">
@@ -11512,7 +11878,7 @@ const CVTemplatePreview: React.FC<{
         <div key="certifications" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
-            CERTIFICATIONS
+            SERTIFIKASI &amp; PELATIHAN
           </h2>
           {dummyData.certifications.map((cert, idx) => (
             <div key={idx} className="pl-4 border-l-2 border-orange-300 mb-2 text-xs">
@@ -11525,7 +11891,7 @@ const CVTemplatePreview: React.FC<{
         <div key="languages" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
-            LANGUAGES
+            PENGUASAAN BAHASA
           </h2>
           <p className="text-xs text-slate-700 pl-4">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
@@ -11534,11 +11900,16 @@ const CVTemplatePreview: React.FC<{
         <div key="courses" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
-            COURSES
+            KURSUS &amp; PELATIHAN
           </h2>
           {dummyData.courses.map((crs, idx) => (
             <div key={idx} className="pl-4 border-l-2 border-orange-300 mb-2 text-xs">
-              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+              <div className="flex items-baseline justify-between mb-0.5">
+                <p className="font-bold text-slate-900">{crs.courseName}</p>
+                <p className="text-[11px] text-orange-600 font-semibold shrink-0 text-right">{crs.year}</p>
+              </div>
+              <p className="text-xs text-slate-700 italic">{crs.institution}</p>
+              <RenderBulletDescription text={crs.description} />
             </div>
           ))}
         </div>
@@ -11547,7 +11918,7 @@ const CVTemplatePreview: React.FC<{
         <div key="scholarships" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
-            SCHOLARSHIPS
+            BEASISWA &amp; PRESTASI
           </h2>
           {dummyData.scholarships.map((sch, idx) => (
             <div key={idx} className="pl-4 border-l-2 border-orange-300 mb-2 text-xs">
@@ -11560,7 +11931,7 @@ const CVTemplatePreview: React.FC<{
         <div key="volunteers" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
-            VOLUNTEER
+            PENGALAMAN RELAWAN
           </h2>
           {dummyData.volunteers.map((vol, idx) => (
             <div key={idx} className="pl-4 border-l-2 border-orange-300 mb-2 text-xs">
@@ -11573,7 +11944,7 @@ const CVTemplatePreview: React.FC<{
         <div key="references" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-[#1738D1] rounded-full"></span>
-            REFERENCES
+            REFERENSI PROFESIONAL
           </h2>
           {dummyData.references.map((ref, idx) => (
             <div key={idx} className="pl-4 border-l-2 border-orange-300 mb-2 text-xs">
@@ -11587,12 +11958,21 @@ const CVTemplatePreview: React.FC<{
     return (
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
         {/* Header with Orange Accent */}
-        <div className="border-l-8 border-[#1738D1] pl-6 mb-6">
-          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-1">
-            {dummyData.fullName}
-          </h1>
-          <p className="text-lg font-bold text-orange-600 mb-2">{dummyData.jobTitle}</p>
-          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
+        <div className={`border-l-8 border-[#1738D1] pl-6 mb-6 flex items-start justify-between gap-4 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+          <div className="flex-1">
+            <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-1">
+              {dummyData.fullName}
+            </h1>
+            <p className="text-lg font-bold text-orange-600 mb-2">{dummyData.jobTitle}</p>
+            <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
+          </div>
+          {dummyData.photoUrl ? (
+            <img
+              src={dummyData.photoUrl}
+              alt={dummyData.fullName}
+              className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border border-slate-300 shrink-0 shadow-2xs`}
+            />
+          ) : null}
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -11606,19 +11986,19 @@ const CVTemplatePreview: React.FC<{
       summary: (
         <div key="summary" className="mb-6 mt-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
-            EXECUTIVE PROFILE
+            RINGKASAN EKSEKUTIF
           </h2>
-          <p className="text-xs leading-relaxed text-slate-700 font-medium">{dummyData.summary}</p>
+          <p className="text-xs leading-relaxed text-slate-700 font-medium text-justify">{dummyData.summary}</p>
         </div>
       ),
       skills: (
         <div key="skills" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
-            CORE COMPETENCIES
+            KEAHLIAN UTAMA
           </h2>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="flex flex-wrap gap-2">
             {dummyData.skills.map((skill, idx) => (
-              <div key={idx} className="text-xs text-slate-700 font-semibold flex items-center gap-1">
+              <div key={idx} className="text-xs text-slate-700 font-semibold flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-[10px] border border-slate-200">
                 <span className="w-1.5 h-1.5 bg-blue-900 rounded-full"></span>
                 {skill}
               </div>
@@ -11629,7 +12009,7 @@ const CVTemplatePreview: React.FC<{
       experience: (
         <div key="experience" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
-            LEADERSHIP EXPERIENCE
+            PENGALAMAN KERJA
           </h2>
           {dummyData.experience.map((exp, idx) => (
             <div key={idx} className="mb-4">
@@ -11638,7 +12018,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600 font-semibold">{exp.period}</p>
               </div>
               <p className="text-xs font-bold text-slate-800 mb-2">{exp.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+              <RenderBulletDescription text={exp.description} />
             </div>
           ))}
         </div>
@@ -11646,7 +12026,7 @@ const CVTemplatePreview: React.FC<{
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
-            INTERNSHIPS
+            PENGALAMAN MAGANG
           </h2>
           {dummyData.internships.map((item, idx) => (
             <div key={idx} className="mb-3">
@@ -11655,7 +12035,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600 font-semibold">{item.period}</p>
               </div>
               <p className="text-xs font-bold text-slate-800 mb-1">{item.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+              <RenderBulletDescription text={item.description} />
             </div>
           ))}
         </div>
@@ -11663,7 +12043,7 @@ const CVTemplatePreview: React.FC<{
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
-            PROJECTS
+            PROYEK &amp; PORTOFOLIO
           </h2>
           {dummyData.projects.map((proj, idx) => (
             <div key={idx} className="mb-3">
@@ -11677,7 +12057,7 @@ const CVTemplatePreview: React.FC<{
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
-            ORGANIZATIONS
+            PENGALAMAN ORGANISASI
           </h2>
           {dummyData.organizations.map((org, idx) => (
             <div key={idx} className="mb-3">
@@ -11686,7 +12066,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600 font-semibold">{org.period}</p>
               </div>
               <p className="text-xs font-semibold text-slate-700 mb-1">{org.role}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+              <RenderBulletDescription text={org.description} />
             </div>
           ))}
         </div>
@@ -11694,7 +12074,7 @@ const CVTemplatePreview: React.FC<{
       education: (
         <div key="education" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
-            EDUCATION
+            RIWAYAT PENDIDIKAN
           </h2>
           {dummyData.education.map((edu, idx) => (
             <div key={idx} className="flex justify-between items-baseline mb-2">
@@ -11710,7 +12090,7 @@ const CVTemplatePreview: React.FC<{
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
-            CERTIFICATIONS
+            SERTIFIKASI &amp; PELATIHAN
           </h2>
           {dummyData.certifications.map((cert, idx) => (
             <div key={idx} className="flex justify-between text-xs mb-1">
@@ -11723,7 +12103,7 @@ const CVTemplatePreview: React.FC<{
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
-            LANGUAGES
+            PENGUASAAN BAHASA
           </h2>
           <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
@@ -11731,11 +12111,16 @@ const CVTemplatePreview: React.FC<{
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
-            COURSES
+            KURSUS &amp; PELATIHAN
           </h2>
           {dummyData.courses.map((crs, idx) => (
             <div key={idx} className="mb-2 text-xs">
-              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+              <div className="flex items-baseline justify-between mb-0.5">
+                <p className="font-bold text-slate-900">{crs.courseName}</p>
+                <p className="text-[11px] text-slate-600 font-semibold shrink-0 text-right">{crs.year}</p>
+              </div>
+              <p className="text-xs italic text-slate-700">{crs.institution}</p>
+              <RenderBulletDescription text={crs.description} />
             </div>
           ))}
         </div>
@@ -11743,7 +12128,7 @@ const CVTemplatePreview: React.FC<{
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
-            SCHOLARSHIPS
+            BEASISWA &amp; PRESTASI
           </h2>
           {dummyData.scholarships.map((sch, idx) => (
             <div key={idx} className="mb-2 text-xs">
@@ -11755,7 +12140,7 @@ const CVTemplatePreview: React.FC<{
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
-            VOLUNTEER
+            PENGALAMAN RELAWAN
           </h2>
           {dummyData.volunteers.map((vol, idx) => (
             <div key={idx} className="mb-2 text-xs">
@@ -11767,7 +12152,7 @@ const CVTemplatePreview: React.FC<{
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b-3 border-navy-800 pb-1 mb-3">
-            REFERENCES
+            REFERENSI PROFESIONAL
           </h2>
           {dummyData.references.map((ref, idx) => (
             <div key={idx} className="text-xs text-slate-700">
@@ -11782,11 +12167,22 @@ const CVTemplatePreview: React.FC<{
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
         {/* Navy Header Block */}
         <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-6 mb-6 -mx-12 -mt-12 shadow-lg">
-          <h1 className="text-3xl font-black uppercase tracking-wide mb-2">
-            {dummyData.fullName}
-          </h1>
-          <p className="text-lg font-semibold text-blue-200 mb-3">{dummyData.jobTitle}</p>
-          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" />
+          <div className={`flex items-start justify-between gap-4 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+            <div className="flex-1">
+              <h1 className="text-3xl font-black uppercase tracking-wide mb-2">
+                {dummyData.fullName}
+              </h1>
+              <p className="text-lg font-semibold text-blue-200 mb-3">{dummyData.jobTitle}</p>
+              <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" />
+            </div>
+            {dummyData.photoUrl ? (
+              <img
+                src={dummyData.photoUrl}
+                alt={dummyData.fullName}
+                className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border-2 border-white/60 shrink-0 shadow-md`}
+              />
+            ) : null}
+          </div>
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -11800,23 +12196,23 @@ const CVTemplatePreview: React.FC<{
       summary: (
         <div key="summary" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
-            ABOUT
+            RINGKASAN PROFESIONAL
           </h2>
-          <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+          <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
         </div>
       ),
       skills: (
         <div key="skills" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
-            SKILLS OVERVIEW
+            KEAHLIAN UTAMA
           </h2>
-          <p className="text-xs text-slate-700">{dummyData.skills.join(' • ')}</p>
+          <p className="text-xs text-slate-700 text-justify">{dummyData.skills.join(' • ')}</p>
         </div>
       ),
       experience: (
         <div key="experience" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
-            EXPERIENCE
+            PENGALAMAN KERJA
           </h2>
           {dummyData.experience.map((exp, idx) => (
             <div key={idx} className="mb-4">
@@ -11825,7 +12221,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600">{exp.period}</p>
               </div>
               <p className="text-xs font-semibold text-cyan-700 mb-2">{exp.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+              <RenderBulletDescription text={exp.description} />
             </div>
           ))}
         </div>
@@ -11833,7 +12229,7 @@ const CVTemplatePreview: React.FC<{
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
-            INTERNSHIPS
+            PENGALAMAN MAGANG
           </h2>
           {dummyData.internships.map((item, idx) => (
             <div key={idx} className="mb-3">
@@ -11842,7 +12238,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600">{item.period}</p>
               </div>
               <p className="text-xs font-semibold text-cyan-700 mb-1">{item.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+              <RenderBulletDescription text={item.description} />
             </div>
           ))}
         </div>
@@ -11850,13 +12246,13 @@ const CVTemplatePreview: React.FC<{
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
-            PROJECTS
+            PROYEK &amp; PORTOFOLIO
           </h2>
           {dummyData.projects.map((proj, idx) => (
             <div key={idx} className="mb-3">
               <p className="text-sm font-bold text-slate-900">{proj.name}</p>
               <p className="text-xs text-cyan-700 mb-1">{proj.tech}</p>
-              <p className="text-xs text-slate-700">{proj.description}</p>
+              <RenderBulletDescription text={proj.description} />
             </div>
           ))}
         </div>
@@ -11864,7 +12260,7 @@ const CVTemplatePreview: React.FC<{
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
-            ORGANIZATIONS
+            PENGALAMAN ORGANISASI
           </h2>
           {dummyData.organizations.map((org, idx) => (
             <div key={idx} className="mb-3">
@@ -11873,7 +12269,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600">{org.period}</p>
               </div>
               <p className="text-xs font-semibold text-cyan-700 mb-1">{org.role}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+              <RenderBulletDescription text={org.description} />
             </div>
           ))}
         </div>
@@ -11881,7 +12277,7 @@ const CVTemplatePreview: React.FC<{
       education: (
         <div key="education" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
-            EDUCATION
+            RIWAYAT PENDIDIKAN
           </h2>
           {dummyData.education.map((edu, idx) => (
             <div key={idx} className="mb-2">
@@ -11894,7 +12290,7 @@ const CVTemplatePreview: React.FC<{
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
-            CERTIFICATIONS
+            SERTIFIKASI &amp; PELATIHAN
           </h2>
           {dummyData.certifications.map((cert, idx) => (
             <div key={idx} className="flex justify-between text-xs mb-1">
@@ -11907,7 +12303,7 @@ const CVTemplatePreview: React.FC<{
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
-            LANGUAGES
+            PENGUASAAN BAHASA
           </h2>
           <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
@@ -11915,11 +12311,16 @@ const CVTemplatePreview: React.FC<{
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
-            COURSES
+            KURSUS &amp; PELATIHAN
           </h2>
           {dummyData.courses.map((crs, idx) => (
             <div key={idx} className="mb-2 text-xs">
-              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+              <div className="flex items-baseline justify-between mb-0.5">
+                <p className="font-bold text-slate-900">{crs.courseName}</p>
+                <p className="text-[11px] text-slate-600 italic shrink-0 text-right">{crs.year}</p>
+              </div>
+              <p className="text-xs italic text-cyan-700">{crs.institution}</p>
+              <RenderBulletDescription text={crs.description} />
             </div>
           ))}
         </div>
@@ -11927,7 +12328,7 @@ const CVTemplatePreview: React.FC<{
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
-            SCHOLARSHIPS
+            BEASISWA &amp; PRESTASI
           </h2>
           {dummyData.scholarships.map((sch, idx) => (
             <div key={idx} className="mb-2 text-xs">
@@ -11939,7 +12340,7 @@ const CVTemplatePreview: React.FC<{
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
-            VOLUNTEER
+            PENGALAMAN RELAWAN
           </h2>
           {dummyData.volunteers.map((vol, idx) => (
             <div key={idx} className="mb-2 text-xs">
@@ -11951,7 +12352,7 @@ const CVTemplatePreview: React.FC<{
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-6">
           <h2 className="text-sm font-black uppercase text-slate-900 border-b-2 border-cyan-600 pb-1 mb-3">
-            REFERENCES
+            REFERENSI PROFESIONAL
           </h2>
           {dummyData.references.map((ref, idx) => (
             <div key={idx} className="text-xs text-slate-700">
@@ -11966,6 +12367,15 @@ const CVTemplatePreview: React.FC<{
       <div className="flex min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
         {/* Left Sidebar - Tech Stack */}
         <div className="w-64 bg-cyan-900 text-white p-6 shrink-0">
+          {dummyData.photoUrl ? (
+            <div className="mb-5 flex justify-center">
+              <img
+                src={dummyData.photoUrl}
+                alt={dummyData.fullName}
+                className={`w-24 h-24 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border-2 border-cyan-400/80 shrink-0 shadow-md`}
+              />
+            </div>
+          ) : null}
           <div className="mb-6">
             <h1 className="text-xl font-black uppercase tracking-tight mb-1">
               {dummyData.fullName.split(' ')[0]}
@@ -11982,7 +12392,7 @@ const CVTemplatePreview: React.FC<{
 
           <div className="mb-6">
             <h2 className="text-xs font-black uppercase text-cyan-300 mb-3 border-b border-cyan-700 pb-1">
-              TECH STACK
+              KEAHLIAN TEKNIS
             </h2>
             <div className="space-y-2">
               {dummyData.skills.map((skill, idx) => (
@@ -12000,7 +12410,7 @@ const CVTemplatePreview: React.FC<{
 
           <div>
             <h2 className="text-xs font-black uppercase text-cyan-300 mb-2 border-b border-cyan-700 pb-1">
-              LINKS
+              TAUTAN
             </h2>
             <div className="text-xs space-y-1 text-cyan-200">
               <p className="break-all">{dummyData.github}</p>
@@ -12022,7 +12432,7 @@ const CVTemplatePreview: React.FC<{
     const sectionBlocks: Record<string, React.ReactNode> = {
       summary: (
         <div key="summary" className="mb-8">
-          <p className="text-xs leading-relaxed text-slate-700 text-center max-w-3xl mx-auto">
+          <p className="text-xs leading-relaxed text-slate-700 text-justify max-w-3xl mx-auto">
             {dummyData.summary}
           </p>
         </div>
@@ -12030,7 +12440,7 @@ const CVTemplatePreview: React.FC<{
       skills: (
         <div key="skills" className="mb-8">
           <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 text-center mb-4">
-            Skills
+            Keahlian
           </h2>
           <div className="flex flex-wrap justify-center gap-3">
             {dummyData.skills.map((skill, idx) => (
@@ -12044,7 +12454,7 @@ const CVTemplatePreview: React.FC<{
       experience: (
         <div key="experience" className="mb-8">
           <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 text-center mb-6">
-            Experience
+            Pengalaman Kerja
           </h2>
           <div className="space-y-6">
             {dummyData.experience.map((exp, idx) => (
@@ -12063,7 +12473,7 @@ const CVTemplatePreview: React.FC<{
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-8">
           <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 text-center mb-4">
-            Internships
+            Pengalaman Magang
           </h2>
           <div className="space-y-4 text-center">
             {dummyData.internships.map((item, idx) => (
@@ -12079,7 +12489,7 @@ const CVTemplatePreview: React.FC<{
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-8">
           <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 text-center mb-4">
-            Projects
+            Proyek &amp; Portofolio
           </h2>
           <div className="space-y-4 text-center">
             {dummyData.projects.map((proj, idx) => (
@@ -12095,7 +12505,7 @@ const CVTemplatePreview: React.FC<{
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-8">
           <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 text-center mb-4">
-            Organizations
+            Pengalaman Organisasi
           </h2>
           <div className="space-y-4 text-center">
             {dummyData.organizations.map((org, idx) => (
@@ -12111,7 +12521,7 @@ const CVTemplatePreview: React.FC<{
       education: (
         <div key="education" className="mb-8 text-center">
           <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
-            Education
+            Riwayat Pendidikan
           </h2>
           {dummyData.education.map((edu, idx) => (
             <div key={idx} className="mb-2">
@@ -12124,7 +12534,7 @@ const CVTemplatePreview: React.FC<{
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-8 text-center text-xs">
           <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
-            Certifications
+            Sertifikasi &amp; Pelatihan
           </h2>
           {dummyData.certifications.map((cert, idx) => (
             <p key={idx} className="text-slate-800 font-semibold">{cert.name} — {cert.issuer} ({cert.issueDate})</p>
@@ -12134,7 +12544,7 @@ const CVTemplatePreview: React.FC<{
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-8 text-center text-xs">
           <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
-            Languages
+            Penguasaan Bahasa
           </h2>
           <p className="text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
@@ -12142,17 +12552,24 @@ const CVTemplatePreview: React.FC<{
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-8 text-center text-xs">
           <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
-            Courses
+            Kursus &amp; Pelatihan
           </h2>
           {dummyData.courses.map((crs, idx) => (
-            <p key={idx} className="text-slate-800 font-semibold">{crs.courseName} — {crs.institution}</p>
+            <div key={idx} className="mb-2 text-xs">
+              <div className="flex items-baseline justify-between mb-0.5">
+                <p className="font-bold text-slate-900">{crs.courseName}</p>
+                <p className="text-[11px] text-slate-500 italic shrink-0 text-right">{crs.year}</p>
+              </div>
+              <p className="text-xs text-slate-600 italic">{crs.institution}</p>
+              <RenderBulletDescription text={crs.description} />
+            </div>
           ))}
         </div>
       ) : null,
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-8 text-center text-xs">
           <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
-            Scholarships
+            Beasiswa &amp; Prestasi
           </h2>
           {dummyData.scholarships.map((sch, idx) => (
             <p key={idx} className="text-slate-800 font-semibold">{sch.name} — {sch.provider}</p>
@@ -12162,7 +12579,7 @@ const CVTemplatePreview: React.FC<{
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-8 text-center text-xs">
           <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
-            Volunteer
+            Pengalaman Relawan
           </h2>
           {dummyData.volunteers.map((vol, idx) => (
             <p key={idx} className="text-slate-800 font-semibold">{vol.role} — {vol.organization}</p>
@@ -12172,7 +12589,7 @@ const CVTemplatePreview: React.FC<{
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-8 text-center text-xs">
           <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
-            References
+            Referensi Profesional
           </h2>
           {dummyData.references.map((ref, idx) => (
             <p key={idx} className="text-slate-800 font-semibold">{ref.fullName} ({ref.title} — {ref.company})</p>
@@ -12184,12 +12601,38 @@ const CVTemplatePreview: React.FC<{
     return (
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
         {/* Minimal Header */}
-        <div className="text-center border-b border-slate-300 pb-6 mb-6">
-          <h1 className="text-4xl font-black tracking-tighter text-slate-900 mb-3">
-            {dummyData.fullName}
-          </h1>
-          <p className="text-sm font-medium text-slate-600 mb-3">{dummyData.jobTitle}</p>
-          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center" />
+        <div className="border-b border-slate-300 pb-6 mb-6">
+          {dummyData.photoUrl && dummyData.photoPosition !== 'center' ? (
+            <div className={`flex items-center justify-between gap-4 mb-2 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+              <div className="flex-1">
+                <h1 className="text-4xl font-black tracking-tighter text-slate-900 mb-2">
+                  {dummyData.fullName}
+                </h1>
+                <p className="text-sm font-medium text-slate-600 mb-2">{dummyData.jobTitle}</p>
+                <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap gap-x-3 gap-y-1 items-center" />
+              </div>
+              <img
+                src={dummyData.photoUrl}
+                alt={dummyData.fullName}
+                className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border border-slate-300 shrink-0 shadow-2xs`}
+              />
+            </div>
+          ) : (
+            <div className="text-center">
+              {dummyData.photoUrl ? (
+                <img
+                  src={dummyData.photoUrl}
+                  alt={dummyData.fullName}
+                  className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border border-slate-300 mx-auto mb-3 shadow-2xs`}
+                />
+              ) : null}
+              <h1 className="text-4xl font-black tracking-tighter text-slate-900 mb-3">
+                {dummyData.fullName}
+              </h1>
+              <p className="text-sm font-medium text-slate-600 mb-3">{dummyData.jobTitle}</p>
+              <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center" />
+            </div>
+          )}
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -12204,18 +12647,18 @@ const CVTemplatePreview: React.FC<{
         <div key="summary" className="mb-6">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-0.5 bg-green-600"></div>
-            <h2 className="text-sm font-black uppercase text-green-800">PROFESSIONAL SUMMARY</h2>
+            <h2 className="text-sm font-black uppercase text-green-800">RINGKASAN PROFESIONAL</h2>
           </div>
-          <p className="text-xs leading-relaxed text-slate-700 pl-10">{dummyData.summary}</p>
+          <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
         </div>
       ),
       skills: (
         <div key="skills" className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-0.5 bg-green-600"></div>
-            <h2 className="text-sm font-black uppercase text-green-800">KEY SKILLS</h2>
+            <h2 className="text-sm font-black uppercase text-green-800">KEAHLIAN UTAMA</h2>
           </div>
-          <div className="flex flex-wrap gap-2 pl-10">
+          <div className="flex flex-wrap gap-2">
             {dummyData.skills.map((skill, idx) => (
               <span key={idx} className="px-3 py-1.5 bg-green-50 border-2 border-green-500 text-green-700 rounded-[10px] text-xs font-bold">
                 {skill}
@@ -12228,7 +12671,7 @@ const CVTemplatePreview: React.FC<{
         <div key="experience" className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-0.5 bg-green-600"></div>
-            <h2 className="text-sm font-black uppercase text-green-800">WORK EXPERIENCE</h2>
+            <h2 className="text-sm font-black uppercase text-green-800">PENGALAMAN KERJA</h2>
           </div>
           <div className="space-y-4 pl-10">
             {dummyData.experience.map((exp, idx) => (
@@ -12238,7 +12681,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs text-green-600 font-semibold">{exp.period}</p>
                 </div>
                 <p className="text-xs font-semibold text-green-700 mb-2">{exp.company}</p>
-                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+                <RenderBulletDescription text={exp.description} />
               </div>
             ))}
           </div>
@@ -12248,7 +12691,7 @@ const CVTemplatePreview: React.FC<{
         <div key="internships" className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-0.5 bg-green-600"></div>
-            <h2 className="text-sm font-black uppercase text-green-800">INTERNSHIPS</h2>
+            <h2 className="text-sm font-black uppercase text-green-800">PENGALAMAN MAGANG</h2>
           </div>
           <div className="space-y-3 pl-10">
             {dummyData.internships.map((item, idx) => (
@@ -12258,7 +12701,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs text-green-600 font-semibold">{item.period}</p>
                 </div>
                 <p className="text-xs font-semibold text-green-700 mb-1">{item.company}</p>
-                <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+                <RenderBulletDescription text={item.description} />
               </div>
             ))}
           </div>
@@ -12268,14 +12711,14 @@ const CVTemplatePreview: React.FC<{
         <div key="projects" className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-0.5 bg-green-600"></div>
-            <h2 className="text-sm font-black uppercase text-green-800">PROJECTS</h2>
+            <h2 className="text-sm font-black uppercase text-green-800">PROYEK &amp; PORTOFOLIO</h2>
           </div>
           <div className="space-y-3 pl-10">
             {dummyData.projects.map((proj, idx) => (
               <div key={idx}>
                 <p className="text-sm font-bold text-slate-900">{proj.name}</p>
                 <p className="text-xs text-green-700 mb-1">{proj.tech}</p>
-                <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
+                <RenderBulletDescription text={proj.description} />
               </div>
             ))}
           </div>
@@ -12285,7 +12728,7 @@ const CVTemplatePreview: React.FC<{
         <div key="organizations" className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-0.5 bg-green-600"></div>
-            <h2 className="text-sm font-black uppercase text-green-800">ORGANIZATIONS</h2>
+            <h2 className="text-sm font-black uppercase text-green-800">PENGALAMAN ORGANISASI</h2>
           </div>
           <div className="space-y-3 pl-10">
             {dummyData.organizations.map((org, idx) => (
@@ -12295,7 +12738,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs text-green-600 font-semibold">{org.period}</p>
                 </div>
                 <p className="text-xs font-semibold text-green-700 mb-1">{org.role}</p>
-                <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+                <RenderBulletDescription text={org.description} />
               </div>
             ))}
           </div>
@@ -12305,7 +12748,7 @@ const CVTemplatePreview: React.FC<{
         <div key="education" className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-0.5 bg-green-600"></div>
-            <h2 className="text-sm font-black uppercase text-green-800">EDUCATION</h2>
+            <h2 className="text-sm font-black uppercase text-green-800">RIWAYAT PENDIDIKAN</h2>
           </div>
           <div className="pl-10">
             {dummyData.education.map((edu, idx) => (
@@ -12322,7 +12765,7 @@ const CVTemplatePreview: React.FC<{
         <div key="certifications" className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-0.5 bg-green-600"></div>
-            <h2 className="text-sm font-black uppercase text-green-800">CERTIFICATIONS</h2>
+            <h2 className="text-sm font-black uppercase text-green-800">SERTIFIKASI &amp; PELATIHAN</h2>
           </div>
           <div className="pl-10 space-y-1 text-xs">
             {dummyData.certifications.map((cert, idx) => (
@@ -12338,7 +12781,7 @@ const CVTemplatePreview: React.FC<{
         <div key="languages" className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-0.5 bg-green-600"></div>
-            <h2 className="text-sm font-black uppercase text-green-800">LANGUAGES</h2>
+            <h2 className="text-sm font-black uppercase text-green-800">PENGUASAAN BAHASA</h2>
           </div>
           <p className="text-xs text-slate-700 pl-10">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
@@ -12347,11 +12790,18 @@ const CVTemplatePreview: React.FC<{
         <div key="courses" className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-0.5 bg-green-600"></div>
-            <h2 className="text-sm font-black uppercase text-green-800">COURSES</h2>
+            <h2 className="text-sm font-black uppercase text-green-800">KURSUS &amp; PELATIHAN</h2>
           </div>
-          <div className="pl-10 space-y-1 text-xs">
+          <div className="pl-10 space-y-2 text-xs">
             {dummyData.courses.map((crs, idx) => (
-              <p key={idx} className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+              <div key={idx}>
+                <div className="flex items-baseline justify-between mb-0.5">
+                  <p className="font-bold text-slate-900">{crs.courseName}</p>
+                  <p className="text-[11px] text-green-600 font-semibold shrink-0 text-right">{crs.year}</p>
+                </div>
+                <p className="text-xs italic text-slate-600">{crs.institution}</p>
+                <RenderBulletDescription text={crs.description} />
+              </div>
             ))}
           </div>
         </div>
@@ -12360,7 +12810,7 @@ const CVTemplatePreview: React.FC<{
         <div key="scholarships" className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-0.5 bg-green-600"></div>
-            <h2 className="text-sm font-black uppercase text-green-800">SCHOLARSHIPS</h2>
+            <h2 className="text-sm font-black uppercase text-green-800">BEASISWA &amp; PRESTASI</h2>
           </div>
           <div className="pl-10 space-y-1 text-xs">
             {dummyData.scholarships.map((sch, idx) => (
@@ -12373,7 +12823,7 @@ const CVTemplatePreview: React.FC<{
         <div key="volunteers" className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-0.5 bg-green-600"></div>
-            <h2 className="text-sm font-black uppercase text-green-800">VOLUNTEER</h2>
+            <h2 className="text-sm font-black uppercase text-green-800">PENGALAMAN RELAWAN</h2>
           </div>
           <div className="pl-10 space-y-1 text-xs">
             {dummyData.volunteers.map((vol, idx) => (
@@ -12386,7 +12836,7 @@ const CVTemplatePreview: React.FC<{
         <div key="references" className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-0.5 bg-green-600"></div>
-            <h2 className="text-sm font-black uppercase text-green-800">REFERENCES</h2>
+            <h2 className="text-sm font-black uppercase text-green-800">REFERENSI PROFESIONAL</h2>
           </div>
           <div className="pl-10 space-y-1 text-xs">
             {dummyData.references.map((ref, idx) => (
@@ -12401,11 +12851,22 @@ const CVTemplatePreview: React.FC<{
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
         {/* Header with Green Accent */}
         <div className="mb-6 pb-4 border-b-4 border-green-600">
-          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
-            {dummyData.fullName}
-          </h1>
-          <p className="text-base font-bold text-green-600 mb-2">{dummyData.jobTitle}</p>
-          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
+          <div className={`flex items-start justify-between gap-4 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+            <div className="flex-1">
+              <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-2">
+                {dummyData.fullName}
+              </h1>
+              <p className="text-base font-bold text-green-600 mb-2">{dummyData.jobTitle}</p>
+              <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
+            </div>
+            {dummyData.photoUrl ? (
+              <img
+                src={dummyData.photoUrl}
+                alt={dummyData.fullName}
+                className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border-2 border-green-600/60 shrink-0 shadow-2xs`}
+              />
+            ) : null}
+          </div>
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -12419,15 +12880,15 @@ const CVTemplatePreview: React.FC<{
       summary: (
         <div key="summary" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 mb-2 text-center">
-            Research Interests &amp; Summary
+            Ringkasan &amp; Minat Penelitian
           </h2>
-          <p className="text-xs leading-relaxed text-slate-700 text-center">{dummyData.summary}</p>
+          <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
         </div>
       ),
       education: (
         <div key="education" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
-            EDUCATION
+            RIWAYAT PENDIDIKAN
           </h2>
           {dummyData.education.map((edu, idx) => (
             <div key={idx} className="bg-slate-50 p-4 rounded-[10px] border border-slate-200 mb-2">
@@ -12444,7 +12905,7 @@ const CVTemplatePreview: React.FC<{
       experience: (
         <div key="experience" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
-            RESEARCH &amp; PROFESSIONAL EXPERIENCE
+            RISET &amp; PENGALAMAN KERJA
           </h2>
           {dummyData.experience.map((exp, idx) => (
             <div key={idx} className="mb-4">
@@ -12453,7 +12914,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600">{exp.period}</p>
               </div>
               <p className="text-xs font-semibold text-navy-700 mb-2">{exp.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
+              <RenderBulletDescription text={exp.description} />
             </div>
           ))}
         </div>
@@ -12461,7 +12922,7 @@ const CVTemplatePreview: React.FC<{
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
-            INTERNSHIP EXPERIENCE
+            PENGALAMAN MAGANG
           </h2>
           {dummyData.internships.map((item, idx) => (
             <div key={idx} className="mb-3">
@@ -12470,7 +12931,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600">{item.period}</p>
               </div>
               <p className="text-xs font-semibold text-navy-700 mb-1">{item.company}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
+              <RenderBulletDescription text={item.description} />
             </div>
           ))}
         </div>
@@ -12478,13 +12939,13 @@ const CVTemplatePreview: React.FC<{
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
-            PUBLICATIONS &amp; PROJECTS
+            PUBLIKASI &amp; PROYEK
           </h2>
           {dummyData.projects.map((proj, idx) => (
             <div key={idx} className="mb-3">
               <p className="text-sm font-bold text-slate-900">{proj.name}</p>
               <p className="text-xs text-navy-700 mb-1">{proj.tech}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
+              <RenderBulletDescription text={proj.description} />
             </div>
           ))}
         </div>
@@ -12492,7 +12953,7 @@ const CVTemplatePreview: React.FC<{
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
-            ACADEMIC ORGANIZATIONS
+            ORGANISASI AKADEMIS
           </h2>
           {dummyData.organizations.map((org, idx) => (
             <div key={idx} className="mb-3">
@@ -12501,7 +12962,7 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs text-slate-600">{org.period}</p>
               </div>
               <p className="text-xs font-semibold text-navy-700 mb-1">{org.role}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
+              <RenderBulletDescription text={org.description} />
             </div>
           ))}
         </div>
@@ -12509,11 +12970,11 @@ const CVTemplatePreview: React.FC<{
       skills: (
         <div key="skills" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
-            TECHNICAL SKILLS
+            KEAHLIAN TEKNIS
           </h2>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="flex flex-wrap gap-2">
             {dummyData.skills.map((skill, idx) => (
-              <div key={idx} className="text-xs text-slate-700 flex items-center gap-1">
+              <div key={idx} className="text-xs text-slate-700 flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-[10px] border border-slate-200">
                 <span className="w-1.5 h-1.5 bg-navy-700 rounded-full"></span>
                 {skill}
               </div>
@@ -12524,7 +12985,7 @@ const CVTemplatePreview: React.FC<{
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
-            HONORS &amp; CERTIFICATIONS
+            PENGHARGAAN &amp; SERTIFIKASI
           </h2>
           <div className="space-y-1 text-xs">
             {dummyData.certifications.map((cert, idx) => (
@@ -12539,7 +13000,7 @@ const CVTemplatePreview: React.FC<{
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
-            LANGUAGES
+            PENGUASAAN BAHASA
           </h2>
           <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
@@ -12547,11 +13008,16 @@ const CVTemplatePreview: React.FC<{
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
-            COURSES &amp; SYMPOSIUMS
+            KURSUS &amp; SIMPOSIUM
           </h2>
           {dummyData.courses.map((crs, idx) => (
             <div key={idx} className="mb-2 text-xs">
-              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+              <div className="flex items-baseline justify-between mb-0.5">
+                <p className="font-bold text-slate-900">{crs.courseName}</p>
+                <p className="text-[11px] text-slate-600 italic shrink-0 text-right">{crs.year}</p>
+              </div>
+              <p className="text-xs italic text-navy-700">{crs.institution}</p>
+              <RenderBulletDescription text={crs.description} />
             </div>
           ))}
         </div>
@@ -12559,7 +13025,7 @@ const CVTemplatePreview: React.FC<{
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
-            FELLOWSHIPS &amp; SCHOLARSHIPS
+            BEASISWA &amp; PRESTASI
           </h2>
           {dummyData.scholarships.map((sch, idx) => (
             <div key={idx} className="mb-2 text-xs">
@@ -12571,7 +13037,7 @@ const CVTemplatePreview: React.FC<{
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
-            COMMUNITY SERVICE
+            PENGABDIAN MASYARAKAT
           </h2>
           {dummyData.volunteers.map((vol, idx) => (
             <div key={idx} className="mb-2 text-xs">
@@ -12583,7 +13049,7 @@ const CVTemplatePreview: React.FC<{
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-6">
           <h2 className="text-sm font-black uppercase text-navy-900 border-b border-navy-700 pb-1 mb-3">
-            ACADEMIC REFERENCES
+            REFERENSI AKADEMIS
           </h2>
           {dummyData.references.map((ref, idx) => (
             <div key={idx} className="text-xs text-slate-700">
@@ -12597,14 +13063,35 @@ const CVTemplatePreview: React.FC<{
     return (
       <div className="p-12 min-h-[297mm] bg-white" style={{ fontFamily: selectedFontFamily }}>
         {/* Academic Header */}
-        <div className="text-center mb-6 pb-4 border-b-2 border-navy-700">
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-2">
-            {dummyData.fullName}
-          </h1>
-          <p className="text-sm font-semibold text-navy-700 mb-2 uppercase tracking-wide">
-            {dummyData.jobTitle}
-          </p>
-          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center" />
+        <div className="mb-6 pb-4 border-b-2 border-navy-700">
+          {dummyData.photoUrl ? (
+            <div className={`flex items-center justify-between gap-4 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+              <div className="flex-1">
+                <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-2">
+                  {dummyData.fullName}
+                </h1>
+                <p className="text-sm font-semibold text-navy-700 mb-2 uppercase tracking-wide">
+                  {dummyData.jobTitle}
+                </p>
+                <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" className="text-xs flex flex-wrap gap-x-3 gap-y-1 items-center" />
+              </div>
+              <img
+                src={dummyData.photoUrl}
+                alt={dummyData.fullName}
+                className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border border-navy-300 shrink-0 shadow-2xs`}
+              />
+            </div>
+          ) : (
+            <div className="text-center">
+              <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-2">
+                {dummyData.fullName}
+              </h1>
+              <p className="text-sm font-semibold text-navy-700 mb-2 uppercase tracking-wide">
+                {dummyData.jobTitle}
+              </p>
+              <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" className="text-xs flex flex-wrap justify-center gap-x-3 gap-y-1 items-center" />
+            </div>
+          )}
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -12618,15 +13105,15 @@ const CVTemplatePreview: React.FC<{
       summary: (
         <div key="summary" className="mb-5">
           <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
-            // SUMMARY
+            // RINGKASAN
           </h2>
-          <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+          <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
         </div>
       ),
       skills: (
         <div key="skills" className="mb-5">
           <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
-            // TECH STACK &amp; SKILLS
+            // KEAHLIAN TEKNIS
           </h2>
           <div className="flex flex-wrap gap-1.5 text-xs">
             {dummyData.skills.map((skill, idx) => (
@@ -12640,7 +13127,7 @@ const CVTemplatePreview: React.FC<{
       experience: (
         <div key="experience" className="mb-5">
           <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-3">
-            // EXPERIENCE
+            // PENGALAMAN KERJA
           </h2>
           <div className="space-y-4">
             {dummyData.experience.map((exp, idx) => (
@@ -12649,7 +13136,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs font-bold text-slate-900">{exp.role} @ {exp.company}</p>
                   <p className="text-[11px] text-slate-500 font-semibold">{exp.period}</p>
                 </div>
-                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line pl-3 border-l-2 border-slate-300">{exp.description}</p>
+                <RenderBulletDescription text={exp.description} className="text-xs leading-relaxed text-slate-700 pl-3 border-l-2 border-slate-300" />
               </div>
             ))}
           </div>
@@ -12658,7 +13145,7 @@ const CVTemplatePreview: React.FC<{
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-5">
           <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-3">
-            // INTERNSHIPS
+            // PENGALAMAN MAGANG
           </h2>
           <div className="space-y-3">
             {dummyData.internships.map((item, idx) => (
@@ -12667,7 +13154,7 @@ const CVTemplatePreview: React.FC<{
                   <p className="text-xs font-bold text-slate-900">{item.role} @ {item.company}</p>
                   <p className="text-[11px] text-slate-500 font-semibold">{item.period}</p>
                 </div>
-                <p className="text-xs leading-relaxed text-slate-700 pl-3 border-l-2 border-slate-300">{item.description}</p>
+                <RenderBulletDescription text={item.description} className="text-xs leading-relaxed text-slate-700 pl-3 border-l-2 border-slate-300" />
               </div>
             ))}
           </div>
@@ -12676,12 +13163,12 @@ const CVTemplatePreview: React.FC<{
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-5">
           <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
-            // PROJECTS
+            // PROYEK &amp; PORTOFOLIO
           </h2>
           {dummyData.projects.map((proj, idx) => (
             <div key={idx} className="mb-2">
               <p className="text-xs font-bold text-slate-900">{proj.name} ({proj.tech})</p>
-              <p className="text-xs text-slate-700 pl-3 border-l-2 border-slate-300">{proj.description}</p>
+              <RenderBulletDescription text={proj.description} className="text-xs text-slate-700 pl-3 border-l-2 border-slate-300" />
             </div>
           ))}
         </div>
@@ -12689,12 +13176,12 @@ const CVTemplatePreview: React.FC<{
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-5">
           <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
-            // ORGANIZATIONS
+            // PENGALAMAN ORGANISASI
           </h2>
           {dummyData.organizations.map((org, idx) => (
             <div key={idx} className="mb-2">
               <p className="text-xs font-bold text-slate-900">{org.name} ({org.role})</p>
-              <p className="text-xs text-slate-700 pl-3 border-l-2 border-slate-300">{org.description}</p>
+              <RenderBulletDescription text={org.description} className="text-xs text-slate-700 pl-3 border-l-2 border-slate-300" />
             </div>
           ))}
         </div>
@@ -12702,7 +13189,7 @@ const CVTemplatePreview: React.FC<{
       education: (
         <div key="education" className="mb-5">
           <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
-            // EDUCATION
+            // RIWAYAT PENDIDIKAN
           </h2>
           {dummyData.education.map((edu, idx) => (
             <div key={idx} className="mb-2">
@@ -12718,7 +13205,7 @@ const CVTemplatePreview: React.FC<{
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-5">
           <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
-            // CERTIFICATIONS
+            // SERTIFIKASI &amp; PELATIHAN
           </h2>
           {dummyData.certifications.map((cert, idx) => (
             <p key={idx} className="text-xs text-slate-700">
@@ -12730,7 +13217,7 @@ const CVTemplatePreview: React.FC<{
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-5">
           <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
-            // LANGUAGES
+            // PENGUASAAN BAHASA
           </h2>
           <p className="text-xs text-slate-700">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
@@ -12738,17 +13225,24 @@ const CVTemplatePreview: React.FC<{
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-5">
           <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
-            // COURSES
+            // KURSUS &amp; PELATIHAN
           </h2>
           {dummyData.courses.map((crs, idx) => (
-            <p key={idx} className="text-xs text-slate-700">{crs.courseName} — {crs.institution}</p>
+            <div key={idx} className="mb-2 text-xs">
+              <div className="flex items-baseline justify-between mb-0.5">
+                <p className="font-bold text-slate-900">{crs.courseName}</p>
+                <p className="text-[11px] text-slate-500 shrink-0 text-right">{crs.year}</p>
+              </div>
+              <p className="text-xs text-slate-600 italic">{crs.institution}</p>
+              <RenderBulletDescription text={crs.description} />
+            </div>
           ))}
         </div>
       ) : null,
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-5">
           <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
-            // SCHOLARSHIPS
+            // BEASISWA &amp; PRESTASI
           </h2>
           {dummyData.scholarships.map((sch, idx) => (
             <p key={idx} className="text-xs text-slate-700">{sch.name} — {sch.provider}</p>
@@ -12758,7 +13252,7 @@ const CVTemplatePreview: React.FC<{
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-5">
           <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
-            // VOLUNTEER
+            // PENGALAMAN RELAWAN
           </h2>
           {dummyData.volunteers.map((vol, idx) => (
             <p key={idx} className="text-xs text-slate-700">{vol.role} — {vol.organization}</p>
@@ -12768,7 +13262,7 @@ const CVTemplatePreview: React.FC<{
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-5">
           <h2 className="text-xs font-bold uppercase text-slate-900 border-b border-dashed border-slate-400 pb-1 mb-2">
-            // REFERENCES
+            // REFERENSI PROFESIONAL
           </h2>
           {dummyData.references.map((ref, idx) => (
             <p key={idx} className="text-xs text-slate-700">{ref.fullName} ({ref.title} — {ref.company})</p>
@@ -12781,13 +13275,24 @@ const CVTemplatePreview: React.FC<{
       <div className="p-10 min-h-[297mm] text-slate-800 bg-white font-mono" style={{ fontFamily: selectedFontFamily }}>
         {/* Typewriter Header */}
         <div className="border-b-2 border-slate-800 pb-4 mb-6">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">
-            {dummyData.fullName}
-          </h1>
-          <p className="text-xs font-semibold text-slate-700 mb-2">
-            {`[role: "${dummyData.jobTitle}"]`}
-          </p>
-          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" className="text-[11px] flex flex-wrap gap-x-2 gap-y-1 items-center" />
+          <div className={`flex items-start justify-between gap-4 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">
+                {dummyData.fullName}
+              </h1>
+              <p className="text-xs font-semibold text-slate-700 mb-2">
+                {`[role: "${dummyData.jobTitle}"]`}
+              </p>
+              <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} separator="|" className="text-[11px] flex flex-wrap gap-x-2 gap-y-1 items-center" />
+            </div>
+            {dummyData.photoUrl ? (
+              <img
+                src={dummyData.photoUrl}
+                alt={dummyData.fullName}
+                className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border-2 border-slate-800 shrink-0 shadow-2xs`}
+              />
+            ) : null}
+          </div>
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -12801,50 +13306,52 @@ const CVTemplatePreview: React.FC<{
       summary: (
         <div key="summary" className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
-            SUMMARY
+            RINGKASAN PROFESIONAL
           </h2>
-          <p className="text-xs leading-relaxed text-slate-800">{dummyData.summary}</p>
+          <p className="text-xs leading-relaxed text-slate-800 text-justify">{dummyData.summary}</p>
         </div>
       ),
-      skills: (
+      skills: dummyData.skills.length > 0 ? (
         <div key="skills" className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
-            SKILLS
+            KEAHLIAN
           </h2>
-          <p className="text-xs text-slate-800 leading-relaxed">{dummyData.skills.join(' • ')}</p>
+          <p className="text-xs text-slate-800 leading-relaxed text-justify">{dummyData.skills.join(' • ')}</p>
         </div>
-      ),
-      experience: (
+      ) : null,
+      experience: dummyData.experience.length > 0 ? (
         <div key="experience" className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-3">
-            EXPERIENCE
+            PENGALAMAN KERJA
           </h2>
           <div className="space-y-4">
             {dummyData.experience.map((exp, idx) => (
               <div key={idx}>
                 <div className="flex justify-between items-baseline mb-0.5">
-                  <p className="text-xs font-bold text-slate-900">{exp.company} — <span className="font-normal italic">{exp.role}</span></p>
-                  <p className="text-[11px] italic text-slate-600">{exp.period}</p>
+                  <p className="text-xs font-bold text-slate-900">{exp.company}</p>
+                  <p className="text-[11px] italic text-slate-600 shrink-0 text-right">{exp.period}</p>
                 </div>
-                <p className="text-xs leading-relaxed text-slate-800 whitespace-pre-line">{exp.description}</p>
+                <p className="text-xs font-normal italic text-slate-800 mb-1">{exp.role}</p>
+                <RenderBulletDescription text={exp.description} className="text-xs leading-relaxed text-slate-800" />
               </div>
             ))}
           </div>
         </div>
-      ),
+      ) : null,
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-3">
-            INTERNSHIP EXPERIENCE
+            PENGALAMAN MAGANG
           </h2>
           <div className="space-y-3">
             {dummyData.internships.map((item, idx) => (
               <div key={idx}>
                 <div className="flex justify-between items-baseline mb-0.5">
-                  <p className="text-xs font-bold text-slate-900">{item.company} — <span className="font-normal italic">{item.role}</span></p>
-                  <p className="text-[11px] italic text-slate-600">{item.period}</p>
+                  <p className="text-xs font-bold text-slate-900">{item.company}</p>
+                  <p className="text-[11px] italic text-slate-600 shrink-0 text-right">{item.period}</p>
                 </div>
-                <p className="text-xs leading-relaxed text-slate-800">{item.description}</p>
+                <p className="text-xs font-normal italic text-slate-800 mb-1">{item.role}</p>
+                <RenderBulletDescription text={item.description} className="text-xs leading-relaxed text-slate-800" />
               </div>
             ))}
           </div>
@@ -12853,12 +13360,12 @@ const CVTemplatePreview: React.FC<{
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
-            FEATURED PROJECTS
+            PROYEK UNGGULAN
           </h2>
           {dummyData.projects.map((proj, idx) => (
             <div key={idx} className="mb-2">
-              <p className="text-xs font-bold text-slate-900">{proj.name} — <span className="font-normal italic">{proj.tech}</span></p>
-              <p className="text-xs leading-relaxed text-slate-800">{proj.description}</p>
+              <p className="text-xs font-bold text-slate-900">{proj.name} <span className="font-normal italic">({proj.tech})</span></p>
+              <RenderBulletDescription text={proj.description} className="text-xs leading-relaxed text-slate-800" />
             </div>
           ))}
         </div>
@@ -12866,23 +13373,24 @@ const CVTemplatePreview: React.FC<{
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
-            ORGANIZATIONS
+            PENGALAMAN ORGANISASI
           </h2>
           {dummyData.organizations.map((org, idx) => (
             <div key={idx} className="mb-2">
-              <div className="flex justify-between items-baseline">
-                <p className="text-xs font-bold text-slate-900">{org.name} — <span className="font-normal italic">{org.role}</span></p>
-                <p className="text-[11px] italic text-slate-600">{org.period}</p>
+              <div className="flex justify-between items-baseline mb-0.5">
+                <p className="text-xs font-bold text-slate-900">{org.name}</p>
+                <p className="text-[11px] italic text-slate-600 shrink-0 text-right">{org.period}</p>
               </div>
-              <p className="text-xs leading-relaxed text-slate-800">{org.description}</p>
+              <p className="text-xs font-normal italic text-slate-800 mb-1">{org.role}</p>
+              <RenderBulletDescription text={org.description} className="text-xs leading-relaxed text-slate-800" />
             </div>
           ))}
         </div>
       ) : null,
-      education: (
+      education: dummyData.education.length > 0 ? (
         <div key="education" className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
-            EDUCATION
+            RIWAYAT PENDIDIKAN
           </h2>
           {dummyData.education.map((edu, idx) => (
             <div key={idx} className="mb-2">
@@ -12890,20 +13398,23 @@ const CVTemplatePreview: React.FC<{
                 <p className="text-xs font-bold text-slate-900">{edu.institution}</p>
                 <p className="text-[11px] italic text-slate-600">{edu.year}</p>
               </div>
-              <p className="text-xs text-slate-800">{edu.degree} ({edu.gpa})</p>
+              <p className="text-xs text-slate-800">{edu.degree}{edu.gpa ? ` (${edu.gpa})` : ''}</p>
             </div>
           ))}
         </div>
-      ),
+      ) : null,
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
-            CERTIFICATIONS
+            SERTIFIKASI & PELATIHAN
           </h2>
           {dummyData.certifications.map((cert, idx) => (
-            <div key={idx} className="flex justify-between text-xs text-slate-800 mb-1">
-              <span>{cert.name} — <em>{cert.issuer}</em></span>
-              <span className="text-[11px] text-slate-600">{cert.issueDate}</span>
+            <div key={idx} className="mb-1 text-xs">
+              <div className="flex justify-between items-baseline">
+                <p className="font-bold text-slate-900">{cert.name}</p>
+                <p className="text-[11px] italic text-slate-600 shrink-0 text-right">{cert.issueDate}</p>
+              </div>
+              <p className="text-slate-700 italic">{cert.issuer}</p>
             </div>
           ))}
         </div>
@@ -12911,7 +13422,7 @@ const CVTemplatePreview: React.FC<{
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
-            LANGUAGES
+            PENGUASAAN BAHASA
           </h2>
           <p className="text-xs text-slate-800">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
@@ -12919,11 +13430,16 @@ const CVTemplatePreview: React.FC<{
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
-            COURSES
+            KURSUS & PELATIHAN
           </h2>
           {dummyData.courses.map((crs, idx) => (
             <div key={idx} className="mb-2 text-xs">
-              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution} ({crs.year})</p>
+              <div className="flex items-baseline justify-between mb-0.5">
+                <p className="font-bold text-slate-900">{crs.courseName}</p>
+                <p className="text-[11px] italic text-slate-600 shrink-0 text-right">{crs.year}</p>
+              </div>
+              <p className="text-xs text-slate-700 italic">{crs.institution}</p>
+              <RenderBulletDescription text={crs.description} className="text-xs leading-relaxed text-slate-800" />
             </div>
           ))}
         </div>
@@ -12931,11 +13447,15 @@ const CVTemplatePreview: React.FC<{
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
-            SCHOLARSHIPS
+            BEASISWA & PRESTASI
           </h2>
           {dummyData.scholarships.map((sch, idx) => (
             <div key={idx} className="mb-2 text-xs">
-              <p className="font-bold text-slate-900">{sch.name} — {sch.provider} ({sch.year})</p>
+              <div className="flex items-baseline justify-between mb-0.5">
+                <p className="font-bold text-slate-900">{sch.name}</p>
+                <p className="text-[11px] italic text-slate-600 shrink-0 text-right">{sch.year}</p>
+              </div>
+              <p className="text-xs text-slate-700 italic">{sch.provider}</p>
             </div>
           ))}
         </div>
@@ -12943,11 +13463,12 @@ const CVTemplatePreview: React.FC<{
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
-            VOLUNTEER
+            PENGALAMAN RELAWAN
           </h2>
           {dummyData.volunteers.map((vol, idx) => (
             <div key={idx} className="mb-2 text-xs">
-              <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
+              <p className="font-bold text-slate-900">{vol.role}</p>
+              <p className="text-xs text-slate-700 italic">{vol.organization}</p>
             </div>
           ))}
         </div>
@@ -12955,11 +13476,12 @@ const CVTemplatePreview: React.FC<{
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-900 pb-0.5 mb-2">
-            REFERENCES
+            REFERENSI PROFESIONAL
           </h2>
           {dummyData.references.map((ref, idx) => (
             <div key={idx} className="text-xs text-slate-800 mb-1">
-              <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
+              <p className="font-bold text-slate-900">{ref.fullName}</p>
+              <p className="text-xs text-slate-700 italic">{ref.title} ({ref.company})</p>
             </div>
           ))}
         </div>
@@ -12969,16 +13491,25 @@ const CVTemplatePreview: React.FC<{
     return (
       <div className="p-10 min-h-[297mm] text-slate-900 bg-white font-serif" style={{ fontFamily: selectedFontFamily }}>
         {/* Header */}
-        <div className="mb-5">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">
-            {dummyData.fullName}
-          </h1>
-          <p className="text-xs font-medium text-slate-700 italic mb-2">
-            {dummyData.jobTitle}
-          </p>
-          <div className="border-b-2 border-slate-900 pb-3">
-            <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
+        <div className={`mb-5 flex items-start justify-between gap-4 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">
+              {dummyData.fullName}
+            </h1>
+            <p className="text-xs font-medium text-slate-700 italic mb-2">
+              {dummyData.jobTitle}
+            </p>
+            <div className="border-b-2 border-slate-900 pb-3">
+              <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
+            </div>
           </div>
+          {dummyData.photoUrl ? (
+            <img
+              src={dummyData.photoUrl}
+              alt={dummyData.fullName}
+              className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border border-slate-300 shrink-0 shadow-2xs`}
+            />
+          ) : null}
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -12992,15 +13523,15 @@ const CVTemplatePreview: React.FC<{
       summary: (
         <div key="summary" className="mb-8">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
-            PROFILE
+            RINGKASAN PROFESIONAL
           </h2>
-          <p className="text-xs leading-loose text-slate-600 font-normal">{dummyData.summary}</p>
+          <p className="text-xs leading-loose text-slate-600 font-normal text-justify">{dummyData.summary}</p>
         </div>
       ),
-      skills: (
+      skills: dummyData.skills.length > 0 ? (
         <div key="skills" className="mb-8">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
-            SKILLS
+            KEAHLIAN
           </h2>
           <div className="flex flex-wrap gap-1.5">
             {dummyData.skills.map((skill, idx) => (
@@ -13010,40 +13541,40 @@ const CVTemplatePreview: React.FC<{
             ))}
           </div>
         </div>
-      ),
-      experience: (
+      ) : null,
+      experience: dummyData.experience.length > 0 ? (
         <div key="experience" className="mb-8">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">
-            EXPERIENCE
+            PENGALAMAN KERJA
           </h2>
           <div className="space-y-6">
             {dummyData.experience.map((exp, idx) => (
               <div key={idx}>
-                <div className="flex justify-between items-baseline mb-1">
-                  <h3 className="text-xs font-semibold text-slate-900">{exp.role}</h3>
-                  <span className="text-[11px] text-slate-400">{exp.period}</span>
+                <div className="flex justify-between items-baseline mb-0.5">
+                  <h3 className="text-xs font-semibold text-slate-900">{exp.company}</h3>
+                  <span className="text-[11px] text-slate-400 shrink-0 text-right">{exp.period}</span>
                 </div>
-                <p className="text-xs text-slate-500 font-medium mb-2">{exp.company}</p>
-                <p className="text-xs leading-loose text-slate-600 whitespace-pre-line">{exp.description}</p>
+                <p className="text-xs text-slate-500 font-medium mb-1.5">{exp.role}</p>
+                <RenderBulletDescription text={exp.description} className="text-xs leading-loose text-slate-600" />
               </div>
             ))}
           </div>
         </div>
-      ),
+      ) : null,
       internships: dummyData.internships.length > 0 ? (
         <div key="internships" className="mb-8">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">
-            INTERNSHIPS
+            PENGALAMAN MAGANG
           </h2>
           <div className="space-y-4">
             {dummyData.internships.map((item, idx) => (
               <div key={idx}>
-                <div className="flex justify-between items-baseline mb-1">
-                  <h3 className="text-xs font-semibold text-slate-900">{item.role}</h3>
-                  <span className="text-[11px] text-slate-400">{item.period}</span>
+                <div className="flex justify-between items-baseline mb-0.5">
+                  <h3 className="text-xs font-semibold text-slate-900">{item.company}</h3>
+                  <span className="text-[11px] text-slate-400 shrink-0 text-right">{item.period}</span>
                 </div>
-                <p className="text-xs text-slate-500 font-medium mb-1">{item.company}</p>
-                <p className="text-xs leading-loose text-slate-600">{item.description}</p>
+                <p className="text-xs text-slate-500 font-medium mb-1.5">{item.role}</p>
+                <RenderBulletDescription text={item.description} className="text-xs leading-loose text-slate-600" />
               </div>
             ))}
           </div>
@@ -13052,13 +13583,12 @@ const CVTemplatePreview: React.FC<{
       projects: dummyData.projects.length > 0 ? (
         <div key="projects" className="mb-8">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
-            PROJECTS
+            PROYEK & PORTOFOLIO
           </h2>
           {dummyData.projects.map((proj, idx) => (
             <div key={idx} className="mb-3">
-              <h3 className="text-xs font-semibold text-slate-900">{proj.name}</h3>
-              <p className="text-xs text-slate-400 mb-1">{proj.tech}</p>
-              <p className="text-xs leading-loose text-slate-600">{proj.description}</p>
+              <h3 className="text-xs font-semibold text-slate-900">{proj.name} {proj.tech ? <span className="text-slate-400 font-normal">({proj.tech})</span> : null}</h3>
+              <RenderBulletDescription text={proj.description} className="text-xs leading-loose text-slate-600" />
             </div>
           ))}
         </div>
@@ -13066,43 +13596,46 @@ const CVTemplatePreview: React.FC<{
       organizations: dummyData.organizations.length > 0 ? (
         <div key="organizations" className="mb-8">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
-            ORGANIZATIONS
+            PENGALAMAN ORGANISASI
           </h2>
           {dummyData.organizations.map((org, idx) => (
             <div key={idx} className="mb-3">
-              <div className="flex justify-between items-baseline mb-1">
+              <div className="flex justify-between items-baseline mb-0.5">
                 <h3 className="text-xs font-semibold text-slate-900">{org.name}</h3>
-                <span className="text-[11px] text-slate-400">{org.period}</span>
+                <span className="text-[11px] text-slate-400 shrink-0 text-right">{org.period}</span>
               </div>
-              <p className="text-xs text-slate-500 font-medium mb-1">{org.role}</p>
-              <p className="text-xs leading-loose text-slate-600">{org.description}</p>
+              <p className="text-xs text-slate-500 font-medium mb-1.5">{org.role}</p>
+              <RenderBulletDescription text={org.description} className="text-xs leading-loose text-slate-600" />
             </div>
           ))}
         </div>
       ) : null,
-      education: (
+      education: dummyData.education.length > 0 ? (
         <div key="education" className="mb-8">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
-            EDUCATION
+            RIWAYAT PENDIDIKAN
           </h2>
           {dummyData.education.map((edu, idx) => (
             <div key={idx} className="mb-2">
               <p className="text-xs font-semibold text-slate-900">{edu.institution}</p>
-              <p className="text-xs text-slate-500">{edu.degree} • {edu.gpa}</p>
+              <p className="text-xs text-slate-500">{edu.degree}{edu.gpa ? ` • ${edu.gpa}` : ''}</p>
               <span className="text-[11px] text-slate-400">{edu.year}</span>
             </div>
           ))}
         </div>
-      ),
+      ) : null,
       certifications: dummyData.certifications.length > 0 ? (
         <div key="certifications" className="mb-8 text-xs">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
-            CERTIFICATIONS
+            SERTIFIKASI & PELATIHAN
           </h2>
           {dummyData.certifications.map((cert, idx) => (
-            <div key={idx} className="flex justify-between mb-1">
-              <span className="font-semibold text-slate-800">{cert.name} — {cert.issuer}</span>
-              <span className="text-slate-400">{cert.issueDate}</span>
+            <div key={idx} className="mb-1.5">
+              <div className="flex justify-between items-baseline mb-0.5">
+                <span className="font-semibold text-slate-800">{cert.name}</span>
+                <span className="text-slate-400 text-[11px] shrink-0 text-right">{cert.issueDate}</span>
+              </div>
+              <p className="text-xs text-slate-500">{cert.issuer}</p>
             </div>
           ))}
         </div>
@@ -13110,7 +13643,7 @@ const CVTemplatePreview: React.FC<{
       languages: dummyData.languages.length > 0 ? (
         <div key="languages" className="mb-8 text-xs">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
-            LANGUAGES
+            PENGUASAAN BAHASA
           </h2>
           <p className="text-slate-600">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
         </div>
@@ -13118,40 +13651,59 @@ const CVTemplatePreview: React.FC<{
       courses: dummyData.courses.length > 0 ? (
         <div key="courses" className="mb-8 text-xs">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
-            COURSES
+            KURSUS & PELATIHAN
           </h2>
           {dummyData.courses.map((crs, idx) => (
-            <p key={idx} className="text-slate-700 font-medium mb-1">{crs.courseName} — {crs.institution}</p>
+            <div key={idx} className="mb-2">
+              <div className="flex justify-between items-baseline mb-0.5">
+                <p className="text-slate-800 font-semibold">{crs.courseName}</p>
+                <span className="text-[11px] text-slate-400 shrink-0 text-right">{crs.year}</span>
+              </div>
+              <p className="text-xs text-slate-500">{crs.institution}</p>
+              <RenderBulletDescription text={crs.description} className="text-xs leading-loose text-slate-600" />
+            </div>
           ))}
         </div>
       ) : null,
       scholarships: dummyData.scholarships.length > 0 ? (
         <div key="scholarships" className="mb-8 text-xs">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
-            SCHOLARSHIPS
+            BEASISWA & PRESTASI
           </h2>
           {dummyData.scholarships.map((sch, idx) => (
-            <p key={idx} className="text-slate-700 font-medium mb-1">{sch.name} — {sch.provider}</p>
+            <div key={idx} className="mb-1.5">
+              <div className="flex justify-between items-baseline mb-0.5">
+                <p className="text-slate-800 font-medium">{sch.name}</p>
+                <span className="text-[11px] text-slate-400 shrink-0 text-right">{sch.year}</span>
+              </div>
+              <p className="text-xs text-slate-500">{sch.provider}</p>
+            </div>
           ))}
         </div>
       ) : null,
       volunteers: dummyData.volunteers.length > 0 ? (
         <div key="volunteers" className="mb-8 text-xs">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
-            VOLUNTEER
+            PENGALAMAN RELAWAN
           </h2>
           {dummyData.volunteers.map((vol, idx) => (
-            <p key={idx} className="text-slate-700 font-medium mb-1">{vol.role} — {vol.organization}</p>
+            <div key={idx} className="mb-1.5">
+              <p className="text-slate-800 font-medium">{vol.role}</p>
+              <p className="text-xs text-slate-500">{vol.organization}</p>
+            </div>
           ))}
         </div>
       ) : null,
       references: dummyData.references.length > 0 ? (
         <div key="references" className="mb-8 text-xs">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
-            REFERENCES
+            REFERENSI PROFESIONAL
           </h2>
           {dummyData.references.map((ref, idx) => (
-            <p key={idx} className="text-slate-700 font-medium mb-1">{ref.fullName} ({ref.title} — {ref.company})</p>
+            <div key={idx} className="mb-1.5">
+              <p className="text-slate-800 font-medium">{ref.fullName}</p>
+              <p className="text-xs text-slate-500">{ref.title} ({ref.company})</p>
+            </div>
           ))}
         </div>
       ) : null,
@@ -13160,217 +13712,29 @@ const CVTemplatePreview: React.FC<{
     return (
       <div className="p-12 min-h-[297mm] font-sans bg-white text-slate-800" style={{ fontFamily: selectedFontFamily }}>
         {/* Header with generous spacing */}
-        <div className="mb-8 pb-6 border-b border-slate-200">
-          <h1 className="text-3xl font-light tracking-wide text-slate-900 mb-2">
-            {dummyData.fullName}
-          </h1>
-          <p className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">
-            {dummyData.jobTitle}
-          </p>
-          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
+        <div className={`mb-8 pb-6 border-b border-slate-200 flex items-start justify-between gap-4 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+          <div className="flex-1">
+            <h1 className="text-3xl font-light tracking-wide text-slate-900 mb-2">
+              {dummyData.fullName}
+            </h1>
+            <p className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">
+              {dummyData.jobTitle}
+            </p>
+            <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
+          </div>
+          {dummyData.photoUrl ? (
+            <img
+              src={dummyData.photoUrl}
+              alt={dummyData.fullName}
+              className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border border-slate-200 shrink-0 shadow-2xs`}
+            />
+          ) : null}
         </div>
 
         {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
       </div>
     );
   };
-
-  const renderTebalBold = () => {
-    const activeOrderKeys = customData?.sectionOrder && customData.sectionOrder.length > 0 ? customData.sectionOrder : DEFAULT_SECTION_ORDER;
-    const sectionBlocks: Record<string, React.ReactNode> = {
-      summary: (
-        <div key="summary" className="mb-6">
-          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
-            ABOUT ME
-          </h2>
-          <p className="text-xs font-medium leading-relaxed text-slate-800">{dummyData.summary}</p>
-        </div>
-      ),
-      skills: (
-        <div key="skills" className="mb-6">
-          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
-            SKILLS
-          </h2>
-          <div className="flex flex-wrap gap-1.5">
-            {dummyData.skills.map((skill, idx) => (
-              <span key={idx} className="bg-slate-900 text-white px-2 py-0.5 text-xs font-bold">
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
-      ),
-      experience: (
-        <div key="experience" className="mb-6">
-          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-4">
-            WORK EXPERIENCE
-          </h2>
-          <div className="space-y-4">
-            {dummyData.experience.map((exp, idx) => (
-              <div key={idx} className="border-l-2 border-slate-900 pl-3">
-                <div className="flex justify-between items-baseline mb-1">
-                  <h3 className="text-xs font-black uppercase text-slate-900">{exp.role}</h3>
-                  <span className="text-[11px] font-bold text-slate-600">{exp.period}</span>
-                </div>
-                <p className="text-xs font-bold text-slate-700 mb-1">{exp.company}</p>
-                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-line">{exp.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      ),
-      internships: dummyData.internships.length > 0 ? (
-        <div key="internships" className="mb-6">
-          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-4">
-            INTERNSHIPS
-          </h2>
-          <div className="space-y-3">
-            {dummyData.internships.map((item, idx) => (
-              <div key={idx} className="border-l-2 border-slate-900 pl-3">
-                <div className="flex justify-between items-baseline mb-1">
-                  <h3 className="text-xs font-black uppercase text-slate-900">{item.role}</h3>
-                  <span className="text-[11px] font-bold text-slate-600">{item.period}</span>
-                </div>
-                <p className="text-xs font-bold text-slate-700 mb-1">{item.company}</p>
-                <p className="text-xs leading-relaxed text-slate-700">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null,
-      projects: dummyData.projects.length > 0 ? (
-        <div key="projects" className="mb-6">
-          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
-            PROJECTS
-          </h2>
-          {dummyData.projects.map((proj, idx) => (
-            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-2">
-              <p className="text-xs font-black uppercase text-slate-900">{proj.name}</p>
-              <p className="text-xs font-semibold text-slate-600 mb-1">{proj.tech}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{proj.description}</p>
-            </div>
-          ))}
-        </div>
-      ) : null,
-      organizations: dummyData.organizations.length > 0 ? (
-        <div key="organizations" className="mb-6">
-          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
-            ORGANIZATIONS
-          </h2>
-          {dummyData.organizations.map((org, idx) => (
-            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-2">
-              <div className="flex justify-between items-baseline mb-1">
-                <h3 className="text-xs font-black uppercase text-slate-900">{org.name}</h3>
-                <span className="text-[11px] font-bold text-slate-600">{org.period}</span>
-              </div>
-              <p className="text-xs font-bold text-slate-700 mb-1">{org.role}</p>
-              <p className="text-xs leading-relaxed text-slate-700">{org.description}</p>
-            </div>
-          ))}
-        </div>
-      ) : null,
-      education: (
-        <div key="education" className="mb-6">
-          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
-            EDUCATION
-          </h2>
-          {dummyData.education.map((edu, idx) => (
-            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-2">
-              <p className="text-xs font-black text-slate-900">{edu.institution}</p>
-              <p className="text-xs font-semibold text-slate-700">{edu.degree}</p>
-              <p className="text-[11px] text-slate-600">{edu.year} — {edu.gpa}</p>
-            </div>
-          ))}
-        </div>
-      ),
-      certifications: dummyData.certifications.length > 0 ? (
-        <div key="certifications" className="mb-6">
-          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
-            CERTIFICATIONS
-          </h2>
-          {dummyData.certifications.map((cert, idx) => (
-            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-1 text-xs">
-              <p className="font-bold text-slate-900">{cert.name} — {cert.issuer} ({cert.issueDate})</p>
-            </div>
-          ))}
-        </div>
-      ) : null,
-      languages: dummyData.languages.length > 0 ? (
-        <div key="languages" className="mb-6">
-          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
-            LANGUAGES
-          </h2>
-          <p className="text-xs font-bold text-slate-800">{dummyData.languages.map(l => `${l.language} (${l.level})`).join(' • ')}</p>
-        </div>
-      ) : null,
-      courses: dummyData.courses.length > 0 ? (
-        <div key="courses" className="mb-6">
-          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
-            COURSES
-          </h2>
-          {dummyData.courses.map((crs, idx) => (
-            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-1 text-xs">
-              <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution}</p>
-            </div>
-          ))}
-        </div>
-      ) : null,
-      scholarships: dummyData.scholarships.length > 0 ? (
-        <div key="scholarships" className="mb-6">
-          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
-            SCHOLARSHIPS
-          </h2>
-          {dummyData.scholarships.map((sch, idx) => (
-            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-1 text-xs">
-              <p className="font-bold text-slate-900">{sch.name} — {sch.provider}</p>
-            </div>
-          ))}
-        </div>
-      ) : null,
-      volunteers: dummyData.volunteers.length > 0 ? (
-        <div key="volunteers" className="mb-6">
-          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
-            VOLUNTEER
-          </h2>
-          {dummyData.volunteers.map((vol, idx) => (
-            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-1 text-xs">
-              <p className="font-bold text-slate-900">{vol.role} — {vol.organization}</p>
-            </div>
-          ))}
-        </div>
-      ) : null,
-      references: dummyData.references.length > 0 ? (
-        <div key="references" className="mb-6">
-          <h2 className="bg-slate-900 text-white px-2 py-1 inline-block font-black text-xs uppercase tracking-wider mb-3">
-            REFERENCES
-          </h2>
-          {dummyData.references.map((ref, idx) => (
-            <div key={idx} className="border-l-2 border-slate-900 pl-3 mb-1 text-xs">
-              <p className="font-bold text-slate-900">{ref.fullName} ({ref.title} — {ref.company})</p>
-            </div>
-          ))}
-        </div>
-      ) : null,
-    };
-
-    return (
-      <div className="p-10 min-h-[297mm] font-sans bg-white text-slate-900" style={{ fontFamily: selectedFontFamily }}>
-        {/* Oversized Name Header */}
-        <div className="mb-6 pb-4 border-b-4 border-slate-900">
-          <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-1">
-            {dummyData.fullName}
-          </h1>
-          <p className="text-sm font-bold uppercase text-slate-700 mb-3">
-            {dummyData.jobTitle}
-          </p>
-          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
-        </div>
-
-        {activeOrderKeys.map((key) => sectionBlocks[key] || null)}
-      </div>
-    );
-  };
-
 
   // Renderer untuk Impact CV Templates
   const renderImpactTemplate = (impactKey: string) => {
@@ -13399,15 +13763,6 @@ const CVTemplatePreview: React.FC<{
         headerStyle: 'text-3xl font-extrabold',
         sectionTitleStyle: 'text-sm font-bold uppercase tracking-wide text-green-600 mb-2',
         sectionContentStyle: 'mt-2 text-xs',
-      },
-      'impact-professional': {
-        color: 'text-blue-600',
-        fontClass: fontStyleMap.serif,
-        headerStyle: 'text-2xl font-bold tracking-tight text-blue-600 border-b-2 border-blue-600 pb-2',
-        sectionTitleStyle: 'text-xs uppercase font-bold tracking-wider bg-blue-600 text-white py-1 px-2.5 inline-block mb-2',
-        sectionContentStyle: 'mt-2 pl-3 border-l-2 border-blue-600/30 text-xs',
-        backgroundClass: 'bg-white',
-        borderStyle: 'border-t-8 border-blue-600',
       },
       'impact-creative': {
         color: 'text-pink-500',
@@ -13556,7 +13911,7 @@ const CVTemplatePreview: React.FC<{
         <div key="summary" className="mb-4">
           <h2 className={cfg.sectionTitleStyle}>RINGKASAN EKSEKUTIF</h2>
           <div className={cfg.sectionContentStyle}>
-            <p className="leading-relaxed whitespace-pre-line text-slate-700">{dummyData.summary}</p>
+            <p className="leading-relaxed whitespace-pre-line text-slate-700 text-justify">{dummyData.summary}</p>
           </div>
         </div>
       ) : null,
@@ -13568,7 +13923,7 @@ const CVTemplatePreview: React.FC<{
               <div key={idx} className="mb-2">
                 <div className="flex justify-between items-baseline mb-0.5">
                   <h3 className="font-bold text-slate-900 text-xs">{exp.position || exp.role || 'Posisi'}</h3>
-                  <span className="text-[11px] font-semibold text-slate-500">{exp.period || `${exp.startDate || ''} - ${exp.endDate || ''}`}</span>
+                  <span className="text-[11px] font-semibold text-slate-500 shrink-0 text-right">{exp.period || `${exp.startDate || ''} - ${exp.endDate || ''}`}</span>
                 </div>
                 <div className="flex justify-between items-baseline mb-1">
                   <p className="font-semibold text-slate-700 text-xs">{exp.company}</p>
@@ -13581,7 +13936,7 @@ const CVTemplatePreview: React.FC<{
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-[11px] leading-relaxed text-slate-700">{exp.description}</p>
+                  <RenderBulletDescription text={exp.description} className="text-[11px] leading-relaxed text-slate-700" />
                 )}
               </div>
             ))}
@@ -13596,7 +13951,7 @@ const CVTemplatePreview: React.FC<{
               <div key={idx} className="mb-1.5">
                 <div className="flex justify-between items-baseline mb-0.5">
                   <h3 className="font-bold text-slate-900 text-xs">{edu.degree}</h3>
-                  <span className="text-[11px] font-semibold text-slate-500">{edu.period || edu.year || `${edu.startDate || ''} - ${edu.endDate || ''}`}</span>
+                  <span className="text-[11px] font-semibold text-slate-500 shrink-0 text-right">{edu.period || edu.year || `${edu.startDate || ''} - ${edu.endDate || ''}`}</span>
                 </div>
                 <p className="font-semibold text-slate-700 text-xs">{edu.institution}</p>
                 {edu.gpa && <p className="text-[11px] text-slate-600">IPK: {edu.gpa}</p>}
@@ -13632,7 +13987,7 @@ const CVTemplatePreview: React.FC<{
                   <h3 className="font-bold text-slate-900 text-xs">{proj.name}</h3>
                 </div>
                 {proj.tech && <p className="text-[10px] font-semibold text-slate-500 mb-0.5">{proj.tech}</p>}
-                <p className="text-[11px] leading-relaxed text-slate-700">{proj.description}</p>
+                <RenderBulletDescription text={proj.description} className="text-[11px] leading-relaxed text-slate-700" />
               </div>
             ))}
           </div>
@@ -13641,10 +13996,14 @@ const CVTemplatePreview: React.FC<{
       certifications: (Array.isArray(dummyData?.certifications) && dummyData.certifications.length > 0) ? (
         <div key="certifications" className="mb-4">
           <h2 className={cfg.sectionTitleStyle}>SERTIFIKASI & LISENSI</h2>
-          <div className={`space-y-1 ${cfg.sectionContentStyle}`}>
+          <div className={`space-y-1.5 ${cfg.sectionContentStyle}`}>
             {dummyData.certifications.map((cert: any, idx: number) => (
               <div key={idx} className="text-xs">
-                <span className="font-bold text-slate-900">{cert.title || cert.name}</span> — <span className="text-slate-700">{cert.issuer}</span> ({cert.year || cert.issueDate})
+                <div className="flex justify-between items-baseline mb-0.5">
+                  <span className="font-bold text-slate-900">{cert.title || cert.name}</span>
+                  <span className="text-[11px] text-slate-500 shrink-0 text-right">{cert.year || cert.issueDate}</span>
+                </div>
+                <p className="text-slate-700">{cert.issuer}</p>
               </div>
             ))}
           </div>
@@ -13665,10 +14024,14 @@ const CVTemplatePreview: React.FC<{
       courses: (Array.isArray(dummyData?.courses) && dummyData.courses.length > 0) ? (
         <div key="courses" className="mb-4">
           <h2 className={cfg.sectionTitleStyle}>PELATIHAN & KURSUS</h2>
-          <div className={`space-y-1 ${cfg.sectionContentStyle}`}>
+          <div className={`space-y-1.5 ${cfg.sectionContentStyle}`}>
             {dummyData.courses.map((crs: any, idx: number) => (
               <div key={idx} className="text-xs">
-                <span className="font-bold text-slate-900">{crs.courseName}</span> — <span className="text-slate-700">{crs.institution}</span> ({crs.year})
+                <div className="flex justify-between items-baseline mb-0.5">
+                  <span className="font-bold text-slate-900">{crs.courseName}</span>
+                  <span className="text-[11px] text-slate-500 shrink-0 text-right">{crs.year}</span>
+                </div>
+                <p className="text-slate-700">{crs.institution}</p>
               </div>
             ))}
           </div>
@@ -13677,10 +14040,14 @@ const CVTemplatePreview: React.FC<{
       scholarships: (Array.isArray(dummyData?.scholarships) && dummyData.scholarships.length > 0) ? (
         <div key="scholarships" className="mb-4">
           <h2 className={cfg.sectionTitleStyle}>BEASISWA</h2>
-          <div className={`space-y-1 ${cfg.sectionContentStyle}`}>
+          <div className={`space-y-1.5 ${cfg.sectionContentStyle}`}>
             {dummyData.scholarships.map((sch: any, idx: number) => (
               <div key={idx} className="text-xs">
-                <span className="font-bold text-slate-900">{sch.name}</span> — <span className="text-slate-700">{sch.provider}</span> ({sch.year})
+                <div className="flex justify-between items-baseline mb-0.5">
+                  <span className="font-bold text-slate-900">{sch.name}</span>
+                  <span className="text-[11px] text-slate-500 shrink-0 text-right">{sch.year}</span>
+                </div>
+                <p className="text-slate-700">{sch.provider}</p>
               </div>
             ))}
           </div>
@@ -13689,10 +14056,11 @@ const CVTemplatePreview: React.FC<{
       volunteers: (Array.isArray(dummyData?.volunteers) && dummyData.volunteers.length > 0) ? (
         <div key="volunteers" className="mb-4">
           <h2 className={cfg.sectionTitleStyle}>RELAWAN</h2>
-          <div className={`space-y-1 ${cfg.sectionContentStyle}`}>
+          <div className={`space-y-1.5 ${cfg.sectionContentStyle}`}>
             {dummyData.volunteers.map((vol: any, idx: number) => (
               <div key={idx} className="text-xs">
-                <span className="font-bold text-slate-900">{vol.role}</span> — <span className="text-slate-700">{vol.organization}</span>
+                <span className="font-bold text-slate-900">{vol.role}</span>
+                <p className="text-slate-700">{vol.organization}</p>
               </div>
             ))}
           </div>
@@ -13701,10 +14069,11 @@ const CVTemplatePreview: React.FC<{
       references: (Array.isArray(dummyData?.references) && dummyData.references.length > 0) ? (
         <div key="references" className="mb-4">
           <h2 className={cfg.sectionTitleStyle}>REFERENSI</h2>
-          <div className={`space-y-1 ${cfg.sectionContentStyle}`}>
+          <div className={`space-y-1.5 ${cfg.sectionContentStyle}`}>
             {dummyData.references.map((ref: any, idx: number) => (
               <div key={idx} className="text-xs">
-                <span className="font-bold text-slate-900">{ref.fullName}</span> ({ref.title} — {ref.company})
+                <span className="font-bold text-slate-900">{ref.fullName}</span>
+                <p className="text-slate-700 italic">{ref.title} ({ref.company})</p>
               </div>
             ))}
           </div>
@@ -13720,13 +14089,24 @@ const CVTemplatePreview: React.FC<{
         style={{ fontFamily: cfg.fontClass || selectedFontFamily }}
       >
         <div className="mb-5">
-          <h1 className={`${cfg.headerStyle} ${cfg.color} mb-1`}>
-            {dummyData.fullName}
-          </h1>
-          <p className="text-sm font-bold uppercase text-slate-600 mb-2">
-            {dummyData.jobTitle}
-          </p>
-          <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
+          <div className={`flex items-start justify-between gap-4 ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+            <div className="flex-1">
+              <h1 className={`${cfg.headerStyle} ${cfg.color} mb-1`}>
+                {dummyData.fullName}
+              </h1>
+              <p className="text-sm font-bold uppercase text-slate-600 mb-2">
+                {dummyData.jobTitle}
+              </p>
+              <RenderContactHeaderLinks dummyData={dummyData} docLinkStyle={docLinkStyle} docShowIcons={docShowIcons} />
+            </div>
+            {dummyData.photoUrl ? (
+              <img
+                src={dummyData.photoUrl}
+                alt={dummyData.fullName}
+                className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border border-slate-300 shrink-0 shadow-2xs`}
+              />
+            ) : null}
+          </div>
         </div>
 
         {impactOrderKeys.map((key) => sectionBlocks[key] || null)}
@@ -13762,78 +14142,10 @@ const CVTemplatePreview: React.FC<{
   const selectedFontFamily = fontStyleMap[docFontFamily] || fontStyleMap.sans;
   const selectedSpacingClass = spacingClassMap[docSpacing] || '';
 
-  // Renderer untuk 26 Template Repositori (Resume Studio, Resumify, Resume Builder, AI Resume Repo)
+  // Renderer untuk Template Repositori
   const renderRepoTemplate = (repoTplId: string) => {
-    // 1. Resumify Tech Sidebar (2 Column Dark Sidebar)
-    if (repoTplId === 'resumify-tech-sidebar') {
-      return (
-        <div className="w-full min-h-[297mm] h-full bg-white text-slate-900 font-sans grid grid-cols-12">
-          <div className="col-span-4 bg-slate-900 text-white min-h-full h-full space-y-6 pt-[var(--cv-margin-top)] pb-[var(--cv-margin-bottom)] pl-[var(--cv-margin-left)] pr-6">
-            <div>
-              <h1 className="text-xl font-black uppercase text-white tracking-tight mb-1">{dummyData.fullName}</h1>
-              <p className="text-xs font-bold text-sky-400 uppercase">{dummyData.jobTitle}</p>
-            </div>
-            <div className="text-[11px] space-y-2 text-slate-300 border-t border-slate-700 pt-4">
-              <p className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">KONTAK</p>
-              <p>{dummyData.email}</p>
-              <p>{dummyData.phone}</p>
-              <p>{dummyData.location}</p>
-              {dummyData.website && <p>{dummyData.website}</p>}
-            </div>
-            {Array.isArray(dummyData?.skills) && dummyData.skills.length > 0 && (
-              <div className="border-t border-slate-700 pt-4">
-                <p className="font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-2">KEAHLIAN</p>
-                <div className="flex flex-wrap gap-1">
-                  {dummyData.skills.map((sk: any, idx: number) => (
-                    <span key={idx} className="bg-slate-800 text-sky-300 text-[10px] font-medium px-2 py-0.5 rounded border border-slate-700">{typeof sk === 'string' ? sk : sk?.name}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-            {Array.isArray(dummyData?.education) && dummyData.education.length > 0 && (
-              <div className="border-t border-slate-700 pt-4 space-y-2">
-                <p className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">PENDIDIKAN</p>
-                {dummyData.education.map((edu: any, idx: number) => (
-                  <div key={idx} className="text-[11px]">
-                    <p className="font-bold text-white">{edu.degree}</p>
-                    <p className="text-slate-400">{edu.institution}</p>
-                    <p className="text-[10px] text-sky-400">{edu.period || edu.year}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="col-span-8 space-y-6 pt-[var(--cv-margin-top)] pb-[var(--cv-margin-bottom)] pr-[var(--cv-margin-right)] pl-6">
-            {dummyData.summary && (
-              <div>
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b-2 border-slate-900 pb-1 mb-2">PROFIL</h2>
-                <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
-              </div>
-            )}
-            {Array.isArray(dummyData?.experience) && dummyData.experience.length > 0 && (
-              <div>
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b-2 border-slate-900 pb-1 mb-3">PENGALAMAN KERJA</h2>
-                <div className="space-y-4">
-                  {dummyData.experience.map((exp: any, idx: number) => (
-                    <div key={idx}>
-                      <div className="flex justify-between items-baseline mb-0.5">
-                        <h3 className="font-bold text-xs text-slate-900">{exp.position || exp.role}</h3>
-                        <span className="text-[10px] font-bold text-slate-500">{exp.period}</span>
-                      </div>
-                      <p className="text-xs font-semibold text-sky-700 mb-1">{exp.company} {exp.location ? `• ${exp.location}` : ''}</p>
-                      <p className="text-xs text-slate-600 leading-relaxed">{exp.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    // 2. Builder 50:50 Two Column Layout
-    if (repoTplId === 'builder-two-column' || repoTplId === 'studio-minimalist-two-col') {
+    // Studio Minimalist Two Column Layout
+    if (repoTplId === 'studio-minimalist-two-col') {
       return (
         <div className="min-h-[297mm] bg-white text-slate-900 font-sans">
           <div className="mb-6 pb-4 border-b-2 border-slate-900 text-center">
@@ -13848,8 +14160,8 @@ const CVTemplatePreview: React.FC<{
             <div className="space-y-5">
               {dummyData.summary && (
                 <div>
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">PROFIL</h2>
-                  <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">RINGKASAN PROFESIONAL</h2>
+                  <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
                 </div>
               )}
               {Array.isArray(dummyData?.skills) && dummyData.skills.length > 0 && (
@@ -13879,11 +14191,14 @@ const CVTemplatePreview: React.FC<{
               {Array.isArray(dummyData?.certifications) && dummyData.certifications.length > 0 && (
                 <div>
                   <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">SERTIFIKASI</h2>
-                  <div className="space-y-1 text-xs">
+                  <div className="space-y-1.5 text-xs">
                     {dummyData.certifications.map((cert: any, idx: number) => (
                       <div key={idx}>
-                        <p className="font-bold text-slate-900">{cert.name || cert.title}</p>
-                        <p className="text-[10px] text-slate-600">{cert.issuer} ({cert.issueDate || cert.year})</p>
+                        <div className="flex justify-between items-baseline mb-0.5">
+                          <p className="font-bold text-slate-900">{cert.name || cert.title}</p>
+                          <span className="text-[10px] text-slate-500 shrink-0 text-right">{cert.issueDate || cert.year}</span>
+                        </div>
+                        <p className="text-[10px] text-slate-600">{cert.issuer}</p>
                       </div>
                     ))}
                   </div>
@@ -13891,7 +14206,7 @@ const CVTemplatePreview: React.FC<{
               )}
               {Array.isArray(dummyData?.languages) && dummyData.languages.length > 0 && (
                 <div>
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">BAHASA</h2>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">PENGUASAAN BAHASA</h2>
                   <div className="flex flex-wrap gap-2 text-xs">
                     {dummyData.languages.map((lang: any, idx: number) => (
                       <span key={idx} className="text-slate-800">
@@ -13913,10 +14228,10 @@ const CVTemplatePreview: React.FC<{
                       <div key={idx} className="text-xs">
                         <div className="flex justify-between items-baseline mb-0.5">
                           <h3 className="font-bold text-slate-900">{exp.role || exp.position || 'Posisi Pekerjaan'}</h3>
-                          <span className="text-[10px] font-medium text-slate-500">{exp.period}</span>
+                          <span className="text-[10px] font-medium text-slate-500 shrink-0 text-right">{exp.period}</span>
                         </div>
                         <p className="font-semibold text-slate-700 mb-1">{exp.company}</p>
-                        <p className="text-slate-600 leading-relaxed text-[11px]">{exp.description}</p>
+                        <RenderBulletDescription text={exp.description} className="text-slate-600 leading-relaxed text-[11px]" />
                       </div>
                     ))}
                   </div>
@@ -13929,7 +14244,7 @@ const CVTemplatePreview: React.FC<{
                     {dummyData.projects.map((proj: any, idx: number) => (
                       <div key={idx}>
                         <p className="font-bold text-slate-900">{proj.name}</p>
-                        <p className="text-[11px] text-slate-600 leading-relaxed">{proj.description}</p>
+                        <RenderBulletDescription text={proj.description} className="text-[11px] text-slate-600 leading-relaxed" />
                       </div>
                     ))}
                   </div>
@@ -13937,11 +14252,15 @@ const CVTemplatePreview: React.FC<{
               )}
               {Array.isArray(dummyData?.courses) && dummyData.courses.length > 0 && (
                 <div>
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">PELATIHAN</h2>
-                  <div className="space-y-1 text-xs">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">KURSUS & PELATIHAN</h2>
+                  <div className="space-y-1.5 text-xs">
                     {dummyData.courses.map((crs: any, idx: number) => (
                       <div key={idx}>
-                        <p className="font-bold text-slate-900">{crs.courseName} — {crs.institution}</p>
+                        <div className="flex justify-between items-baseline mb-0.5">
+                          <p className="font-bold text-slate-900">{crs.courseName}</p>
+                          <span className="text-[10px] text-slate-500 shrink-0 text-right">{crs.year}</span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 italic">{crs.institution}</p>
                       </div>
                     ))}
                   </div>
@@ -13968,11 +14287,9 @@ const CVTemplatePreview: React.FC<{
 
     const repoThemes: Record<string, RepoTheme> = {
       // Studio
-      'studio-timeline': { titleColor: 'text-indigo-900', accentColor: 'bg-indigo-600', sideLine: true },
       'studio-modern-header': { headerBg: 'bg-indigo-950', headerText: 'text-white', titleColor: 'text-indigo-900' },
       'studio-decorative-pattern': { titleColor: 'text-purple-900', accentColor: 'bg-purple-600', badgeStyle: true },
       'studio-centered-classic': { titleColor: 'text-slate-900', isCentered: true },
-      'studio-accent-tabs': { titleColor: 'text-white bg-indigo-600 px-2 py-0.5 rounded-sm inline-block' },
       'studio-full-header': { headerBg: 'bg-indigo-900', headerText: 'text-white', titleColor: 'text-indigo-900' },
       'studio-light-contact': { titleColor: 'text-slate-900', headerBg: 'bg-slate-100 p-4 rounded-md' },
       'studio-bookmark-ribbon': { titleColor: 'text-purple-900 border-l-4 border-purple-600 pl-2' },
@@ -13989,7 +14306,6 @@ const CVTemplatePreview: React.FC<{
       // Builder
       'builder-ats-standard': { titleColor: 'text-black border-b border-black', isCentered: false },
       'builder-modern-blue': { titleColor: 'text-blue-700 border-b-2 border-blue-700' },
-      'builder-creative-box': { titleColor: 'text-emerald-800', boxStyle: true },
       'builder-minimal-serif': { titleColor: 'text-stone-800 border-b border-stone-400' },
       'builder-executive-grid': { titleColor: 'text-slate-900 border-b-2 border-slate-900' },
 
@@ -14058,18 +14374,27 @@ const CVTemplatePreview: React.FC<{
 
     return (
       <div className={`min-h-[297mm] bg-white text-slate-900 font-sans ${theme.borderTop || ''}`}>
-        <div className={`mb-6 pb-4 border-b border-slate-200 ${theme.headerBg || ''} ${theme.isCentered ? 'text-center' : ''}`}>
-          <h1 className={`text-3xl font-extrabold tracking-tight mb-1 ${theme.headerText || 'text-slate-900'}`}>{dummyData.fullName}</h1>
-          <p className={`text-xs font-bold uppercase mb-2 ${theme.headerText ? 'text-slate-200' : 'text-slate-600'}`}>{dummyData.jobTitle}</p>
-          <p className={`text-xs space-x-3 ${theme.headerText ? 'text-slate-300' : 'text-slate-500'}`}>
-            <span>{dummyData.email}</span> • <span>{dummyData.phone}</span> • <span>{dummyData.location}</span>
-          </p>
+        <div className={`mb-6 pb-4 border-b border-slate-200 flex items-start justify-between gap-4 ${theme.headerBg || ''} ${dummyData.photoPosition === 'left' ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex-1 ${theme.isCentered && !dummyData.photoUrl ? 'text-center' : ''}`}>
+            <h1 className={`text-3xl font-extrabold tracking-tight mb-1 ${theme.headerText || 'text-slate-900'}`}>{dummyData.fullName}</h1>
+            <p className={`text-xs font-bold uppercase mb-2 ${theme.headerText ? 'text-slate-200' : 'text-slate-600'}`}>{dummyData.jobTitle}</p>
+            <p className={`text-xs space-x-3 ${theme.headerText ? 'text-slate-300' : 'text-slate-500'}`}>
+              <span>{dummyData.email}</span> • <span>{dummyData.phone}</span> • <span>{dummyData.location}</span>
+            </p>
+          </div>
+          {dummyData.photoUrl ? (
+            <img
+              src={dummyData.photoUrl}
+              alt={dummyData.fullName}
+              className={`w-20 h-20 ${dummyData.photoShape === 'square' ? 'rounded-[10px]' : 'rounded-full'} object-cover border border-slate-300 shrink-0 shadow-2xs`}
+            />
+          ) : null}
         </div>
 
         {dummyData.summary && (
           <div className={`mb-5 ${theme.boxStyle ? 'border border-slate-200 p-3 rounded' : ''}`}>
-            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>PROFIL PROFESSIONAL</h2>
-            <p className="text-xs leading-relaxed text-slate-700">{dummyData.summary}</p>
+            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>RINGKASAN PROFESIONAL</h2>
+            <p className="text-xs leading-relaxed text-slate-700 text-justify">{dummyData.summary}</p>
           </div>
         )}
 
@@ -14081,10 +14406,10 @@ const CVTemplatePreview: React.FC<{
                 <div key={idx} className={theme.sideLine ? `border-l-2 ${theme.accentColor || 'border-slate-800'} pl-3` : ''}>
                   <div className="flex justify-between items-baseline mb-0.5">
                     <h3 className="font-bold text-xs text-slate-900">{exp.position || exp.role}</h3>
-                    <span className="text-[11px] font-semibold text-slate-500">{exp.period}</span>
+                    <span className="text-[11px] font-semibold text-slate-500 shrink-0 text-right">{exp.period}</span>
                   </div>
                   <p className="text-xs font-semibold text-slate-700 mb-1">{exp.company} {exp.location ? `• ${exp.location}` : ''}</p>
-                  <p className="text-xs text-slate-600 leading-relaxed">{exp.description}</p>
+                  <RenderBulletDescription text={exp.description} className="text-xs text-slate-600 leading-relaxed" />
                 </div>
               ))}
             </div>
@@ -14093,7 +14418,7 @@ const CVTemplatePreview: React.FC<{
 
         {Array.isArray(dummyData?.education) && dummyData.education.length > 0 && (
           <div className={`mb-5 ${theme.boxStyle ? 'border border-slate-200 p-3 rounded' : ''}`}>
-            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>PENDIDIKAN</h2>
+            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>RIWAYAT PENDIDIKAN</h2>
             <div className="space-y-2">
               {dummyData.education.map((edu: any, idx: number) => (
                 <div key={idx} className="flex justify-between text-xs">
@@ -14101,7 +14426,7 @@ const CVTemplatePreview: React.FC<{
                     <p className="font-bold text-slate-900">{edu.degree}</p>
                     <p className="text-slate-600">{edu.institution}</p>
                   </div>
-                  <span className="font-semibold text-slate-500">{edu.period || edu.year}</span>
+                  <span className="font-semibold text-slate-500 shrink-0 text-right">{edu.period || edu.year}</span>
                 </div>
               ))}
             </div>
@@ -14123,11 +14448,15 @@ const CVTemplatePreview: React.FC<{
 
         {Array.isArray(dummyData?.certifications) && dummyData.certifications.length > 0 && (
           <div className={`mb-5 ${theme.boxStyle ? 'border border-slate-200 p-3 rounded' : ''}`}>
-            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>SERTIFIKASI & LISENSI</h2>
-            <div className="space-y-1 text-xs">
+            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>SERTIFIKASI & PELATIHAN</h2>
+            <div className="space-y-1.5 text-xs">
               {dummyData.certifications.map((cert: any, idx: number) => (
                 <div key={idx}>
-                  <span className="font-bold text-slate-900">{cert.name || cert.title}</span> — <span className="text-slate-700">{cert.issuer}</span> ({cert.issueDate || cert.year})
+                  <div className="flex justify-between items-baseline mb-0.5">
+                    <span className="font-bold text-slate-900">{cert.name || cert.title}</span>
+                    <span className="text-[11px] text-slate-500 shrink-0 text-right">{cert.issueDate || cert.year}</span>
+                  </div>
+                  <p className="text-slate-700">{cert.issuer}</p>
                 </div>
               ))}
             </div>
@@ -14136,11 +14465,15 @@ const CVTemplatePreview: React.FC<{
 
         {Array.isArray(dummyData?.courses) && dummyData.courses.length > 0 && (
           <div className={`mb-5 ${theme.boxStyle ? 'border border-slate-200 p-3 rounded' : ''}`}>
-            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>PELATIHAN & KURSUS</h2>
-            <div className="space-y-1 text-xs">
+            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>KURSUS & PELATIHAN</h2>
+            <div className="space-y-1.5 text-xs">
               {dummyData.courses.map((crs: any, idx: number) => (
                 <div key={idx}>
-                  <span className="font-bold text-slate-900">{crs.courseName}</span> — <span className="text-slate-700">{crs.institution}</span> ({crs.year})
+                  <div className="flex justify-between items-baseline mb-0.5">
+                    <span className="font-bold text-slate-900">{crs.courseName}</span>
+                    <span className="text-[11px] text-slate-500 shrink-0 text-right">{crs.year}</span>
+                  </div>
+                  <p className="text-slate-700">{crs.institution}</p>
                 </div>
               ))}
             </div>
@@ -14149,11 +14482,15 @@ const CVTemplatePreview: React.FC<{
 
         {Array.isArray(dummyData?.scholarships) && dummyData.scholarships.length > 0 && (
           <div className={`mb-5 ${theme.boxStyle ? 'border border-slate-200 p-3 rounded' : ''}`}>
-            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>BEASISWA</h2>
-            <div className="space-y-1 text-xs">
+            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>BEASISWA & PRESTASI</h2>
+            <div className="space-y-1.5 text-xs">
               {dummyData.scholarships.map((sch: any, idx: number) => (
                 <div key={idx}>
-                  <span className="font-bold text-slate-900">{sch.name}</span> — <span className="text-slate-700">{sch.provider}</span> ({sch.year})
+                  <div className="flex justify-between items-baseline mb-0.5">
+                    <span className="font-bold text-slate-900">{sch.name}</span>
+                    <span className="text-[11px] text-slate-500 shrink-0 text-right">{sch.year}</span>
+                  </div>
+                  <p className="text-slate-700">{sch.provider}</p>
                 </div>
               ))}
             </div>
@@ -14162,7 +14499,7 @@ const CVTemplatePreview: React.FC<{
 
         {Array.isArray(dummyData?.languages) && dummyData.languages.length > 0 && (
           <div className={`mb-5 ${theme.boxStyle ? 'border border-slate-200 p-3 rounded' : ''}`}>
-            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>BAHASA</h2>
+            <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${theme.titleColor}`}>PENGUASAAN BAHASA</h2>
             <div className="flex flex-wrap gap-3 text-xs">
               {dummyData.languages.map((lang: any, idx: number) => (
                 <span key={idx} className="text-slate-800">
@@ -14202,12 +14539,8 @@ const CVTemplatePreview: React.FC<{
         return renderKetatSerif();
       case 'luasa-minimal':
         return renderLuasaMinimal();
-      case 'tebal-bold':
-        return renderTebalBold();
       case 'minimalist-executive':
         return renderMinimalistExecutive();
-      case 'creative-tech':
-        return renderCreativeTech();
       case 'fresh-graduate':
         return renderFreshGraduate();
       case 'harvard-modern':
@@ -14271,14 +14604,8 @@ const CVTemplatePreview: React.FC<{
           box-sizing: border-box !important;
           min-height: 100% !important;
         }
-        .cv-template-root[data-template="resumify-tech-sidebar"],
-        .cv-template-root[data-template="resumify-tech-sidebar"] > div {
-          padding-left: 0 !important;
-          padding-right: 0 !important;
-          padding-top: 0 !important;
-          padding-bottom: 0 !important;
-          height: 100% !important;
-          min-height: 297mm !important;
+        .cv-template-root > div > *:last-child {
+          margin-bottom: 0 !important;
         }
         ${docNameSize ? `.cv-template-root h1 { font-size: ${docNameSize}px !important; }` : ''}
         ${docHeaderSize ? `.cv-template-root h2 { font-size: ${docHeaderSize}px !important; }` : ''}
@@ -14288,7 +14615,9 @@ const CVTemplatePreview: React.FC<{
         .cv-template-root h2,
         .cv-template-root .space-y-4 > div,
         .cv-template-root .space-y-3 > div,
-        .cv-template-root .grid > div {
+        .cv-template-root .grid > div,
+        .cv-template-root [data-template="rezi-classic"] .mb-3,
+        .cv-template-root [data-template="rezi-classic"] .mb-4 {
           break-inside: avoid !important;
           page-break-inside: avoid !important;
         }
@@ -14301,9 +14630,28 @@ const CVTemplatePreview: React.FC<{
 };
 
 // Mini Visual Live Scaled A4 Template Preview (Halaman 1 Saja) for Layout Gallery Cards
-const TemplateThumbnailVisual: React.FC<{ templateId: string; customData?: Partial<CVData> }> = ({
+export const TemplateThumbnailVisual: React.FC<{
+  templateId: string;
+  customData?: Partial<CVData>;
+  docMarginTop?: number;
+  docMarginBottom?: number;
+  docMarginLeft?: number;
+  docMarginRight?: number;
+  docFontFamily?: string;
+  docFontSize?: string;
+  docSpacing?: string;
+  docSectionSpacing?: number;
+}> = ({
   templateId,
   customData,
+  docMarginTop = 1.27,
+  docMarginBottom = 1.27,
+  docMarginLeft = 1.27,
+  docMarginRight = 1.27,
+  docFontFamily,
+  docFontSize,
+  docSpacing,
+  docSectionSpacing,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number>(0.15);
@@ -14327,21 +14675,51 @@ const TemplateThumbnailVisual: React.FC<{ templateId: string; customData?: Parti
     return () => observer.disconnect();
   }, []);
 
+  const topMargin = docMarginTop ?? 1.27;
+  const bottomMargin = docMarginBottom ?? 1.27;
+
   return (
     <div
       ref={containerRef}
       className="w-full h-full relative overflow-hidden bg-white select-none pointer-events-none rounded-[10px]"
     >
       <div
-        className="w-[210mm] h-[297mm] bg-white pointer-events-none absolute top-0 left-0 overflow-hidden"
+        className="w-[210mm] h-[297mm] bg-white pointer-events-none absolute top-0 left-0 overflow-hidden flex flex-col justify-between box-border"
         style={{
           transform: `scale(${scale})`,
           transformOrigin: 'top left',
           width: '210mm',
           height: '297mm',
+          boxSizing: 'border-box',
         }}
       >
-        <CVTemplatePreview templateId={templateId} customData={customData} />
+        {/* Page Top Margin Spacer */}
+        <div style={{ height: `${topMargin}cm`, width: '100%', flexShrink: 0 }} />
+
+        {/* Printable Content Slice Viewport (Halaman 1) */}
+        <div
+          className="w-full overflow-hidden flex-1 relative flex flex-col justify-start [&_.min-h-\[297mm\]]:min-h-0 [&_[class*='min-h-']]:min-h-0"
+          style={{
+            height: `calc(297mm - ${topMargin + bottomMargin}cm)`,
+            maxHeight: `calc(297mm - ${topMargin + bottomMargin}cm)`,
+          }}
+        >
+          <CVTemplatePreview
+            templateId={templateId}
+            customData={customData}
+            docMarginTop={topMargin}
+            docMarginBottom={bottomMargin}
+            docMarginLeft={docMarginLeft}
+            docMarginRight={docMarginRight}
+            docFontFamily={docFontFamily}
+            docFontSize={docFontSize}
+            docSpacing={docSpacing}
+            docSectionSpacing={docSectionSpacing}
+          />
+        </div>
+
+        {/* Page Bottom Margin Spacer */}
+        <div style={{ height: `${bottomMargin}cm`, width: '100%', flexShrink: 0 }} />
       </div>
     </div>
   );

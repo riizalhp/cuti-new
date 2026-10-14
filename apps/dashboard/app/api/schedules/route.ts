@@ -62,9 +62,9 @@ export async function GET(req: NextRequest) {
         timeLabel: formatTimeLabel(rem.remind_at),
         title: rem.title || `Agenda ${rem.applications?.company_name || ''}`,
         type: rem.applications?.position || 'Pengingat Lamaran',
-        badgeColor: 'bg-amber-50 text-amber-600 dark:bg-amber-950/80 dark:text-amber-400 border-amber-200 dark:border-amber-800',
+        badgeColor: 'bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-400 border-amber-200 dark:border-amber-800',
         iconType: 'video',
-        href: '/interview',
+        href: '/tracker',
         isToday,
         rawDate: rem.remind_at.getTime(),
       });

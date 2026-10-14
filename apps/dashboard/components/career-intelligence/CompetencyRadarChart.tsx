@@ -29,7 +29,9 @@ export const CompetencyRadarChart: React.FC<CompetencyRadarChartProps> = ({
   const size = 320;
   const center = size / 2;
   const radius = size * 0.38;
-  const totalAxes = competencies.length;
+  // Batasi sumbu radar maksimal 6 pilar agar mematuhi aturan Antislop-UI & WCAG legibility (mencegah tabrakan teks)
+  const visibleCompetencies = competencies.length > 6 ? competencies.slice(0, 6) : competencies;
+  const totalAxes = visibleCompetencies.length;
   const angleStep = (Math.PI * 2) / totalAxes;
 
   // Level grid rings (20%, 40%, 60%, 80%, 100%)
@@ -45,14 +47,14 @@ export const CompetencyRadarChart: React.FC<CompetencyRadarChartProps> = ({
   };
 
   // Titik User (Current Score)
-  const currentPoints = competencies.map((c, i) => getCoordinates(c.currentScore, i));
+  const currentPoints = visibleCompetencies.map((c, i) => getCoordinates(c.currentScore, i));
   const currentPolygonPoints = currentPoints.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
 
   // Titik Required Role
-  const requiredPoints = competencies.map((c, i) => getCoordinates(c.requiredScore, i));
+  const requiredPoints = visibleCompetencies.map((c, i) => getCoordinates(c.requiredScore, i));
   const requiredPolygonPoints = requiredPoints.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
 
-  const activeComp = competencies.find((c) => c.id === activeCompId);
+  const activeComp = visibleCompetencies.find((c) => c.id === activeCompId);
 
   return (
     <div className={cn('flex flex-col items-center select-none', className)}>
@@ -66,7 +68,7 @@ export const CompetencyRadarChart: React.FC<CompetencyRadarChartProps> = ({
         >
           {/* Circular/Polygon Background Rings */}
           {rings.map((ring, idx) => {
-            const ringPoints = competencies
+            const ringPoints = visibleCompetencies
               .map((_, i) => getCoordinates(ring * 100, i))
               .map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`)
               .join(' ');
@@ -82,7 +84,7 @@ export const CompetencyRadarChart: React.FC<CompetencyRadarChartProps> = ({
           })}
 
           {/* Sumbu Axis Radial */}
-          {competencies.map((comp, i) => {
+          {visibleCompetencies.map((comp, i) => {
             const end = getCoordinates(100, i);
             const isHovered = activeCompId === comp.id;
 
@@ -121,7 +123,7 @@ export const CompetencyRadarChart: React.FC<CompetencyRadarChartProps> = ({
 
           {/* Titik-titik interaktif Pengguna */}
           {currentPoints.map((pt, i) => {
-            const comp = competencies[i];
+            const comp = visibleCompetencies[i];
             const isHovered = activeCompId === comp.id;
 
             return (
@@ -151,7 +153,7 @@ export const CompetencyRadarChart: React.FC<CompetencyRadarChartProps> = ({
           })}
 
           {/* Label Sumbu di luar chart */}
-          {competencies.map((comp, i) => {
+          {visibleCompetencies.map((comp, i) => {
             const labelCoord = getCoordinates(118, i);
             const isHovered = activeCompId === comp.id;
             const angle = i * angleStep - Math.PI / 2;
@@ -193,7 +195,7 @@ export const CompetencyRadarChart: React.FC<CompetencyRadarChartProps> = ({
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-600" />
             <span>{activeComp.name}</span>
           </div>
-          <div className="text-[11px] text-slate-300 dark:text-slate-700">
+          <div className="text-caption text-slate-300 dark:text-slate-700">
             Skor Anda: <strong className="text-white dark:text-slate-900">{activeComp.currentScore}</strong> / Standar: {activeComp.requiredScore}
           </div>
         </div>
@@ -202,7 +204,7 @@ export const CompetencyRadarChart: React.FC<CompetencyRadarChartProps> = ({
       {/* Legend Keterangan */}
       <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs">
         <div className="flex items-center gap-2">
-          <span className="w-3.5 h-1.5 rounded-full bg-[#1738D1] dark:bg-blue-400 inline-block" />
+          <span className="w-3.5 h-1.5 rounded-full bg-cobalt-500 dark:bg-blue-400 inline-block" />
           <span className="font-semibold text-slate-700 dark:text-slate-300">Profil Anda</span>
         </div>
         <div className="flex items-center gap-2">

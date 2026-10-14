@@ -7,15 +7,19 @@ import { setSessionCookie, getStoredSession } from '@/lib/auth';
 import { Sun, Moon, Loader2, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
 import { AuthReviewsCarousel } from '@/components/AuthReviewsCarousel';
+import { Field, Input } from '@/components/ui/field';
+import { Button } from '@/components/ui/button';
 
 interface LoginViewProps {}
 
 export const LoginView: React.FC<LoginViewProps> = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTarget = searchParams?.get('redirect') || '/beranda';
+  const rawRedirect = searchParams?.get('redirect');
+  const redirectTarget = (!rawRedirect || rawRedirect.startsWith('/login') || rawRedirect.startsWith('/register')) ? '/beranda' : rawRedirect;
   const isRegistered = searchParams?.get('registered') === 'true';
   const initialEmail = searchParams?.get('email') || '';
+  const errorParam = searchParams?.get('error') || '';
 
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -23,11 +27,26 @@ export const LoginView: React.FC<LoginViewProps> = () => {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const handleTogglePassword = () => setShowPassword((prev) => !prev);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [hasError, setHasError] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
+
+  useEffect(() => {
+    if (errorParam) {
+      if (errorParam === 'google_oauth_not_configured') {
+        setErrorMessage('Google OAuth belum dikonfigurasi (isi GOOGLE_CLIENT_ID di environment).');
+      } else if (errorParam === 'invalid_oauth_state') {
+        setErrorMessage('Sesi otentikasi Google kedaluwarsa. Silakan coba lagi.');
+      } else {
+        setErrorMessage('Terjadi kendala saat masuk dengan Google. Silakan coba lagi.');
+      }
+      setHasError(true);
+    }
+  }, [errorParam]);
 
   useEffect(() => {
     if (initialEmail) {
@@ -41,12 +60,12 @@ export const LoginView: React.FC<LoginViewProps> = () => {
     if (existingSession && existingSession.email) {
       const isCompleted = localStorage.getItem('employr_onboarding_completed') === 'true';
       if (existingSession.onboarded === false && !isCompleted) {
-        router.replace('/onboarding');
+        window.location.replace('/onboarding');
       } else {
-        router.replace(redirectTarget);
+        window.location.replace(redirectTarget);
       }
     }
-  }, [router, redirectTarget]);
+  }, [redirectTarget]);
 
   const isDarkMode = resolvedTheme === 'dark';
   const toggleDarkMode = () => setTheme(isDarkMode ? 'light' : 'dark');
@@ -107,7 +126,7 @@ export const LoginView: React.FC<LoginViewProps> = () => {
       }
 
       const targetDestination = userData.onboarded ? redirectTarget : '/onboarding';
-      router.push(targetDestination);
+      window.location.replace(targetDestination);
     } catch (err) {
       console.error('Login error:', err);
       triggerShake('Terjadi kendala saat menghubungkan ke database server.');
@@ -117,15 +136,7 @@ export const LoginView: React.FC<LoginViewProps> = () => {
 
   const handleGoogleLogin = () => {
     setIsGoogleLoading(true);
-    const googleUser = {
-      name: 'Google User',
-      email: 'user@gmail.com',
-      role: 'USER',
-      provider: 'google',
-    };
-
-    setSessionCookie(googleUser, 30);
-    router.push(redirectTarget);
+    window.location.href = `/api/auth/google?redirect=${encodeURIComponent(redirectTarget)}`;
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,9 +156,9 @@ export const LoginView: React.FC<LoginViewProps> = () => {
   };
 
   return (
-    <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-2 bg-slate-50 dark:bg-slate-950 font-sans">
+    <div className="min-h-full flex-1 w-full grid grid-cols-1 lg:grid-cols-2 bg-slate-50 dark:bg-slate-950 font-sans">
       {/* LEFT SIDE: Centered Login Card (~360px wide) */}
-      <div className="flex flex-col justify-between min-h-screen p-6 sm:p-10 relative">
+      <div className="flex flex-col justify-between min-h-full p-6 sm:p-10 relative">
         {/* Top bar with logo and theme toggle */}
         <div className="flex items-center justify-between w-full">
           <a href="/" className="inline-block" aria-label="Beranda Employr">
@@ -186,10 +197,10 @@ export const LoginView: React.FC<LoginViewProps> = () => {
           {/* Registration Success Banner */}
           {isRegistered && (
             <div className="mb-5 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 text-xs font-medium flex items-start gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
               <div className="space-y-0.5">
                 <p className="font-bold">Pendaftaran akun berhasil!</p>
-                <p className="text-[11px] text-emerald-600 dark:text-emerald-400">
+                <p className="text-caption text-emerald-700 dark:text-emerald-400">
                   Silakan masukkan kata sandi kamu untuk mulai orientasi karier.
                 </p>
               </div>
@@ -200,7 +211,7 @@ export const LoginView: React.FC<LoginViewProps> = () => {
           <div className={`t-input-wrap ${hasError ? 'is-error' : ''}`}>
             <div className={`t-input ${hasError ? 'is-error' : ''} ${isShaking ? 'is-shaking' : ''}`}>
               {errorMessage && (
-                <div className="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-300 text-xs font-medium">
+                <div className="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 text-xs font-medium">
                   {errorMessage}
                 </div>
               )}
@@ -210,51 +221,47 @@ export const LoginView: React.FC<LoginViewProps> = () => {
           {/* Credential Login Form */}
           <form onSubmit={handleCredentialLogin} className="flex flex-col gap-3.5">
             {/* Email Field */}
-            <div className={`t-input-wrap ${hasError ? 'is-error' : ''}`}>
-              <div className="flex flex-col gap-1.5 text-left">
-                <label htmlFor="login-email-input" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Email
-                </label>
-                <input
-                  id="login-email-input"
-                  type="email"
-                  value={email}
-                  onChange={handleEmailChange}
-                  placeholder="name@contoh.com"
-                  required
-                  onAnimationEnd={() => setIsShaking(false)}
-                  className={`w-full h-10 px-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-navy-700 dark:focus:border-blue-500 focus:ring-2 focus:ring-navy-700/10 dark:focus:ring-blue-500/10 t-input ${hasError ? 'is-error' : ''} ${isShaking ? 'is-shaking' : ''}`}
-                />
-              </div>
-            </div>
+            <Field
+              label="Email"
+              required
+              error={hasError ? errorMessage : undefined}
+            >
+              <Input
+                type="email"
+                value={email}
+                onChange={handleEmailChange}
+                placeholder="name@contoh.com"
+                required
+                className="h-10 text-xs"
+              />
+            </Field>
 
             {/* Password Field */}
-            <div className={`t-input-wrap ${hasError ? 'is-error' : ''}`}>
-              <div className="flex flex-col gap-1.5 text-left">
-                <label htmlFor="login-password-input" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Kata Sandi
-                </label>
-                <div className={`relative t-input rounded-xl ${hasError ? 'is-error' : ''} ${isShaking ? 'is-shaking' : ''}`} onAnimationEnd={() => setIsShaking(false)}>
-                  <input
-                    id="login-password-input"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={handlePasswordChange}
-                    placeholder="••••••••"
-                    required
-                    className={`w-full h-10 pl-3.5 pr-10 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-navy-700 dark:focus:border-blue-500 focus:ring-2 focus:ring-navy-700/10 dark:focus:ring-blue-500/10 ${hasError ? 'border-rose-500 dark:border-rose-500' : ''}`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer"
-                    aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
-                  >
-                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                  </button>
-                </div>
+            <Field
+              label="Kata Sandi"
+              required
+            >
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={handlePasswordChange}
+                  placeholder="••••••••"
+                  required
+                  className="h-10 pr-10 text-xs"
+                />
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={handleTogglePassword}
+                  className="absolute right-0 top-0 bottom-0 w-11 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer z-20 select-none touch-manipulation [&_svg]:pointer-events-none"
+                  aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4 pointer-events-none" /> : <Eye className="w-4 h-4 pointer-events-none" />}
+                </button>
               </div>
-            </div>
+            </Field>
 
             {/* Remember Me & Forgot Password on Same Row */}
             <div className="flex items-center justify-between pt-0.5">
@@ -276,33 +283,33 @@ export const LoginView: React.FC<LoginViewProps> = () => {
             </div>
 
             {/* Full-width Primary Button */}
-            <button
+            <Button
               type="submit"
-              disabled={isLoading}
-              className="w-full h-10 mt-1 rounded-xl bg-navy-700 hover:bg-navy-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center gap-2 transition shadow-sm shadow-navy-700/20 dark:shadow-blue-600/20 disabled:opacity-60 cursor-pointer"
+              variant="primary"
+              size="md"
+              loading={isLoading}
+              className="w-full mt-1 font-semibold text-xs"
             >
-              {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <span>Masuk Sekarang</span>
-              )}
-            </button>
+              Masuk Sekarang
+            </Button>
           </form>
 
           {/* Divider */}
           <div className="relative text-center my-4">
             <div className="absolute inset-0 top-1/2 -translate-y-1/2 border-t border-slate-200 dark:border-slate-800" />
-            <span className="relative bg-slate-50 dark:bg-slate-950 px-2.5 text-[11px] font-medium text-slate-400 dark:text-slate-500">
+            <span className="relative bg-slate-50 dark:bg-slate-950 px-2.5 text-caption font-medium text-slate-500 dark:text-slate-500">
               atau
             </span>
           </div>
 
           {/* Google OAuth Outline Button */}
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="md"
             onClick={handleGoogleLogin}
             disabled={isGoogleLoading}
-            className="w-full h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-2.5 transition disabled:opacity-60 cursor-pointer"
+            className="w-full flex items-center justify-center gap-2.5 font-semibold text-xs"
           >
             {isGoogleLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -317,7 +324,7 @@ export const LoginView: React.FC<LoginViewProps> = () => {
                 <span>Lanjutkan dengan Google</span>
               </>
             )}
-          </button>
+          </Button>
 
           {/* Sign Up Link */}
           <div className="mt-5 text-center">
@@ -334,13 +341,13 @@ export const LoginView: React.FC<LoginViewProps> = () => {
         </div>
 
         {/* Footer info / copyright */}
-        <div className="w-full text-center sm:text-left text-[11px] text-slate-400 dark:text-slate-600">
+        <div className="w-full text-center sm:text-left text-caption text-slate-500 dark:text-slate-600">
           © {new Date().getFullYear()} Employr
         </div>
       </div>
 
       {/* RIGHT SIDE: Video Background Panel (Hidden below lg) */}
-      <div className="hidden lg:flex flex-col justify-between p-12 xl:p-16 relative overflow-hidden bg-slate-950 text-white">
+      <div className="hidden lg:flex flex-col justify-between min-h-full h-full p-12 xl:p-16 relative overflow-hidden bg-slate-950 text-white">
         {/* Background Video */}
         <video
           autoPlay
@@ -355,7 +362,7 @@ export const LoginView: React.FC<LoginViewProps> = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-[#1F3578]/50 to-slate-950/60 pointer-events-none" />
 
         {/* Top Tagline */}
-        <div className="relative z-10 flex items-center gap-2.5 text-[10px] font-extrabold text-blue-200 uppercase tracking-[0.145em]">
+        <div className="relative z-10 flex items-center gap-2.5 text-caption font-extrabold text-blue-200 uppercase tracking-[0.145em]">
           <span className="w-1.5 h-1.5 bg-blue-400 inline-block shrink-0" />
           <span>Platform Karier Terintegrasi</span>
         </div>
@@ -369,7 +376,7 @@ export const LoginView: React.FC<LoginViewProps> = () => {
             </em>
           </h2>
           <p className="mt-4 text-sm text-blue-100/90 leading-relaxed font-normal drop-shadow-sm max-w-md">
-            Bikin CV lolos ATS, cocokan keahlian dengan kriteria lowongan, dan pantau setiap tahapan wawancara secara real-time.
+            Bikin CV standar ATS, cocokan keahlian dengan kriteria loker, dan pantau tahapan seleksimu secara real-time.
           </p>
         </div>
 

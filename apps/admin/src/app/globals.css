@@ -54,17 +54,75 @@
     @apply border-border;
   }
   html {
-    zoom: 0.8;
+    font-size: 87.5%;
+    height: 100%;
     background-color: #F8FAFC;
-    min-height: 125vh;
     font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+  }
+  .dark html, html.dark {
+    background-color: #020617;
+    scrollbar-color: rgba(51, 65, 85, 0.7) transparent;
   }
   body {
     @apply bg-background text-foreground;
+    height: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
     font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: #F8FAFC;
-    min-height: 125vh;
   }
+  .dark body, body.dark {
+    background-color: #020617;
+  }
+}
+
+/* Laptop & Desktop Viewport Adjustment: Zoom out 80% */
+@media screen and (min-width: 1024px) {
+  html {
+    zoom: 0.8;
+  }
+}
+
+/* Admin Dashboard Viewport Lock: Cegah window scrolling agar sidebar & layout selalu full-height ke dasar layar tanpa overscroll void atau white space samping */
+html:has(#admin-root-layout) {
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+body:has(#admin-root-layout) {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#admin-root-layout {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+
+@media print {
+  html {
+    zoom: 1 !important;
+  }
+}
+
+/*
+ * Full-screen overlay (modal/drawer backdrop) tidak boleh kena margin dari
+ * parent `space-y-*` / `space-x-*` (Tailwind v3 memberi margin-top ke sibling),
+ * yang bikin backdrop turun 28px dan bagian atas layar tidak ter-blur.
+ */
+.fixed.inset-0 {
+  margin: 0 !important;
 }
 
 /* Glassmorphism & Custom Card utilities */
@@ -87,10 +145,51 @@ textarea {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
-/* Custom Sleek Scrollbar for Textareas */
-textarea::-webkit-scrollbar {
+/* Global Scrollbars for Entire Admin App */
+::-webkit-scrollbar {
   width: 6px;
   height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.75);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #1738D1;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.7);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.95);
+}
+
+.dark ::-webkit-scrollbar-thumb:active {
+  background: #3B82F6;
+}
+
+/* Custom Sleek Scrollbar for Textareas */
+textarea {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+}
+
+textarea::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
 
 textarea::-webkit-scrollbar-track {
@@ -100,10 +199,128 @@ textarea::-webkit-scrollbar-track {
 textarea::-webkit-scrollbar-thumb {
   background: rgba(148, 163, 184, 0.35);
   border-radius: 9999px;
+  transition: background-color 0.2s ease;
 }
 
 textarea::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.6);
+}
+
+textarea::-webkit-scrollbar-thumb:active {
+  background: #1738D1;
+}
+
+.dark textarea {
+  scrollbar-color: rgba(51, 65, 85, 0.7) transparent;
+}
+
+.dark textarea::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.7);
+}
+
+.dark textarea::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.9);
+}
+
+.dark textarea::-webkit-scrollbar-thumb:active {
+  background: #3B82F6;
+}
+
+/* Custom Sleek Scrollbar for Sidebar & Navigation */
+.sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(51, 65, 85, 0.7) transparent;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.7);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.95);
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #F97316;
+}
+
+/* Custom Sleek Scrollbar for General Scroll Containers */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.7);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #1738D1;
+}
+
+.dark .custom-scrollbar {
+  scrollbar-color: rgba(51, 65, 85, 0.7) transparent;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.7);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.9);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #3B82F6;
+}
+
+/* No Scrollbar Utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 textarea::placeholder {
@@ -178,5 +395,11 @@ input::-ms-clear {
   display: none;
 }
 
-
-
+/* Lock admin dashboard to viewport on desktop so only main content scrolls */
+@media screen and (min-width: 1024px) {
+  html:has(#admin-root-layout),
+  body:has(#admin-root-layout) {
+    height: 100%;
+    overflow: hidden;
+  }
+}

@@ -3,6 +3,13 @@
  * Calculates realistic match score between user CV and job posting
  */
 
+export interface CvCoherenceResult {
+  isCoherent: boolean;
+  coherenceScore: number;
+  hasRoleConflict: boolean;
+  warning?: string;
+}
+
 export interface JobMatchResult {
   jobId: string;
   matchScore: number;
@@ -12,6 +19,10 @@ export interface JobMatchResult {
     experienceMatch: number;
     locationMatch: number;
     salaryMatch: number;
+    isCoherent: boolean;
+    coherenceScore: number;
+    hasRoleConflict: boolean;
+    coherenceWarning?: string;
   };
 }
 
@@ -160,6 +171,9 @@ export function calculateRoleMatch(targetRole: string, jobTitle: string): number
 
   // Role synonyms & related domains
   const roleSynonyms: Record<string, string[]> = {
+    'customer service': ['cs', 'customer support', 'call center', 'helpdesk', 'layanan pelanggan', 'telemarketing', 'contact center', 'front liner', 'desk collection'],
+    'sales': ['marketing', 'account executive', 'business development', 'sales representative', 'promotor', 'penjualan', 'direct sales', 'account manager'],
+    'coach': ['pelatih', 'trainer', 'mentor', 'esports', 'analyst', 'gaming'],
     'project manager': ['project', 'pmo', 'scrum', 'agile', 'product manager', 'project lead', 'program manager'],
     'product manager': ['product', 'pmo', 'project manager', 'product owner', 'scrum'],
     'web developer': ['frontend', 'backend', 'fullstack', 'software engineer', 'programmer', 'web', 'developer'],
@@ -168,6 +182,10 @@ export function calculateRoleMatch(targetRole: string, jobTitle: string): number
     'ui ux designer': ['product design', 'ui designer', 'ux designer', 'figma', 'designer'],
     'digital marketing': ['marketing', 'seo', 'social media', 'content creator', 'ads', 'copywriter'],
     'admin': ['administrasi', 'data entry', 'operasional', 'back office', 'staff admin'],
+    'finance': ['akuntansi', 'keuangan', 'kasir', 'tax', 'pajak', 'auditor', 'accounting'],
+    'operations': ['operasional', 'logistik', 'gudang', 'warehouse', 'kurir', 'driver', 'staff gudang'],
+    'hr': ['human resources', 'recruiter', 'personalia', 'talent acquisition', 'hrd'],
+    'content creator': ['social media', 'videographer', 'video editor', 'copywriter', 'content writer', 'kreator konten'],
   };
 
   for (const [key, synonyms] of Object.entries(roleSynonyms)) {
@@ -182,8 +200,16 @@ export function calculateRoleMatch(targetRole: string, jobTitle: string): number
   return 0;
 }
 
+const GENERIC_SOFT_SKILLS = new Set([
+  'komunikasi', 'komunikasi tim', 'teamwork', 'leadership', 'kepemimpinan',
+  'problem solving', 'analytical', 'kerjasama', 'adaptif', 'teliti',
+  'disiplin', 'integritas', 'excel', 'microsoft excel', 'word', 'microsoft word',
+  'powerpoint', 'office', 'google sheets', 'canva', 'public speaking',
+  'time management', 'manajemen waktu'
+]);
+
 /**
- * Calculate skills overlap percentage
+ * Calculate skills overlap percentage with soft skills dampening
  */
 function calculateSkillsMatch(cvSkills: string[], jobSkills: string[]): number {
   if (!cvSkills.length || !jobSkills.length) return 0;
@@ -194,13 +220,26 @@ function calculateSkillsMatch(cvSkills: string[], jobSkills: string[]): number {
   if (!cvSkillsLower.length || !jobSkillsLower.length) return 0;
 
   let matchCount = 0;
+  let hasDomainSkillMatch = false;
+
   jobSkillsLower.forEach((jobSkill) => {
-    if (cvSkillsLower.some((cvSkill) => cvSkill.includes(jobSkill) || jobSkill.includes(cvSkill))) {
+    const isMatched = cvSkillsLower.some((cvSkill) => cvSkill.includes(jobSkill) || jobSkill.includes(cvSkill));
+    if (isMatched) {
       matchCount++;
+      if (!GENERIC_SOFT_SKILLS.has(jobSkill)) {
+        hasDomainSkillMatch = true;
+      }
     }
   });
 
-  return Math.min(100, Math.round((matchCount / jobSkillsLower.length) * 100));
+  const rawPercent = Math.min(100, Math.round((matchCount / jobSkillsLower.length) * 100));
+
+  // If only generic soft skills matched without any domain hard skills, damp the score heavily
+  if (matchCount > 0 && !hasDomainSkillMatch) {
+    return Math.min(25, Math.round(rawPercent * 0.3));
+  }
+
+  return rawPercent;
 }
 
 /**
@@ -269,7 +308,78 @@ function extractSkillsFromText(text: string): string[] {
 }
 
 /**
- * Main matching function with role gate & strict location penalty
+ * Check internal coherence between CV declared target role and actual experiences/skills
+ */
+export function checkCvInternalCoherence(cv: CV): CvCoherenceResult {
+  const rawTarget = cv.targetRole || cv.target_position || cv.headline || '';
+  const targetRole = normalizeText(rawTarget);
+  if (!targetRole) {
+    return { isCoherent: true, coherenceScore: 100, hasRoleConflict: false };
+  }
+
+  // Extract roles from experience, projects, and internships
+  const expRoles = [
+    ...(Array.isArray(cv.experience) ? cv.experience.map((e: any) => e.role || e.position || '') : []),
+    ...(Array.isArray(cv.projects) ? cv.projects.map((p: any) => p.role || p.name || '') : []),
+    ...(Array.isArray(cv.internships) ? cv.internships.map((i: any) => i.role || i.position || '') : []),
+  ].map(normalizeText).filter(Boolean);
+
+  // Extract skills
+  const cvSkills = [
+    ...(Array.isArray(cv.skills) ? cv.skills.map((s: any) => (typeof s === 'string' ? s : s?.name || s?.skill || '')) : []),
+    ...(Array.isArray(cv.skillsList) ? cv.skillsList : []),
+  ].map(normalizeText).filter(Boolean);
+
+  // If candidate has no experience and no skills filled yet (blank starter CV)
+  if (expRoles.length === 0 && cvSkills.length === 0) {
+    return { isCoherent: true, coherenceScore: 70, hasRoleConflict: false };
+  }
+
+  const roleTokens = targetRole
+    .split(/\s+/)
+    .filter((t) => t.length > 2 && !['and', 'atau', 'dan', 'staff', 'junior', 'senior', 'intern', 'magang'].includes(t));
+
+  // Check 1: Does any experience role overlap with target role or its synonyms?
+  let hasExperienceRoleMatch = false;
+  for (const expRole of expRoles) {
+    if (calculateRoleMatch(targetRole, expRole) >= 70) {
+      hasExperienceRoleMatch = true;
+      break;
+    }
+  }
+
+  // Check 2: Does any skill overlap with target role tokens or hard domain skills?
+  let hasDomainSkillMatch = false;
+  for (const skill of cvSkills) {
+    if (!GENERIC_SOFT_SKILLS.has(skill)) {
+      if (roleTokens.some((rt) => skill.includes(rt) || rt.includes(skill))) {
+        hasDomainSkillMatch = true;
+        break;
+      }
+    }
+  }
+
+  // Severe Internal Conflict:
+  // Target position is explicitly set, and candidate HAS filled experience/skills,
+  // but ZERO experience roles match and ZERO domain skills match!
+  if (!hasExperienceRoleMatch && !hasDomainSkillMatch && (expRoles.length > 0 || cvSkills.length > 3)) {
+    return {
+      isCoherent: false,
+      coherenceScore: 20,
+      hasRoleConflict: true,
+      warning: `Target posisi "${rawTarget}" tidak didukung oleh riwayat pekerjaan atau keahlian di dalam CV ini.`,
+    };
+  }
+
+  return {
+    isCoherent: true,
+    coherenceScore: hasExperienceRoleMatch ? 100 : 75,
+    hasRoleConflict: false,
+  };
+}
+
+/**
+ * Main matching function with role gate, strict location penalty, and internal coherence check
  */
 export function calculateJobMatch(
   cv: CV,
@@ -278,6 +388,7 @@ export function calculateJobMatch(
 ): JobMatchResult {
   const w = weights ?? { role: 0.35, skills: 0.30, experience: 0.15, location: 0.15, salary: 0.05 };
 
+  const coherence = checkCvInternalCoherence(cv);
   const targetRole = cv.targetRole || cv.target_position || cv.headline || '';
   const roleMatch = calculateRoleMatch(targetRole, job.title || '');
 
@@ -314,13 +425,34 @@ export function calculateJobMatch(
     salaryMatch * w.salary
   );
 
-  // Core Hard Gate:
-  // If targetRole is specified, but roleMatch is 0 AND skillsMatch is 0:
-  // This job is completely unrelated (e.g. AC technician for a Project Manager).
-  // Heavy disqualification: cap maximum score at 12% so it never pretends to be a recommendation.
-  if (targetRole && roleMatch === 0 && skillsMatch === 0) {
-    rawScore = Math.min(12, Math.round(rawScore * 0.2));
-  } else if (locationMatch < 20 && (!job.workType || job.workType.toUpperCase() === 'ONSITE')) {
+  // Core Hard Gate & Role Cap Penalty:
+  // If targetRole is specified by candidate:
+  if (targetRole) {
+    if (roleMatch === 0) {
+      // Role is completely unaligned (e.g. Sales Manager vs CS or Esports Coach)
+      if (skillsMatch === 0) {
+        // Disqualification: neither role nor skills match
+        rawScore = Math.min(10, Math.round(rawScore * 0.15));
+      } else {
+        // Some skills matched (e.g. generic tools/soft skills), but the profession is completely different.
+        // Role Cap Penalty: lock max score at 25% so unrelated professions NEVER reach 40%-50%!
+        rawScore = Math.min(25, Math.round(rawScore * 0.45));
+      }
+    } else if (roleMatch < 50) {
+      // Weak/partial role match: cap maximum score at 55%
+      rawScore = Math.min(55, rawScore);
+    }
+  }
+
+  // Internal CV Coherence Guard:
+  // If CV has a severe internal contradiction (e.g. Target says Customer Service, but body is 100% Esports Coach):
+  // Even if the external job is "Customer Service Officer" (roleMatch = 100),
+  // this candidate's CV does NOT actually qualify for Customer Service in reality!
+  if (coherence.hasRoleConflict) {
+    rawScore = Math.min(20, Math.round(rawScore * 0.3));
+  }
+
+  if (locationMatch < 20 && (!job.workType || job.workType.toUpperCase() === 'ONSITE')) {
     // Distant onsite job without relocation capability gets penalized
     rawScore = Math.round(rawScore * 0.4);
   }
@@ -336,6 +468,10 @@ export function calculateJobMatch(
       experienceMatch,
       locationMatch,
       salaryMatch,
+      isCoherent: coherence.isCoherent,
+      coherenceScore: coherence.coherenceScore,
+      hasRoleConflict: coherence.hasRoleConflict,
+      coherenceWarning: coherence.warning,
     },
   };
 }

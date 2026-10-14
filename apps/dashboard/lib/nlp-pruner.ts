@@ -115,3 +115,41 @@ export function tryLocalTemplateGeneration(
     },
   ];
 }
+
+/**
+ * Local Summary Template Engine
+ * Generates instant professional profile summary options without requiring API tokens
+ * or when the AI gateway experiences high latency/timeout.
+ */
+export function tryLocalSummaryTemplateGeneration(
+  inputText: string,
+  targetJobTitle?: string,
+  cvContext?: { education?: string; skills?: string[] }
+): Array<{ id: string; label: string; formulaTag: string; text: string }> {
+  const role = targetJobTitle || 'Profesional';
+  const eduPart = cvContext?.education ? `lulusan ${cvContext.education}` : '';
+  const skillsPart = cvContext?.skills && cvContext.skills.length > 0 ? `keahlian ${cvContext.skills.slice(0, 3).join(', ')}` : '';
+  const defaultFallback = [eduPart, skillsPart, `komitmen kerja tinggi untuk posisi ${role}`].filter(Boolean).join(' dengan ');
+  const clean = inputText.trim() || defaultFallback || `memiliki kompetensi relevan untuk posisi ${role}`;
+
+  return [
+    {
+      id: 'opt-local-summary-1',
+      label: 'Fokus Hasil & Metrik',
+      formulaTag: 'Hasil Terukur',
+      text: `${role} berdedikasi dengan fokus kuat pada efisiensi kerja dan pencapaian target terukur. Berpengalaman dalam ${clean.toLowerCase()}, didukung kemampuan pemecahan masalah analitis serta orientasi pada hasil yang berdampak positif bagi kemajuan tim dan perusahaan.`,
+    },
+    {
+      id: 'opt-local-summary-2',
+      label: 'Fokus Kata Kunci ATS',
+      formulaTag: 'Kata Kunci Relevan',
+      text: `${role} dengan pemahaman komprehensif dalam bidang ${clean.toLowerCase()}. Mampu beradaptasi cepat dengan alur kerja profesional dan standar industri terkini, terbiasa berkolaborasi lintas fungsi, serta siap berkontribusi secara optimal untuk mendorong produktivitas divisi.`,
+    },
+    {
+      id: 'opt-local-summary-3',
+      label: 'Fokus Ringkas & Komunikatif',
+      formulaTag: 'Komunikatif',
+      text: `${role} yang adaptif, komunikatif, dan memiliki etos kerja tinggi dengan latar belakang di ${clean.toLowerCase()}. Cepat menguasai sistem baru, proaktif dalam menangani tantangan operasional, dan berorientasi pada penciptaan kolaborasi tim yang harmonis dan efektif.`,
+    },
+  ];
+}

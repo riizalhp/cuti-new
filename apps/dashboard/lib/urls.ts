@@ -29,6 +29,9 @@ export const getCrossAppUrl = (port: number, prodDomain: string, path = ''): str
   return `http://localhost:${port}${cleanPath}`;
 };
 
+export const getLokerUrl = (path = ''): string =>
+  process.env.NEXT_PUBLIC_LOKER_URL || process.env.NEXT_PUBLIC_PORTAL_URL || getCrossAppUrl(3003, 'loker.employr.id', path);
+
 export const getLearningUrl = (path = ''): string =>
   process.env.NEXT_PUBLIC_LEARNING_URL || getCrossAppUrl(3004, 'learning.employr.id', path);
 
