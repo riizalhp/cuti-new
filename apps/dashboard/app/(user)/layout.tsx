@@ -20,6 +20,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   // Always initialize to null on both SSR and Client to prevent React 19 hydration mismatch.
   // Real auth verification and redirect happens safely in useEffect after hydration.
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ name: string; email: string } | null>(null);
 
   useEffect(() => {
     const session = getStoredSession();
@@ -32,6 +33,12 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     }
 
     setIsAuthorized(true);
+    if (session.name) {
+      setCurrentUser({
+        name: session.name,
+        email: session.email || '',
+      });
+    }
 
     // Check if user has completed onboarding
     if (typeof window !== 'undefined') {
@@ -68,6 +75,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   }
 
   const isCvPage = pathname === '/cv' || pathname?.startsWith('/cv/');
+  const isCvEditor = pathname?.startsWith('/cv/') && pathname !== '/cv' && pathname !== '/cv/create';
   const isFocusMode = pathname === '/cv/create';
 
   if (isFocusMode) {
@@ -110,13 +118,16 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden print:h-auto print:overflow-visible print:block print:w-[210mm] print:m-0 print:p-0">
         <Header
+          currentUser={currentUser ?? undefined}
           onToggleSidebar={toggleSidebarCollapse}
           isSidebarCollapsed={isSidebarCollapsed}
         />
 
         <main
           id="main-content-scroll"
-          className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 pb-24 md:pb-5 w-full no-scrollbar print:h-auto print:overflow-visible print:p-0 print:m-0 print:block print:w-[210mm]"
+          className={`flex-1 p-3 sm:p-4 lg:p-5 pb-24 md:pb-5 w-full no-scrollbar print:h-auto print:overflow-visible print:p-0 print:m-0 print:block print:w-[210mm] ${
+            isCvEditor ? 'overflow-y-auto lg:overflow-hidden' : 'overflow-y-auto'
+          }`}
         >
           <div className="w-full mx-auto space-y-3 sm:space-y-3.5 print:p-0 print:m-0 print:space-y-0 print:w-[210mm] print:max-w-none">
             {children}

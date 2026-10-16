@@ -487,13 +487,13 @@ export const BugReportView: React.FC = () => {
     <div className="space-y-4 lg:space-y-5">
       {/* Top Header Section */}
       <PageHeader
-        title="Lapor Kendala &amp; Masalah"
+        title="Lapor Kendala &amp; Bug"
         subtitle="Menemukan kendala di platform Employr? Sampaikan laporanmu agar segera diperiksa oleh tim kami."
         icon={ShieldAlert}
         badge="Bantuan &amp; Kendala"
         stats={[
           {
-            label: 'Tiket Laporan',
+            label: 'Tiket',
             value: tickets.length,
             icon: ShieldAlert,
             colorClass: 'text-rose-300',
@@ -638,7 +638,7 @@ export const BugReportView: React.FC = () => {
                           value={title}
                           onChange={(e) => setTitle(e.target.value)}
                           placeholder="Contoh: Tombol simpan CV tidak merespon saat diklik"
-                          className="w-full px-4 py-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt-500 transition"
+                          className="w-full px-4 py-3 min-h-[44px] rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-base sm:text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt-500 transition"
                         />
                       </div>
 
@@ -666,7 +666,7 @@ export const BugReportView: React.FC = () => {
                               value={customPageUrl}
                               onChange={(e) => setCustomPageUrl(e.target.value)}
                               placeholder="Ketik atau tempel link (misal: /latihan-soal atau https://app.employr.id/...)"
-                              className="w-full px-4 py-2.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cobalt-500 transition"
+                              className="w-full px-4 py-2.5 min-h-[44px] rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-base sm:text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cobalt-500 transition"
                             />
                           </div>
                         )}
@@ -684,23 +684,25 @@ export const BugReportView: React.FC = () => {
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
                           placeholder="Jelaskan apa yang terjadi, apa yang kamu klik, atau pesan error apa yang muncul..."
-                          className="w-full px-4 py-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt-500 leading-relaxed transition"
+                          className="w-full px-4 py-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-base sm:text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt-500 leading-relaxed transition"
                         />
                       </div>
                     </div>
 
                     {/* Card 2: Tangkapan Layar / Screenshot (Auto WebP) */}
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 sm:p-7 space-y-4 shadow-xs">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                            Tangkapan Layar / Screenshot (Opsional)
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                            Tangkapan Layar (Opsional)
                           </h2>
                           <p className="text-caption text-slate-500 dark:text-slate-400">
                             Lampirkan gambar tampilan yang error jika ada.
                           </p>
                         </div>
-                        <span className="text-caption text-slate-500 dark:text-slate-400">Maks. 3 file</span>
+                        <span className="text-caption text-slate-500 dark:text-slate-400 whitespace-nowrap shrink-0">
+                          Maks. 3 file
+                        </span>
                       </div>
 
                       {/* Upload Dropzone */}
@@ -733,7 +735,12 @@ export const BugReportView: React.FC = () => {
                             Klik untuk memilih gambar atau seret file ke sini
                           </div>
                           <div className="text-caption text-slate-500 dark:text-slate-400">
-                            Atau tekan <span className="px-1.5 py-0.5 rounded-[4px] bg-slate-200 dark:bg-slate-700 font-mono font-bold text-slate-800 dark:text-slate-200">Ctrl + V</span> untuk tempel langsung.
+                            <span className="hidden sm:inline">
+                              Atau tekan <kbd className="px-1.5 py-0.5 rounded-[6px] bg-slate-200 dark:bg-slate-700 font-mono font-bold text-slate-800 dark:text-slate-200">Ctrl + V</kbd> untuk tempel gambar langsung.
+                            </span>
+                            <span className="sm:hidden">
+                              Bisa pilih langsung dari galeri atau kamera ponselmu.
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -746,7 +753,7 @@ export const BugReportView: React.FC = () => {
                               key={idx}
                               className="relative group rounded-[10px] border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-100 dark:bg-slate-800 p-2 flex items-center gap-2.5"
                             >
-                              <div className="w-12 h-12 rounded-[6px] overflow-hidden bg-slate-200 dark:bg-slate-700 shrink-0 flex items-center justify-center">
+                              <div className="w-12 h-12 rounded-[10px] overflow-hidden bg-slate-200 dark:bg-slate-700 shrink-0 flex items-center justify-center">
                                 <img
                                   src={item.data_url}
                                   alt={item.name}
@@ -764,10 +771,11 @@ export const BugReportView: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => removeAttachment(idx)}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-950 dark:hover:text-rose-400 transition cursor-pointer"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-950 dark:hover:text-rose-400 transition cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
                                 title="Hapus gambar"
+                                aria-label={`Hapus lampiran ${item.name}`}
                               >
-                                <X className="w-3.5 h-3.5" />
+                                <X className="w-4 h-4" />
                               </button>
                             </div>
                           ))}
@@ -775,16 +783,44 @@ export const BugReportView: React.FC = () => {
                       )}
                     </div>
 
+                    {/* Mobile System Info Quick Card (Shown above submit on mobile) */}
+                    <div className="lg:hidden p-3.5 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Monitor className="w-4 h-4 text-cobalt-500 dark:text-blue-400 shrink-0" />
+                          <div className="min-w-0">
+                            <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block truncate">
+                              Data Perangkat ({diagnostics.browser} • {diagnostics.os})
+                            </span>
+                            <span className="text-[11px] text-slate-500 dark:text-slate-400 block truncate">
+                              {includeSystemInfo ? 'Sistem menyertakan data teknis untuk analisa' : 'Data perangkat tidak disertakan'}
+                            </span>
+                          </div>
+                        </div>
+                        <label className="flex items-center gap-1.5 shrink-0 min-h-[44px] cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={includeSystemInfo}
+                            onChange={(e) => setIncludeSystemInfo(e.target.checked)}
+                            className="rounded-[4px] border-slate-300 dark:border-slate-600 text-cobalt-500 focus:ring-cobalt-500 w-4 h-4 cursor-pointer"
+                          />
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                            Sertakan
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+
                     {/* Submit Action Bar */}
                     <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
                       <p className="text-caption text-slate-500 dark:text-slate-400">
-                        Laporanmu akan langsung ditinjau oleh tim kami untuk segera diperbaiki.
+                        Laporanmu akan langsung ditinjau oleh tim teknis kami untuk segera ditindaklanjuti.
                       </p>
 
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-6 py-3 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-cobalt-500/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="w-full sm:w-auto min-h-[44px] px-6 py-3 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-cobalt-500/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         {isSubmitting ? (
                           <>
@@ -813,12 +849,12 @@ export const BugReportView: React.FC = () => {
                       <span>Info Sistem Kamu</span>
                     </h3>
 
-                    <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                    <label className="flex items-center gap-1.5 min-h-[44px] py-1 cursor-pointer select-none">
                       <input
                         type="checkbox"
                         checked={includeSystemInfo}
                         onChange={(e) => setIncludeSystemInfo(e.target.checked)}
-                        className="rounded-[4px] border-slate-300 dark:border-slate-600 text-cobalt-500 focus:ring-cobalt-500 w-3.5 h-3.5 cursor-pointer"
+                        className="rounded-[4px] border-slate-300 dark:border-slate-600 text-cobalt-500 focus:ring-cobalt-500 w-4 h-4 cursor-pointer"
                       />
                       <span className="text-caption font-semibold text-slate-600 dark:text-slate-400">
                         Sertakan
@@ -908,24 +944,24 @@ export const BugReportView: React.FC = () => {
         {activeTab === 'history' && (
           <div className="space-y-6">
             {/* Header Title Section */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
               <div className="space-y-1">
                 <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-[10px] bg-blue-50 dark:bg-blue-950/80 text-cobalt-500 dark:text-blue-400 text-xs font-bold border border-blue-200 dark:border-blue-800">
                   <Clock className="w-3.5 h-3.5 shrink-0" />
-                  <span>Status & Tindak Lanjut</span>
+                  <span>Status &amp; Tindak Lanjut</span>
                 </div>
-                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-slate-50 font-sans">
-                  Riwayat Laporan Kendala Akun Kamu
-                </h1>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Klik pada tiket untuk melihat detail lengkap dan balasan dari tim admin.
+                <h2 className="text-base sm:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50 font-sans">
+                  Riwayat Laporan Kendala Kamu
+                </h2>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Pantau perkembangan investigasi dan balasan tim pengembang atas laporanmu.
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('form')}
-                className="px-4 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 text-white text-xs font-bold transition inline-flex items-center gap-1.5 self-start sm:self-center cursor-pointer"
+                className="min-h-[44px] sm:min-h-0 px-4 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white text-xs font-bold transition inline-flex items-center justify-center gap-1.5 self-stretch sm:self-center cursor-pointer shadow-xs shadow-cobalt-500/20"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>Buat Laporan Baru</span>
@@ -933,52 +969,83 @@ export const BugReportView: React.FC = () => {
             </div>
 
             {/* Filter Bar */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-xs">
-              <div className="flex items-center gap-1.5">
-                <Filter className="w-3.5 h-3.5 text-slate-500 ml-1 dark:text-slate-400" />
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 mr-1">
-                  Filter Status:
-                </span>
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-3 sm:p-3.5 space-y-2.5 shadow-xs">
+              <div className="flex items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
+                  <Filter className="w-3.5 h-3.5 text-cobalt-500 dark:text-blue-400 shrink-0" />
+                  <span>Filter Status Laporan</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={loadTickets}
+                  disabled={isLoadingTickets}
+                  className="min-h-[36px] px-2.5 py-1 rounded-[8px] text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer shrink-0"
+                  title="Perbarui daftar tiket"
+                  aria-label="Segarkan daftar tiket"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isLoadingTickets ? 'animate-spin' : ''}`} />
+                  <span>Segarkan</span>
+                </button>
+              </div>
+
+              <div className="overflow-x-auto no-scrollbar pb-0.5">
                 <Tabs
                   value={historyFilter}
                   onValueChange={(val) => setHistoryFilter(val as any)}
+                  className="w-full"
                 >
-                  <TabsList variant="pill">
-                    <TabsTrigger size="xs" value="all">
+                  <TabsList variant="pill" className="w-full justify-start">
+                    <TabsTrigger size="xs" value="all" className="min-h-[44px] sm:min-h-0 whitespace-nowrap">
                       Semua ({tickets.length})
                     </TabsTrigger>
-                    <TabsTrigger size="xs" value="open">
+                    <TabsTrigger size="xs" value="open" className="min-h-[44px] sm:min-h-0 whitespace-nowrap">
                       Menunggu
                     </TabsTrigger>
-                    <TabsTrigger size="xs" value="in_progress">
+                    <TabsTrigger size="xs" value="in_progress" className="min-h-[44px] sm:min-h-0 whitespace-nowrap">
                       Diproses
                     </TabsTrigger>
-                    <TabsTrigger size="xs" value="resolved">
+                    <TabsTrigger size="xs" value="resolved" className="min-h-[44px] sm:min-h-0 whitespace-nowrap">
                       Selesai
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
-
-              <button
-                type="button"
-                onClick={loadTickets}
-                disabled={isLoadingTickets}
-                className="p-1.5 rounded-[8px] text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1 text-xs font-semibold cursor-pointer"
-                title="Perbarui daftar tiket"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isLoadingTickets ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">Segarkan</span>
-              </button>
             </div>
 
             {/* Ticket List Area */}
             {isLoadingTickets ? (
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-12 text-center space-y-3 shadow-xs">
-                <Loader2 className="w-6 h-6 text-cobalt-500 animate-spin mx-auto" />
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Memuat daftar riwayat laporan kendala...
-                </p>
+              <div
+                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4"
+                aria-busy="true"
+                aria-label="Memuat daftar riwayat laporan kendala"
+              >
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-5 space-y-4 shadow-xs animate-pulse motion-reduce:animate-none"
+                  >
+                    <div className="flex items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                      <div className="flex items-center gap-2">
+                        <div className="h-5 w-16 bg-slate-200 dark:bg-slate-800 rounded-[8px]" />
+                        <div className="h-3 w-16 bg-slate-100 dark:bg-slate-800/60 rounded-[4px]" />
+                      </div>
+                      <div className="h-5 w-24 bg-slate-100 dark:bg-slate-800/80 rounded-[8px]" />
+                    </div>
+                    <div className="space-y-2">
+                      <div
+                        className="h-4 bg-slate-200 dark:bg-slate-800 rounded-[6px]"
+                        style={{ width: i % 2 === 0 ? '75%' : '90%' }}
+                      />
+                      <div className="h-3 w-full bg-slate-100 dark:bg-slate-800/70 rounded-[4px]" />
+                      <div className="h-3 w-2/3 bg-slate-100 dark:bg-slate-800/70 rounded-[4px]" />
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <div className="h-3 w-20 bg-slate-100 dark:bg-slate-800/60 rounded-[4px]" />
+                      <div className="h-3 w-14 bg-slate-200 dark:bg-slate-800 rounded-[4px]" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : filteredTickets.length === 0 ? (
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-12 text-center space-y-3 shadow-xs">
@@ -1008,20 +1075,20 @@ export const BugReportView: React.FC = () => {
                   });
 
                   let statusBadge = (
-                    <span className="px-2.5 py-1 rounded-[10px] text-caption font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                      Menunggu Review
+                    <span className="px-2.5 py-1 rounded-[10px] text-caption font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 whitespace-nowrap">
+                      Menunggu Ditinjau
                     </span>
                   );
 
                   if (ticket.status === 'in_review' || ticket.status === 'in_progress') {
                     statusBadge = (
-                      <span className="px-2.5 py-1 rounded-[10px] text-caption font-bold bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                      <span className="px-2.5 py-1 rounded-[10px] text-caption font-bold bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 whitespace-nowrap">
                         Sedang Diperiksa
                       </span>
                     );
                   } else if (ticket.status === 'resolved') {
                     statusBadge = (
-                      <span className="px-2.5 py-1 rounded-[10px] text-caption font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                      <span className="px-2.5 py-1 rounded-[10px] text-caption font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 whitespace-nowrap">
                         Selesai Diperbaiki
                       </span>
                     );
@@ -1047,7 +1114,7 @@ export const BugReportView: React.FC = () => {
                       <div className="space-y-3">
                         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-xs text-cobalt-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/80 px-2.5 py-1 rounded-[10px] border border-blue-200 dark:border-blue-800">
+                            <span className="font-mono font-bold text-xs text-cobalt-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/80 px-2.5 py-1 rounded-[10px] border border-blue-200 dark:border-blue-800 whitespace-nowrap shrink-0">
                               {ticket.ticket_code}
                             </span>
                             <button
@@ -1056,8 +1123,9 @@ export const BugReportView: React.FC = () => {
                                 e.stopPropagation();
                                 handleCopyHistoryTicket(ticket.ticket_code);
                               }}
-                              className="p-1 rounded-[10px] text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer dark:text-slate-400"
+                              className="p-2 rounded-[10px] text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer dark:text-slate-400 min-w-[36px] min-h-[36px] flex items-center justify-center"
                               title="Salin nomor tiket"
+                              aria-label={`Salin nomor tiket ${ticket.ticket_code}`}
                             >
                               {copiedTicketId === ticket.ticket_code ? (
                                 <Check className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
@@ -1065,7 +1133,7 @@ export const BugReportView: React.FC = () => {
                                 <Copy className="w-3.5 h-3.5" />
                               )}
                             </button>
-                            <span className="text-caption text-slate-500 font-medium dark:text-slate-400">
+                            <span className="text-caption text-slate-500 font-medium dark:text-slate-400 whitespace-nowrap">
                               {formattedDate}
                             </span>
                           </div>
@@ -1074,7 +1142,7 @@ export const BugReportView: React.FC = () => {
                         </div>
 
                         <div className="space-y-1">
-                          <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-cobalt-500 dark:group-hover:text-blue-400 transition">
+                          <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-cobalt-500 dark:group-hover:text-blue-400 transition line-clamp-1">
                             {ticket.title}
                           </h4>
                           <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
@@ -1086,28 +1154,28 @@ export const BugReportView: React.FC = () => {
                       {/* Metadata Footer */}
                       <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
                         <div className="flex flex-wrap items-center justify-between gap-2 text-caption text-slate-500 dark:text-slate-400">
-                          <div className="flex items-center gap-2.5">
+                          <div className="flex items-center gap-2.5 min-w-0">
                             {ticket.page_url && (
-                              <div className="flex items-center gap-1 font-mono text-caption">
-                                <Globe className="w-3 h-3 text-slate-500 dark:text-slate-400" />
-                                <span className="truncate max-w-[140px]">{ticket.page_url}</span>
+                              <div className="flex items-center gap-1 font-mono text-caption min-w-0">
+                                <Globe className="w-3 h-3 text-slate-500 dark:text-slate-400 shrink-0" />
+                                <span className="truncate max-w-[120px]">{ticket.page_url}</span>
                               </div>
                             )}
                             {ticket.attachments && ticket.attachments.length > 0 && (
-                              <div className="flex items-center gap-1 text-cobalt-500 dark:text-blue-400 font-semibold">
+                              <div className="flex items-center gap-1 text-cobalt-500 dark:text-blue-400 font-semibold shrink-0">
                                 <FileText className="w-3 h-3" />
-                                <span>{ticket.attachments.length} Screenshot</span>
+                                <span>{ticket.attachments.length} Tangkapan Layar</span>
                               </div>
                             )}
                           </div>
 
                           {hasReplies ? (
-                            <div className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-bold">
+                            <div className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-bold shrink-0">
                               <MessageSquare className="w-3.5 h-3.5" />
                               <span>{ticket.replies?.length} Balasan Admin</span>
                             </div>
                           ) : (
-                            <span className="text-slate-500 dark:text-slate-400">Belum ada balasan</span>
+                            <span className="text-slate-500 dark:text-slate-400 shrink-0">Belum ada balasan</span>
                           )}
                         </div>
                       </div>
@@ -1135,13 +1203,13 @@ export const BugReportView: React.FC = () => {
           {selectedTicketDetail && (
             <>
               {/* Drawer Header */}
-              <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
-                <SheetHeader className="space-y-1 text-left">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-xs text-cobalt-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/80 px-2.5 py-1 rounded-[10px] border border-blue-200 dark:border-blue-800">
+              <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30 gap-2">
+                <SheetHeader className="space-y-1 text-left min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono font-bold text-xs text-cobalt-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/80 px-2.5 py-1 rounded-[10px] border border-blue-200 dark:border-blue-800 whitespace-nowrap shrink-0">
                       {selectedTicketDetail.ticket_code}
                     </span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                    <span className="text-caption text-slate-500 dark:text-slate-400 whitespace-nowrap">
                       {new Date(selectedTicketDetail.created_at).toLocaleDateString('id-ID', {
                         day: 'numeric',
                         month: 'long',
@@ -1151,7 +1219,7 @@ export const BugReportView: React.FC = () => {
                       })}
                     </span>
                   </div>
-                  <SheetTitle className="text-base font-bold text-slate-900 dark:text-slate-100 line-clamp-2">
+                  <SheetTitle className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 line-clamp-2">
                     {selectedTicketDetail.title}
                   </SheetTitle>
                 </SheetHeader>
@@ -1159,7 +1227,7 @@ export const BugReportView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSelectedTicketDetail(null)}
-                  className="p-1.5 rounded-[10px] text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer dark:text-slate-400"
+                  className="p-2 min-w-[44px] min-h-[44px] rounded-[10px] text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer dark:text-slate-400 flex items-center justify-center shrink-0"
                   aria-label="Tutup Detail Laporan"
                 >
                   <X className="w-5 h-5" />
@@ -1167,11 +1235,11 @@ export const BugReportView: React.FC = () => {
               </div>
 
               {/* Drawer Scrollable Body */}
-              <div className="p-5 overflow-y-auto space-y-5 flex-1 text-xs sm:text-sm">
+              <div className="p-4 sm:p-5 overflow-y-auto space-y-5 flex-1 text-xs sm:text-sm pb-[max(2rem,env(safe-area-inset-bottom))]">
                 {/* Ticket Badges & Info */}
                 <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className="px-2.5 py-1 rounded-[10px] font-bold bg-blue-50 dark:bg-blue-950 text-cobalt-500 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
-                    Status: {selectedTicketDetail.status === 'resolved' ? 'Selesai' : selectedTicketDetail.status === 'in_progress' ? 'Sedang Diperiksa' : 'Menunggu Review'}
+                  <span className="px-2.5 py-1 rounded-[10px] font-bold bg-blue-50 dark:bg-blue-950 text-cobalt-500 dark:text-blue-400 border border-blue-200 dark:border-blue-800 whitespace-nowrap">
+                    Status: {selectedTicketDetail.status === 'resolved' ? 'Selesai' : selectedTicketDetail.status === 'in_progress' ? 'Sedang Diperiksa' : 'Menunggu Ditinjau'}
                   </span>
                 </div>
 
@@ -1320,16 +1388,7 @@ export const BugReportView: React.FC = () => {
                 </div>
               </div>
 
-              {/* Drawer Sticky Footer */}
-              <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-end gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setSelectedTicketDetail(null)}
-                  className="px-4 py-2 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
-                >
-                  Tutup
-                </button>
-              </div>
+
             </>
           )}
         </SheetContent>

@@ -7,7 +7,10 @@ updatedAt: 2026-09-26
 keywords: misi cuan, misi, cuan, koin, xp, level, check-in harian, reward, leaderboard, klaim misi, submit bukti, saldo koin, penukaran reward, gamification
 ---
 
-Fitur **Misi & Cuan** (/misi-cuan) mengapresiasi aktivitas persiapan karier dengan memberikan **Koin Karier** dan **XP**. Saldo koin yang terkumpul dapat ditukarkan menjadi saldo e-wallet atau pulsa.
+Fitur **Misi & Cuan** (/misi-cuan) mengapresiasi aktivitas persiapan karier dengan memberikan **Koin Karier** dan **XP**.
+
+> **Status Fitur**: Modul Misi & Cuan saat ini sedang dalam tahap pemutakhiran sistem dan disembunyikan sementara dari navigasi antarmuka dashboard hingga rilis versi stabil berikutnya.
+
 
 ## Sistem Koin, XP, dan Level
 

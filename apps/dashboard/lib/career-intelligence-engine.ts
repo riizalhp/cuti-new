@@ -6,6 +6,8 @@
  */
 
 import { getLokerUrl } from './urls';
+import { isCVEmptyOrDefault } from './ats-score';
+import { TEMPLATE_PLACEHOLDERS } from './ats-score-types';
 
 export interface EvidenceItem {
   source: 'cv_experience' | 'cv_project' | 'cv_skill' | 'cv_education' | 'profile' | 'tracker';
@@ -557,12 +559,22 @@ function extractEvidenceForCompetency(
   const evidence: EvidenceItem[] = [];
   const searchTerms = [...comp.keywords, ...comp.aliases].map((t) => t.toLowerCase());
 
-  // 1. Cek dari CV Experiences & Projects
+  const isPlaceholder = (text?: string) => {
+    if (!text || text.trim().length === 0) return true;
+    const lower = text.toLowerCase().trim();
+    return TEMPLATE_PLACEHOLDERS.some((p) => lower.includes(p));
+  };
+
+  // 1. Cek dari CV Experiences & Projects (Hanya CV yang valid / bukan draf template)
   if (Array.isArray(cvs) && cvs.length > 0) {
     cvs.forEach((cv) => {
+      // Jika CV masih berstatus draf kosong atau template contoh, jangan jadikan bukti kompetensi riil
+      if (isCVEmptyOrDefault(cv)) return;
+
       // Data skills di CV
       if (Array.isArray(cv.skills)) {
         cv.skills.forEach((sk: string) => {
+          if (isPlaceholder(sk)) return;
           const normSkill = normalizeText(sk);
           if (searchTerms.some((term) => normSkill.includes(term) || term.includes(normSkill))) {
             evidence.push({
@@ -577,6 +589,7 @@ function extractEvidenceForCompetency(
       // Pengalaman kerja di CV
       if (Array.isArray(cv.experience)) {
         cv.experience.forEach((exp: any) => {
+          if (!exp || isPlaceholder(exp.company)) return;
           const combinedExpText = normalizeText(
             `${exp.position || ''} ${exp.company || ''} ${exp.description || ''}`
           );
@@ -596,6 +609,7 @@ function extractEvidenceForCompetency(
       // Proyek / Portofolio di CV
       if (Array.isArray(cv.projects)) {
         cv.projects.forEach((proj: any) => {
+          if (!proj || isPlaceholder(proj.name)) return;
           const combinedProjText = normalizeText(
             `${proj.name || ''} ${proj.role || ''} ${proj.description || ''}`
           );
@@ -614,6 +628,7 @@ function extractEvidenceForCompetency(
       // Pendidikan di CV
       if (Array.isArray(cv.education)) {
         cv.education.forEach((edu: any) => {
+          if (!edu || isPlaceholder(edu.institution || edu.school)) return;
           const combinedEduText = normalizeText(`${edu.degree || ''} ${edu.major || ''} ${edu.school || ''}`);
           if (searchTerms.some((term) => combinedEduText.includes(term))) {
             evidence.push({
@@ -631,6 +646,7 @@ function extractEvidenceForCompetency(
   if (userProfile) {
     if (Array.isArray(userProfile.skills)) {
       userProfile.skills.forEach((sk: string) => {
+        if (isPlaceholder(sk)) return;
         const normSkill = normalizeText(sk);
         if (searchTerms.some((term) => normSkill.includes(term))) {
           if (!evidence.some((e) => e.title.includes(sk))) {
@@ -644,7 +660,7 @@ function extractEvidenceForCompetency(
       });
     }
 
-    if (userProfile.major) {
+    if (userProfile.major && !isPlaceholder(userProfile.major)) {
       const normMajor = normalizeText(userProfile.major);
       if (searchTerms.some((term) => normMajor.includes(term))) {
         evidence.push({
@@ -667,24 +683,29 @@ function scoreUserCompetency(
   evidence: EvidenceItem[],
   yearsOfExp: number
 ): { score: number; confidence: 'Tinggi' | 'Sedang' | 'Terbatas' } {
-  let rawScore = 35;
+  // Jika tidak ada bukti terverifikasi, skor awal adalah 0 (tidak ada base score gratis)
+  if (!evidence || evidence.length === 0) {
+    return { score: 0, confidence: 'Terbatas' };
+  }
+
+  let rawScore = 0;
 
   evidence.forEach((ev) => {
     switch (ev.source) {
       case 'cv_experience':
-        rawScore += 22;
+        rawScore += 25;
         break;
       case 'cv_project':
-        rawScore += 18;
+        rawScore += 20;
         break;
       case 'cv_skill':
-        rawScore += 12;
+        rawScore += 15;
         break;
       case 'profile':
-        rawScore += 10;
+        rawScore += 12;
         break;
       case 'cv_education':
-        rawScore += 8;
+        rawScore += 10;
         break;
       default:
         rawScore += 5;
@@ -692,10 +713,10 @@ function scoreUserCompetency(
   });
 
   if (yearsOfExp > 0) {
-    rawScore += Math.min(12, yearsOfExp * 4);
+    rawScore += Math.min(15, yearsOfExp * 5);
   }
 
-  const finalScore = Math.min(96, Math.max(30, Math.round(rawScore)));
+  const finalScore = Math.min(98, Math.max(0, Math.round(rawScore)));
 
   let confidence: 'Tinggi' | 'Sedang' | 'Terbatas' = 'Terbatas';
   if (evidence.length >= 3 || (evidence.length >= 2 && evidence.some((e) => e.source === 'cv_experience'))) {
@@ -711,6 +732,7 @@ function scoreUserCompetency(
  * Label semantik kecocokan role
  */
 function getRoleFitSemanticLabel(score: number): string {
+  if (score === 0) return 'Standar Acuan (Belum Ada Bukti CV)';
   if (score >= 82) return 'Sangat Cocok';
   if (score >= 70) return 'Potensial dengan Sedikit Optimasi';
   if (score >= 55) return 'Perlu Penguatan Kompetensi Kunci';
@@ -827,9 +849,10 @@ export function evaluateCareerIntelligence(
   const targetRole = matchedRole || allRoles[0];
   const yearsOfExp = userProfile?.experience_year || 0;
 
-  const hasCv = Array.isArray(cvs) && cvs.length > 0;
+  const validCvs = Array.isArray(cvs) ? cvs.filter((c) => !isCVEmptyOrDefault(c)) : [];
+  const hasValidCv = validCvs.length > 0;
+  const hasCv = hasValidCv;
   const hasSkills = Boolean(userProfile?.skills && userProfile.skills.length > 0);
-  const isBenchmarkMode = !hasCv && !hasSkills;
 
   const availableCvs = Array.isArray(cvs)
     ? cvs.map((c) => ({
@@ -840,8 +863,11 @@ export function evaluateCareerIntelligence(
     : [];
 
   // Filter basis CV jika user memilih evaluasi dokumen spesifik (mencegah bias cross-contamination antar role)
-  const targetCv = selectedCvId !== 'all' ? cvs.find((c) => c.id === selectedCvId) : null;
-  const activeEvaluatedCvs = targetCv ? [targetCv] : cvs;
+  const targetCv = selectedCvId !== 'all' ? (Array.isArray(cvs) ? cvs.find((c) => c.id === selectedCvId) : null) : null;
+  const isSelectedCvEmpty = targetCv ? isCVEmptyOrDefault(targetCv) : !hasValidCv;
+  const isBenchmarkMode = selectedCvId !== 'all' ? isSelectedCvEmpty : (!hasValidCv && !hasSkills);
+  const activeEvaluatedCvs = targetCv ? (isSelectedCvEmpty ? [] : [targetCv]) : validCvs;
+
   const selectedCvScope = targetCv
     ? {
         id: targetCv.id,
@@ -891,18 +917,20 @@ export function evaluateCareerIntelligence(
     };
   });
 
-  const calculatedFitScore = Math.min(98, Math.max(25, Math.round(totalWeightedScore / totalWeights)));
+  const calculatedFitScore = Math.min(98, Math.max(0, Math.round(totalWeightedScore / totalWeights)));
   const roleFitScore = isBenchmarkMode ? 0 : calculatedFitScore;
   const roleFitLabel = isBenchmarkMode
-    ? 'Standar Industri (Belum Ada Data CV)'
+    ? 'Standar Industri (Belum Ada Bukti CV)'
     : getRoleFitSemanticLabel(roleFitScore);
 
-  const hasExperience = Boolean(yearsOfExp > 0 || (hasCv && cvs.some((c) => c.experience && c.experience.length > 0)));
+  const hasExperience = Boolean(
+    yearsOfExp > 0 || (hasValidCv && validCvs.some((c) => c.experience && c.experience.length > 0))
+  );
   const hasEducation = Boolean(userProfile?.education || userProfile?.major);
   const trackedJobsCount = Array.isArray(applications) ? applications.length : 0;
 
   let completenessScore = 10;
-  if (hasCv) completenessScore += 35;
+  if (hasValidCv) completenessScore += 35;
   if (hasSkills) completenessScore += 20;
   if (hasExperience) completenessScore += 15;
   if (hasEducation) completenessScore += 10;
@@ -912,9 +940,12 @@ export function evaluateCareerIntelligence(
     ? 0
     : Math.min(100, Math.round(completenessScore * 0.4 + roleFitScore * 0.6));
 
-  const topStrengths = [...competencyResults]
-    .sort((a, b) => b.currentScore - a.currentScore)
-    .slice(0, 3);
+  const topStrengths = isBenchmarkMode
+    ? []
+    : [...competencyResults]
+        .filter((c) => c.currentScore > 0)
+        .sort((a, b) => b.currentScore - a.currentScore)
+        .slice(0, 3);
 
   const sortedGaps = [...competencyResults]
     .filter((c) => c.gap < 0)
@@ -1005,8 +1036,8 @@ export function evaluateCareerIntelligence(
     });
 
     const altFitScore = isBenchmarkMode
-      ? 25
-      : Math.min(95, Math.max(30, Math.round(altTotalScore / altTotalWeights)));
+      ? 0
+      : Math.min(95, Math.max(0, Math.round(altTotalScore / altTotalWeights)));
     const transitionData = targetRole.commonTransitions.find((t) => t.targetRoleId === altRole.id);
     const effort = transitionData?.effort || (altFitScore >= 75 ? 'Rendah' : altFitScore >= 60 ? 'Sedang' : 'Signifikan');
     const path = transitionData?.path || [targetRole.title, `Associate ${altRole.title}`, altRole.title];
@@ -1079,7 +1110,7 @@ export function evaluateCareerIntelligence(
     profileCompleteness: {
       percentage: completenessScore,
       hasCv,
-      cvCount: Array.isArray(cvs) ? cvs.length : 0,
+      cvCount: validCvs.length,
       hasSkills,
       hasExperience,
       hasEducation,

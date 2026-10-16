@@ -146,7 +146,6 @@ export const SLANG_AND_SYNONYM_MAP: Record<string, string> = {
   chat: "kontak",
   wa: "kontak",
   whatsapp: "kontak",
-  email: "kontak",
   threads: "kontak",
 
   // === 2. Domain CV, ATS, Resume & Format ===
@@ -230,24 +229,84 @@ export const SLANG_AND_SYNONYM_MAP: Record<string, string> = {
   wawancara: "interview",
   user: "interview",
   hrd: "interview",
-  psikotes: "interview",
-  tes: "interview",
-  interviewing: "interview",
-  interviewers: "interview",
+  jadwal: "jadwal",
+  agenda: "jadwal",
+  reminder: "pengingat",
+  pengingat: "pengingat",
+  star: "star",
 
   offering: "offering",
+  offer: "offering",
+  penawaran: "offering",
   diterima: "offering",
   lolos: "offering",
   tawaran: "offering",
-  gaji: "offering",
-  salary: "offering",
-  kontrak: "offering",
+  gaji: "gaji",
+  salary: "gaji",
+  upah: "gaji",
+  remunerasi: "gaji",
+  kontrak: "kontrak",
+  probation: "probation",
+  percobaan: "probation",
+  negosiasi: "negosiasi",
+  nego: "negosiasi",
+  counteroffer: "negosiasi",
+  bpjs: "bpjs",
+  jamsostek: "bpjs",
+  thr: "thr",
+  denda: "denda",
+  penalty: "denda",
 
   ditolak: "ditolak",
   gugur: "ditolak",
   reject: "ditolak",
   rejection: "ditolak",
   rejek: "ditolak",
+
+  // === 3b. Domain Career Intelligence, Mailer & Lapor Bug ===
+  intel: "intelligence",
+  intelligence: "intelligence",
+  benchmark: "benchmark",
+  radar: "kompetensi",
+  kompetensi: "kompetensi",
+  skillgap: "skill",
+
+  mailer: "mailer",
+  surel: "email",
+  email: "email",
+  subjek: "subject",
+  subject: "subject",
+  lampiran: "lampiran",
+  attachment: "lampiran",
+
+  laporbug: "lapor",
+  tiket: "tiket",
+  screenshot: "screenshot",
+  saran: "saran",
+  aspirasi: "saran",
+  usul: "saran",
+  usulan: "saran",
+  roadmap: "roadmap",
+  upvote: "saran",
+
+  restore: "restore",
+  unhide: "restore",
+  munculkan: "restore",
+  herdi: "herdi",
+  pdp: "pdp",
+  portabilitas: "pdp",
+  dark: "tema",
+  gelap: "tema",
+  terang: "tema",
+  theme: "tema",
+
+  impor: "scraper",
+  import: "scraper",
+  psikotes: "kuis",
+  tpa: "kuis",
+  assessment: "kuis",
+  asesmen: "kuis",
+  tryout: "kuis",
 
   // === 4. Domain Misi, Saldo, Cuan, Referral & Payout ===
   cuan: "saldo",
@@ -391,24 +450,103 @@ export function normalizeSlang(token: string): string {
 }
 
 /**
- * Ekspansi token: menghasilkan token asli + token kanonikal
+ * Lemmatizer ringan Bahasa Indonesia (menghilangkan klitika & afiks umum)
+ * untuk memperluas pencocokan kata berimbuhan tanpa bergantung pada library eksternal.
+ */
+export function simpleIndonesianStem(word: string): string[] {
+  let w = word.toLowerCase();
+  if (w.length <= 3) return [w];
+
+  const variants: string[] = [w];
+
+  // 1. Klitika kepunyaan & partikel: -lah, -kah, -pun, -nya, -ku, -mu
+  const cliticRe = /(?:lah|kah|pun|nya|ku|mu)$/;
+  if (cliticRe.test(w) && w.length > 5) {
+    w = w.replace(cliticRe, "");
+    variants.push(w);
+  }
+
+  // 2. Sufiks: -kan, -an, -i
+  if (w.endsWith("kan") && w.length > 5) {
+    variants.push(w.slice(0, -3));
+  } else if (w.endsWith("an") && w.length > 4) {
+    variants.push(w.slice(0, -2));
+  } else if (w.endsWith("i") && w.length > 4) {
+    variants.push(w.slice(0, -1));
+  }
+
+  // 3. Prefiks umum: me(ng/ny/m/n)-, pe(ng/ny/m/n)-, di-, ter-, ber-, per-
+  for (const base of [...variants]) {
+    if (base.length <= 4) continue;
+    if (base.startsWith("meng") && base.length > 6) {
+      variants.push(base.slice(4));
+      variants.push("k" + base.slice(4));
+    } else if (base.startsWith("meny") && base.length > 6) {
+      variants.push("s" + base.slice(4));
+    } else if (base.startsWith("mem") && base.length > 5) {
+      variants.push(base.slice(3));
+      variants.push("p" + base.slice(3));
+    } else if (base.startsWith("men") && base.length > 5) {
+      variants.push(base.slice(3));
+      variants.push("t" + base.slice(3));
+    } else if (base.startsWith("peng") && base.length > 6) {
+      variants.push(base.slice(4));
+    } else if (base.startsWith("peny") && base.length > 6) {
+      variants.push("s" + base.slice(4));
+    } else if (base.startsWith("pem") && base.length > 5) {
+      variants.push(base.slice(3));
+      variants.push("p" + base.slice(3));
+    } else if (base.startsWith("pen") && base.length > 5) {
+      variants.push(base.slice(3));
+    } else if (base.startsWith("per") && base.length > 5) {
+      variants.push(base.slice(3));
+    } else if (base.startsWith("pe") && base.length > 4) {
+      variants.push(base.slice(2));
+    } else if (base.startsWith("ber") && base.length > 5) {
+      variants.push(base.slice(3));
+    } else if (base.startsWith("ter") && base.length > 5) {
+      variants.push(base.slice(3));
+    } else if (base.startsWith("di") && base.length > 4) {
+      variants.push(base.slice(2));
+    }
+  }
+
+  return Array.from(new Set(variants.filter((v) => v.length >= 2)));
+}
+
+/**
+ * Ekspansi token: menghasilkan token asli + bentuk dasar (stem) + token kanonikal slang
  * agar pencocokan leksikal & semantik bekerja optimal dua arah.
  */
 export function expandTokensWithSlang(tokens: string[]): string[] {
   const result: string[] = [];
   const seen = new Set<string>();
 
-  for (const t of tokens) {
-    if (!seen.has(t)) {
-      result.push(t);
-      seen.add(t);
+  const add = (w: string) => {
+    if (w && !seen.has(w)) {
+      result.push(w);
+      seen.add(w);
     }
+  };
+
+  for (const t of tokens) {
+    add(t);
+
     const normalized = normalizeSlang(t);
-    if (normalized !== t && !seen.has(normalized)) {
-      result.push(normalized);
-      seen.add(normalized);
+    if (normalized !== t) {
+      add(normalized);
+    }
+
+    const stems = simpleIndonesianStem(t);
+    for (const s of stems) {
+      add(s);
+      const stemNorm = normalizeSlang(s);
+      if (stemNorm !== s) {
+        add(stemNorm);
+      }
     }
   }
 
   return result;
 }
+

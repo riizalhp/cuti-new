@@ -545,6 +545,50 @@ export function SettingsView() {
             </div>
           </div>
 
+          {/* Widget Bantuan Customer Service (Herdi) */}
+          <div className="p-4 sm:p-6 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
+              <div>
+                <h2 className="font-extrabold text-sm uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full overflow-hidden border border-orange-400 shrink-0">
+                    <img src="/images/mascot-1.webp" alt="Herdi" className="w-full h-full object-cover scale-[1.7] origin-top translate-y-0.5" />
+                  </div>
+                  <span>Widget Customer Service (Herdi)</span>
+                </h2>
+                <p className="text-caption text-slate-500 dark:text-slate-400 mt-0.5">
+                  Tombol chat bantuan melayang yang berada di sudut kanan bawah dashboard.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>Status Widget Bantuan</span>
+                  <span className="px-1.5 py-0.5 rounded-[6px] bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 text-caption font-bold border border-emerald-200 dark:border-emerald-800">
+                    Online
+                  </span>
+                </h3>
+                <p className="text-caption text-slate-500 dark:text-slate-400 mt-0.5">
+                  Jika widget sebelumnya disembunyikan, klik tombol di samping untuk menampilkannya kembali.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('employr:restore-herdi'));
+                    toast.success('Herdi CS Aktif', 'Widget Customer Service Herdi telah ditampilkan kembali.');
+                  }
+                }}
+                className="px-4 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 text-white font-bold text-xs transition shadow-md shadow-cobalt-500/20 cursor-pointer shrink-0"
+              >
+                Tampilkan Herdi CS
+              </button>
+            </div>
+          </div>
+
           {/* Preferensi Notifikasi */}
           <div className="p-4 sm:p-6 rounded-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
             <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">

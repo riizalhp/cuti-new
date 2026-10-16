@@ -52,9 +52,11 @@ import Link from 'next/link';
 import { COVER_LETTER_PRESETS, extractJobDescriptionEntities } from './CoverLetterView';
 import { mailerApi, userApi, coverLetterApi, cvApi, trackerApi } from '@/lib/api';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CvScopeSelector, TrackerDatePicker, CustomTimePicker } from '@/components/ui';
+import { MascotEmptyState } from '@/components/ui/MascotEmptyState';
 
 
 export type ProviderType = 'gmail' | 'outlook' | 'yahoo' | 'custom';
@@ -832,31 +834,60 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
           },
         ]}
         actions={
-          smtpAccounts.length === 0 ? (
-            <button
-              type="button"
-              onClick={() => {
-                setIsSmtpDrawerOpen(true);
-                setSmtpFeedback(null);
-              }}
-              className="w-full sm:w-auto min-h-[44px] px-4 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white font-semibold text-xs shadow-md shadow-cobalt-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#162758]"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Hubungkan Akun Email</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                setIsSmtpDrawerOpen(true);
-                setSmtpFeedback(null);
-              }}
-              className="w-full sm:w-auto min-h-[44px] px-3.5 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 border border-slate-200 dark:border-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500"
-            >
-              <Server className="w-3.5 h-3.5" />
-              <span>Kelola Akun ({smtpAccounts.length})</span>
-            </button>
-          )
+          <div className="flex items-center gap-2 flex-wrap w-full md:w-auto [&>button]:w-full [&>button]:sm:w-auto [&>button]:min-h-[44px] md:[&>button]:min-h-[34px] [&>div]:w-full md:[&>div]:w-auto">
+            {/* Standar CV Scope Selector di Kanan Atas Page Header */}
+            {userCvs.length > 0 ? (
+              <CvScopeSelector
+                cvs={userCvs}
+                selectedCvId={singleForm.attachment_cv_id || userCvs[0]?.id}
+                onChange={(cvId) => {
+                  setSingleForm((prev) => ({ ...prev, attachment_cv_id: cvId }));
+                  const chosen = userCvs.find((c) => c.id === cvId);
+                  toast.success('Basis CV Diubah', `Berkas ${chosen?.title || 'CV ATS'} aktif sebagai lampiran.`);
+                }}
+                allowAll={false}
+                label="Basis CV"
+              />
+            ) : (
+              <Link
+                href="/cv"
+                className={cn(
+                  buttonVariants({ variant: 'primary', size: 'sm' }),
+                  'w-full sm:w-auto min-h-[44px] md:min-h-[34px] gap-1.5 cursor-pointer shrink-0'
+                )}
+                title="Buat CV pertamamu di CV Builder"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Buat CV</span>
+              </Link>
+            )}
+
+            {smtpAccounts.length === 0 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSmtpDrawerOpen(true);
+                  setSmtpFeedback(null);
+                }}
+                className="w-full sm:w-auto min-h-[44px] md:min-h-[34px] px-3.5 py-2 sm:py-1.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-cobalt-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Hubungkan Akun Email</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSmtpDrawerOpen(true);
+                  setSmtpFeedback(null);
+                }}
+                className="w-full sm:w-auto min-h-[44px] md:min-h-[34px] px-3.5 py-2 sm:py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 active:scale-[0.98] text-white font-bold text-xs border border-white/20 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              >
+                <Server className="w-3.5 h-3.5 text-blue-300" />
+                <span>Kelola Akun ({smtpAccounts.length})</span>
+              </button>
+            )}
+          </div>
         }
       />
 
@@ -1168,7 +1199,14 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
                                 );
                               })()
                             ) : (
-                              <span className="text-xs text-slate-500 dark:text-slate-400">Belum ada CV tersimpan</span>
+                              <div>
+                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                                  Belum ada CV tersimpan
+                                </span>
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                  Buat CV agar otomatis dilampirkan ke email HRD
+                                </p>
+                              </div>
                             )}
                           </div>
                         </div>
@@ -1183,6 +1221,7 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
                               toast.success('CV Dipilih', `Berkas ${chosen?.title || 'CV ATS'} aktif dilampirkan.`);
                             }}
                             allowAll={false}
+                            label="Basis CV"
                             trigger={
                               <button
                                 type="button"
@@ -1194,8 +1233,16 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
                             }
                           />
                         ) : (
-                          <Link href="/cv" className="min-h-[36px] px-2 flex items-center gap-1 text-cobalt-500 text-xs font-bold hover:underline shrink-0">
-                            Buat CV <ExternalLink className="w-3 h-3" />
+                          <Link
+                            href="/cv"
+                            className={cn(
+                              buttonVariants({ variant: 'primary', size: 'sm' }),
+                              'min-h-[36px] gap-1.5 cursor-pointer shrink-0'
+                            )}
+                            title="Buat CV pertamamu di CV Builder"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>Buat CV</span>
                           </Link>
                         )}
                       </div>
@@ -1781,6 +1828,7 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
                                   toast.success('CV Dipilih', `Berkas ${chosen?.title || 'CV ATS'} aktif dilampirkan.`);
                                 }}
                                 allowAll={false}
+                                label="Basis CV"
                                 trigger={
                                   <button
                                     type="button"
@@ -1798,9 +1846,13 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
                                 }
                               />
                             ) : (
-                              <span className="text-caption text-slate-400 italic">
-                                Tanpa lampiran berkas (pilih CV di form)
-                              </span>
+                              <Link
+                                href="/cv"
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-cobalt-500 dark:text-blue-400 hover:underline"
+                              >
+                                <Plus className="w-3 h-3" />
+                                <span>Buat CV untuk Melampirkan</span>
+                              </Link>
                             )}
                           </div>
                         </div>
@@ -2065,14 +2117,12 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
             </div>
 
             {savedCoverLetters.length === 0 ? (
-              <div className="p-8 text-center rounded-[10px] border border-dashed border-slate-200 dark:border-slate-800 space-y-2">
-                <FileText className="w-8 h-8 text-slate-400 mx-auto" />
-                <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Belum ada draf surat yang disimpan.
-                </p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-                  Saat mengetik surat lamaran di tab <strong>Kirim Lamaran</strong>, klik tombol <strong>&quot;Simpan Draf&quot;</strong> agar tersimpan rapi di sini untuk digunakan berulang kali.
-                </p>
+              <div className="rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-2xs">
+                <MascotEmptyState
+                  size="sm"
+                  title="Belum ada draf surat yang disimpan"
+                  description="Saat mengetik surat lamaran di tab Kirim Lamaran, klik tombol Simpan Draf agar tersimpan rapi di sini untuk digunakan berulang kali."
+                />
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
@@ -2862,7 +2912,7 @@ export const MailerView: React.FC<MailerViewProps> = ({ initialTab = 'single' })
 
       {/* Right-Hand Slide-in Drawer: Selaraskan Surat dengan Lowongan */}
       <Sheet open={isAlignDrawerOpen} onOpenChange={setIsAlignDrawerOpen}>
-        <SheetContent className="w-full sm:max-w-xl p-0 flex flex-col h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl">
+        <SheetContent side="right" className="w-full sm:max-w-xl p-0 flex flex-col justify-between overflow-hidden sm:h-full">
           {/* Header Drawer (pr-14 agar tidak menabrak tombol X bawaan Sheet) */}
           <SheetHeader className="p-5 pr-14 border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/30 text-left">
             <SheetTitle className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">

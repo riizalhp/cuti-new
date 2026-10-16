@@ -27,6 +27,7 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { ScrollProgress } from '@/components/ui/scroll-progress';
+import { getLokerUrl } from '@/lib/urls';
 
 const LAST_UPDATED = '15 September 2026';
 const DPO_EMAIL = 'help.employr@outlook.com';
@@ -53,6 +54,52 @@ const TOC_ITEMS = [
 export default function KebijakanPrivasiPage() {
   const [activeSection, setActiveSection] = useState<string>('identitas');
 
+  const handleBack = () => {
+    if (typeof window === 'undefined') return;
+
+    const params = new URLSearchParams(window.location.search);
+    const fromParam = params.get('from') || params.get('returnUrl');
+    const referrer = document.referrer;
+    const isFromLoker =
+      fromParam === 'loker' ||
+      fromParam?.includes('3003') ||
+      fromParam?.includes('loker.employr.id') ||
+      referrer.includes('3003') ||
+      referrer.includes('loker.employr.id');
+
+    // 1. Jika di tab yang sama dan ada riwayat browser (dan bukan loop di halaman legal ini)
+    if (window.history.length > 1 && (!referrer || !referrer.includes(window.location.pathname))) {
+      window.history.back();
+      return;
+    }
+
+    // 2. Jika ada referrer dari halaman luar/loker
+    if (referrer && !referrer.includes(window.location.pathname)) {
+      window.location.href = referrer;
+      return;
+    }
+
+    // 3. Jika berasal dari portal loker (via param from=loker atau terdeteksi)
+    if (isFromLoker) {
+      window.location.href = getLokerUrl();
+      return;
+    }
+
+    // 4. Custom return URL
+    if (fromParam && (fromParam.startsWith('http://') || fromParam.startsWith('https://') || fromParam.startsWith('/'))) {
+      window.location.href = fromParam;
+      return;
+    }
+
+    // 5. Fallback: pengguna login diarahkan ke beranda, tamu diarahkan ke portal loker (bukan ke login)
+    const hasSession = document.cookie.includes('employr_user_session') || document.cookie.includes('cuti_user_session');
+    if (hasSession) {
+      window.location.href = '/beranda';
+    } else {
+      window.location.href = getLokerUrl();
+    }
+  };
+
   const scrollTo = (id: string) => {
     setActiveSection(id);
     const element = document.getElementById(id);
@@ -67,7 +114,7 @@ export default function KebijakanPrivasiPage() {
       <header className="sticky top-0 z-40 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
         <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <Link href="/beranda" className="flex items-center gap-2 group" aria-label="Beranda Employr">
+            <Link href="/" className="flex items-center gap-2 group" aria-label="Beranda Employr">
               <Image
                 src="/logo.webp"
                 alt="Employr Logo"
@@ -92,13 +139,15 @@ export default function KebijakanPrivasiPage() {
               <Scale size={14} />
               <span>Syarat & Ketentuan</span>
             </Link>
-            <Link
-              href="/beranda"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-bold text-white bg-cobalt-500 hover:bg-cobalt-600 shadow-sm transition"
+            <button
+              type="button"
+              onClick={handleBack}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-bold text-white bg-cobalt-500 hover:bg-cobalt-600 shadow-sm transition cursor-pointer"
+              aria-label="Kembali ke halaman sebelumnya"
             >
               <ArrowLeft size={14} />
               <span>Kembali</span>
-            </Link>
+            </button>
           </div>
         </div>
       </header>
@@ -1084,9 +1133,13 @@ export default function KebijakanPrivasiPage() {
                   Syarat & Ketentuan Layanan
                 </Link>
                 <span>·</span>
-                <Link href="/beranda" className="text-slate-700 dark:text-slate-300 hover:underline">
-                  Kembali ke Beranda
-                </Link>
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="text-slate-700 dark:text-slate-300 hover:underline cursor-pointer"
+                >
+                  Kembali ke Halaman Sebelumnya
+                </button>
               </div>
             </div>
           </main>

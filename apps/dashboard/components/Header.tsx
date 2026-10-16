@@ -212,16 +212,20 @@ export const Header: React.FC<HeaderProps> = ({
   };
   const onLogout = handleLogout;
 
-  const [currentUser, setCurrentUser] = useState(
-    propUser || { name: 'Pengguna Employr', email: 'user@employr.id' }
+  const [currentUser, setCurrentUser] = useState<{ name: string; email: string } | null>(
+    propUser || null
   );
 
   useEffect(() => {
+    if (propUser?.name) {
+      setCurrentUser(propUser);
+    }
+
     const session = getStoredSession();
     if (session && session.name) {
       setCurrentUser({
         name: session.name,
-        email: session.email || 'user@employr.id',
+        email: session.email || '',
       });
     }
 
@@ -229,11 +233,11 @@ export const Header: React.FC<HeaderProps> = ({
       if (profile && profile.fullName) {
         setCurrentUser({
           name: profile.fullName,
-          email: profile.email || 'user@employr.id',
+          email: profile.email || '',
         });
       }
     });
-  }, []);
+  }, [propUser]);
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -403,68 +407,6 @@ export const Header: React.FC<HeaderProps> = ({
               actionText: r.actionText || 'Buka Tracker',
             };
           });
-        }
-
-        // Jika belum ada reminder aktif dari database (misal data baru / kosong),
-        // sediakan starter smart reminders sesuai skenario pengingat agar user langsung bisa melihat fungsinya di Header
-        if (trackerNotifItems.length === 0) {
-          const sampleReminders = [
-            {
-              rawId: 'demo-rem-apply-3d',
-              company: 'PT Fintek Nusantara',
-              position: 'Junior Frontend Engineer',
-              title: 'Sudah 3 Hari Sejak Melamar',
-              desc: 'PT Fintek Nusantara (Junior Frontend Engineer) • Sudah 3 hari sejak kamu melamar. Belum ada update dari perusahaan.',
-              time: 'H+3 Apply',
-              urgency: 'medium' as const,
-              templateType: 'follow_up_apply' as const,
-              actionText: 'Salin Draf Follow-up',
-            },
-            {
-              rawId: 'demo-rem-followup-5d',
-              company: 'PT Digital Kreatif',
-              position: 'UI/UX Designer',
-              title: 'Saatnya Follow-up Lamaran',
-              desc: 'PT Digital Kreatif (UI/UX Designer) • Saatnya follow-up lamaran ini ke HRD untuk memastikan berkas telah ditinjau.',
-              time: 'H+5 Apply',
-              urgency: 'high' as const,
-              templateType: 'follow_up_apply' as const,
-              actionText: 'Salin Draf Follow-up',
-            },
-            {
-              rawId: 'demo-rem-interview-h1',
-              company: 'GoTo Indonesia',
-              position: 'Product Specialist',
-              title: 'Jadwal Interview Besok!',
-              desc: 'GoTo Indonesia (Product Specialist) • Besok kamu punya jadwal interview pukul 10:00 WIB. Cek link meeting & pakaian.',
-              time: 'Besok (H-1)',
-              urgency: 'critical' as const,
-              templateType: 'thank_you_interview' as const,
-              actionText: 'Siapkan Jawaban',
-            },
-          ];
-
-          trackerNotifItems = sampleReminders
-            .filter((s) => !dismissedReminderIds.includes(s.rawId))
-            .map((s) => {
-              const isInterview = s.urgency === 'critical' || (s.templateType as string) === 'thank_you_interview';
-              const companyParam = s.company ? encodeURIComponent(s.company) : '';
-              return {
-                id: `tracker-${s.rawId}`,
-                rawId: s.rawId,
-                title: s.title,
-                desc: s.desc,
-                time: s.time,
-                unread: !readReminderIds.includes(s.rawId),
-                href: `/tracker?search=${companyParam}${isInterview ? '&tab=interview' : ''}&reminder=${s.rawId}`,
-                category: 'TRACKER',
-                urgency: s.urgency,
-                company: s.company,
-                position: s.position,
-                templateType: s.templateType,
-                actionText: s.actionText,
-              };
-            });
         }
 
         // DB notifications
@@ -1211,9 +1153,9 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Notifications Dropdown (Desktop) & Slide-in Drawer (Mobile) */}
             {showNotifications && (
               <>
-                {/* Mobile Slide-in Drawer (screen < sm) */}
+                {/* Mobile Bottom Sheet (screen < sm) */}
                 <div
-                  className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end sm:hidden animate-in fade-in duration-200"
+                  className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-end justify-center sm:hidden animate-in fade-in duration-200"
                   onClick={() => setShowNotifications(false)}
                   aria-hidden="true"
                 >
@@ -1221,8 +1163,11 @@ export const Header: React.FC<HeaderProps> = ({
                     role="dialog"
                     aria-label="Panel Notifikasi & Pengingat"
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full max-w-[360px] h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-250"
+                    className="w-full max-h-[85dvh] bg-white dark:bg-slate-900 rounded-t-[16px] border-t border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300"
                   >
+                    <div className="flex justify-center pt-2.5 pb-1 shrink-0" aria-hidden="true">
+                      <div className="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full" />
+                    </div>
                     {renderNotificationContent()}
                   </div>
                 </div>
@@ -1262,7 +1207,7 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <div className="relative">
                 <UserAvatar
-                  name={currentUser.name}
+                  name={currentUser?.name || ''}
                   photoUrl={avatarUrl}
                   size={32}
                   variant="beam"
@@ -1275,12 +1220,16 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
               </div>
               <div className="hidden xl:block text-left">
-                <p className={`text-xs font-black leading-tight flex items-center gap-1 transition ${
-                  showProfileMenu ? 'text-white dark:text-slate-900 font-extrabold' : 'text-slate-900 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400'
-                }`}>
-                  <span>{currentUser.name}</span>
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showProfileMenu ? 'rotate-180 text-orange-400 dark:text-orange-600 font-bold' : 'text-slate-500'}`} />
-                </p>
+                {currentUser?.name ? (
+                  <p className={`text-xs font-black leading-tight flex items-center gap-1 transition ${
+                    showProfileMenu ? 'text-white dark:text-slate-900 font-extrabold' : 'text-slate-900 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400'
+                  }`}>
+                    <span>{currentUser.name}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showProfileMenu ? 'rotate-180 text-orange-400 dark:text-orange-600 font-bold' : 'text-slate-500'}`} />
+                  </p>
+                ) : (
+                  <div className="h-3 w-20 my-0.5 bg-slate-200/80 dark:bg-slate-700/60 rounded animate-pulse" />
+                )}
               </div>
             </button>
 
@@ -1290,15 +1239,17 @@ export const Header: React.FC<HeaderProps> = ({
                   <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800 mb-1.5">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-xs font-black text-slate-900 dark:text-white truncate">
-                        {currentUser.name}
+                        {currentUser?.name || 'Pengguna'}
                       </p>
                       <span className="inline-block px-2 py-0.5 rounded-[10px] text-[10px] font-bold bg-amber-400/20 text-amber-800 dark:text-amber-300 border border-amber-400/30 shrink-0">
                         Pro Member
                       </span>
                     </div>
-                    <p className="text-caption text-slate-500 dark:text-slate-400 truncate font-medium">
-                      {currentUser.email}
-                    </p>
+                    {currentUser?.email ? (
+                      <p className="text-caption text-slate-500 dark:text-slate-400 truncate font-medium">
+                        {currentUser.email}
+                      </p>
+                    ) : null}
 
                     {/* Career Readiness Status Card inside Profile Dropdown */}
                     <Link
@@ -1371,6 +1322,27 @@ export const Header: React.FC<HeaderProps> = ({
                   </button>
 
                   <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
+
+                  {/* Pintasan Bantuan Herdi CS (Memunculkan kembali jika disembunyikan) */}
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('employr:restore-herdi'));
+                      }
+                    }}
+                    className="w-full px-3 py-2 rounded-[10px] text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between transition cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-4 h-4 rounded-full overflow-hidden shrink-0 border border-orange-400">
+                        <img src="/images/mascot-1.webp" alt="Herdi" className="w-full h-full object-cover scale-[1.7] origin-top translate-y-0.5" />
+                      </div>
+                      <span>Bantuan CS Herdi</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-1.5 py-0.5 rounded-[6px] border border-emerald-200 dark:border-emerald-800">
+                      Online
+                    </span>
+                  </button>
 
                   <button
                     onClick={() => {

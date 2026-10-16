@@ -23,20 +23,18 @@ const HeadingTag = `h${level}` as 'h2' | 'h3';
 const headingSize = level === 2 ? 'text-xl sm:text-2xl font-bold' : 'text-lg sm:text-xl font-bold';
 ---
 
-<div class={`subsection-header flex items-center ${rightContent ? 'justify-between' : ''} gap-3 pb-3 ${className}`}>
-  <div class="flex items-center gap-2.5 min-w-0 flex-1">
-    <span class="w-1.5 h-4 bg-[#1738D1] rounded-xs shrink-0"></span>
-    <div class="min-w-0 flex-1">
-      {eyebrow && (
-        <span class={`text-[11px] font-bold tracking-wide ${eyebrowColor} block mb-0.5`}>
-          {eyebrow}
-        </span>
-      )}
-      <HeadingTag class={`${headingSize} text-[#101010] tracking-tight`} set:html={title} />
-    </div>
+<div class={`subsection-header ${rightContent ? 'flex flex-col sm:flex-row sm:items-end justify-between gap-3' : ''} pb-3 ${className}`}>
+  <div class="min-w-0 flex-1">
+    {eyebrow && (
+      <div class="section-label mb-2">
+        <span class={eyebrowColor}>{eyebrow}</span>
+        <i></i>
+      </div>
+    )}
+    <HeadingTag class={`${headingSize} text-[#101010] tracking-tight`} set:html={title} />
   </div>
   {rightContent && (
-    <div class="shrink-0">
+    <div class="shrink-0 mb-0.5">
       <slot name="right" />
     </div>
   )}

@@ -152,7 +152,7 @@ export async function PATCH(
       ...(body.salary !== undefined ? { salary: body.salary } : {}),
       ...(body.portal !== undefined ? { portal: body.portal } : {}),
       ...(body.portalUrl !== undefined ? { portalUrl: body.portalUrl } : {}),
-      ...(body.status !== undefined ? { displayStatus: body.status } : {}),
+      ...(body.status !== undefined ? { displayStatus: body.status === 'WISHLIST' ? 'Tersimpan' : body.status } : {}),
       ...(body.notes !== undefined ? { notes: body.notes } : {}),
       ...(body.interviewDate !== undefined ? { interviewDate: body.interviewDate } : {}),
       ...(body.interviewTime !== undefined ? { interviewTime: body.interviewTime } : {}),
@@ -213,6 +213,8 @@ export async function PATCH(
       }
 
       const statusNotifMap: Record<string, { title: string; message: string; priority: 'IMPORTANT' | 'SUCCESS' | 'INFORMATIONAL' }> = {
+        Tersimpan: { title: 'Lowongan disimpan', message: `Lowongan di ${newCompany} untuk posisi ${newPosition} telah dicatat ke daftar Tersimpan.`, priority: 'INFORMATIONAL' },
+        Terkirim: { title: 'Lamaran terkirim', message: `Lamaran kamu di ${newCompany} untuk posisi ${newPosition} telah dicatat terkirim.`, priority: 'INFORMATIONAL' },
         Screening: { title: 'Lamaran direview HR', message: `Lamaran kamu di ${newCompany} untuk posisi ${newPosition} sedang ditinjau.`, priority: 'INFORMATIONAL' },
         Interview: { title: 'Lamaran lanjut ke Interview', message: `Selamat! Kamu lanjut ke tahap interview di ${newCompany} untuk posisi ${newPosition}.`, priority: 'IMPORTANT' },
         Offering: { title: 'Kamu mendapat penawaran kerja', message: `Offering dari ${newCompany} untuk posisi ${newPosition} menunggu respons kamu.`, priority: 'SUCCESS' },

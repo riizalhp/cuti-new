@@ -38,6 +38,7 @@ interface RecommendedJobItem {
   posted: string;
   matchScore: string;
   matchScoreNum: number;
+  hasMatchCalculated: boolean;
   desc: string;
   responsibilities: string[];
   requirements: string[];
@@ -227,6 +228,7 @@ export const LatestJobsList: React.FC = () => {
                   posted: job.postedDate || 'Baru saja',
                   matchScore: `${job.matchScoreNum}%`,
                   matchScoreNum: job.matchScoreNum,
+                  hasMatchCalculated: true,
                   desc: details.description,
                   responsibilities: details.responsibilities,
                   requirements: details.requirements,
@@ -234,10 +236,9 @@ export const LatestJobsList: React.FC = () => {
                 };
               });
           } else {
-            // Pengguna baru tanpa CV: tampilkan rekomendasi umum
+            // Pengguna baru tanpa CV: tampilkan rekomendasi umum tanpa matchScore palsu
             topJobs = allJobs.slice(0, 3).map((job: any) => {
               const cleaned = cleanJobTitleAndCompany(job.title || job.position, job.company);
-              const score = typeof job.matchScore === 'number' ? job.matchScore : 85;
               const details = resolveJobDetails(
                 cleaned.title,
                 cleaned.company,
@@ -254,8 +255,9 @@ export const LatestJobsList: React.FC = () => {
                 salary: job.salary || '-',
                 type: job.type || 'Full-time',
                 posted: job.postedDate || 'Baru saja',
-                matchScore: `${score}%`,
-                matchScoreNum: score,
+                matchScore: '',
+                matchScoreNum: 0,
+                hasMatchCalculated: false,
                 desc: details.description,
                 responsibilities: details.responsibilities,
                 requirements: details.requirements,
@@ -397,12 +399,20 @@ export const LatestJobsList: React.FC = () => {
                   className="group/detail cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-[8px] transition-colors"
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <span
-                      aria-label={`Tingkat kecocokan profil ${job.matchScore}`}
-                      className={`px-2 py-0.5 rounded-[10px] text-caption font-extrabold border ${badgeStyle}`}
-                    >
-                      Match {job.matchScore}
-                    </span>
+                    {job.hasMatchCalculated ? (
+                      <span
+                        aria-label={`Tingkat kecocokan profil ${job.matchScore}`}
+                        className={`px-2 py-0.5 rounded-[10px] text-caption font-extrabold border ${badgeStyle}`}
+                      >
+                        Match {job.matchScore}
+                      </span>
+                    ) : (
+                      <span
+                        className="px-2 py-0.5 rounded-[10px] text-caption font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                      >
+                        {job.type}
+                      </span>
+                    )}
                     <span
                       aria-label={`Dipublikasikan ${job.posted}`}
                       className="text-caption font-medium text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-[10px] border border-slate-200 dark:border-slate-800"
@@ -518,9 +528,15 @@ export const LatestJobsList: React.FC = () => {
             <>
               {/* Header */}
               <SheetHeader className="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-row items-center justify-between bg-slate-50/50 dark:bg-slate-800/30 space-y-0">
-                <span className={`px-2.5 py-0.5 rounded-[10px] text-xs font-bold border ${getMatchBadgeStyle(selectedJob.matchScoreNum)}`}>
-                  Match Score {selectedJob.matchScore}
-                </span>
+                {selectedJob.hasMatchCalculated ? (
+                  <span className={`px-2.5 py-0.5 rounded-[10px] text-xs font-bold border ${getMatchBadgeStyle(selectedJob.matchScoreNum)}`}>
+                    Match Score {selectedJob.matchScore}
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-0.5 rounded-[10px] text-xs font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    Detail Lowongan
+                  </span>
+                )}
               </SheetHeader>
 
               {/* Body */}
@@ -533,6 +549,29 @@ export const LatestJobsList: React.FC = () => {
                     {selectedJob.company} • {selectedJob.location}
                   </SheetDescription>
                 </div>
+
+                {!selectedJob.hasMatchCalculated && (
+                  <div className="p-3.5 rounded-[10px] bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <p className="text-xs font-bold text-slate-900 dark:text-white">
+                        Skor kecocokan belum aktif
+                      </p>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Buat CV pertamamu agar sistem dapat mencocokkan profilmu dengan lowongan ini secara otomatis.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedJob(null);
+                        router.push('/cv');
+                      }}
+                      className="shrink-0 px-3 py-1.5 rounded-[8px] bg-cobalt-600 hover:bg-cobalt-700 text-white text-xs font-bold transition shadow-2xs cursor-pointer min-h-[34px] flex items-center justify-center"
+                    >
+                      Buat CV
+                    </button>
+                  </div>
+                )}
 
                 <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-[10px] space-y-2 text-xs border border-slate-100 dark:border-slate-700">
                   <p className="text-slate-600 dark:text-slate-300">
@@ -615,6 +654,7 @@ export const LatestJobsList: React.FC = () => {
                               sim.description,
                               sim.requirements
                             );
+                            const isParentMatched = Boolean(selectedJob?.hasMatchCalculated);
                             setSelectedJob({
                               id: sim.id,
                               title: cleaned.title,
@@ -623,8 +663,9 @@ export const LatestJobsList: React.FC = () => {
                               salary: sim.salary_min ? `Rp ${sim.salary_min.toLocaleString('id-ID')}` : '-',
                               type: simType,
                               posted: 'Tersedia',
-                              matchScore: `${sim.similarity_score || 75}%`,
-                              matchScoreNum: sim.similarity_score || 75,
+                              matchScore: isParentMatched ? `${sim.similarity_score || 75}%` : '',
+                              matchScoreNum: isParentMatched ? (sim.similarity_score || 75) : 0,
+                              hasMatchCalculated: isParentMatched,
                               desc: details.description,
                               responsibilities: details.responsibilities,
                               requirements: details.requirements,

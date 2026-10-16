@@ -292,10 +292,11 @@ export function CvCreateStudio() {
 
   // Set default title when template or purpose changes and user hasn't typed custom title
   useEffect(() => {
-    const tplName = cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'ATS';
+    const rawTplName = cvTemplates.find((t) => t.id === selectedTemplateId)?.name || 'Standard';
+    const cleanTplName = rawTplName.replace(/^ATS\s+/i, '').trim();
     if (!cvTitle || cvTitle.startsWith('CV ATS')) {
-      const rolePart = targetJobRole.trim() ? ` - ${targetJobRole.trim()}` : '';
-      setCvTitle(`CV ATS (${tplName})${rolePart}`);
+      const role = targetJobRole.trim();
+      setCvTitle(role ? `CV ATS - ${role}` : `CV ATS (${cleanTplName})`);
     }
   }, [selectedTemplateId, targetJobRole]);
 
@@ -1906,16 +1907,21 @@ export function CvCreateStudio() {
       {/* CONTEXTUAL SLIDE-IN DRAWER (UBAH TEMPLATE / TUJUAN SECARA IN-PLACE) */}
       {activeConfigDrawer && (
         <div
-          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-end sm:items-stretch justify-center sm:justify-end animate-in fade-in duration-200"
           onClick={() => setActiveConfigDrawer(null)}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="drawer-config-title"
-            className="relative z-10 w-full max-w-md sm:max-w-xl h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300"
+            className="relative z-10 w-full max-h-[92dvh] sm:max-h-none h-auto sm:h-full sm:max-w-xl rounded-t-[16px] sm:rounded-none border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl flex flex-col justify-between overflow-hidden animate-in max-sm:slide-in-from-bottom sm:slide-in-from-right duration-300"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Drag Handle Mobile */}
+            <div className="sm:hidden flex justify-center pt-2.5 pb-1 shrink-0" aria-hidden="true">
+              <div className="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full" />
+            </div>
+
             {/* Header */}
             <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30 shrink-0">
               <div>

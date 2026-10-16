@@ -35,9 +35,11 @@ import {
   Clock,
   CheckCircle2,
   FilePlus,
+  Bookmark,
 } from 'lucide-react';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { DotLottiePlayer } from '@/components/DotLottiePlayer';
+import { MascotEmptyState } from '@/components/ui/MascotEmptyState';
 import { CitySearchInput } from '@/components/ui/CitySearchInput';
 import { TrackerDatePicker, fromISODate } from '@/components/ui/TrackerDatePicker';
 import { PortalSearchDropdown } from '@/components/ui/PortalSearchDropdown';
@@ -46,6 +48,7 @@ import { TrackerReminderHub } from '@/components/TrackerReminderHub';
 import { InterviewScheduleModal } from './InterviewScheduleModal';
 import { PostInterviewReviewModal } from './PostInterviewReviewModal';
 import { OfferingPreparationModal } from './OfferingPreparationModal';
+import { OfferingCelebrationModal } from './OfferingCelebrationModal';
 import { ApplicationDetailDrawer } from './ApplicationDetailDrawer';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/Toast';
@@ -85,7 +88,7 @@ export interface ApplicationItem {
   position: string;
   location: string;
   appliedDate: string;
-  status: 'Terkirim' | 'Screening' | 'Interview' | 'Offering' | 'Ditolak';
+  status: 'Tersimpan' | 'Terkirim' | 'Screening' | 'Interview' | 'Offering' | 'Ditolak';
   salary: string;
   notes: string;
   portal: string;
@@ -113,6 +116,12 @@ const KANBAN_COLUMNS: Array<{
   colorClass: string;
   badgeBg: string;
 }> = [
+  {
+    status: 'Tersimpan',
+    label: 'Tersimpan',
+    colorClass: 'border-slate-500/30 bg-slate-500/5',
+    badgeBg: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700',
+  },
   {
     status: 'Terkirim',
     label: 'Terkirim',
@@ -269,6 +278,12 @@ export const COLUMN_EMPTY_STATES: Record<
   ApplicationItem['status'],
   { label: string; icon: any; iconColor: string; bgClass: string }
 > = {
+  Tersimpan: {
+    label: 'Belum ada lowongan tersimpan',
+    icon: Bookmark,
+    iconColor: 'text-slate-500 dark:text-slate-400',
+    bgClass: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300',
+  },
   Terkirim: {
     label: 'Belum ada lamaran terkirim',
     icon: Send,
@@ -447,6 +462,48 @@ export const TrackerView: React.FC = () => {
           ignoreInterviewReminder: a.ignoreInterviewReminder ?? ignoredIds.has(a.id),
         }));
         setApps(mergedApps);
+
+        // Validasi query parameters dari URL (deep link) terhadap data aplikasi nyata
+        if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          const searchParam = params.get('search');
+          const reminderParam = params.get('reminder');
+
+          if (searchParam || reminderParam) {
+            const matchedApp = mergedApps.find((a) => {
+              const matchSearch =
+                searchParam &&
+                (a.company.toLowerCase().includes(searchParam.toLowerCase()) ||
+                  a.position.toLowerCase().includes(searchParam.toLowerCase()) ||
+                  (a.portal || '').toLowerCase().includes(searchParam.toLowerCase()));
+              const matchReminder = reminderParam && (a.id === reminderParam || reminderParam.includes(a.id));
+              return matchSearch || matchReminder;
+            });
+
+            if (matchedApp) {
+              if (searchParam) setSearchTerm(searchParam);
+              if (reminderParam) {
+                handleOpenDetail(matchedApp);
+              }
+            } else {
+              // Jika data lamaran sudah tidak ada / telah dihapus, pulihkan tampilan
+              setSearchTerm('');
+              info(
+                'Lamaran Tidak Ditemukan',
+                `Data lamaran untuk "${searchParam || 'pengingat ini'}" sudah tidak ditemukan atau telah dihapus.`
+              );
+              // Bersihkan query param agar tidak mengunci URL
+              const cleanUrl = new URL(window.location.href);
+              cleanUrl.searchParams.delete('search');
+              cleanUrl.searchParams.delete('reminder');
+              window.history.replaceState(
+                {},
+                '',
+                cleanUrl.pathname + (cleanUrl.searchParams.toString() ? `?${cleanUrl.searchParams.toString()}` : '')
+              );
+            }
+          }
+        }
       }
     } catch (err: any) {
       console.error('[TrackerView] Error fetching applications:', err);
@@ -482,8 +539,11 @@ export const TrackerView: React.FC = () => {
           else if (lower === 'ditolak') setFilterStatus('Ditolak');
         }
 
+        const reminderParam = params.get('reminder');
         const searchParam = params.get('search');
-        if (searchParam) {
+        // Hanya set searchTerm langsung jika BUKAN deep-link reminder,
+        // biarkan fetchApplications memverifikasi data sebelum mengunci filter
+        if (searchParam && !reminderParam) {
           setSearchTerm(searchParam);
         }
 
@@ -506,26 +566,39 @@ export const TrackerView: React.FC = () => {
       const detail = customEvent?.detail;
       if (!detail) return;
 
-      if (detail.company) {
-        setSearchTerm(detail.company);
-      }
-
-      if (detail.templateType === 'thank_you_interview' || detail.category === 'INTERVIEW' || detail.urgency === 'critical') {
-        setFilterStatus('Interview');
-      } else if (detail.urgency === 'high') {
-        setFilterStatus('Screening');
-      }
-
-      // Cari lamaran yang bersangkutan
+      // Cari lamaran yang bersangkutan di data lokal
       const currentApps = appsRef.current;
       const matched = currentApps.find(
         (a) => a.id === detail.appId || (detail.company && a.company.toLowerCase().includes(detail.company.toLowerCase()))
       );
 
       if (matched) {
+        if (detail.company) {
+          setSearchTerm(detail.company);
+        }
+        if (detail.templateType === 'thank_you_interview' || detail.category === 'INTERVIEW' || detail.urgency === 'critical') {
+          setFilterStatus('Interview');
+        } else if (detail.urgency === 'high') {
+          setFilterStatus('Screening');
+        }
         handleOpenDetail(matched);
       } else {
-        // Jika tidak ada data spesifik (misal demo reminder), buka Reminder Hub Drawer agar user melihat opsi aksi
+        // Data lamaran terkait pengingat ini sudah tidak ditemukan / terhapus
+        setSearchTerm('');
+        info(
+          'Lamaran Tidak Ditemukan',
+          `Data lamaran untuk "${detail.company || 'pengingat ini'}" sudah tidak ditemukan atau telah dihapus.`
+        );
+        if (typeof window !== 'undefined') {
+          const cleanUrl = new URL(window.location.href);
+          cleanUrl.searchParams.delete('search');
+          cleanUrl.searchParams.delete('reminder');
+          window.history.replaceState(
+            {},
+            '',
+            cleanUrl.pathname + (cleanUrl.searchParams.toString() ? `?${cleanUrl.searchParams.toString()}` : '')
+          );
+        }
         setIsReminderHubOpen(true);
       }
     };
@@ -626,13 +699,8 @@ export const TrackerView: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    if (!showOfferingCelebration) return;
-    const timer = setTimeout(() => {
-      setShowOfferingCelebration(false);
-    }, 5500);
-    return () => clearTimeout(timer);
-  }, [showOfferingCelebration, celebrationKey]);
+  // User explicitly dismisses or acts upon OfferingCelebrationModal
+
 
   const handlePointerDownCard = (e: React.PointerEvent<HTMLDivElement>, app: ApplicationItem) => {
     // Skip if clicking button, link or interactive element
@@ -753,16 +821,28 @@ export const TrackerView: React.FC = () => {
           currentActiveTargetColumnRef.current = targetStatus;
         }
 
-        // Pengecualian Geser Kolom: Ketika kartu diarahkan & ditahan di tepi layar kanan/kiri
+        // Pengecualian Geser Kolom: Ketika kartu diarahkan & ditahan di tepi kontainer Kanban (kiri / kanan)
         const screenW = window.innerWidth;
         const isMobileScreen = screenW < 768;
-        const edgeZone = isMobileScreen ? Math.min(100, Math.max(75, screenW * 0.25)) : 60;
+        const edgeZone = isMobileScreen ? Math.min(100, Math.max(75, screenW * 0.25)) : 80;
+
+        const container = kanbanScrollContainerRef.current;
+        const containerRect = container?.getBoundingClientRect();
 
         let dir: -1 | 0 | 1 = 0;
-        if (moveEvent.clientX > screenW - edgeZone || (isMobileScreen && dx > 60 && moveEvent.clientX > screenW * 0.55)) {
-          dir = 1; // Geser ke kanan (misal: Screening -> Interview -> Offering -> Ditolak)
-        } else if (moveEvent.clientX < edgeZone || (isMobileScreen && dx < -60 && moveEvent.clientX < screenW * 0.45)) {
-          dir = -1; // Geser ke kiri (misal: Ditolak -> Offering -> Interview -> Screening)
+        if (container && containerRect && container.scrollWidth > container.clientWidth) {
+          const leftBound = containerRect.left + edgeZone;
+          const rightBound = containerRect.right - edgeZone;
+
+          if (moveEvent.clientX >= rightBound || (isMobileScreen && dx > 60 && moveEvent.clientX > screenW * 0.55)) {
+            if (container.scrollLeft + container.clientWidth < container.scrollWidth - 5) {
+              dir = 1; // Geser ke kanan
+            }
+          } else if (moveEvent.clientX <= leftBound || (isMobileScreen && dx < -60 && moveEvent.clientX < screenW * 0.45)) {
+            if (container.scrollLeft > 5) {
+              dir = -1; // Geser ke kiri
+            }
+          }
         }
 
         if (dir !== edgeDirectionRef.current) {
@@ -772,17 +852,16 @@ export const TrackerView: React.FC = () => {
             edgeStepTimerRef.current = null;
           }
 
-          if (dir !== 0 && kanbanScrollContainerRef.current) {
-            const container = kanbanScrollContainerRef.current;
-            if (container.scrollWidth > container.clientWidth) {
-              const stepColumn = () => {
-                if (!isDragging || edgeDirectionRef.current !== dir) return;
+          if (dir !== 0 && container && container.scrollWidth > container.clientWidth) {
+            const stepColumn = () => {
+              if (!isDragging || edgeDirectionRef.current !== dir) return;
 
-                const allCols = Array.from(container.querySelectorAll<HTMLElement>('[data-column-status]'));
+              const allCols = Array.from(container.querySelectorAll<HTMLElement>('[data-column-status]'));
+              if (allCols.length === 0) return;
+
+              if (isMobileScreen) {
                 const screenCenterX = window.innerWidth / 2;
                 let activeIdx = -1;
-
-                // Cari kolom yang posisinya paling dekat dengan tengah layar HP
                 let minDiff = Infinity;
                 allCols.forEach((col, idx) => {
                   const r = col.getBoundingClientRect();
@@ -806,8 +885,6 @@ export const TrackerView: React.FC = () => {
                 if (targetIdx !== activeIdx && allCols[targetIdx]) {
                   const targetCol = allCols[targetIdx];
                   const targetStatus = targetCol.getAttribute('data-column-status') as ApplicationItem['status'];
-
-                  // Scroll container secara horizontal langsung dan akurat
                   const colLeft = targetCol.offsetLeft;
                   const colWidth = targetCol.offsetWidth;
                   const targetScrollLeft = colLeft - (container.clientWidth - colWidth) / 2;
@@ -822,14 +899,55 @@ export const TrackerView: React.FC = () => {
                     } catch (_) {}
                   }
                 }
+              } else {
+                // Di desktop: geser sejauh 1 kolom (306px = 290px lebar kolom + 16px gap)
+                const stepDistance = 306;
+                const newScrollLeft =
+                  dir === 1
+                    ? Math.min(container.scrollWidth - container.clientWidth, container.scrollLeft + stepDistance)
+                    : Math.max(0, container.scrollLeft - stepDistance);
 
-                // Jika user terus menahan kartu di tepi layar, geser lagi ke kolom berikutnya setiap 450ms
-                edgeStepTimerRef.current = setTimeout(stepColumn, 450);
-              };
+                container.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
 
-              // Tahan 250ms di tepi layar sebelum mulai menggeser kolom pertama
-              edgeStepTimerRef.current = setTimeout(stepColumn, 250);
-            }
+                // Deteksi kolom target setelah pergeseran
+                setTimeout(() => {
+                  if (!isDragging) return;
+                  const elemBelow = document.elementFromPoint(lastPointerPosRef.current.x, lastPointerPosRef.current.y);
+                  const colElem = elemBelow?.closest('[data-column-status]');
+                  if (colElem) {
+                    const targetStatus = colElem.getAttribute('data-column-status') as ApplicationItem['status'];
+                    setDragOverColumn(targetStatus);
+                    currentActiveTargetColumnRef.current = targetStatus;
+                  } else {
+                    const freshCols = Array.from(container.querySelectorAll<HTMLElement>('[data-column-status]'));
+                    const cRect = container.getBoundingClientRect();
+                    let candidateCol: HTMLElement | null = null;
+                    if (dir === -1) {
+                      candidateCol = freshCols.find((c) => c.getBoundingClientRect().right > cRect.left + 30) || null;
+                    } else {
+                      candidateCol = [...freshCols].reverse().find((c) => c.getBoundingClientRect().left < cRect.right - 30) || null;
+                    }
+                    if (candidateCol) {
+                      const targetStatus = candidateCol.getAttribute('data-column-status') as ApplicationItem['status'];
+                      setDragOverColumn(targetStatus);
+                      currentActiveTargetColumnRef.current = targetStatus;
+                    }
+                  }
+                }, 120);
+
+                if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                  try {
+                    navigator.vibrate(25);
+                  } catch (_) {}
+                }
+              }
+
+              // Jika user terus menahan kartu di tepi layar, ulangi geser setiap 450ms
+              edgeStepTimerRef.current = setTimeout(stepColumn, 450);
+            };
+
+            // Tahan 200ms di tepi kontainer sebelum mulai geser
+            edgeStepTimerRef.current = setTimeout(stepColumn, 200);
           }
         }
       }
@@ -1479,6 +1597,7 @@ export const TrackerView: React.FC = () => {
       valB = (b.portal || '').toLowerCase();
     } else if (sortField === 'status') {
       const statusOrder: Record<string, number> = {
+        'Tersimpan': 0,
         'Terkirim': 1,
         'Screening': 2,
         'Interview': 3,
@@ -1496,6 +1615,8 @@ export const TrackerView: React.FC = () => {
 
   const getStatusBadgeClass = (status: ApplicationItem['status']) => {
     switch (status) {
+      case 'Tersimpan':
+        return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700';
       case 'Offering':
         return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50';
       case 'Interview':
@@ -1513,6 +1634,7 @@ export const TrackerView: React.FC = () => {
 
   const counts = {
     total: apps.length,
+    tersimpan: apps.filter((a) => a.status === 'Tersimpan').length,
     terkirim: apps.filter((a) => a.status === 'Terkirim' || a.status === 'Screening').length,
     interview: apps.filter((a) => a.status === 'Interview').length,
     offering: apps.filter((a) => a.status === 'Offering').length,
@@ -1529,6 +1651,7 @@ export const TrackerView: React.FC = () => {
         badge="Job Tracker"
         stats={[
           { label: 'Total', value: isLoading || hasBlockingLoadError ? '–' : counts.total, icon: Briefcase, isPrimary: true },
+          { label: 'Tersimpan', value: isLoading || hasBlockingLoadError ? '–' : counts.tersimpan, icon: Bookmark, colorClass: 'text-slate-300' },
           { label: 'Screening', value: isLoading || hasBlockingLoadError ? '–' : counts.terkirim, icon: FileText, colorClass: 'text-sky-300' },
           { label: 'Interview', value: isLoading || hasBlockingLoadError ? '–' : counts.interview, icon: Calendar, colorClass: 'text-indigo-300' },
           { label: 'Offering', value: isLoading || hasBlockingLoadError ? '–' : counts.offering, icon: Sparkles, colorClass: 'text-emerald-300' },
@@ -1612,15 +1735,34 @@ export const TrackerView: React.FC = () => {
 
             {/* Search Box */}
             <div className="relative flex-1 min-w-0">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Cari perusahaan atau posisi..."
                 aria-label="Cari lamaran berdasarkan perusahaan atau posisi"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt-500"
+                className="w-full pl-9 pr-8 py-2 text-xs rounded-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt-500"
               />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm('');
+                    if (typeof window !== 'undefined') {
+                      const cleanUrl = new URL(window.location.href);
+                      cleanUrl.searchParams.delete('search');
+                      cleanUrl.searchParams.delete('reminder');
+                      window.history.replaceState({}, '', cleanUrl.pathname + (cleanUrl.searchParams.toString() ? `?${cleanUrl.searchParams.toString()}` : ''));
+                    }
+                  }}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer"
+                  title="Hapus kata kunci pencarian"
+                  aria-label="Hapus kata kunci pencarian"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
           </div>
 
@@ -1630,6 +1772,7 @@ export const TrackerView: React.FC = () => {
               <TabsList variant="pill" className="w-full lg:w-auto flex justify-start gap-1.5 p-1 bg-slate-100/80 dark:bg-slate-800/80">
                 {[
                   { status: 'Semua', count: apps.length },
+                  { status: 'Tersimpan', count: apps.filter(a => a.status === 'Tersimpan').length },
                   { status: 'Terkirim', count: apps.filter(a => a.status === 'Terkirim').length },
                   { status: 'Screening', count: apps.filter(a => a.status === 'Screening').length },
                   { status: 'Interview', count: apps.filter(a => a.status === 'Interview').length },
@@ -1655,11 +1798,11 @@ export const TrackerView: React.FC = () => {
 
       {/* Loading Skeleton */}
       {isLoading && (
-        <div className="flex lg:grid lg:grid-cols-5 gap-4 overflow-x-auto pb-4 pt-1 items-start min-h-[450px]">
+        <div className="flex overflow-x-auto kanban-scroll gap-4 pb-4 pt-1 items-start min-h-[450px]">
           {KANBAN_COLUMNS.map((col) => (
             <div
               key={col.status}
-              className="shrink-0 w-[85vw] sm:w-[320px] lg:w-auto rounded-[10px] border border-slate-200/80 dark:border-slate-800 p-3 space-y-3 bg-white/40 dark:bg-slate-900/40 animate-pulse motion-reduce:animate-none"
+              className="shrink-0 w-[85vw] sm:w-[280px] lg:w-[290px] min-w-[280px] lg:min-w-[290px] rounded-[10px] border border-slate-200/80 dark:border-slate-800 p-3 space-y-3 bg-white/40 dark:bg-slate-900/40 animate-pulse motion-reduce:animate-none"
             >
               <div className="h-6 bg-slate-200 dark:bg-slate-800 rounded-[10px] w-24 mb-3" />
               <div className="h-28 bg-slate-100 dark:bg-slate-800/60 rounded-[10px] w-full" />
@@ -1714,13 +1857,51 @@ export const TrackerView: React.FC = () => {
 
       {/* VIEW 1: KANBAN BOARD */}
       {!isLoading && apps.length > 0 && viewMode === 'kanban' && (
+        Boolean(searchTerm.trim()) && filteredApps.length === 0 ? (
+          <div className="rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
+            <MascotEmptyState
+              size="md"
+              badge="Pencarian"
+              title="Tidak Ada Lamaran yang Cocok"
+              description={
+                searchTerm.trim()
+                  ? `Tidak ditemukan lamaran dengan kata kunci "${searchTerm}"${filterStatus !== 'Semua' ? ` pada status "${filterStatus}"` : ''}. Coba periksa ejaan atau reset filter.`
+                  : `Tidak ditemukan lamaran pada status "${filterStatus}".`
+              }
+              action={
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setFilterStatus('Semua');
+                    if (typeof window !== 'undefined') {
+                      const cleanUrl = new URL(window.location.href);
+                      cleanUrl.searchParams.delete('search');
+                      cleanUrl.searchParams.delete('tab');
+                      cleanUrl.searchParams.delete('status');
+                      cleanUrl.searchParams.delete('reminder');
+                      window.history.replaceState(
+                        {},
+                        '',
+                        cleanUrl.pathname + (cleanUrl.searchParams.toString() ? `?${cleanUrl.searchParams.toString()}` : '')
+                      );
+                    }
+                  }}
+                  className="px-4 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-cobalt-500/20 transition flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500 focus-visible:ring-offset-2"
+                >
+                  <span>Reset Pencarian & Filter</span>
+                </button>
+              }
+            />
+          </div>
+        ) : (
         <div className="space-y-3">
           <div
             ref={kanbanScrollContainerRef}
-            className={`flex lg:grid lg:grid-cols-5 ${
+            className={`flex overflow-x-auto kanban-scroll ${
               filterStatus === 'Semua'
-                ? `overflow-x-auto ${activeDragItem ? 'snap-none' : 'snap-x snap-mandatory'}`
-                : 'overflow-x-auto max-w-xl mx-auto lg:max-w-none'
+                ? `${activeDragItem ? 'snap-none' : 'snap-x snap-mandatory lg:snap-none'}`
+                : 'max-w-xl mx-auto lg:max-w-none'
             } gap-4 pb-4 pt-1 items-start min-h-[450px]`}
           >
             {KANBAN_COLUMNS.map((col) => {
@@ -1744,7 +1925,11 @@ export const TrackerView: React.FC = () => {
                   data-column-status={col.status}
                   className={`
                     ${isFiltered && !isSelected ? 'hidden lg:block' : 'block'}
-                    ${isFiltered && isSelected ? 'w-full max-w-md mx-auto lg:max-w-none lg:w-auto' : 'snap-center shrink-0 w-[85vw] sm:w-[320px] lg:w-auto'}
+                    ${
+                      isFiltered && isSelected
+                        ? 'w-full max-w-md mx-auto lg:max-w-none lg:w-[290px] lg:min-w-[290px]'
+                        : 'snap-center shrink-0 w-[85vw] sm:w-[280px] lg:w-[290px] min-w-[280px] lg:min-w-[290px]'
+                    }
                     rounded-[10px] border transition-all duration-200 p-3 space-y-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xs
                     ${
                       isOver
@@ -1752,7 +1937,7 @@ export const TrackerView: React.FC = () => {
                         : isFiltered && isSelected
                         ? 'lg:ring-2 lg:ring-cobalt-500 lg:border-cobalt-500 lg:shadow-md'
                         : isFiltered
-                        ? 'lg:opacity-75 lg:hover:opacity-100'
+                        ? 'lg:opacity-60 lg:hover:opacity-100'
                         : ''
                     }
                     ${col.colorClass}
@@ -2052,6 +2237,7 @@ export const TrackerView: React.FC = () => {
             </div>
           )}
         </div>
+        )
       )}
 
       {/* VIEW 2: LIST TABEL */}
@@ -2189,16 +2375,55 @@ export const TrackerView: React.FC = () => {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
                 {sortedAndFilteredApps.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="p-12 text-center text-slate-500 dark:text-slate-400">
-                      <DotLottiePlayer
-                        src="/animations/empty-tracker.json"
-                        autoplay={true}
-                        loop={true}
-                        className="w-20 h-20 mx-auto mb-2"
-                        fallback={<Briefcase className="w-10 h-10 mx-auto text-slate-300 mb-2" />}
+                    <td colSpan={8} className="p-8 sm:p-10 text-center">
+                      <MascotEmptyState
+                        size="md"
+                        title={
+                          searchTerm.trim() || filterStatus !== 'Semua'
+                            ? 'Lamaran tidak ditemukan'
+                            : 'Belum ada lamaran yang tercatat'
+                        }
+                        description={
+                          searchTerm.trim() || filterStatus !== 'Semua'
+                            ? 'Coba sesuaikan kata kunci pencarian atau reset filter status kamu.'
+                            : 'Catat setiap lamaran kerja yang kamu kirim untuk memantau tahapan seleksi secara terpusat.'
+                        }
+                        action={
+                          searchTerm.trim() || filterStatus !== 'Semua' ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSearchTerm('');
+                                setFilterStatus('Semua');
+                                if (typeof window !== 'undefined') {
+                                  const cleanUrl = new URL(window.location.href);
+                                  cleanUrl.searchParams.delete('search');
+                                  cleanUrl.searchParams.delete('tab');
+                                  cleanUrl.searchParams.delete('status');
+                                  cleanUrl.searchParams.delete('reminder');
+                                  window.history.replaceState(
+                                    {},
+                                    '',
+                                    cleanUrl.pathname + (cleanUrl.searchParams.toString() ? `?${cleanUrl.searchParams.toString()}` : '')
+                                  );
+                                }
+                              }}
+                              className="px-4 py-2 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500 focus-visible:ring-offset-2"
+                            >
+                              Reset Pencarian & Filter
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setIsAddModalOpen(true)}
+                              className="px-4 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-cobalt-500/20 transition flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500 focus-visible:ring-offset-2"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>Tambah Lamaran Pertama</span>
+                            </button>
+                          )
+                        }
                       />
-                      <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Tidak ada lamaran ditemukan</p>
-                      <p className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">Coba sesuaikan kata kunci pencarian atau filter status kamu</p>
                     </td>
                   </tr>
                 ) : (
@@ -2296,7 +2521,7 @@ export const TrackerView: React.FC = () => {
                                 handleUpdateStatus(app.id, newStatus);
                               }
                             }}
-                            options={['Terkirim', 'Screening', 'Interview', 'Offering', 'Ditolak']}
+                            options={['Tersimpan', 'Terkirim', 'Screening', 'Interview', 'Offering', 'Ditolak']}
                             size="sm"
                           />
                         </div>
@@ -2480,10 +2705,55 @@ export const TrackerView: React.FC = () => {
             </div>
 
             {sortedAndFilteredApps.length === 0 ? (
-              <div className="p-8 text-center text-slate-500 dark:text-slate-400">
-                <Briefcase className="w-8 h-8 mx-auto text-slate-300 mb-2" />
-                <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Tidak ada lamaran ditemukan</p>
-                <p className="text-caption text-slate-500 mt-0.5 dark:text-slate-400">Coba sesuaikan pencarian atau filter status</p>
+              <div className="p-4 sm:p-6 text-center">
+                <MascotEmptyState
+                  size="sm"
+                  title={
+                    searchTerm.trim() || filterStatus !== 'Semua'
+                      ? 'Lamaran tidak ditemukan'
+                      : 'Belum ada lamaran tercatat'
+                  }
+                  description={
+                    searchTerm.trim() || filterStatus !== 'Semua'
+                      ? 'Coba sesuaikan pencarian atau reset filter status.'
+                      : 'Catat lamaran pertamamu untuk memantau status seleksi.'
+                  }
+                  action={
+                    searchTerm.trim() || filterStatus !== 'Semua' ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearchTerm('');
+                          setFilterStatus('Semua');
+                          if (typeof window !== 'undefined') {
+                            const cleanUrl = new URL(window.location.href);
+                            cleanUrl.searchParams.delete('search');
+                            cleanUrl.searchParams.delete('tab');
+                            cleanUrl.searchParams.delete('status');
+                            cleanUrl.searchParams.delete('reminder');
+                            window.history.replaceState(
+                              {},
+                              '',
+                              cleanUrl.pathname + (cleanUrl.searchParams.toString() ? `?${cleanUrl.searchParams.toString()}` : '')
+                            );
+                          }
+                        }}
+                        className="px-3.5 py-1.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
+                      >
+                        Reset Pencarian & Filter
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="px-3.5 py-2 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 text-white font-bold text-xs shadow-md shadow-cobalt-500/20 transition flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Tambah Lamaran</span>
+                      </button>
+                    )
+                  }
+                />
               </div>
             ) : (
               <div className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -2631,7 +2901,7 @@ export const TrackerView: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                     Tanggal Melamar
@@ -2640,6 +2910,7 @@ export const TrackerView: React.FC = () => {
                     value={newAppliedDate}
                     onChange={(val) => setNewAppliedDate(val)}
                     placeholder="Pilih Tanggal Melamar"
+                    align="left"
                   />
                 </div>
                 <div>
@@ -2649,7 +2920,7 @@ export const TrackerView: React.FC = () => {
                   <CustomSelect
                     value={newStatus}
                     onChange={(val) => setNewStatus(val as ApplicationItem['status'])}
-                    options={['Terkirim', 'Screening', 'Interview', 'Offering', 'Ditolak']}
+                    options={['Tersimpan', 'Terkirim', 'Screening', 'Interview', 'Offering', 'Ditolak']}
                     placeholder="Pilih Status"
                   />
                 </div>
@@ -2854,65 +3125,32 @@ export const TrackerView: React.FC = () => {
         onSave={handleSaveOfferingPreparation}
       />
 
-      {/* Full-screen Offering Celebration - Pita-pita Confetti Lottie Jatuh Memenuhi Layar */}
+      {/* Full-screen Offering Celebration - Confetti Background Layer */}
       {showOfferingCelebration && (
         <div
-          key={celebrationKey}
+          key={`confetti-${celebrationKey}`}
           aria-hidden="true"
-          className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center overflow-hidden"
+          className="fixed inset-0 z-[45] pointer-events-none overflow-hidden"
         >
-          {/* Banner Ucapan Selamat Mengambang (Appllama Apple HIG Floating Island) */}
-          <div className="absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 z-10 w-[calc(100vw-2rem)] max-w-md p-3 sm:px-4 sm:py-3 rounded-[16px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-emerald-200/90 dark:border-emerald-800/80 shadow-2xl shadow-emerald-950/15 flex items-center justify-between gap-3 animate-in slide-in-from-top-3 fade-in duration-300 pointer-events-auto select-none">
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="size-9 rounded-[12px] bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-200/70 dark:border-emerald-800/60 shadow-2xs shrink-0">
-                <Sparkles className="size-4.5 text-emerald-600 dark:text-emerald-400 animate-pulse motion-reduce:animate-none" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight truncate">
-                  Selamat atas Offering Lamaranmu!
-                </p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-                  Pencapaian luar biasa menuju karier impian.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 shrink-0">
-              {celebratingApp && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowOfferingCelebration(false);
-                    handleOpenOfferingModal(celebratingApp);
-                  }}
-                  className="px-3.5 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs shadow-sm transition flex items-center gap-1 cursor-pointer shrink-0"
-                >
-                  <span>Cek Persiapan</span>
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => setShowOfferingCelebration(false)}
-                className="size-7 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition cursor-pointer"
-                title="Tutup banner"
-                aria-label="Tutup banner perayaan offering"
-              >
-                <X className="size-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Animasi Pita-Pita & Confetti Lottie Jatuh Memenuhi Layar */}
-          <div className="w-full h-full">
-            <DotLottiePlayer
-              src="/animations/confetti-ribbons.json"
-              autoplay={true}
-              loop={false}
-              className="w-full h-full pointer-events-none [&_canvas]:!w-full [&_canvas]:!h-full [&_canvas]:!object-cover"
-            />
-          </div>
+          <DotLottiePlayer
+            src="/animations/confetti-ribbons.json"
+            autoplay={true}
+            loop={false}
+            className="w-full h-full pointer-events-none [&_canvas]:!w-full [&_canvas]:!h-full [&_canvas]:!object-cover"
+          />
         </div>
       )}
+
+      {/* Modal Popup Perayaan Offering dengan Maskot Employr */}
+      <OfferingCelebrationModal
+        isOpen={showOfferingCelebration}
+        onClose={() => setShowOfferingCelebration(false)}
+        app={celebratingApp}
+        onOpenPreparation={(app) => {
+          setShowOfferingCelebration(false);
+          handleOpenOfferingModal(app);
+        }}
+      />
 
       {/* Delete Confirmation Modal (P0 Accidental Loss Prevention) */}
       <AlertDialog open={!!appToDelete} onOpenChange={(open) => !open && setAppToDelete(null)}>

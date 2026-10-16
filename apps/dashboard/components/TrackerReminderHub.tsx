@@ -9,7 +9,6 @@ import {
   Check,
   FileText,
   ChevronRight,
-  Info,
   X,
 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
@@ -323,16 +322,6 @@ export const TrackerReminderHub: React.FC<TrackerReminderHubProps> = ({
             )}
           </SheetBody>
 
-          {/* Drawer Footer */}
-          <SheetFooter className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex sm:flex-row items-center justify-between">
-            <div className="flex items-center gap-1.5 text-caption text-slate-600 dark:text-slate-400">
-              <Info className="w-3.5 h-3.5 text-orange-700 dark:text-orange-400" />
-              <span>Pengingat diperbarui otomatis setiap hari</span>
-            </div>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              Tutup
-            </Button>
-          </SheetFooter>
         </SheetContent>
       </Sheet>
 

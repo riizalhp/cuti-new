@@ -24,6 +24,7 @@ import { CitySearchInput } from '@/components/ui/CitySearchInput';
 import { TrackerDatePicker } from '@/components/ui/TrackerDatePicker';
 import { PortalSearchDropdown } from '@/components/ui/PortalSearchDropdown';
 import { AutoResizeTextarea } from '@/components/ui/AutoResizeTextarea';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 import { DEFAULT_INTERVIEW_CHECKLIST } from './InterviewScheduleModal';
 import { DEFAULT_OFFERING_CHECKLIST } from './OfferingPreparationModal';
 import {
@@ -49,37 +50,6 @@ interface ApplicationDetailDrawerProps {
   onOpenPostInterviewModal?: (app: ApplicationItem) => void;
 }
 
-const STATUS_OPTIONS: Array<{
-  status: ApplicationItem['status'];
-  label: string;
-  badgeBg: string;
-}> = [
-  {
-    status: 'Terkirim',
-    label: 'Terkirim',
-    badgeBg: 'bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800',
-  },
-  {
-    status: 'Screening',
-    label: 'Screening',
-    badgeBg: 'bg-orange-100 dark:bg-orange-950/80 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800',
-  },
-  {
-    status: 'Interview',
-    label: 'Interview',
-    badgeBg: 'bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-  },
-  {
-    status: 'Offering',
-    label: 'Offering',
-    badgeBg: 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-  },
-  {
-    status: 'Ditolak',
-    label: 'Ditolak',
-    badgeBg: 'bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800',
-  },
-];
 
 export const ApplicationDetailDrawer: React.FC<ApplicationDetailDrawerProps> = ({
   isOpen,
@@ -152,11 +122,10 @@ export const ApplicationDetailDrawer: React.FC<ApplicationDetailDrawerProps> = (
     }
   };
 
-  const currentStatusConfig = STATUS_OPTIONS.find((s) => s.status === status);
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="p-0 flex flex-col justify-between h-full">
+      <SheetContent side="right" className="p-0 flex flex-col justify-between w-full sm:max-w-xl sm:h-full overflow-hidden">
         {/* Drawer Header */}
         <SheetHeader className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
@@ -179,29 +148,16 @@ export const ApplicationDetailDrawer: React.FC<ApplicationDetailDrawerProps> = (
           <SheetBody className="p-6 space-y-6 flex-1">
 
             {/* Status Tahapan Selector */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+            <div>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                 Status Tahapan
               </label>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
-                {STATUS_OPTIONS.map((item) => {
-                  const isSelected = status === item.status;
-                  return (
-                    <button
-                      key={item.status}
-                      type="button"
-                      onClick={() => setStatus(item.status)}
-                      className={`px-2.5 py-1.5 rounded-[8px] text-caption font-bold border transition text-center cursor-pointer ${
-                        isSelected
-                          ? `${item.badgeBg} ring-2 ring-offset-1 ring-slate-400 dark:ring-offset-slate-900 shadow-xs`
-                          : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
+              <CustomSelect
+                value={status}
+                onChange={(val) => setStatus(val as ApplicationItem['status'])}
+                options={['Tersimpan', 'Terkirim', 'Screening', 'Interview', 'Offering', 'Ditolak']}
+                placeholder="Pilih Status"
+              />
             </div>
 
             {/* Contextual Modules based on current status */}
@@ -449,7 +405,7 @@ export const ApplicationDetailDrawer: React.FC<ApplicationDetailDrawerProps> = (
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                     Tanggal Melamar
@@ -554,7 +510,7 @@ export const ApplicationDetailDrawer: React.FC<ApplicationDetailDrawerProps> = (
                 size="sm"
                 onClick={onClose}
               >
-                Tutup
+                Batal
               </Button>
               <Button
                 type="submit"

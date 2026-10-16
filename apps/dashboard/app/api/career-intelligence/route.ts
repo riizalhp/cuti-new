@@ -481,10 +481,19 @@ export async function GET(req: NextRequest) {
         parsedData.position ||
         ''
       ).trim();
+      const fullName = (
+        parsedData.fullName ||
+        `${parsedData.firstName || ''} ${parsedData.lastName || ''}`
+      ).trim();
       return {
         id: p.id,
         title: p.title || 'CV Aktif',
         targetPosition: targetPos,
+        fullName: fullName || user.name || '',
+        firstName: parsedData.firstName || '',
+        lastName: parsedData.lastName || '',
+        email: parsedData.email || user.email || '',
+        phone: parsedData.phone || '',
         skills: Array.isArray(parsedData.skills) ? parsedData.skills : [],
         experience: Array.isArray(parsedData.experience)
           ? parsedData.experience
@@ -497,6 +506,7 @@ export async function GET(req: NextRequest) {
           : Array.isArray(parsedData.educations)
           ? parsedData.educations
           : [],
+        data: parsedData,
       };
     });
 
@@ -648,10 +658,19 @@ export async function POST(req: NextRequest) {
         parsedData.position ||
         ''
       ).trim();
+      const fullName = (
+        parsedData.fullName ||
+        `${parsedData.firstName || ''} ${parsedData.lastName || ''}`
+      ).trim();
       return {
         id: p.id,
         title: p.title || 'CV Aktif',
         targetPosition: targetPos,
+        fullName: fullName || user.name || '',
+        firstName: parsedData.firstName || '',
+        lastName: parsedData.lastName || '',
+        email: parsedData.email || user.email || '',
+        phone: parsedData.phone || '',
         skills: Array.isArray(parsedData.skills) ? parsedData.skills : [],
         experience: Array.isArray(parsedData.experience)
           ? parsedData.experience
@@ -664,6 +683,7 @@ export async function POST(req: NextRequest) {
           : Array.isArray(parsedData.educations)
           ? parsedData.educations
           : [],
+        data: parsedData,
       };
     });
 

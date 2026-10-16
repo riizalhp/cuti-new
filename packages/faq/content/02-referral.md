@@ -9,6 +9,9 @@ keywords: referral, kode referral, link referral, undang teman, bonus referral, 
 
 Program **Referral** (/referral) memberikan apresiasi saldo setiap kali rekanmu mendaftar dan menggunakan platform melalui kode undanganmu.
 
+> **Status Fitur**: Modul Referral saat ini sedang dalam tahap pemutakhiran sistem dan disembunyikan sementara dari navigasi antarmuka dashboard hingga rilis versi stabil berikutnya.
+
+
 ## Kode dan tautan referral milikmu
 
 Pada menu Referral tersedia dua pilihan:

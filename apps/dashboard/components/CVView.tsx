@@ -13,6 +13,7 @@ import { getStoredSession } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';
 import { CvPromoModal } from '@/components/CvPromoModal';
+import { CvDownloadSuccessModal } from '@/components/CvDownloadSuccessModal';
 import { CvHrdFloatingCta } from '@/components/CvHrdFloatingCta';
 import { CvHrdModal } from '@/components/CvHrdModal';
 import { AiAssistantDrawer } from '@/components/ai/AiAssistantDrawer';
@@ -143,44 +144,44 @@ export const MARGIN_PRESETS: Record<Exclude<MarginPresetType, 'custom'>, {
   labels: { top: string; bottom: string; left: string; right: string };
 }> = {
   normal: {
-    name: 'Normal',
+    name: 'Standar (Normal)',
     top: 2.54,
     bottom: 2.54,
     left: 2.54,
     right: 2.54,
-    labels: { top: 'Top: 2,54 cm', bottom: 'Bottom: 2,54 cm', left: 'Left: 2,54 cm', right: 'Right: 2,54 cm' },
+    labels: { top: 'Atas: 2,54 cm', bottom: 'Bawah: 2,54 cm', left: 'Kiri: 2,54 cm', right: 'Kanan: 2,54 cm' },
   },
   narrow: {
-    name: 'Narrow',
+    name: 'Sempit (Narrow)',
     top: 1.27,
     bottom: 1.27,
     left: 1.27,
     right: 1.27,
-    labels: { top: 'Top: 1,27 cm', bottom: 'Bottom: 1,27 cm', left: 'Left: 1,27 cm', right: 'Right: 1,27 cm' },
+    labels: { top: 'Atas: 1,27 cm', bottom: 'Bawah: 1,27 cm', left: 'Kiri: 1,27 cm', right: 'Kanan: 1,27 cm' },
   },
   moderate: {
-    name: 'Moderate',
+    name: 'Sedang (Moderate)',
     top: 2.54,
     bottom: 2.54,
     left: 1.91,
     right: 1.91,
-    labels: { top: 'Top: 2,54 cm', bottom: 'Bottom: 2,54 cm', left: 'Left: 1,91 cm', right: 'Right: 1,91 cm' },
+    labels: { top: 'Atas: 2,54 cm', bottom: 'Bawah: 2,54 cm', left: 'Kiri: 1,91 cm', right: 'Kanan: 1,91 cm' },
   },
   wide: {
-    name: 'Wide',
+    name: 'Lebar (Wide)',
     top: 2.54,
     bottom: 2.54,
     left: 5.08,
     right: 5.08,
-    labels: { top: 'Top: 2,54 cm', bottom: 'Bottom: 2,54 cm', left: 'Left: 5,08 cm', right: 'Right: 5,08 cm' },
+    labels: { top: 'Atas: 2,54 cm', bottom: 'Bawah: 2,54 cm', left: 'Kiri: 5,08 cm', right: 'Kanan: 5,08 cm' },
   },
   mirrored: {
-    name: 'Mirrored',
+    name: 'Cermin (Mirrored)',
     top: 2.54,
     bottom: 2.54,
     left: 3.18,
     right: 2.54,
-    labels: { top: 'Top: 2,54 cm', bottom: 'Bottom: 2,54 cm', left: 'Inside: 3,18 cm', right: 'Outside: 2,54 cm' },
+    labels: { top: 'Atas: 2,54 cm', bottom: 'Bawah: 2,54 cm', left: 'Dalam: 3,18 cm', right: 'Luar: 2,54 cm' },
   },
 };
 
@@ -1186,6 +1187,18 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
     return found || null;
   });
 
+  // Modal perayaan unduh CV
+  const [isCvDownloadSuccessOpen, setIsCvDownloadSuccessOpen] = useState(false);
+  const [downloadedCvTitle, setDownloadedCvTitle] = useState('');
+
+  useEffect(() => {
+    const handleAfterPrint = () => {
+      setIsCvDownloadSuccessOpen(true);
+    };
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => window.removeEventListener('afterprint', handleAfterPrint);
+  }, []);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [isHrdModalOpen, setIsHrdModalOpen] = useState(false);
   const [isFormDrawerOpen, setIsFormDrawerOpen] = useState(true);
@@ -1428,6 +1441,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
 
   // Document Layout & Formatting Settings State
   const [rightPanelTab, setRightPanelTab] = useState<'editor' | 'templates' | 'pengaturan'>('editor');
+  const [mobileActiveView, setMobileActiveView] = useState<'editor' | 'preview'>('editor');
   const [showLayoutSelector, setShowLayoutSelector] = useState<boolean>(false);
   const [showDocSettings, setShowDocSettings] = useState<boolean>(false);
   const [docFontFamily, setDocFontFamily] = useState<'sans' | 'serif' | 'mono' | 'standard'>(() => (initialCV?.docFontFamily as any) || 'sans');
@@ -1623,9 +1637,17 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
     }
 
     if (downloadFormat === 'pdf') {
+      setDownloadedCvTitle(titleInput || selectedCV?.title || 'CV Lamaran');
       window.print();
+      setTimeout(() => {
+        setIsCvDownloadSuccessOpen(true);
+      }, 1000);
     } else {
       toast.info('Mengunduh Berkas DOCX', `Menyiapkan unduhan "${titleInput || 'CV_Lamar_Kerja.docx'}"...`);
+      setDownloadedCvTitle(titleInput || selectedCV?.title || 'CV Lamaran');
+      setTimeout(() => {
+        setIsCvDownloadSuccessOpen(true);
+      }, 1000);
     }
   };
 
@@ -2230,7 +2252,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
   });
 
   // Real-time Dynamic ATS Score hook
-  const { atsResult, getSectionIssues } = useDynamicATSScore(formData, 300);
+  const { atsResult, getSectionIssues } = useDynamicATSScore(
+    formData,
+    300,
+    (selectedCV?.purpose as any) || (formData as any)?.purpose
+  );
 
   const [aiNote, setAiNote] = useState<string>('');
   const [titleInput, setTitleInput] = useState(() => initialCV?.title || '');
@@ -3041,6 +3067,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
       updatedAt: 'Hari ini',
       atsScore: calculatedScore,
       templateId: selectedTemplateId,
+      photoPosition: formData.photoPosition || docPhotoPosition || 'right',
+      docPhotoPosition: docPhotoPosition || formData.photoPosition || 'right',
       docFontFamily,
       docFontSize,
       docSpacing,
@@ -3307,8 +3335,16 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
       firstName: resolvedFirst,
       lastName: resolvedLast,
       fullName: resolvedFullName,
-      headline: enrichedCv.headline || profileSource?.targetPositions?.[0] || 'Project Manager',
+      headline:
+        enrichedCv.headline ||
+        (enrichedCv as any).target_position ||
+        (enrichedCv as any).targetPosition ||
+        profileSource?.targetPositions?.[0] ||
+        'Professional',
       photoUrl: enrichedCv.photoUrl || '',
+      photoPosition: (enrichedCv as any).photoPosition || (enrichedCv as any).docPhotoPosition || 'right',
+      photoShape: (enrichedCv as any).photoShape || 'circle',
+      showPhoto: (enrichedCv as any).showPhoto !== undefined ? (enrichedCv as any).showPhoto : true,
       email: resolvedEmail,
       phone: resolvedPhone,
       website: enrichedCv.website || '',
@@ -3338,6 +3374,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
     if (cv.docFontSize) setDocFontSize(cv.docFontSize);
     if (cv.docSpacing) setDocSpacing(cv.docSpacing);
     if (cv.docShowIcons !== undefined) setDocShowIcons(cv.docShowIcons);
+    setDocPhotoPosition(((enrichedCv as any).photoPosition || (enrichedCv as any).docPhotoPosition || 'right') as any);
     if (cv.docNameSize !== undefined) setDocNameSize(cv.docNameSize);
     if (cv.docHeaderSize !== undefined) setDocHeaderSize(cv.docHeaderSize);
     if (cv.docBodySize !== undefined) setDocBodySize(cv.docBodySize);
@@ -3735,6 +3772,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                       e.stopPropagation();
                       toast.success('Mempersiapkan PDF', `Membuka pratinjau cetak untuk ${cv.title}...`);
                       handleOpenCvDetail(cv);
+                      setDownloadedCvTitle(cv.title || 'CV Lamaran');
                       setTimeout(() => {
                         try {
                           fetch('/api/cv/track-download', {
@@ -3749,6 +3787,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                           }).catch(() => {});
                         } catch {}
                         window.print();
+                        setTimeout(() => {
+                          setIsCvDownloadSuccessOpen(true);
+                        }, 1000);
                       }, 500);
                     }}
                     className="px-3.5 py-2 rounded-[10px] text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-900 hover:text-white hover:border-slate-900 dark:hover:bg-slate-100 dark:hover:text-slate-900 dark:hover:border-slate-100 border border-slate-200 dark:border-slate-700 shadow-2xs hover:shadow-md active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer relative z-10"
@@ -5516,7 +5557,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                 <span>Kembali</span>
               </button>
 
-              <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block" />
+              <div className="h-6 w-px bg-slate-200 dark:border-slate-800 hidden sm:block" />
 
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline">Tata Letak:</span>
@@ -5582,10 +5623,42 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
             </div>
           </div>
 
+          {/* MOBILE VIEW TOGGLE (< lg): FORMULIR EDITOR VS PRATINJAU CV */}
+          <div className="block lg:hidden w-full no-print">
+            <div className="p-1 rounded-[10px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-1 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setMobileActiveView('editor')}
+                className={`flex-1 py-2 px-3 rounded-[8px] font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer min-h-[44px] ${
+                  mobileActiveView === 'editor'
+                    ? 'bg-[#1738D1] text-white shadow-sm'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <FileText className="w-4 h-4" />
+                <span>Formulir Editor</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileActiveView('preview')}
+                className={`flex-1 py-2 px-3 rounded-[8px] font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer min-h-[44px] ${
+                  mobileActiveView === 'preview'
+                    ? 'bg-[#1738D1] text-white shadow-sm'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <Eye className="w-4 h-4" />
+                <span>Pratinjau CV (A4)</span>
+              </button>
+            </div>
+          </div>
+
           {/* MAIN CONTENT: SPLIT SCREEN ON DESKTOP (LEFT: A4 CANVAS, RIGHT: INLINE FORM EDITOR) */}
-          <div className="cv-print-area-wrapper grid grid-cols-1 lg:grid-cols-12 gap-6 items-start print:block print:w-[210mm] print:m-0 print:p-0">
-            {/* LEFT COLUMN: CENTERED A4 CANVAS PREVIEW */}
-            <div className="cv-print-area-wrapper lg:col-span-7 xl:col-span-7 w-full overflow-x-hidden no-scrollbar pb-6 flex flex-col items-center bg-slate-200/60 dark:bg-slate-950/80 p-4 md:p-6 rounded-[10px] border border-slate-300/60 dark:border-slate-800 h-fit min-h-fit print:p-0 print:bg-transparent print:border-none print:max-h-none print:overflow-visible print:static print:block print:w-[210mm] print:m-0">
+          <div className="cv-print-area-wrapper grid grid-cols-1 lg:grid-cols-12 gap-6 items-start lg:h-[calc(100vh-165px)] lg:min-h-[550px] print:block print:w-[210mm] print:m-0 print:p-0">
+            {/* LEFT COLUMN: A4 CANVAS PREVIEW (DESKTOP DUAL-PANE STUDIO) */}
+            <div className={`cv-print-area-wrapper lg:col-span-7 xl:col-span-7 w-full overflow-x-hidden lg:h-full lg:overflow-y-auto pb-6 flex flex-col items-center bg-slate-200/60 dark:bg-slate-950/80 p-4 md:p-6 rounded-[10px] border border-slate-300/60 dark:border-slate-800 print:p-0 print:bg-transparent print:border-none print:max-h-none print:overflow-visible print:static print:block print:w-[210mm] print:m-0 ${
+              mobileActiveView === 'preview' ? 'flex' : 'hidden lg:flex'
+            }`}>
               <A4PaperlikeCanvas
                 templateId={selectedTemplateId}
                 customData={formData}
@@ -5612,53 +5685,57 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
             </div>
 
             {/* RIGHT COLUMN: TOGGLE TABS (EDITOR | TEMPLATES | PENGATURAN) */}
-            <div className="lg:col-span-5 xl:col-span-5 w-full flex flex-col space-y-3 no-print">
-              {/* Header Navigation Toggle Bar */}
-              <div className="p-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-1 shadow-2xs">
-                <button
-                  type="button"
-                  onClick={() => setRightPanelTab('editor')}
-                  className={`flex-1 py-2 px-3 rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                    rightPanelTab === 'editor'
-                      ? 'bg-[#1738D1] text-white shadow-md'
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'
-                  }`}
-                >
-                  <FileText className="w-3.5 h-3.5" />
-                  <span>Editor</span>
-                </button>
+            <div className={`lg:col-span-5 xl:col-span-5 w-full lg:h-full lg:overflow-y-auto flex flex-col space-y-3 no-print pr-1 ${
+              mobileActiveView === 'editor' ? 'flex' : 'hidden lg:flex'
+            }`}>
+              {/* Header Navigation Toggle Bar (Opaque Sticky Header) */}
+              <div className="sticky top-0 z-20 pb-2 bg-slate-50 dark:bg-slate-950">
+                <div className="p-1.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-1 shadow-2xs">
+                  <button
+                    type="button"
+                    onClick={() => setRightPanelTab('editor')}
+                    className={`flex-1 py-2 px-3 rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                      rightPanelTab === 'editor'
+                        ? 'bg-[#1738D1] text-white shadow-md'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'
+                    }`}
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Editor</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => setRightPanelTab('templates')}
-                  className={`flex-1 py-2 px-3 rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                    rightPanelTab === 'templates'
-                      ? 'bg-[#1738D1] text-white shadow-md'
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'
-                  }`}
-                >
-                  <LayoutGrid className="w-3.5 h-3.5" />
-                  <span>Templates</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setRightPanelTab('templates')}
+                    className={`flex-1 py-2 px-3 rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                      rightPanelTab === 'templates'
+                        ? 'bg-[#1738D1] text-white shadow-md'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'
+                    }`}
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                    <span>Templates</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => setRightPanelTab('pengaturan')}
-                  className={`flex-1 py-2 px-3 rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                    rightPanelTab === 'pengaturan'
-                      ? 'bg-[#1738D1] text-white shadow-md'
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'
-                  }`}
-                >
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span>Pengaturan</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setRightPanelTab('pengaturan')}
+                    className={`flex-1 py-2 px-3 rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                      rightPanelTab === 'pengaturan'
+                        ? 'bg-[#1738D1] text-white shadow-md'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'
+                    }`}
+                  >
+                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                    <span>Pengaturan</span>
+                  </button>
+                </div>
               </div>
 
               {/* TAB 1: EDITOR */}
               {rightPanelTab === 'editor' && (
                 <div className="w-full space-y-3">
-                  <form id="cv-drawer-form" onSubmit={handleSaveCV} className="space-y-3.5 text-xs pb-12">
+                  <form id="cv-drawer-form" onSubmit={handleSaveCV} className="space-y-3.5 text-xs pb-24 lg:pb-12">
                   {/* Section 1: Informasi Pribadi & Kontak (Merged) */}
                   <div className="border border-slate-200 dark:border-slate-800 rounded-[10px] bg-white dark:bg-slate-900 shadow-2xs">
                     <button
@@ -6045,11 +6122,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                                   <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
                                     Bentuk:
                                   </span>
-                                  <div className="flex items-center gap-1 bg-slate-200/70 dark:bg-slate-800 p-0.5 rounded-[8px]">
+                                  <div className="flex items-center gap-1 bg-slate-200/70 dark:bg-slate-800 p-0.5 rounded-[10px]">
                                     <button
                                       type="button"
                                       onClick={() => setFormData((prev) => ({ ...prev, photoShape: 'circle' }))}
-                                      className={`px-2.5 py-1 rounded-[7px] text-[11px] font-bold transition cursor-pointer ${
+                                      className={`px-3 py-1.5 rounded-[8px] text-[11px] font-bold transition cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none ${
                                         (formData.photoShape || 'circle') === 'circle'
                                           ? 'bg-[#1738D1] text-white shadow-2xs'
                                           : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -6060,7 +6137,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                                     <button
                                       type="button"
                                       onClick={() => setFormData((prev) => ({ ...prev, photoShape: 'square' }))}
-                                      className={`px-2.5 py-1 rounded-[7px] text-[11px] font-bold transition cursor-pointer ${
+                                      className={`px-3 py-1.5 rounded-[8px] text-[11px] font-bold transition cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none ${
                                         formData.photoShape === 'square'
                                           ? 'bg-[#1738D1] text-white shadow-2xs'
                                           : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -6077,23 +6154,23 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                                     Posisi:
                                   </span>
                                   {selectedTemplateId === 'tech-sidebar' ? (
-                                    <span className="text-[10px] font-bold text-slate-500 bg-slate-200/70 dark:bg-slate-800 px-2.5 py-1 rounded-[6px]">
+                                    <span className="text-[10px] font-bold text-slate-500 bg-slate-200/70 dark:bg-slate-800 px-2.5 py-1 rounded-[8px]">
                                       Tetap (Sidebar)
                                     </span>
                                   ) : (selectedTemplateId === 'minimalist-executive' || selectedTemplateId === 'charcoal-white') ? (
-                                    <span className="text-[10px] font-bold text-[#1738D1] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2.5 py-1 rounded-[6px] flex items-center gap-1">
+                                    <span className="text-[10px] font-bold text-[#1738D1] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2.5 py-1 rounded-[8px] flex items-center gap-1">
                                       <AlignCenter className="w-3 h-3" />
                                       Tengah (Simetris)
                                     </span>
                                   ) : (
-                                    <div className="flex items-center gap-1 bg-slate-200/70 dark:bg-slate-800 p-0.5 rounded-[8px]">
+                                    <div className="flex items-center gap-1 bg-slate-200/70 dark:bg-slate-800 p-0.5 rounded-[10px]">
                                       <button
                                         type="button"
                                         onClick={() => {
                                           setFormData((prev) => ({ ...prev, photoPosition: 'left' }));
                                           setDocPhotoPosition('left');
                                         }}
-                                        className={`px-2.5 py-1 rounded-[7px] text-[11px] font-bold transition cursor-pointer ${
+                                        className={`px-3 py-1.5 rounded-[8px] text-[11px] font-bold transition cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none ${
                                           (formData.photoPosition || docPhotoPosition || 'right') === 'left'
                                             ? 'bg-[#1738D1] text-white shadow-2xs'
                                             : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -6107,7 +6184,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                                           setFormData((prev) => ({ ...prev, photoPosition: 'right' }));
                                           setDocPhotoPosition('right');
                                         }}
-                                        className={`px-2.5 py-1 rounded-[7px] text-[11px] font-bold transition cursor-pointer ${
+                                        className={`px-3 py-1.5 rounded-[8px] text-[11px] font-bold transition cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none ${
                                           (formData.photoPosition || docPhotoPosition || 'right') === 'right' || (formData.photoPosition || docPhotoPosition) === 'center'
                                             ? 'bg-[#1738D1] text-white shadow-2xs'
                                             : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -8044,32 +8121,32 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                             {/* TAB 3: PENGATURAN */}
               {rightPanelTab === 'pengaturan' && (
                 <div className="w-full bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-[10px] border border-slate-200 dark:border-slate-800 space-y-7 shadow-2xs animate-in fade-in duration-150">
-                  {/* SECTION 1: PENGATURAN MARGIN HALAMAN (WORD PRESET) */}
+                  {/* SECTION 1: PENGATURAN MARGIN HALAMAN */}
                   <div className="space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                       <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                        <LayoutGrid className="w-4 h-4 text-orange-500" />
+                        <LayoutGrid className="w-4 h-4 text-[#1738D1] dark:text-blue-400" />
                         <span>Margin &amp; Layout Halaman</span>
                       </h4>
                       <button
                         type="button"
                         onClick={handleResetDocStyles}
-                        className="px-3 py-1.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                        className="px-3 py-1.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none"
                         title="Reset ke Gaya Default"
                       >
-                        <RotateCcw className="w-3.5 h-3.5 text-orange-500" />
+                        <RotateCcw className="w-3.5 h-3.5 text-[#1738D1] dark:text-blue-400" />
                         <span>Reset Default</span>
                       </button>
                     </div>
 
-                    {/* Preset Buttons Grid (Normal, Narrow, Moderate, Wide, Mirrored) */}
+                    {/* Preset Buttons Grid */}
                     <div className="space-y-2.5">
                       <div className="flex items-center justify-between">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                          Preset Margin Halaman (Word Style)
+                          Preset Margin Halaman
                         </label>
-                        <span className="text-[11px] font-extrabold text-orange-600 dark:text-orange-400 capitalize bg-orange-50 dark:bg-orange-950/60 px-2 py-0.5 rounded-[6px]">
-                          {docMarginPreset === 'custom' ? 'Kustom' : MARGIN_PRESETS[docMarginPreset]?.name || 'Normal'}
+                        <span className="text-[11px] font-extrabold text-[#1738D1] dark:text-blue-300 capitalize bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2.5 py-0.5 rounded-[8px]">
+                          {docMarginPreset === 'custom' ? 'Kustom' : MARGIN_PRESETS[docMarginPreset]?.name || 'Standar'}
                         </span>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -8081,14 +8158,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                               key={key}
                               type="button"
                               onClick={() => handleSelectMarginPreset(key)}
-                              className={`p-3.5 rounded-[10px] border text-left transition cursor-pointer flex flex-col justify-between gap-2 ${
+                              className={`p-3.5 rounded-[10px] border text-left transition cursor-pointer flex flex-col justify-between gap-2 focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none ${
                                 isSelected
-                                  ? 'bg-orange-50/90 dark:bg-orange-950/60 border-[#1738D1] text-orange-700 dark:text-orange-300 ring-2 ring-[#1738D1]/20 shadow-2xs'
+                                  ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] text-[#1738D1] dark:text-blue-300 ring-2 ring-[#1738D1]/20 shadow-2xs'
                                   : 'bg-slate-50/80 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300'
                               }`}
                             >
                               <div className="flex items-center justify-between w-full">
-                                <span className={`text-xs font-extrabold ${isSelected ? 'text-orange-700 dark:text-orange-300' : 'text-slate-900 dark:text-white'}`}>
+                                <span className={`text-xs font-extrabold ${isSelected ? 'text-[#1738D1] dark:text-blue-300' : 'text-slate-900 dark:text-white'}`}>
                                   {item.name}
                                 </span>
                                 {isSelected && (
@@ -8097,7 +8174,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                                   </span>
                                 )}
                               </div>
-                              <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                              <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] font-medium text-slate-600 dark:text-slate-400">
                                 <span>{item.labels.top}</span>
                                 <span>{item.labels.bottom}</span>
                                 <span>{item.labels.left}</span>
@@ -8170,17 +8247,17 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                   {/* SECTION 2: PENGATURAN GAYA DOKUMEN & TIPOGRAFI */}
                   <div className="space-y-5 pt-5 border-t border-slate-200 dark:border-slate-800">
                     <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                      <SlidersHorizontal className="w-4 h-4 text-orange-500" />
+                      <SlidersHorizontal className="w-4 h-4 text-[#1738D1] dark:text-blue-400" />
                       <span>Ukuran Font &amp; Gaya Tipografi</span>
                     </h4>
 
-                    {/* Skala Ukuran Font Global */}
+                    {/* Skala Ukuran Font Dokumen */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                          Skala Ukuran Font Dokumen (Global)
+                          Ukuran Font Dokumen
                         </label>
-                        <span className="text-[11px] font-extrabold text-orange-600 dark:text-orange-400 uppercase bg-orange-50 dark:bg-orange-950/60 px-2 py-0.5 rounded-[6px]">
+                        <span className="text-[11px] font-extrabold text-[#1738D1] dark:text-blue-300 uppercase bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded-[8px]">
                           {docFontSize}
                         </span>
                       </div>
@@ -8195,14 +8272,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                             key={fSize.id}
                             type="button"
                             onClick={() => setDocFontSize(fSize.id as any)}
-                            className={`py-2.5 px-2 rounded-[10px] border text-xs font-bold transition cursor-pointer text-center flex flex-col items-center justify-center gap-1 ${
+                            className={`py-2.5 px-2 rounded-[10px] border text-xs font-bold transition cursor-pointer text-center flex flex-col items-center justify-center gap-1 focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none min-h-[44px] ${
                               docFontSize === fSize.id
-                                ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-700 dark:text-orange-300 shadow-2xs ring-2 ring-[#1738D1]/20'
+                                ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] text-[#1738D1] dark:text-blue-300 shadow-2xs ring-2 ring-[#1738D1]/20'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/80'
                             }`}
                           >
                             <span>{fSize.label}</span>
-                            <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">{fSize.pct}</span>
+                            <span className="text-[10px] font-medium text-slate-600 dark:text-slate-400">{fSize.pct}</span>
                           </button>
                         ))}
                       </div>
@@ -8217,14 +8294,14 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                         <button
                           type="button"
                           onClick={() => setDocShowIcons(!docShowIcons)}
-                          className={`w-full px-3.5 py-2.5 rounded-[10px] border text-xs font-bold flex items-center justify-between transition cursor-pointer ${
+                          className={`w-full px-3.5 py-2.5 rounded-[10px] border text-xs font-bold flex items-center justify-between transition cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none min-h-[44px] ${
                             docShowIcons
-                              ? 'bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800'
+                              ? 'bg-blue-50/80 dark:bg-blue-950/60 text-[#1738D1] dark:text-blue-300 border-blue-200 dark:border-blue-800'
                               : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
                           }`}
                         >
                           <div className="flex items-center gap-2">
-                            <UserCheck className="w-4 h-4 text-orange-500" />
+                            <UserCheck className="w-4 h-4 text-[#1738D1] dark:text-blue-400" />
                             <span>{docShowIcons ? 'Ikon Tampil' : 'Teks Saja'}</span>
                           </div>
                           <div className={`w-4 h-4 rounded-[6px] border flex items-center justify-center ${docShowIcons ? 'bg-[#1738D1] border-[#1738D1] text-white' : 'border-slate-300 dark:border-slate-600'}`}>
@@ -8257,83 +8334,20 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                         />
                       </div>
 
-                      {/* Selection Posisi Foto Profil Header */}
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                          <span className="flex items-center gap-1.5">
-                            <ImageIcon className="w-3.5 h-3.5 text-orange-500" />
-                            <span>Posisi Foto Profil Header</span>
-                          </span>
-                          {selectedTemplateId === 'tech-sidebar' ? (
-                            <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-[6px]">
-                              Terkunci di Sidebar
-                            </span>
-                          ) : (selectedTemplateId === 'minimalist-executive' || selectedTemplateId === 'charcoal-white') ? (
-                            <span className="text-[10px] font-semibold text-[#1738D1] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded-[6px]">
-                              Terkunci di Tengah
-                            </span>
-                          ) : null}
-                        </label>
-                        {selectedTemplateId === 'tech-sidebar' ? (
-                          <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-[10px] border border-slate-200 dark:border-slate-700 text-xs text-slate-500 text-center">
-                            Template ini menempatkan foto secara otomatis pada bilah samping (sidebar).
-                          </div>
-                        ) : (selectedTemplateId === 'minimalist-executive' || selectedTemplateId === 'charcoal-white') ? (
-                          <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-[10px] border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 text-center flex items-center justify-center gap-2">
-                            <AlignCenter className="w-4 h-4 text-[#1738D1] shrink-0" />
-                            <span>Template simetris ini mengunci foto secara otomatis di tengah atas nama.</span>
-                          </div>
-                        ) : (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setDocPhotoPosition('left');
-                                setFormData((prev) => ({ ...prev, photoPosition: 'left' }));
-                              }}
-                              className={`px-3.5 py-2.5 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-2 ${
-                                docPhotoPosition === 'left'
-                                  ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
-                                  : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
-                              }`}
-                            >
-                              <AlignLeft className="w-3.5 h-3.5" />
-                              <span>Di Kiri (Left)</span>
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setDocPhotoPosition('right');
-                                setFormData((prev) => ({ ...prev, photoPosition: 'right' }));
-                              }}
-                              className={`px-3.5 py-2.5 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-2 ${
-                                docPhotoPosition === 'right' || docPhotoPosition === 'center'
-                                  ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
-                                  : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
-                              }`}
-                            >
-                              <AlignRight className="w-3.5 h-3.5" />
-                              <span>Di Kanan (Right)</span>
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
                       {/* Selection Gaya Hyperlink */}
                       <div className="space-y-1.5 sm:col-span-2">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                          <ExternalLink className="w-3.5 h-3.5 text-orange-500" />
+                          <ExternalLink className="w-3.5 h-3.5 text-[#1738D1] dark:text-blue-400" />
                           <span>Gaya Hyperlink / Tautan Kontak</span>
                         </label>
                         <div className="grid grid-cols-3 gap-2.5">
                           <button
                             type="button"
                             onClick={() => setDocLinkStyle('blue')}
-                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none min-h-[44px] ${
                               docLinkStyle === 'blue'
-                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs'
-                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60'
+                                ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] text-[#1738D1] dark:text-blue-300 ring-2 ring-[#1738D1]/20 shadow-2xs'
+                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-300'
                             }`}
                           >
                             <span className="text-blue-600 dark:text-blue-400 underline font-semibold">Biru</span>
@@ -8342,10 +8356,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                           <button
                             type="button"
                             onClick={() => setDocLinkStyle('underline')}
-                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none min-h-[44px] ${
                               docLinkStyle === 'underline'
-                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs'
-                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60'
+                                ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] text-[#1738D1] dark:text-blue-300 ring-2 ring-[#1738D1]/20 shadow-2xs'
+                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-300'
                             }`}
                           >
                             <span className="text-slate-900 dark:text-white underline font-semibold">Underline Hitam</span>
@@ -8354,10 +8368,10 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                           <button
                             type="button"
                             onClick={() => setDocLinkStyle('plain')}
-                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none min-h-[44px] ${
                               docLinkStyle === 'plain'
-                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs'
-                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60'
+                                ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] text-[#1738D1] dark:text-blue-300 ring-2 ring-[#1738D1]/20 shadow-2xs'
+                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-300'
                             }`}
                           >
                             <span className="text-slate-700 dark:text-slate-300 font-normal">Teks Biasa</span>
@@ -8368,16 +8382,16 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                       {/* Pengaturan Hyperlink Referensi */}
                       <div className="space-y-1.5 sm:col-span-2">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                          <Mail className="w-3.5 h-3.5 text-orange-500" />
+                          <Mail className="w-3.5 h-3.5 text-[#1738D1] dark:text-blue-400" />
                           <span>Hyperlink Referensi Kontak</span>
                         </label>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                           <button
                             type="button"
                             onClick={() => setDocRefEmailHyperlink(!docRefEmailHyperlink)}
-                            className={`px-3.5 py-2.5 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
+                            className={`px-3.5 py-2.5 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-between focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none min-h-[44px] ${
                               docRefEmailHyperlink
-                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
+                                ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] text-[#1738D1] dark:text-blue-300 ring-2 ring-[#1738D1]/20 shadow-2xs'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
                             }`}
                           >
@@ -8389,9 +8403,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                           <button
                             type="button"
                             onClick={() => setDocRefPhoneHyperlink(!docRefPhoneHyperlink)}
-                            className={`px-3.5 py-2.5 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
+                            className={`px-3.5 py-2.5 rounded-[10px] border text-xs font-bold transition cursor-pointer flex items-center justify-between focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none min-h-[44px] ${
                               docRefPhoneHyperlink
-                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
+                                ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] text-[#1738D1] dark:text-blue-300 ring-2 ring-[#1738D1]/20 shadow-2xs'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
                             }`}
                           >
@@ -8406,16 +8420,16 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                       {/* Pengaturan Format Link Proyek */}
                       <div className="space-y-1.5 sm:col-span-2">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                          <Globe className="w-3.5 h-3.5 text-orange-500" />
+                          <Globe className="w-3.5 h-3.5 text-[#1738D1] dark:text-blue-400" />
                           <span>Format Tampilan Link Proyek di CV</span>
                         </label>
                         <div className="grid grid-cols-3 gap-2.5">
                           <button
                             type="button"
                             onClick={() => setDocProjectLinkStyle('name')}
-                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer text-center ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer text-center focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none min-h-[44px] ${
                               docProjectLinkStyle === 'name'
-                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
+                                ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] text-[#1738D1] dark:text-blue-300 ring-2 ring-[#1738D1]/20 shadow-2xs'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
                             }`}
                           >
@@ -8424,9 +8438,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                           <button
                             type="button"
                             onClick={() => setDocProjectLinkStyle('text')}
-                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer text-center ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer text-center focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none min-h-[44px] ${
                               docProjectLinkStyle === 'text'
-                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
+                                ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] text-[#1738D1] dark:text-blue-300 ring-2 ring-[#1738D1]/20 shadow-2xs'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
                             }`}
                           >
@@ -8435,9 +8449,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                           <button
                             type="button"
                             onClick={() => setDocProjectLinkStyle('none')}
-                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer text-center ${
+                            className={`px-3 py-2 rounded-[10px] border text-xs font-bold transition cursor-pointer text-center focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none min-h-[44px] ${
                               docProjectLinkStyle === 'none'
-                                ? 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 dark:border-orange-600 shadow-2xs text-orange-700 dark:text-orange-300'
+                                ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] text-[#1738D1] dark:text-blue-300 ring-2 ring-[#1738D1]/20 shadow-2xs'
                                 : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-400'
                             }`}
                           >
@@ -8453,7 +8467,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
                           <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Ukuran Nama</label>
-                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 px-2 py-0.5 rounded-[6px]">{docNameSize} px</span>
+                          <span className="text-[11px] font-bold text-[#1738D1] dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded-[8px]">{docNameSize} px</span>
                         </div>
                         <div className="flex items-center gap-3">
                           <input
@@ -8476,11 +8490,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                         </div>
                       </div>
 
-                      {/* 2. Ukuran Judul */}
+                      {/* 2. Ukuran Judul Bagian */}
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Ukuran Judul (Section Header)</label>
-                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 px-2 py-0.5 rounded-[6px]">{docHeaderSize} px</span>
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Ukuran Judul Bagian</label>
+                          <span className="text-[11px] font-bold text-[#1738D1] dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded-[8px]">{docHeaderSize} px</span>
                         </div>
                         <div className="flex items-center gap-3">
                           <input
@@ -8503,11 +8517,11 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                         </div>
                       </div>
 
-                      {/* 3. Ukuran Isi */}
+                      {/* 3. Ukuran Teks Isi */}
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Ukuran Isi (Teks Body)</label>
-                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 px-2 py-0.5 rounded-[6px]">{docBodySize} px</span>
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Ukuran Teks Isi</label>
+                          <span className="text-[11px] font-bold text-[#1738D1] dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded-[8px]">{docBodySize} px</span>
                         </div>
                         <div className="flex items-center gap-3">
                           <input
@@ -8533,8 +8547,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                       {/* 4. Jarak Antar Bagian */}
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Jarak Antar Bagian (Margin Seksi)</label>
-                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">{docSectionSpacing} px</span>
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Jarak Antar Bagian</label>
+                          <span className="text-[11px] font-bold text-[#1738D1] dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded-[8px]">{docSectionSpacing} px</span>
                         </div>
                         <div className="flex items-center gap-3">
                           <input
@@ -8560,8 +8574,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                       {/* 5. Tinggi Baris */}
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tinggi Baris (Line Height)</label>
-                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">{docLineHeight}</span>
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tinggi Baris</label>
+                          <span className="text-[11px] font-bold text-[#1738D1] dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded-[8px]">{docLineHeight}</span>
                         </div>
                         <div className="flex items-center gap-3">
                           <input
@@ -8588,8 +8602,8 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                       {/* 6. Jarak Antar Huruf */}
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Jarak Antar Huruf (Letter Spacing)</label>
-                          <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">{docLetterSpacing} px</span>
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Jarak Huruf</label>
+                          <span className="text-[11px] font-bold text-[#1738D1] dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded-[8px]">{docLetterSpacing} px</span>
                         </div>
                         <div className="flex items-center gap-3">
                           <input
@@ -8618,7 +8632,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                   {/* SECTION 2: FORMAT UNDUHAN & FORM NAMA DOKUMEN */}
                   <div className="space-y-3.5 pt-3 border-t border-slate-200 dark:border-slate-800">
                     <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                      <Download className="w-4 h-4 text-orange-500" />
+                      <Download className="w-4 h-4 text-[#1738D1] dark:text-blue-400" />
                       <span>Format Unduhan &amp; Nama Dokumen</span>
                     </h4>
 
@@ -8645,9 +8659,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                         <button
                           type="button"
                           onClick={() => setDownloadFormat('pdf')}
-                          className={`py-2 px-3 rounded-[10px] border text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
+                          className={`py-2 px-3 rounded-[10px] border text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none min-h-[44px] ${
                             downloadFormat === 'pdf'
-                              ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-600 dark:text-orange-400 ring-2 ring-[#1738D1]/20'
+                              ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] text-[#1738D1] dark:text-blue-300 ring-2 ring-[#1738D1]/20 shadow-2xs'
                               : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'
                           }`}
                         >
@@ -8658,9 +8672,9 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                         <button
                           type="button"
                           onClick={() => setDownloadFormat('docx')}
-                          className={`py-2 px-3 rounded-[10px] border text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
+                          className={`py-2 px-3 rounded-[10px] border text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1738D1] focus-visible:outline-none min-h-[44px] ${
                             downloadFormat === 'docx'
-                              ? 'bg-orange-50 dark:bg-orange-950/60 border-[#1738D1] text-orange-600 dark:text-orange-400 ring-2 ring-[#1738D1]/20'
+                              ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#1738D1] text-[#1738D1] dark:text-blue-300 ring-2 ring-[#1738D1]/20 shadow-2xs'
                               : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'
                           }`}
                         >
@@ -8669,6 +8683,7 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
                         </button>
                       </div>
                     </div>
+
 
                     {/* INLINE CARD: CV DIBUATKAN HRD (Hidden for now) */}
                     {/*
@@ -9225,6 +9240,13 @@ export const CVView: React.FC<CVViewProps> = ({ cvId, initialCV }) => {
         }}
       />
 
+      {/* MODAL PERAYAAN BERHASIL UNDUH CV DENGAN MASKOT */}
+      <CvDownloadSuccessModal
+        isOpen={isCvDownloadSuccessOpen}
+        onClose={() => setIsCvDownloadSuccessOpen(false)}
+        cvTitle={downloadedCvTitle || titleInput || selectedCV?.title || 'CV Lamaran'}
+      />
+
       {/* Hidden for now: Floating CTA & Modal layanan CV by HRD */}
       {/* <CvHrdFloatingCta /> */}
 
@@ -9634,7 +9656,7 @@ export const A4PaperlikeCanvas: React.FC<{
   }, [totalPages, currentPage]);
 
   return (
-    <div ref={containerRef} className="cv-print-area w-full max-w-full overflow-x-hidden flex flex-col items-center gap-4 py-2 print:p-0 print:m-0 print:w-[210mm]">
+    <div ref={containerRef} className="cv-print-area w-full max-w-full flex flex-col items-center gap-4 py-2 print:p-0 print:m-0 print:w-[210mm]">
       {/* Hidden DOM measurement container */}
       <div className="fixed top-[-9999px] left-[-9999px] opacity-0 pointer-events-none print:hidden" aria-hidden="true">
         <style>{`
@@ -9670,66 +9692,6 @@ export const A4PaperlikeCanvas: React.FC<{
           />
         </div>
       </div>
-
-      {/* Pagination Toolbar (Hanya muncul jika CV lebih dari 1 halaman) */}
-      {totalPages > 1 && (
-        <div
-          className="no-print flex items-center justify-between gap-3 px-4 py-2 bg-white dark:bg-slate-900 rounded-[10px] border border-slate-300/80 dark:border-slate-800 shadow-2xs z-10 transition-all"
-          style={{
-            width: `${scaledWidth}px`,
-            maxWidth: '100%',
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-[#1738D1]" />
-              Halaman {activePage} dari {totalPages}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={activePage <= 1}
-              className="px-2.5 py-1 text-xs font-semibold rounded-[8px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1 cursor-pointer"
-              title="Halaman Sebelumnya"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Sebelumnya</span>
-            </button>
-
-            <div className="flex items-center gap-1 mx-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => setCurrentPage(num)}
-                  className={`w-6 h-6 rounded-[6px] text-xs font-bold transition cursor-pointer flex items-center justify-center ${
-                    activePage === num
-                      ? 'bg-[#1738D1] text-white shadow-xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
-                  title={`Buka Halaman ${num}`}
-                >
-                  {num}
-                </button>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={activePage >= totalPages}
-              className="px-2.5 py-1 text-xs font-semibold rounded-[8px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1 cursor-pointer"
-              title="Halaman Selanjutnya"
-            >
-              <span className="hidden sm:inline">Selanjutnya</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Render Paginated A4 Paper Sheets with Responsive Scale Wrapper */}
       <div
@@ -9851,6 +9813,59 @@ export const A4PaperlikeCanvas: React.FC<{
         );
         })}
       </div>
+
+      {/* Floating Bottom Pagination Capsule Pill (Always accessible, zero canvas height impact) */}
+      {totalPages > 1 && (
+        <div
+          className="no-print sticky bottom-3 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-300/80 dark:border-slate-700 shadow-xl shadow-slate-900/15 text-xs transition-all select-none my-1 pointer-events-auto"
+        >
+          <button
+            type="button"
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={activePage <= 1}
+            className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition flex items-center justify-center cursor-pointer"
+            title="Halaman Sebelumnya"
+            aria-label="Halaman Sebelumnya"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 px-1.5 flex items-center gap-1.5 whitespace-nowrap">
+            <FileText className="w-3.5 h-3.5 text-[#1738D1]" />
+            <span>Hlm {activePage} dari {totalPages}</span>
+          </span>
+
+          <div className="flex items-center gap-1 mx-0.5">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+              <button
+                key={num}
+                type="button"
+                onClick={() => setCurrentPage(num)}
+                className={`w-6 h-6 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center ${
+                  activePage === num
+                    ? 'bg-[#1738D1] text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+                title={`Buka Halaman ${num}`}
+                aria-label={`Buka Halaman ${num}`}
+              >
+                {num}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={activePage >= totalPages}
+            className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition flex items-center justify-center cursor-pointer"
+            title="Halaman Selanjutnya"
+            aria-label="Halaman Selanjutnya"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

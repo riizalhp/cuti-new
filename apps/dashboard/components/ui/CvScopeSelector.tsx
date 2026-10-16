@@ -205,7 +205,7 @@ export const CvScopeSelector: React.FC<CvScopeSelectorProps> = ({
 
       {/* Right-Hand Slide-in Drawer Sesuai Standar Design System Employr */}
       <Sheet open={isDrawerOpen} onOpenChange={setDrawerOpen}>
-        <SheetContent className="w-full sm:max-w-xl p-0 flex flex-col h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl">
+        <SheetContent side="right" className="w-full sm:max-w-xl p-0 flex flex-col justify-between overflow-hidden sm:h-full">
           {/* Header Drawer */}
           <SheetHeader className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
             <SheetTitle className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
@@ -402,14 +402,6 @@ export const CvScopeSelector: React.FC<CvScopeSelectorProps> = ({
               <Plus className="w-3.5 h-3.5" />
               <span>Kelola CV di CV Builder</span>
             </Link>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setDrawerOpen(false)}
-            >
-              Tutup
-            </Button>
           </SheetFooter>
         </SheetContent>
       </Sheet>

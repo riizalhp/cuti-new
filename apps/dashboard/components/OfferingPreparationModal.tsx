@@ -254,7 +254,7 @@ Salam hormat,
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="p-0 flex flex-col justify-between h-full w-full max-w-md sm:max-w-xl overflow-hidden">
+      <SheetContent side="right" className="p-0 flex flex-col justify-between w-full sm:max-w-xl sm:h-full overflow-hidden">
         {/* Header Drawer */}
         <SheetHeader className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex flex-row items-start justify-between gap-3 bg-slate-50/70 dark:bg-slate-800/40 text-left">
           <div className="flex items-center gap-3 pr-8 min-w-0">
@@ -578,7 +578,7 @@ Salam hormat,
               onClick={onClose}
               className="px-3"
             >
-              Tutup
+              Batal
             </Button>
             <Button
               type="button"

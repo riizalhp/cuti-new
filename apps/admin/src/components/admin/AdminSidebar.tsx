@@ -24,6 +24,7 @@ import {
   Briefcase,
   DownloadCloud,
   Mail,
+  CalendarDays,
   X,
 } from "lucide-react"
 import Link from "next/link"
@@ -70,6 +71,7 @@ const navSections: NavSection[] = [
   {
     title: "Growth & Marketing",
     items: [
+      { title: "Kemitraan & Event", href: "/kemitraan", icon: CalendarDays },
       { title: "Newsletter", href: "/newsletter", icon: Mail },
       { title: "Broadcast", href: "/broadcast", icon: Radio },
       { title: "Misi Cuan", href: "/campaigns", icon: Trophy },

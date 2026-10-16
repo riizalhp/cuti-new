@@ -95,7 +95,7 @@ function mapJob(job: any, companyName: string, matchScore?: number) {
     externalUrl: job.external_url || '',
     deadline: deadlineDate ? deadlineDate.toISOString() : null,
     createdAt: createdAtDate.toISOString(),
-    matchScore: matchScore !== undefined ? matchScore : 85,
+    matchScore: matchScore !== undefined ? matchScore : 0,
   };
 }
 
@@ -358,12 +358,12 @@ export async function GET(req: NextRequest) {
           }
         }
       } else {
-        bestMatch = { matchScore: 85, breakdown: null };
+        bestMatch = { matchScore: 0, breakdown: null };
       }
 
       return {
         ...mapped,
-        matchScore: bestMatch.matchScore > 0 ? bestMatch.matchScore : 78,
+        matchScore: bestMatch.matchScore,
         breakdown: bestMatch.breakdown,
       };
     });

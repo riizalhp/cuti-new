@@ -15,11 +15,13 @@ import {
   ChevronRightIcon,
   RefreshCwIcon,
 } from '@/components/icons/CustomIcons';
-import { Sparkles, Globe, Briefcase, BookmarkCheck } from 'lucide-react';
+import { Sparkles, Globe, Briefcase, BookmarkCheck, Plus } from 'lucide-react';
+import Link from 'next/link';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { jobsApi, cvApi, trackerApi } from '@/lib/api';
 import { calculateJobMatch } from '@/lib/job-matcher';
 import { useToast } from '@/components/ui/Toast';
+import { MascotEmptyState } from '@/components/ui/MascotEmptyState';
 import {
   Sheet,
   SheetContent,
@@ -45,6 +47,7 @@ interface JobItem {
   posted: string;
   matchScore: string;
   matchScoreNum: number;
+  hasMatchCalculated: boolean;
   matchedCvTitle?: string;
   matchedCvId?: string;
   hasRoleConflict?: boolean;
@@ -116,17 +119,21 @@ function normalizeSalary(job: any): string {
 const BATCH_SIZE = 24;
 
 function formatJobItems(rawList: any[], userCvs: any[], selectedCvId: string): JobItem[] {
+  const hasUserCvs = Array.isArray(userCvs) && userCvs.length > 0;
+
   return rawList.map((j: any) => {
     const cleaned = cleanJobTitleAndCompany(j.title || j.position, j.company_name || j.company);
     const salaryFormatted = normalizeSalary(j);
 
-    let score = 80;
+    let score = 0;
+    let hasMatchCalculated = false;
     let matchedTitle = '';
     let matchedId = '';
     let hasRoleConflict = false;
     let coherenceWarning: string | undefined = undefined;
 
-    if (userCvs.length > 0) {
+    if (hasUserCvs) {
+      hasMatchCalculated = true;
       const jobInput = {
         ...j,
         title: cleaned.title,
@@ -152,7 +159,7 @@ function formatJobItems(rawList: any[], userCvs: any[], selectedCvId: string): J
           }
         }
 
-        score = maxScore > 0 ? maxScore : 78;
+        score = maxScore >= 0 ? maxScore : 0;
         matchedTitle = bestCv?.title || bestCv?.name || 'CV Utama';
         matchedId = bestCv?.id || '';
         hasRoleConflict = Boolean(bestCalculated?.breakdown?.hasRoleConflict);
@@ -165,15 +172,11 @@ function formatJobItems(rawList: any[], userCvs: any[], selectedCvId: string): J
           hasRoleConflict = Boolean(calculated.breakdown?.hasRoleConflict);
           coherenceWarning = calculated.breakdown?.coherenceWarning;
         } catch {
-          score = 78;
+          score = 0;
         }
         matchedTitle = targetCv?.title || targetCv?.name || 'CV Terpilih';
         matchedId = targetCv?.id || '';
       }
-    } else if (typeof j.similarity_score === 'number' && j.similarity_score > 0) {
-      score = Math.round(j.similarity_score);
-    } else if (typeof j.matchScore === 'number' && j.matchScore > 0) {
-      score = Math.round(j.matchScore);
     }
 
     const reqs = Array.isArray(j.requirements)
@@ -201,8 +204,9 @@ function formatJobItems(rawList: any[], userCvs: any[], selectedCvId: string): J
       salary: salaryFormatted,
       type: wt,
       posted: j.postedDate || (j.created_at ? 'Tersedia' : 'Baru saja'),
-      matchScore: `${score}%`,
+      matchScore: hasMatchCalculated ? `${score}%` : '',
       matchScoreNum: score,
+      hasMatchCalculated,
       matchedCvTitle: matchedTitle,
       matchedCvId: matchedId,
       hasRoleConflict,
@@ -224,7 +228,7 @@ export function LokerExplorerView() {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedWorkType, setSelectedWorkType] = useState<string>('ALL');
   const [onlyHighMatch, setOnlyHighMatch] = useState<boolean>(false);
-  const [sortBy, setSortBy] = useState<'MATCH' | 'NEWEST' | 'SALARY'>('MATCH');
+  const [sortBy, setSortBy] = useState<'MATCH' | 'NEWEST' | 'SALARY'>('NEWEST');
 
   const [jobs, setJobs] = useState<JobItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -261,6 +265,9 @@ export function LokerExplorerView() {
         if (Array.isArray(cvs) && cvs.length > 0) {
           setUserCvs(cvs);
           setSelectedCvId('all');
+          setSortBy('MATCH');
+        } else {
+          setSortBy('NEWEST');
         }
 
         if (Array.isArray(existingApps)) {
@@ -456,9 +463,9 @@ export function LokerExplorerView() {
     }
 
     // Sorting
-    if (sortBy === 'MATCH') {
+    if (sortBy === 'MATCH' && userCvs.length > 0) {
       result.sort((a, b) => b.matchScoreNum - a.matchScoreNum);
-    } else if (sortBy === 'NEWEST') {
+    } else if (sortBy === 'NEWEST' || (sortBy === 'MATCH' && userCvs.length === 0)) {
       result.sort((a, b) => {
         const dateA = a.rawJob?.created_at ? new Date(a.rawJob.created_at).getTime() : 0;
         const dateB = b.rawJob?.created_at ? new Date(b.rawJob.created_at).getTime() : 0;
@@ -473,7 +480,7 @@ export function LokerExplorerView() {
     }
 
     return result;
-  }, [jobs, onlyHighMatch, sortBy]);
+  }, [jobs, onlyHighMatch, sortBy, userCvs.length]);
 
   const workTypeFilters = [
     { id: 'ALL', label: 'Semua Tipe' },
@@ -482,11 +489,11 @@ export function LokerExplorerView() {
     { id: 'ONSITE', label: 'On-Site' },
   ];
 
-  const sortOptions: SelectOption[] = [
-    { value: 'MATCH', label: 'Paling Cocok' },
+  const sortOptions: SelectOption[] = useMemo(() => [
+    ...(userCvs.length > 0 ? [{ value: 'MATCH', label: 'Paling Cocok' }] : []),
     { value: 'NEWEST', label: 'Terbaru' },
     { value: 'SALARY', label: 'Gaji Tertinggi' },
-  ];
+  ], [userCvs.length]);
 
   return (
     <div className="w-full space-y-4 pb-12">
@@ -512,20 +519,34 @@ export function LokerExplorerView() {
         ]}
         actions={
           <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
-            {/* Standar Opsi 2: CV Scope Selector di Kanan Atas Page Header */}
-            <CvScopeSelector
-              cvs={userCvs}
-              selectedCvId={selectedCvId}
-              onChange={(newCvId) => setSelectedCvId(newCvId)}
-              allowAll
-              allLabel="Semua CV (Skor Tertinggi)"
-              label="Basis CV"
-            />
+            {/* Standar CV Scope Selector di Kanan Atas Page Header */}
+            {userCvs.length > 0 ? (
+              <CvScopeSelector
+                cvs={userCvs}
+                selectedCvId={selectedCvId}
+                onChange={(newCvId) => setSelectedCvId(newCvId)}
+                allowAll
+                allLabel="Semua CV (Skor Tertinggi)"
+                label="Basis CV"
+              />
+            ) : (
+              <Link
+                href="/cv"
+                className={cn(
+                  buttonVariants({ variant: 'primary', size: 'sm' }),
+                  'w-full sm:w-auto min-h-[44px] md:min-h-[34px] gap-1.5 cursor-pointer shrink-0'
+                )}
+                title="Buat CV pertamamu di CV Builder"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Buat CV</span>
+              </Link>
+            )}
 
             <button
               onClick={() => fetchJobs()}
               disabled={isLoading}
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[40px] md:min-h-[34px] rounded-[10px] text-xs font-bold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition cursor-pointer shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[44px] md:min-h-[34px] rounded-[10px] text-xs font-bold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition cursor-pointer shrink-0 active:scale-[0.98]"
               title="Perbarui daftar loker"
             >
               <RefreshCwIcon size={14} className={isLoading ? 'animate-spin' : ''} />
@@ -539,7 +560,10 @@ export function LokerExplorerView() {
                 }
                 router.push(`/cv-screener${query.toString() ? `?${query.toString()}` : ''}`);
               }}
-              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 min-h-[40px] md:min-h-[34px] rounded-[10px] text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 transition shadow-sm cursor-pointer shrink-0"
+              className={cn(
+                buttonVariants({ variant: 'primary', size: 'sm' }),
+                'min-h-[44px] md:min-h-[34px] gap-1.5 cursor-pointer shrink-0 shadow-xs'
+              )}
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>Evaluasi ATS</span>
@@ -670,31 +694,31 @@ export function LokerExplorerView() {
           ))}
         </div>
       ) : filteredJobs.length === 0 ? (
-        /* Empty State */
-        <div className="bg-white dark:bg-slate-900 rounded-[10px] p-12 text-center border border-slate-200 dark:border-slate-800 space-y-3">
-          <BriefcaseIcon size={44} className="mx-auto text-slate-300 dark:text-slate-600 mb-2" />
-          <h3 className="font-bold text-base text-slate-900 dark:text-white">
-            Belum ada loker yang cocok
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-            {onlyHighMatch
-              ? 'Belum ada loker yang paling pas dengan profilmu untuk kriteria ini. Coba matikan filter atau cari kata kunci lain ya.'
-              : debouncedQuery
-              ? `Belum ada loker yang cocok dengan kata kunci "${debouncedQuery}". Coba gunakan kata kunci umum seperti "Admin", "Staff", atau "Marketing".`
-              : 'Belum ada loker aktif di kategori ini. Coba pilih filter lain ya.'}
-          </p>
-          <div className="pt-2">
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedWorkType('ALL');
-                setOnlyHighMatch(false);
-              }}
-              className="px-4 py-2 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 text-white font-bold text-xs transition cursor-pointer"
-            >
-              Reset Filter &amp; Pencarian
-            </button>
-          </div>
+        <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <MascotEmptyState
+            size="md"
+            badge="Eksplorasi Loker"
+            title="Belum ada loker yang cocok"
+            description={
+              onlyHighMatch
+                ? 'Belum ada loker yang paling pas dengan profilmu untuk kriteria ini. Coba matikan filter atau cari kata kunci lain ya.'
+                : debouncedQuery
+                ? `Belum ada loker yang cocok dengan kata kunci "${debouncedQuery}". Coba gunakan kata kunci umum seperti "Admin", "Staff", atau "Marketing".`
+                : 'Belum ada loker aktif di kategori ini. Coba pilih filter lain ya.'
+            }
+            action={
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedWorkType('ALL');
+                  setOnlyHighMatch(false);
+                }}
+                className="px-4 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 text-white font-bold text-xs shadow-md shadow-cobalt-500/20 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500 focus-visible:ring-offset-2"
+              >
+                Reset Filter &amp; Pencarian
+              </button>
+            }
+          />
         </div>
       ) : (
         /* 5. Job Cards Grid with In-House Upsell Card */
@@ -733,7 +757,7 @@ export function LokerExplorerView() {
                     <div className="pt-2 flex items-center gap-2 relative z-10">
                       <button
                         onClick={() => router.push('/cv-screener')}
-                        className="flex-1 py-2 px-3 rounded-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition flex items-center justify-center gap-1 cursor-pointer"
+                        className="flex-1 min-h-[44px] sm:min-h-[36px] py-2 px-3.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.98] text-white font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
                       >
                         <Sparkles className="w-3.5 h-3.5" />
                         <span>Cek Skor ATS</span>
@@ -768,17 +792,23 @@ export function LokerExplorerView() {
                     className="cursor-pointer space-y-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500 rounded-[8px]"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      {job.hasRoleConflict ? (
-                        <span
-                          className="px-2 py-0.5 rounded-[10px] text-caption font-extrabold border bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 border-amber-200 dark:border-amber-800 flex items-center gap-1"
-                          title={job.coherenceWarning}
-                        >
-                          <span>⚠ Inkonsisten</span>
-                          <span>({job.matchScore})</span>
-                        </span>
+                      {job.hasMatchCalculated ? (
+                        job.hasRoleConflict ? (
+                          <span
+                            className="px-2 py-0.5 rounded-[10px] text-caption font-extrabold border bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 border-amber-200 dark:border-amber-800 flex items-center gap-1"
+                            title={job.coherenceWarning}
+                          >
+                            <span>⚠ Inkonsisten</span>
+                            <span>({job.matchScore})</span>
+                          </span>
+                        ) : (
+                          <span className={`px-2 py-0.5 rounded-[10px] text-caption font-extrabold border ${badgeStyle}`}>
+                            Match {job.matchScore}
+                          </span>
+                        )
                       ) : (
-                        <span className={`px-2 py-0.5 rounded-[10px] text-caption font-extrabold border ${badgeStyle}`}>
-                          Match {job.matchScore}
+                        <span className="text-caption font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-[10px] border border-slate-200 dark:border-slate-700">
+                          {job.posted}
                         </span>
                       )}
                       <span className="text-caption font-semibold px-2 py-0.5 rounded-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
@@ -914,14 +944,20 @@ export function LokerExplorerView() {
 
       {/* 6. Slide-in Detail Drawer */}
       <Sheet open={Boolean(selectedJob)} onOpenChange={(open) => !open && setSelectedJob(null)}>
-        <SheetContent className="w-full sm:max-w-xl p-0 flex flex-col h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl">
+        <SheetContent side="right" className="w-full sm:max-w-xl p-0 flex flex-col justify-between overflow-hidden sm:h-full">
           {selectedJob && (
             <>
               {/* Header Drawer */}
               <SheetHeader className="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-row items-center justify-between bg-slate-50/50 dark:bg-slate-800/30 space-y-0">
-                <span className={`px-2.5 py-0.5 rounded-[10px] text-xs font-bold border ${getMatchBadgeStyle(selectedJob.matchScoreNum)}`}>
-                  Tingkat Kecocokan {selectedJob.matchScore}
-                </span>
+                {selectedJob.hasMatchCalculated ? (
+                  <span className={`px-2.5 py-0.5 rounded-[10px] text-xs font-bold border ${getMatchBadgeStyle(selectedJob.matchScoreNum)}`}>
+                    Tingkat Kecocokan {selectedJob.matchScore}
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-0.5 rounded-[10px] text-xs font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    Detail Lowongan
+                  </span>
+                )}
               </SheetHeader>
 
               {/* Body Drawer (Scrollable) */}
@@ -936,6 +972,31 @@ export function LokerExplorerView() {
                     <span>{selectedJob.location}</span>
                   </SheetDescription>
                 </div>
+
+                {/* Banner edukasi jika belum memiliki CV */}
+                {!selectedJob.hasMatchCalculated && (
+                  <div className="p-3.5 rounded-[10px] bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-cobalt-600 dark:text-blue-400 shrink-0" />
+                        <span>Skor kecocokan belum aktif</span>
+                      </p>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Kamu belum memiliki draf CV. Buat CV agar sistem dapat menghitung persentase kecocokan skill dan kualifikasimu dengan lowongan ini.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedJob(null);
+                        router.push('/cv');
+                      }}
+                      className="shrink-0 px-3.5 py-2 rounded-[8px] bg-cobalt-600 hover:bg-cobalt-700 text-white text-xs font-bold transition shadow-2xs cursor-pointer min-h-[34px] flex items-center justify-center"
+                    >
+                      Buat CV
+                    </button>
+                  </div>
+                )}
 
                 {/* Ringkasan Gaji & Tipe Kerja */}
                 <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-[10px] space-y-2 text-xs border border-slate-100 dark:border-slate-700">
@@ -1047,6 +1108,25 @@ export function LokerExplorerView() {
                               sim.description,
                               sim.requirements
                             );
+                            const hasUserCvs = userCvs.length > 0;
+                            let simScore = 0;
+                            if (hasUserCvs) {
+                              const targetCv = selectedCvId === 'all' ? userCvs[0] : (userCvs.find((c) => c.id === selectedCvId) || userCvs[0]);
+                              try {
+                                const calc = calculateJobMatch(targetCv, {
+                                  id: sim.id,
+                                  title: cleaned.title,
+                                  company: cleaned.company,
+                                  location: simLoc,
+                                  workType: simType,
+                                  description: details.description,
+                                  requirements: details.requirements,
+                                });
+                                simScore = calc.matchScore;
+                              } catch {
+                                simScore = 0;
+                              }
+                            }
                             setSelectedJob({
                               id: sim.id,
                               title: cleaned.title,
@@ -1055,8 +1135,9 @@ export function LokerExplorerView() {
                               salary: sim.salary_min ? `Rp ${sim.salary_min.toLocaleString('id-ID')}` : '-',
                               type: simType,
                               posted: 'Tersedia',
-                              matchScore: `${sim.similarity_score || 75}%`,
-                              matchScoreNum: sim.similarity_score || 75,
+                              matchScore: hasUserCvs ? `${simScore}%` : '',
+                              matchScoreNum: simScore,
+                              hasMatchCalculated: hasUserCvs,
                               desc: details.description,
                               responsibilities: details.responsibilities,
                               requirements: details.requirements,
@@ -1115,19 +1196,24 @@ export function LokerExplorerView() {
                   variant="outline"
                   size="md"
                   onClick={() => {
-                    const query = new URLSearchParams();
-                    query.set('role', selectedJob.title);
-                    query.set('company', selectedJob.company);
-                    if (selectedJob.matchedCvId) {
-                      query.set('cvId', selectedJob.matchedCvId);
+                    if (selectedJob.hasMatchCalculated) {
+                      const query = new URLSearchParams();
+                      query.set('role', selectedJob.title);
+                      query.set('company', selectedJob.company);
+                      if (selectedJob.matchedCvId) {
+                        query.set('cvId', selectedJob.matchedCvId);
+                      }
+                      setSelectedJob(null);
+                      router.push(`/cv-screener?${query.toString()}`);
+                    } else {
+                      setSelectedJob(null);
+                      router.push('/cv');
                     }
-                    setSelectedJob(null);
-                    router.push(`/cv-screener?${query.toString()}`);
                   }}
                   className="w-full sm:w-auto flex-1 flex items-center justify-center gap-1.5"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-cobalt-500" />
-                  <span>Evaluasi ATS</span>
+                  <span>{selectedJob.hasMatchCalculated ? 'Evaluasi ATS' : 'Buat CV Saya'}</span>
                 </Button>
 
                 {selectedJob.externalUrl ? (
@@ -1146,18 +1232,23 @@ export function LokerExplorerView() {
                     variant="primary"
                     size="md"
                     onClick={() => {
-                      const query = new URLSearchParams();
-                      query.set('role', selectedJob.title);
-                      query.set('company', selectedJob.company);
-                      if (selectedJob.matchedCvId) {
-                        query.set('cvId', selectedJob.matchedCvId);
+                      if (selectedJob.hasMatchCalculated) {
+                        const query = new URLSearchParams();
+                        query.set('role', selectedJob.title);
+                        query.set('company', selectedJob.company);
+                        if (selectedJob.matchedCvId) {
+                          query.set('cvId', selectedJob.matchedCvId);
+                        }
+                        setSelectedJob(null);
+                        router.push(`/cv-screener?${query.toString()}`);
+                      } else {
+                        setSelectedJob(null);
+                        router.push('/cv');
                       }
-                      setSelectedJob(null);
-                      router.push(`/cv-screener?${query.toString()}`);
                     }}
                     className="w-full sm:w-auto flex-1 flex items-center justify-center gap-1.5"
                   >
-                    <span>Cocokkan CV</span>
+                    <span>{selectedJob.hasMatchCalculated ? 'Cocokkan CV' : 'Buat CV'}</span>
                   </Button>
                 )}
               </SheetFooter>

@@ -17,6 +17,6 @@ export const CV_BUILDER_URL = `${APP_URL}/cv`;
 export const REGISTER_URL = `${APP_URL}/register`;
 export const TRACKER_URL = `${APP_URL}/tracker`;
 export const FAQ_URL = rawFaqUrl.replace(/\/$/, '');
-export const PRIVACY_URL = `${APP_URL}/kebijakan-privasi`;
-export const TERMS_URL = `${APP_URL}/syarat-ketentuan`;
+export const PRIVACY_URL = `${APP_URL}/kebijakan-privasi?from=loker`;
+export const TERMS_URL = `${APP_URL}/syarat-ketentuan?from=loker`;
 

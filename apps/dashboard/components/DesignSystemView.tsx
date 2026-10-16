@@ -727,7 +727,7 @@ export const DesignSystemView: React.FC = () => {
               size="sm"
               onClick={() => setIsDemoDrawerOpen(false)}
             >
-              Tutup Demo
+              Batal
             </Button>
             <Button
               variant="primary"

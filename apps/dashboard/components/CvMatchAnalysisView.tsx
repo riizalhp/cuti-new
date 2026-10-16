@@ -2,15 +2,18 @@
 
 import { PageHeader } from '@/components/ui/PageHeader';
 import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { useToast } from '@/components/ui/Toast';
 import { cvApi, jobsApi, trackerApi } from '@/lib/api';
 import { getScoreTextClass } from '@/lib/score-color';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { IconButton } from '@/components/ui/icon-button';
 import { CvScopeSelector } from '@/components/ui/CvScopeSelector';
+import { MascotEmptyState } from '@/components/ui/MascotEmptyState';
 
 import {
   FileText,
@@ -34,6 +37,7 @@ import {
   Loader2,
   Trash2,
   Search,
+  Sparkles,
 } from 'lucide-react';
 
 interface SavedCV {
@@ -463,178 +467,199 @@ export const CvMatchAnalysisView: React.FC = () => {
 
   return (
     <div className="space-y-5 w-full pb-12">
-      {/* 1. Header Standardized */}
+      {/* 1. Header Standardized (Area Biru Dongker) */}
       <PageHeader
         title="Perbandingan Lowongan Kerja"
-        subtitle="Bandingkan kecocokan CV kamu dengan beberapa lowongan kerja sekaligus untuk menentukan prioritas terbaik."
+        subtitle={
+          !activeCv && !isLoading
+            ? 'Bandingkan kecocokan kualifikasi dan kata kunci CV dengan lowongan target. Buat CV dulu di halaman CV untuk memulai analisis.'
+            : 'Bandingkan kecocokan kualifikasi dan kata kunci CV kamu dengan beberapa target lowongan kerja sekaligus.'
+        }
         icon={BarChart2}
         badge="Komparasi Lowongan"
         stats={
-          jobTargets.length > 0
+          !activeCv
             ? [
-                { label: 'Lowongan', value: `${jobTargets.length} Posisi`, icon: Layers, isPrimary: true },
-                { label: 'Target Utama', value: sortedJobs[0] ? sortedJobs[0].position : '-', icon: Trophy, colorClass: 'text-amber-700 dark:text-amber-400' },
+                {
+                  label: 'Status CV',
+                  value: isLoading ? 'Memuat...' : 'Belum Ada',
+                  icon: FileText,
+                  colorClass: 'text-amber-300',
+                  isPrimary: true,
+                },
+                ...(jobTargets.length > 0
+                  ? [
+                      { label: 'Lowongan', value: `${jobTargets.length} Posisi`, icon: Layers },
+                      { label: 'Target Utama', value: sortedJobs[0] ? sortedJobs[0].position : '-', icon: Trophy, colorClass: 'text-amber-300' },
+                    ]
+                  : []),
               ]
-            : undefined
+            : [
+                {
+                  label: 'Skor ATS CV',
+                  value: `${activeCv.atsScore}%`,
+                  icon: Sparkles,
+                  colorClass: 'text-emerald-300',
+                  isPrimary: jobTargets.length === 0,
+                },
+                {
+                  label: 'Lowongan',
+                  value: `${jobTargets.length} Posisi`,
+                  icon: Layers,
+                  isPrimary: jobTargets.length > 0,
+                },
+                ...(jobTargets.length > 0
+                  ? [
+                      {
+                        label: 'Kecocokan Tertinggi',
+                        value: sortedJobs[0] ? `${sortedJobs[0].matchScore}%` : '-',
+                        icon: Trophy,
+                        colorClass: 'text-amber-300',
+                      },
+                    ]
+                  : []),
+              ]
         }
         actions={
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => {
-              setAddSourceTab('manual');
-              setIsAddModalOpen(true);
-            }}
-            className="w-full sm:w-auto min-h-[40px] md:min-h-[34px] flex items-center justify-center gap-1.5"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Tambah Lowongan</span>
-          </Button>
+          <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
+            {savedCVs.length > 0 ? (
+              <CvScopeSelector
+                cvs={savedCVs}
+                selectedCvId={selectedCvId}
+                onChange={handleCvChange}
+                allowAll={false}
+                label="Basis CV"
+              />
+            ) : (
+              <Link
+                href="/cv"
+                className={cn(
+                  buttonVariants({ variant: 'primary', size: 'sm' }),
+                  'w-full sm:w-auto min-h-[44px] md:min-h-[36px] gap-1.5 cursor-pointer shrink-0'
+                )}
+                title="Buat CV pertamamu di CV Builder"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Buat CV</span>
+              </Link>
+            )}
+
+            <Button
+              variant={savedCVs.length > 0 ? 'primary' : 'subtle'}
+              size="sm"
+              onClick={() => {
+                setAddSourceTab('manual');
+                setIsAddModalOpen(true);
+              }}
+              className="w-full sm:w-auto min-h-[44px] md:min-h-[36px] flex items-center justify-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Tambah Lowongan</span>
+            </Button>
+          </div>
         }
       />
 
-      {/* 3. ACTIVE CV SUMMARY BAR & 11. PROGRESS METRICS */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-        {/* Active CV Bar (Full width saat belum ada target, 7 cols saat ada target) */}
-        <div
-          className={`${
-            sortedJobs.length > 0 ? 'lg:col-span-7' : 'lg:col-span-12'
-          } bg-white dark:bg-slate-900/80 rounded-[10px] border border-slate-200 dark:border-slate-800 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3`}
-        >
-          {activeCv ? (
-            <>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-[10px] bg-[#1F3578]/10 text-[#1F3578] dark:text-blue-400 flex items-center justify-center shrink-0">
-                  <FileCheck2 className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-caption font-bold text-slate-500 uppercase tracking-wider dark:text-slate-400">
-                      CV Acuan:
-                    </span>
-                    <span className="text-xs font-black text-slate-900 dark:text-white">
-                      {activeCv.title}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-[10px] text-caption font-extrabold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 flex items-center gap-1">
-                      <span>{activeCv.atsScore}% ATS</span>
-                    </span>
-                  </div>
-                  <p className="text-caption text-slate-500 mt-0.5">
-                    {activeCv.role} • Terakhir dianalisis {activeCv.updatedAt}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {sortedJobs.length === 0 && (
-                  <span className="hidden sm:inline-flex px-2.5 py-1 rounded-[10px] text-caption font-bold bg-blue-50 dark:bg-blue-950/60 text-[#1738D1] dark:text-blue-300 border border-blue-200/60 dark:border-blue-900">
-                    Siap untuk Komparasi
-                  </span>
-                )}
-                <CvScopeSelector
-                  cvs={savedCVs}
-                  selectedCvId={selectedCvId}
-                  onChange={handleCvChange}
-                  allowAll={false}
-                  trigger={
-                    <div
-                      className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer shrink-0 border border-slate-200/80 dark:border-slate-700"
-                    >
-                      <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-                      <span>Ganti CV</span>
-                    </div>
-                  }
-                />
-              </div>
-            </>
-          ) : (
-            <div className="flex items-center gap-3 w-full">
-              <div className="w-9 h-9 rounded-[10px] bg-[#1F3578]/10 text-[#1F3578] flex items-center justify-center shrink-0">
-                <FileCheck2 className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs font-black text-slate-900 dark:text-white">Belum ada CV aktif</p>
-                <p className="text-caption text-slate-500 mt-0.5">
-                  {isLoading ? 'Memuat data CV...' : 'Buat CV dulu di halaman CV, lalu kembali ke sini untuk analisis kecocokan lowongan.'}
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 11. Dashboard Live Progress Summary (Hanya muncul saat ada target lowongan) */}
-        {sortedJobs.length > 0 && (
-          <div className="lg:col-span-5 bg-white dark:bg-slate-900/80 rounded-[10px] border border-slate-200 dark:border-slate-800 p-3.5 shadow-2xs flex items-center justify-between gap-2 text-center text-xs">
-            <div className="flex-1 min-w-0 border-r border-slate-100 dark:border-slate-800 pr-2">
-              <span className="text-[10px] font-bold text-slate-500 block uppercase dark:text-slate-400 truncate">Lowongan</span>
-              <span className="font-extrabold text-slate-900 dark:text-white text-sm">{totalAnalyzed} Target</span>
-            </div>
-
-            <div className="flex-1 min-w-0 border-r border-slate-100 dark:border-slate-800 pr-2">
-              <span className="text-[10px] font-bold text-slate-500 block uppercase dark:text-slate-400 truncate">Rata-rata Match</span>
-              <span className={`font-extrabold text-sm transition-colors ${getScoreTextClass(avgMatchScore, totalAnalyzed === 0)}`}>{avgMatchScore}%</span>
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <span className="text-[10px] font-bold text-slate-500 block uppercase dark:text-slate-400 truncate">Target Terbaik</span>
-              <span className="font-extrabold text-slate-900 dark:text-white text-xs truncate flex items-center justify-center gap-1" title={bestTarget?.company}>
-                <Trophy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-                <span className="truncate">{bestTarget ? `${bestTarget.company} (${bestTarget.matchScore}%)` : '-'}</span>
-              </span>
-            </div>
+      {/* 2. Live Progress Summary (Hanya muncul saat ada target lowongan) */}
+      {sortedJobs.length > 0 && (
+        <div className="bg-white dark:bg-slate-900/80 rounded-[10px] border border-slate-200 dark:border-slate-800 p-3.5 shadow-2xs flex items-center justify-between gap-2 text-center text-xs">
+          <div className="flex-1 min-w-0 border-r border-slate-100 dark:border-slate-800 pr-2">
+            <span className="text-[10px] font-bold text-slate-500 block uppercase dark:text-slate-400 truncate">Lowongan</span>
+            <span className="font-extrabold text-slate-900 dark:text-white text-sm">{totalAnalyzed} Target</span>
           </div>
-        )}
-      </div>
+
+          <div className="flex-1 min-w-0 border-r border-slate-100 dark:border-slate-800 pr-2">
+            <span className="text-[10px] font-bold text-slate-500 block uppercase dark:text-slate-400 truncate">Rata-rata Match</span>
+            <span className={`font-extrabold text-sm transition-colors ${getScoreTextClass(avgMatchScore, totalAnalyzed === 0)}`}>{avgMatchScore}%</span>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <span className="text-[10px] font-bold text-slate-500 block uppercase dark:text-slate-400 truncate">Target Terbaik</span>
+            <span className="font-extrabold text-slate-900 dark:text-white text-xs truncate flex items-center justify-center gap-1" title={bestTarget?.company}>
+              <Trophy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <span className="truncate">{bestTarget ? `${bestTarget.company} (${bestTarget.matchScore}%)` : '-'}</span>
+            </span>
+          </div>
+        </div>
+      )}
 
       {sortedJobs.length === 0 ? (
-        /* UNIFIED EMPTY STATE (RINGKAS, MANUSIAWI, TANPA TEKS BERLEBIHAN) */
-        <div className="bg-white dark:bg-slate-900/80 rounded-[10px] border border-slate-200 dark:border-slate-800 p-8 sm:p-12 shadow-2xs text-center">
-          <div className="max-w-md mx-auto space-y-4">
-            <div className="w-11 h-11 rounded-[10px] bg-blue-50 dark:bg-blue-950/60 text-[#1738D1] dark:text-blue-400 flex items-center justify-center mx-auto border border-blue-100 dark:border-blue-900/50">
-              <Layers className="w-5 h-5" />
-            </div>
-
-            <div className="space-y-1.5">
-              <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
-                Bandingkan CV dengan Target Lowongan
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                Cek kecocokan kualifikasi dan kata kunci CV kamu dengan lowongan kerja sebelum melamar.
-              </p>
-            </div>
-
-            {/* Dua Tombol Aksi Utama */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
-              <Button
-                variant="primary"
-                size="md"
-                onClick={() => {
-                  setAddSourceTab('manual');
-                  setIsAddModalOpen(true);
-                }}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Input Lowongan dari Luar</span>
-              </Button>
-              {rawJobs.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="md"
-                  onClick={() => {
-                    setAddSourceTab('marketplace');
-                    setIsAddModalOpen(true);
-                  }}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2"
-                >
-                  <Briefcase className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                  <span>Pilih dari Marketplace ({rawJobs.length})</span>
-                </Button>
+        <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <MascotEmptyState
+            size="md"
+            badge="Komparasi Kualifikasi"
+            title={
+              savedCVs.length === 0
+                ? 'Belum Ada CV untuk Komparasi'
+                : 'Bandingkan CV dengan Target Lowongan'
+            }
+            description={
+              savedCVs.length === 0
+                ? 'Buat CV dulu di halaman CV, lalu kembali ke sini untuk analisis kecocokan kualifikasi dan kata kunci lowongan.'
+                : `Cek kecocokan kualifikasi dan kata kunci CV (${activeCv?.title || 'CV Saya'}) dengan lowongan kerja sebelum melamar.`
+            }
+            action={
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2 w-full max-w-sm sm:max-w-none mx-auto">
+              {savedCVs.length === 0 ? (
+                <>
+                  <Link
+                    href="/cv"
+                    className={cn(
+                      buttonVariants({ variant: 'primary', size: 'md' }),
+                      'w-full sm:w-auto min-h-[44px] gap-2'
+                    )}
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Buat CV Sekarang</span>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    size="md"
+                    onClick={() => {
+                      setAddSourceTab('manual');
+                      setIsAddModalOpen(true);
+                    }}
+                    className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Tambah Lowongan Manual</span>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={() => {
+                      setAddSourceTab('manual');
+                      setIsAddModalOpen(true);
+                    }}
+                    className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Tambah Lowongan Manual</span>
+                  </Button>
+                  {rawJobs.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="md"
+                      onClick={() => {
+                        setAddSourceTab('marketplace');
+                        setIsAddModalOpen(true);
+                      }}
+                      className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2"
+                    >
+                      <Briefcase className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                      <span>Pilih dari Marketplace ({rawJobs.length})</span>
+                    </Button>
+                  )}
+                </>
               )}
             </div>
-          </div>
-        </div>
-      ) : (
+          }
+        />
+      </div>
+    ) : (
         <>
           {/* MOBILE SEGMENTED CONTROL (Hanya saat ada target) */}
           <div className="lg:hidden flex items-center p-1 bg-slate-200/70 dark:bg-slate-800 rounded-[10px] gap-1">
@@ -679,8 +704,9 @@ export const CvMatchAnalysisView: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleClearAllJobs}
-                      className="text-caption font-bold text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition cursor-pointer px-1.5 py-1 rounded-[6px] hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                      className="text-caption font-bold text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition cursor-pointer px-2.5 py-1.5 min-h-[36px] flex items-center rounded-[8px] hover:bg-rose-50 dark:hover:bg-rose-950/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
                       title="Hapus semua target lowongan dari daftar"
+                      aria-label="Kosongkan semua lowongan dari komparasi"
                     >
                       Kosongkan
                     </button>
@@ -702,9 +728,37 @@ export const CvMatchAnalysisView: React.FC = () => {
               {/* 4. LEADERBOARD CARDS LIST */}
               <div className="space-y-2.5">
                 {isLoading && (
-                  <div className="p-5 rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-center space-y-1.5">
-                    <Loader2 className="w-5 h-5 text-indigo-600 animate-spin mx-auto" />
-                    <p className="text-xs font-semibold text-slate-500">Memuat lowongan dari database...</p>
+                  <div className="space-y-2.5" aria-busy="true" aria-label="Memuat daftar lowongan target komparasi">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="p-3.5 rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2.5 animate-pulse motion-reduce:animate-none"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="space-y-1.5 flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <div className="h-4 w-7 bg-slate-200 dark:bg-slate-800 rounded-[6px]" />
+                              <div
+                                className="h-4 bg-slate-200 dark:bg-slate-800 rounded-[6px]"
+                                style={{ width: i === 1 ? '55%' : i === 2 ? '40%' : '65%' }}
+                              />
+                            </div>
+                            <div className="h-3 w-28 bg-slate-100 dark:bg-slate-800/80 rounded-[4px]" />
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <div className="space-y-1 text-right">
+                              <div className="h-2.5 w-12 bg-slate-100 dark:bg-slate-800/70 rounded-[4px]" />
+                              <div className="h-4 w-10 bg-slate-200 dark:bg-slate-800 rounded-[6px] ml-auto" />
+                            </div>
+                            <div className="w-7 h-7 rounded-[8px] bg-slate-100 dark:bg-slate-800/50" />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 pt-0.5">
+                          <div className="h-4 w-20 rounded-[6px] bg-slate-100 dark:bg-slate-800/80" />
+                          <div className="h-4 w-16 rounded-[6px] bg-slate-100 dark:bg-slate-800/80" />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
 
@@ -823,11 +877,14 @@ export const CvMatchAnalysisView: React.FC = () => {
           <Button
             variant="outline"
             size="md"
-            onClick={() => setIsAddModalOpen(true)}
-            className="w-full border-dashed flex items-center justify-center gap-2"
+            onClick={() => {
+              setAddSourceTab('manual');
+              setIsAddModalOpen(true);
+            }}
+            className="w-full min-h-[44px] border-dashed flex items-center justify-center gap-2 text-slate-700 dark:text-slate-200"
           >
             <Plus className="w-4 h-4 text-cobalt-500" />
-            <span>Tambah Target Lowongan Baru</span>
+            <span>Tambah Lowongan Manual</span>
           </Button>
         </div>
 
@@ -859,12 +916,12 @@ export const CvMatchAnalysisView: React.FC = () => {
                 </div>
 
                 <Button
-                  variant="secondary"
+                  variant="outline"
                   size="sm"
                   onClick={() => setViewMode('detail')}
-                  className="flex items-center gap-1.5"
+                  className="min-h-[36px] flex items-center gap-1.5"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5 text-slate-500" />
+                  <ArrowLeft className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                   <span>Kembali ke Detail</span>
                 </Button>
               </div>
@@ -1136,8 +1193,9 @@ export const CvMatchAnalysisView: React.FC = () => {
               {/* 10. CLEAR CTA HIERARCHY BAR */}
               <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
                 {/* Secondary CTA */}
-                <button
-                  type="button"
+                <Button
+                  variant="outline"
+                  size="md"
                   onClick={async () => {
                     const saved = await trackerApi.create({
                       company: selectedJob.company,
@@ -1154,21 +1212,22 @@ export const CvMatchAnalysisView: React.FC = () => {
                       toast.error('Lamaran belum tersimpan. Periksa koneksi internet Anda.');
                     }
                   }}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-1.5"
                 >
                   <Plus className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                   <span>Tambah ke Tracker</span>
-                </button>
+                </Button>
 
                 {/* Primary CTA */}
-                <button
-                  type="button"
+                <Button
+                  variant="primary"
+                  size="md"
                   onClick={() => toast.success('CV Diselaraskan', `Rekomendasi kata kunci untuk ${selectedJob.company} siap diterapkan ke draf CV.`)}
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-[10px] bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.98] text-white font-bold text-xs shadow-md shadow-[#1738D1]/20 transition text-center cursor-pointer flex items-center justify-center gap-1.5 border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500"
+                  className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-1.5"
                 >
                   <CheckCircle2 className="w-4 h-4 text-white" />
                   <span>Optimalkan CV untuk Lowongan Ini</span>
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
@@ -1311,19 +1370,20 @@ export const CvMatchAnalysisView: React.FC = () => {
               <SheetFooter className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="md"
                   onClick={() => setIsAddModalOpen(false)}
+                  className="w-full sm:w-auto min-h-[44px] sm:min-h-[36px]"
                 >
                   Batal
                 </Button>
 
                 <Button
                   variant="primary"
-                  size="sm"
+                  size="md"
                   onClick={handleRunAnalysis}
                   disabled={isAnalyzing}
                   aria-busy={isAnalyzing}
-                  className="flex items-center justify-center gap-1.5"
+                  className="w-full sm:w-auto min-h-[44px] sm:min-h-[36px] flex items-center justify-center gap-1.5"
                 >
                   {isAnalyzing ? (
                     <>
@@ -1333,7 +1393,7 @@ export const CvMatchAnalysisView: React.FC = () => {
                   ) : (
                     <>
                       <Plus className="w-4 h-4 text-white" />
-                      <span>Mulai Analisis &amp; Tambahkan</span>
+                      <span>Analisis Lowongan</span>
                     </>
                   )}
                 </Button>
@@ -1427,12 +1487,12 @@ export const CvMatchAnalysisView: React.FC = () => {
                             ) : (
                               <Button
                                 size="sm"
-                                variant="secondary"
+                                variant="outline"
                                 aria-label={`Pilih ${job.title || 'lowongan'} di ${job.company} untuk komparasi`}
                                 onClick={() => handleAddJobFromMarketplace(job)}
-                                className="shrink-0 flex items-center gap-1 text-xs h-8 px-2.5"
+                                className="shrink-0 flex items-center gap-1 text-xs min-h-[36px] px-3 font-semibold hover:border-cobalt-500 hover:text-cobalt-600 dark:hover:text-cobalt-400"
                               >
-                                <Plus className="w-3 h-3" />
+                                <Plus className="w-3.5 h-3.5" />
                                 <span>Pilih</span>
                               </Button>
                             )}
@@ -1457,8 +1517,9 @@ export const CvMatchAnalysisView: React.FC = () => {
                 </span>
                 <Button
                   variant="primary"
-                  size="sm"
+                  size="md"
                   onClick={() => setIsAddModalOpen(false)}
+                  className="min-h-[44px] sm:min-h-[36px]"
                 >
                   Selesai Memilih
                 </Button>
@@ -1494,9 +1555,10 @@ export const CvMatchAnalysisView: React.FC = () => {
 
           <DialogFooter className="pt-3">
             <Button
-              variant="secondary"
-              size="sm"
+              variant="outline"
+              size="md"
               onClick={() => setIsKeywordsModalOpen(false)}
+              className="min-h-[44px] sm:min-h-[36px]"
             >
               Tutup
             </Button>

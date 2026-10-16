@@ -195,9 +195,6 @@ export const EvidenceSlideOver: React.FC<EvidenceSlideOverProps> = ({
 
             {/* Sticky Footer Action */}
             <SheetFooter className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex sm:flex-row items-center justify-end gap-2.5 shrink-0">
-              <Button variant="ghost" size="md" onClick={onClose}>
-                Tutup
-              </Button>
               <Link
                 href="/cv"
                 className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'flex items-center gap-1.5')}

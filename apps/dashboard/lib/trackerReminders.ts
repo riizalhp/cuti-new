@@ -37,7 +37,7 @@ export interface ApplicationWithReminders {
   position: string;
   location: string;
   appliedDate: string;
-  status: 'Terkirim' | 'Screening' | 'Interview' | 'Offering' | 'Ditolak';
+  status: 'Tersimpan' | 'Terkirim' | 'Screening' | 'Interview' | 'Offering' | 'Ditolak';
   salary: string;
   notes: string;
   portal: string;

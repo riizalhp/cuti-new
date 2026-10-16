@@ -428,7 +428,7 @@ export function FeatureRequestView() {
         title="Saran & Usulan Fitur"
         subtitle="Sampaikan ide fitur baru untuk Employr atau pantau status pengembangan saranmu."
         icon={Lightbulb}
-        badge="Wishlist Komunitas"
+        badge="Saran Fitur"
         stats={[
           {
             label: 'Total Usulan',
@@ -438,41 +438,46 @@ export function FeatureRequestView() {
             isPrimary: true,
           },
         ]}
-        actions={
-          <Tabs
-            value={activeTab}
-            onValueChange={(val) => {
-              setActiveTab(val as any);
-              setSubmitSuccess(null);
-            }}
-            className="w-full sm:w-auto"
-          >
-            <TabsList variant="pill" className="w-full sm:w-auto bg-black/20 border-white/10 p-0.5 justify-center">
-                <TabsTrigger
-                  size="xs"
-                  value="form"
-                  className="text-slate-300 hover:text-white data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-xs"
-                >
-                  <Lightbulb className="w-3.5 h-3.5" />
-                  <span>Formulir</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  size="xs"
-                  value="history"
-                  className="text-slate-300 hover:text-white data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-xs"
-                >
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>Riwayat</span>
-                  {requests.length > 0 && (
-                    <span className="ml-1 px-1.5 py-0.5 rounded-full text-caption bg-white/20 text-current font-mono">
-                      {requests.length}
-                    </span>
-                  )}
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-        }
       />
+
+      {/* Sub-Navigation Tabs (Konsisten dengan SettingsView & MailerView) */}
+      <div className="w-full">
+        <Tabs
+          value={activeTab}
+          onValueChange={(val) => {
+            setActiveTab(val as any);
+            setSubmitSuccess(null);
+          }}
+          className="w-full"
+        >
+          <TabsList
+            variant="pill"
+            className="w-full sm:w-auto flex justify-between sm:justify-start p-1 gap-1 bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80"
+          >
+            <TabsTrigger
+              size="sm"
+              value="form"
+              className="flex-1 sm:flex-initial text-xs px-3 sm:px-4 py-2.5 sm:py-2 gap-1.5 font-bold min-h-[44px] sm:min-h-[38px] justify-center cursor-pointer"
+            >
+              <Lightbulb className="w-4 h-4 shrink-0 text-amber-500" />
+              <span>Formulir Saran</span>
+            </TabsTrigger>
+            <TabsTrigger
+              size="sm"
+              value="history"
+              className="flex-1 sm:flex-initial text-xs px-3 sm:px-4 py-2.5 sm:py-2 gap-1.5 font-bold min-h-[44px] sm:min-h-[38px] justify-center cursor-pointer"
+            >
+              <Clock className="w-4 h-4 shrink-0 text-cobalt-500" />
+              <span>Riwayat Saya</span>
+              {requests.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 rounded-full text-caption bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-mono font-bold">
+                  {requests.length}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
 
       {/* Main Content Area */}
       <div className="w-full">
@@ -535,14 +540,14 @@ export function FeatureRequestView() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+                  <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
                     <button
                       type="button"
                       onClick={() => {
                         setSubmitSuccess(null);
                         setActiveTab('history');
                       }}
-                      className="px-4 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm shadow-cobalt-500/20 cursor-pointer"
+                      className="w-full sm:w-auto min-h-[44px] px-4 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm shadow-cobalt-500/20 cursor-pointer"
                     >
                       <Clock className="w-3.5 h-3.5" />
                       <span>Lihat di Riwayat</span>
@@ -550,7 +555,7 @@ export function FeatureRequestView() {
                     <button
                       type="button"
                       onClick={() => setSubmitSuccess(null)}
-                      className="px-4 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
+                      className="w-full sm:w-auto min-h-[44px] px-4 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer flex items-center justify-center"
                     >
                       Kirim Saran Lain
                     </button>
@@ -559,7 +564,7 @@ export function FeatureRequestView() {
               ) : (
                 <form
                   onSubmit={handleSubmit}
-                  className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-sm"
+                  className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 p-4 sm:p-6 lg:p-8 space-y-6 shadow-sm"
                 >
                   <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
                     <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -678,12 +683,12 @@ export function FeatureRequestView() {
                             <UploadCloud className="w-5 h-5" />
                           )}
                         </div>
-                        <div className="text-xs">
+                        <div className="text-xs text-center">
                           <span className="font-bold text-cobalt-500 dark:text-blue-400">
-                            Pilih gambar
+                            Ketuk untuk memilih foto
                           </span>{' '}
                           <span className="text-slate-500 dark:text-slate-400">
-                            atau seret ke sini, atau tekan Ctrl+V untuk tempel
+                            atau seret file ke sini
                           </span>
                         </div>
                         <p className="text-caption text-slate-500 dark:text-slate-400">
@@ -709,18 +714,20 @@ export function FeatureRequestView() {
                               <button
                                 type="button"
                                 onClick={() => setZoomedImage(item.data_url)}
-                                className="p-1 rounded bg-white/80 hover:bg-white text-slate-900 transition-colors"
+                                className="p-1.5 rounded-full bg-white/90 hover:bg-white text-slate-900 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center cursor-pointer"
                                 title="Perbesar"
+                                aria-label="Perbesar gambar"
                               >
-                                <Maximize2 className="w-3.5 h-3.5" />
+                                <Maximize2 className="w-4 h-4" />
                               </button>
                               <button
                                 type="button"
                                 onClick={() => removeAttachment(idx)}
-                                className="p-1 rounded bg-rose-600 hover:bg-rose-700 text-white transition-colors"
+                                className="p-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center cursor-pointer"
                                 title="Hapus"
+                                aria-label="Hapus gambar"
                               >
-                                <X className="w-3.5 h-3.5" />
+                                <X className="w-4 h-4" />
                               </button>
                             </div>
                           </div>
@@ -758,11 +765,11 @@ export function FeatureRequestView() {
                   </div>
 
                   {/* Submit Button */}
-                  <div className="pt-4 flex items-center justify-end">
+                  <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-end gap-3">
                     <button
                       type="submit"
                       disabled={isSubmitting || isConvertingImage}
-                      className="px-6 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 text-white text-xs font-bold transition-all shadow-md shadow-cobalt-500/20 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                      className="w-full sm:w-auto min-h-[44px] px-6 py-2.5 rounded-[10px] bg-cobalt-500 hover:bg-cobalt-600 active:scale-[0.99] text-white text-xs font-bold transition-all shadow-md shadow-cobalt-500/20 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                     >
                       {isSubmitting ? (
                         <>
@@ -855,16 +862,16 @@ export function FeatureRequestView() {
         {activeTab === 'history' && (
           <div className="space-y-6">
             {/* Filter & Search Bar */}
-            <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 p-4 shadow-sm flex flex-col md:flex-row items-center gap-3">
+            <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 p-3.5 sm:p-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center gap-3">
               {/* Search */}
-              <div className="relative flex-1 w-full">
+              <div className="relative flex-1 min-w-0 w-full">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari berdasarkan judul, kendala, atau kode saran..."
-                  className="w-full pl-9 pr-4 py-2 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt-500"
+                  placeholder="Cari judul, kendala, atau kode saran..."
+                  className="w-full pl-9 pr-4 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 rounded-[10px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt-500"
                 />
               </div>
 
@@ -900,19 +907,47 @@ export function FeatureRequestView() {
                 type="button"
                 onClick={fetchRequests}
                 disabled={isLoadingList}
-                className="p-2 rounded-[10px] text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 text-xs font-semibold shrink-0 cursor-pointer"
+                className="w-full md:w-auto min-h-[44px] md:min-h-[38px] px-3.5 py-2 rounded-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition flex items-center justify-center gap-2 text-xs font-bold shrink-0 cursor-pointer"
                 title="Perbarui riwayat saran"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${isLoadingList ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">Segarkan</span>
+                <RefreshCw className={`w-4 h-4 shrink-0 ${isLoadingList ? 'animate-spin' : ''}`} />
+                <span>Segarkan Data</span>
               </button>
             </div>
 
             {/* List of Requests */}
             {isLoadingList ? (
-              <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 p-12 text-center space-y-3">
-                <Loader2 className="w-7 h-7 animate-spin mx-auto text-cobalt-500" />
-                <p className="text-xs text-slate-500">Memuat riwayat saran fitur...</p>
+              <div
+                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4"
+                aria-busy="true"
+                aria-label="Memuat riwayat saran fitur"
+              >
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 p-5 shadow-xs space-y-4 animate-pulse motion-reduce:animate-none"
+                  >
+                    <div className="flex items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                      <div className="flex items-center gap-2">
+                        <div className="h-5 w-16 bg-slate-200 dark:bg-slate-800 rounded-[8px]" />
+                        <div className="h-3 w-16 bg-slate-100 dark:bg-slate-800/60 rounded-[4px]" />
+                      </div>
+                      <div className="h-5 w-20 bg-slate-100 dark:bg-slate-800/80 rounded-[8px]" />
+                    </div>
+                    <div className="space-y-2">
+                      <div
+                        className="h-4 bg-slate-200 dark:bg-slate-800 rounded-[6px]"
+                        style={{ width: i % 2 === 0 ? '70%' : '85%' }}
+                      />
+                      <div className="h-3 w-full bg-slate-100 dark:bg-slate-800/70 rounded-[4px]" />
+                      <div className="h-3 w-3/4 bg-slate-100 dark:bg-slate-800/70 rounded-[4px]" />
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <div className="h-3 w-20 bg-slate-100 dark:bg-slate-800/60 rounded-[4px]" />
+                      <div className="h-3 w-16 bg-slate-200 dark:bg-slate-800 rounded-[4px]" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : requests.length === 0 ? (
               <div className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 p-12 text-center space-y-3">
@@ -958,9 +993,9 @@ export function FeatureRequestView() {
                           handleSelectRequest(item);
                         }
                       }}
-                      className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500 p-5 shadow-xs hover:border-cobalt-500 dark:hover:border-blue-500 transition-all flex flex-col justify-between gap-4 cursor-pointer group text-left"
+                      className="bg-white dark:bg-slate-900 rounded-[10px] border border-slate-200 dark:border-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500 p-4 sm:p-5 shadow-xs hover:border-cobalt-500 dark:hover:border-blue-500 transition-all flex flex-col justify-between gap-4 cursor-pointer group text-left min-w-0"
                     >
-                      <div className="space-y-3">
+                      <div className="space-y-3 min-w-0">
                         {/* Top Metadata */}
                         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
                           <div className="flex items-center gap-2">
@@ -985,12 +1020,12 @@ export function FeatureRequestView() {
                         </div>
 
                         {/* Title */}
-                        <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-cobalt-500 dark:group-hover:text-blue-400 transition-colors leading-snug line-clamp-2">
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-cobalt-500 dark:group-hover:text-blue-400 transition-colors leading-snug line-clamp-2 break-words">
                           {item.title}
                         </h4>
 
                         {/* Problem Statement Preview */}
-                        <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed break-words">
                           {item.problem_statement}
                         </p>
                       </div>
@@ -1033,15 +1068,14 @@ export function FeatureRequestView() {
       >
         <SheetContent
           side="right"
-          hideCloseButton
           className="w-full max-w-md sm:max-w-xl p-0 flex flex-col justify-between overflow-hidden"
         >
           {selectedRequest && (
             <>
               {/* Drawer Header */}
-              <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
-                <SheetHeader className="space-y-1 text-left">
-                  <div className="flex items-center gap-2">
+              <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 pr-14 sm:pr-16 bg-slate-50/50 dark:bg-slate-800/30">
+                <SheetHeader className="space-y-1.5 text-left">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs font-mono font-bold text-cobalt-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/80 px-2 py-0.5 rounded-[10px] border border-blue-200 dark:border-blue-800">
                       {selectedRequest.request_code}
                     </span>
@@ -1053,25 +1087,16 @@ export function FeatureRequestView() {
                       {(STATUS_CONFIG[selectedRequest.status] || STATUS_CONFIG.under_review).label}
                     </span>
                   </div>
-                  <SheetTitle className="text-base font-bold text-slate-900 dark:text-white leading-tight line-clamp-2">
+                  <SheetTitle className="text-base font-bold text-slate-900 dark:text-white leading-tight break-words">
                     {selectedRequest.title}
                   </SheetTitle>
                 </SheetHeader>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedRequest(null)}
-                  className="p-1.5 rounded-[10px] text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer dark:text-slate-400"
-                  aria-label="Tutup Detail Saran"
-                >
-                  <X className="w-5 h-5" />
-                </button>
               </div>
 
             {/* Drawer Scrollable Body */}
-            <div className="p-5 overflow-y-auto space-y-5 flex-1 text-xs sm:text-sm">
+            <div className="p-4 sm:p-5 overflow-y-auto space-y-5 flex-1 text-xs sm:text-sm">
               {/* Category & Date Info */}
-              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-[10px]">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-[10px]">
                 <div>
                   Kategori:{' '}
                   <span className="font-bold text-slate-700 dark:text-slate-300">
@@ -1097,7 +1122,7 @@ export function FeatureRequestView() {
                 <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   Kendala & Alasan Fitur
                 </h4>
-                <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">
+                <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                   {selectedRequest.problem_statement}
                 </div>
               </div>
@@ -1108,7 +1133,7 @@ export function FeatureRequestView() {
                   <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                     Ekspektasi Cara Kerja
                   </h4>
-                  <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">
+                  <div className="p-3.5 rounded-[10px] bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                     {selectedRequest.expected_behavior}
                   </div>
                 </div>
@@ -1216,16 +1241,7 @@ export function FeatureRequestView() {
               </div>
             </div>
 
-            {/* Drawer Sticky Footer */}
-            <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-end gap-2.5">
-              <button
-                type="button"
-                onClick={() => setSelectedRequest(null)}
-                className="px-5 py-2.5 rounded-[10px] bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-              >
-                Tutup
-              </button>
-            </div>
+
           </>
         )}
       </SheetContent>

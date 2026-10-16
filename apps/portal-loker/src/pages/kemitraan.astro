@@ -1,0 +1,610 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import FooterPortal from '../components/FooterPortal.astro';
+import SearchModal from '../components/SearchModal.astro';
+
+const title = "Daftarkan Event Kampus & Kemitraan Job Fair | Employr";
+const description = "Layanan publikasi bursa kerja (job fair) resmi, agenda event kampus, seminar karier mahasiswa, dan sponsorship terkurasi di Employr. Verifikasi cepat 1x24 jam via WhatsApp.";
+const canonicalUrl = "http://localhost:3003/kemitraan";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "http://localhost:3003/kemitraan#webpage",
+      "url": "http://localhost:3003/kemitraan",
+      "name": title,
+      "description": description,
+      "inLanguage": "id-ID",
+      "isPartOf": {
+        "@type": "WebSite",
+        "@id": "http://localhost:3003/#website",
+        "url": "http://localhost:3003/",
+        "name": "Employr Job Portal"
+      }
+    },
+    {
+      "@type": "ContactPage",
+      "@id": "http://localhost:3003/kemitraan#contactpage",
+      "url": "http://localhost:3003/kemitraan",
+      "name": "Pendaftaran Kemitraan Event & Promosi Employr",
+      "description": "Formulir pendaftaran kemitraan publikasi bursa kerja (job fair) kampus dan sponsor promosi di Employr.",
+      "mainEntity": {
+        "@type": "Organization",
+        "name": "Employr Indonesia",
+        "url": "http://localhost:3003/",
+        "email": "halo@employr.id"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Beranda",
+          "item": "http://localhost:3003/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Kemitraan & Event",
+          "item": "http://localhost:3003/kemitraan"
+        }
+      ]
+    }
+  ]
+};
+---
+
+<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl}>
+  <!-- Schema Structured Data for SEO -->
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+
+  <Navbar />
+
+  <main class="bg-[#f4f3ee] min-h-screen text-[#101010] py-6 sm:py-10">
+    <!-- Breadcrumb Navigation -->
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 mb-4">
+      <nav class="flex items-center gap-2 text-xs text-[#55544f]" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-[#1738D1] transition">Beranda</a>
+        <span>/</span>
+        <span class="text-[#101010] font-semibold">Kemitraan &amp; Event</span>
+      </nav>
+    </div>
+
+    <!-- MAIN 2-COLUMN EDITORIAL CONTAINER (Utilizing full 1240px max-width, no blank spaces) -->
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+
+        <!-- ================================================================= -->
+        <!-- KOLOM KIRI (5 Cols): Konteks Editorial, Nilai Kemitraan & Bantuan -->
+        <!-- ================================================================= -->
+        <aside class="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
+          <!-- Section Label (Signature Port 4321) -->
+          <div class="section-label">
+            <span>KEMITRAAN &amp; MEDIA PARTNER</span>
+            <i></i>
+          </div>
+
+          <!-- Headline -->
+          <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-[#101010] leading-tight">
+            Publikasikan Agenda Event &amp; <em class="font-serif italic font-normal text-[#1738D1]">Bursa Kerja</em> Kampus
+          </h1>
+
+          <p class="text-sm sm:text-base text-[#55544f] leading-relaxed">
+            Employr membuka kerja sama resmi dengan universitas, politeknik, BEM, dan lembaga penyelenggara untuk mempublikasikan job fair serta agenda karier terkurasi ke ribuan talenta muda di Indonesia.
+          </p>
+
+          <!-- Segmented Pill Mode Switcher -->
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#55544f] block mb-2">
+              Pilih Jenis Pengajuan:
+            </span>
+            <div
+              role="tablist"
+              aria-label="Pilihan Jenis Pengajuan"
+              class="p-1 rounded-full bg-[#e8e7e1] border border-[#d7d6cf] flex items-center gap-1 w-full"
+            >
+              <button
+                type="button"
+                role="tab"
+                id="tab-event"
+                aria-selected="true"
+                aria-controls="partner-form"
+                onclick="setInquiryMode('EVENT_KAMPUS')"
+                class="flex-1 py-2.5 px-3 rounded-full text-xs font-bold transition-all min-h-[44px] flex items-center justify-center cursor-pointer bg-[#101010] text-white shadow-xs focus-visible:outline-2 focus-visible:outline-[#1738D1]"
+              >
+                Event &amp; Job Fair
+              </button>
+              <button
+                type="button"
+                role="tab"
+                id="tab-iklan"
+                aria-selected="false"
+                aria-controls="partner-form"
+                onclick="setInquiryMode('IKLAN_SPONSOR')"
+                class="flex-1 py-2.5 px-3 rounded-full text-xs font-bold transition-all min-h-[44px] flex items-center justify-center cursor-pointer text-[#55544f] hover:text-[#101010] focus-visible:outline-2 focus-visible:outline-[#1738D1]"
+              >
+                Iklan &amp; Sponsor
+              </button>
+            </div>
+          </div>
+
+          <!-- Editorial Highlights Cards -->
+          <div class="space-y-3 pt-2">
+            <div class="bg-white border border-[#d7d6cf] rounded-2xl p-4 sm:p-5 shadow-xs">
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#1738D1] flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                  01
+                </div>
+                <div>
+                  <h2 class="text-sm font-bold text-[#101010]">Saluran Distribusi Luas</h2>
+                  <p class="text-xs text-[#55544f] mt-1 leading-relaxed">
+                    Agenda yang disetujui otomatis masuk ke kalender bursa kerja nasional (<a href="/event" class="text-[#1738D1] underline font-semibold">/event</a>), modul rekomendasi beranda, dan buletin mingguan.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-[#d7d6cf] rounded-2xl p-4 sm:p-5 shadow-xs">
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#059669] flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                  02
+                </div>
+                <div>
+                  <h2 class="text-sm font-bold text-[#101010]">Respon Cepat 1x24 Jam</h2>
+                  <p class="text-xs text-[#55544f] mt-1 leading-relaxed">
+                    Admin kemitraan kami akan langsung memverifikasi proposal dan menghubungi PIC melalui WhatsApp untuk koordinasi materi grafis dan jadwal tayang.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-[#d7d6cf] rounded-2xl p-4 sm:p-5 shadow-xs">
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] text-[#d97706] flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                  03
+                </div>
+                <div>
+                  <h2 class="text-sm font-bold text-[#101010]">Gratis untuk Acara Kampus</h2>
+                  <p class="text-xs text-[#55544f] mt-1 leading-relaxed">
+                    Bursa kerja resmi, seminar karier, dan kegiatan kemahasiswaan nirlaba bebas biaya kurasi dasar.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Contact Information -->
+          <div class="bg-[#f0f2ff] border border-[#c9d0ff] rounded-2xl p-4 text-xs text-[#1738D1]">
+            <p class="font-bold text-xs text-[#101010] mb-1">Butuh Diskusi Proposal Langsung?</p>
+            <p class="text-[#55544f] leading-relaxed mb-2">
+              Kirimkan dokumen kerja sama atau proposal resmi melalui email kemitraan kami:
+            </p>
+            <a href="mailto:halo@employr.id" class="inline-flex items-center gap-1 font-bold text-[#1738D1] hover:underline">
+              <span>halo@employr.id</span>
+              <span>&rarr;</span>
+            </a>
+          </div>
+        </aside>
+
+        <!-- ================================================================= -->
+        <!-- KOLOM KANAN (7 Cols): Formulir Lengkap & FAQ Native -->
+        <!-- ================================================================= -->
+        <div class="lg:col-span-7 space-y-6">
+
+          <!-- Anchor IDs for cross-app backward compatibility -->
+          <div id="mitra-event" class="scroll-mt-24"></div>
+          <div id="iklan" class="scroll-mt-24"></div>
+
+          <!-- Form Card (.card-paper) -->
+          <section
+            aria-labelledby="form-heading"
+            class="bg-white border border-[#d7d6cf] rounded-[24px] p-6 sm:p-8 shadow-[0px_1px_2px_-1px_rgba(16,16,16,0.06),0px_4px_8px_-2px_rgba(16,16,16,0.04)]"
+          >
+            <div class="border-b border-[#d7d6cf] pb-4 mb-6">
+              <h2 id="form-heading" class="text-lg sm:text-xl font-bold text-[#101010]">
+                Formulir Pendaftaran Event Kampus &amp; Job Fair
+              </h2>
+              <p id="form-subheading" class="text-xs sm:text-sm text-[#55544f] mt-1 leading-relaxed">
+                Isi data penanggung jawab dan rincian kegiatan. Tim kami akan menghubungi kontak tertera.
+              </p>
+            </div>
+
+            <!-- Accessible Live Alert Region (WCAG AAA Contrast) -->
+            <div
+              id="status-alert"
+              role="status"
+              aria-live="polite"
+              class="hidden mb-6 p-4 rounded-xl text-sm"
+            ></div>
+
+            <form id="partner-form" class="space-y-4 sm:space-y-5" novalidate>
+              <input type="hidden" id="inquiry_type" name="inquiry_type" value="EVENT_KAMPUS" />
+
+              <!-- Baris 1: PIC & Institusi (Grid 2 Kolom di Desktop/Tablet, 1 di Mobile) -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="pic_name" class="block text-sm font-bold text-[#101010] mb-1.5">
+                    Nama Lengkap PIC <span class="text-[#dc2626]" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="pic_name"
+                    name="pic_name"
+                    required
+                    aria-required="true"
+                    autocomplete="name"
+                    placeholder="Contoh: Rian Prasetyo"
+                    class="w-full h-12 px-4 rounded-xl border border-[#d7d6cf] bg-[#fbfbfa] text-sm text-[#101010] placeholder-[#6e6d68] focus:bg-white focus:outline-none focus-visible:outline-2 focus-visible:outline-[#1738D1] focus-visible:outline-offset-2 transition"
+                  />
+                  <p id="pic_name_error" class="hidden text-xs font-semibold text-[#dc2626] mt-1.5" role="alert"></p>
+                </div>
+
+                <div>
+                  <label for="institution_name" class="block text-sm font-bold text-[#101010] mb-1.5">
+                    Nama Institusi / Kampus / Brand <span class="text-[#dc2626]" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="institution_name"
+                    name="institution_name"
+                    required
+                    aria-required="true"
+                    autocomplete="organization"
+                    placeholder="Contoh: BEM Fakultas Ilmu Komputer UI"
+                    class="w-full h-12 px-4 rounded-xl border border-[#d7d6cf] bg-[#fbfbfa] text-sm text-[#101010] placeholder-[#6e6d68] focus:bg-white focus:outline-none focus-visible:outline-2 focus-visible:outline-[#1738D1] focus-visible:outline-offset-2 transition"
+                  />
+                  <p id="institution_name_error" class="hidden text-xs font-semibold text-[#dc2626] mt-1.5" role="alert"></p>
+                </div>
+              </div>
+
+              <!-- Baris 2: WhatsApp & Email (Grid 2 Kolom) -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="pic_phone" class="block text-sm font-bold text-[#101010] mb-1.5">
+                    Nomor WhatsApp PIC <span class="text-[#dc2626]" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    id="pic_phone"
+                    name="pic_phone"
+                    required
+                    aria-required="true"
+                    autocomplete="tel"
+                    placeholder="081234567890"
+                    class="w-full h-12 px-4 rounded-xl border border-[#d7d6cf] bg-[#fbfbfa] text-sm text-[#101010] placeholder-[#6e6d68] focus:bg-white focus:outline-none focus-visible:outline-2 focus-visible:outline-[#1738D1] focus-visible:outline-offset-2 transition font-mono"
+                  />
+                  <span class="text-xs text-[#55544f] mt-1 block">
+                    Format: 08xx atau 628xx (admin akan konfirmasi via WhatsApp).
+                  </span>
+                  <p id="pic_phone_error" class="hidden text-xs font-semibold text-[#dc2626] mt-1" role="alert"></p>
+                </div>
+
+                <div>
+                  <label for="pic_email" class="block text-sm font-bold text-[#101010] mb-1.5">
+                    Email Resmi PIC <span class="text-[#dc2626]" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="pic_email"
+                    name="pic_email"
+                    required
+                    aria-required="true"
+                    autocomplete="email"
+                    placeholder="nama@kampus.ac.id"
+                    class="w-full h-12 px-4 rounded-xl border border-[#d7d6cf] bg-[#fbfbfa] text-sm text-[#101010] placeholder-[#6e6d68] focus:bg-white focus:outline-none focus-visible:outline-2 focus-visible:outline-[#1738D1] focus-visible:outline-offset-2 transition"
+                  />
+                  <span class="text-xs text-[#55544f] mt-1 block">
+                    Untuk penerimaan bukti pengajuan dan nomor tiket.
+                  </span>
+                  <p id="pic_email_error" class="hidden text-xs font-semibold text-[#dc2626] mt-1" role="alert"></p>
+                </div>
+              </div>
+
+              <!-- Baris 3: Judul Acara / Program -->
+              <div>
+                <label for="event_title" class="block text-sm font-bold text-[#101010] mb-1.5">
+                  Judul Event / Nama Program <span class="text-[#dc2626]" aria-hidden="true">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="event_title"
+                  name="event_title"
+                  required
+                  aria-required="true"
+                  placeholder="Contoh: UI Career Days 2026 / Webinar Kesiapan Kerja"
+                  class="w-full h-12 px-4 rounded-xl border border-[#d7d6cf] bg-[#fbfbfa] text-sm text-[#101010] placeholder-[#6e6d68] focus:bg-white focus:outline-none focus-visible:outline-2 focus-visible:outline-[#1738D1] focus-visible:outline-offset-2 transition"
+                />
+                <p id="event_title_error" class="hidden text-xs font-semibold text-[#dc2626] mt-1.5" role="alert"></p>
+              </div>
+
+              <!-- Baris 4: Tanggal Pelaksanaan & Tautan Proposal (Grid 2 Kolom) -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="event_date" class="block text-sm font-bold text-[#101010] mb-1.5">
+                    Tanggal Pelaksanaan <span class="text-xs font-normal text-[#55544f]">(Opsional)</span>
+                  </label>
+                  <input
+                    type="date"
+                    id="event_date"
+                    name="event_date"
+                    class="w-full h-12 px-4 rounded-xl border border-[#d7d6cf] bg-[#fbfbfa] text-sm text-[#101010] focus:bg-white focus:outline-none focus-visible:outline-2 focus-visible:outline-[#1738D1] focus-visible:outline-offset-2 transition"
+                  />
+                </div>
+
+                <div>
+                  <label for="proposal_url" class="block text-sm font-bold text-[#101010] mb-1.5">
+                    Tautan Proposal / Brosur <span class="text-xs font-normal text-[#55544f]">(Opsional)</span>
+                  </label>
+                  <input
+                    type="url"
+                    id="proposal_url"
+                    name="proposal_url"
+                    autocomplete="url"
+                    placeholder="https://drive.google.com/... atau web"
+                    class="w-full h-12 px-4 rounded-xl border border-[#d7d6cf] bg-[#fbfbfa] text-sm text-[#101010] placeholder-[#6e6d68] focus:bg-white focus:outline-none focus-visible:outline-2 focus-visible:outline-[#1738D1] focus-visible:outline-offset-2 transition"
+                  />
+                </div>
+              </div>
+
+              <!-- Baris 5: Catatan / Kebutuhan Kerja Sama -->
+              <div>
+                <label for="message" class="block text-sm font-bold text-[#101010] mb-1.5">
+                  Catatan &amp; Bentuk Kerja Sama yang Diharapkan
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows="4"
+                  placeholder="Jelaskan kebutuhanmu, misalnya publikasi agenda di kalender bursa kerja, permintaan media partner, atau kebutuhan sponsor..."
+                  class="w-full p-4 rounded-xl border border-[#d7d6cf] bg-[#fbfbfa] text-sm text-[#101010] placeholder-[#6e6d68] focus:bg-white focus:outline-none focus-visible:outline-2 focus-visible:outline-[#1738D1] focus-visible:outline-offset-2 transition resize-y"
+                ></textarea>
+              </div>
+
+              <!-- Submit Action Button -->
+              <div class="pt-2">
+                <button
+                  type="submit"
+                  id="submit-btn"
+                  class="w-full min-h-[50px] px-6 py-3.5 rounded-full bg-[#1738D1] hover:bg-[#132EA8] active:scale-[0.99] text-white font-bold text-sm tracking-wide shadow-md shadow-[#1738D1]/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-[#101010] focus-visible:outline-offset-2"
+                >
+                  <span id="btn-text">Kirim Pengajuan Kemitraan</span>
+                  <svg id="btn-spinner" class="w-4 h-4 animate-spin hidden" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                  </svg>
+                </button>
+                <p class="text-xs text-[#55544f] text-center mt-2.5">
+                  Dengan mengirim formulir ini, PIC bersedia dihubungi oleh admin resmi Employr via WhatsApp atau email resmi.
+                </p>
+              </div>
+            </form>
+          </section>
+
+          <!-- FAQ Accordion (Native <details> with WCAG AAA contrast) -->
+          <section class="space-y-3" aria-labelledby="faq-section-title">
+            <div class="section-label mb-2">
+              <span id="faq-section-title">PERTANYAAN UMUM KEMITRAAN</span>
+              <i></i>
+            </div>
+
+            <details class="group bg-white border border-[#d7d6cf] rounded-2xl p-5 cursor-pointer transition open:shadow-xs">
+              <summary class="flex items-center justify-between font-bold text-sm text-[#101010] select-none list-none">
+                <span>Berapa lama proses verifikasi hingga acara tayang?</span>
+                <span class="w-6 h-6 rounded-full bg-[#f4f3ee] flex items-center justify-center text-[#101010] text-xs font-bold transition-transform group-open:rotate-180">
+                  ↓
+                </span>
+              </summary>
+              <p class="text-xs sm:text-sm text-[#55544f] leading-relaxed mt-3 pt-3 border-t border-[#d7d6cf]">
+                Tim admin meninjau setiap pengajuan dalam kurun waktu 1x24 jam kerja. Setelah proposal dinyatakan lengkap, admin akan langsung menghubungi PIC melalui WhatsApp untuk konfirmasi jadwal penayangan.
+              </p>
+            </details>
+
+            <details class="group bg-white border border-[#d7d6cf] rounded-2xl p-5 cursor-pointer transition open:shadow-xs">
+              <summary class="flex items-center justify-between font-bold text-sm text-[#101010] select-none list-none">
+                <span>Apakah ada biaya untuk publikasi bursa kerja / event kampus?</span>
+                <span class="w-6 h-6 rounded-full bg-[#f4f3ee] flex items-center justify-center text-[#101010] text-xs font-bold transition-transform group-open:rotate-180">
+                  ↓
+                </span>
+              </summary>
+              <p class="text-xs sm:text-sm text-[#55544f] leading-relaxed mt-3 pt-3 border-t border-[#d7d6cf]">
+                Agenda job fair resmi, seminar karier mahasiswa, dan kegiatan nirlaba institusi pendidikan tidak dipungut biaya publikasi kalender dasar. Untuk format promosi berbayar komersial (seperti spotlight banner utama), tim kemitraan kami akan memberikan paket media partner.
+              </p>
+            </details>
+
+            <details class="group bg-white border border-[#d7d6cf] rounded-2xl p-5 cursor-pointer transition open:shadow-xs">
+              <summary class="flex items-center justify-between font-bold text-sm text-[#101010] select-none list-none">
+                <span>Di mana agenda acara saya akan ditampilkan?</span>
+                <span class="w-6 h-6 rounded-full bg-[#f4f3ee] flex items-center justify-center text-[#101010] text-xs font-bold transition-transform group-open:rotate-180">
+                  ↓
+                </span>
+              </summary>
+              <p class="text-xs sm:text-sm text-[#55544f] leading-relaxed mt-3 pt-3 border-t border-[#d7d6cf]">
+                Event yang disetujui akan tampil di halaman kalender bursa kerja nasional (<a href="/event" class="text-[#1738D1] underline font-semibold">/event</a>), kartu rekomendasi di beranda portal loker, serta disertakan pada buletin karier mingguan ke subscriber aktif.
+              </p>
+            </details>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <FooterPortal />
+  <SearchModal />
+</BaseLayout>
+
+<script is:inline>
+  // Tab switcher state
+  window.setInquiryMode = function(mode) {
+    const hiddenInput = document.getElementById('inquiry_type');
+    const tabEvent = document.getElementById('tab-event');
+    const tabIklan = document.getElementById('tab-iklan');
+    const heading = document.getElementById('form-heading');
+    const subheading = document.getElementById('form-subheading');
+
+    if (!hiddenInput) return;
+    hiddenInput.value = mode;
+
+    if (mode === 'IKLAN_SPONSOR') {
+      tabIklan.className = 'flex-1 py-2.5 px-3 rounded-full text-xs font-bold transition-all min-h-[44px] flex items-center justify-center cursor-pointer bg-[#101010] text-white shadow-xs focus-visible:outline-2 focus-visible:outline-[#1738D1]';
+      tabIklan.setAttribute('aria-selected', 'true');
+      tabEvent.className = 'flex-1 py-2.5 px-3 rounded-full text-xs font-bold transition-all min-h-[44px] flex items-center justify-center cursor-pointer text-[#55544f] hover:text-[#101010] focus-visible:outline-2 focus-visible:outline-[#1738D1]';
+      tabEvent.setAttribute('aria-selected', 'false');
+
+      if (heading) heading.textContent = 'Formulir Pemasangan Iklan & Sponsorship';
+      if (subheading) subheading.textContent = 'Silakan isi kebutuhan promosi atau sponsorship brand kamu di ekosistem portal Employr.';
+    } else {
+      tabEvent.className = 'flex-1 py-2.5 px-3 rounded-full text-xs font-bold transition-all min-h-[44px] flex items-center justify-center cursor-pointer bg-[#101010] text-white shadow-xs focus-visible:outline-2 focus-visible:outline-[#1738D1]';
+      tabEvent.setAttribute('aria-selected', 'true');
+      tabIklan.className = 'flex-1 py-2.5 px-3 rounded-full text-xs font-bold transition-all min-h-[44px] flex items-center justify-center cursor-pointer text-[#55544f] hover:text-[#101010] focus-visible:outline-2 focus-visible:outline-[#1738D1]';
+      tabIklan.setAttribute('aria-selected', 'false');
+
+      if (heading) heading.textContent = 'Formulir Pendaftaran Event Kampus & Job Fair';
+      if (subheading) subheading.textContent = 'Isi data penanggung jawab dan rincian kegiatan. Tim kami akan menghubungi kontak tertera.';
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check initial anchor from URL hash
+    const hash = window.location.hash;
+    if (hash === '#iklan') {
+      setInquiryMode('IKLAN_SPONSOR');
+    } else {
+      setInquiryMode('EVENT_KAMPUS');
+    }
+
+    const form = document.getElementById('partner-form');
+    const alertBox = document.getElementById('status-alert');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnSpinner = document.getElementById('btn-spinner');
+
+    if (!form) return;
+
+    // Helper validasi inline
+    function validateField(id, errorId, errorMsg, customCheck) {
+      const input = document.getElementById(id);
+      const err = document.getElementById(errorId);
+      if (!input || !err) return true;
+
+      const val = input.value.trim();
+      const isValid = customCheck ? customCheck(val) : val.length > 0;
+
+      if (!isValid) {
+        input.setAttribute('aria-invalid', 'true');
+        input.classList.add('border-[#dc2626]');
+        err.textContent = errorMsg;
+        err.classList.remove('hidden');
+        return false;
+      } else {
+        input.removeAttribute('aria-invalid');
+        input.classList.remove('border-[#dc2626]');
+        err.classList.add('hidden');
+        return true;
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Client-side validation checks
+      const validName = validateField('pic_name', 'pic_name_error', 'Nama PIC wajib diisi (minimal 2 karakter).', (v) => v.length >= 2);
+      const validInst = validateField('institution_name', 'institution_name_error', 'Nama institusi wajib diisi.', (v) => v.length >= 2);
+      const validPhone = validateField('pic_phone', 'pic_phone_error', 'Nomor WhatsApp wajib diisi (minimal 8 angka).', (v) => v.replace(/[^0-9]/g, '').length >= 8);
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const validEmail = validateField('pic_email', 'pic_email_error', 'Alamat email PIC tidak valid.', (v) => emailRegex.test(v));
+      const validTitle = validateField('event_title', 'event_title_error', 'Judul acara atau program wajib diisi.', (v) => v.length >= 3);
+
+      if (!validName || !validInst || !validPhone || !validEmail || !validTitle) {
+        const firstInvalid = form.querySelector('[aria-invalid="true"]');
+        if (firstInvalid) firstInvalid.focus();
+        return;
+      }
+
+      // Set loading state
+      submitBtn.disabled = true;
+      btnText.textContent = 'Mengirim pengajuan...';
+      btnSpinner.classList.remove('hidden');
+      alertBox.className = 'hidden';
+
+      const formData = new FormData(form);
+      const payload = {
+        pic_name: formData.get('pic_name'),
+        institution_name: formData.get('institution_name'),
+        pic_email: formData.get('pic_email'),
+        pic_phone: formData.get('pic_phone'),
+        inquiry_type: formData.get('inquiry_type') || 'EVENT_KAMPUS',
+        event_title: formData.get('event_title'),
+        event_date: formData.get('event_date') || undefined,
+        proposal_url: formData.get('proposal_url') || undefined,
+        message: formData.get('message') || '',
+      };
+
+      try {
+        const response = await fetch('/api/partner-inquiries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          alertBox.className = 'mb-6 p-5 rounded-2xl bg-[#ecfdf5] border border-[#a7f3d0] text-[#065f46] block shadow-xs';
+          alertBox.innerHTML = `
+            <div class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-[#059669] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">✓</span>
+              <div>
+                <p class="font-bold text-sm sm:text-base">Pengajuan Kemitraan Berhasil Terkirim</p>
+                <p class="mt-1 text-xs sm:text-sm text-[#065f46] leading-relaxed">
+                  ${result.message}
+                </p>
+                <div class="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#d1fae5] font-mono text-xs font-bold text-[#065f46]">
+                  <span>Nomor Tiket:</span>
+                  <strong>#${result.ticket_code}</strong>
+                </div>
+                <p class="mt-2 text-xs text-[#047857]">
+                  Notifikasi telah diteruskan ke inbox admin. Admin akan menghubungi nomor WhatsApp <strong>${payload.pic_phone}</strong> dalam kurun waktu 1x24 jam kerja.
+                </p>
+              </div>
+            </div>
+          `;
+          form.reset();
+          alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          alertBox.className = 'mb-6 p-5 rounded-2xl bg-[#fff1f2] border border-[#fecdd3] text-[#9f1239] block';
+          alertBox.innerHTML = `
+            <div class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-[#e11d48] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">✕</span>
+              <div>
+                <p class="font-bold text-sm">Gagal Mengirimkan Pengajuan</p>
+                <p class="mt-1 text-xs sm:text-sm text-[#9f1239]">${result.message || 'Periksa kembali kelengkapan formulir kamu.'}</p>
+              </div>
+            </div>
+          `;
+          alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      } catch (err) {
+        alertBox.className = 'mb-6 p-5 rounded-2xl bg-[#fff1f2] border border-[#fecdd3] text-[#9f1239] block';
+        alertBox.innerHTML = `
+          <div class="flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-[#e11d48] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">✕</span>
+            <div>
+              <p class="font-bold text-sm">Kendala Jaringan</p>
+              <p class="mt-1 text-xs sm:text-sm text-[#9f1239]">Koneksi internet terputus. Pastikan perangkatmu terhubung lalu coba kembali.</p>
+            </div>
+          </div>
+        `;
+      } finally {
+        submitBtn.disabled = false;
+        btnText.textContent = 'Kirim Pengajuan Kemitraan';
+        btnSpinner.classList.add('hidden');
+      }
+    });
+  });
+</script>

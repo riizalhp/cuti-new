@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/Toast';
 import { CustomSelect, SelectOption } from '@/components/ui/CustomSelect';
 import { userApi, coverLetterApi, cvApi, trackerApi } from '@/lib/api';
+import { MascotEmptyState } from '@/components/ui/MascotEmptyState';
 import {
   Mail,
   Sparkles,
@@ -1353,8 +1354,12 @@ ${userEmail || 'email@email.com'}`);
         </div>
 
         {savedLetters.length === 0 ? (
-          <div className="p-8 text-center rounded-[10px] border border-dashed border-slate-200 dark:border-slate-800 text-slate-500 text-xs dark:text-slate-400">
-            Belum ada surat lamaran yang disimpan. Buat surat baru dan klik &quot;Simpan Draf&quot; untuk menyimpannya di sini.
+          <div className="rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-2xs">
+            <MascotEmptyState
+              size="sm"
+              title="Belum ada surat lamaran yang disimpan"
+              description="Buat surat baru menggunakan formulir di atas lalu klik Simpan Draf agar tersimpan rapi di sini."
+            />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

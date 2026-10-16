@@ -96,11 +96,13 @@ const description = `Informasi lengkap sertifikasi ${sert.title} dari ${sert.iss
           <!-- Action Buttons -->
           <div class="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 w-full lg:w-64 pt-4 lg:pt-0 border-t lg:border-t-0 border-[#d7d6cf]/50">
             <a
-              href="#daftar-sertifikasi"
+              href={sert.officialUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               class="w-full min-h-[44px] px-5 py-3 rounded-full bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-semibold text-xs shadow-md shadow-orange-500/20 text-center flex items-center justify-center gap-2 transition cursor-pointer"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-              <span>Daftar Sertifikasi</span>
+              <span>Daftar di Situs Resmi</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
             </a>
             <div class="flex items-center gap-2 w-full">
               <button
@@ -210,12 +212,9 @@ const description = `Informasi lengkap sertifikasi ${sert.title} dari ${sert.iss
               </a>
             </div>
           </article>
-
-          <!-- Google Ads: In-feed Unit (Setelah Alur Pendaftaran Selesai) -->
-          <AdSlot type="infeed" note="Pelajari materi persiapan uji kompetensi dan kursus bersertifikat." />
         </div>
 
-        <!-- Right: Sidebar Information & Ads -->
+        <!-- Right: Sidebar Information & Marketing -->
         <aside class="lg:col-span-4 space-y-6">
           <div class="bg-white rounded-2xl border border-[#d7d6cf] p-5 shadow-xs">
             <h3 class="text-sm font-semibold text-[#101010] mb-4 pb-2 border-b border-[#d7d6cf]/50">
@@ -247,13 +246,6 @@ const description = `Informasi lengkap sertifikasi ${sert.title} dari ${sert.iss
                 <span class="font-semibold text-[#101010] text-right">{sert.schedule}</span>
               </div>
             </div>
-
-            <a
-              href="#daftar-sertifikasi"
-              class="w-full min-h-[44px] mt-4 px-4 py-2.5 rounded-full bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-xs"
-            >
-              Daftar Sekarang
-            </a>
           </div>
 
           <!-- Verification Tip -->
@@ -266,9 +258,18 @@ const description = `Informasi lengkap sertifikasi ${sert.title} dari ${sert.iss
             </p>
           </div>
 
-          <!-- Google Ads: High-Viewability Sticky Sidebar Unit (300x600) -->
+          <!-- Marketing Unit: Optimasi CV Standar ATS Employr -->
+          <AdSlot
+            type="sidebar"
+            note={`Cantumkan sertifikat ${sert.issuer} ini di CV kamu agar lolos screening otomatis HRD.`}
+          />
+
+          <!-- Marketing B2C Unit: Pelatihan & Persiapan Sertifikasi (Sticky Mengikuti Scroll) -->
           <div class="sticky top-24">
-            <AdSlot type="skyscraper" note="Jangkau calon profesional bersertifikat di seluruh Indonesia." />
+            <AdSlot
+              type="skyscraper"
+              note={`Pelajari materi persiapan uji kompetensi dan simulasi tes ${sert.title} bersama mentor industri.`}
+            />
           </div>
         </aside>
       </div>

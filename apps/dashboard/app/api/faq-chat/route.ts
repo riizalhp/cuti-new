@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     if (!query || typeof query !== "string" || !query.trim()) {
       return NextResponse.json(
         {
-          text: "Halo! Saya Herdi dari Customer Service Employr. Silakan ketik pertanyaanmu, misalnya: cara cetak CV ke PDF, tracker lamaran, atau panduan misi & referral.",
+          text: "Halo! Lagi butuh info apa di Employr? Ketik aja pertanyaan atau kendala yang kamu alami (misal: cetak CV, tracker lamaran, career intelligence, atau draf email), nanti aku carikan panduan resminya ya.",
           suggestions: getQuickPrompts(4),
         },
         { status: 200 }
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     console.error("FAQ Chat Route Error:", error);
     return NextResponse.json(
       {
-        text: "Maaf, layanan bantuan sedang terganggu. Silakan coba beberapa saat lagi, atau baca Pusat Bantuan di faq.employr.id.",
+        text: "Layanan bantuan lagi terganggu nih. Coba kirim ulang pesanmu sebentar lagi, atau kamu bisa buka langsung Pusat Bantuan di faq.employr.id ya.",
         answered: false,
         suggestions: getQuickPrompts(4),
         error: errMessage,

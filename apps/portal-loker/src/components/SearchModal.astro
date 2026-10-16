@@ -1,10 +1,88 @@
 ---
-// SearchModal.astro - Unified multi-category search overlay with real database data
+// SearchModal.astro - Unified multi-category search overlay with real database data & interactive tabs
 import { getPortalCounts } from '../lib/data';
-import { lowonganList, eventList, artikelList, ensureData } from '../data/mock';
+import {
+  lowonganList,
+  eventList,
+  artikelList,
+  sertifikasiList,
+  courseList,
+  ensureData,
+} from '../data/mock';
 
 await ensureData();
 const counts = await getPortalCounts();
+
+const jobCountLabel = counts.jobs > 1000 ? `${Math.floor(counts.jobs / 1000)}k+` : String(counts.jobs);
+
+// Compact catalog of curated initial data for instant zero-latency tab switching & client filtering
+const catalog = {
+  lowongan: lowonganList.slice(0, 10).map((j) => ({
+    id: j.id || j.slug,
+    slug: j.slug,
+    title: j.title,
+    subtitle: j.company,
+    meta: `${j.geo || j.location} • ${j.type}`,
+    url: `/lowongan/${j.slug}`,
+    category: 'lowongan',
+    categoryLabel: 'Loker',
+    badgeClass: 'bg-blue-50 text-[#1738D1] border-blue-200',
+    iconLetter: 'L',
+    searchTerms: `${j.title} ${j.company} ${j.location || ''} ${j.category || ''} ${j.type || ''}`.toLowerCase(),
+  })),
+  event: eventList.slice(0, 10).map((e) => ({
+    id: e.id || e.slug,
+    slug: e.slug,
+    title: e.title,
+    subtitle: e.organizer,
+    meta: `${e.date} • ${e.format}`,
+    url: `/event/${e.slug}`,
+    category: 'event',
+    categoryLabel: 'Event',
+    badgeClass: 'bg-amber-50 text-amber-800 border-amber-200',
+    iconLetter: 'E',
+    searchTerms: `${e.title} ${e.organizer || ''} ${e.location || ''} ${e.format || ''}`.toLowerCase(),
+  })),
+  artikel: artikelList.slice(0, 10).map((a) => ({
+    id: a.id || a.slug,
+    slug: a.slug,
+    title: a.title,
+    subtitle: a.category,
+    meta: a.readTime || 'Karier',
+    url: `/career/${a.slug}`,
+    category: 'artikel',
+    categoryLabel: 'Artikel',
+    badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    iconLetter: 'A',
+    searchTerms: `${a.title} ${a.category || ''} ${a.author || ''}`.toLowerCase(),
+  })),
+  sertifikasi: sertifikasiList.slice(0, 10).map((c) => ({
+    id: c.id || c.slug,
+    slug: c.slug,
+    title: c.title,
+    subtitle: c.provider,
+    meta: `${c.level} • ${c.price}`,
+    url: `/sertifikasi/${c.slug}`,
+    category: 'sertifikasi',
+    categoryLabel: 'Sertifikasi',
+    badgeClass: 'bg-orange-50 text-orange-800 border-orange-200',
+    iconLetter: 'S',
+    searchTerms: `${c.title} ${c.provider || ''} ${c.level || ''}`.toLowerCase(),
+  })),
+  course: courseList.slice(0, 10).map((k) => ({
+    id: k.id || k.slug,
+    slug: k.slug,
+    title: k.title,
+    subtitle: k.provider,
+    meta: `${k.level} • ${k.price}`,
+    url: `/course/${k.slug}`,
+    category: 'course',
+    categoryLabel: 'Pelatihan',
+    badgeClass: 'bg-indigo-50 text-indigo-800 border-indigo-200',
+    iconLetter: 'P',
+    searchTerms: `${k.title} ${k.provider || ''} ${k.level || ''}`.toLowerCase(),
+  })),
+};
 ---
 
 <div
@@ -14,9 +92,9 @@ const counts = await getPortalCounts();
   aria-modal="true"
   aria-label="Pencarian Direktori Karier"
 >
-  <div class="bg-[#f4f3ee] rounded-2xl w-full max-w-3xl shadow-2xl border border-[#d7d6cf] overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-200">
+  <div class="bg-[#f4f3ee] rounded-2xl w-full max-w-3xl shadow-2xl border border-[#d7d6cf] overflow-hidden my-6 sm:my-8 animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[88vh]">
     <!-- Search Input Header -->
-    <div class="p-4 sm:p-5 border-b border-[#d7d6cf] flex items-center gap-3 bg-white">
+    <div class="p-4 sm:p-5 border-b border-[#d7d6cf] flex items-center gap-3 bg-white shrink-0">
       <svg class="w-5 h-5 text-[#6e6d68] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
       </svg>
@@ -24,13 +102,21 @@ const counts = await getPortalCounts();
         type="text"
         id="modal-search-input"
         placeholder="Cari loker, tips karier, event, pelatihan, atau sertifikasi..."
-        class="w-full text-base sm:text-lg text-[#101010] placeholder-[#a5a5a1] outline-none bg-transparent font-medium"
+        class="min-w-0 flex-1 text-base sm:text-lg text-[#101010] placeholder-[#a5a5a1] outline-none bg-transparent font-medium"
+        autocomplete="off"
         autofocus
       />
       <button
         type="button"
+        id="clear-search-modal"
+        class="hidden px-2.5 py-1 text-xs font-bold text-[#6e6d68] hover:text-[#101010] hover:bg-[#101010]/5 rounded-full transition cursor-pointer shrink-0"
+      >
+        Hapus
+      </button>
+      <button
+        type="button"
         id="close-search-modal"
-        class="w-8 h-8 rounded-full flex items-center justify-center text-[#6e6d68] hover:text-[#101010] hover:bg-[#101010]/5 transition cursor-pointer"
+        class="w-8 h-8 rounded-full flex items-center justify-center text-[#6e6d68] hover:text-[#101010] hover:bg-[#101010]/5 transition cursor-pointer shrink-0"
         aria-label="Tutup pencarian"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,93 +126,454 @@ const counts = await getPortalCounts();
     </div>
 
     <!-- Category Filter Tabs inside Modal -->
-    <div class="px-4 py-3 border-b border-[#d7d6cf] flex items-center gap-2 overflow-x-auto text-xs font-bold no-scrollbar bg-[#f4f3ee]" id="modal-category-tabs">
-      <button data-tab="all" data-target="/search" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-[#101010] text-white">Semua</button>
-      <button data-tab="lowongan" data-target="/search?type=lowongan" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-white text-[#6e6d68] border border-[#d7d6cf] hover:border-[#101010]">Loker ({counts.jobs > 1000 ? `${Math.floor(counts.jobs / 1000)}k+` : counts.jobs})</button>
-      {counts.events > 0 && <button data-tab="event" data-target="/search?type=event" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-white text-[#6e6d68] border border-[#d7d6cf] hover:border-[#101010]">Event ({counts.events})</button>}
-      {counts.articles > 0 && <button data-tab="artikel" data-target="/search?type=career" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-white text-[#6e6d68] border border-[#d7d6cf] hover:border-[#101010]">Artikel ({counts.articles})</button>}
-      {counts.certs > 0 && <button data-tab="sertifikasi" data-target="/search?type=sertifikasi" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-white text-[#6e6d68] border border-[#d7d6cf] hover:border-[#101010]">Sertifikasi ({counts.certs})</button>}
-      {counts.courses > 0 && <button data-tab="course" data-target="/search?type=course" class="search-tab-btn px-3.5 py-1.5 rounded-full bg-white text-[#6e6d68] border border-[#d7d6cf] hover:border-[#101010]">Pelatihan ({counts.courses})</button>}
+    <div class="px-4 py-3 border-b border-[#d7d6cf] flex items-center gap-2 overflow-x-auto text-xs font-bold no-scrollbar bg-[#f4f3ee] shrink-0" id="modal-category-tabs">
+      <button
+        type="button"
+        data-tab="all"
+        data-target="/search"
+        data-label="Semua"
+        class="search-tab-btn is-active px-3.5 py-1.5 rounded-full border cursor-pointer shrink-0 shadow-xs"
+      >
+        Semua
+      </button>
+      <button
+        type="button"
+        data-tab="lowongan"
+        data-target="/search?type=lowongan"
+        data-label="Loker"
+        class="search-tab-btn px-3.5 py-1.5 rounded-full border cursor-pointer shrink-0"
+      >
+        Loker ({jobCountLabel})
+      </button>
+      {counts.events > 0 && (
+        <button
+          type="button"
+          data-tab="event"
+          data-target="/search?type=event"
+          data-label="Event"
+          class="search-tab-btn px-3.5 py-1.5 rounded-full border cursor-pointer shrink-0"
+        >
+          Event ({counts.events})
+        </button>
+      )}
+      {counts.articles > 0 && (
+        <button
+          type="button"
+          data-tab="artikel"
+          data-target="/search?type=career"
+          data-label="Artikel"
+          class="search-tab-btn px-3.5 py-1.5 rounded-full border cursor-pointer shrink-0"
+        >
+          Artikel ({counts.articles})
+        </button>
+      )}
+      {counts.certs > 0 && (
+        <button
+          type="button"
+          data-tab="sertifikasi"
+          data-target="/search?type=sertifikasi"
+          data-label="Sertifikasi"
+          class="search-tab-btn px-3.5 py-1.5 rounded-full border cursor-pointer shrink-0"
+        >
+          Sertifikasi ({counts.certs})
+        </button>
+      )}
+      {counts.courses > 0 && (
+        <button
+          type="button"
+          data-tab="course"
+          data-target="/search?type=course"
+          data-label="Pelatihan"
+          class="search-tab-btn px-3.5 py-1.5 rounded-full border cursor-pointer shrink-0"
+        >
+          Pelatihan ({counts.courses})
+        </button>
+      )}
     </div>
 
-    <!-- Search Results Container -->
-    <div id="search-results-box" class="p-4 sm:p-6 max-h-[60vh] overflow-y-auto space-y-3 bg-[#f4f3ee]">
-      <!-- Default Quick Suggestions -->
-      <div class="section-label mb-3"><span>Rekomendasi Pencarian Terkini</span><i></i></div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        {lowonganList.slice(0, 2).map((job) => (
-          <a href={`/lowongan/${job.slug}`} class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#1738D1] flex items-center justify-between group transition shadow-xs">
+    <!-- Search Results Dynamic Box -->
+    <div id="search-results-box" class="p-4 sm:p-6 overflow-y-auto space-y-4 bg-[#f4f3ee] flex-1">
+      <!-- Section Header -->
+      <div id="modal-results-header" class="flex items-center justify-between text-xs font-bold text-[#55544f]">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-[#1738D1]"></span>
+          <span id="modal-header-title">Rekomendasi Terkini di Portal</span>
+        </div>
+        <span id="modal-header-count" class="text-[11px] font-semibold text-[#6e6d68]"></span>
+      </div>
+
+      <!-- Item Cards Container -->
+      <div id="modal-results-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <!-- Initial SSR fallback cards -->
+        {catalog.lowongan.slice(0, 2).map((job) => (
+          <a href={job.url} class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#1738D1] flex items-center justify-between group transition shadow-xs">
             <div class="flex items-center gap-2.5 min-w-0 pr-2">
-              <span class="w-7 h-7 rounded-full bg-blue-50 text-[#1738D1] flex items-center justify-center text-xs font-bold border border-blue-100 shrink-0">L</span>
-              <span class="text-xs font-bold text-[#101010] group-hover:text-[#1738D1] truncate">{job.title}</span>
+              <span class={`w-7 h-7 rounded-full ${job.badgeClass} flex items-center justify-center text-xs font-bold border shrink-0`}>L</span>
+              <div class="min-w-0">
+                <span class="text-xs font-bold text-[#101010] group-hover:text-[#1738D1] truncate block">{job.title}</span>
+                <span class="text-[11px] text-[#6e6d68] truncate block">{job.subtitle}</span>
+              </div>
             </div>
-            <span class="text-[11px] font-bold text-[#55544f] shrink-0 truncate max-w-[120px]">{job.company}</span>
+            <span class="text-[11px] font-semibold text-[#55544f] shrink-0 truncate max-w-[120px] text-right">{job.meta}</span>
           </a>
         ))}
-        {eventList.slice(0, 1).map((ev) => (
-          <a href={`/event/${ev.slug}`} class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#1738D1] flex items-center justify-between group transition shadow-xs">
+        {catalog.event.slice(0, 1).map((ev) => (
+          <a href={ev.url} class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#1738D1] flex items-center justify-between group transition shadow-xs">
             <div class="flex items-center gap-2.5 min-w-0 pr-2">
-              <span class="w-7 h-7 rounded-full bg-amber-50 text-amber-800 flex items-center justify-center text-xs font-bold border border-amber-200 shrink-0">E</span>
-              <span class="text-xs font-bold text-[#101010] group-hover:text-[#1738D1] truncate">{ev.title}</span>
+              <span class={`w-7 h-7 rounded-full ${ev.badgeClass} flex items-center justify-center text-xs font-bold border shrink-0`}>E</span>
+              <div class="min-w-0">
+                <span class="text-xs font-bold text-[#101010] group-hover:text-[#1738D1] truncate block">{ev.title}</span>
+                <span class="text-[11px] text-[#6e6d68] truncate block">{ev.subtitle}</span>
+              </div>
             </div>
-            <span class="text-[11px] font-bold text-[#55544f] shrink-0 truncate max-w-[120px]">{ev.date}</span>
+            <span class="text-[11px] font-semibold text-[#55544f] shrink-0 truncate max-w-[120px] text-right">{ev.meta}</span>
           </a>
         ))}
-        {artikelList.slice(0, 1).map((art) => (
-          <a href={`/career/${art.slug}`} class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#1738D1] flex items-center justify-between group transition shadow-xs">
+        {catalog.artikel.slice(0, 1).map((art) => (
+          <a href={art.url} class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#1738D1] flex items-center justify-between group transition shadow-xs">
             <div class="flex items-center gap-2.5 min-w-0 pr-2">
-              <span class="w-7 h-7 rounded-full bg-rose-50 text-rose-700 flex items-center justify-center text-xs font-bold border border-rose-200 shrink-0">A</span>
-              <span class="text-xs font-bold text-[#101010] group-hover:text-[#1738D1] truncate">{art.title}</span>
+              <span class={`w-7 h-7 rounded-full ${art.badgeClass} flex items-center justify-center text-xs font-bold border shrink-0`}>A</span>
+              <div class="min-w-0">
+                <span class="text-xs font-bold text-[#101010] group-hover:text-[#1738D1] truncate block">{art.title}</span>
+                <span class="text-[11px] text-[#6e6d68] truncate block">{art.subtitle}</span>
+              </div>
             </div>
-            <span class="text-[11px] font-bold text-[#55544f] shrink-0 truncate max-w-[120px]">{art.category}</span>
+            <span class="text-[11px] font-semibold text-[#55544f] shrink-0 truncate max-w-[120px] text-right">{art.meta}</span>
           </a>
         ))}
+        {catalog.sertifikasi.slice(0, 1).map((cert) => (
+          <a href={cert.url} class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#1738D1] flex items-center justify-between group transition shadow-xs">
+            <div class="flex items-center gap-2.5 min-w-0 pr-2">
+              <span class={`w-7 h-7 rounded-full ${cert.badgeClass} flex items-center justify-center text-xs font-bold border shrink-0`}>S</span>
+              <div class="min-w-0">
+                <span class="text-xs font-bold text-[#101010] group-hover:text-[#1738D1] truncate block">{cert.title}</span>
+                <span class="text-[11px] text-[#6e6d68] truncate block">{cert.subtitle}</span>
+              </div>
+            </div>
+            <span class="text-[11px] font-semibold text-[#55544f] shrink-0 truncate max-w-[120px] text-right">{cert.meta}</span>
+          </a>
+        ))}
+        {catalog.course.slice(0, 1).map((crs) => (
+          <a href={crs.url} class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#1738D1] flex items-center justify-between group transition shadow-xs">
+            <div class="flex items-center gap-2.5 min-w-0 pr-2">
+              <span class={`w-7 h-7 rounded-full ${crs.badgeClass} flex items-center justify-center text-xs font-bold border shrink-0`}>P</span>
+              <div class="min-w-0">
+                <span class="text-xs font-bold text-[#101010] group-hover:text-[#1738D1] truncate block">{crs.title}</span>
+                <span class="text-[11px] text-[#6e6d68] truncate block">{crs.subtitle}</span>
+              </div>
+            </div>
+            <span class="text-[11px] font-semibold text-[#55544f] shrink-0 truncate max-w-[120px] text-right">{crs.meta}</span>
+          </a>
+        ))}
+      </div>
+
+      <!-- Category Footer Action / CTA -->
+      <div id="modal-results-footer-cta" class="pt-2 text-center">
+        <a
+          id="modal-category-cta-link"
+          href="/search"
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white border border-[#d7d6cf] hover:border-[#1738D1] text-xs font-bold text-[#1738D1] hover:bg-blue-50/50 transition shadow-2xs"
+        >
+          <span id="modal-category-cta-text">Lihat Seluruh Direktori di Pencarian Terpadu</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+          </svg>
+        </a>
       </div>
     </div>
 
     <!-- Modal Footer -->
-    <div class="p-4 bg-white border-t border-[#d7d6cf] flex items-center justify-between text-xs text-[#6e6d68]">
+    <div class="p-4 bg-white border-t border-[#d7d6cf] flex items-center justify-between text-xs text-[#6e6d68] shrink-0">
       <span>Tekan <kbd class="px-2 py-0.5 rounded-full bg-[#f4f3ee] border border-[#d7d6cf] font-mono text-[10px] text-[#101010]">ESC</kbd> untuk menutup</span>
-      <a href="/search" class="font-bold text-[#1738D1] hover:underline">Buka Pencarian Terpadu</a>
+      <a id="modal-footer-search-link" href="/search" class="font-bold text-[#1738D1] hover:underline flex items-center gap-1">
+        <span>Buka Pencarian Terpadu</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+        </svg>
+      </a>
     </div>
   </div>
 </div>
 
+<script id="search-modal-catalog-data" type="application/json" is:inline set:html={JSON.stringify(catalog)}></script>
+<script id="search-modal-counts-data" type="application/json" is:inline set:html={JSON.stringify({
+  jobs: counts.jobs,
+  events: counts.events,
+  articles: counts.articles,
+  certs: counts.certs,
+  courses: counts.courses,
+  jobCountLabel,
+})}></script>
+
 <script is:inline>
   (function() {
     const modal = document.getElementById('global-search-modal');
-    const openBtn = document.getElementById('open-search-btn');
     const closeBtn = document.getElementById('close-search-modal');
     const modalInput = document.getElementById('modal-search-input');
+    const clearBtn = document.getElementById('clear-search-modal');
     const tabBtns = document.querySelectorAll('.search-tab-btn');
-    let currentTarget = '/search';
+    const headerTitle = document.getElementById('modal-header-title');
+    const headerCount = document.getElementById('modal-header-count');
+    const resultsList = document.getElementById('modal-results-list');
+    const ctaBox = document.getElementById('modal-results-footer-cta');
+    const ctaLink = document.getElementById('modal-category-cta-link');
+    const ctaText = document.getElementById('modal-category-cta-text');
+    const footerSearchLink = document.getElementById('modal-footer-search-link');
 
+    let catalog = {};
+    let counts = { jobs: 0, events: 0, articles: 0, certs: 0, courses: 0, jobCountLabel: '0' };
+    try {
+      const rawCatalog = document.getElementById('search-modal-catalog-data')?.textContent;
+      if (rawCatalog) catalog = JSON.parse(rawCatalog);
+      const rawCounts = document.getElementById('search-modal-counts-data')?.textContent;
+      if (rawCounts) counts = JSON.parse(rawCounts);
+    } catch (e) {
+      console.warn('[search modal] Gagal parse data katalog:', e);
+    }
+
+    let currentTab = 'all';
+    let currentTarget = '/search';
+    let searchDebounceTimer = null;
+    let activeFetchAbort = null;
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    const tabNames = {
+      all: 'Semua Kategori',
+      lowongan: 'Lowongan Kerja',
+      event: 'Event & Job Fair',
+      artikel: 'Artikel & Panduan Karier',
+      sertifikasi: 'Sertifikasi Profesi',
+      course: 'Pelatihan Skill',
+    };
+
+    const ctaInfo = {
+      all: { text: 'Lihat Seluruh Direktori di Pencarian Terpadu', url: '/search' },
+      lowongan: { text: `Lihat Semua Lowongan (${counts.jobCountLabel || counts.jobs})`, url: '/lowongan' },
+      event: { text: `Lihat Semua Event (${counts.events})`, url: '/event' },
+      artikel: { text: `Lihat Semua Artikel (${counts.articles})`, url: '/career' },
+      sertifikasi: { text: `Lihat Semua Sertifikasi (${counts.certs})`, url: '/sertifikasi' },
+      course: { text: `Lihat Semua Pelatihan (${counts.courses})`, url: '/course' },
+    };
+
+    function renderResults(serverResults) {
+      const query = modalInput ? modalInput.value.trim().toLowerCase() : '';
+      const isQuery = query.length > 0;
+
+      let itemsToRender = [];
+
+      if (Array.isArray(serverResults)) {
+        itemsToRender = serverResults;
+      } else if (!isQuery) {
+        if (currentTab === 'all') {
+          itemsToRender = [
+            ...(catalog.lowongan || []).slice(0, 2),
+            ...(catalog.event || []).slice(0, 2),
+            ...(catalog.artikel || []).slice(0, 2),
+            ...(catalog.sertifikasi || []).slice(0, 2),
+            ...(catalog.course || []).slice(0, 2),
+          ];
+        } else {
+          itemsToRender = (catalog[currentTab] || []).slice(0, 10);
+        }
+      } else {
+        if (currentTab === 'all') {
+          const allPool = [
+            ...(catalog.lowongan || []),
+            ...(catalog.event || []),
+            ...(catalog.artikel || []),
+            ...(catalog.sertifikasi || []),
+            ...(catalog.course || []),
+          ];
+          itemsToRender = allPool.filter(item => item.searchTerms && item.searchTerms.includes(query)).slice(0, 10);
+        } else {
+          const pool = catalog[currentTab] || [];
+          itemsToRender = pool.filter(item => item.searchTerms && item.searchTerms.includes(query)).slice(0, 10);
+        }
+      }
+
+      // Update Header
+      if (headerTitle) {
+        if (isQuery) {
+          headerTitle.textContent = `Hasil Pencarian: "${modalInput.value.trim()}"`;
+        } else if (currentTab === 'all') {
+          headerTitle.textContent = 'Rekomendasi Terkini di Portal';
+        } else {
+          headerTitle.textContent = `${tabNames[currentTab] || 'Kategori'} Terkini`;
+        }
+      }
+
+      if (headerCount) {
+        if (isQuery) {
+          headerCount.textContent = `${itemsToRender.length} ditemukan`;
+        } else if (currentTab === 'all') {
+          headerCount.textContent = 'Semua Kategori';
+        } else {
+          headerCount.textContent = `${itemsToRender.length} ditampilkan`;
+        }
+      }
+
+      // Update Full Search URL
+      let fullSearchUrl = currentTarget || '/search';
+      if (isQuery) {
+        fullSearchUrl += (fullSearchUrl.includes('?') ? '&' : '?') + 'q=' + encodeURIComponent(modalInput.value.trim());
+      }
+
+      if (footerSearchLink) {
+        footerSearchLink.setAttribute('href', fullSearchUrl);
+        const span = footerSearchLink.querySelector('span');
+        if (span) {
+          span.textContent = isQuery ? 'Lihat Hasil Lengkap di Halaman Pencarian' : 'Buka Pencarian Terpadu';
+        }
+      }
+
+      // Update Category Action Button
+      if (ctaBox && ctaLink && ctaText) {
+        if (isQuery) {
+          ctaText.textContent = `Buka Seluruh Hasil Pencarian untuk "${modalInput.value.trim()}"`;
+          ctaLink.setAttribute('href', fullSearchUrl);
+          ctaBox.classList.remove('hidden');
+        } else {
+          const info = ctaInfo[currentTab] || ctaInfo.all;
+          ctaText.textContent = info.text;
+          ctaLink.setAttribute('href', info.url);
+          ctaBox.classList.remove('hidden');
+        }
+      }
+
+      // Render Empty State
+      if (!resultsList) return;
+      if (itemsToRender.length === 0) {
+        resultsList.className = 'block';
+        resultsList.innerHTML = `
+          <div class="text-center py-8 px-4 bg-white rounded-xl border border-[#d7d6cf] max-w-md mx-auto">
+            <div class="w-10 h-10 rounded-full bg-blue-50 text-[#1738D1] border border-blue-200 flex items-center justify-center mx-auto mb-2.5">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+            <p class="text-xs font-bold text-[#101010] mb-1">Tidak ada hasil untuk "${escapeHtml(modalInput.value.trim())}"</p>
+            <p class="text-[11px] text-[#6e6d68] mb-3">Coba gunakan kata kunci lain atau buka pencarian terpadu.</p>
+            <a href="${fullSearchUrl}" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-[#1738D1] hover:bg-[#132EA8] text-white text-[11px] font-bold transition">
+              Cari di Direktori Lengkap →
+            </a>
+          </div>
+        `;
+        if (ctaBox) ctaBox.classList.add('hidden');
+        return;
+      }
+
+      // Render Results Cards
+      resultsList.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2.5';
+      resultsList.innerHTML = itemsToRender.map(item => `
+        <a href="${item.url}" class="p-3.5 rounded-xl bg-white border border-[#d7d6cf] hover:border-[#1738D1] flex items-center justify-between group transition shadow-xs">
+          <div class="flex items-center gap-2.5 min-w-0 pr-2">
+            <span class="w-7 h-7 rounded-full ${item.badgeClass || 'bg-blue-50 text-[#1738D1] border-blue-200'} flex items-center justify-center text-xs font-bold border shrink-0">
+              ${item.iconLetter || '•'}
+            </span>
+            <div class="min-w-0">
+              <span class="text-xs font-bold text-[#101010] group-hover:text-[#1738D1] truncate block">${escapeHtml(item.title)}</span>
+              <span class="text-[11px] text-[#6e6d68] truncate block mt-0.5">${escapeHtml(item.subtitle)}</span>
+            </div>
+          </div>
+          <span class="text-[11px] font-semibold text-[#55544f] shrink-0 truncate max-w-[120px] text-right">${escapeHtml(item.meta)}</span>
+        </a>
+      `).join('');
+    }
+
+    function triggerLiveSearch() {
+      const query = modalInput ? modalInput.value.trim() : '';
+      if (clearBtn) {
+        if (query.length > 0) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+      }
+
+      // 1. Instant local render
+      renderResults();
+
+      // 2. Cancel previous timers/requests
+      if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+      if (activeFetchAbort) {
+        activeFetchAbort.abort();
+        activeFetchAbort = null;
+      }
+
+      // 3. Debounced API fetch if query >= 2 chars
+      if (query.length >= 2) {
+        searchDebounceTimer = setTimeout(async () => {
+          try {
+            const controller = new AbortController();
+            activeFetchAbort = controller;
+            const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&type=${encodeURIComponent(currentTab)}`, {
+              signal: controller.signal,
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.success && Array.isArray(data.results)) {
+                if (modalInput && modalInput.value.trim().toLowerCase() === query.toLowerCase()) {
+                  renderResults(data.results);
+                }
+              }
+            }
+          } catch (err) {
+            if (err.name !== 'AbortError') {
+              console.warn('[search modal] Error fetch backend search:', err);
+            }
+          } finally {
+            activeFetchAbort = null;
+          }
+        }, 220);
+      }
+    }
+
+    // Switch Tab Listener
     tabBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
         tabBtns.forEach((b) => {
-          b.classList.remove('bg-[#101010]', 'text-white');
-          b.classList.add('bg-white', 'text-[#6e6d68]', 'border-[#d7d6cf]');
+          b.classList.remove('is-active', 'shadow-xs');
         });
-        btn.classList.remove('bg-white', 'text-[#6e6d68]', 'border-[#d7d6cf]');
-        btn.classList.add('bg-[#101010]', 'text-white');
+        btn.classList.add('is-active', 'shadow-xs');
+
+        currentTab = btn.getAttribute('data-tab') || 'all';
         currentTarget = btn.getAttribute('data-target') || '/search';
+
+        triggerLiveSearch();
       });
     });
 
-    function openModal(initialQuery) {
+    function openModal(initialQuery = '') {
       if (!modal) return;
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
       if (modalInput) {
         if (initialQuery) modalInput.value = initialQuery;
-        modalInput.focus();
+        if (clearBtn) {
+          if (modalInput.value.trim()) clearBtn.classList.remove('hidden');
+          else clearBtn.classList.add('hidden');
+        }
+        setTimeout(() => modalInput.focus(), 60);
       }
+      renderResults();
     }
 
     function closeModal() {
       if (!modal) return;
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+      document.body.style.overflow = '';
+      if (activeFetchAbort) {
+        activeFetchAbort.abort();
+        activeFetchAbort = null;
+      }
     }
 
     function executeSearch() {
@@ -138,11 +585,28 @@ const counts = await getPortalCounts();
       window.location.href = dest;
     }
 
-    openBtn?.addEventListener('click', () => openModal(''));
+    // Event Listeners for triggers
+    document.querySelectorAll('#open-search-btn, [data-open-search-modal], .open-search-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal('');
+      });
+    });
+
     closeBtn?.addEventListener('click', closeModal);
     modal?.addEventListener('click', (e) => {
       if (e.target === modal) closeModal();
     });
+
+    clearBtn?.addEventListener('click', () => {
+      if (modalInput) {
+        modalInput.value = '';
+        modalInput.focus();
+      }
+      triggerLiveSearch();
+    });
+
+    modalInput?.addEventListener('input', triggerLiveSearch);
 
     modalInput?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -158,3 +622,24 @@ const counts = await getPortalCounts();
     });
   })();
 </script>
+
+<style>
+  .search-tab-btn {
+    transition: all 0.15s ease-in-out;
+  }
+  .search-tab-btn.is-active {
+    background-color: #101010 !important;
+    color: #ffffff !important;
+    border-color: #101010 !important;
+  }
+  .search-tab-btn:not(.is-active) {
+    background-color: #ffffff;
+    color: #6e6d68;
+    border-color: #d7d6cf;
+  }
+  .search-tab-btn:not(.is-active):hover {
+    border-color: #101010;
+    color: #101010;
+  }
+</style>
+

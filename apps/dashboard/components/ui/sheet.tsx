@@ -37,7 +37,7 @@ const sheetVariants = cva(
           "inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
         left: "inset-y-0 left-0 h-full w-full max-w-md border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-lg",
         right:
-          "inset-y-0 right-0 h-full w-full max-w-md border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-xl",
+          "inset-x-0 bottom-0 top-auto h-auto max-h-[92dvh] w-full rounded-t-[16px] border-t border-x-0 border-b-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:inset-y-0 sm:right-0 sm:left-auto sm:top-0 sm:h-full sm:max-h-none sm:w-full sm:max-w-xl sm:rounded-none sm:border-l sm:border-t-0 sm:data-[state=closed]:slide-out-to-right sm:data-[state=open]:slide-in-from-right",
       },
     },
     defaultVariants: {
@@ -52,6 +52,19 @@ interface SheetContentProps
   hideCloseButton?: boolean;
   returnFocusRef?: React.RefObject<HTMLElement | null>;
 }
+
+const sanitizeResponsiveSideClasses = (classes?: string, side?: string | null) => {
+  if (!classes || side !== "right") return classes;
+  return classes
+    .split(/\s+/)
+    .map((cls) => {
+      if (cls === "h-full") return "sm:h-full";
+      if (cls === "border-l") return "sm:border-l";
+      if (cls === "border-r") return "sm:border-r";
+      return cls;
+    })
+    .join(" ");
+};
 
 const SheetContent = React.forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Content>,
@@ -94,7 +107,7 @@ const SheetContent = React.forwardRef<
       <SheetOverlay />
       <DialogPrimitive.Content
         ref={ref}
-        className={cn(sheetVariants({ side }), className)}
+        className={cn(sheetVariants({ side }), sanitizeResponsiveSideClasses(className, side))}
         onOpenAutoFocus={(event) => {
           if (document.activeElement instanceof HTMLElement && document.activeElement !== document.body) {
             focusOriginRef.current = document.activeElement;
@@ -111,6 +124,11 @@ const SheetContent = React.forwardRef<
         }}
         {...props}
       >
+        {(side === "right" || side === "bottom") && (
+          <div className="sm:hidden flex justify-center pt-2.5 pb-1 shrink-0" aria-hidden="true">
+            <div className="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full" />
+          </div>
+        )}
         {children}
         {!hideCloseButton && (
           <DialogPrimitive.Close asChild>
@@ -137,7 +155,7 @@ const SheetHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col space-y-1.5 bg-slate-50/50 dark:bg-slate-800/30",
+      "p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col space-y-1 bg-slate-50/50 dark:bg-slate-800/30",
       className
     )}
     {...props}
@@ -150,7 +168,7 @@ const SheetBody = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("flex-1 overflow-y-auto p-5 sm:p-6", className)}
+    className={cn("flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6", className)}
     {...props}
   />
 );
@@ -162,7 +180,7 @@ const SheetFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-end gap-2.5",
+      "p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 pb-[max(1rem,env(safe-area-inset-bottom))] flex items-center justify-end gap-2.5",
       className
     )}
     {...props}

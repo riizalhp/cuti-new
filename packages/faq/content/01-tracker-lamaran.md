@@ -4,7 +4,7 @@ description: Panduan papan Kanban tracker lamaran: pencatatan lowongan, pembarua
 category: lamaran-kerja
 order: 1
 updatedAt: 2026-09-26
-keywords: tracker lamaran, tracker, kanban, tambah lamaran, status lamaran, terkirim, screening, interview, offering, ditolak, pipeline, drag drop, simpan lamaran
+keywords: tracker lamaran, tracker, kanban, tambah lamaran, status lamaran, terkirim, screening, interview, offering, ditolak, pipeline, drag drop, simpan lamaran, jadwal interview, jadwal wawancara, catatan interview, review interview, thank you email, offering preparation
 ---
 
 Fitur **Tracker Lamaran** (/tracker) adalah pusat kendali untuk memantau seluruh proses melamar pekerjaan. Setiap lamaran tersimpan di akunmu sehingga riwayat rekrutmen tetap terdata rapi.
@@ -36,6 +36,14 @@ Kartu lamaran terbagi dalam 5 tahapan proses:
 - Klik ikon hapus pada kartu untuk membersihkan lamaran yang sudah tidak relevan.
 - Setiap kartu merangkum posisi, nama perusahaan, tanggal melamar, dan portal asal.
 
+## Fitur Interaktif pada Kartu Lamaran
+
+Selain pemantauan status, kartu di kolom tertentu dilengkapi modul bantuan khusus:
+
+1. **Jadwal Wawancara & Pengingat**: pada status *Interview*, klik tombol **Jadwal Wawancara** untuk mencatat tanggal, jam, jenis sesi (HRD, User, atau Teknis), tautan pertemuan online (Google Meet / Zoom), serta catatan persiapan. Pengingat otomatis akan muncul di kartu Beranda.
+2. **Catatan Pasca Wawancara (Review)**: setelah sesi wawancara usai, klik tombol **Review Interview** untuk mendokumentasikan pertanyaan yang diajukan interviewer, evaluasi jawabanmu, serta mendapatkan draf pesan terima kasih (*thank you email*) yang siap dikirimkan.
+3. **Persiapan Offering**: pada status *Offering*, klik tombol **Persiapan Offering** untuk meninjau rincian gaji pokok, tunjangan, BPJS, masa probation, serta panduan etika negosiasi counter-offer.
+
 ## Tampilan daftar tabel
 
 Pilih opsi **Tabel** untuk melihat data dalam susunan baris yang praktis:
@@ -56,4 +64,5 @@ Pilih opsi **Tabel** untuk melihat data dalam susunan baris yang praktis:
 - **Apakah tautan lowongan wajib diisi?** Tidak, kolom tautan bersifat opsional untuk memudahkanmu membuka kembali detail postingan lowongan.
 - **Berapa batas maksimal lamaran yang bisa dicatat?** Tracker tidak memiliki batasan kuota. Kamu dapat mencatat seluruh riwayat lamaran tanpa biaya langganan.
 
-Lanjut baca: [Scraper Lowongan](/artikel/scraper-lowongan) dan [Panduan Interview](/artikel/panduan-interview).
+Lanjut baca: [Scraper Lowongan](/artikel/scraper-lowongan), [Meninjau Offering Letter & Negosiasi](/artikel/persiapan-offering-dan-negosiasi), dan [Persiapan Wawancara](/artikel/panduan-interview).
+

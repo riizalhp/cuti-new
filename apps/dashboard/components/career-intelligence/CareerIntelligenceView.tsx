@@ -917,32 +917,45 @@ export const CareerIntelligenceView: React.FC = () => {
                   </div>
 
                   <div className="space-y-2.5">
-                    {topStrengths.map((comp) => (
-                      <div
-                        key={comp.id}
-                        className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 flex items-center justify-between"
-                      >
-                        <div className="space-y-0.5">
-                          <div className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                            {comp.name}
+                    {topStrengths.length > 0 ? (
+                      topStrengths.map((comp) => (
+                        <div
+                          key={comp.id}
+                          className="p-3 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 flex items-center justify-between"
+                        >
+                          <div className="space-y-0.5">
+                            <div className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                              {comp.name}
+                            </div>
+                            <div className="text-caption text-slate-500 dark:text-slate-400">
+                              Standar acuan posisi: {comp.requiredScore}
+                            </div>
                           </div>
-                          <div className="text-caption text-slate-500 dark:text-slate-400">
-                            Standar acuan posisi: {comp.requiredScore}
+                          <div className="flex items-center gap-3">
+                            <span className="text-base font-extrabold text-emerald-700 dark:text-emerald-400">
+                              {comp.currentScore}
+                            </span>
+                            <button
+                              onClick={() => openEvidenceDrawer(comp)}
+                              className="text-caption font-bold text-cobalt-500 dark:text-blue-400 hover:underline cursor-pointer"
+                            >
+                              Bukti
+                            </button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-base font-extrabold text-emerald-700 dark:text-emerald-400">
-                            {comp.currentScore}
-                          </span>
-                          <button
-                            onClick={() => openEvidenceDrawer(comp)}
-                            className="text-caption font-bold text-cobalt-500 dark:text-blue-400 hover:underline cursor-pointer"
-                          >
-                            Bukti
-                          </button>
-                        </div>
+                      ))
+                    ) : (
+                      <div className="p-4 rounded-[10px] bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-200 dark:border-slate-700 text-center space-y-1">
+                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          Belum ada bukti keahlian yang terdata
+                        </p>
+                        <p className="text-caption text-slate-500 dark:text-slate-400">
+                          {isBenchmarkMode
+                            ? 'Lengkapi atau sesuaikan CV Anda agar sistem dapat memvalidasi keahlian riil.'
+                            : 'Tambahkan pengalaman atau keterampilan ke CV untuk menampilkan kekuatan utama.'}
+                        </p>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
 

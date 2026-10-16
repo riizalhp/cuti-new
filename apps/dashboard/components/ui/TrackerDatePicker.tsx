@@ -91,15 +91,34 @@ export const TrackerDatePicker: React.FC<TrackerDatePickerProps> = ({
       setEffectiveAlign('right');
       return;
     }
+    if (align === 'left') {
+      setEffectiveAlign('left');
+      return;
+    }
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       const popoverWidth = typeof window !== 'undefined' && window.innerWidth >= 640 ? 310 : 288;
       const screenW = typeof window !== 'undefined' ? window.innerWidth : 1024;
-      if (rect.left + popoverWidth > screenW - 16) {
-        setEffectiveAlign('right');
-        return;
-      }
-      if (align === 'auto' && rect.right > screenW * 0.55) {
+
+      // Cari pembatas horizontal terdekat (misal slide-in drawer Sheet / dialog / form)
+      const boundaryEl = containerRef.current.closest<HTMLElement>(
+        '[role="dialog"], [data-sheet-content], aside, form'
+      );
+      const boundaryRect = boundaryEl ? boundaryEl.getBoundingClientRect() : null;
+
+      const maxRight = boundaryRect
+        ? Math.min(screenW - 16, boundaryRect.right - 12)
+        : screenW - 16;
+      const minLeft = boundaryRect
+        ? Math.max(16, boundaryRect.left + 12)
+        : 16;
+
+      const fitsLeft = rect.left + popoverWidth <= maxRight;
+      const fitsRight = rect.right - popoverWidth >= minLeft;
+
+      // Hanya ganti ke kanan jika membuka ke kanan (left-0) meluap keluar batas kontainer,
+      // dan membuka ke kiri (right-0) muat di dalam batas kiri kontainer
+      if (!fitsLeft && fitsRight) {
         setEffectiveAlign('right');
         return;
       }
@@ -413,7 +432,7 @@ export const TrackerDatePicker: React.FC<TrackerDatePickerProps> = ({
             <button
               type="button"
               onClick={handlePrevMonth}
-              className="p-1.5 rounded-[8px] hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
+              className="p-1.5 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500"
               title="Bulan sebelumnya"
               aria-label="Bulan sebelumnya"
             >
@@ -432,7 +451,7 @@ export const TrackerDatePicker: React.FC<TrackerDatePickerProps> = ({
                   aria-expanded={isMonthOpen}
                   aria-haspopup="listbox"
                   aria-label="Pilih bulan"
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-[8px] border text-xs font-bold transition cursor-pointer select-none ${
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-[10px] border text-xs font-bold transition cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500 ${
                     isMonthOpen
                       ? 'border-cobalt-500 bg-blue-50/80 dark:bg-blue-950/70 text-cobalt-500 dark:text-blue-300 ring-2 ring-cobalt-500/20'
                       : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-white hover:border-slate-300 dark:hover:border-slate-600'
@@ -460,7 +479,7 @@ export const TrackerDatePicker: React.FC<TrackerDatePickerProps> = ({
                             setViewMonth(idx);
                             setIsMonthOpen(false);
                           }}
-                          className={`w-full flex items-center justify-between px-3 py-1.5 text-xs text-left transition cursor-pointer ${
+                          className={`w-full flex items-center justify-between px-3 py-1.5 text-xs text-left transition cursor-pointer focus-visible:outline-none focus-visible:bg-slate-100 dark:focus-visible:bg-slate-800 ${
                             isSelected
                               ? 'bg-blue-50 dark:bg-blue-950/70 text-cobalt-500 dark:text-blue-300 font-bold'
                               : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium'
@@ -486,7 +505,7 @@ export const TrackerDatePicker: React.FC<TrackerDatePickerProps> = ({
                   aria-expanded={isYearOpen}
                   aria-haspopup="listbox"
                   aria-label="Pilih tahun"
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-[8px] border text-xs font-bold transition cursor-pointer select-none ${
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-[10px] border text-xs font-bold transition cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500 ${
                     isYearOpen
                       ? 'border-cobalt-500 bg-blue-50/80 dark:bg-blue-950/70 text-cobalt-500 dark:text-blue-300 ring-2 ring-cobalt-500/20'
                       : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-white hover:border-slate-300 dark:hover:border-slate-600'
@@ -516,7 +535,7 @@ export const TrackerDatePicker: React.FC<TrackerDatePickerProps> = ({
                             setViewYear(y);
                             setIsYearOpen(false);
                           }}
-                          className={`w-full flex items-center justify-between px-3 py-1.5 text-xs text-left transition cursor-pointer ${
+                          className={`w-full flex items-center justify-between px-3 py-1.5 text-xs text-left transition cursor-pointer focus-visible:outline-none focus-visible:bg-slate-100 dark:focus-visible:bg-slate-800 ${
                             isSelected
                               ? 'bg-blue-50 dark:bg-blue-950/70 text-cobalt-500 dark:text-blue-300 font-bold'
                               : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium'
@@ -535,7 +554,7 @@ export const TrackerDatePicker: React.FC<TrackerDatePickerProps> = ({
             <button
               type="button"
               onClick={handleNextMonth}
-              className="p-1.5 rounded-[8px] hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
+              className="p-1.5 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500"
               title="Bulan berikutnya"
               aria-label="Bulan berikutnya"
             >
@@ -549,21 +568,21 @@ export const TrackerDatePicker: React.FC<TrackerDatePickerProps> = ({
               <button
                 type="button"
                 onClick={() => handleSelectPreset(0)}
-                className="flex-1 py-1 px-2 rounded-[6px] text-caption font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition text-center cursor-pointer"
+                className="flex-1 py-1.5 px-2 rounded-[10px] text-caption font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition text-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500"
               >
                 Hari Ini
               </button>
               <button
                 type="button"
                 onClick={() => handleSelectPreset(-1)}
-                className="flex-1 py-1 px-2 rounded-[6px] text-caption font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition text-center cursor-pointer"
+                className="flex-1 py-1.5 px-2 rounded-[10px] text-caption font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition text-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500"
               >
                 Kemarin
               </button>
               <button
                 type="button"
                 onClick={() => handleSelectPreset(-3)}
-                className="flex-1 py-1 px-2 rounded-[6px] text-caption font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition text-center cursor-pointer"
+                className="flex-1 py-1.5 px-2 rounded-[10px] text-caption font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition text-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500"
               >
                 3 Hari Lalu
               </button>
@@ -575,7 +594,7 @@ export const TrackerDatePicker: React.FC<TrackerDatePickerProps> = ({
             {DAY_NAMES.map((d) => (
               <span
                 key={d}
-                className="text-caption font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider py-0.5"
+                className="text-caption font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider py-0.5"
               >
                 {d}
               </span>
@@ -591,7 +610,7 @@ export const TrackerDatePicker: React.FC<TrackerDatePickerProps> = ({
                     key={idx}
                     type="button"
                     onClick={() => handleSelectDay(item.year, item.month, item.day)}
-                    className="h-8 rounded-[8px] text-caption font-medium text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 transition cursor-pointer flex items-center justify-center"
+                    className="h-8 min-h-[32px] rounded-[10px] text-caption font-medium text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500"
                   >
                     {item.day}
                   </button>
@@ -603,7 +622,7 @@ export const TrackerDatePicker: React.FC<TrackerDatePickerProps> = ({
                   key={idx}
                   type="button"
                   onClick={() => handleSelectDay(item.year, item.month, item.day)}
-                  className={`h-8 rounded-[8px] text-xs font-semibold flex items-center justify-center transition cursor-pointer ${
+                  className={`h-8 min-h-[32px] rounded-[10px] text-xs font-semibold flex items-center justify-center transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-500 ${
                     item.isSelected
                       ? 'bg-cobalt-500 text-white font-bold shadow-md shadow-cobalt-500/30 scale-105'
                       : item.isToday

@@ -17,6 +17,7 @@ const VALID_SIDEBAR_PREFIXES = [
   "/data-scraper",
   "/feature-adoption",
   "/growth",
+  "/kemitraan",
   "/laporan-bug",
   "/logs",
   "/newsletter",

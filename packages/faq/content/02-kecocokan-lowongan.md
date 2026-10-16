@@ -4,7 +4,7 @@ description: Gunakan fitur Kecocokan Lowongan (Match CV) untuk melihat seberapa 
 category: evaluasi-optimasi
 order: 2
 updatedAt: 2026-08-18
-keywords: kecocokan lowongan, match cv, match score, skor kecocokan, cocok lowongan, bandingkan lowongan, rekomendasi lowongan, job match
+keywords: kecocokan lowongan, match cv, match score, skor kecocokan, cocok lowongan, bandingkan lowongan, rekomendasi lowongan, job match, bandingkan cv, komparasi cv, cv vs lowongan, kesesuaian cv
 ---
 
 Fitur **Kecocokan Lowongan** (/match-cv) menghitung seberapa cocok CV-mu dengan lowongan yang tersedia, sehingga kamu tahu lowongan mana yang paling realistis untuk dilamar.

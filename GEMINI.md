@@ -269,9 +269,11 @@ Gunakan Bahasa Indonesia kasual, ringkas, dan membangun kepercayaan.
    - Pengelompokan informasi secara modular menggunakan Tailwind Grid (`grid-cols-12` atau `grid-cols-1 md:grid-cols-3`).
    - Hirarki visual jelas dengan padding proporsional (`p-5`, `p-6`), batas border bersih (`border-slate-200 dark:border-slate-800`), dan sudut terstandarisasi (`rounded-[10px]`).
 
-4. **Right-Hand Slide-in Drawer**:
-   - Seluruh formulir interaktif kompleks (misalnya: *Tambah Lamaran*, *Detail ATS*, *Edit Profil*, *Detail Lowongan*) WAJIB menggunakan slide-in drawer yang meluncur dari kanan layar (`fixed inset-0 z-50 justify-end slide-in-from-right`), BUKAN modal pop-up di tengah.
-   - Dilengkapi backdrop blur kustom (`bg-slate-950/60 backdrop-blur-xs`), header bertitel dengan tombol tutup, body dengan scroll independen (`overflow-y-auto`), serta sticky footer action.
+4. **Adaptive Sheet & Right-Hand Drawer**:
+   - Seluruh formulir interaktif kompleks (misalnya: *Tambah Lamaran*, *Detail ATS*, *Edit Profil*, *Detail Lowongan*) WAJIB menggunakan adaptive sheet:
+     - **Desktop (≥ 640px)**: Slide-in drawer dari kanan layar (`fixed inset-0 z-50 justify-end slide-in-from-right`), BUKAN modal pop-up di tengah.
+     - **Mobile (< 640px)**: Bottom Sheet meluncur dari bawah (`slide-in-from-bottom`, `max-h-[92dvh]`, `rounded-t-[16px]`, dilengkapi drag-handle pill).
+   - Dilengkapi backdrop blur kustom (`bg-slate-950/60 backdrop-blur-xs`), header bertitel dengan tombol tutup, body dengan scroll independen (`overflow-y-auto overscroll-contain`), serta sticky footer action.
 
 5. **Mobile-First Bottom Navigation (4 Tab)**:
    - Di layar mobile (< 1024px), gunakan fixed **Bottom Navigation (64px + safe area)**: *Beranda, CV, Tracker, Profil*.
@@ -327,9 +329,11 @@ Gunakan Bahasa Indonesia kasual, ringkas, dan membangun kepercayaan.
 - **Status Interview Badge**: `px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800`
 - **ATS Score Badge (Kotak)**: `px-2.5 py-1 rounded-[10px] text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800`
 
-#### Right-Hand Slide-in Drawer Spec
+#### Adaptive Sheet & Drawer Spec
 
-- **Overlay Backdrop**: `fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end transition-opacity`
-- **Drawer Panel**: `relative z-10 w-full max-w-md sm:max-w-xl h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300`
-- **Header**: `p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30`
-- **Sticky Footer**: `p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-end gap-2.5`
+- **Overlay Backdrop**: `fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end max-sm:items-end transition-opacity`
+- **Panel Container**:
+  - **Mobile (< 640px)**: `relative z-10 w-full max-h-[92dvh] rounded-t-[16px] border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-bottom duration-300`
+  - **Desktop (≥ 640px)**: `sm:max-w-xl sm:h-full sm:rounded-none sm:border-l sm:border-t-0 animate-in slide-in-from-right duration-300`
+- **Header**: `p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30`
+- **Sticky Footer**: `p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 pb-[max(1rem,env(safe-area-inset-bottom))] flex items-center justify-end gap-2.5`

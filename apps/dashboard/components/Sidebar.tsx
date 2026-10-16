@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -134,6 +135,57 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const isExpanded = !(isCollapsed && !isMobileOpen);
 
+  const [mounted, setMounted] = React.useState(false);
+  const [hoveredItem, setHoveredItem] = React.useState<{
+    id: string;
+    label: string;
+    badge?: string | null;
+    rect: DOMRect;
+  } | null>(null);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (isExpanded) {
+      setHoveredItem(null);
+    }
+  }, [isExpanded]);
+
+  React.useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setHoveredItem(null);
+      }
+    };
+    const handleGlobalResize = () => {
+      setHoveredItem(null);
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    window.addEventListener('resize', handleGlobalResize);
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown);
+      window.removeEventListener('resize', handleGlobalResize);
+    };
+  }, []);
+
+  const handleItemHover = (
+    e: React.MouseEvent<HTMLElement> | React.FocusEvent<HTMLElement>,
+    id: string,
+    label: string,
+    badge?: string | null
+  ) => {
+    if (!isExpanded) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setHoveredItem({ id, label, badge, rect });
+    }
+  };
+
+  const handleItemLeave = (id: string) => {
+    setHoveredItem((prev) => (prev?.id === id ? null : prev));
+  };
+
   return (
     <>
       {/* Mobile Overlay Backdrop */}
@@ -215,7 +267,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Navigation Section (Scrollable Middle Area) */}
-        <div className={cn('flex-1 overflow-y-auto sidebar-scrollbar pr-1 pt-4 pb-5 transition-all duration-300 ease-in-out', isCollapsed && !isMobileOpen ? 'px-2' : 'px-3')}>
+        <div
+          onScroll={() => setHoveredItem(null)}
+          className={cn('flex-1 overflow-y-auto sidebar-scrollbar pr-1 pt-4 pb-5 transition-all duration-300 ease-in-out', isCollapsed && !isMobileOpen ? 'px-2' : 'px-3')}
+        >
           <nav className="space-y-4">
             {categories.map((categoryGroup) => {
               const isSingleItemCategory =
@@ -243,7 +298,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         pathname === item.href ||
                         pathname.startsWith(item.href + '/') ||
                         (item.id === 'email-cover-letter' && (pathname === '/surat-lamaran' || pathname.startsWith('/surat-lamaran/')));
-                      const titleAttr = !isExpanded ? item.label : undefined;
 
                       const isExternal = item.href.startsWith('http://') || item.href.startsWith('https://');
                       const linkClasses = cn(
@@ -318,10 +372,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             target="_blank"
                             rel="noopener noreferrer"
                             data-tour={tourId}
+                            aria-label={item.label}
+                            onMouseEnter={(e) => handleItemHover(e, item.id, item.label, item.badge)}
+                            onMouseLeave={() => handleItemLeave(item.id)}
+                            onFocus={(e) => handleItemHover(e, item.id, item.label, item.badge)}
+                            onBlur={() => handleItemLeave(item.id)}
                             onClick={() => {
+                              setHoveredItem(null);
                               if (onCloseMobile) onCloseMobile();
                             }}
-                            title={titleAttr}
                             className={linkClasses}
                           >
                             {linkContent}
@@ -335,10 +394,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           href={item.href}
                           data-tour={tourId}
                           aria-current={isActive ? 'page' : undefined}
+                          aria-label={item.label}
+                          onMouseEnter={(e) => handleItemHover(e, item.id, item.label, item.badge)}
+                          onMouseLeave={() => handleItemLeave(item.id)}
+                          onFocus={(e) => handleItemHover(e, item.id, item.label, item.badge)}
+                          onBlur={() => handleItemLeave(item.id)}
                           onClick={() => {
+                            setHoveredItem(null);
                             if (onCloseMobile) onCloseMobile();
                           }}
-                          title={titleAttr}
                           className={linkClasses}
                         >
                           {linkContent}
@@ -357,11 +421,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* Logout Action Button */}
           <button
             type="button"
+            aria-label="Keluar Akun"
+            onMouseEnter={(e) => handleItemHover(e, 'logout', 'Keluar Akun')}
+            onMouseLeave={() => handleItemLeave('logout')}
+            onFocus={(e) => handleItemHover(e, 'logout', 'Keluar Akun')}
+            onBlur={() => handleItemLeave('logout')}
             onClick={() => {
+              setHoveredItem(null);
               if (onCloseMobile) onCloseMobile();
               handleLogout();
             }}
-            title={!isExpanded ? 'Keluar Akun' : undefined}
             className={cn(
               'w-full flex items-center rounded-[10px] text-xs font-bold text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-all duration-200 group cursor-pointer border border-transparent hover:border-rose-200 dark:hover:border-rose-900/40',
               !isExpanded ? 'justify-center p-2.5' : 'justify-start px-3 py-2 gap-2'
@@ -374,6 +443,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
       </aside>
+
+      {/* Floating Tooltip Label saat Collapsed (Desktop Only) */}
+      {mounted && !isExpanded && hoveredItem && createPortal(
+        <div
+          role="tooltip"
+          className="fixed pointer-events-none z-[9999] hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-[8px] bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold shadow-xl border border-slate-700/60 animate-in fade-in-0 zoom-in-95 duration-150 select-none"
+          style={{
+            left: `${Math.round(hoveredItem.rect.right + 10)}px`,
+            top: `${Math.round(hoveredItem.rect.top + (hoveredItem.rect.height / 2))}px`,
+            transform: 'translateY(-50%)',
+          }}
+        >
+          <span>{hoveredItem.label}</span>
+          {hoveredItem.badge && (
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-cobalt-500 text-white leading-none">
+              {hoveredItem.badge}
+            </span>
+          )}
+        </div>,
+        document.body
+      )}
     </>
   );
 };

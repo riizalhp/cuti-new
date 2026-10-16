@@ -156,7 +156,7 @@ export const InterviewScheduleModal: React.FC<InterviewScheduleModalProps> = ({
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="p-0 flex flex-col justify-between h-full w-full max-w-md sm:max-w-xl overflow-hidden">
+      <SheetContent side="right" className="p-0 flex flex-col justify-between w-full sm:max-w-xl sm:h-full overflow-hidden">
         {/* Header Drawer */}
         <SheetHeader className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex flex-row items-start justify-between gap-3 text-left">
           <div className="flex items-start gap-3 min-w-0 pr-8">

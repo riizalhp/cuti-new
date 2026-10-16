@@ -197,7 +197,7 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
                 <img
                   src="/images/mascot-1.webp"
                   alt="HR Recruiter"
-                  className="w-full h-full object-cover scale-[2.1] origin-top translate-y-1"
+                  className="w-full h-full object-cover scale-[1.65] origin-top translate-y-0.5"
                 />
                 <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-emerald-500 rounded-full border border-slate-900" />
               </div>
@@ -226,7 +226,7 @@ export const CvHrdFloatingCta: React.FC<CvHrdFloatingCtaProps> = ({
               <img
                 src="/images/mascot-1.webp"
                 alt="HR Specialist"
-                className="w-full h-full object-cover scale-[2.1] origin-top translate-y-1"
+                className="w-full h-full object-cover scale-[1.65] origin-top translate-y-0.5"
               />
               <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900" />
             </div>

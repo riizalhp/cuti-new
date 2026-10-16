@@ -1,0 +1,532 @@
+{
+  "viewportsTested": [
+    {
+      "viewport": "iPhone-SE-375",
+      "formReport": {
+        "label": "iPhone-SE-375 - Tab Formulir",
+        "docWidth": 375,
+        "scrollWidth": 375,
+        "bodyScrollWidth": 375,
+        "hasHorizontalOverflow": false,
+        "overflowingCount": 1,
+        "overflowingSample": [
+          {
+            "tag": "img",
+            "id": "",
+            "className": "w-full h-full object-cover scale-[2.1] origin-top translate-y-1 group-hover:scale-[2.2] transition-t",
+            "rect": {
+              "left": 311,
+              "right": 376,
+              "width": 65,
+              "docWidth": 375
+            },
+            "textSnippet": ""
+          }
+        ],
+        "smallTargetsCount": 24,
+        "smallTargetsSample": [
+          {
+            "tag": "a",
+            "text": "",
+            "width": 219,
+            "height": 32,
+            "className": "relative flex items-center justify-center group w-full h-8 overflow-hidden"
+          },
+          {
+            "tag": "button",
+            "text": "Tutup Menu",
+            "width": 31,
+            "height": 31,
+            "className": "md:hidden absolute right-3.5 top-1/2 -translate-y-1/2 p-1.5 rounded-[10px] text-"
+          },
+          {
+            "tag": "a",
+            "text": "Beranda",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "CV Saya",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Screening & Evaluasi ATS",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Optimasi LinkedIn",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Career Intelligence\nPRO",
+            "width": 227,
+            "height": 36,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Tracker Lamaran",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Eksplorasi Loker",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Komparasi Lowongan",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Email & Cover Letter",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Pengaturan Akun",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Saran Fitur",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Lapor Kendala",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "button",
+            "text": "Keluar Akun",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold text-rose-700 dark:tex"
+          }
+        ]
+      },
+      "historyReport": {
+        "label": "iPhone-SE-375 - Tab Riwayat",
+        "docWidth": 375,
+        "scrollWidth": 375,
+        "bodyScrollWidth": 375,
+        "hasHorizontalOverflow": false,
+        "overflowingCount": 1,
+        "overflowingSample": [
+          {
+            "tag": "img",
+            "id": "",
+            "className": "w-full h-full object-cover scale-[2.1] origin-top translate-y-1 group-hover:scale-[2.2] transition-t",
+            "rect": {
+              "left": 311,
+              "right": 376,
+              "width": 65,
+              "docWidth": 375
+            },
+            "textSnippet": ""
+          }
+        ],
+        "smallTargetsCount": 22,
+        "smallTargetsSample": [
+          {
+            "tag": "a",
+            "text": "",
+            "width": 219,
+            "height": 32,
+            "className": "relative flex items-center justify-center group w-full h-8 overflow-hidden"
+          },
+          {
+            "tag": "button",
+            "text": "Tutup Menu",
+            "width": 31,
+            "height": 31,
+            "className": "md:hidden absolute right-3.5 top-1/2 -translate-y-1/2 p-1.5 rounded-[10px] text-"
+          },
+          {
+            "tag": "a",
+            "text": "Beranda",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "CV Saya",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Screening & Evaluasi ATS",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Optimasi LinkedIn",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Career Intelligence\nPRO",
+            "width": 227,
+            "height": 36,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Tracker Lamaran",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Eksplorasi Loker",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Komparasi Lowongan",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Email & Cover Letter",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Pengaturan Akun",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Saran Fitur",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Lapor Kendala",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "button",
+            "text": "Keluar Akun",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold text-rose-700 dark:tex"
+          }
+        ]
+      }
+    },
+    {
+      "viewport": "iPhone-14-390",
+      "formReport": {
+        "label": "iPhone-14-390 - Tab Formulir",
+        "docWidth": 390,
+        "scrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "hasHorizontalOverflow": false,
+        "overflowingCount": 1,
+        "overflowingSample": [
+          {
+            "tag": "img",
+            "id": "",
+            "className": "w-full h-full object-cover scale-[2.1] origin-top translate-y-1 group-hover:scale-[2.2] transition-t",
+            "rect": {
+              "left": 326,
+              "right": 391,
+              "width": 65,
+              "docWidth": 390
+            },
+            "textSnippet": ""
+          }
+        ],
+        "smallTargetsCount": 24,
+        "smallTargetsSample": [
+          {
+            "tag": "a",
+            "text": "",
+            "width": 219,
+            "height": 32,
+            "className": "relative flex items-center justify-center group w-full h-8 overflow-hidden"
+          },
+          {
+            "tag": "button",
+            "text": "Tutup Menu",
+            "width": 31,
+            "height": 31,
+            "className": "md:hidden absolute right-3.5 top-1/2 -translate-y-1/2 p-1.5 rounded-[10px] text-"
+          },
+          {
+            "tag": "a",
+            "text": "Beranda",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "CV Saya",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Screening & Evaluasi ATS",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Optimasi LinkedIn",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Career Intelligence\nPRO",
+            "width": 227,
+            "height": 36,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Tracker Lamaran",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Eksplorasi Loker",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Komparasi Lowongan",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Email & Cover Letter",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Pengaturan Akun",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Saran Fitur",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Lapor Kendala",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "button",
+            "text": "Keluar Akun",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold text-rose-700 dark:tex"
+          }
+        ]
+      },
+      "historyReport": {
+        "label": "iPhone-14-390 - Tab Riwayat",
+        "docWidth": 390,
+        "scrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "hasHorizontalOverflow": false,
+        "overflowingCount": 1,
+        "overflowingSample": [
+          {
+            "tag": "img",
+            "id": "",
+            "className": "w-full h-full object-cover scale-[2.1] origin-top translate-y-1 group-hover:scale-[2.2] transition-t",
+            "rect": {
+              "left": 326,
+              "right": 391,
+              "width": 65,
+              "docWidth": 390
+            },
+            "textSnippet": ""
+          }
+        ],
+        "smallTargetsCount": 22,
+        "smallTargetsSample": [
+          {
+            "tag": "a",
+            "text": "",
+            "width": 219,
+            "height": 32,
+            "className": "relative flex items-center justify-center group w-full h-8 overflow-hidden"
+          },
+          {
+            "tag": "button",
+            "text": "Tutup Menu",
+            "width": 31,
+            "height": 31,
+            "className": "md:hidden absolute right-3.5 top-1/2 -translate-y-1/2 p-1.5 rounded-[10px] text-"
+          },
+          {
+            "tag": "a",
+            "text": "Beranda",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "CV Saya",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Screening & Evaluasi ATS",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Optimasi LinkedIn",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Career Intelligence\nPRO",
+            "width": 227,
+            "height": 36,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Tracker Lamaran",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Eksplorasi Loker",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Komparasi Lowongan",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Email & Cover Letter",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Pengaturan Akun",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Saran Fitur",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "a",
+            "text": "Lapor Kendala",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold transition-all duratio"
+          },
+          {
+            "tag": "button",
+            "text": "Keluar Akun",
+            "width": 227,
+            "height": 34,
+            "className": "w-full flex items-center rounded-[10px] text-xs font-bold text-rose-700 dark:tex"
+          }
+        ]
+      }
+    }
+  ],
+  "tabs": {},
+  "drawer": {}
+}

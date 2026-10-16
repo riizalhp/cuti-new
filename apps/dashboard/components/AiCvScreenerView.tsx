@@ -14,7 +14,9 @@ import {
   SheetFooter,
 } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { IconButton } from '@/components/ui/icon-button';
 
 import {
@@ -2792,14 +2794,26 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
 
             {/* TIER 2: Actions Bar */}
             <div className="shrink-0 md:ml-auto w-full md:w-auto flex items-center justify-stretch md:justify-end gap-2 relative z-10 pt-1.5 md:pt-0 border-t border-white/10 md:border-t-0 [&>button]:w-full [&>button]:sm:w-auto [&>button]:min-h-[44px] md:[&>button]:min-h-[34px] [&>div]:w-full md:[&>div]:w-auto">
-              {hasSavedCvs && (
+              {hasSavedCvs ? (
                 <CvScopeSelector
                   cvs={savedCvs}
                   selectedCvId={selectedCvId}
                   onChange={handleCvChange}
                   allowAll={false}
-                  label="Dokumen CV"
+                  label="Basis CV"
                 />
+              ) : (
+                <Link
+                  href="/cv"
+                  className={cn(
+                    buttonVariants({ variant: 'primary', size: 'sm' }),
+                    'w-full sm:w-auto min-h-[44px] md:min-h-[34px] gap-1.5 cursor-pointer shrink-0'
+                  )}
+                  title="Buat CV pertamamu di CV Builder"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Buat CV</span>
+                </Link>
               )}
 
               <button
@@ -3113,8 +3127,21 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
             {/* Bottom Action Footer (CTA & Validation Status) */}
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2.5">
               {!hasUsableCv ? (
-                <div className="p-2.5 rounded-[8px] bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 text-caption font-semibold text-amber-800 dark:text-amber-300 text-center">
-                  *Pilih atau buat profil CV aktif terlebih dahulu di bagian atas
+                <div className="p-3.5 rounded-[10px] bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                  <div className="flex items-center gap-2.5 text-xs font-semibold text-amber-900 dark:text-amber-200">
+                    <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 hidden sm:block" />
+                    <span>Belum ada CV yang dipilih. Buat atau pilih profil CV aktif untuk memulai screening.</span>
+                  </div>
+                  <Link
+                    href="/cv"
+                    className={cn(
+                      buttonVariants({ variant: 'primary', size: 'sm' }),
+                      'min-h-[44px] sm:min-h-[36px] w-full sm:w-auto shrink-0 gap-1.5'
+                    )}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Buat CV Sekarang</span>
+                  </Link>
                 </div>
               ) : targetBasis === 'job' && !Boolean((jobPosition || targetRole)?.trim()) ? (
                 <div className="p-2.5 rounded-[8px] bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 text-caption font-semibold text-amber-800 dark:text-amber-300 text-center">
@@ -3198,15 +3225,27 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
 
               {/* Sisi Kanan: Utilitas Aksi */}
               <div className="flex items-center gap-2 self-start sm:self-auto shrink-0 flex-wrap print:hidden [&>button]:min-h-[44px] sm:[&>button]:min-h-[34px] [&>div]:min-h-[44px] sm:[&>div]:min-h-[34px]">
-                {hasSavedCvs && (
+                {hasSavedCvs ? (
                   <CvScopeSelector
                     cvs={savedCvs}
                     selectedCvId={selectedCvId}
                     onChange={handleCvChange}
                     allowAll={false}
-                    label="Dokumen CV"
+                    label="Basis CV"
                     className="min-h-[44px] sm:min-h-[34px] py-1.5 px-3 rounded-[8px] bg-white/10 hover:bg-white/20 text-white border-white/20 [&_span]:text-slate-200 [&_span.text-slate-900]:text-white [&_svg]:text-white"
                   />
+                ) : (
+                  <Link
+                    href="/cv"
+                    className={cn(
+                      buttonVariants({ variant: 'primary', size: 'sm' }),
+                      'min-h-[44px] sm:min-h-[34px] gap-1.5 cursor-pointer shrink-0'
+                    )}
+                    title="Buat CV pertamamu di CV Builder"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Buat CV</span>
+                  </Link>
                 )}
 
                 <button
@@ -5160,29 +5199,20 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
             </div>
           </div>
 
-          {/* Sticky Footer */}
-          <SheetFooter className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex flex-row items-center justify-between gap-2.5 sm:space-x-0">
-            {reportHistory.length > 0 ? (
+          {/* Sticky Footer - aksi hapus riwayat */}
+          {reportHistory.length > 0 && (
+            <SheetFooter className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex flex-row items-center justify-between gap-2.5 sm:space-x-0">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleClearAllHistory}
-                className="text-caption font-bold text-rose-700 hover:text-rose-600 hover:bg-rose-50 flex items-center gap-1 p-0 h-auto dark:text-rose-400"
+                className="text-caption font-bold text-rose-700 hover:text-rose-600 hover:bg-rose-50 flex items-center gap-1 p-0 h-auto dark:text-rose-400 cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Hapus Semua Riwayat</span>
               </Button>
-            ) : (
-              <div />
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsHistoryDrawerOpen(false)}
-            >
-              Tutup
-            </Button>
-          </SheetFooter>
+            </SheetFooter>
+          )}
         </SheetContent>
       </Sheet>
 
@@ -5381,9 +5411,9 @@ Berikan respon konsultasi yang profesional, bersahabat, ringkas (2-3 kalimat), d
                 variant="secondary"
                 size="sm"
                 onClick={() => setIsOptimizeDrawerOpen(false)}
-                className="w-full"
+                className="w-full cursor-pointer"
               >
-                Tutup &amp; Tetap di Halaman Laporan
+                Selesai &amp; Tetap di Halaman Laporan
               </Button>
             ) : (
               <>

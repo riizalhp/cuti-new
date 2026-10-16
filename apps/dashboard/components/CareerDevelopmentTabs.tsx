@@ -630,11 +630,6 @@ export const CareerDevelopmentTabs: React.FC = () => {
               </SheetBody>
 
               <SheetFooter className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/90 flex flex-row items-center justify-end gap-2 shrink-0">
-                <SheetClose asChild>
-                  <Button variant="ghost" size="sm" className="h-9 px-3.5 text-xs">
-                    Tutup
-                  </Button>
-                </SheetClose>
                 <a
                   href={selectedDetail.url}
                   target="_blank"

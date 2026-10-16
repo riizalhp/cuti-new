@@ -114,7 +114,8 @@ export async function POST(req: NextRequest) {
     }
 
     const newId = isValidUUID(body.id) ? body.id : crypto.randomUUID();
-    const uiStatus = body.status || 'Terkirim';
+    const rawStatus = body.status || 'Terkirim';
+    const uiStatus = rawStatus === 'WISHLIST' ? 'Tersimpan' : rawStatus;
     const dbStatus = mapUiToDbStatus(uiStatus);
 
     const insightPayload = {

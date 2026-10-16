@@ -15,13 +15,12 @@ Employr adalah **Career Operating System** untuk pencari kerja muda Indonesia (s
 - **Evaluasi CV**: Simulasikan penilaian 11 persona recruiter (Startup, Unicorn, Corporate, BUMN, hingga perusahaan di Jepang & Amerika), lengkap dengan heatmap pandangan HRD dan rekomendasi perbaikan.
 - **Tracker Lamaran**: Pantau semua lamaran dalam papan Kanban (Terkirim, Screening, Interview, Offering, hingga Ditolak).
 - **Scraper Lowongan**: Pindai lowongan kerja dari 30+ portal (JobStreet, LinkedIn, Glints, Kalibrr, dan lainnya) dalam satu tempat.
-- **Surat Lamaran & Kecocokan Lowongan**: Buat cover letter otomatis dan cek seberapa cocok CV-mu dengan lowongan target.
-- **Panduan Interview**: Simulasi mock interview, bank pertanyaan lengkap dengan jawaban ideal, dan checklist persiapan.
+- **Surat Lamaran & Draf Email (Mailer)**: Buat dokumen cover letter PDF dan susun draf body email lamaran formal/kasual untuk HRD.
+- **Kecocokan Lowongan & Scraper**: Bandingkan skor kecocokan CV-mu dengan lowongan dan pindai lowongan dari 30+ portal.
+- **Career Intelligence**: Analisis radar kompetensi 360°, tolok ukur gaji industri, dan identifikasi kesenjangan keahlian.
+- **Persiapan Wawancara & Offering**: Strategi menjawab berbasis STAR, catatan wawancara di Tracker, serta panduan telaah penawaran kerja dan negosiasi gaji.
 - **Optimasi LinkedIn**: Tempel link profil LinkedIn untuk diekstrak dan diaudit, lengkap dengan rekomendasi optimasi.
-- **Misi & Cuan**: Kerjakan misi karier, lakukan check-in harian, dan kumpulkan Koin serta XP untuk ditukar reward.
-- **Referral**: Ajak teman dengan kode referral dan dapatkan bonus.
-- **Career Readiness**: Ukur skor kesiapan kerjamu dari 4 pilar dan raih badge *Job Ready Certified*.
-- **Kursus, Sertifikasi & Latihan Soal**: Akses katalog kursus & sertifikat di learning.employr.id serta latihan soal.
+- **Career Readiness & Latihan Soal**: Ukur skor kesiapan kerja dan kerjakan bank soal psikotes serta seleksi kerja.
 
 ## Situs-situs dalam ekosistem Employr
 

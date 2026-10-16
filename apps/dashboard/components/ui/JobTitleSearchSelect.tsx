@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, ChevronDown, X, Briefcase, Plus, Check, Sparkles } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Search, ChevronDown, X, Briefcase, Plus, Check } from 'lucide-react';
 import { useRoleSearchIndex, POPULAR_ENTRY_ROLES } from '@/lib/role-search-index';
 import type { DynamicRoleBlueprint } from '@/lib/career-direction-engine';
 
@@ -29,8 +30,23 @@ export const JobTitleSearchSelect: React.FC<JobTitleSearchSelectProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const sheetInputRef = useRef<HTMLInputElement>(null);
+
+  // Deteksi mode mobile (< 640px)
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    const media = window.matchMedia('(max-width: 639px)');
+    const updateMobile = () => setIsMobile(media.matches);
+    updateMobile();
+    media.addEventListener?.('change', updateMobile);
+    return () => media.removeEventListener?.('change', updateMobile);
+  }, []);
 
   // Hook pencarian 788 master blueprints & 11.000 alias
   const { search } = useRoleSearchIndex(blueprints);
@@ -42,8 +58,9 @@ export const JobTitleSearchSelect: React.FC<JobTitleSearchSelectProps> = ({
     }
   }, [value, isOpen]);
 
-  // Handle outside click
+  // Handle outside click di desktop
   useEffect(() => {
+    if (isMobile) return;
     const handleOutsideClick = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
@@ -53,7 +70,28 @@ export const JobTitleSearchSelect: React.FC<JobTitleSearchSelectProps> = ({
     };
     document.addEventListener('mousedown', handleOutsideClick);
     return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, [value]);
+  }, [value, isMobile]);
+
+  // Kunci scroll background body saat Mobile Bottom Sheet terbuka
+  useEffect(() => {
+    if (isOpen && isMobile) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen, isMobile]);
+
+  // Autofocus input di dalam Mobile Bottom Sheet saat dibuka
+  useEffect(() => {
+    if (isOpen && isMobile) {
+      const timer = setTimeout(() => {
+        sheetInputRef.current?.focus();
+      }, 120);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, isMobile]);
 
   // Hasil pencarian cerdas
   const searchResults = useMemo(() => {
@@ -105,7 +143,7 @@ export const JobTitleSearchSelect: React.FC<JobTitleSearchSelectProps> = ({
     e.stopPropagation();
     onChange('');
     setSearchQuery('');
-    if (inputRef.current) {
+    if (!isMobile && inputRef.current) {
       inputRef.current.focus();
     }
   };
@@ -146,15 +184,23 @@ export const JobTitleSearchSelect: React.FC<JobTitleSearchSelectProps> = ({
     <div ref={containerRef} className="relative w-full">
       {/* Input Display Box */}
       <div
+        onClick={() => {
+          if (!disabled) {
+            setIsOpen(true);
+            if (isMobile) {
+              setSearchQuery(value || '');
+            }
+          }
+        }}
         className={`relative flex items-center w-full rounded-[10px] border transition-all duration-150 ${
           hasError
             ? 'border-rose-400 bg-rose-50/50 dark:bg-rose-950/20'
             : isOpen
             ? 'border-cobalt-500 ring-2 ring-cobalt-500/20 bg-white dark:bg-slate-900'
             : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700'
-        } ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-800' : ''}`}
+        } ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-800' : 'cursor-pointer sm:cursor-text'}`}
       >
-        <div className="pl-3.5 pr-2 text-slate-500 dark:text-slate-400 flex items-center justify-center">
+        <div className="pl-3.5 pr-2 text-slate-500 dark:text-slate-400 flex items-center justify-center shrink-0">
           <Search className="w-4 h-4" />
         </div>
 
@@ -169,26 +215,28 @@ export const JobTitleSearchSelect: React.FC<JobTitleSearchSelectProps> = ({
           aria-controls="job-title-listbox"
           aria-activedescendant={highlightedIndex >= 0 ? `job-title-option-${highlightedIndex}` : undefined}
           disabled={disabled}
+          readOnly={isMobile}
           value={searchQuery}
           onChange={(e) => {
-            setSearchQuery(e.target.value);
-            if (!isOpen) setIsOpen(true);
-            setHighlightedIndex(-1);
+            if (!isMobile) {
+              setSearchQuery(e.target.value);
+              if (!isOpen) setIsOpen(true);
+              setHighlightedIndex(-1);
+            }
           }}
           onFocus={() => {
             if (!disabled) {
               setIsOpen(true);
-              setTimeout(() => {
-                inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-              }, 200);
+              if (!isMobile) {
+                setTimeout(() => {
+                  inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 200);
+              }
             }
-          }}
-          onClick={() => {
-            if (!disabled && !isOpen) setIsOpen(true);
           }}
           onKeyDown={handleKeyDown}
           placeholder={placeholder || 'Cari posisi kerja (misal: kurir, barista, admin shopee)...'}
-          className="w-full py-2.5 pr-20 text-base sm:text-xs font-semibold text-slate-900 dark:text-white bg-transparent focus:outline-none placeholder:text-slate-500 placeholder:font-medium"
+          className="w-full py-2.5 pr-20 text-xs font-semibold text-slate-900 dark:text-white bg-transparent focus:outline-none placeholder:text-slate-500 placeholder:font-medium select-none sm:select-text cursor-pointer sm:cursor-text"
         />
 
         {/* Clear and Toggle Buttons dengan Touch Target Ergonomis */}
@@ -207,10 +255,11 @@ export const JobTitleSearchSelect: React.FC<JobTitleSearchSelectProps> = ({
           <button
             type="button"
             disabled={disabled}
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               if (!disabled) {
                 setIsOpen(!isOpen);
-                if (!isOpen && inputRef.current) {
+                if (!isOpen && !isMobile && inputRef.current) {
                   inputRef.current.focus();
                 }
               }
@@ -227,8 +276,8 @@ export const JobTitleSearchSelect: React.FC<JobTitleSearchSelectProps> = ({
         </div>
       </div>
 
-      {/* Popover Dropdown */}
-      {isOpen && !disabled && (
+      {/* 1. DESKTOP POPOVER DROPDOWN (>= 640px) */}
+      {isOpen && !disabled && !isMobile && (
         <div
           id="job-title-listbox"
           role="listbox"
@@ -342,6 +391,190 @@ export const JobTitleSearchSelect: React.FC<JobTitleSearchSelectProps> = ({
             )}
           </div>
         </div>
+      )}
+
+      {/* 2. MOBILE ADAPTIVE SEARCH BOTTOM SHEET (< 640px) */}
+      {isOpen && !disabled && isMobile && mounted && typeof document !== 'undefined' && (
+        createPortal(
+          <div
+            className="fixed inset-0 z-[9999] flex flex-col justify-end bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200"
+            onClick={() => {
+              setIsOpen(false);
+              setSearchQuery(value || '');
+            }}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Pilih Posisi Pekerjaan"
+              className="relative w-full max-h-[90dvh] h-[85dvh] flex flex-col rounded-t-[16px] bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-250"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Drag Handle Bar Pill */}
+              <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto my-2.5 shrink-0" />
+
+              {/* Sheet Header */}
+              <div className="px-4 pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
+                <div className="min-w-0 pr-2">
+                  <h3 className="text-sm font-extrabold text-slate-900 dark:text-white truncate">
+                    Pilih Posisi Pekerjaan
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                    Cari dari 780+ profesi atau ketik nama posisi baru
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false);
+                    setSearchQuery(value || '');
+                  }}
+                  className="w-11 h-11 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                  aria-label="Tutup pencarian"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Pinned Search Input at TOP of Mobile Sheet */}
+              <div className="p-3 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                <div className="relative flex items-center w-full rounded-[10px] border border-cobalt-500 ring-2 ring-cobalt-500/20 bg-slate-50 dark:bg-slate-800/80">
+                  <div className="pl-3.5 pr-2 text-slate-500 dark:text-slate-400 flex items-center justify-center shrink-0">
+                    <Search className="w-4 h-4 text-cobalt-500" />
+                  </div>
+                  <input
+                    ref={sheetInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (options.length > 0) {
+                          handleSelect(options[0].value);
+                        } else if (searchQuery.trim()) {
+                          handleSelect(searchQuery.trim());
+                        }
+                      } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        setIsOpen(false);
+                      }
+                    }}
+                    placeholder="Ketik nama posisi (misal: Admin, Barista)..."
+                    className="w-full py-2.5 pr-11 text-sm font-semibold text-slate-900 dark:text-white bg-transparent focus:outline-none placeholder:text-slate-400"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2 w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full hover:bg-slate-200/50"
+                      aria-label="Bersihkan pencarian"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Category & Status Bar */}
+              <div className="px-4 py-2 bg-slate-50/80 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between text-caption font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider shrink-0">
+                <span className="flex items-center gap-1.5">
+                  <Briefcase className="w-3.5 h-3.5 text-cobalt-500 dark:text-blue-400" />
+                  {searchQuery.trim() ? 'Hasil Pencarian' : 'Posisi Terpopuler'}
+                </span>
+                <span className="text-[10px] font-normal text-slate-500">
+                  {options.length} pilihan
+                </span>
+              </div>
+
+              {/* Scrollable Results List (Takes remaining height above virtual keyboard) */}
+              <div className="flex-1 overflow-y-auto overscroll-contain px-2 py-2 divide-y divide-slate-100 dark:divide-slate-800/60 pb-[max(2rem,env(safe-area-inset-bottom))]">
+                {options.map((opt, idx) => {
+                  const isSelected = value.toLowerCase() === opt.value.toLowerCase();
+
+                  if (opt.type === 'custom') {
+                    return (
+                      <button
+                        key={`custom-${opt.value}`}
+                        type="button"
+                        onClick={() => handleSelect(opt.value)}
+                        className="w-full text-left px-3.5 py-3 min-h-[48px] transition cursor-pointer flex items-center justify-between bg-blue-50/50 dark:bg-blue-950/30 text-cobalt-500 dark:text-blue-400 font-medium rounded-[8px] my-0.5 active:bg-blue-100 dark:active:bg-blue-900/50"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-6 h-6 rounded-[6px] bg-cobalt-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                            <Plus className="w-4 h-4 stroke-[3]" />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="truncate block font-bold text-xs text-slate-900 dark:text-white">
+                              Gunakan &quot;{opt.value}&quot;
+                            </span>
+                            <span className="text-[11px] font-medium text-cobalt-600 dark:text-blue-400 block">
+                              Tambahkan sebagai posisi baru
+                            </span>
+                          </div>
+                        </div>
+                        <span className="px-2 py-1 rounded-[6px] text-[10px] font-extrabold uppercase bg-blue-100 dark:bg-blue-900/60 text-cobalt-500 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shrink-0">
+                          Posisi Baru
+                        </span>
+                      </button>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={`existing-${opt.value}-${idx}`}
+                      type="button"
+                      onClick={() => handleSelect(opt.value)}
+                      className={`w-full text-left px-3.5 py-3 min-h-[48px] transition cursor-pointer flex items-center justify-between rounded-[8px] my-0.5 ${
+                        isSelected
+                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold'
+                          : 'text-slate-700 dark:text-slate-200 active:bg-slate-100 dark:active:bg-slate-800/80'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                        <Briefcase
+                          className={`w-4 h-4 shrink-0 ${
+                            isSelected
+                              ? 'text-cobalt-500 dark:text-blue-400'
+                              : 'text-slate-400 dark:text-slate-500'
+                          }`}
+                        />
+                        <div className="truncate">
+                          <span className="truncate block text-xs font-semibold text-slate-900 dark:text-white">
+                            {opt.value}
+                          </span>
+                          {opt.matchedAlias && (
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-normal">
+                              Cocok alias: <span className="text-cobalt-500 dark:text-blue-400 font-semibold">{opt.matchedAlias}</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        {opt.categoryLabel && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-[6px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                            {opt.categoryLabel}
+                          </span>
+                        )}
+                        {isSelected && (
+                          <Check className="w-4 h-4 text-cobalt-500 dark:text-blue-400 shrink-0 stroke-[2.5]" />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+
+                {options.length === 0 && (
+                  <div className="px-4 py-8 text-center text-slate-500 text-xs">
+                    Tidak ada posisi yang cocok dengan kata kunci &quot;{searchQuery}&quot;.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>,
+          document.body
+        )
       )}
     </div>
   );

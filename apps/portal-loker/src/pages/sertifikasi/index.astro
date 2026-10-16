@@ -128,8 +128,8 @@ if (query) {
   });
 }
 
-// 3. Logika Paginasi (Maksimal 6 item per halaman agar tidak lelah scroll)
-const PER_PAGE = 6;
+// 3. Logika Paginasi (8 item per halaman: 4 atas + infeed ads + 4 bawah)
+const PER_PAGE = 8;
 const totalItems = filteredCerts.length;
 const totalPages = Math.max(1, Math.ceil(totalItems / PER_PAGE));
 const currentPage = Math.min(Math.max(1, pageNum), totalPages);
@@ -137,9 +137,9 @@ const startIdx = (currentPage - 1) * PER_PAGE;
 const endIdx = startIdx + PER_PAGE;
 const paginatedCerts = filteredCerts.slice(startIdx, endIdx);
 
-// Pembagian item untuk in-feed ads (4 item pertama, lalu ads, lalu sisa 2 item)
+// Pembagian item untuk in-feed ads (4 item pertama, lalu ads, lalu 4 item kedua)
 const topCerts = paginatedCerts.slice(0, 4);
-const bottomCerts = paginatedCerts.slice(4, 6);
+const bottomCerts = paginatedCerts.slice(4, 8);
 
 // Helper URL Paginasi & Filter yang mempertahankan query parameter
 function getPageUrl(targetPage: number) {
@@ -278,9 +278,9 @@ const filterChips = [
       <AdSlot type="leaderboard" note="Rekomendasi program pelatihan dan bimbingan sertifikasi persiapan karier." />
 
       <!-- Layout 2 Kolom: Kiri Daftar Sertifikasi, Kanan Sidebar Modul -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8 items-start">
         <!-- Kolom Kiri: Daftar Skema Sertifikasi & In-Feed Ads & Paginasi (8 Kolom) -->
-        <section class="lg:col-span-8 flex flex-col justify-between" aria-label="Daftar Sertifikasi">
+        <section class="lg:col-span-8 space-y-6" aria-label="Daftar Sertifikasi">
           <div>
             <SubsectionHeader
               title="Daftar Skema Sertifikasi Terverifikasi"
@@ -634,7 +634,7 @@ const filterChips = [
             rightContent={true}
             className="mb-6"
           >
-            <a slot="right" href="/loker" class="min-h-[44px] inline-flex items-center gap-1 text-xs font-bold text-[#1738D1] hover:underline">
+            <a slot="right" href="/lowongan" class="min-h-[44px] inline-flex items-center gap-1 text-xs font-bold text-[#1738D1] hover:underline">
               <span>Semua Lowongan</span>
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -676,7 +676,7 @@ const filterChips = [
                 </div>
 
                 <a
-                  href={`/loker/${job.slug}`}
+                  href={`/lowongan/${job.slug}`}
                   class="min-h-[44px] w-full px-4 py-2 rounded-xl border border-[#b8b7af] bg-[#f4f3ee] group-hover:bg-[#101010] group-hover:text-white group-hover:border-[#101010] text-xs font-bold text-[#101010] transition flex items-center justify-center gap-1.5 shadow-xs"
                 >
                   <span>Lihat Lowongan</span>

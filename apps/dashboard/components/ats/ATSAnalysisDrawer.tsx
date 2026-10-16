@@ -62,7 +62,7 @@ export const ATSAnalysisDrawer: React.FC<ATSAnalysisDrawerProps> = ({
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <SheetContent side="right" className="w-full max-w-md flex flex-col p-0 overflow-hidden">
+      <SheetContent side="right" className="w-full sm:max-w-xl flex flex-col p-0 overflow-hidden">
         {/* Drawer Header */}
         <SheetHeader className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-row items-center justify-between shrink-0 space-y-0">
           <div className="flex items-center gap-2">

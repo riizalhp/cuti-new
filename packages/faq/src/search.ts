@@ -129,7 +129,7 @@ function cosine(a: Map<string, number>, b: Map<string, number>, bNorm: number): 
 }
 
 /** Skor relevansi minimum agar dianggap "terjawab". */
-export const MIN_SCORE = 0.15;
+export const MIN_SCORE = 0.12;
 
 function makeSnippet(article: FaqArticle, queryTerms: string[]): string {
   const plain = markdownToPlainText(article.body);
@@ -152,16 +152,29 @@ export function searchFaq(query: string, limit = 3): FaqSearchResult {
   const q = query.trim();
   const index = buildIndex();
   const qv = queryVector(q, index);
+  const queryTerms = tokenize(q);
 
   const scored: SearchHit[] = index.docs
     .map((doc) => {
-      const score = cosine(qv, doc.terms, doc.norm);
+      let score = cosine(qv, doc.terms, doc.norm);
+
+      // Boost relevansi jika ada kecocokan eksplisit pada kata kunci atau judul artikel
+      const docKeywords = doc.article.keywords;
+      const titleTokens = tokenize(doc.article.title);
+
+      let matchCount = 0;
+      for (const t of queryTerms) {
+        if (docKeywords.includes(t)) matchCount += 2;
+        else if (titleTokens.includes(t)) matchCount += 1.5;
+      }
+      if (matchCount > 0) {
+        score += matchCount * 0.08;
+      }
+
       return { article: doc.article, score, snippet: "" };
     })
     .filter((h) => h.score > 0)
     .sort((a, b) => b.score - a.score);
-
-  const queryTerms = tokenize(q);
 
   const hits = scored
     .slice(0, limit)
@@ -178,7 +191,7 @@ export function searchFaq(query: string, limit = 3): FaqSearchResult {
   const answered = Boolean(bestHit && bestHit.score >= MIN_SCORE && sharesToken);
   const top = answered ? bestHit : undefined;
 
-  const answerText = top ? buildChatAnswer(top.article, top.snippet) : buildFallbackAnswer(q);
+  const answerText = top ? buildChatAnswer(top.article) : buildFallbackAnswer(q);
 
   const suggestions = index.docs
     .filter((d) => d.article.slug !== top?.article.slug)
@@ -188,62 +201,79 @@ export function searchFaq(query: string, limit = 3): FaqSearchResult {
   return { query: q, hits, answered, answerText, suggestions };
 }
 
-function buildChatAnswer(article: FaqArticle, snippet: string): string {
-  const categoryLabel = getCategoryLabel(article.category);
-  const steps = extractSteps(article.body).slice(0, 4);
+function buildChatAnswer(article: FaqArticle): string {
+  // Bedakan apakah artikel bersifat panduan langkah (How-To) atau penjelasan umum / konseptual
+  const isHowTo = /^(cara|panduan|langkah|menyusun|memindai|mengecek|mengelola|melaporkan)/i.test(
+    article.title
+  );
 
   const lines: string[] = [
-    `Berikut panduan singkatnya (${categoryLabel}):`,
-    ``,
     `**${article.title}**`,
     ``,
     article.description,
-    ``,
   ];
 
-  if (steps.length > 0) {
-    lines.push("Langkah penting:", "");
-    for (const s of steps) lines.push(`- ${s}`);
-    lines.push("");
+  const keyPoints = extractKeyPoints(article.body, isHowTo ? 4 : 3);
+  if (keyPoints.length > 0) {
+    lines.push(``);
+    lines.push(isHowTo ? "Langkah ringkasnya:" : "Poin penting:");
+    keyPoints.forEach((point, idx) => {
+      lines.push(isHowTo ? `${idx + 1}. ${point}` : `• ${point}`);
+    });
   }
 
-  if (snippet && snippet !== article.description) {
-    lines.push(snippet, "");
-  }
-
-  lines.push(
-    `Baca panduan lengkap & detail di Pusat Bantuan: faq.employr.id/artikel/${article.slug}`
-  );
+  lines.push(``);
+  lines.push(`Pelajari panduan lengkapnya di: faq.employr.id/artikel/${article.slug}`);
 
   return lines.join("\n");
 }
 
-/** Ambil beberapa poin penting (list items) dari isi artikel. */
-function extractSteps(body: string): string[] {
-  const steps: string[] = [];
+/** Ambil poin-poin penting (list items) secara utuh tanpa memotong kata di tengah jalan. */
+function extractKeyPoints(body: string, maxItems = 4): string[] {
+  const points: string[] = [];
+  const seen = new Set<string>();
+
   for (const line of body.split(/\r?\n/)) {
-    const m = line.match(/^\s*[-*+]\s+(.*)$/);
-    if (m && steps.length < 8) {
-      const text = m[1]
-        .replace(/\*\*([^*]+)\*\*/g, "$1")
-        .replace(/`([^`]+)`/g, "$1")
-        .replace(/\[([^\]]+)\]\([^)\s]+\)/g, "$1")
-        .trim();
-      if (text) steps.push(text);
+    // Ambil list item berurutan (1. ...) atau tak berurutan (- / *)
+    const m = line.match(/^\s*(?:[-*+]|\d+\.)\s+(.*)$/);
+    if (!m) continue;
+
+    let text = m[1]
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/\[([^\]]+)\]\([^)\s]+\)/g, "$1")
+      .trim();
+
+    // Jika item terlalu panjang, batasi ke kalimat pertama yang utuh
+    if (text.length > 140) {
+      const firstSentence = text.match(/^([^.?!]+[.?!])/);
+      if (firstSentence && firstSentence[1].length >= 30) {
+        text = firstSentence[1].trim();
+      } else {
+        const lastSpace = text.lastIndexOf(" ", 135);
+        if (lastSpace > 40) {
+          text = `${text.slice(0, lastSpace)}...`;
+        }
+      }
+    }
+
+    if (text && !seen.has(text)) {
+      points.push(text);
+      seen.add(text);
+      if (points.length >= maxItems) break;
     }
   }
-  return steps;
+
+  return points;
 }
 
 function buildFallbackAnswer(query: string): string {
   return [
-    "Maaf, saya belum menemukan jawaban yang cocok dengan pertanyaanmu di Pusat Bantuan kami.",
+    "Wah, aku belum nemu panduan yang pas buat kata kunci itu.",
     "",
-    `Kamu bertanya: "${query.trim()}"`,
+    "Coba ketik kata kuncinya lebih simpel, misalnya: **cetak CV**, **tracker lamaran**, **career intelligence**, **draf email**, atau **evaluasi ATS**.",
     "",
-    "Coba gunakan kata kunci yang lebih spesifik, misalnya: \"cara cetak CV PDF\", \"tambah lamaran di tracker\", \"evaluasi CV\", atau \"check-in harian\".",
-    "",
-    "Kamu juga bisa melihat semua artikel panduan di faq.employr.id, atau hubungi tim Customer Service Employr melalui email help.employr@outlook.com, Threads @employr.id, atau DM Threads @riizalhp.",
+    "Kamu juga bisa telusuri langsung di Pusat Bantuan (faq.employr.id) atau email tim kami di **help.employr@outlook.com** kalau butuh bantuan lebih lanjut ya.",
   ].join("\n");
 }
 
@@ -253,11 +283,12 @@ export function getQuickPrompts(limit = 4): string[] {
     "cara-cetak-cv-pdf",
     "tracker-lamaran",
     "evaluasi-cv-screener",
-    "misi-cuan",
-    "referral",
+    "career-intelligence",
+    "draf-email-lamaran",
+    "persiapan-offering-dan-negosiasi",
     "skor-ats-cv",
     "career-readiness",
-    "onboarding-pertama-kali",
+    "lapor-kendala-dan-saran",
   ];
   const articles = loadArticles();
   return topSlugs
@@ -266,3 +297,4 @@ export function getQuickPrompts(limit = 4): string[] {
     .slice(0, limit)
     .map((a) => a!.title.replace(/^Cara\s+/i, ""));
 }
+

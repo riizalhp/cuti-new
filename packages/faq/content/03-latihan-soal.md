@@ -4,7 +4,7 @@ description: Berlatih soal-soal karier dan teknis di Employr: kerjakan kuis grat
 category: pengembangan-karier
 order: 3
 updatedAt: 2026-09-15
-keywords: latihan soal, kuis, quiz, soal, latihan, test, tryout, bank soal, pembahasan, skor kuis, gratis
+keywords: latihan soal, kuis, quiz, soal, latihan, test, tryout, bank soal, pembahasan, skor kuis, gratis, psikotes, tpa, assessment, tes kerja, seleksi kerja, tes logika, tes numerik
 ---
 
 Fitur **Latihan Soal** (/latihan-soal) menyediakan bank kuis untuk mengasah kemampuanmu: dari soal karier umum hingga teknis sesuai bidang pekerjaan.

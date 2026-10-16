@@ -4,7 +4,7 @@ description: Cari lowongan kerja dari banyak portal sekaligus — pilih portal, 
 category: lamaran-kerja
 order: 2
 updatedAt: 2026-08-18
-keywords: scraper lowongan, scan lowongan, cari lowongan, jobstreet, linkedin, glints, kalibrr, dealls, portal lowongan, scrape, bot lowongan
+keywords: scraper lowongan, scan lowongan, cari lowongan, jobstreet, linkedin, glints, kalibrr, dealls, portal lowongan, scrape, bot lowongan, impor loker, tarik lowongan, ambil loker, salin link lowongan
 ---
 
 Fitur **Scraper Lowongan** (/scrape-jobs) memindai lowongan kerja dari **30+ portal** dalam satu tempat, sehingga kamu tidak perlu buka satu per satu.
